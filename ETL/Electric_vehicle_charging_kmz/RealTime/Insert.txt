@@ -1,0 +1,9 @@
+'Electric_vehicle_charging_kmz_RT', 'Colonnine per la ricarica dei veicoli elettrici', NULL, 'Servizi', 'kmz', NULL, NULL, 'HTTP', 'no', 'Opendata comune Firenze - http://opendata.comune.fi.it', NULL, NULL, NULL, NULL, NULL, 'stop', 'stop', 'stop', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'no', 'no', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '7200', '90', 'http://datigis.comune.fi.it/kml/ColonnineRicarica.kmz', '2018-01-31T12:41:30.000+01:00', '2017-07-28T13:37:05.000+01:00', '0', '0', NULL, NULL, 'Elementi puntuali che rappresentano la geolocalizzazione delle colonnine di ricarica nel territorio comunale fiorentino. Aggiornati ogni 15 minuti per lo stato di ricarica delle colonnine ', NULL, '1', '', '', NULL, NULL
+
+
+
+'Electric_vehicle_charging_kmz_ST', 'Colonnine per la ricarica dei veicoli elettrici', NULL, 'Servizi', 'kmz', NULL, NULL, 'HTTP', 'no', 'Opendata comune Firenze - http://opendata.comune.fi.it', NULL, NULL, NULL, NULL, NULL, 'stop', 'stop', 'stop', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'no', 'no', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '7200', '90', 'http://datigis.comune.fi.it/kml/ColonnineRicarica.kmz', '2018-01-26T13:37:36.000+01:00', '2018-01-26T13:38:27.000+01:00', '0', '0', NULL, NULL, 'Elementi puntuali che rappresentano la geolocalizzazione delle colonnine di ricarica nel territorio comunale fiorentino. Aggiornati ogni 15 minuti per lo stato di ricarica delle colonnine ', NULL, '1', '', '', NULL, NULL
+
+
+Generic Error: Apache or kettle -> that's the problem: java.sql.SQLException: org.apache.hadoop.hbase.client.RetriesExhaustedException: Failed after attempts=36, exceptions:
+2018/02/13 19:25:16 - Phoenix insert 2 2.0 - Tue Feb 13 19:25:16 CET 2018, null, java.net.SocketTimeoutException: callTimeout=60000, callDuration=68252: row 'SYSTEM:CATALOG,,' on table 'hbase:meta' at region=hbase:meta,,1.1588230740, hostname=hbase-sensori-node1,60020,1516729980292, seqNum=0

@@ -1,0 +1,2 @@
+IpAddressMaster,PortHBase,PortMySql,DatabaseMySql,UsernameMySql,PswMySql
+localhost,2181,3306,Elaborato_Sis_Distr,testuser,password

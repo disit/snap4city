@@ -1,0 +1,10 @@
+otherCategoryITA;otherCategoryENG;nameITA;nameENG;abbreviationITA;abbreviationENG;descriptionShortITA;descriptionShortENG;descriptionLongITA;descriptionLongENG;phone;fax;url;email;RefPerson;province;city;postalcode;streetAddress;civicNumber;secondPhone;secondFax;secondEmail;secondCivicNumber;secondStreetAddress;notes;timetable;photo;latitude;longitude;streetId
+;;http://www.disit.org/km4city/resource/eCharging_15EP22T2AA1S000001;;;;colonnine di ricarica;charging_station;;Station: ACTIVE|Column: FINISHED;;;;;;FI;FIRENZE;50100;;;;;;;;;;;43.740532;11.291268;
+;;http://www.disit.org/km4city/resource/eCharging_15EP22T2AA1S000004;;;;colonnine di ricarica;charging_station;;Station: ACTIVE|Column: FINISHED;;;;;;FI;FIRENZE;50100;;;;;;;;;;;43.774826;11.272259;
+;;http://www.disit.org/km4city/resource/eCharging_15EP22T2AA1S000008;;;;colonnine di ricarica;charging_station;;Station: ACTIVE|Column: FINISHED;;;;;;FI;FIRENZE;50100;;;;;;;;;;;43.791428;11.270008;
+;;http://www.disit.org/km4city/resource/eCharging_15EP22T2AA1S000007;;;;colonnine di ricarica;charging_station;;Station: ACTIVE|Column: ACTIVE;;;;;;FI;FIRENZE;50100;;;;;;;;;;;43.78668;11.269524;
+;;http://www.disit.org/km4city/resource/eCharging_17ZP22T5AB1U000019;;;;colonnine di ricarica;charging_station;;Station: ACTIVE|Column: FINISHED;;;;;;FI;FIRENZE;50100;;;;;;;;;;;45.76866;8.990328;
+;;http://www.disit.org/km4city/resource/eCharging_15EP22T2AA1S000003;;;;colonnine di ricarica;charging_station;;Station: ACTIVE|Column: FINISHED;;;;;;FI;FIRENZE;50100;;;;;;;;;;;43.77016;11.270451;
+;;http://www.disit.org/km4city/resource/eCharging_15EP22T2AA1S000002;;;;colonnine di ricarica;charging_station;;Station: ACTIVE|Column: FINISHED;;;;;;FI;FIRENZE;50100;;;;;;;;;;;43.770275;11.212392;
+;;http://www.disit.org/km4city/resource/eCharging_15EP22T2AA1S000010;;;;colonnine di ricarica;charging_station;;Station: MAINTENANCE|Column: FINISHED;;;;;;FI;FIRENZE;50100;;;;;;;;;;;43.76382;11.272061;
+;;http://www.disit.org/km4city/resource/eCharging_16ZP22T5AB1S000003;;;;colonnine di ricarica;charging_station;;Station: ACTIVE|Column: FINISHED;;;;;;FI;FIRENZE;50100;;;;;;;;;;;43.807373;11.238579;

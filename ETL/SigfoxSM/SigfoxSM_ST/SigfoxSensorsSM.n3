@@ -1,0 +1,26 @@
+<http://www.disit.org/km4city/resource/SensoreSigfoxSM_17AB75> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.disit.org/km4city/schema#Weather_sensor> .
+<http://www.disit.org/km4city/resource/SensoreSigfoxSM_17AB75> <http://purl.org/dc/terms/identifier> "Sensore Sigfox Santa Marta 17B75" .
+<http://www.disit.org/km4city/resource/SensoreSigfoxSM_17AB75> <http://www.w3.org/2003/01/geo/wgs84_pos#long> "11.253583"^^<http://www.w3.org/2001/XMLSchema#float> .
+<http://www.disit.org/km4city/resource/SensoreSigfoxSM_17AB75> <http://schema.org/addressLocality> "Firenze" .
+<http://www.disit.org/km4city/resource/RT04801703571TO> <http://purl.org/dc/terms/identifier> "RT04801703571TO" .
+<http://www.disit.org/km4city/resource/SensoreSigfoxSM_17AB75> <http://www.disit.org/km4city/schema#isInRoad> <http://www.disit.org/km4city/resource/RT04801703571TO> .
+<http://www.disit.org/km4city/resource/SensoreSigfoxSM_17AB75> <http://schema.org/name> "Sensore Sigfox Santa Marta" .
+<http://www.disit.org/km4city/resource/SensoreSigfoxSM_17AB75> <http://schema.org/streetAddress> "VIA DI SANTA MARTA" .
+<http://www.disit.org/km4city/resource/SensoreSigfoxSM_17AB75> <http://www.w3.org/2003/01/geo/wgs84_pos#lat> "43.798645"^^<http://www.w3.org/2001/XMLSchema#float> .
+<http://www.disit.org/km4city/resource/SensoreSigfoxSM_17AB75> <http://schema.org/addressRegion> "FI" .
+<http://www.disit.org/km4city/resource/SensoreSigfoxSM_17AB75> <https://www.disit.org/km4city/schema#ownership> "private".
+<http://www.disit.org/km4city/resource/RT04801703571TO> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.disit.org/km4city/schema#Road> .
+
+
+<http://www.disit.org/km4city/resource/SensoreSigfoxSM_C3AEB> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.disit.org/km4city/schema#Weather_sensor> .
+<http://www.disit.org/km4city/resource/SensoreSigfoxSM_C3AEB> <http://purl.org/dc/terms/identifier> "Sensore Sigfox Santa Marta C3AEB" .
+<http://www.disit.org/km4city/resource/SensoreSigfoxSM_C3AEB>  <http://www.w3.org/2003/01/geo/wgs84_pos#long> "11.2538"^^<http://www.w3.org/2001/XMLSchema#float> .
+<http://www.disit.org/km4city/resource/SensoreSigfoxSM_C3AEB>  <http://schema.org/addressLocality> "Firenze" .
+<http://www.disit.org/km4city/resource/RT04801703571TO> <http://purl.org/dc/terms/identifier> "RT04801703571TO" .
+<http://www.disit.org/km4city/resource/SensoreSigfoxSM_C3AEB>  <http://www.disit.org/km4city/schema#isInRoad> <http://www.disit.org/km4city/resource/RT04801703571TO> .
+<http://www.disit.org/km4city/resource/SensoreSigfoxSM_C3AEB>  <http://schema.org/name> "Sensore Sigfox Santa Marta" .
+<http://www.disit.org/km4city/resource/SensoreSigfoxSM_C3AEB>  <http://schema.org/streetAddress> "VIA DI SANTA MARTA" .
+<http://www.disit.org/km4city/resource/SensoreSigfoxSM_C3AEB>  <http://www.w3.org/2003/01/geo/wgs84_pos#lat> "43.7984"^^<http://www.w3.org/2001/XMLSchema#float> .
+<http://www.disit.org/km4city/resource/SensoreSigfoxSM_C3AEB>  <http://schema.org/addressRegion> "FI" .
+<http://www.disit.org/km4city/resource/SensoreSigfoxSM_C3AEB> <https://www.disit.org/km4city/schema#ownership> "private".
+<http://www.disit.org/km4city/resource/RT04801703571TO> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.disit.org/km4city/schema#Road> .

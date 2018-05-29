@@ -1,0 +1,8 @@
+
+
+DATE=$(date +'%d-%m-%Y:%H:%M') && curl -v http://192.168.0.101/api/3/action/resource_create  -H "Authorization:3cbdf91c-ead7-4e17-9673-ed9cf71031a4"  -F upload=@/media/Trasformazioni/Phoenix_ETL/snap4city/from_KM4cityKB_to_datagate/Ingestion/file_data.csv  -F package_id=electric_vehicle_charging -F name=electric_vehicle_charging_data_${DATE} -F format=csv -F description='Electric vehicle charging points'
+
+
+
+
+DATE=$(date +'%d-%m-%Y:%H:%M') && echo "curl -v http://192.168.0.101/api/3/action/resource_create  -H "Authorization:3cbdf91c-ead7-4e17-9673-ed9cf71031a4"  -F upload=@/media/Trasformazioni/Phoenix_ETL/snap4city/electric_vehicle_charging_datagate/Original_data/file_data.csv  -F package_id=electric_vehicle_charging -F name=electric_vehicle_charging_data_$DATE -F format=csv -F description='Electric vehicle charging points'"

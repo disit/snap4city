@@ -1,0 +1,10 @@
+HeaderReceived row: http://www.disit.org/km4city/resource/eCharging_15EP22T2AA1S000001 state: FINISHED
+Received row: http://www.disit.org/km4city/resource/eCharging_15EP22T2AA1S000003 state: FINISHED
+Received row: http://www.disit.org/km4city/resource/eCharging_15EP22T2AA1S000008 state: FINISHED
+Received row: http://www.disit.org/km4city/resource/eCharging_15EP22T2AA1S000007 state: FINISHED
+Received row: http://www.disit.org/km4city/resource/eCharging_17ZP22T5AB1U000019 state: FINISHED
+Received row: http://www.disit.org/km4city/resource/eCharging_15EP22T2AA1S000005 state: FINISHED
+Received row: http://www.disit.org/km4city/resource/eCharging_15EP22T2AA1S000004 state: FINISHED
+Received row: http://www.disit.org/km4city/resource/eCharging_15EP22T2AA1S000002 state: FINISHED
+Received row: http://www.disit.org/km4city/resource/eCharging_15EP22T2AA1S000010 state: FINISHED
+Received row: http://www.disit.org/km4city/resource/eCharging_16ZP22T2AA1S000002 state: FINISHED

@@ -1,0 +1,1 @@
+select * from ChargingStationObservation order by acquisitiontime DESC LIMIT 10
