@@ -1,0 +1,293 @@
+Warning message:
+In readLines(file) : incomplete final line found on 'Stat4CityFunctions.R'
+Starting server to listen on port 8080
+Loading required package: lattice
+Warning: replacing previous import by ‘plyr::ddply’ when loading ‘caret’
+Warning in .doLoadActions(where, attach) :
+  trying to execute load actions without 'methods' package
+Warning: replacing previous import by ‘tidyr::%>%’ when loading ‘broom’
+Warning: replacing previous import by ‘tidyr::gather’ when loading ‘broom’
+Warning: replacing previous import by ‘tidyr::spread’ when loading ‘broom’
+Warning: replacing previous import by ‘rlang::!!’ when loading ‘recipes’
+Warning: replacing previous import by ‘rlang::expr’ when loading ‘recipes’
+Warning: replacing previous import by ‘rlang::f_lhs’ when loading ‘recipes’
+Warning: replacing previous import by ‘rlang::f_rhs’ when loading ‘recipes’
+Warning: replacing previous import by ‘rlang::is_empty’ when loading ‘recipes’
+Warning: replacing previous import by ‘rlang::lang’ when loading ‘recipes’
+Warning: replacing previous import by ‘rlang::na_dbl’ when loading ‘recipes’
+Warning: replacing previous import by ‘rlang::names2’ when loading ‘recipes’
+Warning: replacing previous import by ‘rlang::quos’ when loading ‘recipes’
+Warning: replacing previous import by ‘rlang::sym’ when loading ‘recipes’
+Warning: replacing previous import by ‘rlang::syms’ when loading ‘recipes’
+
+Attaching package: ‘psych’
+
+The following objects are masked from ‘package:ggplot2’:
+
+    %+%, alpha
+
+corrplot 0.84 loaded
+Loading required package: DBI
+Note: the specification for S3 class “AsIs” in package ‘DBI’ seems equivalent to one from package ‘jsonlite’: not turning on duplicate class definitions for this class.
+Note: the specification for S3 class “difftime” in package ‘DBI’ seems equivalent to one from package ‘lubridate’: not turning on duplicate class definitions for this class.
+Loading required package: dplyr
+
+Attaching package: ‘dplyr’
+
+The following object is masked from ‘package:gridExtra’:
+
+    combine
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+Loading required package: zoo
+
+Attaching package: ‘zoo’
+
+The following objects are masked from ‘package:base’:
+
+    as.Date, as.Date.numeric
+
+
+Attaching package: ‘xts’
+
+The following objects are masked from ‘package:dplyr’:
+
+    first, last
+
+Warning in statisticsResult[indfolder]$statisticsOutputName = unbox("MeanPerDayMoment") :
+  number of items to replace is not a multiple of replacement length
+Warning in is.na(e1) | is.na(e2) :
+  longer object length is not a multiple of shorter object length
+Warning in `==.default`(dataWE$identifier, sensorsName) :
+  longer object length is not a multiple of shorter object length
+Warning in is.na(e1) | is.na(e2) :
+  longer object length is not a multiple of shorter object length
+Warning in `==.default`(dataWD$identifier, sensorsName) :
+  longer object length is not a multiple of shorter object length
+<simpleError: could not find function "textGrob">
+Warning in statisticsResult[indfolder]$statisticsOutputName = unbox("MeanPerDayMoment") :
+  number of items to replace is not a multiple of replacement length
+Warning in is.na(e1) | is.na(e2) :
+  longer object length is not a multiple of shorter object length
+Warning in `==.default`(dataWE$identifier, sensorsName) :
+  longer object length is not a multiple of shorter object length
+Warning in is.na(e1) | is.na(e2) :
+  longer object length is not a multiple of shorter object length
+Warning in `==.default`(dataWD$identifier, sensorsName) :
+  longer object length is not a multiple of shorter object length
+<simpleError: could not find function "textGrob">
+Warning in statisticsResult[indfolder]$statisticsOutputName = unbox("MeanPerDayMoment") :
+  number of items to replace is not a multiple of replacement length
+Warning in is.na(e1) | is.na(e2) :
+  longer object length is not a multiple of shorter object length
+Warning in `==.default`(dataWE$identifier, sensorsName) :
+  longer object length is not a multiple of shorter object length
+Warning in is.na(e1) | is.na(e2) :
+  longer object length is not a multiple of shorter object length
+Warning in `==.default`(dataWD$identifier, sensorsName) :
+  longer object length is not a multiple of shorter object length
+Warning in statisticsResult[indfolder]$statisticsOutputName = unbox("StatisticsBySensors") :
+  number of items to replace is not a multiple of replacement length
+Warning in statisticsResult[indfolder]$statisticsOutputName = unbox("Correlations") :
+  number of items to replace is not a multiple of replacement length
+Warning in statisticsResult[indfolder]$statisticsOutputName = unbox("MeanPerDayMoment") :
+  number of items to replace is not a multiple of replacement length
+Warning in is.na(e1) | is.na(e2) :
+  longer object length is not a multiple of shorter object length
+Warning in `==.default`(dataWE$identifier, sensorsName) :
+  longer object length is not a multiple of shorter object length
+Warning in is.na(e1) | is.na(e2) :
+  longer object length is not a multiple of shorter object length
+Warning in `==.default`(dataWD$identifier, sensorsName) :
+  longer object length is not a multiple of shorter object length
+Warning in statisticsResult[indfolder]$statisticsOutputName = unbox("StatisticsBySensors") :
+  number of items to replace is not a multiple of replacement length
+Warning in statisticsResult[indfolder]$statisticsOutputName = unbox("Correlations") :
+  number of items to replace is not a multiple of replacement length
+Warning in statisticsResult[indfolder]$statisticsOutputName = unbox("MeanPerDayMoment") :
+  number of items to replace is not a multiple of replacement length
+Warning in is.na(e1) | is.na(e2) :
+  longer object length is not a multiple of shorter object length
+Warning in `==.default`(dataWE$identifier, sensorsName) :
+  longer object length is not a multiple of shorter object length
+Warning in statisticsResult[indfolder]$statisticsOutputName = unbox("StatisticsBySensors") :
+  number of items to replace is not a multiple of replacement length
+Warning in statisticsResult[indfolder]$statisticsOutputName = unbox("Correlations") :
+  number of items to replace is not a multiple of replacement length
+Warning in statisticsResult[indfolder]$statisticsOutputName = unbox("MeanPerDayMoment") :
+  number of items to replace is not a multiple of replacement length
+Warning in is.na(e1) | is.na(e2) :
+  longer object length is not a multiple of shorter object length
+Warning in `==.default`(dataWE$identifier, sensorsName) :
+  longer object length is not a multiple of shorter object length
+Warning in statisticsResult[indfolder]$statisticsOutputName = unbox("StatisticsBySensors") :
+  number of items to replace is not a multiple of replacement length
+Warning in statisticsResult[indfolder]$statisticsOutputName = unbox("Correlations") :
+  number of items to replace is not a multiple of replacement length
+Warning in statisticsResult[indfolder]$statisticsOutputName = unbox("MeanPerDayMoment") :
+  number of items to replace is not a multiple of replacement length
+Warning in is.na(e1) | is.na(e2) :
+  longer object length is not a multiple of shorter object length
+Warning in `==.default`(dataWE$identifier, sensorsName) :
+  longer object length is not a multiple of shorter object length
+Warning in is.na(e1) | is.na(e2) :
+  longer object length is not a multiple of shorter object length
+Warning in `==.default`(dataWD$identifier, sensorsName) :
+  longer object length is not a multiple of shorter object length
+Warning in statisticsResult[indfolder]$statisticsOutputName = unbox("StatisticsBySensors") :
+  number of items to replace is not a multiple of replacement length
+Warning in statisticsResult[indfolder]$statisticsOutputName = unbox("Correlations") :
+  number of items to replace is not a multiple of replacement length
+Starting server to listen on port 8080
+<simpleError in (function (a, b) {    as.numeric(a) + as.numeric(b)})(b = "3"): argument "a" is missing, with no default>
+Loading required package: lattice
+Warning: replacing previous import by ‘plyr::ddply’ when loading ‘caret’
+Warning in .doLoadActions(where, attach) :
+  trying to execute load actions without 'methods' package
+Warning: replacing previous import by ‘tidyr::%>%’ when loading ‘broom’
+Warning: replacing previous import by ‘tidyr::gather’ when loading ‘broom’
+Warning: replacing previous import by ‘tidyr::spread’ when loading ‘broom’
+Warning: replacing previous import by ‘rlang::!!’ when loading ‘recipes’
+Warning: replacing previous import by ‘rlang::expr’ when loading ‘recipes’
+Warning: replacing previous import by ‘rlang::f_lhs’ when loading ‘recipes’
+Warning: replacing previous import by ‘rlang::f_rhs’ when loading ‘recipes’
+Warning: replacing previous import by ‘rlang::is_empty’ when loading ‘recipes’
+Warning: replacing previous import by ‘rlang::lang’ when loading ‘recipes’
+Warning: replacing previous import by ‘rlang::na_dbl’ when loading ‘recipes’
+Warning: replacing previous import by ‘rlang::names2’ when loading ‘recipes’
+Warning: replacing previous import by ‘rlang::quos’ when loading ‘recipes’
+Warning: replacing previous import by ‘rlang::sym’ when loading ‘recipes’
+Warning: replacing previous import by ‘rlang::syms’ when loading ‘recipes’
+
+Attaching package: ‘psych’
+
+The following objects are masked from ‘package:ggplot2’:
+
+    %+%, alpha
+
+corrplot 0.84 loaded
+Loading required package: DBI
+Note: the specification for S3 class “AsIs” in package ‘DBI’ seems equivalent to one from package ‘jsonlite’: not turning on duplicate class definitions for this class.
+Note: the specification for S3 class “difftime” in package ‘DBI’ seems equivalent to one from package ‘lubridate’: not turning on duplicate class definitions for this class.
+Loading required package: dplyr
+
+Attaching package: ‘dplyr’
+
+The following object is masked from ‘package:gridExtra’:
+
+    combine
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+Loading required package: zoo
+
+Attaching package: ‘zoo’
+
+The following objects are masked from ‘package:base’:
+
+    as.Date, as.Date.numeric
+
+
+Attaching package: ‘xts’
+
+The following objects are masked from ‘package:dplyr’:
+
+    first, last
+
+Warning in statisticsResult[indfolder]$statisticsOutputName = unbox("MeanPerDayMoment") :
+  number of items to replace is not a multiple of replacement length
+Warning in is.na(e1) | is.na(e2) :
+  longer object length is not a multiple of shorter object length
+Warning in `==.default`(dataWE$identifier, sensorsName) :
+  longer object length is not a multiple of shorter object length
+Warning in is.na(e1) | is.na(e2) :
+  longer object length is not a multiple of shorter object length
+Warning in `==.default`(dataWD$identifier, sensorsName) :
+  longer object length is not a multiple of shorter object length
+Warning in statisticsResult[indfolder]$statisticsOutputName = unbox("StatisticsBySensors") :
+  number of items to replace is not a multiple of replacement length
+Warning in statisticsResult[indfolder]$statisticsOutputName = unbox("Correlations") :
+  number of items to replace is not a multiple of replacement length
+Warning in statisticsResult[indfolder]$statisticsOutputName = unbox("MeanPerDayMoment") :
+  number of items to replace is not a multiple of replacement length
+Warning in is.na(e1) | is.na(e2) :
+  longer object length is not a multiple of shorter object length
+Warning in `==.default`(dataWE$identifier, sensorsName) :
+  longer object length is not a multiple of shorter object length
+Warning in is.na(e1) | is.na(e2) :
+  longer object length is not a multiple of shorter object length
+Warning in `==.default`(dataWD$identifier, sensorsName) :
+  longer object length is not a multiple of shorter object length
+Warning in statisticsResult[indfolder]$statisticsOutputName = unbox("StatisticsBySensors") :
+  number of items to replace is not a multiple of replacement length
+Warning in statisticsResult[indfolder]$statisticsOutputName = unbox("Correlations") :
+  number of items to replace is not a multiple of replacement length
+Warning in statisticsResult[indfolder]$statisticsOutputName = unbox("MeanPerDayMoment") :
+  number of items to replace is not a multiple of replacement length
+Warning in is.na(e1) | is.na(e2) :
+  longer object length is not a multiple of shorter object length
+Warning in `==.default`(dataWE$identifier, sensorsName) :
+  longer object length is not a multiple of shorter object length
+Warning in is.na(e1) | is.na(e2) :
+  longer object length is not a multiple of shorter object length
+Warning in `==.default`(dataWD$identifier, sensorsName) :
+  longer object length is not a multiple of shorter object length
+Warning in statisticsResult[indfolder]$statisticsOutputName = unbox("StatisticsBySensors") :
+  number of items to replace is not a multiple of replacement length
+Warning in statisticsResult[indfolder]$statisticsOutputName = unbox("Correlations") :
+  number of items to replace is not a multiple of replacement length
+Warning in statisticsResult[indfolder]$statisticsOutputName = unbox("MeanPerDayMoment") :
+  number of items to replace is not a multiple of replacement length
+Warning in is.na(e1) | is.na(e2) :
+  longer object length is not a multiple of shorter object length
+Warning in `==.default`(dataWE$identifier, sensorsName) :
+  longer object length is not a multiple of shorter object length
+Warning in is.na(e1) | is.na(e2) :
+  longer object length is not a multiple of shorter object length
+Warning in `==.default`(dataWD$identifier, sensorsName) :
+  longer object length is not a multiple of shorter object length
+Warning in statisticsResult[indfolder]$statisticsOutputName = unbox("StatisticsBySensors") :
+  number of items to replace is not a multiple of replacement length
+Warning in statisticsResult[indfolder]$statisticsOutputName = unbox("Correlations") :
+  number of items to replace is not a multiple of replacement length
+Warning in statisticsResult[indfolder]$statisticsOutputName = unbox("MeanPerDayMoment") :
+  number of items to replace is not a multiple of replacement length
+Warning in is.na(e1) | is.na(e2) :
+  longer object length is not a multiple of shorter object length
+Warning in `==.default`(dataWE$identifier, sensorsName) :
+  longer object length is not a multiple of shorter object length
+Warning in is.na(e1) | is.na(e2) :
+  longer object length is not a multiple of shorter object length
+Warning in `==.default`(dataWD$identifier, sensorsName) :
+  longer object length is not a multiple of shorter object length
+Warning in statisticsResult[indfolder]$statisticsOutputName = unbox("StatisticsBySensors") :
+  number of items to replace is not a multiple of replacement length
+Warning in statisticsResult[indfolder]$statisticsOutputName = unbox("Correlations") :
+  number of items to replace is not a multiple of replacement length
+Warning in statisticsResult[indfolder]$statisticsOutputName = unbox("MeanPerDayMoment") :
+  number of items to replace is not a multiple of replacement length
+Warning in is.na(e1) | is.na(e2) :
+  longer object length is not a multiple of shorter object length
+Warning in `==.default`(dataWE$identifier, sensorsName) :
+  longer object length is not a multiple of shorter object length
+Warning in is.na(e1) | is.na(e2) :
+  longer object length is not a multiple of shorter object length
+Warning in `==.default`(dataWD$identifier, sensorsName) :
+  longer object length is not a multiple of shorter object length
+Warning in statisticsResult[indfolder]$statisticsOutputName = unbox("StatisticsBySensors") :
+  number of items to replace is not a multiple of replacement length
+Warning in statisticsResult[indfolder]$statisticsOutputName = unbox("Correlations") :
+  number of items to replace is not a multiple of replacement length
