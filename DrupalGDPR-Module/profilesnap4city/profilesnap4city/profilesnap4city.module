@@ -1,0 +1,534 @@
+<?php
+
+/* Snap4city Drupal GDPR module
+   Copyright (C) 2018 DISIT Lab http://www.disit.org - University of Florence
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as
+   published by the Free Software Foundation, either version 3 of the
+   License, or (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Affero General Public License for more details.
+
+   You should have received a copy of the GNU Affero General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>. */
+
+
+/* Split the code 
+
+   No Drupal Way but PHP 
+
+*/
+include_once 'includes/downloadPersonalData.inc';
+include_once 'includes/deletePersonalData.inc';
+
+include_once 'includes/myPersonalData.inc';
+//include_once 'includes/otherPersonalData.inc';
+include_once 'includes/myIOTData-su.inc';
+include_once 'includes/myIOTData-sgid.inc';
+
+include_once 'includes/myAnnotationData.inc';
+
+
+include_once 'includes/myActivityPersonalData.inc';
+
+include_once 'includes/deleteAllPersonalData.inc';
+
+
+include_once 'includes/deprecated.inc';
+include_once 'includes/swissKnife.inc';
+
+
+/**
+ * Implements hook_block_info.
+ */
+function profilesnap4city_block_info() {
+
+//    $blocks['custom'] = array('info' => 'Personal data table block');
+    $blocks['mypersonaldata_user_info'] = array('info' => 'Personal data user info');
+
+    $blocks['mypersonaldata_list_app_table'] = array('info' => 'Personal data list app table block');
+    $blocks['mypersonaldata_details_app_table'] = array('info' => 'Personal data details app table block');
+    $blocks['mypersonaldata_delete_app'] = array('info' => 'Personal data delete app block');
+
+    $blocks['mypersonaldata_download_app'] = array('info' => 'Personal data download app block');
+    $blocks['mypersonaldata_delegation_form'] = array('info' => 'Personal data delegation form block');
+    $blocks['mypersonaldata_add_deleg_form'] = array('info' => 'Personal data add delegation form block');
+
+
+/*Other Data*/
+    /*     $blocks['otherpersonaldata_list_app_table'] = array('info' => 'Other personal data list app table block'); */
+    /* $blocks['otherpersonaldata_details_app_table'] = array('info' => 'Other  data details app table block'); */
+    
+
+    $blocks['myiotdata_su_delegation_form'] = array('info' => 'IOT data service uri delegation form block');
+    $blocks['myiotdata_su_add_deleg_form'] = array('info' => 'IOT data service uri add delegation form block');
+
+
+    $blocks['myiotdata_sgid_delegation_form'] = array('info' => 'IOT data service groupID  delegation form block');
+    $blocks['myiotdata_sgid_add_deleg_form'] = array('info' => 'IOT data service groupID add delegation form block');
+
+    
+    $blocks['myannotiationdata_table'] = array('info' => 'Annotation  data table block');
+    //$blocks['myannotationdata_delete'] = array('info' => 'Annotation data delete app block');
+    //$blocks['myannotationdata_download'] = array('info' => 'Annotation data download block');
+    $blocks['myannotationdata_delegation_form'] = array('info' => 'Annotation data delegation form block');
+    $blocks['myannotationdata_add_deleg_form'] = array('info' => 'Annotation data add delegation form block');
+
+
+/*My Activity Data*/
+        $blocks['myactivity_list_app_table'] = array('info' => 'My Activity personal data list app table block');
+        $blocks['activityonmy_list_app_table'] = array('info' => 'Activity on my personal data list app table block');
+//     $blocks['myactivitypersonaldata_details_app_table'] = array('info' => 'My Activity  data details app table block'); 
+    
+        /* Delete All */
+
+$blocks['mypersonaldata_delete_all'] = array('info' => 'Personal data delete all block');
+        
+    
+    return $blocks;
+}
+
+
+/**
+ * Implements hook_block_view.
+ */
+function profilesnap4city_block_view($delta) {
+
+
+
+
+    global $user;
+    switch ($delta) {
+
+
+        //Used ? -> Not sure
+    case 'mypersonaldata_user_info':
+
+   
+
+               
+        $table=retrieve_drupaldata(); 
+
+        $block = array(
+            // ‘subject’ => t(‘Subject’),
+            'content' => $table
+
+        );
+
+        break;
+   
+
+
+
+    case 'mypersonaldata_list_app_table':
+
+    
+        $table=retrieve_mypersonaldata_app_list_datatable(); 
+
+        $block = array(
+
+            //'content' => '<h2>My App</h2>'.$table
+            'content' => $table
+
+        );
+
+        break;
+   
+
+    case 'mypersonaldata_details_app_table':
+
+
+
+        $url=$_SERVER['REQUEST_URI'];
+
+        $app_id = substr($url, strrpos($url, '=') + 1);
+
+        
+        
+        $table=retrieve_mypersonaldata_datatables($app_id); 
+
+
+        
+
+        $block = array(
+            // ‘subject’ => t(‘Subject’),
+            'content' => '<h2>Data stored for my App</h2>'.$table,
+
+        );
+
+        break;
+
+      case 'mypersonaldata_delete_app':
+
+
+
+        $url=$_SERVER['REQUEST_URI'];
+
+        $app_id = substr($url, strrpos($url, '=') + 1);
+
+            
+        $form=drupal_get_form('delete_mypersonaldata_form'); 
+
+
+
+        $block = array(
+
+            'content' => $form,
+
+        );
+
+        break;
+
+
+    case 'mypersonaldata_delete_all':
+
+
+  
+        $form=drupal_get_form('delete_all_mypersonaldata_form'); 
+
+
+
+        $block = array(
+
+            'content' => $form,
+
+        );
+
+        break;
+
+
+    case 'mypersonaldata_download_app':
+
+
+
+        $url=$_SERVER['REQUEST_URI'];
+
+        $app_id = substr($url, strrpos($url, '=') + 1);
+
+    
+        
+        $form=drupal_get_form('download_mypersonaldata_form');
+
+
+        $block = array(
+            // ‘subject’ => t(‘Subject’),
+            'content' => $form,
+
+        );
+
+        break;
+
+        
+    case 'mypersonaldata_delegation_form':
+
+        $url=$_SERVER['REQUEST_URI'];
+
+        $app_id = substr($url, strrpos($url, '=') + 1);
+
+
+        
+        $form = drupal_get_form('profilesnap4city_delegation_add_more');     
+        $block = array(
+    
+            'content' => $form,
+
+        );
+
+        break;
+    
+
+    case 'mypersonaldata_add_deleg_form':
+
+
+
+        $url=$_SERVER['REQUEST_URI'];
+
+        $app_id = substr($url, strrpos($url, '=') + 1);
+
+
+        $_SESSION['current_app_id']=$app_id;
+
+
+        
+    
+        $form = drupal_get_form('profilesnap4city_add_delegation_form');
+        $block = array(
+    
+            'content' => $form,
+
+        );
+
+        break;
+
+        /*Other Data*/
+
+    /*         case 'otherpersonaldata_list_app_table': */
+
+    
+    /*     $table=retrieve_otherpersonaldata_app_list_datatable();  */
+
+    /*     $block = array( */
+
+    /*         'content' => '<h2>Other App</h2>'.$table */
+
+    /*     ); */
+
+    /*     break; */
+   
+
+    /* case 'otherpersonaldata_details_app_table': */
+
+
+
+    /*     $url=$_SERVER['REQUEST_URI']; */
+
+    /*     $app_id = substr($url, strrpos($url, '=') + 1); */
+
+        
+        
+    /*     $table=retrieve_otherpersonaldata_datatables($app_id);  */
+
+
+    /*     $block = array( */
+    /*         // ‘subject’ => t(‘Subject’), */
+    /*         'content' => '<h2>Data stored for other App</h2>'.$table, */
+
+    /*     ); */
+
+    /*     break; */
+
+
+
+                /*My activity data*/
+
+        case 'myactivity_list_app_table':
+    
+        $table=retrieve_myactivityPersonaldata_app_list_datatable();
+
+
+	if (user_has_role(21)){
+
+        $block = array(
+
+            
+	     'content' => '<h2> User access on their data</h2>'. $table
+
+        );
+
+}else{
+
+        $block = array(
+            'content' => '<h2>My access on my own data</h2>'. $table
+           
+
+        );
+}
+
+        
+        break;
+   
+        case 'activityonmy_list_app_table':
+    
+        $table=retrieve_activityOnMyPersonaldata_app_list_datatable();
+
+        $block = array(
+
+            'content' => '<h2>Other access on my own data</h2>'.$table
+
+        );
+
+        break;
+
+    /* case 'myactivitypersonaldata_details_app_table': */
+
+
+
+    /*     $url=$_SERVER['REQUEST_URI']; */
+
+    /*     $app_id = substr($url, strrpos($url, '=') + 1); */
+
+        
+        
+    /*     $table=retrieve_otherpersonaldata_datatables($app_id); */
+
+
+    /*     $block = array( */
+    /*         // ‘subject’ => t(‘Subject’), */
+    /*         'content' => '<h2>Data stored for other App</h2>'.$table, */
+
+    /*     ); */
+
+    /*     break; */
+
+
+        
+        
+/* My IOT Case */
+
+    case 'myiotdata_su_delegation_form':
+
+        /*  $url=$_SERVER['REQUEST_URI']; */
+
+        /* $app_id = substr($url, strrpos($url, '=') + 1); */
+
+
+        
+        $form = drupal_get_form('myiotdata_su_delegation_form');     
+        $block = array(
+    
+            'content' => $form,
+
+        );
+
+        break;
+    
+
+    case 'myiotdata_su_add_deleg_form':
+
+
+ 
+    
+        $form = drupal_get_form('myiotdata_su_delegation_add_form');
+        $block = array(
+    
+            'content' => $form,
+
+        );
+
+        break;
+
+
+    case 'myiotdata_sgid_delegation_form':
+
+
+        
+        $form = drupal_get_form('myiotdata_sgid_delegation_form');     
+        $block = array(
+    
+            'content' => $form,
+
+        );
+
+        break;
+    
+
+    case 'myiotdata_sgid_add_deleg_form':
+
+  
+    
+        $form = drupal_get_form('myiotdata_sgid_delegation_add_form');
+        $block = array(
+    
+            'content' => $form,
+
+        );
+
+        break;
+
+
+        
+        
+
+        /*Annotation Case*/
+
+    case 'myannotiationdata_table':
+
+     
+
+        
+        $table=retrieve_myannotationdata_datatables(); 
+
+
+        $block = array(
+            // ‘subject’ => t(‘Subject’),
+            'content' => '<h2>My annotations</h2>'.$table,
+
+        );
+
+        break;
+
+    /* case 'myannotationdata_delete': */
+
+
+
+    /*     $url=$_SERVER['REQUEST_URI']; */
+
+    /*     $app_id = substr($url, strrpos($url, '=') + 1); */
+
+            
+    /*     $form=drupal_get_form('delete_myannotationdata_form');  */
+
+
+
+    /*     $block = array( */
+
+    /*         'content' => $form, */
+
+    /*     ); */
+
+    /*     break; */
+
+
+    /* case 'myannotationdata_download': */
+
+
+
+    /*     $url=$_SERVER['REQUEST_URI']; */
+
+    /*     $app_id = substr($url, strrpos($url, '=') + 1); */
+
+    
+        
+    /*     $form=drupal_get_form('download_myannotationdata_form'); */
+
+
+    /*     $block = array( */
+    /*         // ‘subject’ => t(‘Subject’), */
+    /*         'content' => $form, */
+
+    /*     ); */
+
+    /*     break; */
+
+        
+    case 'myannotationdata_delegation_form':
+
+        
+        $form = drupal_get_form('profilesnap4city_myannotation_delegation_add_more');     
+        $block = array(
+    
+            'content' => $form,
+
+        );
+
+        break;
+    
+
+    case 'myannotationdata_add_deleg_form':
+
+
+
+        
+    
+        $form = drupal_get_form('profilesnap4city_myannotation_add_delegation_form');
+        $block = array(
+    
+            'content' => $form,
+
+        );
+
+        break;
+
+
+        
+    }
+
+      
+    return $block;
+}
+
+?>

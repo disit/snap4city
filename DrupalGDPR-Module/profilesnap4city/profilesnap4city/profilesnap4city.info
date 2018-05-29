@@ -1,0 +1,7 @@
+name = ProfileSnap4City
+description = Profile snap4city
+core = 7.x
+
+files[] = includes/downloadPersonalData.php
+files[] = includes/controller.php
+
