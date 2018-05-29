@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+	<Appenders>
+		<RollingFile name="MyFileAll" fileName="${sys:logFileFolder}/datamanager-test/datamanager-all.log" immediateFlush="true" append="true" filePattern="${sys:logFileFolder}/datamanager-test/datamanager-all-$${date:yyyy-MM}/%d{yyyy-MM-dd}-%i.log.gz">
+			<PatternLayout>
+				<Pattern>%d{yyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36}:%L - %msg%n</Pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="50 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="50" />
+		</RollingFile>
+		<RollingFile name="MyFileError" fileName="${sys:logFileFolder}/datamanager-test/datamanager-error.log" immediateFlush="true" append="true"	filePattern="${sys:logFileFolder}/datamanager-test/datamanager-error-$${date:yyyy-MM}/%d{yyyy-MM-dd}-%i.log.gz">
+			<ThresholdFilter level="error"/>
+			<PatternLayout>
+				<Pattern>%d{yyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36}:%L - %msg%n</Pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="50 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="50" />
+		</RollingFile>
+		<RollingFile name="MyFileWarn" fileName="${sys:logFileFolder}/datamanager-test/datamanager-warn.log" immediateFlush="true" append="true"	filePattern="${sys:logFileFolder}/datamanager-test/datamanager-warn-$${date:yyyy-MM}/%d{yyyy-MM-dd}-%i.log.gz">
+			<ThresholdFilter level="warn"/>
+			<PatternLayout>
+				<Pattern>%d{yyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36}:%L - %msg%n</Pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="50 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="50" />
+		</RollingFile>		
+		<Console name="STDOUT" target="SYSTEM_OUT">
+			<PatternLayout>
+				<Pattern>%d{yyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36}:%L - %msg%n</Pattern>
+			</PatternLayout>
+    	</Console>
+	</Appenders>
+	
+	<Loggers>
+		<Root level="trace">
+			<AppenderRef ref="MyFileAll"/>
+			<AppenderRef ref="MyFileError"/>
+			<AppenderRef ref="MyFileWarn"/>
+			<AppenderRef ref="STDOUT"/>		
+		</Root>
+		
+		<Logger name="org.hibernate" level="warn" />
+		<Logger name="org.springframework" level="warn" />
+		
+	</Loggers>
+</Configuration>
