@@ -1,0 +1,156 @@
+openapi: 3.0.1
+info:
+  title: Notificator API
+  version: 1.0.0
+servers:
+  - url: http://notificator.km4city.org/notificator
+paths:
+  /restInterfaceExternal.php:
+    get:
+      tags: [External]
+      parameters:
+        - name: operation
+          in: query
+          description: The operation to be performed.
+          required: true
+          schema: 
+            type: string
+            enum: [getDashboardsList, getDashboardWidgets, getEvents]
+          example: getDashboardsList
+        - name: dashboardTitle
+          in: query
+          description: Titolo della dashboard. Utilizzato come parametro obbligatorio nella richiesta  _getDashboardWidgets_ e come parametro opzionale nella richiesta _getEvents_.
+          schema: 
+            type: string
+          example: Web monitoring - Status (mobile)
+        - name: startDate
+          in: query
+          description: Eventi occorsi prima di questo timestamp non verranno restituiti. Utilizzato (opzionalmente) per la sola richiesta _getEvents_.
+          schema: 
+            type: string
+            format: date-time
+          example: '2018-04-06 10:27:27'
+        - name: endDate
+          in: query
+          description: Eventi occorsi dopo questo timestamp non verranno restituiti. Utilizzato (opzionalmente) per la sola richiesta _getEvents_.
+          schema:
+            type: string
+            format: date-time
+          example: '2018-04-07 10:27:27'
+        - name: widgetTitle
+          in: query
+          description: Titolo di widget generatore di eventi di interesse. Utilizzato (opzionalmente) per la sola richiesta _getEvents_.
+          schema: 
+            type: string
+          example: Disit.org
+      responses:
+        200:
+          description: |
+            * **getDashboardsList** - Elenco dei titoli delle Dashboards contenenti widgets registrati sul Notificatore come generatori di eventi. Per ogni dashboard vengono restituiti titolo ed URL.
+            
+            * **getDashboardWidgets** - Elenco degli widgets (istanze di widget) appartenenti ad una certa dashboard e registrati sul Notificatore come generatori di eventi. 
+            
+            * **getEvents** - Un elenco di eventi (istanze di evento, accadimenti) in base ai parametri che gli mandi in ingresso.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - detail
+                  - data
+                properties:
+                  detail:
+                    description: _Ok_ for success, a short description of the error otherwise.
+                    type: string
+                    example: Ok
+                  data:
+                    description: An array where the retrieved data can be found.
+                    oneOf:
+                      - type: array
+                        items:
+                          $ref: '#/components/schemas/dashboard'
+                      - type: array
+                        items:
+                          $ref: '#/components/schemas/widget'
+                      - type: array
+                        items:
+                          $ref: '#/components/schemas/event'
+components:
+  schemas:
+    dashboard:
+      type: object
+      properties:
+        dashboardTitle:
+          type: string
+          example: DataCenter
+        dashboardUrl:
+          type: string
+          example: http://dashboard.km4city.org/dashboardSmartCity/view/index.php?iddasboard=NDI=
+    widget:
+      type: object
+      properties:
+        generatorId:
+          description: Identificativo interno al Notificatore del widget.
+          type: integer
+          format: int32
+          example: 261
+        widgetTitle:
+          description: Titolo del widget.
+          type: string
+          example: Disit.org
+        metricName:
+          description: Nome della metrica mostrata da quel widget.
+          type: string
+          example: Disit_Org_status
+        user:
+          description: Utente che ha creato il widget.
+          type: string
+          example: marazzini
+        eventTypes:
+          description: Un array con l'elenco dei tipi di evento innescati da questo widget.
+          type: array
+          items:
+            type: string
+          example: ["Value != token found - KO"]
+    event:
+      type: object
+      properties:
+        id: 
+          description: Identificativo interno al Notificatore dell'evento.
+          type: integer
+          format: int32
+          example: 73780
+        eventTime: 
+          description: Timestamp dell'evento.
+          type: string
+          format: date-time
+          example: 2018-04-12 17:22:19
+        eventType: 
+          description: Tipo di evento (coerente con quanto detto per l'elenco degli widgets generatori di eventi).
+          type: string 
+          example: Value > 50 - eccolo
+        appName:
+          description: Applicazione (sarà sempre "Dashboard Manager" nel tuo caso).
+          type: string
+          example: Dashboard Manager
+        appUsr: 
+          description: Utente che ha creato il widget.
+          type: string
+          example: marazzini
+        genName: 
+          description: Titolo del widget che ha generato l'evento.
+          type: string
+          example: Gas1 (day)
+        genType: 
+          description: Nome della metrica mostrata da quel widget.
+          type: string
+          example: DCGas1
+        genContainer: 
+          description: Titolo della dashboard contenente quel widget.
+          type: string
+          example: Snap4City - DataCenter gas and smoke (mobile)
+        url: 
+          description: Url della dashboard contenente quel widget.
+          type: string
+          format: url
+          example: https://dashboard.km4city.org/view/index.php?iddasboard=MjIw

@@ -1,0 +1,1392 @@
+openapi: 3.0.1
+info:
+  title: DISCES API
+  description: >
+    A typical major requirement in a Smart City/Cloud environment consists of an
+    engine for distributed task scheduling. In this context, DISIT lab developed
+    an efficient solution for Smart management and scheduling, Distributed SCE
+    Scheduler, DISCES. DISCES consists of a set of distributed instances of
+    running agents performing concurrent tasks. DISCES engine with cluster
+    functionality allows adding distributed nodes and defining jobs, without
+    service downtime.
+  contact:
+    name: Daniele Cenni
+    email: daniele.cenni@unifi.it
+  version: 1.0.0
+servers:
+  - url: 'http://192.168.0.23:8080'
+paths:
+  /SmartCloudEngine/index.jsp:
+    get:
+      tags:
+        - API
+      description: >
+        The full list of the APIs that can be accessed via a HTTP GET request
+        follows:
+
+        * **checkExistJob** 
+
+          _Description:_ API to check the existence of a job on the scheduler. 
+          
+          _Input model:_ id_name_group_input_json
+          
+          _Output model:_ bool_json_output
+
+        * **checkExistTrigger**
+
+          _Description:_ API to check the existence of a trigger on the scheduler.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **clear**
+
+          _Description:_ API to delete all jobs and triggers on the scheduler.
+          
+          _Input model:_ id_input_json
+          
+          _Output model:_ bool_output
+          
+        * **clearScheduler**
+
+          _Description:_ alias of _clear_.
+          
+        * **deleteCalendar**
+
+          _Description:_ API to delete a calendar on the scheduler.
+          
+          _Input model:_ id_calendar_input_json
+          
+          _Output model:_ bool_html_output
+          
+        * **deleteJob**
+
+          _Description:_ API to delete a job from the scheduler, and all associated triggers.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **getCurrentlyExecutingJobs**
+
+          _Description:_ API to ask for a list of running jobs.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ tabular_json_output
+          
+        * **getTriggersOfJob**
+
+          _Description:_ API to ask for a list of running jobs.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ tabular_json_output
+          
+        * **getJobDetail**
+
+          _Description:_ API to ask for job details.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ key_value_json_output
+          
+        * **getJobGroupNames**
+        
+          _Description:_ API to ask for a list of groups.
+          
+          _Input model:_ id_input_json
+          
+          _Output model:_ numbered_values_json_output
+          
+        * **getPausedTriggerGroups**
+          
+          _Description:_ API to ask for a list of paused triggers.
+          
+          _Input model:_ id_input_json
+          
+          _Output model:_ numbered_values_json_output
+          
+        * **getSchedulerInstanceId**
+        
+          _Description:_ API to ask for the scheduler's instance id.
+          
+          _Input model:_ id_input_json
+          
+          _Output model:_ string_output
+          
+        * **getSchedulerName**
+        
+          _Description:_ API to ask for the scheduler's instance name.
+          
+          _Input model:_ id_input_json
+          
+          _Output model:_ string_output
+          
+        * **getTriggerGroupNames**
+          
+          _Description:_ API to ask for a list of all triggers.
+          
+          _Input model:_ id_input_json
+          
+          _Output model:_ numbered_values_json_output
+          
+        * **getTriggerKeys**
+        
+          _Description:_ API to ask for a list of all triggers in a group.
+          
+          _Input model:_ id_triggerGrp_input_json
+          
+          _Output model:_ numbered_values_json_output
+
+        * **getTriggersOfJob**
+        
+          _Description:_ API to ask for a list of all triggers of a job.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ tabular_json_output
+          
+        * **getTriggerState**
+        
+          _Description:_ API to request a trigger status.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ string_output
+          
+        * **interruptJob**
+        
+          _Description:_ API to request the interruption of all instances of a job.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **interruptJobInstance**
+        
+          _Description:_ API to request the interruption of an instance of a job.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **interruptJobs**
+        
+          _Description:_ API to request the interruption of all running jobs.
+          
+          _Input model:_ id_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **interruptFireInstanceId**
+        
+          _Description:_ API to request the interruption of an instance of a job.
+          
+          _Input model:_ id_fire_input_json
+          
+          _Output model:_ bool_html_output
+      
+        * **isInStandbyMode**
+        
+          _Description:_ API to ask if the scheduler is on standby.
+          
+          _Input model:_ id_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **isShutdown**
+        
+          _Description:_ API to ask if the scheduler is shutdown.
+          
+          _Input model:_ id_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **isStarted**
+        
+          _Description:_ API to ask if the scheduler is running.
+          
+          _Input model:_ id_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **pauseTriggers**
+        
+          _Description:_ API to ask you to pause all triggers (including future triggers).
+          
+          _Input model:_ id_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **pauseJob**
+        
+          _Description:_ API to prompt you to pause a job.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **pauseJobs**
+        
+          _Description:_ API to ask for a list of all triggers in a group.
+          
+          _Input model:_ id_jobGrp_input_json
+          
+          _Output model:_ bool_html_output
+          
+        * **pauseTrigger**
+        
+          _Description:_ API to prompt you to pause a trigger.
+          
+          _Input model:_ id_triggerName_triggerGrp_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **pauseTriggers**
+        
+          _Description:_ API to prompt you to pause a trigger.
+          
+          _Input model:_ id_groupName_input_json
+          
+          _Output model:_ bool_html_output
+          
+        * **rescheduleJob**
+        
+          _Description:_ API for requesting job rescheduling.
+          
+          _Input model:_ id_wi_jobName_jobGrp_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **resumeAll**
+        
+          _Description:_ API to request resume of all jobs and triggers.
+          
+          _Input model:_ id_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **resumeJob**
+        
+          _Description:_ API to request a job resume.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **resumeJobs**
+        
+          _Description:_ API to ask for a group's job resume.
+          
+          _Input model:_ id_jobGrp_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **resumeTrigger**
+        
+          _Description:_ API to request a trigger resume.
+          
+          _Input model:_ id_triggerName_triggerGrp_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **resumeTriggers**
+        
+          _Description:_ API to request resume of triggers of a group.
+          
+          _Input model:_ id_groupName_input_json
+          
+          _Output model:_ bool_html_output       
+          
+        * **shutdownScheduler**
+        
+          _Description:_ API for requesting scheduler shutdowns.
+        
+          _Input model:_ id_wait4jobs2complete_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **standbyScheduler**
+        
+          _Description:_ API to request standby of the scheduler.
+          
+          _Input model:_ id_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **startScheduler**
+        
+          _Description:_ API for requesting the scheduler start.
+          
+          _Input model:_ id_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **startDelayed**
+        
+          _Description:_ API for requesting delayed scheduler start.
+          
+          _Input model:_ id_seconds_input_json
+          
+          _Output model:_ bool_html_output
+          
+        * **truncateCatalinaLog**
+        
+          _Description:_ API to request for Catalina log truncate (Tomcat).
+          
+          _Input model:_ id_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **triggerJob**
+        
+          _Description:_ API to request for a job execution.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **unscheduleJob**
+        
+          _Description:_ API to request removal of a job from the scheduler.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **listJobTriggers**
+        
+          _Description:_ API to ask for a job trigger list.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ table_row_json_output
+          
+        * **updateJobDataMap**
+        
+          _Description:_ API to ask for a job trigger list.
+          
+          _Input model:_ id_jobName_jobGrp_jobDataMap_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **addJob**
+        
+          _Description:_ API to request to add a job to the scheduler.
+          
+          _Input model:_ id_jobName_jobGrp_jobClass_input_json
+          
+          _Output model:_ bool_json_output
+
+        * **getNotificationEmail**
+        
+          _Description:_ API to ask for the notification email associated with the job completion.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **getJobDataMap**
+        
+          _Description:_ API to request for a job data map in JSON format.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ key_value_json_output
+          
+        * **getJobFireTimes**
+        
+          _Description:_ API to request job firing times.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ key_value_json_output
+          
+        * **getJobTriggers**
+        
+          _Description:_ API to request job triggers.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ tabular_json_output_essential
+          
+        * **getSchedulerMetadata**
+        
+          _Description:_ API to request scheduler metadata.
+          
+          _Input model:_ id_input_json
+          
+          _Output model:_ key_value_json_output
+          
+        * **getSystemStatus**
+        
+          _Description:_ API to request the scheduler node status.
+          
+          _Input model:_ id_input_json
+          
+          _Output model:_ key_value_json_output
+          
+        * **getConnectionPoolInfo**
+        
+          _Description:_ API for requesting connection pool information for the database.
+          
+          _Input model:_ id_input_json
+          
+          _Output model:_ key_value_json_output
+          
+        * **buildTriggerForJob**
+        
+          _Description:_ API to request the creation of a trigger for a job.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **setJobProgress**
+        
+          _Description:_ API to set the percentage progress of a job.
+          
+          _Input model:_ id_fireid_progress_input_json
+          
+          _Output model:_ bool_html_output
+          
+        * **getJobProgress**
+        
+          _Description:_ API to request the percentage progress of a job.
+          
+          _Input model:_ id_fireid_input_json
+          
+          _Output model:_ string_html_output
+          
+      parameters:
+        - name: json
+          description: >-
+            The parameter value is expected to be a serialized JSON object.
+            Refer to the description of the API of your interest to know how
+            your input should be shaped (_input model_). Reach the _Models_ section at the bottom of this page and explode the model of your interest to know more about it.
+          in: query
+          required: true
+          schema:
+            type: object
+            oneOf:
+              - $ref: '#/components/schemas/id_calendar_input_json'
+              - $ref: '#/components/schemas/id_fire_input_json'
+              - $ref: '#/components/schemas/id_fireid_input_json'
+              - $ref: '#/components/schemas/id_fireid_progress_input_json'
+              - $ref: '#/components/schemas/id_groupName_input_json'
+              - $ref: '#/components/schemas/id_name_group_fire_input_json'
+              - $ref: '#/components/schemas/id_jobName_jobGrp_input_json'
+              - $ref: '#/components/schemas/id_jobName_jobGrp_jobClass_input_json'
+              - $ref: '#/components/schemas/id_jobName_jobGrp_jobDataMap_input_json'
+              - $ref: '#/components/schemas/id_triggerGrp_input_json'
+              - $ref: '#/components/schemas/id_triggerName_triggerGrp_input_json'
+              - $ref: '#/components/schemas/id_jobGrp_input_json'
+              - $ref: '#/components/schemas/id_input_json'
+              - $ref: '#/components/schemas/id_seconds_input_json'
+              - $ref: '#/components/schemas/id_wait4jobs2complete_input_json'
+              - $ref: '#/components/schemas/id_wi_jobName_jobGrp_input_json'
+              - $ref: '#/components/schemas/table_row_json_output'
+
+      responses:
+        '200':
+          description: >-
+            Different APIs provide different outputs. Refer to the description
+            of the API of your interest to know how its output is shaped (output
+            model).
+          content:
+            application/json:
+              schema:
+                type: object
+                oneOf:
+                  - $ref: '#/components/schemas/bool_json_output'
+                  - $ref: '#/components/schemas/bool_html_output'
+                  - $ref: '#/components/schemas/bool_output'
+                  - $ref: '#/components/schemas/string_html_output'
+                  - $ref: '#/components/schemas/tabular_json_output'
+                  - $ref: '#/components/schemas/tabular_json_output_essential'
+                  - $ref: '#/components/schemas/key_value_json_output'
+                  - $ref: '#/components/schemas/numbered_values_json_output'
+                  - $ref: '#/components/schemas/string_output'
+    post:
+      tags:
+        - API
+      description: >
+        The full list of the available functionalities that can be accessed
+        through an HTTP POST request follows:
+
+        * **checkExistJob** 
+
+          _Description:_ API to check the existence of a job on the scheduler. 
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **checkExistTrigger**
+
+          _Description:_ API to check the existence of a trigger on the scheduler.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **clear**
+
+          _Description:_ API to delete all jobs and triggers on the scheduler.
+          
+          _Input model:_ id_input_json
+          
+          _Output model:_ bool_output
+          
+        * **clearScheduler**
+
+          _Description:_ alias of _clear_
+          
+        * **deleteCalendar**
+
+          _Description:_ API to delete a calendar on the scheduler.
+          
+          _Input model:_ id_calendar_input_json
+          
+          _Output model:_ bool_html_output
+          
+        * **deleteJob**
+
+          _Description:_ API to delete a job from the scheduler, and all associated triggers.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **getCurrentlyExecutingJobs**
+
+          _Description:_ API to ask for a list of running jobs.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ tabular_json_output
+          
+        * **getTriggersOfJob**
+
+          _Description:_ API to ask for a list of running jobs.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ tabular_json_output
+          
+        * **getJobDetail**
+
+          _Description:_ API to ask for job details.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ key_value_json_output
+          
+        * **getJobGroupNames**
+        
+          _Description:_ API to ask for a list of groups.
+          
+          _Input model:_ id_input_json
+          
+          _Output model:_ numbered_values_json_output
+          
+        * **getPausedTriggerGroups**
+          
+          _Description:_ API to ask for a list of paused triggers.
+          
+          _Input model:_ id_input_json
+          
+          _Output model:_ numbered_values_json_output
+          
+        * **getSchedulerInstanceId**
+        
+          _Description:_ API to ask for the scheduler's instance id.
+          
+          _Input model:_ id_input_json
+          
+          _Output model:_ string_output
+          
+        * **getSchedulerName**
+        
+          _Description:_ API to ask for the scheduler's instance name.
+          
+          _Input model:_ id_input_json
+          
+          _Output model:_ string_output
+          
+        * **getTriggerGroupNames**
+          
+          _Description:_ API to ask for a list of all triggers.
+          
+          _Input model:_ id_input_json
+          
+          _Output model:_ numbered_values_json_output
+          
+        * **getTriggerKeys**
+        
+          _Description:_ API to ask for a list of all triggers in a group.
+          
+          _Input model:_ id_triggerGrp_input_json
+          
+          _Output model:_ numbered_values_json_output
+
+        * **getTriggersOfJob**
+        
+          _Description:_ API to ask for a list of all triggers of a job.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ tabular_json_output
+          
+        * **getTriggerState**
+        
+          _Description:_ API to request a trigger status.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ string_output
+          
+        * **interruptJob**
+        
+          _Description:_ API to request the interruption of all instances of a job.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **interruptJobInstance**
+        
+          _Description:_ API to request the interruption of an instance of a job.
+          
+          _Input model:_ id_name_group_fire_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **interruptJobs**
+        
+          _Description:_ API to request the interruption of all running jobs.
+          
+          _Input model:_ id_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **interruptFireInstanceId**
+        
+          _Description:_ API to request the interruption of an instance of a job.
+          
+          _Input model:_ id_fire_input_json
+          
+          _Output model:_ bool_html_output
+          
+        * **isInStandbyMode**
+        
+          _Description:_ API to ask if the scheduler is on standby.
+          
+          _Input model:_ id_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **isShutdown**
+        
+          _Description:_ API to ask if the scheduler is shutdown.
+          
+          _Input model:_ id_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **isStarted**
+        
+          _Description:_ API to ask if the scheduler is running.
+          
+          _Input model:_ id_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **pauseTriggers**
+        
+          _Description:_ API to ask you to pause all triggers (including future triggers).
+          
+          _Input model:_ id_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **pauseJob**
+        
+          _Description:_ API to prompt you to pause a job.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **pauseJobs**
+        
+          _Description:_ API to ask for a list of all triggers in a group.
+          
+          _Input model:_ id_jobGrp_input_json
+          
+          _Output model:_ bool_html_output
+          
+        * **pauseTrigger**
+        
+          _Description:_ API to prompt you to pause a trigger.
+          
+          _Input model:_ id_triggerName_triggerGrp_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **pauseTriggers**
+        
+          _Description:_ API to prompt you to pause a trigger.
+          
+          _Input model:_ id_groupName_input_json
+          
+          _Output model:_ bool_html_output
+          
+        * **rescheduleJob**
+        
+          _Description:_ API for requesting job rescheduling.
+          
+          _Input model:_ id_wi_jobName_jobGrp_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **resumeAll**
+        
+          _Description:_ API to request resume of all jobs and triggers.
+          
+          _Input model:_ id_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **resumeJob**
+        
+          _Description:_ API to request a job resume.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **resumeJobs**
+        
+          _Description:_ API to ask for a group's job resume.
+          
+          _Input model:_ id_jobGrp_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **resumeTrigger**
+        
+          _Description:_ API to request a trigger resume.
+          
+          _Input model:_ id_triggerName_triggerGrp_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **resumeTriggers**
+        
+          _Description:_ API to request resume of triggers of a group.
+          
+          _Input model:_ id_groupName_input_json
+          
+          _Output model:_ bool_html_output 
+          
+        * **shutdownScheduler**
+        
+          _Description:_ API for requesting scheduler shutdowns.
+        
+          _Input model:_ id_wait4jobs2complete_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **standbyScheduler**
+        
+          _Description:_ API to request standby of the scheduler.
+          
+          _Input model:_ id_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **startScheduler**
+        
+          _Description:_ API for requesting the scheduler start.
+          
+          _Input model:_ id_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **startDelayed**
+        
+          _Description:_ API for requesting delayed scheduler start.
+          
+          _Input model:_ id_seconds_input_json
+          
+          _Output model:_ bool_html_output
+          
+        * **truncateCatalinaLog**
+        
+          _Description:_ API to request for Catalina log truncate (Tomcat).
+          
+          _Input model:_ id_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **triggerJob**
+        
+          _Description:_ API to request for a job execution.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **unscheduleJob**
+        
+          _Description:_ API to request removal of a job from the scheduler.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **listJobTriggers**
+        
+          _Description:_ API to ask for a job trigger list.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ table_row_json_output
+          
+        * **updateJobDataMap**
+        
+          _Description:_ API to ask for a job trigger list.
+          
+          _Input model:_ id_jobName_jobGrp_jobDataMap_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **addJob**
+        
+          _Description:_ API to request to add a job to the scheduler.
+          
+          _Input model:_ id_jobName_jobGrp_jobClass_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **getNotificationEmail**
+        
+          _Description:_ API to ask for the notification email associated with the job completion.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **getJobDataMap**
+        
+          _Description:_ API to request for a job data map in JSON format.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ key_value_json_output
+          
+        * **getJobFireTimes**
+        
+          _Description:_ API to request job firing times.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ key_value_json_output
+          
+        * **getJobTriggers**
+        
+          _Description:_ API to request job triggers.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ tabular_json_output_essential
+          
+        * **getSchedulerMetadata**
+        
+          _Description:_ API to request scheduler metadata.
+          
+          _Input model:_ id_input_json
+          
+          _Output model:_ key_value_json_output
+          
+        * **getSystemStatus**
+        
+          _Description:_ API to request the scheduler node status.
+          
+          _Input model:_ id_input_json
+          
+          _Output model:_ key_value_json_output
+          
+        * **getConnectionPoolInfo**
+        
+          _Description:_ API for requesting connection pool information for the database.
+          
+          _Input model:_ id_input_json
+          
+          _Output model:_ key_value_json_output
+          
+        * **buildTriggerForJob**
+        
+          _Description:_ API to request the creation of a trigger for a job.
+          
+          _Input model:_ id_jobName_jobGrp_input_json
+          
+          _Output model:_ bool_json_output
+          
+        * **setJobProgress**
+        
+          _Description:_ API to set the percentage progress of a job.
+          
+          _Input model:_ id_fireid_progress_input_json
+          
+          _Output model:_ bool_html_output
+          
+        * **getJobProgress**
+        
+          _Description:_ API to request the percentage progress of a job.
+          
+          _Input model:_ id_fireid_input_json
+          
+          _Output model:_ string_html_output
+          
+      requestBody:
+        description: >-
+          Refer to the description of the API of your interest to know how your
+          input should be shaped (_input model_).
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              oneOf:
+              - $ref: '#/components/schemas/id_calendar_input_json'
+              - $ref: '#/components/schemas/id_fire_input_json'
+              - $ref: '#/components/schemas/id_fireid_input_json'
+              - $ref: '#/components/schemas/id_fireid_progress_input_json'
+              - $ref: '#/components/schemas/id_groupName_input_json'
+              - $ref: '#/components/schemas/id_name_group_fire_input_json'
+              - $ref: '#/components/schemas/id_jobName_jobGrp_input_json'
+              - $ref: '#/components/schemas/id_jobName_jobGrp_jobClass_input_json'
+              - $ref: '#/components/schemas/id_jobName_jobGrp_jobDataMap_input_json'
+              - $ref: '#/components/schemas/id_jobName_jobGrp_jobClass_input_json'
+              - $ref: '#/components/schemas/id_triggerGrp_input_json'
+              - $ref: '#/components/schemas/id_triggerName_triggerGrp_input_json'
+              - $ref: '#/components/schemas/id_input_json'
+              - $ref: '#/components/schemas/id_jobGrp_input_json'
+              - $ref: '#/components/schemas/id_seconds_input_json'
+              - $ref: '#/components/schemas/id_wait4jobs2complete_input_json'
+              - $ref: '#/components/schemas/id_wi_jobName_jobGrp_input_json'
+              - $ref: '#/components/schemas/table_row_json_output'
+      responses:
+        '200':
+          description: >-
+            Different APIs provide different outputs. Refer to the description
+            of the API of your interest to know how its output is shaped (output
+            model).
+          content:
+            application/json:
+              schema:
+                type: object
+                oneOf:
+                  - $ref: '#/components/schemas/bool_json_output'
+                  - $ref: '#/components/schemas/bool_html_output'
+                  - $ref: '#/components/schemas/bool_output'
+                  - $ref: '#/components/schemas/string_html_output'
+                  - $ref: '#/components/schemas/tabular_json_output'
+                  - $ref: '#/components/schemas/tabular_json_output_essential'
+                  - $ref: '#/components/schemas/key_value_json_output'
+                  - $ref: '#/components/schemas/numbered_values_json_output'
+                  - $ref: '#/components/schemas/string_output'
+components:
+  schemas:
+    bool_html_output:
+      type: string
+      format: html
+      enum:
+        - <p>true</p>
+        - <p>false</p>
+      example: <p>true</p>
+    bool_json_output:
+      type: object
+      properties:
+        '0':
+          type: array
+          items:
+            type: string
+            enum:
+              - response
+          example:
+            - response
+        '1':
+          type: boolean
+          example: false
+      example:
+        '0':
+          - response
+        '1': 'false'
+    bool_output:
+      oneOf:
+        - $ref: '#/components/schemas/bool_html_output'
+        - $ref: '#/components/schemas/bool_json_output'
+    id_calendar_input_json:
+      type: object
+      properties:
+        id:
+          description: >-
+            The id of the required action. Find it in bold in the listing
+            of the exposed APIs.
+          type: string
+          example: deleteCalendar
+        calendarName:
+          description: The calendar name.
+          type: string
+          example: my_calendar_name
+    id_fire_input_json:
+      type: object
+      required:
+        - id
+        - fireInstanceId
+      properties:
+        id:
+          description: >-
+            The id of the required action. Find it in bold in the listing
+            of the exposed APIs.
+          type: string
+          example: checkExistJob
+        fireInstanceId:
+          description: The job’s instance id.
+          type: string
+          example: debian14567344086331456734410234
+    id_fireid_input_json:
+      description: Semantically alias of _id_fire_input_json_.
+      type: object
+      required:
+        - id
+        - fire_instance_id
+      properties:
+        id:
+          description: >-
+            The id of the required action. Find it in bold in the listing
+            of the exposed APIs.
+          type: string
+          example: setJobProgress
+        fire_instance_id:
+          description: The job’s instance id.
+          type: string
+          example: debian14567344086331456734410234
+    id_fireid_progress_input_json:
+      description: Semantically alias of _id_fire_input_json_.
+      type: object
+      required:
+        - id
+        - fire_instance_id
+        - progress
+      properties:
+        id:
+          description: >-
+            The id of the required action. Find it in bold in the listing
+            of the exposed APIs.
+          type: string
+          example: setJobProgress
+        fire_instance_id:
+          description: The job’s instance id.
+          type: string
+          example: debian14567344086331456734410234
+        progress:
+          description: The progress percentage of a job
+          type: integer
+          format: int32
+          example: 30
+    id_groupName_input_json:
+      description: Semantically alias of id_triggerGrp_input_json model.
+      type: object
+      required:
+        - id
+        - groupName
+      properties:
+        id:
+          description: >-
+            The id of the required action. Find it in bold in the listing
+            of the exposed APIs.
+          type: string
+          example: pauseTriggers
+        groupName:
+          description: The (trigger) group name.
+          type: string
+          example: group1 
+    id_jobGrp_input_json:
+      type: object
+      required:
+        - id
+        - jobGroup
+      properties:
+        id:
+          description: >-
+            The id of the required action. Find it in bold in the listing
+            of the exposed APIs.
+          type: string
+          example: pauseJobs
+        jobGroup:
+          description: The group name.
+          type: string
+          example: group1 
+    id_seconds_input_json:
+      type: object
+      required:
+        - id
+        - seconds
+      properties:
+        id:
+          description: >-
+            The id of the required action. Find it in bold in the listing
+            of the exposed APIs.
+          type: string
+          example: startDelayed
+        seconds:
+          description: The seconds of delay.
+          type: integer
+          format: int32
+          example: 600       
+    id_triggerGrp_input_json:
+      type: object
+      required:
+        - id
+        - triggerGroup
+      properties:
+        id:
+          description: >-
+            The id of the required action. Find it in bold in the listing
+            of the exposed APIs.
+          type: string
+          example: getTriggerKeys
+        triggerGroup:
+          description: The group name.
+          type: string
+          example: group1   
+
+    id_triggerName_triggerGrp_input_json:
+      type: object
+      required:
+        - id
+        - triggerName
+        - triggerGroup
+      properties:
+        id:
+          description: >-
+            The id of the required action. Find it in bold in the listing
+            of the exposed APIs.
+          type: string
+          example: checkExistJob
+        triggerName:
+          description: The trigger name.
+          type: string
+          example: trigger1
+        jobGroup:
+          description: The trigger group.
+          type: string
+          example: group1
+    id_input_json:
+      type: object
+      properties:
+        id:
+          description: >-
+            The id of the required action. Find it in bold in the listing
+            of the exposed APIs.
+          type: string
+          example: clear
+    id_jobName_jobGrp_input_json:
+      type: object
+      required:
+        - id
+        - jobName
+        - jobGroup
+      properties:
+        id:
+          description: >-
+            The id of the required action. Find it in bold in the listing
+            of the exposed APIs.
+          type: string
+          example: checkExistJob
+        jobName:
+          description: The job name.
+          type: string
+          example: job1
+        jobGroup:
+          description: The job group.
+          type: string
+          example: group1
+    id_jobName_jobGrp_jobDataMap_input_json:
+      type: object
+      required:
+        - id
+        - jobName
+        - jobGroup
+        - jobDataMap
+      properties:
+        id:
+          description: >-
+            The id of the required action. Find it in bold in the listing
+            of the exposed APIs.
+          type: string
+          example: updateJobDataMap
+        jobName:
+          description: The job name.
+          type: string
+          example: job1
+        jobGroup:
+          description: The job group.
+          type: string
+          example: group1
+        jobDataMap:
+          description: The job data map in JSON format.
+          type: object
+    id_jobName_jobGrp_jobClass_input_json:
+      type: object
+      required:
+        - id
+        - jobName
+        - jobGroup
+        - jobClass
+      properties:
+        id:
+          description: >-
+            The id of the required action. Find it in bold in the listing
+            of the exposed APIs.
+          type: string
+          example: addJob
+        jobName:
+          description: The job name.
+          type: string
+          example: job1
+        jobGroup:
+          description: The job group.
+          type: string
+          example: group1
+        jobClass:
+          description: The job class.
+          type: string
+          example: class1
+    id_name_group_fire_input_json:
+      type: object
+      required:
+        - id
+        - jobName
+        - jobGroup
+        - fireInstanceId
+      properties:
+        id:
+          description: >-
+            The id of the required action. Find it in bold in the listing
+            of the exposed APIs.
+          type: string
+          example: checkExistJob
+        jobName:
+          description: The job name.
+          type: string
+          example: job1
+        jobGroup:
+          description: The job group.
+          type: string
+          example: group1
+        fireInstanceId:
+          description: The job’s instance id.
+          type: string
+          example: debian14567344086331456734410234
+    id_wait4jobs2complete_input_json:
+      type: object
+      properties:
+        id:
+          description: >-
+            The id of the required action. Find it in bold in the listing
+            of the exposed APIs.
+          type: string
+          example: shutdownScheduler
+        waitForJobsToComplete:
+          description: If true, the scheduler is shutdown when jobs are completed, otherwise it will be shutdown immediately.
+          type: boolean
+          example: true
+    id_wi_jobName_jobGrp_input_json:
+      description: Semantically alias of id_jobName_jobGrp_input_json.
+      type: object
+      required:
+        - id
+        - withIdentityNameGroup
+      properties:
+        id:
+          description: >-
+            The id of the required action. Find it in bold in the listing
+            of the exposed APIs.
+          type: string
+          example: rescheduleJob
+        withIdentityNameGroup:
+          description: The job and group names separated by a dot (.)
+          type: string
+          example: job1.grp1
+    key_value_json_output:
+      type: object
+      additionalProperties:
+        oneOf:
+          - type: string
+          - type: array
+      example: |
+        {"#isNonConcurrent":"[{\"processPath\":\"\\\/opt\\\/jdk1.8.0_51\\\/bin\\\/java\"},{\"cp\":\"-classpath\"},{\"lib\":\":\\\/var\\\/www\\\/html\\\/sce\\\/test\\\/lib\\\/*\"},{\"InsertTweets\":\"inserttweets.InsertTweets\"},{\"insertTweets.properties\":\"\\\/var\\\/www\\\/html\\\/sce\\\/test\\\/lib\\\/insertTweets.properties\"}]"}
+    numbered_values_json_output:
+      type: object
+      additionalProperties:
+        type: string
+      example: |
+        {"0":"InsertTweetsRecommender","1":"TwitterVigilanceIndexing"}
+    string_html_output:
+      type: string
+      format: html
+      example: <p>30</30>
+    string_output:
+      description: Typically returned by those APIs that are expected to provide the identifier, name, or status of one entity.
+      type: string
+      example: debian1456734408633
+    tabular_json_output:
+      type: object
+      properties:
+        '0':
+          type: array
+          items:
+            type: string
+            enum:
+              - response
+          example:
+            - response
+        '1':
+          description: Serialization of a JSON that aims to represent a set of numbered rows through arrays of unlabeled values (positional semantic).
+          type: string
+          example: |
+            "{\"0\":[\"job1\",\"group1\",\"Sat Mar 12 14:07:44 CET 2016\"]}"
+      example: |
+        {"0":["response"],"1":"{\"0\":[\"job1\",\"group1\",\"Sat Mar 12 14:07:44 CET 2016\"]}"}
+    tabular_json_output_essential:
+      type: object
+      additionalProperties:
+        type: array
+    table_row_json_output:
+      type: object
+      properties:
+        '0':
+          description: Headers
+          type: array
+          items:
+            type: string
+          example: |
+            ["Trigger Name","Trigger Group","Calendar Name","Description","End Time","Final Fire Time","Misfire Instruction","Next Fire Time","Previous Fire Time","Priority","Start Time","May Fire Again"]
+        '1':
+          description: Values
+          type: array
+          example: |
+            ["7e369086-851f-4191-927f-229327d0f44c","4b2cf714-cd6c-4265-8b2e-702a80150736","","","","","0","Thu Mar 17 12:00:00 CET 2016","Thu Mar 17 06:00:00 CET 2016","5","Thu Dec 10 12:00:00 CET 2015","true"]
+      example: |
+        {"0":["Trigger Name","Trigger Group","Calendar Name","Description","End Time","Final Fire Time","Misfire Instruction","Next Fire Time","Previous Fire Time","Priority","Start Time","May Fire Again"],"1":["7e369086-851f-4191-927f-229327d0f44c","4b2cf714-cd6c-4265-8b2e-702a80150736","","","","","0","Thu Mar 17 12:00:00 CET 2016","Thu Mar 17 06:00:00 CET 2016","5","Thu Dec 10 12:00:00 CET 2015","true"]}
+externalDocs:
+  description: 'DISCES: DISTRIBUTED SCE SCHEDULER TOOLS (SCE: SMART CITY/CLOUD ENGINE), A DISIT TOOL FOR SMART ENVIRONMENTS'
+  url: http://www.disit.org/drupal/?q=node/6746
+            

@@ -1,0 +1,94 @@
+openapi: 3.0.1
+info:
+  title: Ownership API
+  version: '2.0'
+servers:
+  - url: http://{hostname}/ownership-api/v1
+    variables: 
+      hostname:
+        default: localhost
+paths:
+  /list:
+    get:
+      tags: [Read]
+      summary: It returns a JSON array that contains elements of the indicated type that are visible to the token's owner. 
+      parameters:
+        - name: type
+          in: query
+          description: The type of the elements of interest.
+          required: true
+          schema:
+            type: string
+        - name: accessToken
+          in: query
+          description: The user's access token.
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: A JSON array that contains elements of the indicated type that are visible to the token's owner. 
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                
+  /register:
+    post:
+      tags: [Write]
+      summary: Register ownership information.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: 
+                - elementId
+                - elementType
+                - elementName
+                - accessToken
+              properties:
+                elementId:
+                  type: string
+                elementType:
+                  type: string
+                  enum: [AppID, IOTID, ServiceURI,ServiceGraphID]
+                elementName:
+                  type: string
+                elementUrl:
+                  type: string
+                  format: uri
+                elementDetails:
+                  type: object
+                accessToken:
+                  type: string
+      responses:
+        default:
+          description: The ownership information is registered.
+          
+  /delete:
+    get:
+      tags: [Delete]
+      summary: Delete ownership information.
+      parameters:
+        - name: type
+          in: query
+          required: true
+          schema: 
+            type: string
+        - name: elementId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: accessToken
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: A logical delete is performed.

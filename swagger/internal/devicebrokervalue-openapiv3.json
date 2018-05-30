@@ -1,0 +1,1542 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Device, Broker and Value Mgmt API",
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "http://{snap4city}/api",
+      "variables": {
+        "snap4city": {
+          "default": "snap4city"
+        }
+      }
+    }
+  ],
+  "paths": {
+    "/device.php": {
+      "summary": "Device Management",
+      "get": {
+        "tags": [
+          "Device"
+        ],
+        "summary": "Insert, update, delete and retrieve devices and device attributes.",
+        "description": "This API is for managing the IoT devices. It can be leveraged for inserting, updating, deleting, and retrieving information about a device of interest. The __action__ input parameter indicates what operation has to be performed:\n\n* __Insert__ - This API is intended for inserting a new device in the Iot-Directory. The user has to specify the required parameters for inserting a device. The status of the operation is returned. This operation also provides the registration in the Knowledge Base when the required fields have been specified. The fields required for being inserted in the Kwoledge Base are reported below. Finally, this API provides the  registration in the specified context broker (when the context broker requires a specific registration).  \n\n* __Update__ - This API is intended for updating a device in the Iot-Directory. The user has to specify the required parameters for updating a device. The status of the operation is returned. This operation also provides the updating in the Knowledge base when the required fields have been specified and the updating in the specified context broker.\n\n* __Delete__ - This API is intended for deleting a device from the Iot-Directory. The user has to specify the required parameters for deleting a device. The status of the operation is returned. This operation also provides the deletion from the Knowledge base when the required fields have been specified and the deletion from corresponding context broker.\n\n* __Get all devices__ - This API is intended for retrieving all device from the Iot-Directory. The user has to specify no parameters for retrieving all the device. The status of the operation is returned together with the requested data.\n\n* __Get device attributes__ - This API is intended for retrieving all the values associated with devices from the Iot-Directory. The user has to specify the required parameters for retrieving all the attributes. The status of the operation is returned together with the requested data.\n\n* __Get parameter values__ - This API is intended for retrieving all values of the parameters value_type, data_type and value_unit that can be found in the Iot-Directory. The user is not expected to provide any input parameter. The status of the operation is returned together with the requested data.\n",
+        "parameters": [
+          {
+            "name": "action",
+            "in": "query",
+            "description": "The operation to be performed.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "insert",
+                "update",
+                "delete",
+                "get_all_device",
+                "get_device_attributes",
+                "get_param_values"
+              ]
+            },
+            "example": "insert"
+          },
+          {
+            "name": "id",
+            "in": "query",
+            "description": "Unique identifier for the device (in the specified context broker).",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "provaMM7777"
+          },
+          {
+            "name": "devicetype",
+            "in": "query",
+            "description": "\nThe type of the device (e.g. Thermometer, TrainPass, Citylamp, fan)\n\n_Required for actions:_ insert, update.\n",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "Thermometer"
+          },
+          {
+            "name": "contextbroker",
+            "in": "query",
+            "description": "\nName of the context broker that handles the device.\n\n_Required for actions:_ insert, update, delete, get_device_attribute.\n",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "mqttUNIFI"
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "description": "\nSensor, or actuator.\n\n_Required for actions:_ insert, update.\n",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "sensor",
+                "actuator"
+              ]
+            },
+            "example": "sensor"
+          },
+          {
+            "name": "protocol",
+            "in": "query",
+            "description": "\nOne of the supported protocols (e.g. mqtt, ngsi, amqp).\n\n_Required for actions:_ insert, update.\n",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "mqtt",
+                "ngsi",
+                "amqp"
+              ]
+            },
+            "example": "mqtt"
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "description": "\nCsv, xml, JSON.\n\n_Required for actions:_ insert, update.\n",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "csv",
+                "xml",
+                "json"
+              ]
+            },
+            "example": "csv"
+          },
+          {
+            "name": "mac",
+            "in": "query",
+            "description": "\nMac address of the device (when available otherwise empty string).\n\n_Used in actions:_ insert, update.\n",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "00-14-22-01-23-45"
+          },
+          {
+            "name": "producer",
+            "in": "query",
+            "description": "\nDevice producer (when available otherwise empty string).\n\n_Used in actions:_ insert, update.\n",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "Arduino"
+          },
+          {
+            "name": "model",
+            "in": "query",
+            "description": "\nDevice model (when available otherwise empty string).\n\n_Used in actions:_ insert, update.\n",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "TMP36"
+          },
+          {
+            "name": "latitude",
+            "in": "query",
+            "description": "\nLatitude coordinate of the device location.\n\n_Required for actions:_ insert, update.\n",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "format": "float",
+              "maximum": 90,
+              "minimum": -90
+            },
+            "example": 43.769562
+          },
+          {
+            "name": "longitude",
+            "in": "query",
+            "description": "\nLongitude coordinate of the device location.\n\n_Required for actions:_ insert, update.\n",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "format": "float",
+              "maximum": 180,
+              "minimum": -180
+            },
+            "example": 11.255814
+          },
+          {
+            "name": "visibility",
+            "in": "query",
+            "description": "\nPublic, or private.\n\n_Required for actions:_ insert, update.\n",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "public",
+                "private"
+              ]
+            },
+            "example": "public"
+          },
+          {
+            "name": "frequency",
+            "in": "query",
+            "description": "\nFrequency at which it produces observations, in seconds.\n\n_Required for actions:_ insert, update.\n",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "example": 60
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "\nA list of JSON objects representing the values generated by a device for each observation. \n\n_Required for actions:_ insert, update.\n",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/components/schemas/attribute"
+              }
+            }
+          },
+          {
+            "name": "deleteattributes",
+            "in": "query",
+            "description": "A list of JSON objects representing the values removed by a device.\n\n_Used in actions:_ update.\n",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/attribute"
+              }
+            }
+          },
+          {
+            "name": "newattributes",
+            "in": "query",
+            "description": "A list of JSON objects representing the values generated by a device for each observation.\n\n_Used in actions:_ update.\n",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/attribute"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/device"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Device"
+        ],
+        "summary": "Insert, update, delete and retrieve devices and device attributes.",
+        "description": "This API is for managing the IoT devices. It can be leveraged for inserting, updating, deleting, and retrieving information about a device of interest. The __action__ input parameter indicates what operation has to be performed:\n\n* __Insert__ - This API is intended for inserting a new device in the Iot-Directory. The user has to specify the required parameters for inserting a device. The status of the operation is returned. This operation also provides the registration in the Knowledge Base when the required fields have been specified. The fields required for being inserted in the Kwoledge Base are reported below. Finally, this API provides the  registration in the specified context broker (when the context broker requires a specific registration).  \n\n* __Update__ - This API is intended for updating a device in the Iot-Directory. The user has to specify the required parameters for updating a device. The status of the operation is returned. This operation also provides the updating in the Knowledge base when the required fields have been specified and the updating in the specified context broker.\n\n* __Delete__ - This API is intended for deleting a device from the Iot-Directory. The user has to specify the required parameters for deleting a device. The status of the operation is returned. This operation also provides the deletion from the Knowledge base when the required fields have been specified and the deletion from corresponding context broker.\n\n* __Get all devices__ - This API is intended for retrieving all device from the Iot-Directory. The user has to specify no parameters for retrieving all the device. The status of the operation is returned together with the requested data.\n\n* __Get device attributes__ - This API is intended for retrieving all the values associated with devices from the Iot-Directory. The user has to specify the required parameters for retrieving all the attributes. The status of the operation is returned together with the requested data.\n\n* __Get parameter values__ - This API is intended for retrieving all values of the parameters value_type, data_type and value_unit that can be found in the Iot-Directory. The user is not expected to provide any input parameter. The status of the operation is returned together with the requested data.\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "action"
+                ],
+                "properties": {
+                  "action": {
+                    "description": "The operation to be performed.",
+                    "type": "string",
+                    "enum": [
+                      "insert",
+                      "update",
+                      "delete",
+                      "get_all_device",
+                      "get_device_attributes",
+                      "get_param_values"
+                    ],
+                    "example": "insert"
+                  },
+                  "id": {
+                    "description": "Unique identifier for the device (in the specified context broker).",
+                    "type": "string",
+                    "example": "provaMM7777"
+                  },
+                  "devicetype": {
+                    "description": "\nThe type of the device (e.g. Thermometer, TrainPass, Citylamp, fan)\n\n_Needed for actions:_ insert, update.\n",
+                    "type": "string",
+                    "example": "Thermometer"
+                  },
+                  "contextbroker": {
+                    "description": "\nName of the context broker that handles the device.\n\n_Needed for actions:_ insert, update, delete, get_device_attribute.\n",
+                    "type": "string",
+                    "example": "mqttUNIFI"
+                  },
+                  "kind": {
+                    "description": "\nSensor, or actuator.\n\n_Needed for actions:_ insert, update.\n",
+                    "type": "string",
+                    "enum": [
+                      "sensor",
+                      "actuator"
+                    ],
+                    "example": "sensor"
+                  },
+                  "protocol": {
+                    "description": "\nOne of the supported protocols (e.g. mqtt, ngsi, amqp).\n\n_Needed for actions:_ insert, update.\n",
+                    "type": "string",
+                    "enum": [
+                      "mqtt",
+                      "ngsi",
+                      "amqp"
+                    ],
+                    "example": "mqtt"
+                  },
+                  "format": {
+                    "description": "\nCsv, xml, JSON.\n\n_Needed for actions:_ insert, update.\n",
+                    "type": "string",
+                    "enum": [
+                      "csv",
+                      "xml",
+                      "json"
+                    ],
+                    "example": "csv"
+                  },
+                  "mac": {
+                    "description": "\nMac address of the device (when available otherwise empty string).\n\n_Used in actions:_ insert, update.\n",
+                    "type": "string",
+                    "example": "00-14-22-01-23-45"
+                  },
+                  "producer": {
+                    "description": "\nDevice producer (when available otherwise empty string).\n\n_Used in actions:_ insert, update.\n",
+                    "type": "string",
+                    "example": "Arduino"
+                  },
+                  "model": {
+                    "description": "\nDevice model (when available otherwise empty string).\n\n_Used in actions:_ insert, update.\n",
+                    "type": "string",
+                    "example": "TMP36"
+                  },
+                  "latitude": {
+                    "description": "\nLatitude coordinate of the device location.\n\n_Needed for actions:_ insert, update.\n",
+                    "type": "number",
+                    "format": "float",
+                    "maximum": 90,
+                    "minimum": -90,
+                    "example": 43.769562
+                  },
+                  "longitude": {
+                    "description": "\nLongitude coordinate of the device location.\n\n_Needed for actions:_ insert, update.\n",
+                    "type": "number",
+                    "format": "float",
+                    "maximum": 180,
+                    "minimum": -180,
+                    "example": 11.255814
+                  },
+                  "visibility": {
+                    "description": "\nPublic, or private.\n\n_Needed for actions:_ insert, update.\n",
+                    "type": "string",
+                    "enum": [
+                      "public",
+                      "private"
+                    ],
+                    "example": "public"
+                  },
+                  "frequency": {
+                    "description": "\nFrequency at which it produces observations, in seconds.\n\n_Needed for actions:_ insert, update.\n",
+                    "type": "integer",
+                    "format": "int32",
+                    "example": 60
+                  },
+                  "attributes": {
+                    "description": "\nA list of JSON objects representing the values generated by a device for each observation. \n\n_Required for actions:_ insert, update.\n            \n",
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "$ref": "#/components/schemas/attribute"
+                    }
+                  },
+                  "deleteattributes": {
+                    "description": "A list of JSON objects representing the values removed by a device.\n\n_Used in actions:_ update.    \n",
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/attribute"
+                    }
+                  },
+                  "newattributes": {
+                    "description": "A list of JSON objects representing the values generated by a device for each observation.\n\n_Used in actions:_ update.\n",
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/attribute"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/device"
+          }
+        }
+      }
+    },
+    "/contextbroker.php": {
+      "get": {
+        "tags": [
+          "Broker"
+        ],
+        "summary": "Context Broker",
+        "description": "This API is for the management of the context brokers. It allows to insert, update, delete, get the full listing of the brokers, and the full listing of the allowed configuration parameters, and get the configuration of a specific broker. The __action__ input parameter indicates what operation has to be performed:\n\n* __Insert__ - This API is intended for inserting a new Context Broker in the Iot-Directory. The user has to specify the required parameters for inserting the Context Broker. The status of the operation is returned. This operation also registers the new broker in the Knowledge Base, when the required fields have been specified.\n\n* __Update__ - This API is intended for updating a Context Broker in the Iot-Directory. The user has to specify the required parameters for updating the Context Broker. The status of the operation is returned. This operation also updates the Knowledge Base when the required fields have been specified.\n\n* __Delete__ - This API is intended for deleting a Context Broker from the Iot-Directory. The user has to specify the required parameters for deleting the Context Broker. The status of the operation is returned. This operation also deletes the broker from the Knowledge Base when the required fields have been specified.\n\n* __Get all Context Broker__ - This API is intended for retrieving all Context Brokers from the Iot-Directory. The user has to specify no parameters. The status of the operation is returned, together with the requested data.\n\n* __Get config data__ - This API is intended for retrieving all config data from the Iot-Directory. The user has to specify no parameters. The status of the operation is returned, together with the requested data. \n\n* __Get config data values__ - This API is intended for retrieving all config data values from the Iot-Directory. The user has to specify no parameters. The status of the operation is returned, together with the requested data. \n",
+        "parameters": [
+          {
+            "name": "action",
+            "in": "query",
+            "description": "The operation to be performed.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "insert",
+                "update",
+                "delete",
+                "get_all_contextbroker",
+                "get_config_data",
+                "get_config_data_values"
+              ]
+            },
+            "example": "insert"
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Name of the Context Broker that handles different devices. It is a unique identifier.\n\n_Required for actions:_ insert, update, delete.\n",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "rabbitUNIMI"
+          },
+          {
+            "name": "ip",
+            "in": "query",
+            "description": "The Internet Protocol (IP) address of the Context Broker.\n\n_Required for actions:_ insert, update.\n",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "159.149.129.184"
+          },
+          {
+            "name": "protocol",
+            "in": "query",
+            "description": "The communication protocol to be used for interfacing to the broker. It is expected to be one of the three communication protocols supported at today: mqtt, amqp, ngsi.\n\n_Required for actions:_ insert, update.\n",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "mqtt",
+                "amqp",
+                "ngsi"
+              ]
+            },
+            "example": "amqp"
+          },
+          {
+            "name": "port",
+            "in": "query",
+            "description": "The port number of the Context Broker.\n\n_Required for actions:_ insert, update.\n",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "example": 1026
+          },
+          {
+            "name": "latitude",
+            "in": "query",
+            "description": "Latitude coordinate of the Context Broker location (when available, otherwise an empty string).\n\n_Used in actions:_ insert, update.\n",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": 43.769562
+          },
+          {
+            "name": "longitude",
+            "in": "query",
+            "description": "Longitude coordinate of the Context Broker location (when available, otherwise an empty string).\n\n_Used in actions:_ insert, update.\n",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": 11.255814
+          },
+          {
+            "name": "login",
+            "in": "query",
+            "description": "Login name for authenticating to the Context Broker (when available, otherwise an empty string).\n\n_Used in actions:_ insert, update.\n",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "prova"
+          },
+          {
+            "name": "password",
+            "in": "query",
+            "description": "Login password for authenticating to the Context Broker (when available, otherwise an empty string).\n\n_Used in actions:_ insert, update.\n",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "prova25"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/broker"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Broker"
+        ],
+        "summary": "Context Broker",
+        "description": "This API is for the management of the context brokers. It allows to insert, update, delete, get the full listing of the brokers, and the full listing of the allowed configuration parameters, and get the configuration of a specific broker. The __action__ input parameter indicates what operation has to be performed:\n\n* __Insert__ - This API is intended for inserting a new Context Broker in the Iot-Directory. The user has to specify the required parameters for inserting the Context Broker. The status of the operation is returned. This operation also registers the new broker in the Knowledge Base, when the required fields have been specified.\n\n* __Update__ - This API is intended for updating a Context Broker in the Iot-Directory. The user has to specify the required parameters for updating the Context Broker. The status of the operation is returned. This operation also updates the Knowledge Base when the required fields have been specified.\n\n* __Delete__ - This API is intended for deleting a Context Broker from the Iot-Directory. The user has to specify the required parameters for deleting the Context Broker. The status of the operation is returned. This operation also deletes the broker from the Knowledge Base when the required fields have been specified.\n\n* __Get all Context Broker__ - This API is intended for retrieving all Context Brokers from the Iot-Directory. The user has to specify no parameters. The status of the operation is returned, together with the requested data.\n\n* __Get config data__ - This API is intended for retrieving all config data from the Iot-Directory. The user has to specify no parameters. The status of the operation is returned, together with the requested data. \n\n* __Get config data values__ - This API is intended for retrieving all config data values from the Iot-Directory. The user has to specify no parameters. The status of the operation is returned, together with the requested data. \n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "action"
+                ],
+                "properties": {
+                  "action": {
+                    "description": "The operation to be performed.",
+                    "type": "string",
+                    "enum": [
+                      "insert",
+                      "update",
+                      "delete",
+                      "get_all_contextbroker",
+                      "get_config_data",
+                      "get_config_data_values"
+                    ],
+                    "example": "insert"
+                  },
+                  "name": {
+                    "description": "Name of the Context Broker that handles different devices. It is a unique identifier.\n\n_Required for actions:_ insert, update, delete.\n",
+                    "type": "string",
+                    "example": "rabbitUNIMI"
+                  },
+                  "ip": {
+                    "description": "The Internet Protocol (IP) address of the Context Broker.\n\n_Required for actions:_ insert, update. \n",
+                    "type": "string",
+                    "example": "159.149.129.184"
+                  },
+                  "protocol": {
+                    "description": "The communication protocol to be used for interfacing to the broker. It is expected to be one of the three communication protocols supported at today: mqtt, amqp, ngsi.\n\n_Required for actions:_ insert, update.\n",
+                    "type": "string",
+                    "enum": [
+                      "mqtt",
+                      "amqp",
+                      "ngsi"
+                    ],
+                    "example": "amqp"
+                  },
+                  "port": {
+                    "description": "The port number of the Context Broker.\n\n_Required for actions:_ insert, update.\n",
+                    "type": "integer",
+                    "format": "int32",
+                    "example": 1026
+                  },
+                  "latitude": {
+                    "description": "Latitude coordinate of the Context Broker location (when available, otherwise an empty string).\n\n_Used in actions:_ insert, update.\n",
+                    "type": "string",
+                    "example": 43.769562
+                  },
+                  "longitude": {
+                    "description": "Longitude coordinate of the Context Broker location (when available, otherwise an empty string).\n\n_Used in actions:_ insert, update.\n",
+                    "type": "string",
+                    "example": 11.255814
+                  },
+                  "login": {
+                    "description": "Login name for authenticating to the Context Broker (when available, otherwise an empty string).\n\n_Used in actions:_ insert, update.\n",
+                    "type": "string",
+                    "example": "prova"
+                  },
+                  "password": {
+                    "description": "Login password for authenticating to the Context Broker (when available, otherwise an empty string).\n\n_Used in actions:_ insert, update.\n",
+                    "type": "string",
+                    "example": "prova25"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/broker"
+          }
+        }
+      }
+    },
+    "/value.php": {
+      "summary": "Values Management",
+      "get": {
+        "tags": [
+          "Value"
+        ],
+        "summary": "Insert, update, delete, get all event values, get a specific event value.",
+        "description": "This API is for the management of the event values. It allows to insert, update, delete, get the full listing of the event values, and get the values for a specific event. The __action__ input parameter indicates what operation has to be performed:\n\n* __Insert__ - This API is intended for inserting a new value with a device already registered in the Iot-Directory. The user has to specify the required parameters for inserting a value. The status of the operation is returned. This operation also provides the registration in the Knowledge Base when the required fields have been specified. Finally the value is also reported in the structure of the device registered in the Context Broker (when this is required by the Context Broker).\n\n* __Update__ - This API is intended for updating a value with a device already registered in the Iot-Directory. The user has to specify the required parameters for updating a value. The status of the operation is returned. This operation also provides the updating on the Knowledge Base when the required fields have been specified. Finally the value is also reported in the structure of the device registered in the Context Broker (when this is required by the Context Broker).\n\n* __Delete__ - This API is intended for deleting a value from the Iot-Directory. The user has to specify the required parameters for deleting a value. The status of the operation is returned. This operation also provides the deletion from the Knowledge Base when the required fields have been specified and the deletion from the specified device.  \n\n* __Get all event values__ - This API is intended for retrieving all values from the Iot-Directory. The user has to specify no parameters. The status of the operation is returned, together with the requested data. \n\n* __Get event value__ - This API is intended for retrieving all values from the Iot-Directory. The user has to specify the required parameters for retrieving event values. The status of the operation is returned, together with the requested data.\n",
+        "parameters": [
+          {
+            "name": "action",
+            "in": "query",
+            "description": "The operation to be performed.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "insert",
+                "update",
+                "delete",
+                "get_all_event_value",
+                "get_event_value"
+              ]
+            },
+            "example": "insert"
+          },
+          {
+            "name": "device",
+            "in": "query",
+            "description": "The device unique identifier.\n\n_Required for actions:_ insert, update, delete, get_event_value. \n",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "provaMM77"
+          },
+          {
+            "name": "contextbroker",
+            "in": "query",
+            "description": "Name of the Context Broker that handles the device.\n\n_Required for actions:_ insert, update, get_event_value. \n",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "rabbitUNIMI"
+          },
+          {
+            "name": "cb",
+            "in": "query",
+            "description": "Name of the Context Broker that handles the device.\n\n_Required for actions:_ delete.\n",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "rabbitUNIMI"
+          },
+          {
+            "name": "value_name",
+            "in": "query",
+            "description": "Name of the value (and unique in the specified device and context broker).\n\n_Required for actions:_ insert, update, delete, get_event_value. \n",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "ProvaVal"
+          },
+          {
+            "name": "data_type",
+            "in": "query",
+            "description": "Data type of the value (e.g. integer, float, string, boolean, and so on).\n\n_Required for actions:_ insert, update. \n",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "binary"
+          },
+          {
+            "name": "value_type",
+            "in": "query",
+            "description": "Type of the value (e.g. Temperature, humidity, light, CO_concentration, and so on).\n\n_Required for actions:_ insert, update. \n",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "actuator_canceller"
+          },
+          {
+            "name": "value_unit",
+            "in": "query",
+            "description": "Unit of measure of the value (eg. oC,  %, lux, ppm, and so on).\n\n_Required for actions:_ insert, update. \n",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "lux"
+          },
+          {
+            "name": "editable",
+            "in": "query",
+            "description": "It specifies if the measure can be only read (false) or a value can be assigned (true). \n\n_Required for actions:_ insert, update.\n",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "example": true
+          },
+          {
+            "name": "healthiness_criteria",
+            "in": "query",
+            "description": "The type of check to perform on values (value_refresh_rate, different_values or value_bounds).\n\n_Required for actions:_ insert, update.\n",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "value_refresh_rate",
+                "different_values",
+                "value_bounds"
+              ]
+            },
+            "example": "value_refresh_rate"
+          },
+          {
+            "name": "healthiness_value",
+            "in": "query",
+            "description": "Healthiness value related to the healthiness criteria. The interpretetation varies depending of the adopted healthiness criteria: it could be the frequence of data acquisition (e.g. 300 seconds), the number of last values that have to have at least two different values, or the min and max allowed values.\n\n_Required for actions:_ insert, update.\n",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": 100
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/value"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Value"
+        ],
+        "summary": "Insert, update, delete, get all event values, get a specific event value.",
+        "description": "This API is for the management of the event values. It allows to insert, update, delete, get the full listing of the event values, and get the values for a specific event. The __action__ input parameter indicates what operation has to be performed:\n\n* __Insert__ - This API is intended for inserting a new value with a device already registered in the Iot-Directory. The user has to specify the required parameters for inserting a value. The status of the operation is returned. This operation also provides the registration in the Knowledge Base when the required fields have been specified. Finally the value is also reported in the structure of the device registered in the Context Broker (when this is required by the Context Broker).\n\n* __Update__ - This API is intended for updating a value with a device already registered in the Iot-Directory. The user has to specify the required parameters for updating a value. The status of the operation is returned. This operation also provides the updating on the Knowledge Base when the required fields have been specified. Finally the value is also reported in the structure of the device registered in the Context Broker (when this is required by the Context Broker).\n\n* __Delete__ - This API is intended for deleting a value from the Iot-Directory. The user has to specify the required parameters for deleting a value. The status of the operation is returned. This operation also provides the deletion from the Knowledge Base when the required fields have been specified and the deletion from the specified device.  \n\n* __Get all event values__ - This API is intended for retrieving all values from the Iot-Directory. The user has to specify no parameters. The status of the operation is returned, together with the requested data. \n\n* __Get event value__ - This API is intended for retrieving all values from the Iot-Directory. The user has to specify the required parameters for retrieving event values. The status of the operation is returned, together with the requested data.\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "action"
+                ],
+                "properties": {
+                  "action": {
+                    "description": "The operation to be performed.",
+                    "type": "string",
+                    "enum": [
+                      "insert",
+                      "update",
+                      "delete",
+                      "get_all_event_value",
+                      "get_event_value"
+                    ],
+                    "example": "insert"
+                  },
+                  "device": {
+                    "description": "The device unique identifier.\n\n_Required for actions:_ insert, update, delete, get_event_value. \n",
+                    "type": "string",
+                    "example": "provaMM77"
+                  },
+                  "contextbroker": {
+                    "description": "Name of the Context Broker that handles the device.\n\n_Required for actions:_ insert, update, get_event_value. \n",
+                    "type": "string",
+                    "example": "rabbitUNIMI"
+                  },
+                  "cb": {
+                    "description": "Name of the Context Broker that handles the device.\n\n_Required for actions:_ delete.\n",
+                    "type": "string",
+                    "example": "rabbitUNIMI"
+                  },
+                  "value_name": {
+                    "description": "Name of the value (and unique in the specified device and context broker).\n\n_Required for actions:_ insert, update, delete, get_event_value. \n",
+                    "type": "string",
+                    "example": "ProvaVal"
+                  },
+                  "data_type": {
+                    "description": "Data type of the value (e.g. integer, float, string, boolean, and so on).\n\n_Required for actions:_ insert, update. \n",
+                    "type": "string",
+                    "example": "binary"
+                  },
+                  "value_type": {
+                    "description": "Type of the value (e.g. Temperature, humidity, light, CO_concentration, and so on).\n\n_Required for actions:_ insert, update. \n",
+                    "type": "string",
+                    "example": "actuator_canceller"
+                  },
+                  "value_unit": {
+                    "description": "Unit of measure of the value (eg. oC,  %, lux, ppm, and so on).\n\n_Required for actions:_ insert, update. \n",
+                    "type": "string",
+                    "example": "lux"
+                  },
+                  "editable": {
+                    "description": "It specifies if the measure can be only read (false) or a value can be assigned (true). \n\n_Required for actions:_ insert, update.\n",
+                    "type": "boolean",
+                    "example": true
+                  },
+                  "healthiness_criteria": {
+                    "description": "The type of check to perform on values (value_refresh_rate, different_values or value_bounds).\n\n_Required for actions:_ insert, update.\n",
+                    "type": "string",
+                    "enum": [
+                      "value_refresh_rate",
+                      "different_values",
+                      "value_bounds"
+                    ],
+                    "example": "value_refresh_rate"
+                  },
+                  "healthiness_value": {
+                    "description": "Healthiness value related to the healthiness criteria. The interpretetation varies depending of the adopted healthiness criteria: it could be the frequence of data acquisition (e.g. 300 seconds), the number of last values that have to have at least two different values, or the min and max allowed values.\n\n_Required for actions:_ insert, update.\n",
+                    "type": "string",
+                    "example": 100
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/value"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "attribute": {
+        "description": "A type of detection that a device is capable to perform.",
+        "type": "object",
+        "required": [
+          "data_type",
+          "value_unit",
+          "value_type",
+          "healthiness_criteria",
+          "helthiness_value"
+        ],
+        "properties": {
+          "value_name": {
+            "description": "Name of the value.",
+            "type": "string",
+            "example": "a"
+          },
+          "data_type": {
+            "description": "Basic type of the value (e.g. string, integer).",
+            "type": "string",
+            "example": "binary"
+          },
+          "value_type": {
+            "description": "A semantic description of the value.",
+            "type": "string",
+            "example": "actuator_canceller"
+          },
+          "editable": {
+            "description": "If the value can be only read or its value can be also updated.",
+            "type": "string",
+            "example": 0
+          },
+          "value_unit": {
+            "description": "Unit of measure of the value.",
+            "type": "string",
+            "example": "A"
+          },
+          "healthiness_criteria": {
+            "description": "How the healthy status of the device should be determined.",
+            "type": "string",
+            "enum": [
+              "refresh_rate",
+              "different_values",
+              "value_bounds"
+            ],
+            "example": "refresh_rate"
+          },
+          "healthiness_value": {
+            "description": "The corresponding value.",
+            "type": "string",
+            "example": 3600
+          }
+        }
+      }
+    },
+    "responses": {
+      "device": {
+        "description": "JSON document where the status of the operation and the possible retrieved data can be found.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "status",
+                "visibility",
+                "active"
+              ],
+              "properties": {
+                "status": {
+                  "description": "The mandatory status of the operation: Ok, or Ko.\n\n_Returned by all actions._\n",
+                  "type": "string",
+                  "enum": [
+                    "ok",
+                    "ko"
+                  ],
+                  "example": "ok"
+                },
+                "msg": {
+                  "description": "A message related to the execution of the operation.\n\n_Returned by all actions._\n",
+                  "type": "string"
+                },
+                "visibility": {
+                  "description": "The visibility reported in input: public, or private.\n\n_Returned by actions:_ insert, update.\n",
+                  "type": "string",
+                  "enum": [
+                    "public",
+                    "private"
+                  ],
+                  "example": "public"
+                },
+                "active": {
+                  "description": "Whether the device has been properly inserted in the Knowledge Base: true, or false.\n\n_Returned by actions:_ insert, update.\n",
+                  "type": "boolean",
+                  "example": true
+                },
+                "content": {
+                  "oneOf": [
+                    {
+                      "description": "A JSON list where information about the devices can be found.\n\n_Returned by actions:_ get_all_device.\n",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "contextBroker": {
+                            "type": "string",
+                            "example": "orionUNIMI"
+                          },
+                          "device": {
+                            "type": "string",
+                            "example": "ARDUINO_ST_4201"
+                          },
+                          "uri": {
+                            "type": "string",
+                            "format": "uri",
+                            "example": "http://www.disit.org/km4city/resource/iot/orionUNIMI/ARDUINO_ST_4201"
+                          },
+                          "devicetype": {
+                            "type": "string",
+                            "example": "Temperature"
+                          },
+                          "kind": {
+                            "type": "string",
+                            "enum": [
+                              "sensor",
+                              "actuator"
+                            ]
+                          },
+                          "status1": {
+                            "type": "string",
+                            "example": "active"
+                          },
+                          "macaddress": {
+                            "type": "string",
+                            "nullable": true,
+                            "example": "00-14-22-01-23-45"
+                          },
+                          "model": {
+                            "type": "string",
+                            "nullable": true,
+                            "example": "ARDUINO_ST_4203"
+                          },
+                          "producer": {
+                            "type": "string",
+                            "nullable": true,
+                            "example": "Arduino"
+                          },
+                          "longitude": {
+                            "type": "number",
+                            "format": "float",
+                            "example": 9.214914
+                          },
+                          "latitude": {
+                            "type": "number",
+                            "format": "float",
+                            "example": 45.463701
+                          },
+                          "protocol": {
+                            "type": "string",
+                            "enum": [
+                              "mqtt",
+                              "ngsi",
+                              "amqp"
+                            ],
+                            "example": "mqtt"
+                          },
+                          "format": {
+                            "type": "string",
+                            "enum": [
+                              "csv",
+                              "xml",
+                              "json"
+                            ],
+                            "example": "csv"
+                          },
+                          "visibility": {
+                            "type": "string",
+                            "enum": [
+                              "public",
+                              "private"
+                            ],
+                            "example": "public"
+                          },
+                          "frequency": {
+                            "type": "integer",
+                            "format": "int32",
+                            "nullable": true,
+                            "example": 60
+                          },
+                          "created": {
+                            "type": "string",
+                            "format": "date-time",
+                            "example": "2018-03-12T15:21:00.000Z"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "description": "A JSON list where information about the device attributes can be found.\n\n_Returned by actions:_ get_device_attributes.\n",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "contextBroker": {
+                            "type": "string",
+                            "example": "orionUNIMI"
+                          },
+                          "device": {
+                            "type": "string",
+                            "example": "ARDUINO_ST_4201"
+                          },
+                          "value_name": {
+                            "type": "string",
+                            "example": "latitude"
+                          },
+                          "data_type": {
+                            "type": "string",
+                            "example": "float"
+                          },
+                          "value_type": {
+                            "type": "string",
+                            "example": "latitude"
+                          },
+                          "editable": {
+                            "type": "string",
+                            "example": 0
+                          },
+                          "value_unit": {
+                            "type": "string",
+                            "example": "A"
+                          },
+                          "order": {
+                            "type": "integer",
+                            "format": "int32",
+                            "example": 1
+                          },
+                          "healthiness_criteria": {
+                            "type": "string",
+                            "enum": [
+                              "refresh_rate",
+                              "different_values",
+                              "value_bounds"
+                            ],
+                            "example": "refresh_rate"
+                          },
+                          "healthiness_value": {
+                            "type": "string",
+                            "example": 300
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "value_type": {
+                  "description": "A JSON list containing the supported value types in the Knowledge Base.\n\n_Returned by actions:_ get_param_values.\n",
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "example": "actuator_canceller"
+                  }
+                },
+                "data_type": {
+                  "description": "A JSON list containing the supported data types in the Knowledge Base.\n\n_Returned by actions:_ get_param_values.\n",
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "example": "binary"
+                  }
+                },
+                "value_unit": {
+                  "description": "A JSON list containing the supported value units in the Knowledge Base.\n\n_Returned by actions:_ get_param_values.\n",
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "example": "A"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "broker": {
+        "description": "JSON document where the status of the operation and the possible retrieved data can be found.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "status"
+              ],
+              "properties": {
+                "status": {
+                  "description": "The mandatory status of the operation: Ok, or Ko.\n\n_Returned by all actions._\n",
+                  "type": "string",
+                  "enum": [
+                    "ok",
+                    "ko"
+                  ],
+                  "example": "ok"
+                },
+                "msg": {
+                  "description": "A message related to the execution of the operation.\n\n_Returned by all actions._\n",
+                  "type": "string"
+                },
+                "content": {
+                  "oneOf": [
+                    {
+                      "description": "A list of the identified context brokers. \n\n_Returned by actions:_ get_all_contextbroker.\n",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "contextbroker": {
+                            "type": "string",
+                            "example": "mqttUNIFI"
+                          },
+                          "protocol": {
+                            "type": "string",
+                            "enum": [
+                              "mqtt",
+                              "amqp",
+                              "ngsi"
+                            ],
+                            "example": "mqtt"
+                          },
+                          "ip": {
+                            "type": "string",
+                            "example": "192.168.1.10"
+                          },
+                          "port": {
+                            "type": "integer",
+                            "format": "int32",
+                            "example": 1883
+                          },
+                          "uri": {
+                            "type": "string",
+                            "nullable": true,
+                            "example": "http://www.disit.org/km4city/resource/iot/mqttUNIFI"
+                          },
+                          "login": {
+                            "type": "string",
+                            "example": "brokeruser"
+                          },
+                          "password": {
+                            "type": "string",
+                            "example": "brokerpwd"
+                          },
+                          "latitude": {
+                            "type": "number",
+                            "format": "float",
+                            "example": 43.7731
+                          },
+                          "longitude": {
+                            "type": "number",
+                            "format": "float",
+                            "example": 11.256
+                          },
+                          "created": {
+                            "type": "string",
+                            "format": "date-time",
+                            "example": "2018-02-07T15:14:39.000Z"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "description": "A list of devices present on the server that can be accessed relying on the device name.\n\n_Returned by actions:_ get_config_data.\n",
+                      "type": "object",
+                      "properties": {
+                        "additionalProperties": {
+                          "type": "object",
+                          "properties": {
+                            "entityType": {
+                              "type": "string",
+                              "example": "Temperature"
+                            },
+                            "kind": {
+                              "type": "string",
+                              "enum": [
+                                "sensor",
+                                "actuator"
+                              ],
+                              "example": "sensor"
+                            },
+                            "protocol": {
+                              "type": "string",
+                              "enum": [
+                                "ngsi",
+                                "mqtt",
+                                "amqp"
+                              ],
+                              "example": "ngsi"
+                            },
+                            "longitude": {
+                              "type": "number",
+                              "format": "float",
+                              "example": 9.214914
+                            },
+                            "latitude": {
+                              "type": "number",
+                              "format": "float",
+                              "example": 45.463701
+                            },
+                            "contextBroker": {
+                              "type": "string",
+                              "example": "orionUNIMI"
+                            },
+                            "name": {
+                              "type": "string",
+                              "example": "orionUNIMI"
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "ngsi",
+                                "mqtt",
+                                "amqp"
+                              ],
+                              "example": "mqtt"
+                            },
+                            "ip": {
+                              "type": "string",
+                              "example": "159.149.129.184"
+                            },
+                            "port": {
+                              "type": "integer",
+                              "format": "int32",
+                              "example": 1026
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "description": "A list of values associated with the devices present on the system.\n\n_Returned by actions:_ get_config_data_values.\n",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "cb": {
+                            "type": "string",
+                            "example": "rabbitUNIMI"
+                          },
+                          "device": {
+                            "type": "string",
+                            "example": "provaMM7779"
+                          },
+                          "value_name": {
+                            "type": "string",
+                            "example": "a"
+                          },
+                          "data_type": {
+                            "type": "string",
+                            "example": "binary"
+                          },
+                          "value_type": {
+                            "type": "string",
+                            "example": "actuator_canceller"
+                          },
+                          "editable": {
+                            "type": "string",
+                            "example": 0
+                          },
+                          "value_unit": {
+                            "type": "string",
+                            "example": "A"
+                          },
+                          "healthiness_criteria": {
+                            "type": "string",
+                            "enum": [
+                              "refresh_rate",
+                              "different_values",
+                              "value_bounds"
+                            ],
+                            "example": "refresh_rate"
+                          },
+                          "longitude": {
+                            "type": "number",
+                            "format": "float",
+                            "example": 9.214914
+                          },
+                          "latitude": {
+                            "type": "number",
+                            "format": "float",
+                            "example": 45.463701
+                          },
+                          "protocol": {
+                            "type": "string",
+                            "enum": [
+                              "ngsi",
+                              "mqtt",
+                              "amqp"
+                            ],
+                            "example": "ngsi"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "value": {
+        "description": "JSON document where the status of the operation and the possible retrieved data can be found.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "status"
+              ],
+              "properties": {
+                "status": {
+                  "description": "The mandatory status of the operation: Ok, or Ko.\n\n_Returned by all actions._\n",
+                  "type": "string",
+                  "enum": [
+                    "ok",
+                    "ko"
+                  ],
+                  "example": "ok"
+                },
+                "msg": {
+                  "description": "A message related to the execution of the operation.\n\n_Returned by all actions._\n",
+                  "type": "string"
+                },
+                "content": {
+                  "oneOf": [
+                    {
+                      "description": "A list of values associated with devices of the system.\n\n_Returned by actions:_ get_all_event_value.\n",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "cb": {
+                            "type": "string",
+                            "example": "orionUNIMI"
+                          },
+                          "device": {
+                            "type": "string",
+                            "example": "ARDUINO_ST_4201"
+                          },
+                          "value_name": {
+                            "type": "string",
+                            "example": "latitude"
+                          },
+                          "data_type": {
+                            "type": "string",
+                            "example": "float"
+                          },
+                          "value_type": {
+                            "type": "string",
+                            "example": "latitude"
+                          },
+                          "editable": {
+                            "type": "string",
+                            "example": 0
+                          },
+                          "value_unit": {
+                            "type": "string",
+                            "example": "A"
+                          },
+                          "healthiness_criteria": {
+                            "type": "string",
+                            "enum": [
+                              "refresh_rate",
+                              "different_values",
+                              "value_bounds"
+                            ],
+                            "example": "refresh_rate"
+                          },
+                          "value_refresh_rate": {
+                            "type": "integer",
+                            "format": "int32",
+                            "example": 300
+                          },
+                          "different_values": {
+                            "type": "integer",
+                            "format": "int32",
+                            "nullable": true,
+                            "example": 10
+                          },
+                          "value_bounds": {
+                            "type": "string",
+                            "nullable": true,
+                            "example": 620
+                          },
+                          "order": {
+                            "type": "integer",
+                            "format": "int32",
+                            "example": 1
+                          },
+                          "kind": {
+                            "type": "string",
+                            "enum": [
+                              "sensor",
+                              "actuator"
+                            ],
+                            "example": "sensor"
+                          },
+                          "latitude": {
+                            "type": "number",
+                            "format": "float",
+                            "example": 45.463701
+                          },
+                          "longitude": {
+                            "type": "number",
+                            "format": "float",
+                            "example": 9.214914
+                          },
+                          "status1": {
+                            "type": "string",
+                            "example": "active"
+                          },
+                          "visibility": {
+                            "type": "string",
+                            "enum": [
+                              "public",
+                              "private"
+                            ],
+                            "example": "public"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "description": "The information associated with the specified value_name.\n\n_Returned by actions:_ get_event_value.\n",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "cb": {
+                            "type": "string",
+                            "example": "orionUNIMI"
+                          },
+                          "device": {
+                            "type": "string",
+                            "example": "ARDUINO_ST_4201"
+                          },
+                          "value_name": {
+                            "type": "string",
+                            "example": "latitude"
+                          },
+                          "data_type": {
+                            "type": "string",
+                            "example": "float"
+                          },
+                          "value_type": {
+                            "type": "string",
+                            "example": "latitude"
+                          },
+                          "editable": {
+                            "type": "string",
+                            "example": 0
+                          },
+                          "value_unit": {
+                            "type": "string",
+                            "example": "A"
+                          },
+                          "healthiness_criteria": {
+                            "type": "string",
+                            "enum": [
+                              "refresh_rate",
+                              "different_values",
+                              "value_bounds"
+                            ],
+                            "example": "refresh_rate"
+                          },
+                          "value_refresh_rate": {
+                            "type": "integer",
+                            "format": "int32",
+                            "example": 300
+                          },
+                          "different_values": {
+                            "type": "integer",
+                            "format": "int32",
+                            "nullable": true,
+                            "example": 10
+                          },
+                          "value_bounds": {
+                            "type": "string",
+                            "nullable": true,
+                            "example": 620
+                          },
+                          "order": {
+                            "type": "integer",
+                            "format": "int32",
+                            "example": 1
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

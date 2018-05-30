@@ -1,0 +1,207 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Km4city Web App API",
+    "description": "This API allows users to go directly to perform the functions in the web app without interacting with the app interface.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://www.km4city.org/webapp"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "tags": [
+          "API"
+        ],
+        "parameters": [
+          {
+            "name": "operation",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "discovercity",
+                "aroundyou",
+                "aroundyou/accomodation",
+                "aroundyou/agricultureandlivestock",
+                "aroundyou/advertising",
+                "aroundyou/civilandedilengineering",
+                "aroundyou/culturalactivity",
+                "aroundyou/educationandresearch",
+                "aroundyou/emergency",
+                "aroundyou/entertainment",
+                "aroundyou/environment",
+                "aroundyou/financialservice",
+                "aroundyou/governmentoffice",
+                "aroundyou/healtcare",
+                "aroundyou/industryandmanufacturing",
+                "aroundyou/miningandquarrying",
+                "aroundyou/shoppingandservice",
+                "aroundyou/tourismservice",
+                "aroundyou/transferserviceandrenting",
+                "aroundyou/utilitiesandsupply",
+                "aroundyou/wholesale",
+                "aroundyou/wineandfood",
+                "textsearch",
+                "poi",
+                "publictransport",
+                "publictransport/ticket",
+                "publictransport/pathfinder",
+                "publictransport/timetable",
+                "publictransport/tplsearcher",
+                "privatetransport",
+                "privatetransport/cyclepaths",
+                "privatetransport/autosearcher",
+                "privatetransport/carposition",
+                "privatetransport/fuelstation",
+                "privatetransport/parking",
+                "privatetransport/pathfinder",
+                "events",
+                "suggestionsnearyou",
+                "suggestions",
+                "weather",
+                "personalassistant",
+                "environmentmenu",
+                "environmentmenu/infosoc",
+                "environmentmenu/weatherinmenu",
+                "environmentmenu/cyclepathsenvironment",
+                "environmentmenu/greenareas",
+                "environmentmenu/agricultureandlivestockenvironment",
+                "environmentmenu/environment2",
+                "environmentmenu/pollen",
+                "environmentmenu/pollution",
+                "health",
+                "health/emergencymenu",
+                "health/healtcaremenu",
+                "health/pharmacy",
+                "health/firstaid",
+                "other",
+                "other/favourites",
+                "other/chronology",
+                "other/lastcontribution",
+                "other/rating",
+                "other/information",
+                "other/tips",
+                "authentication",
+                "settings",
+                "aboutus"
+              ]
+            },
+            "example": "discovercity"
+          },
+          {
+            "name": "coordinates",
+            "in": "query",
+            "description": "Override the position possibly provided by the GPS sensors. The expected value of this parameter is a WGS84 latitude followed by a semicolon and a WGS84 longitude.",
+            "allowReserved": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "43.833333;11.333333"
+          },
+          {
+            "name": "serviceuri",
+            "in": "query",
+            "description": "Show details of a service URI.",
+            "allowReserved": true,
+            "schema": {
+              "type": "string",
+              "format": "uri"
+            },
+            "example": "http://www.disit.org/km4city/resource/Bus_ataflinea_Stop_FM0017_5"
+          },
+          {
+            "name": "geoJsonUri",
+            "in": "query",
+            "description": "Get a GeoJson passed as URL and draw it on the map.",
+            "allowReserved": true,
+            "schema": {
+              "type": "string",
+              "format": "uri"
+            },
+            "example": "http://servicemap.km4city.org/WebAppGrafo/api/v1/events/?range=week"
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "Change the language of the interface. Possible values (ita, eng, fra, deu, esp).",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ita",
+                "eng",
+                "fra",
+                "deu",
+                "esp"
+              ]
+            },
+            "example": "ita"
+          },
+          {
+            "name": "destination",
+            "in": "query",
+            "description": "These values are entered as the destination point and the route is calculated using the values entered in the coordinates parameter or the position provided by the GPS sensor as the starting point. The expected value of this parameter is a WGS84 latitude followed by a semicolon and a WGS84 longitude. Only used in the _pathfinder_. operations.",
+            "allowReserved": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "43.833333;11.333333"
+          },
+          {
+            "name": "routeType",
+            "in": "query",
+            "description": "Only used in the _pathfinder_.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "car",
+                "foot_shortest",
+                "foot_quiet",
+                "public_transport"
+              ]
+            },
+            "example": "car"
+          },
+          {
+            "name": "maxDistance",
+            "in": "query",
+            "description": "Maximum distance from the GPS position of the services to be retrieved, expressed in Km (0.1 is used if parameter is missing). Only used in _search_ operations.",
+            "schema": {
+              "type": "number",
+              "format": "float",
+              "default": 0.1
+            },
+            "example": 2
+          },
+          {
+            "name": "maxResults",
+            "in": "query",
+            "description": "Maximum number of results to be returned. If parameter is missing 100 is assumed, if it is 0 all results are returned.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 100
+            },
+            "example": 50
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An appropriately populated service map, possibly including appropriate components for allowing user input.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "format": "html"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

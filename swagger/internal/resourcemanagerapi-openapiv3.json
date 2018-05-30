@@ -1,0 +1,180 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Resource Manager API v5",
+    "version": "1.1.0",
+    "description": "At today, the _IoTApp_ only can be uploaded through direct invocations of the API. The upload of other types of information can be performed through the Web interface."
+  },
+  "servers": [
+    {
+      "url": "http://processloader.snap4city.org/processloader/api"
+    }
+  ],
+  "paths": {
+    "/upload.php": {
+      "post": {
+        "tags": [
+          "Upload"
+        ],
+        "summary": "Upload a Resource",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "user",
+                  "app_type",
+                  "nature",
+                  "sub_nature",
+                  "licence",
+                  "description"
+                ],
+                "properties": {
+                  "name": {
+                    "description": "Resource title (that appears in the loader home page).",
+                    "type": "string",
+                    "example": "IoT_NodereRed_WeatherSensor"
+                  },
+                  "user": {
+                    "description": "Snap4city LDAP user.",
+                    "type": "string",
+                    "example": "badii"
+                  },
+                  "app_type": {
+                    "description": "Application type details. _IoTApp_ is the graph combining the blocks (json). _IoTBlocks_ is a zip containing one or more NodeRed libraries.",
+                    "type": "string",
+                    "enum": [
+                      "IoTApp",
+                      "IoTBlocks",
+                      "ResDash",
+                      "DevDash",
+                      "AMMA",
+                      "ControlRoomDashboard",
+                      "MicroService"
+                    ],
+                    "example": "IoTApp"
+                  },
+                  "nature": {
+                    "description": "Resource KM4City Category. The full list of the permitted values can be retrieved through a [SPARQL query](http://servicemap.disit.org/WebAppGrafo/sparql?query=select%20distinct%20substr(str(?m),37)%20as%20?macroClass%20%7b%20?m%20rdfs:subClassOf%20km4c:Service.%20filter%20exists%20%7b?c%20rdfs:subClassOf%20?m%7d%20%7d%20order%20by%20?m&format=json).",
+                    "type": "string",
+                    "example": "Environment"
+                  },
+                  "sub_nature": {
+                    "description": "Resource KM4City Sub Category. The full list of the permitted values can be retrieved through a [SPARQL query](http://servicemap.disit.org/WebAppGrafo/sparql?query=%20select%20distinct%20substr(str(?m),37)%20as%20?macroClass%20substr(str(?c),37)%20as%20?subClass%20%7b%20?m%20rdfs:subClassOf%20km4c:Service.%20?c%20rdfs:subClassOf+%20?m.%20%7d%20order%20by%20?m%20?c&format=json).",
+                    "type": "string",
+                    "example": "Weather_sensor"
+                  },
+                  "format": {
+                    "description": "Format of the source file (original data).",
+                    "type": "string",
+                    "example": "xml"
+                  },
+                  "licence": {
+                    "description": "Licence of use. Is an URL to a licence.",
+                    "type": "string",
+                    "format": "url",
+                    "enum": [
+                      "https://creativecommons.org/licenses/by/4.0"
+                    ],
+                    "example": "https://creativecommons.org/licenses/by/4.0"
+                  },
+                  "description": {
+                    "description": "Description",
+                    "type": "string",
+                    "example": "A flow coming from NodeRed"
+                  },
+                  "url": {
+                    "type": "string"
+                  },
+                  "method": {
+                    "type": "string"
+                  },
+                  "help": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "description": "Data",
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "example": "895ff442.3d7148"
+                        },
+                        "type": {
+                          "type": "string",
+                          "example": "twitter in"
+                        },
+                        "tags": {
+                          "type": "string"
+                        },
+                        "z": {
+                          "type": "string",
+                          "example": "cbed55e.e236da8"
+                        },
+                        "user": {
+                          "type": "boolean",
+                          "example": false
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "topic": {
+                          "type": "string",
+                          "example": "tweets"
+                        },
+                        "inputs": {
+                          "type": "integer",
+                          "format": "int32"
+                        },
+                        "x": {
+                          "type": "integer",
+                          "format": "int32",
+                          "example": 150
+                        },
+                        "y": {
+                          "type": "integer",
+                          "format": "int32",
+                          "example": 120
+                        },
+                        "wires": {
+                          "type": "array",
+                          "items": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "example": "c648a579.645268"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success."
+          },
+          "400": {
+            "description": "Insert NOT done due to incorrect json formatting or lack of mandatory data."
+          },
+          "500": {
+            "description": "DB connection failure and unmanaged errors."
+          }
+        }
+      }
+    }
+  },
+  "externalDocs": {
+    "description": "Process Loader home page",
+    "url": "http://processloader.snap4city.org"
+  }
+}

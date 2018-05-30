@@ -1,0 +1,202 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "EventLogger API v.2.0",
+    "description": "An operative documentation of the EventLogger API. The EventLogger API are HTTP REST API through which it is possible to call and instantiate a logging action by the EventLogger tool, exploiting the Rsyslog protocol on the EventLogger tool without the requirement to install nor configuring Rsyslog also on the different clients.",
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "http://{EVENTLOGGER_HOST}/RsyslogAPI",
+      "variables": {
+        "EVENTLOGGER_HOST": {
+          "description": "The IP or name of the server where the API has been deployed.",
+          "default": "localhost"
+        }
+      }
+    }
+  ],
+  "paths": {
+    "/rsyslog.php": {
+      "get": {
+        "tags": [
+          "Rsyslog"
+        ],
+        "parameters": [
+          {
+            "name": "p",
+            "in": "query",
+            "description": "Type of operation.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "p"
+              ]
+            }
+          },
+          {
+            "name": "pid",
+            "in": "query",
+            "description": "\n* __For Node-RED/IoT__: it is the Container ID of the Process which is calling the EventLogger API. It must be a unique identifier string.\n\n* __For ETL__: it is the name of the Process which is calling the EventLogger API. It must be unique. It must be a unique identifier string.\n",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tmstmp",
+            "in": "query",
+            "description": "The current Millisecond Timestamp (Unix-Epoch) the IoT-Node-RED or ETL Process when calling the EventLogger API.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "modCom",
+            "in": "query",
+            "description": "Communication mode is a codified parameter describing if the IoT device or ETL process is in transmission mode (__TX__) or in receiving mode (__RX__).",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "TX",
+                "RX"
+              ]
+            }
+          },
+          {
+            "name": "appName",
+            "in": "query",
+            "description": "Name of the Node-RED / ETL Application.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "IP_local",
+            "in": "query",
+            "description": "IP of the current Microservice (IoT or host where the ETL Process is executed) calling the EventLogger API.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "IP_ext",
+            "in": "query",
+            "description": "IP of the external host to / from which the current agent represented by __IP_local__ is transmitting / receiving data, according to the __modCom__ parameter. It can be of both forms IPv4 or DNS.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "payloadSize",
+            "in": "query",
+            "description": "Measure of data flow traffic (transmitted or received, according to the __modCom__ parameter) between __IP_local__ and __IP_ext__. It must be expressed in KyloBytes (KB).",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "counts",
+            "in": "query",
+            "description": "Number of counts (transmitted or received, according to the __modCom__ parameter) between __IP_local__ and __IP_ext__, for example the number of services retrieved around a given GPS point. If __payloadSize__ is null or empty, this parameter becomes mandatory.",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "agent",
+            "in": "query",
+            "description": "Codified parameter defining the agent type.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Node-Red",
+                "ETL",
+                "Data-Analytics"
+              ]
+            }
+          },
+          {
+            "name": "motivation",
+            "in": "query",
+            "description": "Codified parameter defining the type of operation performed by the Microservice calling the EventLogger API.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ASCAPI",
+                "Dashboard",
+                "DB_Storage",
+                "External_Service",
+                "FileSystem_Storage",
+                "IoT_Count",
+                "IoT_Service",
+                "Message_Control",
+                "Message_Count",
+                "User_Count"
+              ]
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "Language of data transmitted to / by the current Microservice.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lat",
+            "in": "query",
+            "description": "\n* __For Node-RED/IoT__: it is the GPS Latitude of Microservice owner.\n\n* __For ETL__: it is the Latitude of the service / device involved in the Process.\n",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "lon",
+            "in": "query",
+            "description": "\n* __For Node-RED/IoT__: it is the GPS Longitude of Microservice owner.\n\n* __For ETL__: it is the Longitude of the service / device involved in the Process.\n",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "serviceUri",
+            "in": "query",
+            "description": "Km4City URI of the service involved in the Process.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "message",
+            "in": "query",
+            "description": "Text message for additional notes.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "The requested action is performed."
+          }
+        }
+      }
+    }
+  }
+}

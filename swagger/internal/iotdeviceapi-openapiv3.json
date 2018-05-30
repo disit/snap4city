@@ -1,0 +1,562 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "IoT Device Registration API",
+    "description": "The API accepts in input a description of an IoT device with its broker and attributes in the form of a JSON document shaped conforming to a well-defined schema and set of acceptable values, and performs delete/insert operations on a graph database, also returning the URI of the inserted, updated or deleted device.",
+    "version": "2.0.0"
+  },
+  "servers": [
+    {
+      "description": "Test",
+      "url": "http://www.disit.org/ServiceMap/api/v1/iot"
+    },
+    {
+      "description": "Local",
+      "url": "http://localhost:8080/iotdeviceapi"
+    }
+  ],
+  "paths": {
+    "/insert": {
+      "post": {
+        "tags": [
+          "Registry"
+        ],
+        "summary": "For registering or updating a device in the graph database.",
+        "requestBody": {
+          "description": "An appropriate JSON representation of the device that has to be registered or updated.",
+          "required": true,
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/device"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The response body contains in plain text the URI of the registered or updated device, or it is empty if something goes wrong. In the latter case, a _Warning_ header is added where a description of the problem can be found.",
+            "headers": {
+              "Warning": {
+                "description": "The possible error message",
+                "required": false,
+                "schema": {
+                  "type": "string",
+                  "example": "Validation failed for data: service-uri-p1."
+                }
+              }
+            },
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "format": "uri",
+                  "example": "http://www.disit.org/km4city/resource/iot/orionUNIFI/TrafficLight_229_widgetOnOffButton2932"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/delete": {
+      "post": {
+        "tags": [
+          "Registry"
+        ],
+        "summary": "For deleting a device from the graph database.",
+        "requestBody": {
+          "description": "An appropriate JSON representation of the device that has to be deleted.",
+          "required": true,
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/device"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The response body contains in plain text the URI of the deleted device, or it is empty if something goes wrong. In the latter case, a _Warning_ header is added where a description of the problem can be found.",
+            "headers": {
+              "Warning": {
+                "description": "The possible error message",
+                "required": false,
+                "schema": {
+                  "type": "string",
+                  "example": "Validation failed for data: service-uri-p1."
+                }
+              }
+            },
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "format": "uri",
+                  "example": "http://www.disit.org/km4city/resource/iot/orionUNIFI/TrafficLight_229_widgetOnOffButton2932"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/disable": {
+      "post": {
+        "tags": [
+          "Device Attributes"
+        ],
+        "summary": "For disabling a device attribute.",
+        "requestBody": {
+          "description": "A JSON object with a single property, named _uri_, that indicates the attribute that has to be disabled.",
+          "required": true,
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "uri"
+                ],
+                "properties": {
+                  "uri": {
+                    "type": "string",
+                    "format": "uri",
+                    "example": "http://www.disit.org/km4city/resource/iot/orionUNIFI/TrafficLight_229_widgetOnOffButton2932/light"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The response body contains in plain text the URI of the disabled attribute, or it is empty if something goes wrong. In the latter case, a _Warning_ header is added where a description of the problem can be found.",
+            "headers": {
+              "Warning": {
+                "description": "The possible error message",
+                "required": false,
+                "schema": {
+                  "type": "string",
+                  "example": "Validation failed for data: uri-exists."
+                }
+              }
+            },
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "format": "uri",
+                  "example": "http://www.disit.org/km4city/resource/iot/orionUNIFI/TrafficLight_229_widgetOnOffButton2932/light"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/enable": {
+      "post": {
+        "tags": [
+          "Device Attributes"
+        ],
+        "summary": "For enabling a device attribute that had been disabled.",
+        "requestBody": {
+          "description": "A JSON object with a single property, named _uri_, that indicates the attribute that has to be enabled.",
+          "required": true,
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "uri"
+                ],
+                "properties": {
+                  "uri": {
+                    "type": "string",
+                    "format": "uri",
+                    "example": "http://www.disit.org/km4city/resource/iot/orionUNIFI/TrafficLight_229_widgetOnOffButton2932/light"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The response body contains in plain text the URI of the enabled attribute, or it is empty if something goes wrong. In the latter case, a _Warning_ header is added where a description of the problem can be found.",
+            "headers": {
+              "Warning": {
+                "description": "The possible error message",
+                "required": false,
+                "schema": {
+                  "type": "string",
+                  "example": "Validation failed for data: uri-exists."
+                }
+              }
+            },
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "format": "uri",
+                  "example": "http://www.disit.org/km4city/resource/iot/orionUNIFI/TrafficLight_229_widgetOnOffButton2932/light"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/make-private": {
+      "post": {
+        "tags": [
+          "Registry"
+        ],
+        "summary": "For marking a device as a private device.",
+        "requestBody": {
+          "description": "A JSON object with a single property, named _uri_, that indicates the Service URI of the device that has to be marked as private.",
+          "required": true,
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "uri"
+                ],
+                "properties": {
+                  "uri": {
+                    "type": "string",
+                    "format": "uri",
+                    "example": "http://www.disit.org/km4city/resource/iot/orionUNIFI/TrafficLight_229_widgetOnOffButton2932"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The response body contains in plain text the Service URI of the device that has been marked as private, or it is empty if something goes wrong. In the latter case, a _Warning_ header is added where a description of the problem can be found.",
+            "headers": {
+              "Warning": {
+                "description": "The possible error message",
+                "required": false,
+                "schema": {
+                  "type": "string",
+                  "example": "Validation failed for data: uri-exists."
+                }
+              }
+            },
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "format": "uri",
+                  "example": "http://www.disit.org/km4city/resource/iot/orionUNIFI/TrafficLight_229_widgetOnOffButton2932"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/make-public": {
+      "post": {
+        "tags": [
+          "Registry"
+        ],
+        "summary": "For marking a device as a public device.",
+        "requestBody": {
+          "description": "A JSON object with a single property, named _uri_, that indicates the Service URI of the device that has to be marked as public.",
+          "required": true,
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "uri"
+                ],
+                "properties": {
+                  "uri": {
+                    "type": "string",
+                    "format": "uri",
+                    "example": "http://www.disit.org/km4city/resource/iot/orionUNIFI/TrafficLight_229_widgetOnOffButton2932"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The response body contains in plain text the Service URI of the device that has been marked as public, or it is empty if something goes wrong. In the latter case, a _Warning_ header is added where a description of the problem can be found.",
+            "headers": {
+              "Warning": {
+                "description": "The possible error message",
+                "required": false,
+                "schema": {
+                  "type": "string",
+                  "example": "Validation failed for data: uri-exists."
+                }
+              }
+            },
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "format": "uri",
+                  "example": "http://www.disit.org/km4city/resource/iot/orionUNIFI/TrafficLight_229_widgetOnOffButton2932"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "device": {
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "kind",
+          "broker",
+          "attributes"
+        ],
+        "properties": {
+          "id": {
+            "description": "A free text string where a unique identifier for the device can be found.",
+            "type": "string",
+            "example": "ARDUINO_ST_4201"
+          },
+          "type": {
+            "description": "A free text string that synthetically describes what the device measures, e.g. whether it is a temperature sensor, a traffic sensor, a presence detector, or what else.",
+            "type": "string",
+            "example": "Temperature"
+          },
+          "kind": {
+            "description": "A text string that is expected to be set to sensor, or actuator, for differentiating the two typologies of devices.",
+            "type": "string",
+            "enum": [
+              "sensor",
+              "actuator"
+            ],
+            "example": "sensor"
+          },
+          "protocol": {
+            "description": "A text string where the communication protocol is indicated through which the broker can be accessed, i.e. amqp, mqtt, or ngsi.",
+            "type": "string",
+            "enum": [
+              "amqp",
+              "mqtt",
+              "ngsi"
+            ],
+            "example": "ngsi"
+          },
+          "format": {
+            "description": "A free text string that describes the format of the possible output that is produced by the device, e.g. csv.",
+            "type": "string",
+            "example": "csv"
+          },
+          "macaddress": {
+            "description": "A text string where the MAC address of the device can be found.",
+            "type": "string",
+            "example": "00-14-22-01-23-45"
+          },
+          "model": {
+            "description": "A free text string where the model of the device (the product name provided by the manufacturer) can be found.",
+            "type": "string",
+            "example": "ST 4201"
+          },
+          "producer": {
+            "description": "A free text string the manufacturer of the device can be found.",
+            "type": "string",
+            "example": "Arduino"
+          },
+          "latitude": {
+            "description": "A float number that indicates the (starting) WGS84 latitude of the device. If the device moves over the time, an attribute (see below) is expected to be defined for the device, that contains its real-time latitude (can be missing, but in that case, the broker must have the latitude property set and valid).",
+            "type": "number",
+            "format": "float",
+            "example": 43.833333
+          },
+          "longitude": {
+            "description": "A float number that indicates the (starting) WGS84 longitude of the device. If the device moves over the time, an attribute (see below) is expected to be defined for the device, that contains its real-time latitude (can be missing, but in that case, the broker must have the longitude property set and valid).",
+            "type": "number",
+            "format": "float",
+            "example": 11.333333
+          },
+          "frequency": {
+            "description": "An integer number that expresses the frequency at which the device produces its outputs, as the time interval in seconds between two consecutive detections.",
+            "type": "integer",
+            "format": "int32",
+            "example": 60
+          },
+          "created": {
+            "description": "A text string where the date and time when the device has been put in place can be found.",
+            "type": "string",
+            "format": "date-time",
+            "example": "2018-03-12 15:17:11"
+          },
+          "uri": {
+            "description": "The URI is provided if the device has already been registered in the Knowledge Base (update operations). If it is not provided, an insert operation is assumed, and a new URI is generated based on the broker name and device id.",
+            "type": "string",
+            "format": "uri",
+            "example": "http://www.disit.org/km4city/resource/iot/orionUNIMI/ARDUINO_ST_4201"
+          },
+          "ownership": {
+            "description": "The ownership of the device.",
+            "type": "string",
+            "enum": [
+              "public",
+              "private"
+            ],
+            "default": "public",
+            "example": "public"
+          },
+          "broker": {
+            "description": "A JSON object that describes the device broker.",
+            "type": "object",
+            "required": [
+              "name",
+              "type",
+              "ip",
+              "port"
+            ],
+            "properties": {
+              "name": {
+                "description": "A free text string where the broker name can be found.",
+                "type": "string",
+                "example": "orionUNIMI"
+              },
+              "type": {
+                "description": "A text string in lowercase letters that indicates whether it is a AMQP, MQTT, or NGSI broker.",
+                "type": "string",
+                "enum": [
+                  "amqp",
+                  "mqtt",
+                  "ngsi"
+                ],
+                "example": "ngsi"
+              },
+              "ip": {
+                "description": "A text string where the IP address of the broker can be found.",
+                "type": "string",
+                "example": "159.149.129.184"
+              },
+              "port": {
+                "description": "An integer number that indicates the network port that is opened on the broker. Together with the IP address, it makes up the broker endpoint.",
+                "type": "integer",
+                "format": "int32",
+                "example": 1026
+              },
+              "login": {
+                "description": "A text string that indicates the user name that should be used for requesting data to the broker.",
+                "type": "string",
+                "example": "guest"
+              },
+              "password": {
+                "description": "A text string that indicates the password that should be used in combination with the user name for requesting data to the broker.",
+                "type": "string",
+                "example": "guestpwd"
+              },
+              "latitude": {
+                "description": "A float number where the WGS84 latitude of the broker can be found (mandatory if a latitude has not been specified for the device).",
+                "type": "number",
+                "format": "float",
+                "example": 44.833333
+              },
+              "longitude": {
+                "description": "A float number where the WGS84 longitude of the broker can be found (mandatory if a latitude has not been specified for the device).",
+                "type": "number",
+                "format": "float",
+                "example": 12.333333
+              },
+              "created": {
+                "description": "A text string where the date and time when the broker has been put in place can be found.",
+                "type": "string",
+                "format": "date-time",
+                "example": "2018-03-13 15:17:11"
+              }
+            }
+          },
+          "attributes": {
+            "description": "A JSON array whose items describe what the device detects.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "value_name",
+                "data_type",
+                "value_type",
+                "value_unit",
+                "value_refresh_rate",
+                "healthiness_criteria"
+              ],
+              "properties": {
+                "value_name": {
+                  "description": "A free text string that briefly indicates what type of detection the attribute represents, e.g. tempXX, humXX, thievesInLivingRoom.",
+                  "type": "string",
+                  "example": "temp"
+                },
+                "data_type": {
+                  "description": "A text string that indicates the data type of the values that the device produces in output for the specific type of detections, e.g. integer, float, Boolean, string. A list of the allowed values for data_type has been defined and can be found in the XML request configuration documents.",
+                  "type": "string",
+                  "example": "float"
+                },
+                "value_type": {
+                  "description": "A text string where a high-level indication can be found of the type of detections that the attribute represents, that is aimed at enabling searches of all devices that detect the same thing in different locations. A list of the allowed values for value_type has been defined, but it cannot be found in the configuration documents. Instead, the list of the allowed values can be found in the destination Knowledge Base, shaped as a set of SSN Property instances.",
+                  "type": "string",
+                  "example": "temperature"
+                },
+                "value_unit": {
+                  "description": "The unit of measure of the values that are produced in output as a result of the detections of the type that is represented by the device attribute. A list of the allowed value_unit can be found in the XML request configuration documents.",
+                  "type": "string",
+                  "example": "°C"
+                },
+                "value_refresh_rate": {
+                  "description": "An integer number that expresses the frequency at which the device produces outputs of the type that is represented by the device attribute. The frequency is expressed as the time interval in seconds between two consecutive detections.",
+                  "type": "integer",
+                  "format": "int32",
+                  "example": 60
+                },
+                "healthiness_criteria": {
+                  "description": "A text string that indicates how it is possible to determine if the device is correctly producing output values as a result of the detections of the type that is represented by the device attribute. The allowed values are: refresh_rate (there is a problem if the expected refresh rate is not respected), different_values (there is a problem if the device produces in output the same value for more than consecutive_detections detections), or within_bounds (there is a problem if the output value does not fall within an interval that is described through the value_bounds property).",
+                  "type": "string",
+                  "enum": [
+                    "refresh_rate",
+                    "different_values",
+                    "within_bounds"
+                  ],
+                  "example": "refresh_rate"
+                },
+                "different_values": {
+                  "description": "An integer number, see the _healthiness_criteria_ for details about its semantic.",
+                  "type": "integer",
+                  "format": "int32",
+                  "example": 10
+                },
+                "value_bounds": {
+                  "description": "A text string with a well-defined syntax, that represents a value interval. See the healthiness_criteria for details about its semantic.",
+                  "type": "string",
+                  "example": "-10;+60"
+                },
+                "disabled": {
+                  "description": "It indicates if the device attribute has to be disabled, and therefore hidden in the user views, excluded from indexing, and so on. If missing, the status of the device attribute is left unaltered. _Remark: unaltered_ is not the same as _enabled_.\n",
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "externalDocs": {
+    "description": "Extended PDF documentation (313k)",
+    "url": "https://servicemap.disit.org/WebAppGrafo/api/v1/iot/doc.pdf"
+  }
+}

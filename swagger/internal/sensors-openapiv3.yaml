@@ -1,0 +1,349 @@
+openapi: 3.0.1
+info:
+  title: Sensors API
+  version: 1.0.0
+servers:
+  - url: http://www.disit.org/sensor
+paths:
+  /api.php:
+    post:
+      tags: [Insert]
+      summary: Insert Sensors
+      description: If the input JSON is valid, the sensor(s) is persisted in the table _sensors_ of the schema _sensors_ of the database, and the total number of the written sensors is returned in the response body.
+      requestBody:
+        description: A JSON where one or more sensors are represented.
+        content:
+          application/json:
+            schema:
+              type: object
+              oneOf:
+                - $ref: '#/components/schemas/Beacon'
+                - $ref: '#/components/schemas/Wifi'
+                - $ref: '#/components/schemas/Status'
+                - type: array
+                  items:
+                    oneOf:
+                      - $ref: '#/components/schemas/Beacon'
+                      - $ref: '#/components/schemas/Wifi'
+                      - $ref: '#/components/schemas/Status'
+      responses:
+        200: 
+          description: The sensors have been successfully persisted.
+        400:
+          description: Malformed input, such as syntax errors, or errors at field level. In the latter case, the invalid fields are listed in the response body. If multiple sensors can be found in the input JSON, the list of invalid fields refers to the first of the invalid sensors.
+        500: 
+          description: Connection errors and other unexpected situations.
+  /api_select.php:
+    get:
+      tags: [Retrieve]
+      summary: Get Sensors
+      parameters:
+        - name: action
+          in: query
+          description: The only supported value at today is  _get_sensors_.
+          required: true
+          schema:
+            type: string
+            enum: [get_sensors]
+          example: get_sensors
+        - name: user
+          in: query
+          description: The requester user name. 
+          required: true
+          schema:
+            type: string
+          example: user
+        - name: pwd
+          in: query
+          description: The requester password. 
+          required: true
+          schema:
+            type: string
+          example: pwd
+        - name: type
+          in: query
+          description: The output format.
+          schema:
+            type: string
+            enum: [html, csv, json]
+          example: html
+        - name: limit
+          in: query
+          description: The number of results to be returned, for pagination purposes.
+          schema: 
+            type: integer
+            format: int32
+          example: 1000
+        - name: offset
+          in: query
+          description: The number of results that must be skipped, for pagination purposes.
+          schema:
+            type: integer
+            format: int32
+          example: 1000
+      responses:
+        200:
+          description: The sensors are returned in the specified format.
+          content:
+            text/html:
+              schema: 
+                type: string
+                format: html
+            text/csv:
+              schema:
+                type: string
+                format: csv
+            application/json:
+              schema:
+                type: array
+                items:
+                  oneOf:
+                    - $ref: '#/components/schemas/Beacon'
+                    - $ref: '#/components/schemas/Wifi'
+                    - $ref: '#/components/schemas/Status'
+        400:
+          description: Malformed URL. No query performed.
+        500:
+          description: Connection errors or other unexpected situations.
+components:
+  schemas:
+    Beacon:
+      type: object
+      required:
+        - date
+        - latitude
+        - longitude
+        - sender_IP
+        - type
+      properties:
+        UUID:
+          type: string
+          example: b9407f30-f5f8-466e-aff9-25556b57fe6d
+        id:
+          type: string
+          example: 25556b57fe6d
+        sender_IP:
+          type: string
+          example: 192.168.0.1
+        date:
+          type: string
+          example: 2015-11-11 13:23:44
+        date_pre_scan:
+          type: string
+          example: 2016-03-09 19:15:44
+        type:
+          type: string
+          example: beacon
+        latitude:
+          type: string
+          example: 43.7666667
+        longitude:
+          type: string
+          example: 11.25
+        lat_pre_scan:
+          type: string
+          example: 43.6
+        long_pre_scan:
+          type: string
+          example: 11.26
+        sensor_name:
+          type: string
+          example: blue beacon
+        MAC_address:
+          type: string
+          example: 00:A0:C9:14:C8:29
+        power:
+          type: string
+          example: 15 dB
+        rssi:
+          type: string
+          example: 13 dB
+        minor:
+          type: string
+          example: 12345
+        major: 
+          type: string
+          example: 45123
+        provider:
+          type: string
+          example: network
+        speed:
+          type: integer
+          format: int32
+          example: 0
+        altitude:
+          type: integer
+          format: int32
+          example: 0
+        accuracy:
+          type: integer
+          format: int32
+          example: 45
+        heading:
+          type: integer
+          format: int32
+          example: 0
+        device_model:
+          type: string
+          example: AAAA lt03lte
+        device_id:
+          type: string
+          example: 42767b11352d69d6408ffcc
+        status:
+          type: string
+          example: bike
+        prev_status:
+          type: string
+          example: bus
+        appID:
+          type: string
+          example: fdck_i
+    Wifi:
+      type: object
+      required:
+        - date
+        - latitude
+        - longitude
+        - sender_IP
+        - type
+      properties:
+        sender_IP:
+          type: string
+          example: 192.168.0.1
+        date:
+          type: string
+          example: 2016-03-09 19:16:44
+        date_pre_scan:
+          type: string
+          example: 2016-03-09 19:15:44
+        type:
+          type: string
+          example: wifi
+        latitude:
+          type: string
+          example: 43.7666667
+        longitude:
+          type: string
+          example: 11.25
+        lat_pre_scan:
+          type: string
+          example: 43.6
+        long_pre_scan:
+          type: string
+          example: 11.26
+        network_name:
+          type: string
+          example: disit lab
+        MAC_address:
+          type: string
+          example: 00:A0:C9:14:C8:29
+        power:
+          type: string
+          example: 45 dB
+        rssi:
+          type: string
+          example: 45 dB
+        frequency:
+          type: string
+          example: 4545 Mhz
+        capabilities:
+          type: string
+          example: '[WPA-PSK-TKIP][WPA2-PSK-CCMP+TKIP][ESS]'
+        provider:
+          type: string
+          example: network
+        speed:
+          type: integer
+          format: int32
+          example: 0
+        altitude:
+          type: integer
+          format: int32
+          example: 0
+        accuracy:
+          type: integer
+          format: int32
+          example: 45
+        heading:
+          type: integer
+          format: int32
+          example: 0
+        device_model:
+          type: string
+          example: AAAA lt03lte
+        device_id:
+          type: string
+          example: 42767b11352d69d6408ffcc8216a4438017cbbcc44ba5d07abd6ff38d859d519
+        status:
+          type: string
+          example: bike
+        prev_status:
+          type: string
+          example: bus                
+    Status:
+      type: object
+      required:
+        - date
+        - latitude
+        - longitude
+        - sender_IP
+        - type
+      properties:
+        sender_IP:
+          type: string
+          example: 192.168.0.1
+        date:
+          type: string
+          example: 2015-11-11 13:23:44
+        date_pre_scan:
+          type: string
+          example: 2016-03-09 19:15:44
+        type:
+          type: string
+          example: status
+        latitude:
+          type: string
+          example: 43.7666667
+        longitude:
+          type: string
+          example: 11.25
+        lat_pre_scan:
+          type: string
+          example: 43.6
+        long_pre_scan:
+          type: string
+          example: 11.26
+        MAC_address:
+          type: string
+          example: 00:00:00:00:00:00
+        provider:
+          type: string
+          example: network
+        speed:
+          type: integer
+          format: int32
+          example: 0
+        altitude:
+          type: integer
+          format: int32
+          example: 0
+        accuracy:
+          type: integer
+          format: int32
+          example: 45
+        heading:
+          type: integer
+          format: int32
+          example: 0
+        device_model:
+          type: string
+          example: AAAA lt03lte
+        device_id:
+          type: string
+          example: 42767b11352d69d6408ffcc
+        status:
+          type: string
+          example: bike
+        prev_status:
+          type: string
+          example: bus
