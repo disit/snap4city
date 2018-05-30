@@ -1,0 +1,308 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "IoT Device API",
+    "description": "The API accepts in input JSONs where IoT devices and  brokers are represented, and based on a configurable mapping, it executes appropriate SPARQL delete/insert queries on a graph database for maintaining a consistent N-Quads representation of such entities, and enabling the retrieval of the detected data and spatial device searches.",
+    "termsOfService": "http://www.disit.org/drupal/?q=en-US/node/6742",
+    "contact": {
+      "name": "Paolo Nesi",
+      "email": "paolo.nesi@unifi.it",
+      "url": "http://www.disit.org/drupal/?q=node/5490"
+    },
+    "license": {
+      "name": "GNU Affero General Public License, Version 3",
+      "url": "http://www.gnu.org/licenses/agpl.html"
+    },
+    "version": "1.0.0"
+  },
+  "host": "www.disit.org",
+  "basePath": "/ServiceMap/api/v1/iot",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "text/plain; charset=utf-8"
+  ],
+  "paths": {
+    "/insert": {
+      "post": {
+        "tags": [
+          "Primitives"
+        ],
+        "summary": "Reads IoT devices and brokers from a JSON, and writes them to a graph database based on a configurable mapping.",
+        "description": "The behavior of this primitive is completely governed by a configuration document, where the full ETL process is outlined. Data types, employed pluggable components, data builds, validations, loading, are all described in the document.",
+        "operationId": "org.disit.iotdeviceapi.Insert",
+        "parameters": [
+          {
+            "name": "JSON IoT Device Object",
+            "in": "body",
+            "description": "The JSON that describes the IoT Device (sensor or actuator), and its broker. \n\n_Note:_ Geospatial coordinates are not required to be present on both the device and the broker, it is enough that they can be found on one of them.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/device"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "In case of success, the URI of the inserted or updated device is returned in a single line plain text response. Otherwise, the response body is left empty, and a Warning header is added that helps to understand what happened."
+          }
+        },
+        "schemes": [
+          "https"
+        ]
+      }
+    },
+    "/delete": {
+      "post": {
+        "tags": [
+          "Primitives"
+        ],
+        "summary": "It accepts in input a device represented as a JSON, and deletes everything about it from the Knowledge Base.",
+        "description": "It builds the N-Quads tha same way it is done at insert time, but it deletes them instead of inserting. Brokers and SSN properties (_semantic labels_) are preserved, while their connections to the deleted devices are deleted also.",
+        "operationId": "org.disit.iotdeviceapi.Delete",
+        "parameters": [
+          {
+            "name": "JSON Object",
+            "in": "body",
+            "description": "The JSON that describes the device that has to be deleted.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/device"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "In case of success, the URI of the deleted device is returned in a single line plain text response. Otherwise, the response body is left empty, and a Warning header is added that helps to understand what happened."
+          }
+        },
+        "schemes": [
+          "https"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "device": {
+      "type": "object",
+      "required": [
+        "id",
+        "kind",
+        "type",
+        "latitude",
+        "longitude"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "example": "test_sensor02"
+        },
+        "uri": {
+          "type": "string",
+          "format": "uri",
+          "example": "http://www.disit.org/km4city/resource/iot/orionUNIFI/test_sensor02"
+        },
+        "model": {
+          "type": "string",
+          "example": "DHT11"
+        },
+        "type": {
+          "type": "string",
+          "example": "Thermometer"
+        },
+        "frequency": {
+          "type": "integer",
+          "example": 20
+        },
+        "latitude": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90,
+          "example": 43.816859
+        },
+        "longitude": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180,
+          "example": 10.199423
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "sensor",
+            "actuator"
+          ],
+          "example": "sensor"
+        },
+        "protocol": {
+          "type": "string",
+          "example": "ngsi"
+        },
+        "format": {
+          "type": "string",
+          "example": "csv"
+        },
+        "macaddress": {
+          "type": "string",
+          "example": "00-14-22-01-23-45"
+        },
+        "producer": {
+          "type": "string",
+          "example": "A Manufacturer Name"
+        },
+        "aStatus": {
+          "type": "string",
+          "enum": [
+            "mapped",
+            "unmapped"
+          ]
+        },
+        "pStatus": {
+          "type": "string",
+          "enum": [
+            "mapped",
+            "unmapped"
+          ]
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2018-03-12T15:17:11.000Z"
+        },
+        "period": {
+          "type": "integer",
+          "format": "int32",
+          "default": 0
+        },
+        "healthinessCriteria": {
+          "type": "string",
+          "example": "refreshRate",
+          "default": "unknown"
+        },
+        "broker": {
+          "type": "object",
+          "required": [
+            "name",
+            "type",
+            "ip",
+            "port",
+            "latitude",
+            "longitude"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "example": "orionUNIFI"
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "amqp",
+                "mqtt",
+                "ngsi"
+              ],
+              "example": "mqtt"
+            },
+            "ip": {
+              "type": "string",
+              "example": "192.168.1.9"
+            },
+            "port": {
+              "type": "integer",
+              "example": 1036
+            },
+            "latitude": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90,
+              "example": 43.77925
+            },
+            "longitude": {
+              "type": "number",
+              "minimum": -180,
+              "maximum": 180,
+              "example": 11.24626
+            },
+            "created": {
+              "type": "string",
+              "format": "date-time",
+              "example": "2018-03-12T15:17:11.000Z"
+            },
+            "login": {
+              "type": "string",
+              "example": "username"
+            },
+            "password": {
+              "type": "string",
+              "example": "password"
+            }
+          }
+        },
+        "attributes": {
+          "type": "object",
+          "required": [
+            "value_name",
+            "data_type",
+            "value_type",
+            "value_unit",
+            "value_refresh_rate",
+            "healthiness_criteria",
+            "value_bounds"
+          ],
+          "properties": {
+            "value_name": {
+              "type": "string",
+              "example": "temp"
+            },
+            "data_type": {
+              "type": "string",
+              "example": "float"
+            },
+            "value_type": {
+              "type": "string",
+              "example": "temperature"
+            },
+            "value_unit": {
+              "type": "string",
+              "example": "°C"
+            },
+            "value_refresh_rate": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "healthiness_criteria": {
+              "type": "string",
+              "enum": [
+                "refresh_rate",
+                "different_values",
+                "within_bounds"
+              ]
+            },
+            "value_bounds": {
+              "type": "string",
+              "example": "unspecified"
+            },
+            "different_values": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            },
+            "order": {
+              "type": "integer",
+              "example": 1,
+              "default": 0
+            }
+          }
+        }
+      }
+    }
+  },
+  "externalDocs": {
+    "description": "Configuration guide",
+    "url": "http://www.disit.org/ServiceMap/api/v1/iot/doc.pdf"
+  }
+}
