@@ -1,0 +1,279 @@
+<!--/* NODE-RED-CONTRIB-SNAP4CITY-USER
+   Copyright (C) 2018 DISIT Lab http://www.disit.org - University of Florence
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as
+   published by the Free Software Foundation, either version 3 of the
+   License, or (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Affero General Public License for more details.
+
+   You should have received a copy of the GNU Affero General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>. */-->
+<script type="text/x-red" data-template-name="full-text-search-near-marker">
+    <div class="form-row">
+        <label for="node-input-name">Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-search">Search Text</label>
+        <input type="text" id="node-input-search" placeholder="Search Text">
+    </div>
+    <div class="form-row">
+        <label for="node-input-maxdists">Max Distance</label>
+        <select id="node-input-maxdists">
+            <option value="0.1">100 Meters</option>
+            <option value="0.2">200 Meters</option>
+            <option value="0.5">500 Meters</option>
+            <option value="1">1 KMeters</option>
+            <option value="2">2 KMeters</option>
+            <option value="5">5 KMeters</option>
+            <option value="10">10 KMeters</option>
+            <option value="20">20 KMeters</option>
+            <option value="50">50 KMeters</option>
+            <option value="0">All</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-maxresults">Max Results</label>
+        <select id="node-input-maxresults">
+            <option value="100">100</option>
+            <option value="200">200</option>
+            <option value="500">500</option>
+            <option value="1000">1000</option>
+            <option value="2000">2000</option>
+            <option value="0">All</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-lang">Language</label>
+        <select id="node-input-lang">
+            <option value="en">English</option>
+            <option value="fr">French</option>
+            <option value="de">German</option>
+            <option value="it">Italian</option>
+            <option value="es">Spanish</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-latitude">Latitude</label>
+        <input type="text" id="node-input-latitude" placeholder="Latitude" disabled>
+    </div>
+    <div class="form-row">
+        <label for="node-input-longitude">Longitude</label>
+        <input type="text" id="node-input-longitude" placeholder="Longitude" disabled>
+    </div>
+    <div class="form-row">
+        <link rel="stylesheet" href="s4c/css/leaflet.css" />
+        <link rel="stylesheet" href="s4c/css/leaflet.draw.css" />
+        <div id="node-input-map" style="width: 100%; height: 300px"></div>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="full-text-search-near-marker">
+    <p>It allows to retrieve the geolocated entities (not only services) that match with a list of keywords.</p>
+
+    <h3>Inputs</h3>
+    A JSON with these parameters:
+
+    <dl class="message-properties">
+        <dt>latitude
+            <span class="property-type">number</span>
+        </dt>
+        <dd> latitude of a GPS position</dd>
+        <dt>longitude
+            <span class="property-type">number</span>
+        </dt>
+        <dd> longitude of a GPS position</dd>
+        <dt>search
+            <span class="property-type">string</span>
+        </dt>
+        <dd> the keywords separated with spaces that have to match with any textual description associated with an entity.g</dd>
+        <dt>maxdistance
+            <span class="property-type">number</span>
+        </dt>
+        <dd> maximum distance from the GPS position of the services to be retrieved, expressed in Km (0.1 is used if parameter
+            is missing) if it is equal to “inside” it searches for services with a WKT geometry that contains the specified
+            GPS position (e.g a park)</dd>
+        <dt>maxresults
+            <span class="property-type">number</span>
+        </dt>
+        <dd> maximum number of results to be returned (if parameter is missing 100 is assumed), if it is 0 all results are returned</dd>
+        <dt>lang
+            <span class="property-type">string</span>
+        </dt>
+        <dd> ISO 2 chars language code (e.g. “it”, “en”, “fr”, “de”, “es”) to be used for returned descriptions if available in
+            multiple languages. Currently for languages other than “it” and “en” it returns “en” descriptions. (if parameter
+            is missing “en” is assumed)</dd>
+    </dl>
+
+    <h3>Outputs</h3>
+    <ol class="node-ports">
+        <li>ServiceUri Array
+            <dl class="message-properties">
+                <dd> Returns an array containing the servicesUri of each service found</dd>
+            </dl>
+        </li>
+        <li>GeoJSON Results
+            <dl class="message-properties">
+                <dd> the results format is a GeoJSON “FeatureCollection” with the matching entities, additionally the “fullCount”
+                    property provides the full count of results available matching the query. For each “Feature” a minimal
+                    set of properties are provided</dd>
+            </dl>
+        </li>
+    </ol>
+
+    <h3>Details</h3>
+    <p>The node can receive a JSON with the parameters described in the Inputs section and with them generate the output JSON.
+        If the values are not present in the input JSON, these are read by those in the configuration. If they are not present
+        in either part, an error is generated for the necessary parameters.</p>
+
+</script>
+
+<script type="text/javascript" src="s4c/js/leaflet.js"></script>
+<script type="text/javascript" src="s4c/js/leaflet.draw.js"></script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('full-text-search-near-marker', {
+        category: 'S4CSearch',
+        color: '#FFAAAA',
+        defaults: {
+            name: {
+                value: ""
+            },
+            latitude: {
+                value: 0.0,
+                required: false,
+                validate: RED.validators.number()
+            },
+            longitude: {
+                value: 0.0,
+                required: false,
+                validate: RED.validators.number()
+            },
+            search: {
+                value: "",
+                required: false
+            },
+            maxdists: {
+                value: 1,
+                required: false,
+                validate: RED.validators.number()
+            },
+            maxresults: {
+                value: 100,
+                required: false,
+                validate: RED.validators.number()
+            },
+            lang: {
+                value: "",
+                required: false
+            }
+        },
+        outputs: 2,
+        inputs: 1,
+        outputLabels: ["service uri array", "geojson result"],
+        icon: "abc.png",
+        label: function () {
+            return this.name || "full-text-search-near-marker";
+        },
+        oneditprepare: function () {
+            node = this;
+            map = L.map('node-input-map').setView([43.78, 11.23], 9);
+            L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            window.node_input_map = map;
+
+            var mapLayers = {};
+
+            drawnItems = new L.FeatureGroup();
+            map.addLayer(drawnItems);
+
+            var editControl = new L.Control.Draw({
+                draw: false,
+                edit: {
+                    featureGroup: drawnItems
+                }
+            });
+            map.addControl(editControl);
+
+            drawControl = new L.Control.Draw({
+                draw: {
+                    position: 'topleft',
+                    polyline: false,
+                    marker: {
+                        icon: new L.DivIcon({
+                            iconSize: new L.Point(8, 8),
+                            className: 'leaflet-div-icon leaflet-editing-icon test'
+                        })
+                    },
+                    circlemarker: false,
+                    circle: false,
+                    polygon: false,
+                    rectangle: false
+                }
+            });
+            map.addControl(drawControl);
+
+            L.control.layers(mapLayers, {
+                'drawlayer': drawnItems
+            }, {
+                collapsed: true
+            }).addTo(map);
+
+            map.on(L.Draw.Event.CREATED, function (e) {
+                var fence = e.layer;
+                fence.nodeID = node.id;
+                if (drawnItems.hasLayer(fence) == false) {
+                    drawnItems.addLayer(fence);
+                }
+
+                drawControl.remove();
+
+                markers = {};
+
+                drawnItems.eachLayer(function (layer) {
+                    markers[layer.nodeID] = layer.toGeoJSON();
+                });
+
+                $("#node-input-latitude").val(markers[node.id].geometry.coordinates[1]);
+                $("#node-input-longitude").val(markers[node.id].geometry.coordinates[0]);
+            });
+
+            map.on('draw:edited', function (e) {
+                var fences = e.layers;
+                fences.eachLayer(function (fence) {
+                    fence.shape = "geofence";
+                    if (drawnItems.hasLayer(fence) == false) {
+                        drawnItems.addLayer(fence);
+                    }
+                });
+
+                markers = {};
+
+                drawnItems.eachLayer(function (layer) {
+                    markers[layer.nodeID] = layer.toGeoJSON();
+                });
+
+                $("#node-input-latitude").val(markers[node.id].geometry.coordinates[1]);
+                $("#node-input-longitude").val(markers[node.id].geometry.coordinates[0]);
+            });
+
+            map.on('draw:deleted', function (e) {
+                drawControl.addTo(map);
+                $("#node-input-latitude").val(0);
+                $("#node-input-longitude").val(0);
+            });
+
+        },
+        oneditresize: function () {
+            if (window.node_input_map) {
+                window.node_input_map.invalidateSize(true);
+            }
+        }
+    });
+</script>

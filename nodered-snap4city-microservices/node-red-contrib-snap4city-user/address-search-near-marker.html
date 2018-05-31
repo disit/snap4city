@@ -1,0 +1,192 @@
+<!--/* NODE-RED-CONTRIB-SNAP4CITY-USER
+   Copyright (C) 2018 DISIT Lab http://www.disit.org - University of Florence
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as
+   published by the Free Software Foundation, either version 3 of the
+   License, or (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Affero General Public License for more details.
+
+   You should have received a copy of the GNU Affero General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>. */-->
+<script type="text/x-red" data-template-name="address-search-near-marker">
+    <div class="form-row">
+        <label for="node-input-name">Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-latitude">Latitude</label>
+        <input type="text" id="node-input-latitude" placeholder="Latitude" disabled>
+    </div>
+    <div class="form-row">
+        <label for="node-input-longitude">Longitude</label>
+        <input type="text" id="node-input-longitude" placeholder="Longitude" disabled>
+    </div>
+    <div class="form-row">
+        <link rel="stylesheet" href="s4c/css/leaflet.css" />
+        <link rel="stylesheet" href="s4c/css/leaflet.draw.css" />
+        <div id="node-input-map" style="width: 100%; height: 300px"></div>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="address-search-near-marker">
+    <p>it allows to retrieve the complete address (municipality, street and civic number) given the GPS position. It may also
+        provide a list of services or public transport lines intersecting with the provided GPS position.
+    </p>
+
+    <h3>Inputs</h3>
+    A JSON with these parameters:
+
+    <dl class="message-properties">
+        <dt>latitude
+            <span class="property-type">number</span>
+        </dt>
+        <dd> latitude of a GPS position</dd>
+        <dt>longitude
+            <span class="property-type">number</span>
+        </dt>
+        <dd> longitude of a GPS position</dd>
+    </dl>
+
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dd> A JSON object with properties: • address: the street name. • number: the civic number. • addressUri: the URI identifying
+            the civic number in the road graph. • municipality: the estimated municipality (it may not work properly on the
+            municipalities borders) • municipalityUri: the URI identifying the municipality in the road graph.
+        </dd>
+    </dl>
+
+    <h3>Details</h3>
+    <p>The node can receive a JSON with the parameters described in the Inputs section and with them generate the output JSON.
+        If the values are not present in the input JSON, these are read by those in the configuration. If they are not present
+        in either part, an error is generated for the necessary parameters.</p>
+    </p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('address-search-near-marker', {
+        category: 'S4CSearch',
+        color: '#FFCC66',
+        defaults: {
+            name: {
+                value: ""
+            },
+            latitude: {
+                value: 0.0,
+                required: false,
+                validate: RED.validators.number()
+            },
+            longitude: {
+                value: 0.0,
+                required: false,
+                validate: RED.validators.number()
+            }
+        },
+        outputs: 1,
+        inputs: 1,
+        outputLabels: ["address information"],
+        icon: "white-globe.png",
+        label: function () {
+            return this.name || "address-search-near-marker";
+        },
+        oneditprepare: function () {
+            node = this;
+            map = L.map('node-input-map').setView([43.78, 11.23], 9);
+            L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            window.node_input_map = map;
+
+            var mapLayers = {};
+
+            drawnItems = new L.FeatureGroup();
+            map.addLayer(drawnItems);
+
+            var editControl = new L.Control.Draw({
+                draw: false,
+                edit: {
+                    featureGroup: drawnItems
+                }
+            });
+            map.addControl(editControl);
+
+            drawControl = new L.Control.Draw({
+                draw: {
+                    position: 'topleft',
+                    polyline: false,
+                    marker: {
+                        icon: new L.DivIcon({
+                            iconSize: new L.Point(8, 8),
+                            className: 'leaflet-div-icon leaflet-editing-icon test'
+                        })
+                    },
+                    circlemarker: false,
+                    circle: false,
+                    polygon: false,
+                    rectangle: false
+                }
+            });
+            map.addControl(drawControl);
+
+            L.control.layers(mapLayers, {
+                'drawlayer': drawnItems
+            }, {
+                collapsed: true
+            }).addTo(map);
+
+            map.on(L.Draw.Event.CREATED, function (e) {
+                var fence = e.layer;
+                fence.nodeID = node.id;
+                if (drawnItems.hasLayer(fence) == false) {
+                    drawnItems.addLayer(fence);
+                }
+
+                drawControl.remove();
+
+                markers = {};
+
+                drawnItems.eachLayer(function (layer) {
+                    markers[layer.nodeID] = layer.toGeoJSON();
+                });
+
+                $("#node-input-latitude").val(markers[node.id].geometry.coordinates[1]);
+                $("#node-input-longitude").val(markers[node.id].geometry.coordinates[0]);
+            });
+
+            map.on('draw:edited', function (e) {
+                var fences = e.layers;
+                fences.eachLayer(function (fence) {
+                    fence.shape = "geofence";
+                    if (drawnItems.hasLayer(fence) == false) {
+                        drawnItems.addLayer(fence);
+                    }
+                });
+
+                markers = {};
+
+                drawnItems.eachLayer(function (layer) {
+                    markers[layer.nodeID] = layer.toGeoJSON();
+                });
+
+                $("#node-input-latitude").val(markers[node.id].geometry.coordinates[1]);
+                $("#node-input-longitude").val(markers[node.id].geometry.coordinates[0]);
+            });
+
+            map.on('draw:deleted', function (e) {
+                drawControl.addTo(map);
+                $("#node-input-latitude").val(0);
+                $("#node-input-longitude").val(0);
+            });
+
+        },
+        oneditresize: function () {
+            if (window.node_input_map) {
+                window.node_input_map.invalidateSize(true);
+            }
+        }
+    });
+</script>

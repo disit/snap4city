@@ -1,0 +1,725 @@
+<!--
+  Copyright 2016 IBM Corp.
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  http://www.apache.org/licenses/LICENSE-2.0
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+
+//////////////////////////////////////////////////// // ORION CONTEXT BROKER SERVICE CONFIG NODE ////////////////////////////////////////////////////
+<script type="text/x-red" data-template-name="orion-service">
+	<div class="form-row">
+		<label for="node-config-input-url">
+			<i class="fa fa-cloud"></i> Broker URL</label>
+		<input type="text" id="node-config-input-url">
+	</div>
+	<div class="form-row">
+		<label for="node-config-input-port">
+			<i class="fa fa-globe"></i>
+			<span>port</span>
+		</label>
+		<input type="text" id="node-config-input-port" style="width: 50px">
+	</div>
+	<!--	<div class="form-row">
+	    <label>&nbsp;</label>
+	    <input type="checkbox" id="node-config-input-useAuth" style="display: inline-block; width: auto; vertical-align: top;">
+	    <label style="width: 70%;"><span>Authorization required</span></label>
+    </div>
+	<div class="form-row node-config-input-useAuth-row">
+		<label for="node-config-input-user"><i class="fa fa-user"></i> <span>key 1</span></label>
+		<input type="text" id="node-config-input-user">
+	</div>
+	<div class="form-row node-config-input-useAuth-row">
+		<label for="node-config-input-password"><i class="fa fa-lock"></i> <span>key 2</span></label>
+		<input type="password" id="node-config-input-password">
+	</div>-->
+	<div class="form-row">
+		<label for="node-config-input-name">
+			<i class="fa fa-tag"></i>
+			<span data-i18n="node-red:common.label.name"></span>
+		</label>
+		<input type="text" id="node-config-input-name" data-i18n="[placeholder]node-red:common.label.name">
+	</div>
+</script>
+
+
+//////////////////////////////////////////////////// // ORION CONTEXT BROKER SUBSCRIBE NODE ////////////////////////////////////////////////////
+<script type="text/x-red" data-template-name="fiware orion in">
+	<div class="form-row">
+		<label for="node-input-service">
+			<i class="fa fa-cloud"></i> Service</label>
+		<input type="text" id="node-input-service">
+	</div>
+	<div class="form-row">
+		<label for="node-input-entype">
+			<i class="fa fa-globe"></i>
+			<span>Device type</span>
+		</label>
+		<input type="text" id="node-input-entype">
+	</div>
+	<div class="form-row">
+		<label for="node-input-enid">
+			<i class="fa fa-globe"></i>
+			<span>Device NameID</span>
+		</label>
+		<input type="text" id="node-input-enid">
+	</div>
+	<div class="form-row">
+		<label for="node-input-userk1">
+			<i class="fa fa-globe"></i>
+			<span>key 1</span>
+		</label>
+		<input type="text" id="node-input-userk1">
+	</div>
+	<div class="form-row">
+		<label for="node-input-passk2">
+			<i class="fa fa-globe"></i>
+			<span>key 2</span>
+		</label>
+		<input type="text" id="node-input-passk2">
+	</div>
+	<div class="form-row">
+		<label>&nbsp;</label>
+		<input type="checkbox" id="node-input-ispattern" style="display: inline-block; width: auto; vertical-align: top;">
+		<label style="width: 70%;">
+			<span>is pattern</span>
+		</label>
+	</div>
+
+	<div class="form-row">
+		<label for="node-input-attributes">
+			<i class="fa fa-globe"></i>
+			<span>attributes</span>
+		</label>
+		<input type="text" id="node-input-attributes" placeholder="comma-separated values, leave empty for all atributes">
+	</div>
+	<div class="form-row">
+		<label for="node-input-condvalues">
+			<i class="fa fa-globe"></i>
+			<span>cond. values</span>
+		</label>
+		<input type="text" id="node-input-condvalues" placeholder="comma-separated condition values, leave empty for all">
+	</div>
+	<div class="form-row">
+		<label>&nbsp;</label>
+		<input type="checkbox" id="node-input-includeattr" style="display: inline-block; width: auto; vertical-align: top;">
+		<label style="width: 70%;">
+			<span>include attributes metadata in output</span>
+		</label>
+	</div>
+
+	<div class="form-row">
+		<label for="node-input-throttle">
+			<i class="fa fa-tasks"></i>
+			<span>throttle</span>
+		</label>
+		<select type="text" id="node-input-throttle" style="width:52%;">
+			<option value="PT1S">PT1S</option>
+			<option value="PT5S">PT5S</option>
+			<option value="PT10S">PT10S</option>
+			<option value="PT30S">PT30S</option>
+			<option value="PT1M">PT1M</option>
+			<option value="PT5M">PT5M</option>
+		</select>
+	</div>
+	<div class="form-row">
+		<label for="node-input-duration">
+			<i class="fa fa-tasks"></i>
+			<span>duration</span>
+		</label>
+		<select type="text" id="node-input-duration" style="width:52%;">
+			<option value="P1D">P1D</option>
+			<option value="P1W">P1W</option>
+			<option value="P1M">P1M</option>
+		</select>
+	</div>
+
+	<div class="form-row">
+		<label>&nbsp;</label>
+		<input type="checkbox" id="node-input-noderedhostauto" style="display: inline-block; width: auto; vertical-align: top;">
+		<label style="width: 70%;">
+			<span>Find node-red routable hostname automatically</span>
+		</label>
+	</div>
+
+	<div class="form-row node-input-noderedhost-row">
+		<label for="node-input-noderedhost">
+			<i class="fa fa-lock"></i>
+			<span>node-red hostname</span>
+		</label>
+		<input type="text" id="node-input-noderedhost">
+	</div>
+
+	<div class="form-row">
+		<label for="node-input-name">
+			<i class="fa fa-tag"></i>
+			<span>name</span>
+		</label>
+		<input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
+	</div>
+	<div class="form-tips" id="tip-json" hidden>
+		<span data-i18n="httpin.tip.req"></span>
+	</div>
+</script>
+
+
+////////////////////////////////////////////////////// //ORION CONTEXT BROKER QUERY NODE // //////////////////////////////////////////////////////
+<script type="text/x-red" data-template-name="fiware orion">
+
+	<div class="form-row">
+		<label for="node-input-service">
+			<i class="fa fa-cloud"></i> Service</label>
+		<input type="text" id="node-input-service">
+	</div>
+
+	<div class="form-row">
+		<label for="node-input-entype">
+			<i class="fa fa-globe"></i>
+			<span>Device type</span>
+		</label>
+		<input type="text" id="node-input-entype">
+	</div>
+
+	<div class="form-row">
+		<label for="node-input-enid">
+			<i class="fa fa-globe"></i>
+			<span>Device NameID</span>
+		</label>
+		<input type="text" id="node-input-enid">
+	</div>
+	<div class="form-row">
+		<label for="node-input-userk1">
+			<i class="fa fa-globe"></i>
+			<span>key 1</span>
+		</label>
+		<input type="text" id="node-input-userk1">
+	</div>
+	<div class="form-row">
+		<label for="node-input-passk2">
+			<i class="fa fa-globe"></i>
+			<span>key 2</span>
+		</label>
+		<input type="text" id="node-input-passk2">
+	</div>
+
+	<div class="form-row">
+		<label for="node-input-attributes">
+			<i class="fa fa-globe"></i>
+			<span>Attributes</span>
+		</label>
+		<input type="text" id="node-input-attributes" placeholder="comma-separated values, leave empty for all atributes">
+	</div>
+
+	<div class="form-row">
+		<label>&nbsp;</label>
+		<input type="checkbox" id="node-input-useFiltering" style="display: inline-block; width: auto; vertical-align: top;">
+		<label for="node-input-useFiltering" style="width: 70%;">
+			<span>Use filtering?</span>
+		</label>
+	</div>
+	<div class="form-row node-input-rtype-row">
+		<label for="node-input-rtype">
+			<i class="fa fa-tasks"></i>
+			<span>Filter type</span>
+		</label>
+		<select type="text" id="node-input-rtype" style="width:52%;">
+			<option value="FIWARE::StringQuery">StringQuery</option>
+			<option value="FIWARE::Filter::Existence">Existence</option>
+			<option value="FIWARE::Filter::Not::Existence">Not Existence</option>
+		</select>
+	</div>
+	<div class="form-row node-input-rvalue-row">
+		<label for="node-input-rvalue">
+			<i class="fa fa-globe"></i>
+			<span>Restriction value</span>
+		</label>
+		<input type="text" id="node-input-rvalue" placeholder="Restriction scope value">
+	</div>
+
+	<div class="form-row">
+		<label for="node-input-limit">
+			<i class="fa fa-globe"></i>
+			<span>Limit</span>
+		</label>
+		<input type="text" id="node-input-limit" placeholder="Results limit">
+	</div>
+	<div class="form-row">
+		<label>&nbsp;</label>
+		<input type="checkbox" id="node-input-includeattr" style="display: inline-block; width: auto; vertical-align: top;">
+		<label style="width: 70%;">
+			<span>include attributes metadata in output</span>
+		</label>
+	</div>
+
+
+	<div class="form-row">
+		<label for="node-input-name">
+			<i class="fa fa-tag"></i>
+			<span>Name</span>
+		</label>
+		<input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
+	</div>
+	<div class="form-tips" id="tip-json" hidden>
+		<span data-i18n="httpin.tip.req"></span>
+	</div>
+
+</script>
+
+////////////////////////////////////////////////////////////////////////// //SIMPLE ORION CONTEXT BROKER CREATE NODE (currently
+used to test) // //////////////////////////////////////////////////////////////////////////
+<script type="text/x-red" data-template-name="orion-test">
+
+	<div class="form-row">
+		<label for="node-input-service">
+			<i class="fa fa-cloud"></i> Service</label>
+		<input type="text" id="node-input-service">
+	</div>
+
+	<div class="form-row">
+		<label for="node-input-entype">
+			<i class="fa fa-globe"></i>
+			<span>Device type</span>
+		</label>
+		<input type="text" id="node-input-entype">
+	</div>
+
+	<div class="form-row">
+		<label for="node-input-enid">
+			<i class="fa fa-globe"></i>
+			<span>Device NameID</span>
+		</label>
+		<input type="text" id="node-input-enid">
+	</div>
+
+	<div class="form-row">
+		<label for="node-input-userk1">
+			<i class="fa fa-globe"></i>
+			<span>key 1</span>
+		</label>
+		<input type="text" id="node-input-userk1">
+	</div>
+	<div class="form-row">
+		<label for="node-input-passk2">
+			<i class="fa fa-globe"></i>
+			<span>key 2</span>
+		</label>
+		<input type="text" id="node-input-passk2">
+	</div>
+
+	<div class="form-row">
+		<label for="node-input-attrkey">
+			<i class="fa fa-globe"></i>
+			<span>Attribute key</span>
+		</label>
+		<input type="text" id="node-input-attrkey">
+	</div>
+
+
+	<div class="form-row">
+		<label for="node-input-attrvalue">
+			<i class="fa fa-globe"></i>
+			<span>Attribute value</span>
+		</label>
+		<input type="text" id="node-input-attrvalue">
+	</div>
+
+	<div class="form-row">
+		<label for="node-input-name">
+			<i class="fa fa-tag"></i>
+			<span>Name</span>
+		</label>
+		<input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
+	</div>
+	<div class="form-tips" id="tip-json" hidden>
+		<span data-i18n="httpin.tip.req"></span>
+	</div>
+
+</script>
+
+<script type="text/x-red" data-help-name="orion-test"></script>
+
+<script type="text/x-red" data-help-name="orion-service"></script>
+
+<script type="text/x-red" data-help-name="fiware orion in">
+	<p>Provides a node subscribing on Fiware Orion context broker and listening for the changes.</p>
+
+	<ul>
+		<li>
+			<code>url</code>, used as the context broker url of the request. Url shouldn't contain port</li>
+		<li>
+			<code>port</code>, used as the url port.</li>
+		<li>
+			<code>throttle</code>, is used to specify a minimum inter-notification arrival time, default value 5 seconds</li>
+		<li>
+			<code>entity type</code>, if set, should be context element entity type. If not specified, will search for all types</li>
+		<li>
+			<code>entity id</code>, if set, should be context element entity ID. If not specified, will search for all IDs</li>
+		<li>
+			<code>is pattern</code>, whether entity ID is pattern, false by default</li>
+		<li>
+			<code>duration</code>time untill subscription will expire</li>
+		<li>
+			<code>attributes</code>, a comma separated list of context element attributes to be filtered and returned. If not specified,
+			will return all</li>
+		<li>
+			<code>condvalues</code>, the "triggering attributes", i.e. attributes that upon change due to Update context elements trigger
+			the notification.</li>
+		<li>
+			<code>includeattr</code>, include all element attributes in the output, by default
+			<code>true</code>
+		</li>
+		<li>
+			<code>credentials</code>, include authorization credentials: user and password</li>
+	</ul>
+	<p>
+		The output message contains the following properties:
+		<ul>
+			<li>
+				<code>payload</code> containing list of changed elements</li>
+			<li>
+				<code>statusCode</code> is the status code, or the error code if the subscription processing failed</li>
+		</ul>
+</script>
+
+<script type="text/x-red" data-help-name="fiware orion">
+	<p>Provides a node for making requests to Fiware Orion context broker.</p>
+	<p>The URL and port can be configured in the node, if they are left blank they should be set in an incoming message on
+		<code>msg.url</code> and
+		<code>msg.port</code>
+	</p>
+	<p>Orion auth. credentials must be configured in the node, if left blank should be set in incoming message under
+		<code>msg.credentials.user</code> and
+		<code>msg.credentials.password</code> or in case using access token auth
+		<code>msg.credentials.token</code>
+	</p>
+	<ul>
+		<li>
+			<code>url</code>, used as the context broker url of the request. Url shouldn't contain port</li>
+		<li>
+			<code>port</code>, used as the url port.</li>
+		<li>
+			<code>entype</code>, if set, should be context element entity type. If not specified, will search for all types</li>
+		<li>
+			<code>enid</code>, if set, should be context element entity ID. If not specified, will search for all IDs</li>
+		<li>
+			<code>ispattern</code>, whether ID is pattern, false by default</li>
+		<li>
+			<code>attributes</code>, a comma separated list of context element attributes to be filtered and returned. If not specified,
+			will return all elements</li>
+		<li>
+			<code>rtype</code>, filter type. Available filters:
+			<code>FIWARE::StringQuery</code>,
+			<code>FIWARE::Filter::Existence</code> and
+			<code>FIWARE::Filter::Not::Existence</code>
+		</li>
+		<li>
+			<code>rvalue</code>, filter value, relevant only only for
+			<code>StringQuery</code> filter type, as
+			<code>Existence</code> filters use default
+			<code>"entity::type"</code>
+		</li>
+		<li>
+			<code>limit</code>, limit number of returned elements</li>
+		<li>
+			<code>includeattr</code>, include all element attributes in the output, by default
+			<code>true</code>
+		</li>
+		<li>
+			<code>credentials</code>, include authorization credentials, access token or user and password</li>
+	</ul>
+	<p>
+		The output message contains the following properties:
+		<ul>
+			<li>
+				<code>payload</code> is the body of the response containing list of requested elements</li>
+			<li>
+				<code>statusCode</code> is the status code of the response, or the error code if the request could not be completed</li>
+		</ul>
+</script>
+
+<script type="text/javascript">
+	(function () {
+		RED.nodes.registerType('orion-service', {
+			category: 'config',
+			defaults: {
+				name: {
+					value: ""
+				},
+				url: {
+					value: ""
+				},
+				port: {
+					value: "",
+					validate: RED.validators.number(),
+					required: true
+				}
+			},
+			credentials: {
+				user: {
+					type: "text",
+					required: false
+				},
+				password: {
+					type: "password",
+					required: false
+				}
+			},
+			label: function () {
+				return this.name || this.namespace || "Orion Service";
+			},
+			oneditprepare: function () {
+				if (this.credentials.user || this.credentials.password) {
+					$('#node-config-input-useAuth').prop('checked', true);
+					$(".node-config-input-useAuth-row").show();
+				} else {
+					$('#node-config-input-useAuth').prop('checked', false);
+					$(".node-config-input-useAuth-row").hide();
+					$('#node-config-input-user').val('');
+					$('#node-config-input-password').val('');
+				}
+
+				$("#node-config-input-useAuth").change(function () {
+					if ($(this).is(":checked")) {
+						$('#node-config-input-user').val('');
+						$('#node-config-input-password').val('');
+						$(".node-config-input-useAuth-row").show();
+					} else {
+						$('#node-config-input-user').val('');
+						$('#node-config-input-password').val('');
+						$(".node-config-input-useAuth-row").hide();
+					}
+				});
+			},
+			oneditsave: function () {
+				if ($("#node-config-input-useAuth").is(":checked")) {
+					$(".node-config-input-useAuth-row").show();
+				} else {
+					$(".node-config-input-useAuth-row").hide();
+					$('#node-config-input-user').val('');
+					$('#node-config-input-password').val('');
+				}
+			}
+		});
+		RED.nodes.registerType('fiware orion in', {
+			category: 'S4CIoT',
+			color: "rgb(231, 231, 174)",
+			defaults: {
+				name: {
+					value: ""
+				},
+				service: {
+					type: "orion-service",
+					required: true
+				},
+				throttle: {
+					value: "PT5S"
+				},
+				entype: {
+					value: ""
+				},
+				enid: {
+					value: ""
+				},
+				userk1: {
+					value: ""
+				},
+				passk2: {
+					value: ""
+				},
+				ispattern: {
+					value: false
+				},
+				duration: {
+					value: "P1W"
+				},
+				attributes: {
+					value: ""
+				},
+				condvalues: {
+					value: ""
+				},
+				includeattr: {
+					value: true
+				},
+				noderedhost: {
+					value: ""
+				},
+				noderedhostauto: {
+					value: true
+				}
+			},
+			inputs: 0,
+			outputs: 1,
+			icon: "orioncb.png",
+			label: function () {
+				if (this.name) {
+					return this.name;
+				} else {
+					return "Fiware Orion";
+				}
+			},
+			labelStyle: function () {
+				return this.name ? "node_label_italic" : "";
+			},
+			oneditprepare: function () {
+				if (this.credentials.includeattr) {
+					$('#node-input-includeattr').prop('checked', true);
+				}
+
+				$("#node-input-noderedhostauto").change(function () {
+					if ($(this).is(":checked")) {
+						$(".node-input-noderedhost-row").hide();
+						$('#node-input-noderedhost').val('');
+					} else {
+						$(".node-input-noderedhost-row").show();
+					}
+				});
+			}
+		});
+
+		RED.nodes.registerType('fiware orion', {
+			category: 'S4CIoT',
+			color: "rgb(231, 231, 174)",
+			defaults: {
+				name: {
+					value: ""
+				},
+				service: {
+					type: "orion-service",
+					required: true
+				},
+				entype: {
+					value: ""
+				},
+				enid: {
+					value: ".*"
+				},
+				userk1: {
+					value: ""
+				},
+				passk2: {
+					value: ""
+				},
+				attributes: {
+					value: ""
+				},
+				rtype: {
+					value: ""
+				},
+				rvalue: {
+					value: ""
+				},
+				limit: {
+					value: 20,
+					validate: RED.validators.number()
+				},
+				includeattr: {
+					value: true
+				}
+			},
+			inputs: 1,
+			outputs: 1,
+			icon: "orioncb.png",
+			label: function () {
+				return this.name || "Fiware Orion Query";
+			},
+			labelStyle: function () {
+				return this.name ? "node_label_italic" : "";
+			},
+			oneditprepare: function () {
+
+				if (this.rtype || this.rvalue) {
+					$('#node-input-useFiltering').prop('checked', true);
+					$(".node-input-rtype-row").show();
+
+					if ($('#node-input-rtype').val() !== 'FIWARE::StringQuery') {
+						$(".node-input-rvalue-row").hide();
+					} else {
+						$(".node-input-rvalue-row").show();
+					}
+
+				} else {
+					$('#node-input-useFiltering').prop('checked', false);
+					$(".node-input-rtype-row").hide();
+					$(".node-input-rvalue-row").hide();
+
+					$('#node-input-rtype').val('');
+					$('#node-input-rvalue').val('');
+				}
+
+				if (this.credentials.includeattr) {
+					$('#node-input-includeattr').prop('checked', true);
+				}
+
+				$("#node-input-useFiltering").change(function () {
+					if ($(this).is(":checked")) {
+						$('#node-input-rtype').val('FIWARE::StringQuery');
+						$(".node-input-rtype-row").show();
+						$('#node-input-rvalue').val('');
+						$(".node-input-rvalue-row").show();
+					} else {
+						$(".node-input-rtype-row").hide();
+						$(".node-input-rvalue-row").hide();
+						$('#node-input-rtype').val('');
+						$('#node-input-rvalue').val('');
+					}
+				});
+
+				$("#node-input-rtype").change(function () {
+					if ($('#node-input-rtype').val() === "FIWARE::StringQuery") {
+						$(".node-input-rvalue-row").show();
+					} else {
+						$(".node-input-rvalue").val('');
+						$(".node-input-rvalue-row").hide();
+					}
+				});
+			}
+		});
+		RED.nodes.registerType('orion-test', {
+			category: 'S4CIoT',
+			color: "rgb(42, 231, 42)",
+			defaults: {
+				name: {
+					value: ""
+				},
+				service: {
+					type: "orion-service",
+					required: true
+				},
+				entype: {
+					value: ""
+				},
+				enid: {
+					value: ""
+				},
+				userk1: {
+					value: ""
+				},
+				passk2: {
+					value: ""
+				},
+				attrkey: {
+					value: ""
+				},
+				attrvalue: {
+					value: ""
+				}
+			},
+			inputs: 1,
+			outputs: 1,
+			icon: "orioncb.png",
+			label: function () {
+				return this.name || "Fiware Orion Test";
+			},
+			labelStyle: function () {
+				return this.name ? "node_label_italic" : "";
+			}
+		});
+	})();
+</script>

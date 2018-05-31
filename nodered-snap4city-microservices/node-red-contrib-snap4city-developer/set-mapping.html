@@ -1,0 +1,57 @@
+<!--/* NODE-RED-CONTRIB-SNAP4CITY-DEVELOPER
+   Copyright (C) 2018 DISIT Lab http://www.disit.org - University of Florence
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as
+   published by the Free Software Foundation, either version 3 of the
+   License, or (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Affero General Public License for more details.
+
+   You should have received a copy of the GNU Affero General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>. */-->
+<script type="text/javascript">
+    RED.nodes.registerType('set-mapping', {
+        category: 'S4CMapping',
+        color: '#E7E7AE',
+        defaults: {
+            name: {
+                value: ""
+            },
+            source: {
+                value: ""
+            },
+            destination: {
+                value: ""
+            }
+        },
+        outputs: 1,
+        inputs: 1,
+        icon: "white-globe.png",
+        label: function () {
+            return this.name || "set-mapping";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="set-mapping">
+    <div class="form-row">
+        <label for="node-input-name">Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-source">Source</label>
+        <input type="text" id="node-input-source" placeholder="Source">
+    </div>
+    <div class="form-row">
+        <label for="node-input-destination">Destination</label>
+        <input type="text" id="node-input-destination" placeholder="Destination">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="set-mapping">
+
+</script>

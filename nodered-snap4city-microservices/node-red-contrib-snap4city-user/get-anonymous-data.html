@@ -1,0 +1,121 @@
+<!--/* NODE-RED-CONTRIB-SNAP4CITY-USER
+   Copyright (C) 2018 DISIT Lab http://www.disit.org - University of Florence
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as
+   published by the Free Software Foundation, either version 3 of the
+   License, or (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Affero General Public License for more details.
+
+   You should have received a copy of the GNU Affero General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>. */-->
+<script type="text/javascript">
+    RED.nodes.registerType('get-anonymous-data', {
+        category: 'S4CData',
+        color: '#b0dfe3',
+        defaults: {
+            name: {
+                value: ""
+            },
+            variablename: {
+                value: ""
+            },
+            motivation: {
+                value: ""
+            },
+            startdate: {
+                value: ""
+            },
+            enddate: {
+                value: ""
+            },
+            last: {
+                value: ""
+            }
+        },
+        outputs: 1,
+        inputs: 1,
+        icon: "white-globe.png",
+        label: function () {
+            return this.name || "get-anonymous-data";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="get-anonymous-data">
+    <div class="form-row">
+        <label for="node-input-name">Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-variablename">Variable Name</label>
+        <input type="text" id="node-input-variablename" placeholder="Variable Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-motivation">Motivation</label>
+        <input type="text" id="node-input-motivation" placeholder="Motivation">
+    </div>
+    <div class="form-row">
+        <label for="node-input-startdate">Start Date</label>
+        <input type="datetime-local" id="node-input-startdate">
+    </div>
+    <div class="form-row">
+        <label for="node-input-enddate">End Date</label>
+        <input type="datetime-local" id="node-input-enddate">
+    </div>
+    <div class="form-row">
+        <label for="node-input-last">Last</label>
+        <select id="node-input-last">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+        </select>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="get-anonymous-data">
+    <p>It allows to retrieve data entered in My Personal Data of people who have made them anonymous and public.</p>
+
+    <h3>Inputs</h3>
+    A JSON with these parameters:
+
+    <dl class="message-properties">
+        <dt>variablename
+            <span class="property-type">string</span>
+        </dt>
+        <dd>The name of the variable you want to retrieve</dd>
+        <dt>motivation
+            <span class="property-type">string</span>
+        </dt>
+        <dd>The reason you entered earlier for saving the data</dd>
+        <dt>startdate
+            <span class="property-type">date</span>
+        </dt>
+        <dd>Start date of the data search period</dd>
+        <dt>enddate
+            <span class="property-type">date</span>
+        </dt>
+        <dd>End date of the data search period</dd>
+        <dt>Last
+            <span class="property-type">number</span>
+        </dt>
+        <dd>If selected, it only retrieves the last n (where n is the value inserted) data of the inserted period</dd>
+    </dl>
+
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dd> Returns an array containing the public data that have been saved in the search period</dd>
+    </dl>
+
+    <h3>Details</h3>
+    <p>The node can receive a JSON with the parameters described in the Inputs section and with them generate the output JSON.
+        If the values are not present in the input JSON, these are read by those in the configuration. If they are not present
+        in either part, an error is generated for the necessary parameters.</p>
+
+</script>

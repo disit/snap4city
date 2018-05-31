@@ -1,0 +1,167 @@
+<!--/* NODE-RED-CONTRIB-SNAP4CITY-USER
+   Copyright (C) 2018 DISIT Lab http://www.disit.org - University of Florence
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as
+   published by the Free Software Foundation, either version 3 of the
+   License, or (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Affero General Public License for more details.
+
+   You should have received a copy of the GNU Affero General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>. */-->
+<script type="text/javascript">
+    RED.nodes.registerType('tpl-stops-by-route', {
+        category: 'S4CSearch',
+        color: '#b0dfe3',
+        defaults: {
+            name: {
+                value: ""
+            },
+            route: {
+                value: "",
+                required: false
+            }
+        },
+        outputs: 2,
+        inputs: 1,
+        outputLabels: ["service uri array", "geojson result"],
+        icon: "tpl.png",
+        label: function () {
+            return this.name || "tpl-stops-by-route";
+        },
+        oneditprepare: function () {
+            var node = this;
+            $("#node-input-agency").empty();
+            $.ajax({
+                url: "https://servicemap.km4city.org/WebAppGrafo/api/v1/tpl/agencies/",
+                type: "GET",
+                async: false,
+                dataType: "json",
+                success: function (data) {
+                    var agencies = data.Agencies;
+                    for (var i = 0; i < agencies.length; i++) {
+                        $("<option value=\"" + agencies[i].agency + "\">" + agencies[i].name +
+                            "</option>").appendTo($("#node-input-agency"));
+                    }
+                    $("#node-input-agency").val("");
+                },
+                error: function (err) {
+                    console.log(err);
+                }
+            });
+
+            $("#node-input-agency").change(function () {
+                if ($("#node-input-agency").val() != null) {
+                    $("#node-input-line").empty();
+                    $.ajax({
+                        url: "http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/bus-lines/?agency=" +
+                            $("#node-input-agency").val(),
+                        type: "GET",
+                        async: false,
+                        dataType: "json",
+                        success: function (data) {
+                            var lines = data.BusLines;
+                            for (var i = 0; i < lines.length; i++) {
+                                $("<option value=\"" + lines[i].uri + "\">" + lines[i].shortName +
+                                    ": " + lines[i].longName + "</option>").appendTo(
+                                    $("#node-input-line"));
+                            }
+                            $("#node-input-line").val("");
+                        },
+                        error: function (err) {
+                            console.log(err);
+                        }
+                    });
+                }
+            });
+
+            $("#node-input-line").change(function () {
+                if ($("#node-input-line").val() != null) {
+                    $("#node-input-route").empty();
+                    $.ajax({
+                        url: "http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/bus-routes/?line=" +
+                            $("#node-input-line").val(),
+                        type: "GET",
+                        async: false,
+                        dataType: "json",
+                        success: function (data) {
+                            var routes = data.BusRoutes;
+                            for (var i = 0; i < routes.length; i++) {
+                                $("<option value=\"" + routes[i].route + "\">" + routes[
+                                        i].line + ": " + routes[i].firstBusStop +
+                                    " - " + routes[i].lastBusStop + "</option>").appendTo(
+                                    $("#node-input-route"));
+                            }
+                            $("#node-input-route").val("");
+                        },
+                        error: function (err) {
+                            console.log(err);
+                        }
+                    });
+                }
+            });
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="tpl-stops-by-route">
+    <div class="form-row">
+        <label for="node-input-name">Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-agency">Agency</label>
+        <select id="node-input-agency">
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-line">Line</label>
+        <select id="node-input-line">
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-route">Route</label>
+        <select id="node-input-route">
+        </select>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="tpl-stops-by-route">
+    <p>API provide a list of the public transport stops available for a given route. </p>
+
+    <h3>Inputs</h3>
+    A JSON with these parameters:
+
+    <dl class="message-properties">
+        <dt>route
+            <span class="property-type">string</span>
+        </dt>
+        <dd>URI of the route whose bus stops are to be retrieved</dd>
+    </dl>
+
+    <h3>Outputs</h3>
+    <ol class="node-ports">
+        <li>ServiceUri Array
+            <dl class="message-properties">
+                <dd> Returns an array containing the servicesUri of each service found</dd>
+            </dl>
+        </li>
+        <li>Stop Information
+            <dl class="message-properties">
+                <dd> It provides an JSON Object with line number (aka line short name) and line name (aka line long name) and
+                    a GeoJSON FeatureCollection with the stops. The stops are provided in stop order, from the first to the
+                    last</dd>
+            </dl>
+        </li>
+    </ol>
+
+    <h3>Details</h3>
+    <p>The node can receive a JSON with the parameters described in the Inputs section and with them generate the output JSON.
+        If the values are not present in the input JSON, these are read by those in the configuration. If they are not present
+        in either part, an error is generated for the necessary parameters.</p>
+
+</script>

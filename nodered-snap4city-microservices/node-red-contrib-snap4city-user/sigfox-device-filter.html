@@ -1,0 +1,66 @@
+<!--/* NODE-RED-CONTRIB-SNAP4CITY-USER
+   Copyright (C) 2018 DISIT Lab http://www.disit.org - University of Florence
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as
+   published by the Free Software Foundation, either version 3 of the
+   License, or (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Affero General Public License for more details.
+
+   You should have received a copy of the GNU Affero General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>. */-->
+<script type="text/javascript">
+    RED.nodes.registerType('sigfox device filter', {
+        category: 'S4CSigfox',
+        color: '#a6bbcf',
+        defaults: {
+            name: {
+                value: ""
+            },
+            device: {
+                value: "",
+                required: true
+            }
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "function.png",
+        label: function () {
+            if (this.name) {
+                return this.name;
+            } else if (this.device) {
+                return "sigfox device filter [" + this.device + "]";
+            } else {
+                return "sigfox device filter";
+            }
+        },
+        labelStyle: function () {
+            return this.name ? "node_label_italic" : "";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="sigfox device filter">
+    <div class="form-row">
+        <label for="node-input-device">
+            <i class="icon-tag"></i> Device:</label>
+        <input type="text" id="node-input-device" placeholder="e.g. 86F29">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name">
+            <i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="sigfox device filter">
+    <p>Filters messages from sigfox input node based on given device ID.</p>
+    <p>This node accepts JSON objects/JSON strings and returns a JSON object. Received JSON must contain at least the following
+        property:
+        <code>device</code>
+    </p>
+</script>

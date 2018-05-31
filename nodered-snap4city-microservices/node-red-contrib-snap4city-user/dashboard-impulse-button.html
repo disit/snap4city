@@ -1,0 +1,224 @@
+<!--/* NODE-RED-CONTRIB-SNAP4CITY-USER
+   Copyright (C) 2018 DISIT Lab http://www.disit.org - University of Florence
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as
+   published by the Free Software Foundation, either version 3 of the
+   License, or (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Affero General Public License for more details.
+
+   You should have received a copy of the GNU Affero General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>. */-->
+<style type="text/css">
+    .dashboardBtn {
+        background: #AD1625;
+        border: none;
+        color: #eee !important;
+        padding-top: 5px;
+        padding-bottom: 5px;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+</style>
+
+
+<script type="text/javascript">
+    RED.nodes.registerType('impulse-button', {
+        category: 'S4CDashboard',
+        color: '#00a2d3',
+        defaults: {
+            selectedDashboard: {
+                value: "",
+            },
+            flowName: {
+                value: ""
+            },
+            username: {
+                value: ""
+            },
+            name: {
+                value: "",
+                required: true
+            },
+            dashboardTitle: {
+                value: "",
+                required: true
+            },
+            valueType: {
+                value: "String",
+                required: true
+            },
+            offValue: {
+                value: "Off",
+                required: true
+            },
+            onValue: {
+                value: "On",
+                required: true
+            }
+        },
+        inputs: 0,
+        outputs: 2,
+        outputLabels: ["impulse value", "base value"],
+        icon: "inject.png",
+        label: function () {
+            return this.name || "impulse-button";
+        },
+        paletteLabel: function () {
+            return this.name || "impulse-button";
+        },
+        align: 'left',
+        oneditprepare: function () {
+            $("#node-input-dashboardTitleNew").val("");
+            $("#node-input-dashboardTitle").val("");
+            $('#node-input-username').val($('#usermenu-item-username span b').text());
+            $('#node-input-flowName').val($("li.red-ui-tab.ui-draggable.active a").attr("title"));
+            $('#node-dashboard-edit').click(function () {
+                window.open($('#node-input-dashboardManagerBaseUrl').val() +
+                    "/controllers/openNRDashboardEditor.php?username=" + $(
+                        '#usermenu-item-username span b').html() + "&dashboardTitle=" +
+                    encodeURIComponent($('#node-input-dashboardTitle').val()), '_blank');
+            });
+
+            $('#node-dashboard-view').click(function () {
+                window.open($('#node-input-dashboardManagerBaseUrl').val() +
+                    "/controllers/openNRDashboardViewer.php?username=" + $(
+                        '#usermenu-item-username span b').html() + "&dashboardTitle=" +
+                    encodeURIComponent($('#node-input-dashboardTitle').val()), '_blank');
+            });
+
+            $("#createNewDashboardTitle").click(function () {
+                $("#node-input-dashboardTitleNew").show();
+                $("#node-input-dashboardTitle").hide();
+                $("#createNewDashboardTitle").hide();
+                $("#backDashboardTitle").show();
+                $("#node-input-dashboardTitle").attr("id", "node-input-dashboardTitleOld");
+                $("#node-input-dashboardTitleNew").attr("id", "node-input-dashboardTitle");
+            });
+
+            $("#backDashboardTitle").click(function () {
+                $("#node-input-dashboardTitle").attr("id", "node-input-dashboardTitleNew");
+                $("#node-input-dashboardTitleOld").attr("id", "node-input-dashboardTitle");
+                $("#node-input-dashboardTitleNew").val("");
+                $("#node-input-dashboardTitleNew").hide();
+                $("#node-input-dashboardTitle").show();
+                $("#createNewDashboardTitle").show();
+                $("#backDashboardTitle").hide();
+            });
+
+            $("#node-input-dashboardTitle").empty();
+
+            $.ajax({
+                url: $('#node-input-dashboardManagerBaseUrl').val() +
+                    "/api/nodeRedDashboardsApi.php?secret=45awwprty_zzq34&username=" + $(
+                        '#node-input-username').val(),
+                type: "GET",
+                async: true,
+                dataType: "json",
+                success: function (data) {
+                    if (data.length != 0) {
+                        for (var i = 0; i < data.length; i++) {
+                            $("<option value=\"" + data[i] + "\">" + decodeURI(data[i].replace(
+                                /\+/g, " ")) + "</option>").appendTo($(
+                                "#node-input-dashboardTitle"));
+                        }
+                        $("#node-input-dashboardTitle").val($("#node-input-selectedDashboard").val());
+                    } else {
+                        $("#node-input-dashboardTitleNew").show();
+                        $("#node-input-dashboardTitle").hide();
+                        $("#createNewDashboardTitle").hide();
+                        $("#node-input-dashboardTitle").val("");
+                    }
+                },
+                error: function (err) {
+                    console.log(err);
+                }
+            });
+            $("#node-input-dashboardTitle").val($("#node-input-selectedDashboard").val());
+        },
+        oneditsave: function () {
+            $("#node-input-selectedDashboard").val($("#node-input-dashboardTitle").val());
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="impulse-button">
+    <input type="hidden" id="node-input-username">
+    <input type="hidden" id="node-input-flowName">
+    <input type="hidden" id="node-input-selectedDashboard">
+    <input type="hidden" id="node-input-dashboardManagerBaseUrl" value="https://dashboard.km4city.org/dashboardSmartCity">
+    <!--<input type="hidden" id="node-input-dashboardManagerBaseUrl" value="http://localhost/dashboardsmartcity/dash">-->
+    <div class="form-row">
+        <label for="node-input-dashboardTitle">
+            <i class="fa fa-dashboard"></i> Dashboard</label>
+        <button id="createNewDashboardTitle">New Title</button>
+        <button id="backDashboardTitle" style="display:none">Show list</button>
+        <input type="text" id="node-input-dashboardTitleNew" placeholder="Dashboard Title" style="display:none; width: 55%;">
+        <select id="node-input-dashboardTitle">
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name">
+            <i class="icon-tag"></i> Widget title</label>
+        <input type="text" id="node-input-name" placeholder="Title">
+    </div>
+    <div class="form-row">
+        <button class="dashboardBtn" click="openDashboardEditor" role="button" aria-disabled="false" id="node-dashboard-edit">
+            Edit Dashboard
+        </button>
+        <button class="dashboardBtn" click="openDashboardViewer" role="button" aria-disabled="false" id="node-dashboard-view">
+            View Dashboard
+        </button>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="impulse-button">
+    <p>With this node you can add a button to an existing dashboard or a new one created by the node. If this button is pressed,
+        it outputs a message from the top output, if the button is released, it outputs a message from the bottom output.
+    </p>
+
+    <h3>Configuration</h3>
+
+    <dl class="message-properties">
+        <dt>dashboard
+            <span class="property-type">string</span>
+        </dt>
+        <dd>Dashboard title to which the button will be added</dd>
+        <dt>widget
+            <span class="property-type">string</span>
+        </dt>
+        <dd> Title that will have the widget containing the button.</dd>
+        <dt>value type
+            <span class="property-type">string</span>
+        </dt>
+        <dd> Type of value that is sent from the node when the button is pressed or released</dd>
+        <dt>base value
+            <span class="property-type">string</span>
+        </dt>
+        <dd> Value that is sent when the button is released</dd>
+        <dt>impulse value
+            <span class="property-type">string</span>
+        </dt>
+        <dd> Value that is sent when the button is pressed</dd>
+
+    </dl>
+
+    <h3>Outputs</h3>
+    <ol class="node-ports">
+        <li>Impulse Value
+            <dl class="message-properties">
+                <dd> Returns the impulse value when the button is pressed</dd>
+            </dl>
+        </li>
+        <li>Base Value
+            <dl class="message-properties">
+                <dd> Returns the base value when the button is released</dd>
+            </dl>
+        </li>
+    </ol>
+
+</script>

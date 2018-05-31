@@ -1,0 +1,310 @@
+<!--/* NODE-RED-CONTRIB-SNAP4CITY-USER
+   Copyright (C) 2018 DISIT Lab http://www.disit.org - University of Florence
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as
+   published by the Free Software Foundation, either version 3 of the
+   License, or (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Affero General Public License for more details.
+
+   You should have received a copy of the GNU Affero General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>. */-->
+<style type="text/css">
+    .dashboardBtn {
+        background: #AD1625;
+        border: none;
+        color: #eee !important;
+        padding-top: 5px;
+        padding-bottom: 5px;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+</style>
+
+
+<script type="text/javascript">
+    RED.nodes.registerType('dashboard in', {
+        category: 'S4CDashboard',
+        color: '#00a2d3',
+        defaults: {
+            username: {
+                value: ""
+            },
+            name: {
+                value: "",
+                required: true
+            },
+            dashboardTitle: {
+                value: "",
+                required: true
+            },
+            valueType: {
+                value: "-1",
+                required: true
+            },
+            startValue: {
+                required: true
+            },
+            domain: {
+                value: "-1",
+                required: true
+            },
+            minValue: {
+                value: 0
+            },
+            maxValue: {
+                value: 100
+            },
+            offValue: {
+                value: 'Off'
+            },
+            onValue: {
+                value: 'On'
+            }
+        },
+        inputs: 0,
+        outputs: 1,
+        icon: "dashIcon.png",
+        label: function () {
+            return this.name || "city dashboard";
+        },
+        paletteLabel: function () {
+            return this.name || "city dashboard";
+        },
+        align: 'left',
+        oneditprepare: function () {
+            $("#node-input-dashboardTitleNew").val("");
+            $("#node-input-dashboardTitle").val("");
+            $('#node-input-username').val($('#usermenu-item-username span b').text());
+            $('#node-input-flowName').val($("li.red-ui-tab.ui-draggable.active a").attr("title"));
+            $('#node-dashboard-edit').click(function () {
+                window.open($('#node-input-dashboardManagerBaseUrl').val() +
+                    "/controllers/openNRDashboardEditor.php?username=" + $(
+                        '#usermenu-item-username span b').html() + "&dashboardTitle=" +
+                    encodeURIComponent($('#node-input-dashboardTitle').val()), '_blank');
+            });
+
+            $('#node-dashboard-view').click(function () {
+                window.open($('#node-input-dashboardManagerBaseUrl').val() +
+                    "/controllers/openNRDashboardViewer.php?username=" + $(
+                        '#usermenu-item-username span b').html() + "&dashboardTitle=" +
+                    encodeURIComponent($('#node-input-dashboardTitle').val()), '_blank');
+            });
+
+            $("#createNewDashboardTitle").click(function () {
+                $("#node-input-dashboardTitleNew").show();
+                $("#node-input-dashboardTitle").hide();
+                $("#createNewDashboardTitle").hide();
+                $("#backDashboardTitle").show();
+                $("#node-input-dashboardTitle").attr("id", "node-input-dashboardTitleOld");
+                $("#node-input-dashboardTitleNew").attr("id", "node-input-dashboardTitle");
+            });
+
+            $("#backDashboardTitle").click(function () {
+                $("#node-input-dashboardTitle").attr("id", "node-input-dashboardTitleNew");
+                $("#node-input-dashboardTitleOld").attr("id", "node-input-dashboardTitle");
+                $("#node-input-dashboardTitleNew").val("");
+                $("#node-input-dashboardTitleNew").hide();
+                $("#node-input-dashboardTitle").show();
+                $("#createNewDashboardTitle").show();
+                $("#backDashboardTitle").hide();
+            });
+
+            $("#node-input-dashboardTitle").empty();
+
+            $.ajax({
+                url: $('#node-input-dashboardManagerBaseUrl').val() +
+                    "/api/nodeRedDashboardsApi.php?secret=45awwprty_zzq34&username=" + $(
+                        '#node-input-username').val(),
+                type: "GET",
+                async: true,
+                dataType: "json",
+                success: function (data) {
+                    if (data.length != 0) {
+                        for (var i = 0; i < data.length; i++) {
+                            $("<option value=\"" + data[i] + "\">" + decodeURI(data[i].replace(
+                                /\+/g, " ")) + "</option>").appendTo($(
+                                "#node-input-dashboardTitle"));
+                        }
+                        $("#node-input-dashboardTitle").val($("#node-input-selectedDashboard").val());
+                    } else {
+                        $("#node-input-dashboardTitleNew").show();
+                        $("#node-input-dashboardTitle").hide();
+                        $("#createNewDashboardTitle").hide();
+                        $("#node-input-dashboardTitle").val("");
+                    }
+                },
+                error: function (err) {
+                    console.log(err);
+                }
+            });
+            $("#node-input-dashboardTitle").val($("#node-input-selectedDashboard").val());
+
+
+
+
+
+
+
+
+            $('#node-input-domain').change(function () {
+                switch ($(this).val()) {
+                    case "contRange":
+                        $('#node-input-offValue').parents('div.form-row').hide();
+                        $('#node-input-onValue').parents('div.form-row').hide();
+                        $('#node-input-offValue').removeClass('input-error');
+                        $('#node-input-onValue').removeClass('input-error');
+                        $('#node-input-minValue').parents('div.form-row').show();
+                        $('#node-input-maxValue').parents('div.form-row').show();
+                        $('#node-input-minValue').addClass('input-error');
+                        $('#node-input-maxValue').addClass('input-error');
+                        break;
+
+                    case "onOff":
+                        $('#node-input-minValue').parents('div.form-row').hide();
+                        $('#node-input-maxValue').parents('div.form-row').hide();
+                        $('#node-input-minValue').removeClass('input-error');
+                        $('#node-input-maxValue').removeClass('input-error');
+                        $('#node-input-offValue').parents('div.form-row').show();
+                        $('#node-input-onValue').parents('div.form-row').show();
+                        $('#node-input-offValue').addClass('input-error');
+                        $('#node-input-onValue').addClass('input-error');
+                        $('label[for=node-input-offValue] span').text('Off value');
+                        $('label[for=node-input-onValue] span').text('On value');
+                        break;
+
+                    case "impulse":
+                        $('#node-input-minValue').parents('div.form-row').hide();
+                        $('#node-input-maxValue').parents('div.form-row').hide();
+                        $('#node-input-minValue').removeClass('input-error');
+                        $('#node-input-maxValue').removeClass('input-error');
+                        $('#node-input-offValue').parents('div.form-row').show();
+                        $('#node-input-onValue').parents('div.form-row').show();
+                        $('#node-input-offValue').addClass('input-error');
+                        $('#node-input-onValue').addClass('input-error');
+                        $('label[for=node-input-offValue] span').text('Base value');
+                        $('label[for=node-input-onValue] span').text('Impulse value');
+                        break;
+
+                    case "singleNumericValue":
+                        $('#node-input-offValue').parents('div.form-row').hide();
+                        $('#node-input-onValue').parents('div.form-row').hide();
+                        $('#node-input-offValue').removeClass('input-error');
+                        $('#node-input-onValue').removeClass('input-error');
+                        $('#node-input-minValue').parents('div.form-row').hide();
+                        $('#node-input-maxValue').parents('div.form-row').hide();
+                        $('#node-input-minValue').removeClass('input-error');
+                        $('#node-input-maxValue').removeClass('input-error');
+                        break;
+
+                    default:
+                        $('#node-input-offValue').parents('div.form-row').hide();
+                        $('#node-input-onValue').parents('div.form-row').hide();
+                        $('#node-input-offValue').removeClass('input-error');
+                        $('#node-input-onValue').removeClass('input-error');
+                        $('#node-input-minValue').parents('div.form-row').hide();
+                        $('#node-input-maxValue').parents('div.form-row').hide();
+                        $('#node-input-minValue').removeClass('input-error');
+                        $('#node-input-maxValue').removeClass('input-error');
+                        break;
+                }
+            });
+
+            $('#node-dashboard-edit').click(function () {
+                window.open($('#node-input-dashboardManagerBaseUrl').val() +
+                    "/controllers/openNRDashboardEditor.php?username=" + $(
+                        '#usermenu-item-username span b').html() + "&dashboardTitle=" +
+                    encodeURIComponent($('#node-input-dashboardTitle').val()), '_blank');
+            });
+
+            $('#node-dashboard-view').click(function () {
+                window.open($('#node-input-dashboardManagerBaseUrl').val() +
+                    "/controllers/openNRDashboardViewer.php?username=" + $(
+                        '#usermenu-item-username span b').html() + "&dashboardTitle=" +
+                    encodeURIComponent($('#node-input-dashboardTitle').val()), '_blank');
+            });
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="dashboard in">
+    <input type="hidden" id="node-input-username">
+    <input type="hidden" id="node-input-flowName">
+    <input type="hidden" id="node-input-selectedDashboard">
+    <input type="hidden" id="node-input-dashboardManagerBaseUrl" value="https://dashboard.km4city.org/dashboardSmartCity">
+    <!--<input type="hidden" id="node-input-dashboardManagerBaseUrl" value="http://localhost/dashboardsmartcity/dash">-->
+    <div class="form-row">
+        <label for="node-input-dashboardTitle">
+            <i class="fa fa-dashboard"></i> Dashboard</label>
+        <button id="createNewDashboardTitle">New Title</button>
+        <button id="backDashboardTitle" style="display:none">Show list</button>
+        <input type="text" id="node-input-dashboardTitleNew" placeholder="Dashboard Title" style="display:none; width: 55%;">
+        <select id="node-input-dashboardTitle">
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name">
+            <i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-valueType">
+            <i class="fa fa-calculator"></i> Value type</label>
+        <select id="node-input-valueType">
+            <option value="Boolean">Boolean</option>
+            <option value="Float">Float</option>
+            <option value="Integer">Integer</option>
+            <option value="String">String</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-domain">
+            <i class="fa fa-circle-o"></i> Domain</label>
+        <select id="node-input-domain">
+            <option value="contRange">Continuous range</option>
+            <option value="onOff">Bi-state commutation</option>
+            <option value="impulse">Impulse</option>
+            <option value="singleNumericValue">Single numeric value</option>
+        </select>
+    </div>
+    <div class="form-row" style="display: none">
+        <label for="node-input-minValue">
+            <i class="fa fa-angle-down"></i> Min value</label>
+        <input type="text" id="node-input-minValue" placeholder="" value="0">
+    </div>
+    <div class="form-row" style="display: none">
+        <label for="node-input-maxValue">
+            <i class="fa fa-angle-up"></i> Max value</label>
+        <input type="text" id="node-input-maxValue" placeholder="" value="100">
+    </div>
+    <div class="form-row" style="display: none">
+        <label for="node-input-offValue">
+            <i class="fa fa-angle-down"></i>
+            <span>Off value</span>
+        </label>
+        <input type="text" id="node-input-offValue" placeholder="" value="Off">
+    </div>
+    <div class="form-row" style="display: none">
+        <label for="node-input-onValue">
+            <i class="fa fa-angle-up"></i>
+            <span>On value</span>
+        </label>
+        <input type="text" id="node-input-onValue" placeholder="" value="On">
+    </div>
+    <div class="form-row">
+        <button class="dashboardBtn" click="openDashboardEditor" role="button" aria-disabled="false" id="node-dashboard-edit">
+            Edit city dashboard
+        </button>
+        <button class="dashboardBtn" click="openDashboardViewer" role="button" aria-disabled="false" id="node-dashboard-view">
+            View city dashboard
+        </button>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="dashboard in">
+    <p>Snap4City dashboard input node</p>
+</script>

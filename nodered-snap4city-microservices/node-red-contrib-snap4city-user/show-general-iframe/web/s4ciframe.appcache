@@ -1,0 +1,10 @@
+CACHE MANIFEST
+# date: Jan 31st 2018 - v1.1.10
+
+CACHE:
+index.html
+lib/sockjs.min.js
+
+
+NETWORK:
+*

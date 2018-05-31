@@ -1,0 +1,104 @@
+<!--/* NODE-RED-CONTRIB-SNAP4CITY-USER
+   Copyright (C) 2018 DISIT Lab http://www.disit.org - University of Florence
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as
+   published by the Free Software Foundation, either version 3 of the
+   License, or (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Affero General Public License for more details.
+
+   You should have received a copy of the GNU Affero General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>. */-->
+<script type="text/javascript">
+    RED.nodes.registerType('save-my-data', {
+        category: 'S4CData',
+        color: '#b0dfe3',
+        defaults: {
+            name: {
+                value: ""
+            },
+            variablename: {
+                value: ""
+            },
+            variablevalue: {
+                value: ""
+            },
+            variableunit: {
+                value: ""
+            },
+            motivation: {
+                value: ""
+            }
+        },
+        outputs: 1,
+        inputs: 1,
+        icon: "white-globe.png",
+        label: function () {
+            return this.name || "save-my-data";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="save-my-data">
+    <div class="form-row">
+        <label for="node-input-name">Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-variablename">Variable Name</label>
+        <input type="text" id="node-input-variablename" placeholder="Variable Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-variablevalue">Variable Value</label>
+        <input type="text" id="node-input-variablevalue" placeholder="Variable Value">
+    </div>
+    <div class="form-row">
+        <label for="node-input-variableunit">Variable Unit</label>
+        <input type="text" id="node-input-variableunit" placeholder="Variable Unit">
+    </div>
+    <div class="form-row">
+        <label for="node-input-motivation">Motivation</label>
+        <input type="text" id="node-input-motivation" placeholder="Motivation">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="save-my-data">
+    <p>It allows to save the personal data on My Personal Data.</p>
+
+    <h3>Inputs</h3>
+    A JSON with these parameters:
+
+    <dl class="message-properties">
+        <dt>variablename
+            <span class="property-type">string</span>
+        </dt>
+        <dd>The name of the variable you want to retrieve</dd>
+        <dt>motivation
+            <span class="property-type">string</span>
+        </dt>
+        <dd>The reason you entered earlier for saving the data</dd>
+        <dt>variableunit
+            <span class="property-type">string</span>
+        </dt>
+        <dd>Unit of measurement of the value of the variable inserted</dd>
+        <dt>variablevalue
+            <span class="property-type">string</span>
+        </dt>
+        <dd>Value that you want to save on My Personal Data</dd>
+    </dl>
+
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dd> Returns the value entered with its metadata</dd>
+    </dl>
+
+    <h3>Details</h3>
+    <p>The node can receive a JSON with the parameters described in the Inputs section and with them generate the output JSON.
+        If the values are not present in the input JSON, these are read by those in the configuration. If they are not present
+        in either part, an error is generated for the necessary parameters.</p>
+
+</script>

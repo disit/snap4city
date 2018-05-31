@@ -1,0 +1,199 @@
+<!--/* NODE-RED-CONTRIB-SNAP4CITY-DEVELOPER
+   Copyright (C) 2018 DISIT Lab http://www.disit.org - University of Florence
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as
+   published by the Free Software Foundation, either version 3 of the
+   License, or (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Affero General Public License for more details.
+
+   You should have received a copy of the GNU Affero General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>. */-->
+<script type="text/javascript">
+    RED.nodes.registerType('notificator-last-events', {
+        category: 'S4CManagement',
+        color: '#b0dfe3',
+        defaults: {
+            name: {
+                value: ""
+            },
+            dashboard: {
+                value: "",
+                required: false
+            },
+            widget: {
+                value: "",
+                required: false
+            },
+            event: {
+                value: "",
+                required: false
+            },
+            checkevery: {
+                value: 60,
+                required: false
+            }
+        },
+        outputs: 1,
+        inputs: 0,
+        icon: "white-globe.png",
+        label: function () {
+            return this.name || "notificator-last-events";
+        },
+        oneditprepare: function () {
+            var node = this;
+            console.log(node.interval);
+            if (node.interval != null) {
+                console.log("Cancello Intervallo");
+                clearInterval(node.interval);
+            }
+            $("#node-input-dashboard").empty();
+            $.ajax({
+                url: "http://notificator.km4city.org/notificator/restInterfaceExternal.php?operation=getDashboardsList",
+                type: "GET",
+                async: false,
+                dataType: "json",
+                success: function (data) {
+                    var dashboards = data.data;
+                    for (var i = 0; i < dashboards.length; i++) {
+                        $("<option value=\"" + dashboards[i].dashboardTitle + "\">" +
+                            dashboards[i].dashboardTitle + "</option>").appendTo($(
+                            "#node-input-dashboard"));
+                    }
+                    $("#node-input-dashboard").val("");
+                },
+                error: function (err) {
+                    console.log(err);
+                }
+            });
+
+            $("#node-input-dashboard").change(function () {
+                if ($("#node-input-dashboard").val() != null) {
+                    $("#node-input-widget").empty();
+                    $.ajax({
+                        url: "http://notificator.km4city.org/notificator/restInterfaceExternal.php?operation=getDashboardWidgets&dashboardTitle=" +
+                            $("#node-input-dashboard").val(),
+                        type: "GET",
+                        async: false,
+                        dataType: "json",
+                        success: function (data) {
+                            node.widgetsList = data.data;
+                            var widgets = node.widgetsList
+                            for (var i = 0; i < widgets.length; i++) {
+                                $("<option value=\"" + widgets[i].widgetTitle + "\">" +
+                                    widgets[i].widgetTitle + "</option>").appendTo(
+                                    $("#node-input-widget"));
+                            }
+                            $("#node-input-event").empty();
+                            for (var j = 0; j < widgets[0].eventTypes.length; j++) {
+                                $("<option value=\"" + widgets[0].eventTypes[j] + "\">" +
+                                    widgets[0].eventTypes[j] + "</option>").appendTo(
+                                    $("#node-input-event"));
+                            }
+                        },
+                        error: function (err) {
+                            console.log(err);
+                        }
+                    });
+                }
+            });
+
+            $("#node-input-widget").change(function () {
+                if ($("#node-input-widget").val() != null) {
+                    $("#node-input-event").empty();
+                    var widgets = node.widgetsList;
+                    for (var i = 0; i < widgets.length; i++) {
+                        if (widgets[i].widgetTitle == $("#node-input-widget").val()) {
+                            for (var j = 0; j < widgets[i].eventTypes.length; j++) {
+                                $("<option value=\"" + widgets[i].eventTypes[j] + "\">" + widgets[i]
+                                    .eventTypes[j] + "</option>").appendTo($(
+                                    "#node-input-event"));
+                            }
+                            break;
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="notificator-last-events">
+    <div class="form-row">
+        <label for="node-input-name">Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-dashboard">Dashboard</label>
+        <select id="node-input-dashboard">
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-widget">Widget</label>
+        <select id="node-input-widget">
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-event">Event</label>
+        <select id="node-input-event">
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-checkevery">Check Every</label>
+        <select id="node-input-checkevery">
+            <option value="30">30 Seconds</option>
+            <option value="60">1 Minute</option>
+            <option value="300">5 Minutes</option>
+            <option value="600">10 Minutes</option>
+            <option value="900">15 Minutes</option>
+            <option value="1800">30 Minutes</option>
+            <option value="3600">1 Hour</option>
+            <option value="7200">2 Hour</option>
+            <option value="21600">6 Hour</option>
+            <option value="43200">12 Hour</option>
+            <option value="86400">1 Day</option>
+        </select>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="notificator-last-events">
+    <p>It allows to request the last events that have been detected by the notifier. It is possible to choose the interval to
+        check for new events.</p>
+
+    <h3>Inputs</h3>
+    A JSON with these parameters:
+
+    <dl class="message-properties">
+        <dt>dashboard
+            <span class="property-type">string</span>
+        </dt>
+        <dd>The name of the dashboard where the event being notified was created</dd>
+        <dt>Widget
+            <span class="property-type">string</span>
+        </dt>
+        <dd>The name of the widget where the event being notified was created</dd>
+        <dt>Event
+            <span class="property-type">string</span>
+        </dt>
+        <dd>The name of the event to be observed with this node</dd>
+        <dt>Check Every
+            <span class="property-type">number</span>
+        </dt>
+        <dd>Time interval that indicates when the presence of the event is re-checked (indicated in seconds)</dd>
+    </dl>
+
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dd> Returns an array containing the last events that have been detected by the notifier</dd>
+    </dl>
+
+    <h3>Details</h3>
+    <p>The node can receive a JSON with the parameters described in the Inputs section and with them generate the output JSON.
+        If the values are not present in the input JSON, these are read by those in the configuration. If they are not present
+        in either part, an error is generated for the necessary parameters.</p>
+
+</script>
