@@ -1,0 +1,106 @@
+<!--/* NODE-RED-CONTRIB-SNAP4CITY-DEVELOPER
+   Copyright (C) 2018 DISIT Lab http://www.disit.org - University of Florence
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as
+   published by the Free Software Foundation, either version 3 of the
+   License, or (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Affero General Public License for more details.
+
+   You should have received a copy of the GNU Affero General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>. */-->
+<script type="text/javascript">
+    RED.nodes.registerType('geometry-search-near-gps-position', {
+        category: 'S4CSearchDev',
+        color: '#FFCC66',
+        defaults: {
+            name: {
+                value: ""
+            },
+            latitude: {
+                value: 0.0,
+                required: false,
+                validate: RED.validators.number()
+            },
+            longitude: {
+                value: 0.0,
+                required: false,
+                validate: RED.validators.number()
+            }
+        },
+        outputs: 2,
+        inputs: 1,
+        icon: "white-globe.png",
+        label: function () {
+            return this.name || "geometry-search-near-gps-position";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="geometry-search-near-gps-position">
+    <div class="form-row">
+        <label for="node-input-name">Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-latitude">Latitude</label>
+        <input type="text" id="node-input-latitude" placeholder="Latitude">
+    </div>
+    <div class="form-row">
+        <label for="node-input-longitude">Longitude</label>
+        <input type="text" id="node-input-longitude" placeholder="Longitude">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="geometry-search-near-gps-position">
+    <p>it allows to retrieve the complete address (municipality, street and civic number) given the GPS position. It may also
+        provide a list of services or public transport lines intersecting with the provided GPS position.
+    </p>
+
+    <h3>Inputs</h3>
+    A JSON with these parameters:
+
+    <dl class="message-properties">
+        <dt>latitude
+            <span class="property-type">number</span>
+        </dt>
+        <dd> latitude of a GPS position</dd>
+        <dt>longitude
+            <span class="property-type">number</span>
+        </dt>
+        <dd> longitude of a GPS position</dd>
+    </dl>
+
+    h3>Outputs</h3>
+    <ol class="node-ports">
+        <li>ServiceUri Array
+            <dl class="message-properties">
+                <dd> Returns an array containing the servicesUri of each service found</dd>
+            </dl>
+        </li>
+        <li>Address Information
+            <dl class="message-properties">
+                <dd> A JSON object with properties: • address: the street name. • number: the civic number. • addressUri: the
+                    URI identifying the civic number in the road graph. • municipality: the estimated municipality (it may
+                    not work properly on the municipalities borders) • municipalityUri: the URI identifying the municipality
+                    in the road graph. • intersect: array of objects with properties: o name: name of the intersecting service
+                    or public transport line. o uri: URI of the intersecting service or public transport line. o class: URI
+                    representing the class o type: type of geometry intersecting the GPS position, can be lineString or Polygon
+                    o routeType: type of route can be Bus, LightRail, Ferry, Train o agency: name of the agency providing
+                    the service o direction: direction of the line o distance: distance of the GPS position with the intersecting
+                    geometry
+                </dd>
+            </dl>
+        </li>
+    </ol>
+
+    <h3>Details</h3>
+    <p>The node can receive a JSON with the parameters described in the Inputs section and with them generate the output JSON.
+        If the values are not present in the input JSON, these are read by those in the configuration. If they are not present
+        in either part, an error is generated for the necessary parameters.</p>
+    </p>
+</script>

@@ -1,0 +1,101 @@
+<!--/* NODE-RED-CONTRIB-SNAP4CITY-DEVELOPER
+   Copyright (C) 2018 DISIT Lab http://www.disit.org - University of Florence
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as
+   published by the Free Software Foundation, either version 3 of the
+   License, or (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Affero General Public License for more details.
+
+   You should have received a copy of the GNU Affero General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>. */-->
+<script type="text/javascript">
+    RED.nodes.registerType('event-search-exp', {
+        category: 'S4CSearchDev',
+        color: '#FDD0A2',
+        defaults: {
+            name: {
+                value: ""
+            },
+            range: {
+                value: "",
+                required: false
+            },
+            maxresults: {
+                value: 100,
+                required: false,
+                validate: RED.validators.number()
+            }
+        },
+        outputs: 2,
+        inputs: 1,
+        icon: "white-globe.png",
+        label: function () {
+            return this.name || "event-search-exp";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="event-search-exp">
+    <div class="form-row">
+        <label for="node-input-name">Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-range">Range</label>
+        <select id="node-input-range">
+            <option value="day">Day</option>
+            <option value="week">Week</option>
+            <option value="month">Month</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-maxresults">Max Results (0 for all Results)</label>
+        <input type="text" id="node-input-maxresults" placeholder="Max Results">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="event-search-exp">
+    <p>It allows to retrieve the geolocated events in a given temporal range (day, week or month).</p>
+
+    <h3>Inputs</h3>
+    A JSON with these parameters:
+
+    <dl class="message-properties">
+        <dt>range
+            <span class="property-type">string</span>
+        </dt>
+        <dd> time range for the events to be retrieved, it can be ‘day’ for the events of the day of the request, ‘week’ for the
+            events in the next 7 days or ‘month’ for the events in the next 30 days (if omitted ‘day’ is assumed).
+            <dt>maxresults
+                <span class="property-type">number</span>
+            </dt>
+            <dd> maximum number of results to be returned (if parameter is missing 100 is assumed), if it is 0 all results are
+                returned</dd>
+    </dl>
+
+    <h3>Outputs</h3>
+    <ol class="node-ports">
+        <li>ServiceUri Array
+            <dl class="message-properties">
+                <dd> Returns an array containing the servicesUri of each service found</dd>
+            </dl>
+        </li>
+        <li>GeoJSON Results
+            <dl class="message-properties">
+                <dd> the results format is a GeoJSON “FeatureCollection” with the matching events. For each “Feature” a set of
+                    properties is provided.d</dd>
+            </dl>
+        </li>
+    </ol>
+
+    <h3>Details</h3>
+    <p>The node can receive a JSON with the parameters described in the Inputs section and with them generate the output JSON.
+        If the values are not present in the input JSON, these are read by those in the configuration. If they are not present
+        in either part, an error is generated for the necessary parameters.</p>
+
+</script>

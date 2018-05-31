@@ -1,0 +1,213 @@
+<!--
+  Copyright 2014 Sense Tecnic Systems, Inc.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="datagate insert">
+  <p>This node sends data to DATAGATE Datastore via datastore_upsert API. </p>
+  <p>It receives a msg whose payload is an
+    <b>array</b> of records to be pushed to the DATAGATE Datastore resource.</p>
+
+  <p>It also supports sending data to DATAGATE Timeseries API, a new extension that allows DATAGATE to work with timeseries
+    data. More at
+    <a href="https://github.com/namgk/ckan-timeseries">DATAGATE Timeseries Github</a>
+  </p>
+
+  <p>The records should conform the resource schema as specified when the resource was being created:
+    <b>correct data type</b>,
+    <b>have exact number of fields</b>.</p>
+  <p>
+    <b>Note: Timeseries API will not be able to work with resources created by original Datastore API</b>
+  </p>
+</script>
+
+<script type="text/x-red" data-template-name="datagate insert">
+  <div class="form-row">
+    <label for="node-input-auth">
+      <i class="fa"></i> DATAGATE Auth</label>
+    <input type="text" id="node-input-auth">
+  </div>
+  <div class="form-row">
+    <label for="node-input-resourceId">
+      <i class="icon-tag"></i>Resource Id</label>
+    <input type="text" id="node-input-resourceId" placeholder="DATAGATE resource Id">
+  </div>
+  <div class="form-row">
+    <label for="node-input-name">
+      <i class="fa fa-tag"></i> Name </label>
+    <input type="text" id="node-input-name" placeholder="A name for this node">
+  </div>
+  <div class="form-row">
+    <label>Timeseries?</label>
+    <input type="checkbox" id="node-input-timeseries" style="display: inline-block; width: auto; vertical-align: top;">
+  </div>
+</script>
+
+
+<script type="text/x-red" data-help-name="datagate search">
+  <p>This node gets data from DATAGATE Timeseries Datastore. Default limit for returning results is 500 records per request.
+    There is paging support in the response</p>
+
+  <p>It also support getting data from DATAGATE Timeseries Datastore API, a new extension that allows DATAGATE to work with
+    timeseries data. More at
+    <a href="https://github.com/namgk/ckan-timeseries">DATAGATE Timeseries Github</a>
+  </p>
+
+  <p>It looks for all possible parameters in msg.payload to build the query. 'fromtime' and 'totime' properties found in msg.payload
+    overwrite ones found in this node s configurations</p>
+
+  <p>Details on the parameters:
+    <a href="http://docs.ckan.org/en/latest/maintaining/datastore.html#ckanext.datastore.logic.action.datastore_search">DATAGATE Datstore</a>
+  </p>
+
+  <p>
+    <b>Note: Timeseries API will not be able to work with resources created by original Datastore API</b>
+  </p>
+</script>
+
+<script type="text/x-red" data-template-name="datagate search">
+  <div class="form-tips">
+    <p>From time and To time can be specified as "last 1d,3s", "last 40s,10m,2d" or as iso8601 standard as "2016-10-11T21:27:00-07:00",
+      "2016-10-31"</p>
+    <div class="form-row">
+      <label for="node-input-auth">
+        <i class="fa"></i> DATAGATE Auth</label>
+      <input type="text" id="node-input-auth">
+    </div>
+    <div class="form-row">
+      <label for="node-input-resourceId">
+        <i class="fa fa-tag"></i> Resource Id</label>
+      <input type="text" id="node-input-resourceId" placeholder="DATAGATE resource Id">
+    </div>
+    <div class="form-row">
+      <label for="node-input-name">
+        <i class="fa fa-tag"></i> Name </label>
+      <input type="text" id="node-input-name" placeholder="A name for this node">
+    </div>
+    <div class="form-row">
+      <label>Timeseries?</label>
+      <input type="checkbox" id="node-input-timeseries" style="display: inline-block; width: auto; vertical-align: top;">
+    </div>
+    <div class="form-row">
+      <label for="node-input-fromtime">
+        <i class="icon-tag"></i>From time</label>
+      <input type="text" id="node-input-fromtime" placeholder="last 5m">
+    </div>
+    <div class="form-row">
+      <label for="node-input-totime">
+        <i class="icon-tag"></i>To time</label>
+      <input type="text" id="node-input-totime" placeholder="last 1s">
+    </div>
+</script>
+
+
+<script type="text/javascript">
+  var color = "#f2f2f2"
+
+  RED.nodes.registerType('datagate insert', {
+    category: 'S4CBigData',
+    defaults: {
+      resourceId: {
+        required: true
+      },
+      name: {
+        required: false
+      },
+      timeseries: {
+        value: false,
+        required: false
+      },
+      auth: {
+        type: "datagate-credentials",
+        required: true
+      }
+    },
+    color: color,
+    inputs: 1,
+    outputs: 0,
+    icon: "ckan_logo.png",
+    align: "right",
+    label: function () {
+      return this.name || "datagate insert";
+    },
+    labelStyle: function () {
+      return this.name ? "node_label_italic" : "";
+    }
+  });
+
+  RED.nodes.registerType('datagate search', {
+    category: 'S4CBigData',
+    defaults: {
+      resourceId: {
+        required: true
+      },
+      name: {
+        required: false
+      },
+      auth: {
+        type: "datagate-credentials",
+        required: true
+      },
+      timeseries: {
+        value: false,
+        required: false
+      },
+      fromtime: {
+        value: "",
+        required: false
+      },
+      totime: {
+        value: "",
+        required: false
+      }
+    },
+    color: color,
+    inputs: 1,
+    outputs: 1,
+    icon: "ckan_logo.png",
+    align: "left",
+    label: function () {
+      return this.name || "datagate search";
+    },
+    labelStyle: function () {
+      return this.name ? "node_label_italic" : "";
+    },
+    oneditprepare: function () {
+      $("#node-input-timeseries").change(function () {
+        $("#node-input-fromtime").prop('disabled', !this.checked);
+        $("#node-input-totime").prop('disabled', !this.checked);
+      });
+    },
+    button: {
+      onclick: function () {
+        console.log('querying')
+        var node = this;
+        $.ajax({
+          url: "datagate_search/" + this.id,
+          type: "POST",
+          success: function (resp) {
+            RED.notify("Node triggered", "success");
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            if (jqXHR.status == 404) {
+              RED.notify("Node not deployed", "error");
+            } else {
+              RED.notify('Status: ' + jqXHR.status + ', ' + textStatus, "error");
+            }
+          }
+        });
+      }
+    }
+  });
+</script>
