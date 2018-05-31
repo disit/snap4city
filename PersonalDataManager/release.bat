@@ -1,0 +1,2 @@
+call mvn clean install tomcat7:redeploy -Dtomcat-server=remote-deploy-s4c-10 -DlogFileFolder=c:\logs -Dspring.profiles.active=local -DskipTests
+call pscp.exe -pw ubuntu "target\classes\static\docs\index.html" ubuntu@192.168.0.17:/home/ubuntu/apis/datamanager
