@@ -1,7 +1,20 @@
-library(grid)
-#query 
-# it's possible to choose the number of values to download, setting the limit of the query with "limit_query_sensor"
+# /* TRAFFIC QUERY FUNCTION CONTRIB SNAP4CITY USER
+# Copyright (C) 2018 DISIT Lab http://www.disit.org - University of Florence
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+# 
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
+#TRAFFIC QUERY FUNCTION
 TrafficDataQuery = function(currentDate, daysNumber){
 
 #limit_query_sensor = 144*60  #limit: one day corresponds to 144 ten minutes'slots   
@@ -17,23 +30,15 @@ urlSPARQLSensors <- paste("http://192.168.0.206:8890/sparql?default-graph-uri=&q
 sensors = read.csv(urlSPARQLSensors, sep=",",header=T, colClasses=c(rep("character",1),rep("numeric",2),rep("character",3)))
 sensors = unique(sensors)  
 vfh=50 
-sensor_list=sensors[,"sensor"][1:5]
+sensor_list=sensors[,"sensor"][1:5] #FIRST FIVE METRO SENSORS
 sensor_list=unique(sensor_list)
-#sensor_list=c("METRO762","METRO806","METRO807","METRO762","METRO489")
 
 #list initialization
 sensorDatasetList <- vector("list", length(sensor_list))
 names(sensorDatasetList) <- sensor_list
 
   for(i in length(sensor_list):1){
-    # urlSPARQLSensore <- paste(
-    #   "http://192.168.0.206:8890/sparql?default-graph-uri=&query=SELECT+DISTINCT+%3Fidentifier%2C%3Fdate%2C+%3FaverageSpeed%2C+%3FaverageTime%2C+%3Fconcentration%2C+%3FvehicleFlow++{%0D%0A<http%3A%2F%2Fwww.disit.org%2Fkm4city%2Fresource%2F",sensor_list[i], ">+km4c%3AhasObservation+%3Fobs.%0D%0A<http%3A%2F%2Fwww.disit.org%2Fkm4city%2Fresource%2F",sensor_list[i], ">+<http%3A%2F%2Fpurl.org%2Fdc%2Fterms%2Fidentifier>+%3Fidentifier.%0D%0A%3Fobs+km4c%3AaverageSpeed+%3FaverageSpeed%3B%0D%0Akm4c%3AaverageTime+%3FaverageTime%3B%0D%0Akm4c%3Aconcentration+%3Fconcentration%3B%0D%0Akm4c%3AvehicleFlow+%3FvehicleFlow%3B%0D%0A<http%3A%2F%2Fpurl.org%2Fdc%2Fterms%2Fdate>+%3Fdate.+FILTER+%28%3Fdate+%3C%3D+%22",
-    #   currentDate,
-    #   "T00%3A00%3A00%22+%5E%5Exsd%3AdateTime%29%0D%0A%7D%0D%0Aorder+by+desc(%3Fdate)%0D%0ALIMIT+",
-    #   limit_query_sensor,
-    #   "+&format=text%2Fcsv&timeout=0&debug=on", 
-    # sep="")
-    
+      
     urlSPARQLSensore <- paste(
       "http://192.168.0.206:8890/sparql?default-graph-uri=&query=SELECT+DISTINCT+%3Fidentifier%2C%3Fdate%2C+%3FaverageSpeed%2C+%3FaverageTime%2C+%3Fconcentration%2C+%3FvehicleFlow++{%0D%0A<http%3A%2F%2Fwww.disit.org%2Fkm4city%2Fresource%2F",sensor_list[i], ">+km4c%3AhasObservation+%3Fobs.%0D%0A<http%3A%2F%2Fwww.disit.org%2Fkm4city%2Fresource%2F",sensor_list[i], ">+<http%3A%2F%2Fpurl.org%2Fdc%2Fterms%2Fidentifier>+%3Fidentifier.%0D%0A%3Fobs+km4c%3AaverageSpeed+%3FaverageSpeed%3B%0D%0Akm4c%3AaverageTime+%3FaverageTime%3B%0D%0Akm4c%3Aconcentration+%3Fconcentration%3B%0D%0Akm4c%3AvehicleFlow+%3FvehicleFlow%3B%0D%0A<http%3A%2F%2Fpurl.org%2Fdc%2Fterms%2Fdate%3E+%3Fdate.+FILTER+%28%3Fdate+%3C%3D+%22",
       currentDate,
@@ -45,7 +50,7 @@ names(sensorDatasetList) <- sensor_list
    temp = read.csv(urlSPARQLSensore, sep=",",header=T)
     if (dim(temp)[1] != 0){
       for (j in 1:dim(temp)[1]){
-        temp[j,"density"]=temp[j,"vehicleFlow"]/vfh*0.02    #unit? di misura del modello
+        temp[j,"density"]=temp[j,"vehicleFlow"]/vfh*0.02    
         
         if (is.na(temp[j,"density"])){
           print(paste("i",i, sep=" "))
@@ -88,9 +93,7 @@ for (j in 2: (length(files))){
   dat = rbind(dat, file) 
 }
   dat <- dat[, -1]
-#automatic melting data
-# variableNames <- colnames(dat)[which(colnames(dat) != "identifier" &
-#                                      colnames(dat) != "date_time")]
+
 variableNames <- c("vehicleFlow", "averageSpeed")  #I'm interest only in vehicle flow and average speed
 newTraffData <- matrix(NA, nrow = 1, ncol = 4)
 colnames(newTraffData) <- c("identifier", "date_time", "value", "variable")
@@ -105,7 +108,9 @@ for (i in 1:length(variableNames)) {
 #date and time format
 newTraffData$date_time <- format(strptime(newTraffData$date_time, "%Y-%m-%dT%H:%M"), "%Y-%m-%d %H:%M")
 newTraffData <- newTraffData[-1, ]
-#--------
+
+
+
 newDataset <- matrix(NA, ncol = 5, nrow = 1)
 newDataset <- as.data.frame(newDataset)
 colnames(newDataset) <- c("identifier","date_time","alignDateTime","value","variable")

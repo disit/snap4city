@@ -1,3 +1,20 @@
+# /* DESCRIPTIVE STATISTICS CONTRIB SNAP4CITY USER
+# Copyright (C) 2018 DISIT Lab http://www.disit.org - University of Florence
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+# 
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>. */
+
+#DESCRIPTIVE STATISTICS
 descriptiveStatistics = function(currentDate) {
   
   inputWD <- "~/Snap4City/Sensors Data"
@@ -30,7 +47,6 @@ descriptiveStatistics = function(currentDate) {
   
   dataset <- dataset[order(dataset$alignDateTime), ]
   
-  #---- dataset spliting in a working days data and weekend data ----
   #splitting of workdays and weekend
   indexWE <- which(dataset$dayOfTheWeek  == "Weekend")
   dataWE <- dataset[indexWE, c("time","identifier","variable","value","dayMoment")] 
@@ -62,8 +78,9 @@ descriptiveStatistics = function(currentDate) {
       }
     }
   }
-  #----------------------------------------------------------------------------------------------------------------
+
   dataFinal <- dcast(dataset[, c("time","identifier","variable","value","dayMoment")], time+dayMoment ~ identifier+variable, fun.aggregate=mean)
+  
   #DATA "IMPUTATION":
   uniqueSensorType <- colnames(dataFinal)[which(colnames(dataFinal)!="time" & colnames(dataFinal)!="dayMoment")]
   options(digits = 3)

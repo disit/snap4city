@@ -1,12 +1,27 @@
+# /* TREND PLOTS CONTRIB SNAP4CITY USER
+# Copyright (C) 2018 DISIT Lab http://www.disit.org - University of Florence
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+# 
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>. */
+
+#TREND PLOTS
 TrendPlots <- function(currentDate){
   
   inputWD <- "~/Snap4City/Sensors Data"
   outWD <- "~/Snap4City/StatisticsOutput/TrendPlot"
   csvFileName <- "SensorsDatasetFinal.csv"
   
-  #setwd("~/Snap4City/Sensors Data")
   setwd(inputWD)
-  #dataset <- read.csv("SensorsDatasetFinal.csv", sep=",")
   dataset <- read.csv(csvFileName, sep=",")
   dataset <- dataset[-1 , -grep("X", colnames(dataset))]
   
