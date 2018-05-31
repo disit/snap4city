@@ -1,0 +1,32 @@
+<dataConfig>
+    <dataSource type="JdbcDataSource" 
+                driver="com.mysql.jdbc.Driver"
+                url="jdbc:mysql://localhost:3306/quartz" 
+                user="user" 
+                password="passw"/>
+    <document name="quartz">  
+        <entity name="vm_stats"  
+                pk="id"
+                query="SELECT a.id, a.container, b.name AS vm_name, a.vm_uuid, a.vm_ip, a.ip, a.cpu, a.mem_usage, a.mem_limit, a.mem, a.net_i, a.net_o, CONVERT_TZ(a.date, @@session.time_zone, '+00:00') AS date, FROM_UNIXTIME(TRUNCATE(UNIX_TIMESTAMP(CONVERT_TZ(a.date, @@session.time_zone, '+00:00')), -1)) AS date10s, FROM_UNIXTIME(ROUND(UNIX_TIMESTAMP(CONVERT_TZ(a.date, @@session.time_zone, '+00:00'))/(60*1))*(60*1)) AS date1m, FROM_UNIXTIME(FLOOR(UNIX_TIMESTAMP(CONVERT_TZ(a.date, @@session.time_zone, '+00:00'))/(60*10))*(60*10)) AS date10m FROM quartz.docker_stats a LEFT JOIN quartz.vm_list b ON a.vm_uuid = b.uuid"
+                deltaImportQuery="SELECT a.id, a.container, b.name AS vm_name, a.vm_uuid, a.vm_ip, a.ip, a.cpu, a.mem_usage, a.mem_limit, a.mem, a.net_i, a.net_o, CONVERT_TZ(a.date, @@session.time_zone, '+00:00') AS date, FROM_UNIXTIME(TRUNCATE(UNIX_TIMESTAMP(CONVERT_TZ(a.date, @@session.time_zone, '+00:00')), -1)) AS date10s, FROM_UNIXTIME(ROUND(UNIX_TIMESTAMP(CONVERT_TZ(a.date, @@session.time_zone, '+00:00'))/(60*1))*(60*1)) AS date1m, FROM_UNIXTIME(FLOOR(UNIX_TIMESTAMP(CONVERT_TZ(a.date, @@session.time_zone, '+00:00'))/(60*10))*(60*10)) AS date10m FROM quartz.docker_stats a LEFT JOIN quartz.vm_list b ON a.vm_uuid = b.uuid WHERE a.id='${dih.delta.id}'"
+                deltaQuery="SELECT a.id, a.container, b.name AS vm_name, a.vm_uuid, a.vm_ip, a.ip, a.cpu, a.mem_usage, a.mem_limit, a.mem, a.net_i, a.net_o, CONVERT_TZ(a.date, @@session.time_zone, '+00:00') AS date, FROM_UNIXTIME(TRUNCATE(UNIX_TIMESTAMP(CONVERT_TZ(a.date, @@session.time_zone, '+00:00')), -1)) AS date10s, FROM_UNIXTIME(ROUND(UNIX_TIMESTAMP(CONVERT_TZ(a.date, @@session.time_zone, '+00:00'))/(60*1))*(60*1)) AS date1m, FROM_UNIXTIME(FLOOR(UNIX_TIMESTAMP(CONVERT_TZ(a.date, @@session.time_zone, '+00:00'))/(60*10))*(60*10)) AS date10m FROM quartz.docker_stats a LEFT JOIN quartz.vm_list b ON a.vm_uuid = b.uuid WHERE a.date > '${dih.last_index_time}'"
+        >
+            <field column="id" name="id"/>
+            <field column="container" name="container"/> 
+            <field column="vm_name" name="vm_name"/> 
+            <field column="vm_uuid" name="vm_uuid"/>
+            <field column="vm_ip" name="vm_ip"/>
+            <field column="ip" name="ip"/>
+            <field column="cpu" name="cpu"/>
+            <field column="mem_usage" name="mem_usage"/>
+            <field column="mem_limit" name="mem_limit"/>
+            <field column="mem" name="mem"/>
+            <field column="net_i" name="net_i"/>
+            <field column="net_o" name="net_o"/>
+            <field column="date" name="date"/>
+            <field column="date10s" name="date10s"/>
+            <field column="date1m" name="date1m"/>
+            <field column="date10m" name="date10m"/>
+        </entity>
+    </document>
+</dataConfig>

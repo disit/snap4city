@@ -1,0 +1,58 @@
+<dataConfig>
+    <dataSource type="JdbcDataSource" 
+                driver="com.mysql.jdbc.Driver"
+                url="jdbc:mysql://localhost:3306/quartz" 
+                user="user" 
+                password="password"/>
+    <document>  
+        <entity name="vm_stats"  
+                pk="id"
+                query="SELECT a.id, a.name, a.uuid, a.nic, b.ip, b.host, b.docker, a.vCenter_uuid, a.cpu_limit, a.mem_limit, a.cpu_reservation, a.mem_reservation, a.vcpus, a.cpu_ready_avg, a.cpu_ready_max, 
+                a.cpu_usage, a.memory, a.memory_shared_percentage, a.memory_shared, a.memory_balloon_percentage, a.memory_balloon, a.memory_swapped_percentage, a.memory_swapped, a.memory_active_percentage, 
+                a.memory_active, a.datastore_io_read, a.datastore_io_write, a.datastore_lat_read, a.datastore_lat_write, a.networkTx, a.networkRx, b.group, CONVERT_TZ(a.date, @@session.time_zone, '+00:00') AS date, FROM_UNIXTIME(TRUNCATE(UNIX_TIMESTAMP(CONVERT_TZ(a.date, @@session.time_zone, '+00:00')), -1)) AS date10s, FROM_UNIXTIME(ROUND(UNIX_TIMESTAMP(CONVERT_TZ(a.date, @@session.time_zone, '+00:00'))/(60*1))*(60*1)) AS date1m, FROM_UNIXTIME(FLOOR(UNIX_TIMESTAMP(CONVERT_TZ(a.date, @@session.time_zone, '+00:00'))/(60*10))*(60*10)) AS date10m FROM quartz.vm_stats a LEFT JOIN quartz.vm_list b ON a.uuid = b.uuid"
+                deltaImportQuery="SELECT a.id, a.name, a.uuid, a.nic, b.ip, b.host, b.docker, a.vCenter_uuid, a.cpu_limit, a.mem_limit, a.cpu_reservation, a.mem_reservation, a.vcpus, a.cpu_ready_avg, a.cpu_ready_max, 
+                a.cpu_usage, a.memory, a.memory_shared_percentage, a.memory_shared, a.memory_balloon_percentage, a.memory_balloon, a.memory_swapped_percentage, a.memory_swapped, a.memory_active_percentage, 
+                a.memory_active, a.datastore_io_read, a.datastore_io_write, a.datastore_lat_read, a.datastore_lat_write, a.networkTx, a.networkRx, b.group, CONVERT_TZ(a.date, @@session.time_zone, '+00:00') AS date, FROM_UNIXTIME(TRUNCATE(UNIX_TIMESTAMP(CONVERT_TZ(a.date, @@session.time_zone, '+00:00')), -1)) AS date10s, FROM_UNIXTIME(ROUND(UNIX_TIMESTAMP(CONVERT_TZ(a.date, @@session.time_zone, '+00:00'))/(60*1))*(60*1)) AS date1m, FROM_UNIXTIME(FLOOR(UNIX_TIMESTAMP(CONVERT_TZ(a.date, @@session.time_zone, '+00:00'))/(60*10))*(60*10)) AS date10m FROM quartz.vm_stats a LEFT JOIN quartz.vm_list b ON a.uuid = b.uuid WHERE a.id='${dih.delta.id}'"
+                deltaQuery="SELECT a.id, a.name, a.uuid, a.nic, b.ip, b.host, b.docker, a.vCenter_uuid, a.cpu_limit, a.mem_limit, a.cpu_reservation, a.mem_reservation, a.vcpus, a.cpu_ready_avg, a.cpu_ready_max, 
+                a.cpu_usage, a.memory, a.memory_shared_percentage, a.memory_shared, a.memory_balloon_percentage, a.memory_balloon, a.memory_swapped_percentage, a.memory_swapped, a.memory_active_percentage, 
+                a.memory_active, a.datastore_io_read, a.datastore_io_write, a.datastore_lat_read, a.datastore_lat_write, a.networkTx, a.networkRx, b.group, CONVERT_TZ(a.date, @@session.time_zone, '+00:00') AS date, FROM_UNIXTIME(TRUNCATE(UNIX_TIMESTAMP(CONVERT_TZ(a.date, @@session.time_zone, '+00:00')), -1)) AS date10s, FROM_UNIXTIME(ROUND(UNIX_TIMESTAMP(CONVERT_TZ(a.date, @@session.time_zone, '+00:00'))/(60*1))*(60*1)) AS date1m, FROM_UNIXTIME(FLOOR(UNIX_TIMESTAMP(CONVERT_TZ(a.date, @@session.time_zone, '+00:00'))/(60*10))*(60*10)) AS date10m FROM quartz.vm_stats a LEFT JOIN quartz.vm_list b ON a.uuid = b.uuid WHERE a.date > '${dih.last_index_time}'"
+        >
+            <field column="id" name="id"/>
+            <field column="name" name="name"/>  
+            <field column="uuid" name="uuid"/>
+            <field column="nic" name="nic"/>
+            <field column="ip" name="ip"/>
+            <field column="host" name="host"/>
+            <field column="docker" name="docker"/>
+            <field column="vCenter_uuid" name="vCenter_uuid"/>
+            <field column="cpu_limit" name="cpu_limit"/>
+            <field column="mem_limit" name="mem_limit"/>
+            <field column="cpu_reservation" name="cpu_reservation"/>
+            <field column="mem_reservation" name="mem_reservation"/>
+            <field column="vcpus" name="vcpus"/>
+            <field column="cpu_ready_avg" name="cpu_ready_avg"/>
+            <field column="cpu_ready_max" name="cpu_ready_max"/>
+            <field column="cpu_usage" name="cpu_usage"/>
+            <field column="memory" name="memory"/>
+            <field column="memory_shared_percentage" name="memory_shared_percentage"/>
+            <field column="memory_shared" name="memory_shared"/>
+            <field column="memory_balloon_percentage" name="memory_balloon_percentage"/>
+            <field column="memory_balloon" name="memory_balloon"/>
+            <field column="memory_swapped_percentage" name="memory_swapped_percentage"/>
+            <field column="memory_swapped" name="memory_swapped"/>
+            <field column="memory_active_percentage" name="memory_active_percentage"/>
+            <field column="memory_active" name="memory_active"/>
+            <field column="datastore_io_read" name="datastore_io_read"/>
+            <field column="datastore_io_write" name="datastore_io_write"/>
+            <field column="datastore_lat_read" name="datastore_lat_read"/>
+            <field column="datastore_lat_write" name="datastore_lat_write"/>
+            <field column="networkTx" name="networkTx"/>
+            <field column="networkRx" name="networkRx"/>
+            <field column="group" name="group"/>
+            <field column="date" name="date"/>
+            <field column="date10s" name="date10s"/>
+            <field column="date1m" name="date1m"/>
+            <field column="date10m" name="date10m"/>
+        </entity>
+    </document>
+</dataConfig>

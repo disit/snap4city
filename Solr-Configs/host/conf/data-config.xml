@@ -1,0 +1,27 @@
+<dataConfig>
+    <dataSource type="JdbcDataSource" 
+                driver="com.mysql.jdbc.Driver"
+                url="jdbc:mysql://localhost:3306/quartz" 
+                user="user" 
+                password="password"/>
+    <document name="quartz">  
+        <entity name="vm_stats"  
+                pk="id"
+                query="SELECT id, ip, vCenter_uuid, cpu_used, cpu_total, mem_used, mem_total, CONVERT_TZ(date, @@session.time_zone, '+00:00') AS date, FROM_UNIXTIME(TRUNCATE(UNIX_TIMESTAMP(CONVERT_TZ(date, @@session.time_zone, '+00:00')), -1)) AS date10s, FROM_UNIXTIME(ROUND(UNIX_TIMESTAMP(CONVERT_TZ(date, @@session.time_zone, '+00:00'))/(60*1))*(60*1)) AS date1m, FROM_UNIXTIME(FLOOR(UNIX_TIMESTAMP(CONVERT_TZ(date, @@session.time_zone, '+00:00'))/(60*10))*(60*10)) AS date10m FROM quartz.host_stats"
+                deltaImportQuery="SELECT id, ip, vCenter_uuid, cpu_used, cpu_total, mem_used, mem_total, CONVERT_TZ(date, @@session.time_zone, '+00:00') AS date, FROM_UNIXTIME(TRUNCATE(UNIX_TIMESTAMP(CONVERT_TZ(date, @@session.time_zone, '+00:00')), -1)) AS date10s, FROM_UNIXTIME(ROUND(UNIX_TIMESTAMP(CONVERT_TZ(date, @@session.time_zone, '+00:00'))/(60*1))*(60*1)) AS date1m, FROM_UNIXTIME(FLOOR(UNIX_TIMESTAMP(CONVERT_TZ(date, @@session.time_zone, '+00:00'))/(60*10))*(60*10)) AS date10m FROM quartz.host_stats WHERE id='${dih.delta.id}'"
+                deltaQuery="SELECT id, ip, vCenter_uuid, cpu_used, cpu_total, mem_used, mem_total, CONVERT_TZ(date, @@session.time_zone, '+00:00') AS date, FROM_UNIXTIME(TRUNCATE(UNIX_TIMESTAMP(CONVERT_TZ(date, @@session.time_zone, '+00:00')), -1)) AS date10s, FROM_UNIXTIME(ROUND(UNIX_TIMESTAMP(CONVERT_TZ(date, @@session.time_zone, '+00:00'))/(60*1))*(60*1)) AS date1m, FROM_UNIXTIME(FLOOR(UNIX_TIMESTAMP(CONVERT_TZ(date, @@session.time_zone, '+00:00'))/(60*10))*(60*10)) AS date10m FROM quartz.host_stats WHERE date > '${dih.last_index_time}'"
+        >
+            <field column="id" name="id"/>
+            <field column="ip" name="ip"/> 
+            <field column="vCenter_uuid" name="vCenter_uuid"/> 
+            <field column="cpu_used" name="cpu_used"/>
+            <field column="cpu_total" name="cpu_total"/>
+            <field column="mem_used" name="mem_used"/>
+            <field column="mem_total" name="mem_total"/>
+            <field column="date" name="date"/>
+            <field column="date10s" name="date10s"/>
+            <field column="date1m" name="date1m"/>
+            <field column="date10m" name="date10m"/>
+        </entity>
+    </document>
+</dataConfig>
