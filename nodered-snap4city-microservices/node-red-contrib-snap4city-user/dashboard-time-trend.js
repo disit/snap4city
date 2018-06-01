@@ -73,7 +73,8 @@ module.exports = function (RED) {
                 widgetType: "widgetTimeTrend",
                 widgetTitle: node.name,
                 dashboardTitle: node.dashboardTitle,
-                httpRoot: node.httpRoot
+                httpRoot: node.httpRoot,
+                refreshToken: retrieveRefreshToken()
             };
 
             node.ws.send(JSON.stringify(newMetric));
@@ -247,6 +248,30 @@ module.exports = function (RED) {
 
         });
 
+    }
+
+    function retrieveRefreshToken() {
+        var fs = require('fs');
+        var refreshToken = fs.readFileSync('refresh_token', 'utf-8');
+        var url = "https://www.snap4city.org/auth/realms/master/protocol/openid-connect/token/";
+        var params = "client_id=nodered&client_secret=943106ae-c62c-4961-85a2-849f6955d404&grant_type=refresh_token&scope=openid profile&refresh_token=" + refreshToken;
+        var response = "";
+        var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
+        var xmlHttp = new XMLHttpRequest();
+        console.log(encodeURI(url));
+        xmlHttp.open("POST", encodeURI(url), false);
+        xmlHttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xmlHttp.send(params);
+        if (xmlHttp.responseText != "") {
+            try {
+                response = JSON.parse(xmlHttp.responseText);
+            } catch (e) {}
+        }
+        if (response != "") {
+            fs.writeFileSync('refresh_token', response.refresh_token);
+            return response.refresh_token;
+        }
+        return response;
     }
     RED.nodes.registerType("dashboard-time-trend", DashboardTimeTrendNode);
 };
