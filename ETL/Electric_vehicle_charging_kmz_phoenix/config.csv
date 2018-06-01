@@ -1,0 +1,2 @@
+DestDirect,TriplesDestDirect,IpAddressMaster,PortHBase,PortMySql,DatabaseMySql,UsernameMySql,PswMySql,IpRepository,NameRepository,UsernameRep,PswRep,ConnTimeout,SockTimeout,WaitTime,ConnTimeout17,SockTimeout17,WaitTime17
+/home/ubuntu/Desktop/Sources,/home/ubuntu/Desktop/Triples,127.0.0.1,2181,3306,Elaborato_Sis_Distr,testuser,testpw,192.168.0.207,km4city36,MobilityFET,Mobility8FET,200000,300000,300000,200000,300000,30000
