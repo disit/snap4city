@@ -1,0 +1,1 @@
+moved to repository https://github.com/disit/node-red-contrib-snap4city-user

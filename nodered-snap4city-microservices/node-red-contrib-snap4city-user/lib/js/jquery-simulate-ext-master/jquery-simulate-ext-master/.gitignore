@@ -1,6 +1,0 @@
-.*
-dist
-!.gitignore
-!.jshintrc
-/node_modules
-/bower_components
