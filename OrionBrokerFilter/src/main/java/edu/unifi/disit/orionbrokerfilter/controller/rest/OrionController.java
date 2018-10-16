@@ -43,6 +43,11 @@ public class OrionController {
 	@Value("${spring.orionbroker_endpoint}")
 	private String orionbroker_endpoint;
 
+	@RequestMapping(value = "/api/test", method = RequestMethod.GET)
+	public ResponseEntity<String> engagerTest() {
+		return new ResponseEntity<String>("alive", HttpStatus.OK);
+	}
+
 	// -------------------POST queryContex ---------------------------------------------
 	@RequestMapping(value = "/v1/queryContext", method = RequestMethod.POST, consumes = { "application/json" }, produces = { "application/json" })
 	@ResponseBody

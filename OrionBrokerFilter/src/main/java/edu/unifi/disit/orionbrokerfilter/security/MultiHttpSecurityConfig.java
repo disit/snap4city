@@ -13,23 +13,62 @@
    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA. */
 package edu.unifi.disit.orionbrokerfilter.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.access.channel.ChannelProcessingFilter;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 @EnableWebSecurity
 public class MultiHttpSecurityConfig {
 
+	@Autowired
+	private AccessTokenAuthenticationFilter myAccessTokenAuthenticationFilter;
+
+	@Bean // to avoid double instantiantion in filter chain
+	public FilterRegistrationBean filterRegistrationBean() {
+		FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
+		filterRegistrationBean.setEnabled(false);
+		filterRegistrationBean.setFilter(myAccessTokenAuthenticationFilter);
+		return filterRegistrationBean;
+	}
+
 	@Configuration
-	public class RestSecurityConfigV1 extends WebSecurityConfigurerAdapter {
+	@Order(1)
+	public class TestSecurityConfigV1 extends WebSecurityConfigurerAdapter {
 
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
 			http
-					.csrf().disable()
+					.antMatcher("/api/test")
 					.authorizeRequests()
-					/**/.antMatchers("/**").permitAll();
+					/**/.anyRequest().permitAll();
 		}
 	}
+
+	@Configuration
+	@Order(2)
+	public class RestSecurityConfigV1 extends WebSecurityConfigurerAdapter {
+
+		@Autowired
+		private MyCorsFilter myCorsFilter;
+
+		@Override
+		protected void configure(HttpSecurity http) throws Exception {
+
+			http
+					.csrf().disable()
+					.addFilterBefore(myCorsFilter, ChannelProcessingFilter.class)
+					.addFilterBefore(myAccessTokenAuthenticationFilter, BasicAuthenticationFilter.class)
+					.antMatcher("/v1/**")
+					.authorizeRequests()
+					/**/.anyRequest().hasRole("USER");
+		}
+	}
+
 }

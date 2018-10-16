@@ -14,9 +14,16 @@
 package edu.unifi.disit.orionbrokerfilter.security;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 
+import java.security.cert.X509Certificate;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -24,16 +31,24 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -43,9 +58,12 @@ import org.springframework.web.filter.GenericFilterBean;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.unifi.disit.orionbrokerfilter.datamodel.CachedCredentials;
+import edu.unifi.disit.orionbrokerfilter.datamodel.Credentials;
 import edu.unifi.disit.orionbrokerfilter.datamodel.Response;
 import edu.unifi.disit.orionbrokerfilter.exception.CredentialsNotValidException;
 
@@ -69,57 +87,323 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 	@Value("${spring.ownership_endpoint}")
 	private String ownership_endpoint;
 
+	@Value("${spring.delegation_endpoint}")
+	private String delegation_endpoint;
+
+	@Value("${spring.servicemapkb_endpoint}")
+	private String servicemapkb_endpoint;
+
+	@Value("${spring.orionbrokerkbURI}")
+	private String orionbrokerkbURI;
+
+	@Value("${spring.elapsingcache.minutes}")
+	private Integer minutesElapsingCache;
+
 	@Autowired
 	private MessageSource messages;
 
 	ObjectMapper objectMapper = new ObjectMapper();
 
+	HashMap<String, CachedCredentials> cachedCredentials = new HashMap<String, CachedCredentials>();
+
+	HashMap<String, String> cachedPksha1UsernameOwnership = new HashMap<String, String>();
+
 	@Override
-	public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws JsonProcessingException, IOException, ServletException {
 
 		final HttpServletRequest req = (HttpServletRequest) request;
-		String k1 = req.getParameter("k1");
-		String k2 = req.getParameter("k2");
+		MultiReadHttpServletRequest multiReadRequest = new MultiReadHttpServletRequest((HttpServletRequest) request);
+
+		String pksha1 = null;
+
+		X509Certificate[] certs = (X509Certificate[]) multiReadRequest.getAttribute("javax.servlet.request.X509Certificate");
+		if ((certs != null) && (certs.length > 0)) {
+			String pk = new String(Base64.encode(certs[0].getPublicKey().getEncoded()), StandardCharsets.UTF_8);
+			logger.debug("certificate arrived, public key is:" + pk);
+			pksha1 = DigestUtils.sha1Hex(pk.getBytes());
+			logger.debug("sha1 public key is: {}", pksha1);
+		}
+
+		String k1 = multiReadRequest.getParameter("k1");
+		String k2 = multiReadRequest.getParameter("k2");
 		String elementId = req.getParameter("elementid");
+		String queryType = ((HttpServletRequest) request).getServletPath();
 
-		if ((k1 != null) && (k2 != null) && (elementId != null)) {
+		if ((elementId != null)) {
 
-			logger.debug("Received a request for {}", elementId);
-			logger.debug("K1 {}", k1);
-			logger.debug("K2 {}", k2);
+			logger.debug("Received a request of type {} for {}", elementId, queryType);
+			if (k1 != null)
+				logger.debug("K1 {}", k1);
+			if (k2 != null)
+				logger.debug("K2 {}", k2);
 
 			try {
-				String accessToken = getAccessToken(request.getLocale());
 
-				checkAuthorized(k1, k2, elementId, accessToken, request.getLocale());
+				String sensorName = getSensorName(multiReadRequest, isWriteQuery(queryType));// can be null
+				if (sensorName != null)
+					logger.debug("sensor's name {}", sensorName);
+
+				checkAuthorization(elementId, k1, k2, queryType, sensorName, pksha1, request.getLocale());
 
 				logger.debug("Credentials ARE VALID");
 
-				filterChain.doFilter(request, response);// continue
+				authUser();
+
 			} catch (CredentialsNotValidException e) {
-				logger.debug("Credentials ARE NOT VALID");
+				logger.error("Credentials ARE NOT VALID", e);
 
-				Response toreturn2 = new Response();
-				toreturn2.setResult(false);
-				toreturn2.setMessage(e.getMessage());
+				writeResponseError(response, e.getMessage());
 
-				((HttpServletResponse) response).setStatus(401);
-				((HttpServletResponse) response).getWriter().write(objectMapper.writeValueAsString(toreturn2));
+				return;
 			}
 
 		} else {
-			logger.debug("Credentials ARE NOT PRESENT");
+			logger.error("Credentials ARE NOT PRESENT");
 
-			Response toreturn2 = new Response();
-			toreturn2.setResult(false);
-			toreturn2.setMessage(messages.getMessage("login.ko.credentialsnotpresent", null, request.getLocale()));
+			writeResponseError(response, messages.getMessage("login.ko.credentialsnotpresent", null, request.getLocale()));
 
-			((HttpServletResponse) response).setStatus(401);
-			((HttpServletResponse) response).getWriter().write(objectMapper.writeValueAsString(toreturn2));
+			return;
+
+		}
+
+		filterChain.doFilter(multiReadRequest, response);// DO WE NEED IT???
+	}
+
+	private String getSensorName(HttpServletRequest multiReadRequest, boolean isWriteQuery) throws IOException, NoSuchMessageException, CredentialsNotValidException {
+
+		String entityBody = IOUtils.toString(multiReadRequest.getInputStream(), StandardCharsets.UTF_8.toString());
+
+		// retrieve "attributes index
+		int startIndex = entityBody.indexOf("attributes");
+		if (startIndex == -1) {
+			logger.warn(messages.getMessage("login.ko.sensornamenotpresent", null, multiReadRequest.getLocale()) + " entityBody is {}", entityBody);
+			// throw new CredentialsNotValidException(messages.getMessage("login.ko.sensornamenotpresent", null, multiReadRequest.getLocale()));
+
+			return null;
+		}
+
+		// calcolate startindex of sensor name
+		if (isWriteQuery)
+			startIndex = startIndex + 10 + 4 + 8;
+		else
+			startIndex = startIndex + 10 + 4;
+
+		if (startIndex > entityBody.length()) {
+			logger.warn(messages.getMessage("login.ko.sensornamenotvalid", null, multiReadRequest.getLocale()) + "(1) entityBody is {}", entityBody);
+			// throw new CredentialsNotValidException(messages.getMessage("login.ko.sensornamenotvalid", null, multiReadRequest.getLocale()) + "(1)");
+			return null;
+		}
+
+		int endIndex = entityBody.indexOf("\"", startIndex);
+		if (endIndex == -1) {
+			// if the attribute field is empty, the sensor name is empty
+			logger.debug("detecting empty attributes, sensor name is empty-string (the delegation has to be formatted correctly)");
+			return "";
+		}
+
+		return entityBody.substring(startIndex, endIndex);
+	}
+
+	private void writeResponseError(ServletResponse response, String msg) throws JsonProcessingException, IOException {
+		Response toreturn2 = new Response();
+		toreturn2.setResult(false);
+		toreturn2.setMessage(msg);
+
+		((HttpServletResponse) response).setStatus(401);
+		((HttpServletResponse) response).getWriter().write(objectMapper.writeValueAsString(toreturn2));
+	}
+
+	private void authUser() {
+		List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
+		authorities.add(new SimpleGrantedAuthority("ROLE_USER")); // here we just set the basic role to USER
+		UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken("username", "userpwd", authorities);// here we just set a fake password
+		SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+	}
+
+	private void checkAuthorization(String elementId, String k1, String k2, String queryType, String sensorName, String pksha1, Locale lang) throws CredentialsNotValidException, UnsupportedEncodingException {
+
+		CachedCredentials cc = getCachedCredentials(elementId, sensorName, lang);
+
+		if (cc.getIsPublic()) {
+			if (isWriteQuery(queryType)) {
+				logger.debug("The operation is WRITE on public");
+				if (cc.getOwnerCredentials().isValid(k1, k2, pksha1)) {
+					logger.debug("The owner credentials are valid");
+					return;
+				} else {
+					logger.warn("The owner credential are not valid --> please update this information ASAP, since this function is going to be DEPRECATED in a while!!! {} {} {} {} {}", cc, k1, k2, elementId, queryType);
+					return;// return ok anyway //TODO to remove this condition!!!
+				}
+			} else {
+				logger.debug("The operation is READ on public");
+				return;
+			}
+		} else {
+			if (isWriteQuery(queryType)) {
+				logger.debug("The operation is WRITE on private");
+				if (cc.getOwnerCredentials().isValid(k1, k2, pksha1)) {
+					logger.debug("The owner credentials are valid");
+					return;
+				} else {
+					logger.debug("The owner credentials are NOT valid");
+					throw new CredentialsNotValidException(messages.getMessage("login.ko.credentialsnotvalid", null, lang));
+				}
+			} else {
+				logger.debug("The operation is READ on private");
+				if (cc.getOwnerCredentials().isValid(k1, k2, pksha1)) {
+					logger.debug("The owner credentials are valid");
+					return;
+				} else {
+					// TODO if the elementID is private, the invoked query is a READ, and it's not the owner, first we need to check if the sensorID is PUBLIC (from cached and via packet inspection) and if not we need to validate the
+					// delegation as below
+					logger.debug("The owner credentials are not valid");
+					for (Credentials c : cc.getDelegatedCredentials()) {
+						if (cc.getOwnerCredentials().getPksha1() == null) {// if the elementID is not protected with certificate, use k1, k2 enforcement
+							if (c.isValid(k1, k2)) {
+								logger.debug("One of the delegated credentials are valid, certificate not envolved");
+								return;
+							}
+						} else {// if the elementID is protected with certificate, use username of public key enforcement
+							if (c.isValid(getUsername(pksha1, lang))) {
+								logger.debug("One of the delegated credentials are valid, certificate envolved");
+								return;
+							}
+						}
+					}
+					logger.debug("None of the delegated credential are valid");
+					throw new CredentialsNotValidException(messages.getMessage("login.ko.credentialsnotvalid", null, lang));
+				}
+			}
+		}
+	}
+
+	private String getUsername(String pksha1, Locale lang) throws CredentialsNotValidException {
+		String toreturn = null;
+		if ((toreturn = cachedPksha1UsernameOwnership.get(pksha1)) != null)
+			return toreturn;
+		else {
+			String accessToken = getAccessToken(lang);
+			toreturn = getUsernamePKCredentials(accessToken, pksha1, lang);
+			if (toreturn != null)
+				cachedPksha1UsernameOwnership.put(pksha1, toreturn);
+
+		}
+		return toreturn;
+	}
+
+	private boolean isWriteQuery(String queryType) {
+		return queryType.contains("updateContext");
+	}
+
+	private CachedCredentials getCachedCredentials(String elementId, String sensorName, Locale lang) throws CredentialsNotValidException, UnsupportedEncodingException {
+
+		String sensorUri = (sensorName == null) ? orionbrokerkbURI + elementId : orionbrokerkbURI + elementId + "/" + sensorName;
+
+		// retrieve cached credentials
+		CachedCredentials cc = cachedCredentials.get(sensorUri);
+
+		if (cc == null) {
+			logger.debug("not found in cache");
+		} else {
+			logger.debug("found in cache: {}", cc);
+			if (cc.isElapsed()) {
+				logger.debug("remove from cache since not valid anymore");
+				cachedCredentials.remove(sensorUri);
+				cc = null;
+			}
+		}
+
+		// if not found or invalidated, retrieve new credentials
+		if (cc == null) {
+			logger.debug("retrieving credentials");
+
+			cc = new CachedCredentials(minutesElapsingCache);
+			cc.setIsPublic(isPublicFromKB(elementId, lang));
+			String accessToken = getAccessToken(lang);
+			cc.setOwnerCredentials(getOwnerCredentials(accessToken, elementId, lang));
+			cc = enrichDelegatedCredentials(cc, accessToken, sensorUri, lang);
+
+			cachedCredentials.put(sensorUri, cc);
+		}
+
+		logger.debug("Cached credentials are: {}", cc);
+
+		return cc;
+	}
+
+	// default value:private (old scenario from iotdirectory)
+	// if there is a string that contains "public", in the ow field, it is considered public
+	private boolean isPublicFromKB(String elementId, Locale lang) throws CredentialsNotValidException {
+
+		String queryKB = "select distinct ?ow { " +
+				"OPTIONAL {<" + orionbrokerkbURI + elementId + "> km4c:ownership ?ow.}" + "}";// assume that any elementId here are on this orion broker
+
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+		params.add("format", "json");
+		params.add("timeout", "0");
+		params.add("query", queryKB);
+
+		UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(servicemapkb_endpoint)
+				.queryParams(params)
+				.build();
+		logger.debug("query isPublicFromKB {}", uriComponents.toUri());
+
+		RestTemplate restTemplate = new RestTemplate();
+		HttpHeaders headers = new HttpHeaders();
+		HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+
+		try {
+			ResponseEntity<String> response = restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, entity, String.class);
+			logger.debug("Response from isPublicFromKB {}", response);
+
+			ObjectMapper objectMapper = new ObjectMapper();
+
+			JsonNode rootNode = objectMapper.readTree(response.getBody().getBytes());
+
+			JsonNode resultNode = rootNode.path("results");
+			if ((resultNode == null) || (resultNode.isNull()) || (resultNode.isMissingNode())) {
+				logger.debug("no results found, it's private");
+				return false;
+			}
+
+			JsonNode bindingsNode = resultNode.path("bindings");
+			if ((bindingsNode == null) || (bindingsNode.isNull()) || (bindingsNode.isMissingNode())) {
+				logger.debug("no bindings found, it's private");
+				return false;
+			}
+
+			Iterator<JsonNode> els = bindingsNode.elements();
+
+			if (els.hasNext()) {
+				JsonNode owNode = els.next().path("ow");
+				if ((owNode == null) || (owNode.isNull()) || (owNode.isMissingNode())) {
+					logger.debug("no ow found, it's private");
+					return false;
+				}
+
+				JsonNode valueNode = owNode.path("value");
+				if ((valueNode == null) || (valueNode.isNull()) || (valueNode.isMissingNode())) {
+					logger.debug("no value found, it's private");
+					return false;
+				}
+
+				return valueNode.asText().contains("public");
+
+			} else {
+				logger.debug("bindings empty, it's private");
+				return false;
+			}
+
+		} catch (HttpClientErrorException | IOException e) {
+			logger.error("Trouble in isPublicFromKB", e);
+			throw new CredentialsNotValidException(messages.getMessage("login.ko.networkproblems", null, lang));
 		}
 	}
 
 	private String getAccessToken(Locale lang) throws CredentialsNotValidException {
+
+		String toreturn = new String();
+
 		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
 		params.add("grant_type", "password");
 		params.add("client_id", clientId);
@@ -127,30 +411,40 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		params.add("password", password);
 
 		UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(token_endpoint).build();
+		logger.debug("query getAccessToken {}", uriComponents.toUri());
 
 		RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
 		HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<MultiValueMap<String, String>>(params, headers);
 
 		try {
 			ResponseEntity<String> response = restTemplate.exchange(uriComponents.toUri(), HttpMethod.POST, entity, String.class);
-			logger.debug("Response from keyclock {}" + response);
+			logger.debug("Response from getAccessToken {}", response);
 
 			ObjectMapper objectMapper = new ObjectMapper();
 
 			JsonNode rootNode = objectMapper.readTree(response.getBody().getBytes());
 			JsonNode atNode = rootNode.path("access_token");
 
-			return atNode.asText();
+			if ((atNode == null) || (atNode.isNull()) || (atNode.isMissingNode())) {
+				logger.error("The retrieved data does not contains access_token");
+				throw new CredentialsNotValidException(messages.getMessage("login.ko.configurationerror", null, lang));
+			}
+
+			toreturn = atNode.asText();
 		} catch (HttpClientErrorException | IOException e) {
 			logger.error("Trouble in getAccessToken", e);
-			throw new CredentialsNotValidException(messages.getMessage("login.ko.credentialsnotvalid", null, lang));
+			throw new CredentialsNotValidException(messages.getMessage("login.ko.networkproblems", null, lang));
 		}
+
+		return toreturn;
 	}
 
-	private void checkAuthorized(String k1, String k2, String elementId, String accessToken, Locale lang) throws CredentialsNotValidException {
+	private Credentials getOwnerCredentials(String accessToken, String elementId, Locale lang) throws CredentialsNotValidException {
+
+		Credentials toreturn = new Credentials();
+
 		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
 		params.add("type", "IOTID");
 		params.add("accessToken", accessToken);
@@ -159,39 +453,186 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(ownership_endpoint)
 				.queryParams(params)
 				.build();
+		logger.debug("query getOwnerCredentials {}", uriComponents.toUri());
 
 		RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();
-
 		HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
 
 		try {
 			ResponseEntity<String> response = restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, entity, String.class);
-			logger.debug("Response from server ownership {}" + response);
+			logger.debug("Response from  getOwnerCredentials {}", response);
 
 			ObjectMapper objectMapper = new ObjectMapper();
 
 			JsonNode rootNode = objectMapper.readTree(response.getBody().getBytes());
 			Iterator<JsonNode> els = rootNode.elements();
 
-			if (!els.hasNext())
-				throw new CredentialsNotValidException(messages.getMessage("login.ko.ownershipnotfound", null, lang));
+			if ((els == null) || (!els.hasNext())) {
+				logger.error("The retrieved data does not contains any elements");
+				throw new CredentialsNotValidException(messages.getMessage("login.ko.configurationerror", null, lang));
+			}
 
-			JsonNode edNode = els.next().path("elementDetails");
+			JsonNode elNode = els.next();
+			JsonNode usernameNode = elNode.path("username");
 
-			if ((edNode == null) || (edNode.isNull()))
-				throw new CredentialsNotValidException(messages.getMessage("login.ko.keynotvalid", null, lang));
+			if ((usernameNode == null) || (usernameNode.isNull()) || (usernameNode.isMissingNode())) {
+				logger.error("The retreived data does not contains username");
+				throw new CredentialsNotValidException(messages.getMessage("login.ko.configurationerror", null, lang));
+			}
+
+			String username = usernameNode.asText();
+
+			JsonNode pksha1Node = elNode.path("publickeySHA1");
+
+			String pksha1 = null;
+
+			if ((pksha1Node != null) && (!pksha1Node.isNull()) && (!pksha1Node.isMissingNode())) {
+				pksha1 = pksha1Node.asText();
+			}
+
+			JsonNode edNode = elNode.path("elementDetails");
+
+			if ((edNode == null) || (edNode.isNull()) || (edNode.isMissingNode())) {
+				logger.error("The retreived data does not contains elementDetails");
+				throw new CredentialsNotValidException(messages.getMessage("login.ko.configurationerror", null, lang));
+			}
 
 			JsonNode k1Node = edNode.path("k1");
 			JsonNode k2Node = edNode.path("k2");
 
-			if ((k1Node == null) || (k2Node == null) || (k1Node.isNull()) || (k2Node.isNull()) || (!k1.equals(k1Node.asText())) || (!k2.equals(k2Node.asText()))) {
-				throw new CredentialsNotValidException(messages.getMessage("login.ko.keynotvalid", null, lang));
+			if ((k1Node == null) || (k1Node.isNull()) || ((k2Node == null) || (k2Node.isNull())) || (k1Node.isMissingNode()) || (k2Node.isMissingNode())) {
+				logger.error("The retreived data does not contains k1, k2");
+				throw new CredentialsNotValidException(messages.getMessage("login.ko.configurationerror", null, lang));
 			}
 
+			toreturn = new Credentials(k1Node.asText(), k2Node.asText(), username, pksha1);
 		} catch (HttpClientErrorException | IOException e) {
-			logger.error("Trouble in checkAuthorized", e);
-			throw new CredentialsNotValidException(messages.getMessage("login.ko.ownershipnotfound", null, lang));
+			logger.error("Trouble in getOwnerCredentials", e);
+			throw new CredentialsNotValidException(messages.getMessage("login.ko.networkproblems", null, lang));
 		}
+
+		return toreturn;
+	}
+
+	private String getUsernamePKCredentials(String accessToken, String pksha1, Locale lang) throws CredentialsNotValidException {
+
+		String toreturn = null;
+
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+		params.add("type", "IOTID");
+		params.add("accessToken", accessToken);
+		params.add("pubkeySHA1", pksha1);
+
+		UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(ownership_endpoint)
+				.queryParams(params)
+				.build();
+		logger.debug("query getOwnerCredentials {}", uriComponents.toUri());
+
+		RestTemplate restTemplate = new RestTemplate();
+		HttpHeaders headers = new HttpHeaders();
+		HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+
+		try {
+			ResponseEntity<String> response = restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, entity, String.class);
+			logger.debug("Response from  getOwnerCredentials {}", response);
+
+			ObjectMapper objectMapper = new ObjectMapper();
+
+			JsonNode rootNode = objectMapper.readTree(response.getBody().getBytes());
+			Iterator<JsonNode> els = rootNode.elements();
+
+			if ((els == null) || (!els.hasNext())) {
+				logger.error("The retrieved data does not contains any elements");
+				throw new CredentialsNotValidException(messages.getMessage("login.ko.configurationerror", null, lang));
+			}
+
+			JsonNode elNode = els.next();
+			JsonNode usernameNode = elNode.path("username");
+
+			if ((usernameNode == null) || (usernameNode.isNull()) || (usernameNode.isMissingNode())) {
+				logger.error("The retreived data does not contains usernmae");
+				throw new CredentialsNotValidException(messages.getMessage("login.ko.configurationerror", null, lang));
+			}
+
+			toreturn = usernameNode.asText();
+
+		} catch (HttpClientErrorException | IOException e) {
+			logger.error("Trouble in getOwnerCredentials", e);
+			throw new CredentialsNotValidException(messages.getMessage("login.ko.networkproblems", null, lang));
+		}
+
+		return toreturn;
+	}
+
+	private CachedCredentials enrichDelegatedCredentials(CachedCredentials cc, String accessToken, String sensorUri, Locale lang) throws CredentialsNotValidException, UnsupportedEncodingException {
+
+		List<Credentials> toreturn = new ArrayList<Credentials>();
+
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+		params.add("accessToken", accessToken);
+		params.add("sourceRequest", "orionbrokerfilter");
+
+		UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(delegation_endpoint + "/" + URLEncoder.encode(sensorUri, StandardCharsets.UTF_8.toString()) + "/delegator")
+				.queryParams(params)
+				.build();
+		logger.debug("query getDelegatedCredentials {}", uriComponents.toUri());
+
+		RestTemplate restTemplate = new RestTemplate();
+		HttpHeaders headers = new HttpHeaders();
+		HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+
+		try {
+			ResponseEntity<String> response = restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, entity, String.class);
+			logger.debug("Response from getDelegatedCredentials {}", response);
+
+			ObjectMapper objectMapper = new ObjectMapper();
+
+			if (response.getBody() != null) {// 204 no content body
+				JsonNode rootNode = objectMapper.readTree(response.getBody().getBytes());
+				Iterator<JsonNode> els = rootNode.elements();
+
+				while ((els != null) && (els.hasNext())) {
+					JsonNode elNode = els.next();
+
+					JsonNode udNode = elNode.path("usernameDelegated");
+					if ((udNode == null) || (udNode.isNull()) || (udNode.isMissingNode())) {
+						logger.error("The retrieved data does not contains userDelegated");
+						// throw new CredentialsNotValidException(messages.getMessage("login.ko.configurationerror", null, lang));
+						continue;
+					}
+					if (udNode.asText().equals("ANONYMOUS"))
+						cc.setIsPublic(true);
+
+					String ud = udNode.asText();
+
+					JsonNode deNode = elNode.path("delegationDetails");
+
+					if ((deNode == null) || (deNode.isNull()) || (deNode.isMissingNode())) {
+						logger.error("The retrieved data does not contains delegationDetails");
+						// throw new CredentialsNotValidException(messages.getMessage("login.ko.configurationerror", null, lang));
+						continue;
+					}
+
+					JsonNode k1Node = deNode.path("k1");
+					JsonNode k2Node = deNode.path("k2");
+
+					if ((k1Node == null) || (k1Node.isNull()) || ((k2Node == null) || (k2Node.isNull())) || (k1Node.isMissingNode()) || (k2Node.isMissingNode())) {
+						logger.error("The retreived data does not contains k1, k2");
+						// throw new CredentialsNotValidException(messages.getMessage("login.ko.configurationerror", null, lang));
+						continue;
+					}
+
+					toreturn.add(new Credentials(k1Node.asText(), k2Node.asText(), ud, null));
+				}
+			}
+		} catch (HttpClientErrorException | IOException e) {
+			logger.error("Trouble in getDelegatedCredentials", e);
+			throw new CredentialsNotValidException(messages.getMessage("login.ko.networkproblems", null, lang));
+		}
+
+		cc.setDelegatedCredentials(toreturn);
+
+		return cc;
 	}
 }
