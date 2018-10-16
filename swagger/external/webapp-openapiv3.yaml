@@ -1,7 +1,148 @@
 openapi: 3.0.1
 info:
-  title: Km4city Web App API
-  description: This API allows users to go directly to perform the functions in the web app without interacting with the app interface.
+  title: Km4city Web App API 
+  description: |
+    This API allows users to go directly to perform the functions in the web app without interacting with the app interface.
+    
+    A comprehensive set of sample API calls follows:
+    
+    *  [https://www.km4city.org/webapp/?operation=discovercity](https://www.km4city.org/webapp/?operation=discovercity)
+    *  [https://www.km4city.org/webapp/?operation=aroundyou](https://www.km4city.org/webapp/?operation=aroundyou)
+    *  [https://www.km4city.org/webapp/?operation=aroundyou/accomodation](https://www.km4city.org/webapp/?operation=aroundyou/accomodation)
+    *  [https://www.km4city.org/webapp/?operation=aroundyou/agricultureandlivestock](https://www.km4city.org/webapp/?operation=aroundyou/agricultureandlivestock)
+    *  [https://www.km4city.org/webapp/?operation=aroundyou/advertising](https://www.km4city.org/webapp/?operation=aroundyou/advertising)
+    *  [https://www.km4city.org/webapp/?operation=aroundyou/civilandedilengineering](https://www.km4city.org/webapp/?operation=aroundyou/civilandedilengineering)
+    *  [https://www.km4city.org/webapp/?operation=aroundyou/culturalactivity](https://www.km4city.org/webapp/?operation=aroundyou/culturalactivity)
+    *  [https://www.km4city.org/webapp/?operation=aroundyou/educationandresearch](https://www.km4city.org/webapp/?operation=aroundyou/educationandresearch)
+    *  [https://www.km4city.org/webapp/?operation=aroundyou/emergency](https://www.km4city.org/webapp/?operation=aroundyou/emergency)
+    *  [https://www.km4city.org/webapp/?operation=aroundyou/entertainment](https://www.km4city.org/webapp/?operation=aroundyou/entertainment)
+    *  [https://www.km4city.org/webapp/?operation=aroundyou/environment](https://www.km4city.org/webapp/?operation=aroundyou/environment)
+    *  [https://www.km4city.org/webapp/?operation=aroundyou/financialservice](https://www.km4city.org/webapp/?operation=aroundyou/financialservice)
+    *  [https://www.km4city.org/webapp/?operation=aroundyou/governmentoffice](https://www.km4city.org/webapp/?operation=aroundyou/governmentoffice)
+    *  [https://www.km4city.org/webapp/?operation=aroundyou/healtcare](https://www.km4city.org/webapp/?operation=aroundyou/healtcare)
+    *  [https://www.km4city.org/webapp/?operation=aroundyou/industryandmanufacturing](https://www.km4city.org/webapp/?operation=aroundyou/industryandmanufacturing)
+    *  [https://www.km4city.org/webapp/?operation=aroundyou/miningandquarrying](https://www.km4city.org/webapp/?operation=aroundyou/miningandquarrying)
+    *  [https://www.km4city.org/webapp/?operation=aroundyou/shoppingandservice](https://www.km4city.org/webapp/?operation=aroundyou/shoppingandservice)
+    *  [https://www.km4city.org/webapp/?operation=aroundyou/tourismservice](https://www.km4city.org/webapp/?operation=aroundyou/tourismservice)
+    *  [https://www.km4city.org/webapp/?operation=aroundyou/transferserviceandrenting](https://www.km4city.org/webapp/?operation=aroundyou/transferserviceandrenting)
+    *  [https://www.km4city.org/webapp/?operation=aroundyou/utilitiesandsupply]([https://www.km4city.org/webapp/?operation=aroundyou/utilitiesandsupply)
+    *  [https://www.km4city.org/webapp/?operation=aroundyou/wholesale](https://www.km4city.org/webapp/?operation=aroundyou/wholesale)
+    *  [https://www.km4city.org/webapp/?operation=aroundyou/wineandfood](https://www.km4city.org/webapp/?operation=aroundyou/wineandfood)
+    *  [https://www.km4city.org/webapp/?operation=textsearch](https://www.km4city.org/webapp/?operation=textsearch)
+    *  [https://www.km4city.org/webapp/?operation=poi](https://www.km4city.org/webapp/?operation=poi)
+    *  [https://www.km4city.org/webapp/?operation=publictransport](https://www.km4city.org/webapp/?operation=publictransport)
+    *  [https://www.km4city.org/webapp/?operation=publictransport/ticket](https://www.km4city.org/webapp/?operation=publictransport/ticket)
+    *  [https://www.km4city.org/webapp/?operation=publictransport/pathfinder](https://www.km4city.org/webapp/?operation=publictransport/pathfinder)
+    *  [https://www.km4city.org/webapp/?operation=publictransport/timetable](https://www.km4city.org/webapp/?operation=publictransport/timetable)
+    *  [https://www.km4city.org/webapp/?operation=publictransport/tplsearcher](https://www.km4city.org/webapp/?operation=publictransport/tplsearcher)
+    *  [https://www.km4city.org/webapp/?operation=privatetransport](https://www.km4city.org/webapp/?operation=privatetransport)
+    *  [https://www.km4city.org/webapp/?operation=privatetransport/cyclepaths](https://www.km4city.org/webapp/?operation=privatetransport/cyclepaths)
+    *  [https://www.km4city.org/webapp/?operation=privatetransport/autosearcher](https://www.km4city.org/webapp/?operation=privatetransport/autosearcher)
+    *  [https://www.km4city.org/webapp/?operation=privatetransport/carposition](https://www.km4city.org/webapp/?operation=privatetransport/carposition)
+    *  [https://www.km4city.org/webapp/?operation=privatetransport/fuelstation](https://www.km4city.org/webapp/?operation=privatetransport/fuelstation)
+    *  [https://www.km4city.org/webapp/?operation=privatetransport/parking](https://www.km4city.org/webapp/?operation=privatetransport/parking])
+    *  [https://www.km4city.org/webapp/?operation=privatetransport/pathfinder](https://www.km4city.org/webapp/?operation=privatetransport/pathfinder)
+    *  [https://www.km4city.org/webapp/?operation=events](https://www.km4city.org/webapp/?operation=events)
+    *  [https://www.km4city.org/webapp/?operation=suggestionsnearyou](https://www.km4city.org/webapp/?operation=suggestionsnearyou)
+    *  [https://www.km4city.org/webapp/?operation=suggestions](https://www.km4city.org/webapp/?operation=suggestions)
+    *  [https://www.km4city.org/webapp/?operation=weather](https://www.km4city.org/webapp/?operation=weather)
+    *  [https://www.km4city.org/webapp/?operation=personalassistant](https://www.km4city.org/webapp/?operation=personalassistant)
+    *  [https://www.km4city.org/webapp/?operation=environmentmenu](https://www.km4city.org/webapp/?operation=environmentmenu)
+    *  [https://www.km4city.org/webapp/?operation=environmentmenu/infosoc](https://www.km4city.org/webapp/?operation=environmentmenu/infosoc)
+    *  [https://www.km4city.org/webapp/?operation=environmentmenu/weatherinmenu](https://www.km4city.org/webapp/?operation=environmentmenu/weatherinmenu)
+    *  [https://www.km4city.org/webapp/?operation=environmentmenu/cyclepathsenvironment](https://www.km4city.org/webapp/?operation=environmentmenu/cyclepathsenvironment)
+    *  [https://www.km4city.org/webapp/?operation=environmentmenu/greenareas](https://www.km4city.org/webapp/?operation=environmentmenu/greenareas)
+    *  [https://www.km4city.org/webapp/?operation=environmentmenu/agricultureandlivestockenvironment](https://www.km4city.org/webapp/?operation=environmentmenu/agricultureandlivestockenvironment)
+    *  [https://www.km4city.org/webapp/?operation=environmentmenu/environment2](https://www.km4city.org/webapp/?operation=environmentmenu/environment2)
+    *  [https://www.km4city.org/webapp/?operation=environmentmenu/pollen](https://www.km4city.org/webapp/?operation=environmentmenu/pollen)
+    *  [https://www.km4city.org/webapp/?operation=environmentmenu/pollution](https://www.km4city.org/webapp/?operation=environmentmenu/pollution)
+    *  [https://www.km4city.org/webapp/?operation=health](https://www.km4city.org/webapp/?operation=health)
+    *  [https://www.km4city.org/webapp/?operation=health/emergencymenu](https://www.km4city.org/webapp/?operation=health/emergencymenu)
+    *  [https://www.km4city.org/webapp/?operation=health/healtcaremenu](https://www.km4city.org/webapp/?operation=health/healtcaremenu)
+    *  [https://www.km4city.org/webapp/?operation=health/pharmacy](https://www.km4city.org/webapp/?operation=health/pharmacy)
+    *  [https://www.km4city.org/webapp/?operation=health/firstaid](https://www.km4city.org/webapp/?operation=health/firstaid)
+    *  [https://www.km4city.org/webapp/?operation=other](https://www.km4city.org/webapp/?operation=other)
+    *  [https://www.km4city.org/webapp/?operation=other/favourites](https://www.km4city.org/webapp/?operation=other/favourites)
+    *  [https://www.km4city.org/webapp/?operation=other/chronology](https://www.km4city.org/webapp/?operation=other/chronology)
+    *  [https://www.km4city.org/webapp/?operation=other/lastcontribution](https://www.km4city.org/webapp/?operation=other/lastcontribution)
+    *  [https://www.km4city.org/webapp/?operation=other/rating](https://www.km4city.org/webapp/?operation=other/rating)
+    *  [https://www.km4city.org/webapp/?operation=other/information](https://www.km4city.org/webapp/?operation=other/information)
+    *  [https://www.km4city.org/webapp/?operation=other/tips](https://www.km4city.org/webapp/?operation=other/tips)
+    *  [https://www.km4city.org/webapp/?operation=authentication](https://www.km4city.org/webapp/?operation=authentication)
+    *  [https://www.km4city.org/webapp/?operation=settings](https://www.km4city.org/webapp/?operation=settings)
+    *  [https://www.km4city.org/webapp/?operation=aboutus](https://www.km4city.org/webapp/?operation=aboutus)
+    *  [https://www.km4city.org/webapp/?operation=pathfinder&destination=43.720953;10.409746&coordinates=43.533860;11.568589&routeType=foot_shortest](https://www.km4city.org/webapp/?operation=pathfinder&destination=43.720953;10.409746&coordinates=43.533860;11.568589&routeType=foot_shortest)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=discovercity](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=discovercity)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/accomodation](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/accomodation)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&coordinates=43.720953;10.409746&operation=aroundyou/accommodation](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&coordinates=43.720953;10.409746&operation=aroundyou/accommodation)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/agricultureandlivestock](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/agricultureandlivestock)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/advertising](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/advertising)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/civilandedilengineering](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/civilandedilengineering)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/culturalactivity](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/culturalactivity)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/educationandresearch](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/educationandresearch)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/emergency](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/emergency)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/entertainment](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/entertainment)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/environment](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/environment)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/financialservice](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/financialservice)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/governmentoffice](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/governmentoffice)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/healtcare](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/healtcare)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/industryandmanufacturing](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/industryandmanufacturing)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/miningandquarrying](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/miningandquarrying)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/shoppingandservice](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/shoppingandservice)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/tourismservice](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/tourismservice)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/transferserviceandrenting](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/transferserviceandrenting)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/utilitiesandsupply](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/utilitiesandsupply)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/wholesale](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/wholesale)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/wineandfood](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/wineandfood)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=textsearch](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=textsearch)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=poi](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=poi)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=publictransport]([https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=publictransport)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=publictransport/ticket](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=publictransport/ticket)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=publictransport/pathfinder](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=publictransport/pathfinder)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=publictransport/timetable](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=publictransport/timetable)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=publictransport/tplsearcher](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=publictransport/tplsearcher)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=privatetransport](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=privatetransport)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=privatetransport/cyclepaths](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=privatetransport/cyclepaths)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=privatetransport/autosearcher](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=privatetransport/autosearcher)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=privatetransport/carposition](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=privatetransport/carposition)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=privatetransport/fuelstation](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=privatetransport/fuelstation)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=privatetransport/parking](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=privatetransport/parking)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=privatetransport/pathfinder](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=privatetransport/pathfinder)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=events](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=events)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=suggestionsnearyou](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=suggestionsnearyou)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=suggestions](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=suggestions)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=weather](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=weather)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=personalassistant](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=personalassistant)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=environmentmenu](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=environmentmenu)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=environmentmenu/infosoc](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=environmentmenu/infosoc)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=environmentmenu/weatherinmenu](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=environmentmenu/weatherinmenu)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=environmentmenu/cyclepathsenvironment](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=environmentmenu/cyclepathsenvironment)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=environmentmenu/greenareas](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=environmentmenu/greenareas)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=environmentmenu/agricultureandlivestockenvironment](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=environmentmenu/agricultureandlivestockenvironment)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=environmentmenu/environment2](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=environmentmenu/environment2)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=environmentmenu/pollen](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=environmentmenu/pollen)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=environmentmenu/pollution](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=environmentmenu/pollution)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=health](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=health)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=health/emergencymenu](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=health/emergencymenu)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=health/healtcaremenu](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=health/healtcaremenu)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=health/pharmacy](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=health/pharmacy)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=health/firstaid](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=health/firstaid)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=other](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=other)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=other/favourites](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=other/favourites)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=other/chronology](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=other/chronology)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=other/lastcontribution](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=other/lastcontribution)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=other/rating](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=other/rating)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=other/information](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=other/information)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=other/tips](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=other/tips)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=authentication](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=authentication)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=settings](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=settings)
+    *  [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aboutus](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aboutus)
+    *  [https://www.km4city.org/webapp/?geoJsonUri=http://servicemap.km4city.org/WebAppGrafo/api/v1/events/?range=week&lang=it&maxResults=100](https://www.km4city.org/webapp/?geoJsonUri=http://servicemap.km4city.org/WebAppGrafo/api/v1/events/?range=week&lang=it&maxResults=100)
+    *  [https://www.km4city.org/webapp/?operation=privatetransport&lang=fra](https://www.km4city.org/webapp/?operation=privatetransport&lang=fra)
+    *  [https://www.km4city.org/webapp/?operation=health&lang=deu](https://www.km4city.org/webapp/?operation=health&lang=deu)
+    *  [https://www.km4city.org/webapp/?operation=aroundyou&lang=eng](https://www.km4city.org/webapp/?operation=aroundyou&lang=eng)
+      
   version: 1.0.0
 servers:
   - url: https://www.km4city.org/webapp
@@ -12,6 +153,15 @@ paths:
       parameters:
         - name: operation
           in: query
+          description: | 
+            The operation to be performed.
+          
+            Sample API calls where this parameter is submitted follow:
+            * [https://www.km4city.org/webapp/?operation=discovercity](https://www.km4city.org/webapp/?operation=discovercity)
+            * [https://www.km4city.org/webapp/?operation=aroundyou](https://www.km4city.org/webapp/?operation=aroundyou)
+            * [https://www.km4city.org/webapp/?operation=aroundyou/accomodation](https://www.km4city.org/webapp/?operation=aroundyou/accomodation)
+            * [https://www.km4city.org/webapp/?operation=aroundyou/agricultureandlivestock](https://www.km4city.org/webapp/?operation=aroundyou/agricultureandlivestock)
+            * [https://www.km4city.org/webapp/?operation=aroundyou/advertising](https://www.km4city.org/webapp/?operation=aroundyou/advertising)
           schema:
             type: string
             enum:
@@ -83,14 +233,32 @@ paths:
           example: discovercity
         - name: coordinates
           in: query
-          description: Override the position possibly provided by the GPS sensors. The expected value of this parameter is a WGS84 latitude followed by a semicolon and a WGS84 longitude.
+          description: |
+            It overrides the position possibly provided by the GPS sensor. The expected value of this parameter is a WGS84 latitude followed by a semicolon and a WGS84 longitude.
+            
+              Sample API calls where this parameter is submitted follow:
+              * [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=discovercity](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=discovercity)
+              * [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou)
+              * [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/accomodation](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/accomodation)
+              * [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&coordinates=43.720953;10.409746&operation=aroundyou/accommodation](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&coordinates=43.720953;10.409746&operation=aroundyou/accommodation)
+              * [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/agricultureandlivestock](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/agricultureandlivestock)
+              * [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/advertising](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/advertising)
+              * [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/civilandedilengineering](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/civilandedilengineering)
+              * [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/culturalactivity](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/culturalactivity)
+              * [https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/educationandresearch](https://www.km4city.org/webapp/?coordinates=43.720953;10.409746&operation=aroundyou/educationandresearch)
           allowReserved: true
           schema:
             type: string
           example: 43.833333;11.333333
         - name: serviceuri
           in: query
-          description: Show details of a service URI.
+          description: |
+            Show details of a service URI.
+            
+            Sample API calls where this parameter is submitted follow:
+            * [http://www.km4city.org/webapp/?serviceuri=Bus_ataflinea_Stop_FM0017_5](http://www.km4city.org/webapp/?serviceuri=Bus_ataflinea_Stop_FM0017_5)
+            * [http://www.km4city.org/webapp/?serviceUri=http://www.disit.org/km4city/resource/Bus_ataflinea_Stop_FM0017_5](http://www.km4city.org/webapp/?serviceUri=http://www.disit.org/km4city/resource/Bus_ataflinea_Stop_FM0017_5)
+
           allowReserved: true
           schema:
             type: string
@@ -98,7 +266,11 @@ paths:
           example: http://www.disit.org/km4city/resource/Bus_ataflinea_Stop_FM0017_5
         - name: geoJsonUri
           in: query
-          description: Get a GeoJson passed as URL and draw it on the map.
+          description: |
+            Get a GeoJson passed as URL and draw it on the map.
+            
+            Sample API calls where this parameter is submitted follow:
+            * [https://www.km4city.org/webapp/?geoJsonUri=http://servicemap.km4city.org/WebAppGrafo/api/v1/events/?range=week&lang=it&maxResults=100](https://www.km4city.org/webapp/?geoJsonUri=http://servicemap.km4city.org/WebAppGrafo/api/v1/events/?range=week&lang=it&maxResults=100)
           allowReserved: true
           schema:
             type: string
@@ -106,7 +278,14 @@ paths:
           example: http://servicemap.km4city.org/WebAppGrafo/api/v1/events/?range=week
         - name: lang
           in: query
-          description: Change the language of the interface. Possible values (ita, eng, fra, deu, esp).
+          description: |
+            Change the language of the interface. Possible values (ita, eng, fra, deu, esp).
+            
+            Sample API calls where this parameter is submitted follow:
+            * [https://www.km4city.org/webapp/?operation=privatetransport&lang=fra](https://www.km4city.org/webapp/?operation=privatetransport&lang=fra)
+            * [https://www.km4city.org/webapp/?operation=health&lang=deu](https://www.km4city.org/webapp/?operation=health&lang=deu)
+            * [https://www.km4city.org/webapp/?operation=aroundyou&lang=eng](https://www.km4city.org/webapp/?operation=aroundyou&lang=eng)
+
           schema:
             type: string
             enum:
@@ -118,14 +297,25 @@ paths:
           example: ita
         - name: destination
           in: query
-          description: These values are entered as the destination point and the route is calculated using the values entered in the coordinates parameter or the position provided by the GPS sensor as the starting point. The expected value of this parameter is a WGS84 latitude followed by a semicolon and a WGS84 longitude. Only used in the _pathfinder_. operations.
+          description: |
+            These values are entered as the destination point and the route is calculated using the values entered in the coordinates parameter as the starting point. The expected value of this parameter is a WGS84 latitude followed by a semicolon and a WGS84 longitude. Only used in the _pathfinder_. operations.
+            
+            Sample API calls where this parameter is submitted follow:
+            * [https://www.km4city.org/webapp/?operation=pathfinder&destination=43.720953;10.409746&coordinates=43.533860;11.568589&routeType=foot_shortest](https://www.km4city.org/webapp/?operation=pathfinder&destination=43.720953;10.409746&coordinates=43.533860;11.568589&routeType=foot_shortest)
+            * [https://www.km4city.org/webapp/?operation=pathfinder&destination=43.7711;11.2713&coordinates=43.795;11.2652&routeType=public_transport](https://www.km4city.org/webapp/?operation=pathfinder&destination=43.7711;11.2713&coordinates=43.795;11.2652&routeType=public_transport)
+            
           allowReserved: true
           schema:
             type: string
           example: 43.833333;11.333333
         - name: routeType
           in: query
-          description: Only used in the _pathfinder_.
+          description: | 
+            Only used in the _pathfinder_.
+            
+            Sample API calls where this parameter is submitted follow:
+            * [https://www.km4city.org/webapp/?operation=pathfinder&destination=43.720953;10.409746&coordinates=43.533860;11.568589&routeType=foot_shortest](https://www.km4city.org/webapp/?operation=pathfinder&destination=43.720953;10.409746&coordinates=43.533860;11.568589&routeType=foot_shortest)
+            * [https://www.km4city.org/webapp/?operation=pathfinder&destination=43.7711;11.2713&coordinates=43.795;11.2652&routeType=public_transport](https://www.km4city.org/webapp/?operation=pathfinder&destination=43.7711;11.2713&coordinates=43.795;11.2652&routeType=public_transport)            
           schema:
             type: string
             enum:
@@ -136,7 +326,11 @@ paths:
           example: car
         - name: maxDistance
           in: query
-          description: Maximum distance from the GPS position of the services to be retrieved, expressed in Km (0.1 is used if parameter is missing). Only used in _search_ operations.
+          description: |
+            Maximum distance from the GPS position of the services to be retrieved, expressed in Km (0.1 is used if parameter is missing). Only used in _search_ operations.
+            
+            Sample API calls where this parameter is submitted follow:
+            * [https://www.km4city.org/webapp/?coordinates=43.80953;11.25&operation=aroundyou/civilandedilengineering&maxDistance=2&maxResults=50](https://www.km4city.org/webapp/?coordinates=43.80953;11.25&operation=aroundyou/civilandedilengineering&maxDistance=2&maxResults=50)
           schema: 
             type: number
             format: float
@@ -144,12 +338,58 @@ paths:
           example: 2
         - name: maxResults
           in: query
-          description: Maximum number of results to be returned. If parameter is missing 100 is assumed, if it is 0 all results are returned. 
+          description: |
+            Maximum number of results to be returned. If parameter is missing 100 is assumed, if it is 0 all results are returned. Only used in _search_ operations.
+            
+            Sample API calls where this parameter is submitted follow:
+            * [https://www.km4city.org/webapp/?coordinates=43.80953;11.25&operation=aroundyou/civilandedilengineering&maxDistance=2&maxResults=50](https://www.km4city.org/webapp/?coordinates=43.80953;11.25&operation=aroundyou/civilandedilengineering&maxDistance=2&maxResults=50)            
           schema:
             type: integer
             format: int32
             default: 100
           example: 50
+        - name: bodyFontSize
+          in: query
+          description: |
+            The size of the text in the HTML body, in pixels.
+            
+            Sample API calls where this parameter is submitted follow:
+            * [https://www.km4city.org/webapp/?scaleFactorIcons=3&bodyFontSize=25&geoJsonUri=http://servicemap.km4city.org/WebAppGrafo/api/v1/?selection=43.7991694;11.2393286%26categories%3DService%26maxResults%3D50%26maxDists%3D0.1%26format%3Djson%26lang%3Dit%26fullCount%3Dfalse](https://www.km4city.org/webapp/?scaleFactorIcons=3&bodyFontSize=25&geoJsonUri=http://servicemap.km4city.org/WebAppGrafo/api/v1/?selection=43.7991694;11.2393286%26categories%3DService%26maxResults%3D50%26maxDists%3D0.1%26format%3Djson%26lang%3Dit%26fullCount%3Dfalse)
+          schema:
+            type: integer
+            format: int32
+          example: 12
+        - name: scaleFactorIcons
+          in: query
+          description: |
+            A multiplier for the size of markers of services on the map.
+            
+            Sample API calls where this parameter is submitted follow:
+            * [https://www.km4city.org/webapp/?scaleFactorIcons=3&bodyFontSize=25&geoJsonUri=http://servicemap.km4city.org/WebAppGrafo/api/v1/?selection=43.7991694;11.2393286%26categories%3DService%26maxResults%3D50%26maxDists%3D0.1%26format%3Djson%26lang%3Dit%26fullCount%3Dfalse](https://www.km4city.org/webapp/?scaleFactorIcons=3&bodyFontSize=25&geoJsonUri=http://servicemap.km4city.org/WebAppGrafo/api/v1/?selection=43.7991694;11.2393286%26categories%3DService%26maxResults%3D50%26maxDists%3D0.1%26format%3Djson%26lang%3Dit%26fullCount%3Dfalse)            
+          schema:
+            type: integer
+            format: int32
+          example: 2
+        - name: bottomMenu
+          in: query
+          description: |
+            If set to _true_, the listing of found services is anchored to the bottom side of the screen, regardless of the screen orientation.
+            
+            Sample API calls where this parameter is submitted follow:
+            * [https://www.km4city.org/webapp/?scaleFactorIcons=3&bodyFontSize=25&bottomMenu=true&geoJsonUri=http://servicemap.km4city.org/WebAppGrafo/api/v1/?selection=43.7991694;11.2393286%26categories%3DService%26maxResults%3D50%26maxDists%3D0.1%26format%3Djson%26lang%3Dit%26fullCount%3Dfalse](https://www.km4city.org/webapp/?scaleFactorIcons=3&bodyFontSize=25&bottomMenu=true&geoJsonUri=http://servicemap.km4city.org/WebAppGrafo/api/v1/?selection=43.7991694;11.2393286%26categories%3DService%26maxResults%3D50%26maxDists%3D0.1%26format%3Djson%26lang%3Dit%26fullCount%3Dfalse)
+          schema:
+            type: boolean
+            default: false
+        - name: rightMenu
+          in: query
+          description: |
+            If set to true, the listing of found services is anchored to the right side of the screen, regardless of the screen orientation.
+            
+            Sample API calls where this parameter is submitted follow:
+            * [https://www.km4city.org/webapp/?scaleFactorIcons=3&bodyFontSize=25&rightMenu=true&geoJsonUri=http://servicemap.km4city.org/WebAppGrafo/api/v1/?selection=43.7991694;11.2393286%26categories%3DService%26maxResults%3D50%26maxDists%3D0.1%26format%3Djson%26lang%3Dit%26fullCount%3Dfalse](https://www.km4city.org/webapp/?scaleFactorIcons=3&bodyFontSize=25&rightMenu=true&geoJsonUri=http://servicemap.km4city.org/WebAppGrafo/api/v1/?selection=43.7991694;11.2393286%26categories%3DService%26maxResults%3D50%26maxDists%3D0.1%26format%3Djson%26lang%3Dit%26fullCount%3Dfalse)
+          schema:
+            type: boolean
+            default: false
       responses:
         200:
           description: An appropriately populated service map, possibly including appropriate components for allowing user input.
@@ -158,12 +398,317 @@ paths:
               schema: 
                 type: string
                 format: html
-        
-          
-
-          
-          
-          
-          
-            
-          
+              example: |
+                <!DOCTYPE html>
+                <!--
+                Licensed to the Apache Software Foundation (ASF) under one
+                or more contributor license agreements.  See the NOTICE file
+                distributed with this work for additional information
+                regarding copyright ownership.  The ASF licenses this file
+                to you under the Apache License, Version 2.0 (the
+                "License"); you may not use this file except in compliance
+                with the License.  You may obtain a copy of the License at
+                
+                http://www.apache.org/licenses/LICENSE-2.0
+                
+                Unless required by applicable law or agreed to in writing,
+                software distributed under the License is distributed on an
+                "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+                KIND, either express or implied.  See the License for the
+                specific language governing permissions and limitations
+                under the License.
+                -->
+                <html>
+                <head>
+                    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+                    <meta charset="utf-8">
+                    <meta name="description" content="SiiMobile Application">
+                    <meta name="format-detection" content="telephone=no" />
+                    <meta name="viewport"
+                          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+                    <meta name="author" content="">
+                    <title>KM4City</title>
+                    <link type="image/ico" rel="icon" href="./favicon.ico">
+                    <!-- <link type="text/css" rel="stylesheet" href="css/jquery.mobile-1.4.5.min.css">
+                    <link type="text/css" rel="stylesheet" href="css/ol.css" />
+                    <link type="text/css" rel="stylesheet" href="css/index.css" />
+                    <link type="text/css" rel="stylesheet" href="css/ita.css" />
+                    <link type="text/css" rel="stylesheet" href="css/eng.css" />
+                    <link type="text/css" rel="stylesheet" href="css/deu.css" />
+                    <link type="text/css" rel="stylesheet" href="css/fra.css" />
+                    <link type="text/css" rel="stylesheet" href="css/esp.css" />
+                    <link type="text/css" rel="stylesheet" href="css/ui.fancytree.min.css" />
+                    <link type="text/css" rel="stylesheet" href="css/bootstrap.min.css" />
+                    <link type="text/css" rel="stylesheet" href="css/ionicons.min.css" />
+                    <link type="text/css" rel="stylesheet" href="css/fa-svg-with-js.css" /> -->
+                    <!--WEB-->
+                    <!--<link type="text/css" rel="stylesheet" href="css/web.css" />-->
+                    <!--WEB-->
+                    <!--<link type="text/css" rel="stylesheet" href="css/star-rating.min.css" />
+                    <link type="text/css" rel="stylesheet" href="css/dataTables.bootstrap.min.css" />
+                    <link type="text/css" rel="stylesheet" href="css/survey.css" />
+                    <link type="text/css" rel="stylesheet" href="css/bootstrap-multiselect.css" /> -->
+                    <link type="text/css" rel="stylesheet" href="css/build/production.min.css"></link>
+                    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,performance.now|always"></script>
+                    <script type="text/javascript" src="cordova.js"></script>
+                    <script type="text/javascript" src="js/build/production.js"></script>
+                
+                </head>
+                <body id="home" style="background-color: white">
+                    
+                    <script type="text/javascript">
+                        application.initialize();
+                    </script>
+                    <div id="loadingOverlayPage" class="loading" style="z-index: 10003;display:none;">Loading&#8230;</div>
+                    <div id="coverMap" style="z-index: 10001;position: absolute; top: 55px; left: 0px; right: 0px; bottom: 0px; background: #eee; text-align: center;">
+                        <img src="img/progressBar.gif" style="position: absolute;left: 20%;right: auto;top: 50%;width: 60%;">
+                    </div>
+                    <div id="indexPage" data-role="page" role="main" style="background-color:white">
+                        <!-- <span id="easterEggReducedMap" style="display: none;">
+                            <img src="img/ooops.jpg" style="position: absolute; bottom: 15px; width: 50%; left: 25%;">
+                            <button class="btn btn-success" style="position: absolute; bottom: 10px; width: 50%; left: 25%;" onclick="application.resetInterface();">OK</button>
+                        </span> -->
+                        <nav id="navbar" class="navbar navbar-default navbar-fixed-top" style="z-index: 1000">
+                            <img onclick="PrincipalMenu.fromHomeButton = true; PrincipalMenu.show();PrincipalMenu.checkForBackButton();" src="img/km4city.png" width="40" height="40" class="pull-left" style="margin-left: 7px;margin-top: 8px;">
+                            <a class="navbar-brand ui-link" onclick="PrincipalMenu.fromHomeButton = true; PrincipalMenu.show(); PrincipalMenu.checkForBackButton();" href="#" style="padding-right: 5px;"><i class="fas fa-home" style="color:#777;font-size: 35px; margin-top: 3px;"></i></a>            
+                            <ul class="nav navbar-nav navbar-right">
+                                <li class="dropdown" id="dropdownThreeVertical">
+                                    <a class="dropdown-toggle navbar-text"
+                                       data-toggle="dropdown" role="button" aria-expanded="false">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </a>
+                                    <ul id="threeVerticalDotMenu" class="dropdown-menu"
+                                        style="min-width: 0px; top: 100%; right: 0px; left: auto;"
+                                        role="menu"></ul>
+                                </li>
+                                <li>
+                                    <a href="#textSearchMenu" role="button" class="navbar-text"
+                                       onclick="TextSearcher.show()">
+                                        <i class="fas fa-search"></i>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#categorySearchMenu" role="button" class="navbar-text"
+                                       onclick="CategorySearcher.showPanelMenu()">
+                                        <i id="categorySearchMenuImage" class="fas fa-list-ul"></i>
+                                    </a>
+                                </li>
+                                 <li class="dropdown" id="dropdownUser" style="display:none">
+                                    <a class="dropdown-toggle navbar-text"
+                                       data-toggle="dropdown" role="button" aria-expanded="false">
+                                        <i class="fas fa-user"></i>
+                                    </a>
+                                    <ul id="dropdownUserMenu" class="dropdown-menu"
+                                        style="min-width: 0px; top: 100%; right: 0px; left: auto;"
+                                        role="menu"></ul>
+                                </li>
+                            </ul>
+                        </nav>
+                        <nav id="navbarNavigation" class="navbar navbar-default navbar-fixed-top" style="z-index: 1001">
+                            <img onclick="PrincipalMenu.show();" src="img/km4city.png" width="40" height="40" class="pull-left" style="margin-left: 7px;margin-top: 8px;">
+                            <a class="navbar-brand ui-link" onclick=" PrincipalMenu.show();" href="#" style="padding-right: 5px;"><i class="fas fa-home" style="color:#777;font-size: 25px; margin-top: 5px;"></i></a>
+                            <p id="navigationMode" class="navbar-text" style="font-size: 19px; margin-top: 14px; float: right; padding-right: 8px;"></p> 
+                        </nav>
+                        <div id="chronologyMenu" class="commonMenu"></div>
+                        <div id="favouritesMenu" class="commonMenu"></div>
+                        <div id="lastContributionsMenu" class="commonMenu"></div>
+                        <div id="personalAssistantMenu" class="commonMenu"></div>
+                        <div id="ticketingMenu" class="commonMenu"></div>
+                        <div id="survey">
+                            <div class="panel panel-default">
+                                <div class="panel-heading" style="height: 55px; ">
+                                    <a class="pull-right" onclick="SurveyTaker.hide();"><i class="glyphicon glyphicon-remove" style="color: #777;float: right; padding-top: 14px;"></i></a>
+                                    <b id="surveyHeaderTitle" style="float: left; padding-top: 10px;">
+                                        <i class="glyphicon glyphicon-list-alt"></i> Survey
+                                    </b>
+                                </div>
+                            </div>
+                            <div id="surveyInner">
+                            </div>
+                        </div>
+                        <div id="gpsPopup"></div>
+                        <div id="manualPopup"></div>
+                        <div id="carPopup"></div>
+                        <div id="manualRoutingPopup"></div>
+                        <div id="selectedServicePopup"></div>
+                        <div id="content" data-role="content" data-enhance="true" style="padding-top: 55px; background-color: #EEEEEE;">
+                            <div id="map" class="map"></div>
+                        </div>
+                        <div id="categorySearchMenu" data-role="panel" data-position="right"
+                             data-display="overlay" data-dismissible="false" data-swipe-close="false" style="border-radius: 4px;z-index: 999;"></div>
+                        <div id="loadingImage">
+                            <img src="img/loading.gif" style="width: 100%; height: 100%">
+                        </div>
+                        <div id="autoSearchLoadingImage">
+                            <img src="img/loading.gif" style="width: 100%; height: 100%">
+                        </div>
+                        <div id="settingsLoadingImage">
+                            <img src="img/settingsLoading.gif" style="width: 100%; height: 100%">
+                        </div>
+                        <div class="modal" id="dialogModal" tabindex="-1"
+                             role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                        </div>
+                        <div id="servicesFounded">
+                            <a id="servicesFoundedInner" onclick="InfoManager.openLastSearchPerformed();"></a>
+                        </div>
+                        <div id="infoCarPosition">
+                            <span id="infoCarPositionInner"></span>
+                        </div>
+                        <div id="lastOperation">
+                            <div id="lastOperationInner">
+                            </div>
+                        </div>
+                        <div id="openNavigator" style="left: 30%;right: 30%;bottom: 75px;position: absolute;z-index: 998;display:none;text-align:center;">
+                            <div id="openNavigatorInner" onclick="PathFinder.hide(true); Navigator.start(true); $('#openNavigator').hide();" class="btn btn-lg btn-success">
+                                
+                            </div>
+                        </div>
+                        <div id="openPathFinder" style="left: 30%;right: 30%;bottom: 10px;position: absolute;z-index: 998;display:none;text-align:center;">
+                            <div id="openPathFinderInner" onclick="Navigator.showPathFinder();" class="btn btn-lg btn-success">
+                                
+                            </div>
+                        </div>
+                        <div id="positionOnMarker" style="left: 30%;right: 30%;bottom: 50px;position: absolute;z-index: 998;display:none;text-align:center;">
+                            <div id="positionOnMarkerInner" onclick="Navigator.centerMapOnNavigatorMarker();" class="btn btn-lg btn-primary">
+                
+                            </div>
+                        </div>
+                
+                        <div id="navigatorDirection" style="left: 0px;right: 0px;bottom: 0px;position: absolute;z-index: 998;display: none;background-color: white;" class="card-2">
+                            <b style="font-size: 30px;padding: 11px;color: #777;" id="navigatorDirectionDistance">-</b>
+                            <i class="fas fa-2x fa-minus" style="color: darkgreen;" id="navigatorDirectionWay"></i>
+                            <span style="float:right;font-size: 16px;padding: 10px;" id="navigatorDirectionRoad">-</span>
+                            <!-- <div id="navigatorProgressBar" class="progress card-2" style="margin-top:0px; height: 25px;margin-bottom: 0px;border-radius: 0px;">
+                                <div id="navigatorProgressBarStatus" class="progress-bar progress-bar-danger" style="width: 0%;">
+                                </div>
+                            </div> -->
+                        </div>
+                         
+                        <div id="navigatorSpeed" class="card-2 circleInfo"></div>
+                        <div id="navigatorEta" class="card-2 circleInfo" style="bottom:210px; padding: 20px 0px;"></div>
+                        <div id="navigatorDistance" class="card-2 circleInfo" style="bottom:130px"></div>
+                    </div>
+                
+                    <div id="testProdAPIAlert" class="testProdAlert" style="left: 10%; width: 15%; height: 32px;">API</div>
+                    <div id="testProdRecommendAlert" class="testProdAlert" style="left: 25%; width: 15%; height: 32px;">Rec</div>
+                    <div id="testProdSensorAlert" class="testProdAlert" style="left: 40%; width: 15%; height: 32px;">Sens</div>
+                    <div id="testProdPhotoAlert" class="testProdAlert" style="left: 55%; width: 15%; height: 32px;">Photo</div>
+                    <div id="testProdPersAlert" class="testProdAlert" style="left: 70%; width: 15%; height: 32px;">Pers</div>
+                    <div id="profileShower">
+                        <div id="profileShowerInner"></div>
+                    </div>
+                
+                    <div class="modal" id="sendPhotoModal" tabindex="-1"
+                         role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" style="width: 95%;">
+                            <div class="modal-content"
+                                 style="text-align: center; margin: 0px 10px">
+                                <div class="modal-body" style="padding-bottom: 0px">
+                                    <img src="" id="sendPhotoPreview"
+                                         style="max-width: 233px; max-height: 60%; margin-bottom: 15px"
+                                         class="center-block img-responsive card-2">
+                                    <b id="userStarsLabelSendPhotoModal" style="color: #777"></b>
+                                    <input id="inputStarsSendPhotoModal" type="number" class="rating" min=0 max=5 step=1 data-size="sm" data-show-clear="false" data-default-caption="{rating}" data-star-captions="{}">
+                                    <b id="commentLabelSendPhotoModal" style="margin-top: 15px;color: #777"></b>
+                                    <br />
+                                    <textarea id="textAreaCommentsSendPhotoModal" style="resize: vertical;width: 233px; height: 50px; border: 1px solid #777;"></textarea>
+                                    </div>
+                                <div class="modal-footer" style="text-align: center;border: 0px;">
+                                    <button id="sendPhotoModalCancelButton" type="button" class="btn btn-default" style="width:75px;" onclick="PictureManager.hideSendPhotoModal();"></button>
+                                    <button id="sendPhotoModalSendButton" type="button" class="btn btn-success card-2" style="color: white;width:75px;" onclick="PictureManager.uploadPhoto(); PictureManager.hideSendPhotoModal();"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal" id="sendPhotoAlbumModal" tabindex="-1"
+                         role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" style="width: 95%;">
+                            <div class="modal-content"
+                                 style="text-align: center; margin: 0px 10px">
+                                <div class="modal-body" id="sendPhotoAlbumModalBody" style="padding-bottom: 0px">
+                                    <div id="sendPhotoAlbumModalImageList" style="margin-bottom: 15px;"></div>
+                                    <b id="userStarsLabelSendPhotoAlbumModal" style="color: #777"> </b>
+                                    <input id="inputStarsSendPhotoAlbumModal" type="number" class="rating" min=0 max=5 step=1 data-show-clear="false" data-size="sm" data-default-caption="{rating}" data-star-captions="{}">
+                                    <b id="commentLabelSendPhotoAlbumModal" style="margin-top: 15px;color: #777"> </b>
+                                    <br />
+                                    <textarea id="textAreaCommentsSendPhotoAlbumModal" style="resize: vertical;width: 233px; height: 50px; border: 1px solid #777;"></textarea>
+                                </div>
+                                <div class="modal-footer" id="sendPhotoAlbumModalFooter" style="text-align: center;border: 0px;">
+                                    <button id="sendPhotoAlbumModalCancelButton" type="button" class="btn btn-default" style="width:75px;" onclick="PictureManager.hideSendPhotoAlbumModal();"></button>
+                                    <button id="sendPhotoAlbumModalSendButton" type="button" class="btn btn-success card-2" style="color: white;width:75px;" onclick="PictureManager.uploadPhoto(); PictureManager.hideSendPhotoAlbumModal();"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal" id="starsModal" tabindex="-1"
+                         role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" style="width: 95%;">
+                            <div class="modal-content"
+                                 style="text-align: center; margin: 0px 10px">
+                                <div class="modal-body" style="display: inline-block;padding-bottom: 0px">
+                                    <form id="inputForm" enctype="multipart/form-data" method="post">
+                                        <input id="inputUploadPhotoFeedbackModal" multiple type="file" accept="image/*" class="btn btn-default" style="display: none">
+                                    </form>
+                                    <button id="buttonUploadPhotoFeedbackModal" type="button" class="btn btn-default" onclick="FeedbackManager.pickPhotoFromAlbum();" style="border: 0px;margin-bottom: 15px;"></button>
+                                    <button id="buttonTakePhotoFeedbackModal" type="button" class="btn btn-default" onclick="FeedbackManager.takePhoto();" style="border: 0px;margin-bottom: 15px;"></button>
+                                    <br />
+                                    <b id="userStarsLabelSendFeedbackModal" style="color: #777"></b>
+                                    <input id="inputStarsFeedbackModal" type="number" class="rating" min=0 max=5 step=1 data-size="sm" data-show-clear="false" data-default-caption="{rating}" data-star-captions="{}">
+                                    <b id="commentLabelSendFeedbackModal" style="margin-top: 15px;color: #777"> </b>
+                                    <br />
+                                    <textarea id="textAreaCommentsFeedbackModal" style="resize: vertical; width: 233px;height: 50px; border: 1px solid #777;"></textarea>
+                                </div>
+                                <div class="modal-footer" style="text-align: center;border: 0px;">
+                                    <button id="starsModalCancelButton" type="button" class="btn btn-default" style="width:90px;" onclick="FeedbackManager.hideModal();"></button>
+                                    <button id="starsModalSendButton" type="button" class="btn btn-success card-2" style="color: white;width:90px;" onclick="FeedbackManager.sendStars();"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal" id="serviceImageModal" tabindex="-1"
+                         role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    </div>
+                    <div class="modal" id="infoSOCModal" tabindex="-1"
+                         role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" style="width: 95%;">
+                            <div class="modal-content" style="text-align: center; margin: 0px 10px">
+                                <div id="infoSOCModalBody" class="modal-body">
+                                </div>
+                                <div class="modal-footer" style="padding: 0px; border: 0px">
+                                    <button id="infoSOCModalFooterButton" type="button" class="btn btn-default" data-dismiss="modal" aria-label="Close" style="width:100%;border-top-left-radius:0px; border-top-right-radius:0px; border-left: 0px;border-right: 0px;border-bottom: 0px;" onclick="InfoSOCManager.hideInfoSOCModal();"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal" id="instigatorImageModal" tabindex="-1"
+                         role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" style="max-width: 95%; max-height: 80%;">
+                            <div class="modal-content">
+                                <div class="modal-body" id="instigatorImageModalBody">
+                                    <div style="max-width: 100%; max-height: 100%" class="imgPreview">
+                                        <canvas id="instigatorImagePreview" style="width: 100%; height: 100%">
+                                    </div>
+                                </div>
+                                <div class="modal-footer" style="padding: 0px; border-bottom: 0px">
+                                    <button id="instigatorImageModalFooterButton" type="button" class="btn btn-default" data-dismiss="modal" aria-label="Close" style="width:100%;border-top-left-radius:0px; border-top-right-radius:0px; border-left: 0px;border-right: 0px;border-bottom: 0px;" onclick="Instigator.hideModal();"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal" id="infoRouteModal" tabindex="-1"
+                         role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    </div>
+                    <div class="modal" id="timetableModal" tabindex="-1"
+                         role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    </div>
+                    <div class="modal" id="filterFuelStationModal" tabindex="-1"
+                         role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+                    </div>
+                    <div class="modal" id="filterTPLModal" tabindex="-1"
+                         role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+                    </div>
+                    <div class="modal" id="timerCarPositionModal" tabindex="-1"
+                         role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+                    </div>
+                </body>
+                </html>

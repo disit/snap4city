@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "http://servicemap.disit.org/WebAppGrafo/api/v1"
+      "url": "https://servicemap.disit.org/WebAppGrafo/api/v1"
     }
   ],
   "paths": {
@@ -1345,6 +1345,293 @@
           },
           "404": {
             "description": "Invalid user id."
+          }
+        }
+      }
+    },
+    "/shortestpath": {
+      "get": {
+        "tags": [
+          "Routing"
+        ],
+        "summary": "Shortest Path Finder",
+        "description": "This API allows to get a path from a source point to a destination point. The points can be specified as latitude;longitude coordinates or using the serviceUri of a service. The path is provided as WKT geometry and as a sequence of arcs between nodes (the service uses the OpenStreetMap road graph). The type of route can be specified as using public transport, feet, or car. The start datetime is used to select the options for public_transport and to evaluate the time needed to make the path.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "source",
+            "description": "_lat_;_long_ or service URI of the starting point.\n\n_Example:_ 43.7767;11.2477\n",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "destination",
+            "description": "_lat_;_long_ or service URI of the destination.\n\n_Example:_ 43.7687;11.2620\n",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "routeType",
+            "description": "Can be _public_transport_, _foot_shortest_, _foot_quiet_, or _car_. It defaults to _foot_shortest_.\n\n_Example:_ foot_shortest\n",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "public_transport",
+                "foot_shortest",
+                "foot_quiet",
+                "car"
+              ],
+              "default": "foot_shortest"
+            }
+          },
+          {
+            "in": "query",
+            "name": "startDatetime",
+            "description": "Date and time of start. It defaults to the current date and time.\n\n_Example:_ 2017-01-13T12:34:00\n",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "description": "The output format. It can be _json_, or _html_. It defaults to _json_.\n\n_Example:_ html\n",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "html"
+              ],
+              "default": "json"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uid",
+            "description": "A user identifier.\n\n_Example:_ e7c13b5ce309dcddce9f72c810c3f93c61ac1c47d66126127f7a78bd5c2cb8a2\n",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The API provides a JSON object with the path from the source to the destination. [[HTML Example]](http://servicemap.disit.org/WebAppGrafo/api/v1/shortestpath/?source=43.7767;11.2477&destination=43.7687;11.2620&format=html) [[JSON Example]](http://servicemap.disit.org/WebAppGrafo/api/v1/shortestpath/?source=43.7767;11.2477&destination=43.7687;11.2620)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "pathsearch_time": {
+                      "type": "number",
+                      "format": "double",
+                      "example": 38.718251
+                    },
+                    "journey": {
+                      "type": "object",
+                      "properties": {
+                        "source_node": {
+                          "type": "object",
+                          "properties": {
+                            "lon": {
+                              "type": "number",
+                              "format": "double",
+                              "example": 11.247889800000012
+                            },
+                            "lat": {
+                              "type": "number",
+                              "format": "double",
+                              "example": 43.77658149999974
+                            },
+                            "node_id": {
+                              "type": "string",
+                              "example": 2531656509
+                            }
+                          }
+                        },
+                        "destination_node": {
+                          "type": "object",
+                          "properties": {
+                            "lon": {
+                              "type": "number",
+                              "format": "double",
+                              "example": 11.247889800000012
+                            },
+                            "lat": {
+                              "type": "number",
+                              "format": "double",
+                              "example": 43.77658149999974
+                            },
+                            "node_id": {
+                              "type": "string",
+                              "example": 2531656509
+                            }
+                          }
+                        },
+                        "search_route_type": {
+                          "type": "string",
+                          "example": "shortest_foot_optimization"
+                        },
+                        "start_datetime": {
+                          "type": "string",
+                          "format": "date-time",
+                          "example": "2018-10-02T10:48:51"
+                        },
+                        "routes": {
+                          "type": "object",
+                          "properties": {
+                            "wkt": {
+                              "type": "string",
+                              "example": "LINESTRING(11.247773300000013 43.776550599999744,11.247889800000012 43.77658149999974,11.248006000000013 43.77661179999975,11.248124300000011 43.77664249999975,11.24830620000001 43.77669059999975,11.24846460000001 43.776735099999755,11.248531900000023 43.7766016,11.24887640000001 43.776686199999986,11.248965100000024 43.77670890000001,11.249017000000006 43.776722200000165,11.249046300000023 43.7767299,11.249252699999948 43.77678319999993,11.24927209999999 43.776788200000055,11.24931299999999 43.77679870000006,11.249333199999947 43.77680389999993,11.24935249999993 43.77680889999993,11.249553099999991 43.77627370000006,11.249689600000035 43.77590960000006,11.249719500000003 43.775805800000114,11.249735999999974 43.77576359999974,11.249945500000004 43.7752983,11.250034100000006 43.77508940000016,11.250061300000004 43.775025200000115,11.250103200000009 43.77491180000031,11.250258000000004 43.77463709999994,11.250346900000004 43.774554000000194,11.250363200000006 43.774538400000175,11.250374899999992 43.77452800000015,11.250392400000004 43.77451490000019,11.25121969999999 43.77397750000005,11.25126949999997 43.773945199999936,11.251320300000014 43.773912999999986,11.251996599999968 43.773543700000275,11.25222250000001 43.77342030000003,11.252272200000014 43.773420399999985,11.252559700000008 43.77342129999998,11.25274760000001 43.77342180000004,11.252761000000007 43.77320539999998,11.25276369999999 43.77316250000003,11.252764299999955 43.77314639999993,11.252777000000039 43.77295750000007,11.25279079999999 43.77274759999997,11.252790999999975 43.77269850000001,11.252792399999969 43.77243069999996,11.252793299999999 43.77224639999996,11.252793599999944 43.77219620000016,11.252792799999998 43.77216019999996,11.252777600000048 43.771499600000105,11.25337260000002 43.77148880000001,11.25352890000002 43.7714817,11.253574100000016 43.77148310000001,11.253570400000013 43.77134440000003,11.253564500000014 43.77111860000015,11.253627799999965 43.77111760000016,11.253826299999988 43.77111699999993,11.254141399999988 43.77111619999993,11.254350299999965 43.77111560000017,11.254427200000006 43.77111499999997,11.254422600000016 43.77088650000006,11.254589900000013 43.77088160000003,11.254685200000011 43.77087860000021,11.254769500000014 43.770874000000234,11.255304300000049 43.77086360000011,11.25529370000001 43.7705961,11.25568590000005 43.770564600000114,11.25586909999997 43.770553600000255,11.25592940000005 43.770549400000114,11.256109300000048 43.77053510000012,11.256097300000063 43.770208899999915,11.256413499999972 43.770213000000226,11.256672699999996 43.77020680000021,11.256846700000063 43.77019789999992,11.25703829999997 43.770176699999986,11.257440699999997 43.77007620000021,11.25769100000001 43.769971500000054,11.257869600000001 43.76991279999989,11.258619200000048 43.76973100000011,11.258822999999982 43.76970029999993,11.259229999999981 43.76966129999993,11.259446799999981 43.769634099999934,11.2595269 43.769619500000054,11.259581499999982 43.769600799999935,11.260587100000025 43.7691122000001,11.260630099999982 43.769091299999936,11.260522999999992 43.768963900000095,11.260680600000027 43.7688982000001,11.260840900000026 43.768831000000105,11.260897500000032 43.76880750000004,11.260909900000033 43.76882090000002,11.261175100000028 43.76870300000011,11.261462600000032 43.76859510000003,11.261585700000033 43.768536800000035,11.261576000000034 43.76852060000002,11.261821299999994 43.7684255000001,11.261813800000027 43.76841470000011,11.261960700000028 43.76834290000011,11.262052300000033 43.768448900000024,11.262093100000003 43.768496100000036,11.262143399999978 43.768559999999894)\n"
+                            },
+                            "arc": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "distance": {
+                                    "type": "number",
+                                    "format": "double",
+                                    "example": 0.009987643869990633
+                                  },
+                                  "start_datetime": {
+                                    "type": "string",
+                                    "format": "time",
+                                    "example": "10:48:51"
+                                  },
+                                  "end_datetime": {
+                                    "type": "string",
+                                    "format": "time",
+                                    "example": "10:48:58"
+                                  },
+                                  "destination_node": {
+                                    "type": "object",
+                                    "properties": {
+                                      "lon": {
+                                        "type": "number",
+                                        "format": "double",
+                                        "example": 11.247889800000012
+                                      },
+                                      "lat": {
+                                        "type": "number",
+                                        "format": "double",
+                                        "example": 43.77658149999974
+                                      },
+                                      "node_id": {
+                                        "type": "string",
+                                        "example": 2531656509
+                                      }
+                                    }
+                                  },
+                                  "source_node": {
+                                    "type": "object",
+                                    "properties": {
+                                      "lon": {
+                                        "type": "number",
+                                        "format": "double",
+                                        "example": 11.247889800000012
+                                      },
+                                      "lat": {
+                                        "type": "number",
+                                        "format": "double",
+                                        "example": 43.77658149999974
+                                      },
+                                      "node_id": {
+                                        "type": "string",
+                                        "example": 2531656509
+                                      }
+                                    }
+                                  },
+                                  "transport_provider": {
+                                    "type": "string",
+                                    "example": "private"
+                                  },
+                                  "transport": {
+                                    "type": "string",
+                                    "example": "foot"
+                                  },
+                                  "transport_service_type": {
+                                    "type": "string",
+                                    "example": "private transport"
+                                  },
+                                  "desc": {
+                                    "type": "string",
+                                    "example": "nd"
+                                  }
+                                }
+                              }
+                            },
+                            "eta": {
+                              "type": "string",
+                              "format": "time",
+                              "example": "11:12:37"
+                            },
+                            "distance": {
+                              "type": "number",
+                              "format": "double",
+                              "example": 1.8425385565618329
+                            },
+                            "time": {
+                              "type": "string",
+                              "format": "time",
+                              "example": "00:23:40"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "node_id_time": {
+                      "type": "number",
+                      "format": "double",
+                      "example": 0.011026000000000001
+                    },
+                    "response": {
+                      "type": "object",
+                      "properties": {
+                        "error_message": {
+                          "type": "string",
+                          "example": "successful"
+                        },
+                        "current_operation": {
+                          "type": "string",
+                          "example": "route optimization"
+                        },
+                        "error_code": {
+                          "type": "string",
+                          "example": 0
+                        }
+                      }
+                    },
+                    "elapsed_ms": {
+                      "type": "integer",
+                      "format": "int32",
+                      "example": 66
+                    },
+                    "message_version": {
+                      "type": "string",
+                      "example": "1.0"
+                    }
+                  }
+                },
+                "example": {
+                  "externalValue": "http://servicemap.disit.org/WebAppGrafo/api/v1/shortestpath/?source=43.7767;11.2477&destination=43.7687;11.2620"
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "format": "html"
+                },
+                "example": {
+                  "externalValue": "http://servicemap.disit.org/WebAppGrafo/api/v1/shortestpath/?source=43.7767;11.2477&destination=43.7687;11.2620&format=html"
+                }
+              }
+            }
           }
         }
       }

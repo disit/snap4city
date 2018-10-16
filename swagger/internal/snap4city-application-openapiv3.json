@@ -1,0 +1,111 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Snap4City Application API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://192.168.0.207/snap4city-application-api/v1"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "tags": [
+          "Create"
+        ],
+        "summary": "Creates, restarts, deletes, or check the healthiness of Node-RED IoT Apps",
+        "parameters": [
+          {
+            "name": "op",
+            "in": "query",
+            "description": "The operation to be performed. It is expected to be one of: \n* _new_nodered_, for creating a new App;\n* _restart_app_, for restarting an App;\n* _rm_app_, for deleting an App;\n* _status_, for checking the current healthiness status of the App.\n",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "new_nodered",
+                "restart_app",
+                "rm_app",
+                "status"
+              ]
+            },
+            "example": "new_nodered"
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "description": "The name of the app. It is expected to be submitted for App creation.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "The type of creation. It is expected to be submitted for App creation.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "basic",
+                "advanced"
+              ]
+            }
+          },
+          {
+            "name": "accessToken",
+            "in": "query",
+            "description": "The user access token. It is needed for all of the operations.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "query",
+            "description": "The unique identifier of the App. It is expected to be submitted for restarting, deleting, and checking the current healthiness status of an App.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A JSON whose shape depends of the operation. When a new App is created, the JSON contains the unique identifier, the name and the URL of the newly created App. If the healthiness is requested, a boolean that indicates whether the App is healthy or not is returned instead.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "description": "A unique identifier for the App. It is expected to be returned when a new App is created.",
+                      "type": "string"
+                    },
+                    "url": {
+                      "description": "The URL of the App. It is expected to be returned when a new App is created.",
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "name": {
+                      "description": "The name of the App. It is expected to be returned when a new App is created.",
+                      "type": "string"
+                    },
+                    "healthiness": {
+                      "description": "The current healthiness status of the App. It is expected to be returned in response to _status_ operations.",
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

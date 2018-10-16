@@ -1,8 +1,7 @@
 openapi: 3.0.1
 info:
-  title: Resource Manager API v5
-  version: 1.1.0
-  description: At today, the _IoTApp_ only can be uploaded through direct invocations of the API. The upload of other types of information can be performed through the Web interface.
+  title: Resource Manager API v8
+  version: 2.0.0
 servers:
   - url: http://processloader.snap4city.org/processloader/api
 paths:
@@ -11,6 +10,7 @@ paths:
       tags: [Upload]
       summary: Upload a Resource
       requestBody:
+        description: A JSON should be submitted for uploading resources of type IoTApp, AMMA, DevDash, ResDash. A multipart body should be submitted for uploading resources of type IoTBlocks, MicroService.
         content:
           application/json:
             schema:
@@ -18,31 +18,31 @@ paths:
               required:
                 - name
                 - user
-                - app_type
+                - resource_type
                 - nature
                 - sub_nature
                 - licence
                 - description
+                - data
               properties:
                 name:
                   description: Resource title (that appears in the loader home page).
                   type: string
-                  example: IoT_NodereRed_WeatherSensor
+                  example: NodereRed_weather_sensor
                 user:
-                  description: Snap4city LDAP user.
+                  description: A valid access token.
                   type: string
-                  example: badii
-                app_type:
-                  description: Application type details. _IoTApp_ is the graph combining the blocks (json). _IoTBlocks_ is a zip containing one or more NodeRed libraries.
+                resource_type:
+                  description: Resource type.
                   type: string
-                  enum: [IoTApp, IoTBlocks, ResDash, DevDash, AMMA, ControlRoomDashboard, MicroService]
+                  enum: [IoTApp, ResDash, DevDash, AMMA]
                   example: IoTApp
                 nature:
-                  description: Resource KM4City Category. The full list of the permitted values can be retrieved through a [SPARQL query](http://servicemap.disit.org/WebAppGrafo/sparql?query=select%20distinct%20substr(str(?m),37)%20as%20?macroClass%20%7b%20?m%20rdfs:subClassOf%20km4c:Service.%20filter%20exists%20%7b?c%20rdfs:subClassOf%20?m%7d%20%7d%20order%20by%20?m&format=json).
+                  description: Resource KM4City Category. The full list of the permitted values can be retrieved through a [SPARQL query](http://servicemap.disit.org/WebAppGrafo/sparql?query=select%20distinct%20substr(str(?m),37)%20as%20?macroClass%20{%20?m%20rdfs:subClassOf%20km4c:Service.%20filter%20exists%20{?c%20rdfs:subClassOf%20?m}%20}%20order%20by%20?m&format=json).
                   type: string
                   example: Environment
                 sub_nature:
-                  description: Resource KM4City Sub Category. The full list of the permitted values can be retrieved through a [SPARQL query](http://servicemap.disit.org/WebAppGrafo/sparql?query=%20select%20distinct%20substr(str(?m),37)%20as%20?macroClass%20substr(str(?c),37)%20as%20?subClass%20%7b%20?m%20rdfs:subClassOf%20km4c:Service.%20?c%20rdfs:subClassOf+%20?m.%20%7d%20order%20by%20?m%20?c&format=json).
+                  description: Resource KM4City Sub Category. The full list of the permitted values can be retrieved through a [SPARQL query](http://servicemap.disit.org/WebAppGrafo/sparql?query=%20select%20distinct%20substr(str(?m),37)%20as%20?macroClass%20substr(str(?c),37)%20as%20?subClass%20{%20?m%20rdfs:subClassOf%20km4c:Service.%20?c%20rdfs:subClassOf+%20?m.%20}%20order%20by%20?m%20?c&format=json).
                   type: string
                   example: Weather_sensor
                 format:
@@ -59,63 +59,357 @@ paths:
                   description: Description
                   type: string
                   example: A flow coming from NodeRed
-                url: 
-                  type: string
-                method:
-                  type: string
-                help:
-                  type: string
                 data:
                   description: Data
                   type: array
                   items:
-                    type: object
-                    properties:
-                      id:
-                        type: string
-                        example: 895ff442.3d7148
-                      type:
-                        type: string
-                        example: twitter in
-                      tags:
-                        type: string
-                      z:
-                        type: string
-                        example: cbed55e.e236da8
-                      user:
-                        type: boolean
-                        example: false
-                      name:
-                        type: string
-                      topic:
-                        type: string
-                        example: tweets
-                      inputs:
-                        type: integer
-                        format: int32
-                      x:
-                        type: integer
-                        format: int32
-                        example: 150
-                      y:
-                        type: integer
-                        format: int32
-                        example: 120
-                      wires:
-                        type: array
-                        items: 
-                          type: array
-                          items:
-                            type: string
-                            example: c648a579.645268
+                    $ref: '#components/schemas/data'
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - resource
+                - request
+              properties:
+                resource:
+                  description: A compressed file (ZIP, or RAR).
+                  type: string
+                  format: binary
+                request:
+                  type: object
+                  required:
+                    - name
+                    - user
+                    - resource_type
+                    - nature
+                    - sub_nature
+                    - licence
+                    - description
+                  properties:
+                    name:
+                      description: Resource title (that appears in the loader home page).
+                      type: string
+                      example: NodereRed_weather_sensor
+                    user:
+                      description: A valid access token.
+                      type: string
+                    resource_type:
+                      description: Resource type.
+                      type: string
+                      enum: [IoTBlocks, MicroService]
+                      example: MicroService
+                    nature:
+                      description: Resource KM4City Category. The full list of the permitted values can be retrieved through a [SPARQL query](http://servicemap.disit.org/WebAppGrafo/sparql?query=select%20distinct%20substr(str(?m),37)%20as%20?macroClass%20{%20?m%20rdfs:subClassOf%20km4c:Service.%20filter%20exists%20{?c%20rdfs:subClassOf%20?m}%20}%20order%20by%20?m&format=json).
+                      type: string
+                      example: Environment
+                    sub_nature:
+                      description: Resource KM4City Sub Category. The full list of the permitted values can be retrieved through a [SPARQL query](http://servicemap.disit.org/WebAppGrafo/sparql?query=%20select%20distinct%20substr(str(?m),37)%20as%20?macroClass%20substr(str(?c),37)%20as%20?subClass%20{%20?m%20rdfs:subClassOf%20km4c:Service.%20?c%20rdfs:subClassOf+%20?m.%20}%20order%20by%20?m%20?c&format=json).
+                      type: string
+                      example: Weather_sensor
+                    format:
+                      description: Format of the source file (original data).
+                      type: string
+                      example: xml
+                    licence:
+                      description: Licence of use. Is an URL to a licence.
+                      type: string
+                      format: url
+                      enum: [https://creativecommons.org/licenses/by/4.0]
+                      example: https://creativecommons.org/licenses/by/4.0
+                    description:
+                      description: Description
+                      type: string
+                      example: A flow coming from NodeRed
+                    url:
+                      description: Mandatory for the resources of type __MicroService__.
+                      type: string
+                    method:
+                      description: Mandatory for the resources of type __MicroService__.
+                      type: string                    
+                    help:
+                      description: Mandatory for the resources of type __MicroService__.
+                      type: string                  
         required: true
       responses:
         200:
           description: Success.
-        400:
-          description: Insert NOT done due to incorrect json formatting or lack of mandatory data.
+        401:
+          description: App type (__resource_type__) not recognised.
+        402:
+          description: Insert NOT done due to lack of mandatory data.
         500:
-          description: DB connection failure and unmanaged errors.
+          description: DB connection error.
+        501: 
+          description: DB problem.
+        502:
+          description: Upload failed.
+        503:
+          description: File not compressed.
+        504:
+          description: Missing input __resource__.
+        505:
+          description: Cannot decode JSON.
+        506:
+          description: Request (POST) not set.
+  /download.php:
+    get:
+      tags: [Download]
+      summary: Download a Resource via Resource ID
+      description: |
+      
+        A remarkable note about the __user__ and __status__ parameters:
+        
+        * If the access token is submitted through the __user__ parameter, but the __status__ is not specified, then details are returned about all the resources created by the user (both _Private_ and _Public_);
+        * If the access token is submitted through the __user__ parameter, and the __status__ is also submitted and set to _Private_, then details are returned about all the _Private_ resources created by user;
+        * If the access token is submitted through the __user__ parameter, and the __status__ is also submitted and set to _Public_, then details are returned about all the _Public_ resources created by user; 
+        * If the access token is submitted through the __user__ parameter, and the __status__ is also submitted and set to _All_, then details are returned about all the resources created by user, and about all the _Public_ resources created by other users;
+        * If nor the __user__ neither the __status__ parameters are submitted, all the _Public_ resources are returned that have been created by users other than the requester.
+        
+      parameters:
+        - name: id
+          in: query
+          description: Resource ID
+          required: true
+          schema:
+            type: string
+          example: 300
+        - name: user
+          in: query
+          description: User access token. Required for accessing a private resource by ID.
+          required: false
+          schema:
+            type: string
+        - name: resource_type
+          in: query
+          description: Resource type. It is a filter that can be submitted in those requests where the ID of the resource of interest is not specified. 
+          required: false
+          schema: 
+            type: string
+            enum: [IoTApp, ResDash, DevDash, AMMA, IoTBlocks, MicroService, ETL, R, Java]
+          example: IoTApp
+        - name: nature
+          in: query
+          description: Resource KM4City Category. It is a filter that can be submitted in those requests where the ID of the resource of interest is not specified. The full list of the permitted values can be retrieved through a [SPARQL query](http://servicemap.disit.org/WebAppGrafo/sparql?query=select%20distinct%20substr(str(?m),37)%20as%20?macroClass%20{%20?m%20rdfs:subClassOf%20km4c:Service.%20filter%20exists%20{?c%20rdfs:subClassOf%20?m}%20}%20order%20by%20?m&format=json).
+          required: false
+          schema: 
+            type: string
+          example: Environment
+        - name: sub_nature
+          in: query
+          description: Resource KM4City Sub Category. It is a filter that can be submitted in those requests where the ID of the resource of interest is not specified. The full list of the permitted values can be retrieved through a [SPARQL query](http://servicemap.disit.org/WebAppGrafo/sparql?query=%20select%20distinct%20substr(str(?m),37)%20as%20?macroClass%20substr(str(?c),37)%20as%20?subClass%20{%20?m%20rdfs:subClassOf%20km4c:Service.%20?c%20rdfs:subClassOf+%20?m.%20}%20order%20by%20?m%20?c&format=json).
+          required: false
+          schema:
+            type: string
+          example: Weather_sensor
+        - name: format
+          in: query
+          description: Format of the source file (original data). It is a filter that can be submitted in those requests where the ID of the resource of interest is not specified. 
+          required: false
+          schema:
+            type: string
+          example: xml
+        - name: licence
+          in: query
+          description: Licence of use. Is an URL to a licence. It is a filter that can be submitted in those requests where the ID of the resource of interest is not specified. 
+          required: false
+          schema: 
+            type: string
+            format: url
+            enum: [https://creativecommons.org/licenses/by/4.0]
+          example: https://creativecommons.org/licenses/by/4.0
+        - name: access
+          in: query
+          description: Access. It is a filter that can be submitted in those requests where the ID of the resource of interest is not specified. 
+          required: false
+          schema: 
+            type: string
+        - name: method
+          in: query
+          description: Method. It is a filter that can be submitted in those requests where the ID of the resource of interest is not specified. 
+          required: false
+          schema: 
+            type: string        
+        - name: status
+          in: query
+          description: The resource status. It is meaningfull only if the access token is submitted, through the __user__ parameter. It is a filter that can be submitted in those requests where the ID of the resource of interest is not specified. 
+          required: false
+          schema:
+            type: string
+            enum: [All,Public,Private]
+          example: All  
+                  
+      responses:
+        200:
+          description: A JSON is returned that contains the resource data (also including the attached compressed file if it can be found).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    description: The HTTP response status code.
+                    type: integer
+                    format: int32
+                    enum: [200]
+                  result:
+                    description: The textual description of the HTTP response status code.
+                    type: string
+                    enum: [Ok]
+                  file_link:
+                    description: An URL from where the resource can be downloaded.
+                    type: string
+                    format: uri
+                  file_metadata:
+                    $ref: '#components/schemas/metadata'
+                  files:
+                    type: array
+                    items:
+                      $ref: '#components/schemas/metadata'
+                  file_data:
+                    type: array
+                    items:
+                      $ref: '#components/schemas/data'                
+        500:
+          description: DB connection errors, invalid tokens, invalid input (one or more parameters not recognized), resource type not recognized or not yet implemented.
+        501:
+          description: Database error.
+components:
+  schemas:
+    metadata:
+      description: Metadata about the resource of interest, identified through its unique identifier.
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          description: Resource title (that appears in the loader home page).
+          type: string
+          example: NodereRed_weather_sensor
+        downloads:
+          type: string
+        creation_date:
+          type: string
+          format: date-time
+        average_stars:
+          type: string
+        votes:
+          type: string
+        description:
+          description: Description
+          type: string
+          example: A flow coming from NodeRed
+        resource_type:
+          type: string
+          enum: [IoTApp, ResDash, DevDash, AMMA, IoTBlocks, MicroService]
+        nature:
+          description: Resource KM4City Category. The full list of the permitted values can be retrieved through a [SPARQL query](http://servicemap.disit.org/WebAppGrafo/sparql?query=select%20distinct%20substr(str(?m),37)%20as%20?macroClass%20{%20?m%20rdfs:subClassOf%20km4c:Service.%20filter%20exists%20{?c%20rdfs:subClassOf%20?m}%20}%20order%20by%20?m&format=json).
+          type: string
+          example: Environment
+        sub_nature:
+          description: Resource KM4City Sub Category. The full list of the permitted values can be retrieved through a [SPARQL query](http://servicemap.disit.org/WebAppGrafo/sparql?query=%20select%20distinct%20substr(str(?m),37)%20as%20?macroClass%20substr(str(?c),37)%20as%20?subClass%20{%20?m%20rdfs:subClassOf%20km4c:Service.%20?c%20rdfs:subClassOf+%20?m.%20}%20order%20by%20?m%20?c&format=json).
+          type: string
+          example: Weather_sensor
+        format:
+          description: Format of the source file (original data).
+          type: string
+          example: xml
+        licence:
+          description: Licence of use. Is an URL to a licence.
+          type: string
+          format: url
+          enum: [https://creativecommons.org/licenses/by/4.0]
+          example: https://creativecommons.org/licenses/by/4.0
+        url:
+          description: Expected to be found for the resources of type __MicroService__.
+          type: string
+        method:
+          description: Expected to be found for the resources of type __MicroService__.
+          type: string                    
+        help:
+          description: Expected to be found for the resources of type __MicroService__.
+          type: string   
+        access:
+          type: string
+        public:
+          type: string
+          enum: [0,1]      
+    data:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 355d95d.ba7306a
+        type:
+          type: string
+          example: inject
+        tags:
+          type: string
+        z:
+          type: string
+          example: 1fbdd2b9.847dad
+        user:
+          type: boolean
+          example: false
+        name:
+          type: string
+        filename:
+          type: string
+        format:
+          type: string
+          example: utf8
+        chunk:
+          type: boolean
+          example: false
+        sendError:
+          type: boolean
+          example: false
+        server: 
+          type: string
+          example: smtp.gmail.com
+        port:
+          type: string
+          example: 465
+        secure: 
+          type: boolean
+          example: true
+        dname:
+          type: string
+        topic:
+          type: string
+          example: tweets
+        payload:
+          type: string
+        payloadType:
+          type: string
+          example: date
+        repeat:
+          type: string
+        crontab:
+          type: string
+        once:
+          type: string
+        onceDelay:
+          type: string
+        inputs:
+          type: integer
+          format: int32
+          example: 0
+        x:
+          type: integer
+          format: int32
+          example: 150
+        y:
+          type: integer
+          format: int32
+          example: 120
+        wires:
+          type: array
+          items: 
+            type: array
+            items:
+              type: string
+              example: c648a579.645268
+    
 externalDocs:
   description: Process Loader home page
   url: http://processloader.snap4city.org 
