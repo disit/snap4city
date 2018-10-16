@@ -23,5 +23,17 @@ $db_pwd = "password";
 $sso_client_id = 'php-ownership-api';
 $sso_client_secret = '...secret...';
 $sso_login_redirect = 'http://localhost/ownership-api/login/';
+$sso_userinfo_endpoint = 'http://localhost:8088/auth/realms/master/protocol/openid-connect/userinfo';
 
+$log_path = '/tmp';
+
+$trustedIpAddrs = array('localhost');
+
+$keycloack_base_url = 'http://localhost:8088/auth';
+$keycloack_admin = 'admin';
+$keycloack_pwd = '...password...';
+
+$ldapServer = 'localhost';
+$ldapPort = '389';
+$ldapBaseDN = 'dc=test,dc=example,dc=org';
 

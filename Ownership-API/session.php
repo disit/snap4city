@@ -16,19 +16,19 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
 require '../../vendor/autoload.php';
+require_once '../../config.php';
+require_once 'common.php';
+
 use Jumbojett\OpenIDConnectClient;
 
-if(isset($_REQUEST['username'])) {
+$ipAddress = @get_client_ip_server();
+if(isset($_REQUEST['username']) && in_array($ipAddress, $trustedIpAddrs)) {
   $uinfo=new stdClass();
   $uinfo->username=$_REQUEST['username'];
   $uinfo->mainRole='';
 } else {
   $oidc = new OpenIDConnectClient();
-  $oidc->providerConfigParam(array('authorization_endpoint'=>'https://www.snap4city.org/auth/realms/master/protocol/openid-connect/auth'));
-  $oidc->providerConfigParam(array('token_endpoint'=>'https://www.snap4city.org/auth/realms/master/protocol/openid-connect/token'));
-  $oidc->providerConfigParam(array('userinfo_endpoint'=>'https://www.snap4city.org/auth/realms/master/protocol/openid-connect/userinfo'));
-  $oidc->providerConfigParam(array('jwks_uri'=>'https://www.snap4city.org/auth/realms/master/protocol/openid-connect/certs'));
-  $oidc->providerConfigParam(array('issuer'=>'https://www.snap4city.org/auth/realms/master'));
+  $oidc->providerConfigParam(array('userinfo_endpoint'=>$sso_userinfo_endpoint));
 
   if(isset($_SESSION['accessToken'])) {
     $accessToken=$_SESSION['accessToken'];
@@ -37,6 +37,7 @@ if(isset($_REQUEST['username'])) {
   } else {
     header("HTTP/1.1 401 Unauthorized");
     echo "No token provided";
+    ownership_access_log(['op'=>$OPERATION,'result'=>'NO_TOKEN']);
     exit;
   }
   $oidc->setAccessToken($accessToken);
@@ -46,6 +47,9 @@ if(isset($_REQUEST['username'])) {
   if(isset($uinfo->error)) {
     header("HTTP/1.1 401 Unauthorized");
     echo json_encode($uinfo);
+    $f=fopen($log_path."/ownership-error.log","a");
+    fwrite($f,date('c')." ERROR: ".json_encode($uinfo)."\n");
+    ownership_access_log(['op'=>$OPERATION,'result'=>'UNAUTHORIZED']);
     exit;  
   }
 
@@ -55,11 +59,15 @@ if(isset($_REQUEST['username'])) {
   if(!isset($uinfo->username)) {
     header("HTTP/1.1 400 BAD REQUEST");
     echo "No username found ".json_encode($uinfo);
+    $f=fopen($log_path."/ownership-error.log","a");
+    fwrite($f,date('c')." ERROR: no username found ".json_encode($uinfo)."\n");
+    ownership_access_log(['op'=>$OPERATION,'result'=>'NO_USERNAME']);
     exit;  
   }
   
   $ROLES = array('RootAdmin','ToolAdmin','AreaManager','Manager','Public');
-  $uinfo->mainRole = '';
+  $uinfo->mainRole = 'none';
+
   if(isset($uinfo->roles)) {
     foreach($ROLES as $r) {
       if(in_array($r, $uinfo->roles)) {
@@ -68,4 +76,24 @@ if(isset($_REQUEST['username'])) {
       }
     }
   }
+}
+
+function get_client_ip_server() {
+    $ipaddress = '';
+    if ($_SERVER['HTTP_CLIENT_IP'])
+        $ipaddress = $_SERVER['HTTP_CLIENT_IP'];
+    else if($_SERVER['HTTP_X_FORWARDED_FOR'])
+        $ipaddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    else if($_SERVER['HTTP_X_FORWARDED'])
+        $ipaddress = $_SERVER['HTTP_X_FORWARDED'];
+    else if($_SERVER['HTTP_FORWARDED_FOR'])
+        $ipaddress = $_SERVER['HTTP_FORWARDED_FOR'];
+    else if($_SERVER['HTTP_FORWARDED'])
+        $ipaddress = $_SERVER['HTTP_FORWARDED'];
+    else if($_SERVER['REMOTE_ADDR'])
+        $ipaddress = $_SERVER['REMOTE_ADDR'];
+    else
+        $ipaddress = 'UNKNOWN';
+ 
+    return $ipaddress;
 }

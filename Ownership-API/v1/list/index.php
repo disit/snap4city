@@ -14,9 +14,10 @@
 
    You should have received a copy of the GNU Affero General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
+$OPERATION = 'LIST';
 
 include("../../session.php");
-include("../../config.php");
+require_once ("../../config.php");
 
 $db=mysqli_connect($db_host,$db_user,$db_pwd,$database) or die("DB connection error ");
 
@@ -36,6 +37,11 @@ if(isset($_REQUEST['elementId'])) {
     $ids[] = mysqli_escape_string($db,$id);
   $filter .= "AND elementId IN ('".implode("','",$ids)."') ";
 }
+if(isset($_REQUEST['pubkeySHA1'])) {
+  $pubkeySHA1 = mysqli_escape_string($db, $_REQUEST['pubkeySHA1']);
+  $filter .= "AND publickeySHA1 = '".$pubkeySHA1."' ";
+}
+
 if($uinfo->mainRole=='RootAdmin')
   $userFilter = "1 ";
 else
@@ -47,7 +53,11 @@ $i=0;
 while($o=mysqli_fetch_object($r)) {
   if($i!=0)
     echo ',';
-  //unset($o->id);
+  unset($o->id);
+  if($o->publickeySHA1==null)
+    unset($o->publickeySHA1);
+  unset($o->deleted);
+  unset($o->deletedBy);
   if($o->elementDetails!=null) {
     $o->elementDetails=json_decode($o->elementDetails);
   }
@@ -55,3 +65,5 @@ while($o=mysqli_fetch_object($r)) {
   $i++;
 }
 echo "]\n";
+
+ownership_access_log(['op'=>$OPERATION,'user'=>$uinfo->username,'type'=>isset($_REQUEST['type']) ? $_REQUEST['type'] : 'any','role'=>$uinfo->mainRole]);

@@ -14,9 +14,10 @@
 
    You should have received a copy of the GNU Affero General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
+$OPERATION = 'DELETE';
 
 include("../../session.php");
-include("../../config.php");
+require_once("../../config.php");
 
 $db=mysqli_connect($db_host,$db_user,$db_pwd,$database) or die("DB connection error ");
 
@@ -51,3 +52,5 @@ $nDeleted = mysqli_affected_rows($db);
 if($nDeleted==0)
   header("HTTP/1.1 400 BAD REQUEST");
 echo "{ \"deleted\": ".$nDeleted."}\n";
+
+ownership_access_log(['op'=>$OPERATION,'user'=>$uinfo->username,'type'=> $_REQUEST['type'],'id'=> $_REQUEST['elementId']]);
