@@ -15,19 +15,16 @@
    You should have received a copy of the GNU Affero General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
-function new_nodered($db,$uname, $aname, $image) {
+function new_nodered($db, $aid, $uname, $aname, $image) {
   include '../config.php';
   
-  $aid=random_str($app_id_length);          
-  $name = "nr".$aid;
-
   //prepare the /data dir for nodered
   $out = array();
   $ret = null;
-  exec($nodered_script.' '.$name.' '.$uname,$out,$ret);
+  exec($nodered_script.' '.$aid.' '.$uname,$out,$ret);
 
-  $result=new_marathon_nodered_container($marathon_url,$image,$name,$uname);
-  if($result) {
+  $result=new_marathon_nodered_container($marathon_url,$image,$aid,$uname);
+  if($result && !isset($result['error'])) {
     $did = "";
     if(is_string($result)) {
       $did = $result;
@@ -37,7 +34,7 @@ function new_nodered($db,$uname, $aname, $image) {
     } else {
       $id = $result["tasks"][0]["id"];
     }
-    
+    /*
     $proxy='        location  /nodered/'.$name.'/ {
                 proxy_set_header Host $http_host;
                 proxy_set_header X-Real-IP $remote_addr;
@@ -53,52 +50,38 @@ function new_nodered($db,$uname, $aname, $image) {
       fwrite($f,$proxy);
       fclose($f);
     }
+    */
     
-    $url = "https://iot-app.snap4city.org/nodered/$name";
-    return array("id"=>$name,"url"=>$url,'name'=>$aname);
+    $url = "https://iot-app.snap4city.org/nodered/$aid";
+    return array("id"=>$aid,"url"=>$url,'name'=>$aname);
   } else {
-    //mysqli_query($db, "UPDATE application SET status='ERROR',status_description='cannot create container' WHERE id=$aid") or die(mysqli_error($db));
-    return array('error'=>"cannot create container");
+    return array('error'=>"cannot create container ".$result['error']);
   }
 }
 
-function new_plumber($db,$uid) {
-  /*
-  if($r=mysqli_query($db, "SELECT COUNT(*) as napps FROM application WHERE uid='$uid' AND (status='RUNNING' OR status='STOPPED')") or die(mysqli_error($db))) {
-    if($o=mysqli_fetch_object($r)) {
-      if($o->napps >= 10) {
-        echo "{error:\"cannot create you reached maximum number\"}";
-        return;
-      }
-    }
-  }
+function new_plumber($uname) {
+  include '../config.php';
   
-  mysqli_query($db, "INSERT INTO application(uid,status) VALUES($uid,'PRE-CREATE')");
-  $aid=mysqli_insert_id($db);
-  $name = "plumber$aid";
+  $aid=random_str($app_id_length);          
+  $name = "pl".$aid;
 
-  $result=  new_marathon_plumber_container("192.168.1.187",null,$name);
-  if($result) {
+  $result=new_marathon_plumber_container_container($marathon_url,$pl_image,$name,$uname);
+  if($result && !isset($result['error'])) {
     $did = "";
     if(is_string($result)) {
-      mysqli_query($db, "UPDATE application SET status='DEPLOYING', name='$name',deployment_id='$result' WHERE id=$aid") or die(mysqli_error($db));
+      $did = $result;
     }
     else if(count($result["tasks"])==0){
       $did = $result["deployments"][0]["id"];
-      mysqli_query($db, "UPDATE application SET status='DEPLOYING', name='$name',deployment_id='$did' WHERE id=$aid") or die(mysqli_error($db));
     } else {
-      var_dump($result);
       $id = $result["tasks"][0]["id"];
-      mysqli_query($db, "UPDATE application SET status='RUNNING', name='$name',container_id='$id' WHERE id=$aid") or die(mysqli_error($db));
     }
-    $url = "http://www.snap4city.org/plumber/$name";
-    echo "{\"id\":\"$aid\",\"url\":\"$url\"}";
+    
+    $url = "https://iot-app.snap4city.org/plumber/$name";
+    return array("id"=>$name,"url"=>$url,'name'=>$aname);
   } else {
-    mysqli_query($db, "UPDATE application SET status='ERROR',status_description='cannot create container' WHERE id=$aid") or die(mysqli_error($db));
-    echo "{error:\"cannot create container\"}";
-  } 
-   *
-   */ 
+    return array('error'=>"cannot create container ".$result['error']);
+  }
 }
 
 function stop_nodered($db,$uid,$aid) {
@@ -176,11 +159,6 @@ function new_marathon_nodered_container($base_url,$image, $id, $uname) {
   $json = '{
     "id": "'. $id .'",
     "cmd": "npm start -- --userDir /data",
-    "labels": {
-      "HAPROXY_GROUP":"external",
-      "HAPROXY_0_VHOST":"iot-app.snap4city.org",
-      "HAPROXY_0_PATH":"/nodered/'. $id .'/"
-    },
     "container": {
         "type": "DOCKER", 
         "docker": {
@@ -203,19 +181,22 @@ function new_marathon_nodered_container($base_url,$image, $id, $uname) {
     "mem": '.$nodered_mem.', 
     "disk": 128, 
     "healthChecks": [{
-        "maxConsecutiveFailures": 0, 
-        "protocol": "HTTP", 
+        "maxConsecutiveFailures": '.$appHealthChecksMaxConsecutiveFailures.', 
+        "protocol": "MESOS_HTTP", 
         "portIndex": 0, 
-        "gracePeriodSeconds": 240, 
+        "gracePeriodSeconds": '.$appHealthChecksGracePeriodSeconds.' , 
         "path": "/nodered/'.$id.'/ui", 
-        "timeoutSeconds": 10, 
-        "intervalSeconds": 15}], 
+        "timeoutSeconds": '.$appHealthChecksTimeoutSeconds.', 
+        "intervalSeconds": '.$appHealthChecksIntervalSeconds.'}], 
     "appId": "'. $id .'"
 }';
   /*$out = array();
   $ret = null;
   exec("/home/ubuntu/add-nodered.sh $id $uname",$out,$ret);*/
+  $log=fopen($logDir."/marathon.log","a");
+  fwrite($log,date('c')." ".$json."\n\n");
   $result = http_post($base_url."/v2/apps",$json, "application/json");
+  fwrite($log,date('c')." ".var_export($result,true)); 
   if($result["httpcode"]==201) {
     store_on_disces_em($id, $json);
     return $result["result"];
@@ -224,13 +205,56 @@ function new_marathon_nodered_container($base_url,$image, $id, $uname) {
     store_on_disces_em($id, $json);
     return $result["result"]["deploymentId"];
   } else {
-    //var_dump($result);
-    return "";
+    return array('error'=>$result["httpcode"]." ".$result["result"]);
   }
   return "";
 }
 
-function new_marathon_plumber_container($base_url,$image, $id) {
+function new_marathon_plumber_container($base_url,$image, $id, $uname) {
+  include '../config.php';
+  $json = '{
+    "id": "'. $id .'",
+    "cmd": "Rscript /root/Snap4City/Snap4CityStatistics/RunRestApi.R",
+    "container": {
+        "type": "DOCKER", 
+        "docker": {
+            "network": "HOST", 
+            "image": "'. $image .'"
+        },
+        "volumes": [
+        {
+            "containerPath": "/root",
+            "hostPath": "/mnt/data/pl-data/'. $id .'",
+            "mode": "RW"
+        }
+    ]        
+    },
+    "cpus": '.$plumber_cpu.', 
+    "portDefinitions": [{"name": null, "protocol": "tcp", "port": 0, "labels": null}],
+    "instances": 1,
+    "constraints": [["@hostname", "UNLIKE", "mesos[1-3]t"]],
+    "env": {}, 
+    "mem": '.$plumber_mem.', 
+    "disk": 128, 
+    "appId": "'. $id .'"
+}';
+  $log=fopen($logDir."/marathon.log","a");
+  fwrite($log,date('c')." ".$json."\n\n");
+  $result = http_post($base_url."/v2/apps",$json, "application/json");
+  fwrite($log,date('c')." ".var_export($result,true)); 
+  if($result["httpcode"]==201) {
+    store_on_disces_em($id, $json);
+    return $result["result"];
+  }
+  else if($result["httpcode"]==200) {
+    store_on_disces_em($id, $json);
+    return $result["result"]["deploymentId"];
+  } else {
+    return array('error'=>$result["httpcode"]." ".$result["result"]);
+  }
+  return "";
+}
+/*function new_marathon_plumber_container($base_url,$image, $id) {
   $json = '{
     "cmd": "Rscript /root/Snap4City/Snap4CityStatistics/RunRestApi.R",
     "id": "'. $id .'",
@@ -291,7 +315,7 @@ function new_marathon_plumber_container($base_url,$image, $id) {
   }
   return "";
 }
-
+*/
 function random_str($length, $keyspace = '0123456789abcdefghijklmnopqrstuvwxyz')
 {
     $pieces = [];

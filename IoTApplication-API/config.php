@@ -15,7 +15,7 @@
    You should have received a copy of the GNU Affero General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
-
+$logDir = '/tmp';
 $db_host = "localhost";
 $database = "snap4cityapps";
 $db_user = "user";
@@ -32,4 +32,15 @@ $app_id_length = 5;
 $marathon_url = "http://localhost:8080";
 
 $nodered_cpu = 0.085;
-$nodered_mem = 140;        
+$nodered_mem = 140;
+$plumber_cpu = 0.085;
+$plumber_mem = 140;
+
+$nodered_basic_img = 'snap4city-nodered-basic:v25';
+$nodered_adv_img = 'snap4city-nodered-adv:v20';
+$plumber_img = '';
+
+$appHealthChecksMaxConsecutiveFailures = 4;
+$appHealthChecksGracePeriodSeconds = 240;
+$appHealthChecksTimeoutSeconds = 30;
+$appHealthChecksIntervalSeconds = 15;

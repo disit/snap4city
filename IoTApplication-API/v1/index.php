@@ -31,7 +31,7 @@ $op="";
 $uname=$uinfo->username;
 $aid=0;
 $name='';
-$type='basic';
+$type='';
 
 if(isset($_REQUEST['op']) && is_string($_REQUEST['op']))
   $op = $_REQUEST['op'];
@@ -39,20 +39,38 @@ if(isset($_REQUEST['name']) && is_string($_REQUEST['name']))
   $name = $_REQUEST['name'];
 if(isset($_REQUEST['id']) && is_string($_REQUEST['id']))
   $aid = $_REQUEST['id'];
-if(isset($_REQUEST['type']) && ($_REQUEST['type']=='basic' || $_REQUEST['type']=='advanced'))
-  $type = $_REQUEST['type'];
-
-if($type=='basic')
-  $image = "snap4city-nodered-basic:v1"; //"disitlab/tst-dkr:003";
-else
-  $image = "disitlab/tst-dkr:003";
 
 switch ($op) {
   case 'new_nodered':
+    if(isset($_REQUEST['type']) && ($_REQUEST['type']=='basic' || $_REQUEST['type']=='advanced'))
+      $type = $_REQUEST['type'];
+    if(strlen($uname)>0 && strlen($name)>0 && $type) {
+      if($type=='basic')
+        $image = $nodered_basic_img;
+      else
+        $image = $nodered_adv_img;
+      $aid="nr".random_str($app_id_length);
+      $app = array("id"=>$aid,"url"=>"https://iot-app.snap4city.org/nodered/$aid",'name'=>$name, 'type'=>$type, 'image'=>$image);
+      $r=register_app($app);
+      if($r['httpcode']!=200) {
+          $app=array("error"=>$r['result']);
+      } else {
+        $r=new_nodered($db, $aid, $uname, $name, $image);
+        if(isset($r['error'])) {
+          $app = $r;
+        }
+      }
+      echo json_encode($app);
+    } else {
+      echo "{error:\"invalid user name '$uname' or app name '$name' or type '$type'\"}";
+    }      
+    break;
+  case 'new_plumber':
     if(strlen($uname)>0 && strlen($name)>0) {
-      $app=new_nodered($db,$uname,$name, $image);
+      $app=new_plumber($db, $uname, $name, $plumber_img);
       if(!isset($app['error'])) {
-        $app['type']=$type;
+        $app['type'] = 'plumber';
+        $app['image'] = $plumber_img;
         $r=register_app($app);
         if($r['httpcode']!=200) {
           $app=array("error"=>$r['result']);
@@ -63,7 +81,6 @@ switch ($op) {
       echo "{error:\"invalid user name '$uname' or app name '$name'\"}";
     }      
     break;
-  case 'new_plumber':
     if($uid>0) {
       $id=new_plumber($db,$uid);
     } else {
@@ -123,7 +140,7 @@ function register_app($app) {
   $element['elementType']='AppID';
   $element['elementUrl']=$app['url'];
   $element['elementId']=$app['id'];
-  $element['elementDetails']=array('type'=>$app['type']);
+  $element['elementDetails']=array('type'=>$app['type'],'image'=>$app['image']);
   if(isset($_REQUEST['accessToken'])) {
     $result = http_post($ownership_api_url."/v1/register/?accessToken=".$_REQUEST['accessToken'], json_encode($element), "application/json");
     //var_dump($result);
