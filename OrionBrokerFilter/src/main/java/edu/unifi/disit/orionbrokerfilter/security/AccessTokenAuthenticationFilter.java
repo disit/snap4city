@@ -1,16 +1,15 @@
 /* Orion Broker Filter (OBF).
    Copyright (C) 2015 DISIT Lab http://www.disit.org - University of Florence
-   This program is free software; you can redistribute it and/or
-   modify it under the terms of the GNU General Public License
-   as published by the Free Software Foundation; either version 2
-   of the License, or (at your option) any later version.
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as
+   published by the Free Software Foundation, either version 3 of the
+   License, or (at your option) any later version.
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA. */
+   GNU Affero General Public License for more details.
+   You should have received a copy of the GNU Affero General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package edu.unifi.disit.orionbrokerfilter.security;
 
 import java.io.IOException;
@@ -201,7 +200,10 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 			return "";
 		}
 
-		return entityBody.substring(startIndex, endIndex);
+		if (endIndex - startIndex >= 2)
+			return entityBody.substring(startIndex, endIndex);
+		else
+			return "";// no sensor name are retrieved -> it's a subscription!
 	}
 
 	private void writeResponseError(ServletResponse response, String msg) throws JsonProcessingException, IOException {
@@ -241,7 +243,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		} else {
 			if (isWriteQuery(queryType)) {
 				logger.debug("The operation is WRITE on private");
-				if (cc.getOwnerCredentials().isValid(k1, k2, pksha1)) {
+				if (cc.getOwnerCredentials().isValid(k1, k2, pksha1)) {// TODO bugfix improve the management of security-level
 					logger.debug("The owner credentials are valid");
 					return;
 				} else {
@@ -258,7 +260,8 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 					// delegation as below
 					logger.debug("The owner credentials are not valid");
 					for (Credentials c : cc.getDelegatedCredentials()) {
-						if (cc.getOwnerCredentials().getPksha1() == null) {// if the elementID is not protected with certificate, use k1, k2 enforcement
+						// if (cc.getOwnerCredentials().getPksha1() == null) {// if the elementID is not protected with certificate, use k1, k2 enforcement
+						if (pksha1 == null) {// TODO bugfix improve the management of security-level
 							if (c.isValid(k1, k2)) {
 								logger.debug("One of the delegated credentials are valid, certificate not envolved");
 								return;
@@ -275,6 +278,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 				}
 			}
 		}
+
 	}
 
 	private String getUsername(String pksha1, Locale lang) throws CredentialsNotValidException {
