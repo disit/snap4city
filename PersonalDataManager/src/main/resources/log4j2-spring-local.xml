@@ -50,6 +50,7 @@
 		<Logger name="org.hibernate" level="warn" />
 		<Logger name="org.springframework" level="warn" />
 		<Logger name="com.mchange.v2.c3p0" level="warn" />
+		<Logger name="org.apache.tomcat" level="warn" />		
 		
 	</Loggers>
 </Configuration>

@@ -10,19 +10,16 @@
    GNU Affero General Public License for more details.
    You should have received a copy of the GNU Affero General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
-package edu.unifi.disit.datamanager.datamodel;
+package edu.unifi.disit.datamanager.datamodel.profiledb;
 
-public enum ActivityAccessType {
-	READ("READ"), WRITE("WRITE"), DELETE("DELETE");
+import java.util.Date;
+import java.util.List;
 
-	private final String text;
+public interface DataDAOCustom {
 
-	private ActivityAccessType(final String text) {
-		this.text = text;
-	}
+	List<Data> getDataByUsername(String username, String variableName, String motivation, Date from, Date to, Integer first, Integer last);
 
-	@Override
-	public String toString() {
-		return text;
-	}
+	List<Data> getDataByUsernameDelegated(String username, String variableName, String motivation, Date from, Date to, Integer first, Integer last);
+
+	List<Data> getDataByAppId(String appId, String appOwner, String variableName, String motivation, Date from, Date to, Integer first, Integer last);
 }

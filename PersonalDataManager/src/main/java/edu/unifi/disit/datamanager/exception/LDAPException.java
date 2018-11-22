@@ -10,19 +10,17 @@
    GNU Affero General Public License for more details.
    You should have received a copy of the GNU Affero General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
-package edu.unifi.disit.datamanager.datamodel;
+package edu.unifi.disit.datamanager.exception;
 
-public enum ActivityAccessType {
-	READ("READ"), WRITE("WRITE"), DELETE("DELETE");
+public class LDAPException extends Exception {
 
-	private final String text;
+	private static final long serialVersionUID = 4368707787895751911L;
 
-	private ActivityAccessType(final String text) {
-		this.text = text;
+	public LDAPException() {
+		super();
 	}
 
-	@Override
-	public String toString() {
-		return text;
+	public LDAPException(String string) {
+		super(string);
 	}
 }

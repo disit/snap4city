@@ -1,22 +1,22 @@
 /* Data Manager (DM).
    Copyright (C) 2015 DISIT Lab http://www.disit.org - University of Florence
-   This program is free software; you can redistribute it and/or
-   modify it under the terms of the GNU General Public License
-   as published by the Free Software Foundation; either version 2
-   of the License, or (at your option) any later version.
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as
+   published by the Free Software Foundation, either version 3 of the
+   License, or (at your option) any later version.
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA. */
+   GNU Affero General Public License for more details.
+   You should have received a copy of the GNU Affero General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package edu.unifi.disit.datamanager.config;
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceBuilder;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
@@ -38,11 +38,39 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 		basePackages = { "edu.unifi.disit.datamanager.datamodel.profiledb" })
 public class ProfileDBDbConfig {
 
+	@Value("${profiledb.datasource.validationQuery}")
+	private String validationQuery;
+
+	@Value("${profiledb.datasource.removeAbandonedTimeout}")
+	private Integer removeAbandonedTimeout;
+
+	@Value("${profiledb.datasource.maxActive}")
+	private Integer maxActive;
+
+	@Value("${profiledb.datasource.maxIdle}")
+	private Integer maxIdle;
+
+	@Value("${profiledb.datasource.maxWait}")
+	private Integer maxWait;
+
 	@Primary
 	@Bean(name = "profiledbDataSource")
 	@ConfigurationProperties(prefix = "profiledb.datasource")
 	public DataSource dataSource() {
-		return DataSourceBuilder.create().build();
+		org.apache.tomcat.jdbc.pool.DataSource d = (org.apache.tomcat.jdbc.pool.DataSource) DataSourceBuilder.create().build();
+
+		d.setValidationQuery(validationQuery);
+		d.setRemoveAbandoned(true);
+		d.setTestOnBorrow(true);
+		d.setTestOnConnect(true);
+		d.setTestWhileIdle(true);
+		d.setLogAbandoned(true);
+		d.setRemoveAbandonedTimeout(removeAbandonedTimeout);
+		d.setMaxActive(maxActive);
+		d.setMaxIdle(maxIdle);
+		d.setMaxWait(maxWait);
+
+		return d;
 	}
 
 	@Primary

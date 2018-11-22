@@ -2,6 +2,7 @@
 <Configuration status="INFO">
 	<Appenders>
 		<RollingFile name="MyFileAll" fileName="${sys:logFileFolder}/datamanager/datamanager-all.log" immediateFlush="true" append="true" filePattern="${sys:logFileFolder}/datamanager/datamanager-all-$${date:yyyy-MM}/%d{yyyy-MM-dd}-%i.log.gz">
+			<ThresholdFilter level="debug"/>
 			<PatternLayout>
 				<Pattern>%d{yyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36}:%L - %msg%n</Pattern>
 			</PatternLayout>
@@ -50,6 +51,7 @@
 		<Logger name="org.hibernate" level="warn" />
 		<Logger name="org.springframework" level="warn" />
 		<Logger name="com.mchange.v2.c3p0" level="warn" />
+		<Logger name="org.apache.tomcat" level="warn" />
 		
 	</Loggers>
 </Configuration>

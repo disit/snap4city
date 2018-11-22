@@ -10,19 +10,15 @@
    GNU Affero General Public License for more details.
    You should have received a copy of the GNU Affero General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
-package edu.unifi.disit.datamanager.datamodel;
+package edu.unifi.disit.datamanager.service;
 
-public enum ActivityAccessType {
-	READ("READ"), WRITE("WRITE"), DELETE("DELETE");
+import java.util.Locale;
 
-	private final String text;
+import edu.unifi.disit.datamanager.datamodel.Response;
+import edu.unifi.disit.datamanager.exception.CredentialsException;
 
-	private ActivityAccessType(final String text) {
-		this.text = text;
-	}
+public interface IAccessService {
 
-	@Override
-	public String toString() {
-		return text;
-	}
+	Response checkAccessFromApp(String elementID, Locale lang) throws CredentialsException;
+
 }

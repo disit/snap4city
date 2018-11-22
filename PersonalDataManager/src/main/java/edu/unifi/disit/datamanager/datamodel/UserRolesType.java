@@ -12,12 +12,12 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package edu.unifi.disit.datamanager.datamodel;
 
-public enum ActivityAccessType {
-	READ("READ"), WRITE("WRITE"), DELETE("DELETE");
+public enum UserRolesType {
+	Observer("Observer"), Public("Public"), Manager("Manager"), AreaManager("AreaManager"), ToolAdmin("ToolAdmin"), RootAdmin("RootAdmin");
 
 	private final String text;
 
-	private ActivityAccessType(final String text) {
+	private UserRolesType(final String text) {
 		this.text = text;
 	}
 
