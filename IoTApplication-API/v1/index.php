@@ -29,7 +29,7 @@ $db=mysqli_connect($db_host,$db_user,$db_pwd,$database) or die("DB connection er
 
 $op="";
 $uname=$uinfo->username;
-$aid=0;
+$aid='';
 $name='';
 $type='';
 
@@ -39,6 +39,7 @@ if(isset($_REQUEST['name']) && is_string($_REQUEST['name']))
   $name = $_REQUEST['name'];
 if(isset($_REQUEST['id']) && is_string($_REQUEST['id']))
   $aid = $_REQUEST['id'];
+header("Access-Control-Allow-Origin: *");
 
 switch ($op) {
   case 'new_nodered':
@@ -49,10 +50,11 @@ switch ($op) {
         $image = $nodered_basic_img;
       else
         $image = $nodered_adv_img;
-      $aid="nr".random_str($app_id_length);
+      $aid = $nrapp_id_prefix . random_str($app_id_length);
       $app = array("id"=>$aid,"url"=>"https://iot-app.snap4city.org/nodered/$aid",'name'=>$name, 'type'=>$type, 'image'=>$image);
       $r=register_app($app);
       if($r['httpcode']!=200) {
+          header("HTTP/1.1 400 BAD REQUEST");
           $app=array("error"=>$r['result']);
       } else {
         $r=new_nodered($db, $aid, $uname, $name, $image);
@@ -62,62 +64,88 @@ switch ($op) {
       }
       echo json_encode($app);
     } else {
+      header("HTTP/1.1 400 BAD REQUEST");
       echo "{error:\"invalid user name '$uname' or app name '$name' or type '$type'\"}";
     }      
     break;
   case 'new_plumber':
-    if(strlen($uname)>0 && strlen($name)>0) {
-      $app=new_plumber($db, $uname, $name, $plumber_img);
-      if(!isset($app['error'])) {
-        $app['type'] = 'plumber';
-        $app['image'] = $plumber_img;
-        $r=register_app($app);
-        if($r['httpcode']!=200) {
-          $app=array("error"=>$r['result']);
+    if(strlen($uname)>0 && strlen($name)>0 && strlen($aid)>0) {
+      //check if application is already present
+      $r = get_app($aid);
+      if($r['httpcode']==200 && count($r['result'])>0) {
+        $a = $r['result'][0];
+        $app = array("id"=>$a['elementId'],"url"=>$a['elementUrl'], 'name'=>$a['elementName'], 'type'=>$a['elementDetails']['type'], 'image'=>$a['elementDetails']['image'], 'health'=>@$a['elementDetails']['health'] ?: NULL, 'created'=>$a['created']);
+        echo json_encode($app);            
+      } else {
+        if($_SERVER['REQUEST_METHOD']=='POST') {
+          if(isset($_FILES['R_file']) && is_uploaded_file($_FILES['R_file']['tmp_name'])) {
+            $r_file = $_FILES['R_file']['tmp_name'];
+            $image = $plumber_img;
+            //$aid = $plumber_id_prefix . random_str($app_id_length);
+            $health = NULL;
+            /*if(isset($_REQUEST['health'])) {
+              $health = $_REQUEST['health'];
+            }*/
+            $iotappid = NULL;
+            if(isset($_REQUEST['iotappid'])) {
+              $iotappid = $_REQUEST['iotappid'];
+            }
+            $app = array("id"=>$aid,"url"=>"https://iot-app.snap4city.org/plumber/$aid", 'name'=>$name, 'type'=>'plumber', 'image'=>$image, 'health'=>$health, 'iotappid' => $iotappid);
+            $r=register_app($app);
+            if($r['httpcode']!=200) {
+                $app=$r['result'];
+                $app['error'] = 'failed register '.$app['error'];
+            } else {
+              $r=new_plumber($aid, $uname, $name, $image, $r_file, $health);
+              if(isset($r['error'])) {
+                $app = $r;
+              }
+            }
+            echo json_encode($app);
+          } else {
+            header("HTTP/1.1 400 BAD REQUEST");
+            echo "{error:\"missing R_file\"}";      
+          }
+        } else {
+            header("HTTP/1.1 400 BAD REQUEST");
+            echo "{error:\"use POST method\"}";                
         }
       }
-      echo json_encode($app);
     } else {
-      echo "{error:\"invalid user name '$uname' or app name '$name'\"}";
+      header("HTTP/1.1 400 BAD REQUEST");
+      echo "{error:\"invalid user name '$uname' or app name '$name' or missing id\"}";
     }      
-    break;
-    if($uid>0) {
-      $id=new_plumber($db,$uid);
-    } else {
-      echo "{error:\"invalid uid $uid\"}";
-    }      
-    break;
-  case 'stop_app':
-    if(strlen($uname)>0 && strlen($aid)>0) {
-      stop_app($db,$uname,$aid);
-    } else {
-      echo "{error:\"invalid uname or id\"}";
-    }
-    break;
-  case 'start_app':
-    if(strlen($uname)>0 && strlen($aid)>0) {
-      start_app($db,$uname,$aid);
-    } else {
-      echo "{error:\"invalid uname or id\"}";
-    }
     break;
   case 'restart_app':
     if(strlen($uname)>0 && strlen($aid)>0) {
-      restart_app($db,$uname,$aid);
+      $r=get_app($aid);
+      if($r['httpcode']==200 && count($r['result'])>0) {
+        restart_app($db,$uname,$aid);
+      }
     } else {
+      header("HTTP/1.1 400 BAD REQUEST");
       echo "{error:\"invalid uname or id\"}";
     }
     break;
   case 'rm_app':
     if(strlen($uname)>0 && strlen($aid)>0) {
-      $r=delete_app($aid);
-      if($r['httpcode']==200) {
-        remove_from_disces_em($aid);
-        rm_app($db,$uname,$aid);
+      $r=get_app($aid);
+      if($r['httpcode']==200 && count($r['result'])>0) {
+        $type = $r['result'][0]['elementType'];
+        $r=delete_app($aid, $type);
+        if($r['httpcode']==200) {
+          remove_from_disces_em($aid);
+          rm_app($db,$uname,$aid);
+        } else {
+          header("HTTP/1.1 400 BAD REQUEST");
+          echo '{"error":"delete app id:'.$aid.' type:'.$type.' result:'.json_encode($r['result']).'}';
+        }
       } else {
-        echo '{"error":"'.json_encode($r['result']).'}';
+        header("HTTP/1.1 400 BAD REQUEST");
+        echo '{"error":"get app id:'.$aid.' result:'.json_encode($r['result']).'}';
       }
     } else {
+      header("HTTP/1.1 400 BAD REQUEST");
       echo "{error:\"invalid uname or id\"}";
     }
     break;
@@ -125,10 +153,12 @@ switch ($op) {
     if(strlen($uname)>0 && strlen($aid)>0) {
       status_app($db,$uname,$aid);
     } else {
+      header("HTTP/1.1 400 BAD REQUEST");
       echo "{error:\"invalid uname or id\"}";
     }
     break;
   default:
+    header("HTTP/1.1 400 BAD REQUEST");
     echo "{error: \"operation '$op' is not valid\"}";
 }
 
@@ -136,11 +166,17 @@ function register_app($app) {
   include "../config.php";
   
   $element=array();
-  $element['elementName']=$app['name'];
-  $element['elementType']='AppID';
-  $element['elementUrl']=$app['url'];
-  $element['elementId']=$app['id'];
+  $element['elementName'] = $app['name'];
+  $element['elementType'] = $app['type']=='plumber' ? 'DAAppID' : 'AppID';
+  $element['elementUrl'] = $app['url'];
+  $element['elementId'] = $app['id'];
   $element['elementDetails']=array('type'=>$app['type'],'image'=>$app['image']);
+  if(isset($app['health']))
+    $element['elementDetails']['health'] = $app['health'];
+  if(isset($app['iotappid']) || @$app['iotappid']===NULL) {
+    $element['elementDetails']['iotappids'] = $app['iotappid']===NULL ? array() : array($app['iotappid']);
+  }
+  
   if(isset($_REQUEST['accessToken'])) {
     $result = http_post($ownership_api_url."/v1/register/?accessToken=".$_REQUEST['accessToken'], json_encode($element), "application/json");
     //var_dump($result);
@@ -151,11 +187,21 @@ function register_app($app) {
   return $result;
 }
 
-function delete_app($appid) {
+function get_app($appid) {
   include "../config.php";
 
   if(isset($_REQUEST['accessToken'])) {
-    $result = @http_get($ownership_api_url."/v1/delete/?type=AppID&elementId=$appid&accessToken=".$_REQUEST['accessToken']);
+    $result = @http_get($ownership_api_url."/v1/list/?type=AppID;DAAppID&elementId=$appid&accessToken=".$_REQUEST['accessToken']);
+    //var_dump($result);
+  }
+  return $result;
+}
+
+function delete_app($appid, $type) {
+  include "../config.php";
+
+  if(isset($_REQUEST['accessToken'])) {
+    $result = @http_get($ownership_api_url."/v1/delete/?type=$type&elementId=$appid&accessToken=".$_REQUEST['accessToken']);
     //var_dump($result);
   }
   return $result;

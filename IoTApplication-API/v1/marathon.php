@@ -21,7 +21,7 @@ function new_nodered($db, $aid, $uname, $aname, $image) {
   //prepare the /data dir for nodered
   $out = array();
   $ret = null;
-  exec($nodered_script.' '.$aid.' '.$uname,$out,$ret);
+  exec($nodered_script.' '.$aid.' '.$uname, $out, $ret);
 
   $result=new_marathon_nodered_container($marathon_url,$image,$aid,$uname);
   if($result && !isset($result['error'])) {
@@ -59,13 +59,15 @@ function new_nodered($db, $aid, $uname, $aname, $image) {
   }
 }
 
-function new_plumber($uname) {
+function new_plumber($aid, $uname, $aname, $image, $r_file, $health) {
   include '../config.php';
   
-  $aid=random_str($app_id_length);          
-  $name = "pl".$aid;
-
-  $result=new_marathon_plumber_container_container($marathon_url,$pl_image,$name,$uname);
+  //prepare the /data dir for nodered
+  $out = array();
+  $ret = null;
+  exec($plumber_script.' '.$aid.' '.$r_file,$out,$ret);
+  
+  $result=new_marathon_plumber_container($marathon_url, $image, $aid, $uname, $health);
   if($result && !isset($result['error'])) {
     $did = "";
     if(is_string($result)) {
@@ -77,8 +79,8 @@ function new_plumber($uname) {
       $id = $result["tasks"][0]["id"];
     }
     
-    $url = "https://iot-app.snap4city.org/plumber/$name";
-    return array("id"=>$name,"url"=>$url,'name'=>$aname);
+    $url = "https://iot-app.snap4city.org/plumber/$aid";
+    return array("id"=>$aid,"url"=>$url,'name'=>$aname);
   } else {
     return array('error'=>"cannot create container ".$result['error']);
   }
@@ -144,7 +146,14 @@ function status_app($db,$uid,$aid) {
   $result = http_get($marathon_url."/v2/apps/".$aid);
   if($result["httpcode"]==200) {
     $r = array();
-    @$r['healthiness']=$result['result']['app']['tasks'][0]['healthCheckResults'][0]['alive'] ?: false;
+    $alive = NULL;
+    if(count(@$result['result']['app']['healthChecks'])>0)
+      $alive=false;
+    @$r['healthiness']=$result['result']['app']['tasks'][0]['healthCheckResults'][0]['alive'] ?: $alive;
+    if($result['result']['app']['tasksRunning']==0) {
+      $r['healthiness']=false;
+      $r['lastTaskFailure']=$result['result']['app']['lastTaskFailure'];
+    }
     echo json_encode($r);
   }
   else {
@@ -210,37 +219,64 @@ function new_marathon_nodered_container($base_url,$image, $id, $uname) {
   return "";
 }
 
-function new_marathon_plumber_container($base_url,$image, $id, $uname) {
+function new_marathon_plumber_container($base_url,$image, $id, $uname, $health) {
   include '../config.php';
+
+  $healthCheck = '';
+  if($health!=NULL) {
+    $healthCheck ='    "healthChecks": [{
+        "maxConsecutiveFailures": '.$appHealthChecksMaxConsecutiveFailures.', 
+        "protocol": "MESOS_HTTP", 
+        "portIndex": 0, 
+        "gracePeriodSeconds": '.$appHealthChecksGracePeriodSeconds.' , 
+        "path": "/'.$health.'", 
+        "timeoutSeconds": '.$appHealthChecksTimeoutSeconds.', 
+        "intervalSeconds": '.$appHealthChecksIntervalSeconds.'}],';
+  }
+  
   $json = '{
     "id": "'. $id .'",
-    "cmd": "Rscript /root/Snap4City/Snap4CityStatistics/RunRestApi.R",
+    "args": ["/data/plumber.R"],
     "container": {
         "type": "DOCKER", 
         "docker": {
-            "network": "HOST", 
             "image": "'. $image .'"
         },
         "volumes": [
-        {
-            "containerPath": "/root",
-            "hostPath": "/mnt/data/pl-data/'. $id .'",
+          {
+            "containerPath": "/data",
+            "hostPath": "/mnt/data/plumber/'. $id .'",
             "mode": "RW"
-        }
-    ]        
+          }],
+        "portMappings": [
+            {
+              "containerPort": 8000,
+              "hostPort": 0,
+              "labels": {},
+              "name": "http",
+              "protocol": "tcp",
+              "servicePort": 10040
+            }
+        ]    
     },
     "cpus": '.$plumber_cpu.', 
-    "portDefinitions": [{"name": null, "protocol": "tcp", "port": 0, "labels": null}],
+    "networks": [
+      {
+      "mode": "container/bridge"
+      }
+    ],
+    "portDefinitions": [],
     "instances": 1,
     "constraints": [["@hostname", "UNLIKE", "mesos[1-3]t"]],
     "env": {}, 
     "mem": '.$plumber_mem.', 
-    "disk": 128, 
+    "disk": 128,
+    '.$healthCheck.'
     "appId": "'. $id .'"
 }';
   $log=fopen($logDir."/marathon.log","a");
   fwrite($log,date('c')." ".$json."\n\n");
-  $result = http_post($base_url."/v2/apps",$json, "application/json");
+  $result = http_post($base_url."/v2/apps", $json, "application/json");
   fwrite($log,date('c')." ".var_export($result,true)); 
   if($result["httpcode"]==201) {
     store_on_disces_em($id, $json);
@@ -250,7 +286,7 @@ function new_marathon_plumber_container($base_url,$image, $id, $uname) {
     store_on_disces_em($id, $json);
     return $result["result"]["deploymentId"];
   } else {
-    return array('error'=>$result["httpcode"]." ".$result["result"]);
+    return array('error'=>$result["httpcode"]." ".var_export($result["result"],true));
   }
   return "";
 }

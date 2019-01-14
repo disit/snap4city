@@ -24,11 +24,7 @@ if(isset($_REQUEST['username'])) {
   $uinfo->username=$_REQUEST['username'];
 } else {
   $oidc = new OpenIDConnectClient();
-  $oidc->providerConfigParam(array('authorization_endpoint'=>'https://www.snap4city.org/auth/realms/master/protocol/openid-connect/auth'));
-  $oidc->providerConfigParam(array('token_endpoint'=>'https://www.snap4city.org/auth/realms/master/protocol/openid-connect/token'));
-  $oidc->providerConfigParam(array('userinfo_endpoint'=>'https://www.snap4city.org/auth/realms/master/protocol/openid-connect/userinfo'));
-  $oidc->providerConfigParam(array('jwks_uri'=>'https://www.snap4city.org/auth/realms/master/protocol/openid-connect/certs'));
-  $oidc->providerConfigParam(array('issuer'=>'https://www.snap4city.org/auth/realms/master'));
+  $oidc->providerConfigParam(array('userinfo_endpoint'=>$sso_userinfo_endpoint));
 
   if(isset($_SESSION['accessToken'])) {
     $accessToken=$_SESSION['accessToken'];

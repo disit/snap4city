@@ -28,17 +28,23 @@ $disces_em_pwd = "password";
 
 $ownership_api_url = "http://localhost/ownership-api";
 $nodered_script = "/home/user/add-nodered.sh";
+$plumber_script = "/home/ubuntu/add-plumber.sh";
 $app_id_length = 5;
+
+$nrapp_id_prefix = "nr";
+$plumber_id_prefix = "pl";
 $marathon_url = "http://localhost:8080";
+
+$sso_userinfo_endpoint = 'https://www.snap4city.org/auth/realms/master/protocol/openid-connect/userinfo';
 
 $nodered_cpu = 0.085;
 $nodered_mem = 140;
 $plumber_cpu = 0.085;
-$plumber_mem = 140;
+$plumber_mem = 500;
 
 $nodered_basic_img = 'snap4city-nodered-basic:v25';
 $nodered_adv_img = 'snap4city-nodered-adv:v20';
-$plumber_img = '';
+$plumber_img = 'trestletech/plumber';
 
 $appHealthChecksMaxConsecutiveFailures = 4;
 $appHealthChecksGracePeriodSeconds = 240;
