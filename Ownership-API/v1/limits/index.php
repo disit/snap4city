@@ -23,26 +23,42 @@ $log=fopen("/tmp/owner.log","a");
 fwrite($log, date('c')." limits\n");
 //echo 'register '.$uinfo->username;
 if(!isset($_REQUEST['type']) || strlen(trim($_REQUEST['type']))==0) {
-  $_REQUEST['type'] = 'DashboardID;AppID;IOTID';
+  $_REQUEST['type'] = 'DashboardID;AppID;IOTID;DAAppID';
 }
 
 $types = explode(";", $_REQUEST['type']);
 
 $db=mysqli_connect($db_host,$db_user,$db_pwd,$database) or die("DB connection error ");
 
-$org = get_organization_user($uinfo->username);
+if(isset($_REQUEST['username']) && $uinfo->mainRole=='RootAdmin') {
+  $username = $_REQUEST['username'];
+  $role = get_user_role($username);
+  if(!$role) {
+    header("HTTP/1.1 400 BAD REQUEST");
+    echo "invalid username no role found for $username";
+    $f=fopen($log_path."/ownership-error.log","a");
+    fwrite($f,date('c')." ERROR: invalid username, no role found for $username\n");
+    ownership_access_log(['op'=>$OPERATION,'user'=>$uinfo->username,'forUser'=>$username, 'result'=>'NO_ROLE']);
+    exit;  
+  }
+} else {
+  $username = $uinfo->username;
+  $role = $uinfo->mainRole;
+}
+
+$org = get_user_organization($username);
 
 $o = array();
 foreach($types as $elementType) {
-  list($limit,$qry) = get_limit_user($db, $org, $uinfo->username, $uinfo->mainRole, $elementType);
+  list($limit,$qry) = get_limit_user($db, $org, $username, $role, $elementType);
     
-  $q = "SELECT count(*) as count FROM ownership WHERE username='".mysqli_escape_string($db, $uinfo->username)."'".
+  $q = "SELECT count(*) as count FROM ownership WHERE username='".mysqli_escape_string($db, $username)."'".
           " AND elementType='".mysqli_escape_string($db, $elementType)."' AND deleted is NULL";
   $r = mysqli_query($db, $q);
   if($r && ($c=mysqli_fetch_array($r))) {
     $o[] = array('elementType'=>$elementType, 'limit'=>$limit, 'current'=>$c[0]);
   }
 }
-echo json_encode(array('username'=>$uinfo->username, 'role'=>$uinfo->mainRole, 'organization'=>$org, 'limits'=>$o));
+echo json_encode(array('username'=>$username, 'role'=>$role, 'organization'=>$org, 'limits'=>$o));
 
-ownership_access_log(['op'=>$OPERATION,'user'=>$uinfo->username,'type'=>$elementType]);
+ownership_access_log(['op'=>$OPERATION,'user'=>$uinfo->username,'forUser'=>$username,'type'=>$elementType]);

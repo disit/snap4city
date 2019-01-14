@@ -23,7 +23,7 @@ function ownership_access_log($msg) {
 
 function get_limit_user($db, $org, $username, $role, $elementType) {
   if($org==NULL)
-    $org = get_organization_user ($username);
+    $org = get_user_organization($username);
   $q = "SELECT max(maxCount) FROM limits WHERE (organization='any' OR organization='".mysqli_escape_string($db, $org)."') AND ".
           "(username='any' OR username='".mysqli_escape_string($db, $username)."') AND ".
           "(role='any' OR role='".mysqli_escape_string($db, $role)."') AND ".
@@ -34,7 +34,7 @@ function get_limit_user($db, $org, $username, $role, $elementType) {
   return array(0, $q." error ".mysqli_error($db));
 }
 
-function get_organization_user($username) {
+function get_user_organization($username) {
   require 'config.php';
   
   $connection = ldap_connect($ldapServer, $ldapPort);
@@ -53,4 +53,40 @@ function get_organization_user($username) {
   }
 
   return 'any';
+}
+
+function get_user_role($username) {
+  require 'config.php';
+  
+  $connection = ldap_connect($ldapServer, $ldapPort);
+  ldap_set_option($connection, LDAP_OPT_PROTOCOL_VERSION, 3);
+  ldap_bind($connection);
+  
+  $ldapUsername = "cn=" . $username . "," . $ldapBaseDN;  
+  $roles = array("RootAdmin","ToolAdmin","AreaManager","Manager","Observer");
+  
+  foreach($roles as $role) {
+    if(checkLdapRole($connection, $ldapUsername, $role, $ldapBaseDN))
+      return $role;
+  }
+
+  return '';
+}
+
+function checkLdapRole($connection, $userDn, $role, $baseDn) 
+ {
+    $result = ldap_search($connection, $baseDn, '(&(objectClass=organizationalRole)(cn=' . $role . ')(roleOccupant=' . $userDn . '))');
+    $entries = ldap_get_entries($connection, $result);
+    foreach ($entries as $key => $value) 
+    {
+       if(is_numeric($key)) 
+       { 
+          if($value["cn"]["0"] == $role) 
+          {
+             return true;
+          }
+       }
+    }
+
+    return false;
 }

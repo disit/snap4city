@@ -21,6 +21,15 @@ require_once ("../../config.php");
 
 $db=mysqli_connect($db_host,$db_user,$db_pwd,$database) or die("DB connection error ");
 
+$deleteFilter = 'deleted IS NULL';
+if(isset($_REQUEST['includeDeleted'])) {
+  $deleteFilter = '1';
+}
+
+$onlyMine = false;
+if (isset($_REQUEST['onlyMine']) && $_REQUEST['onlyMine']=='true')
+  $onlyMine=true;
+
 $filter = '';
 if(isset($_REQUEST['type'])) {
   $types = explode(";", $_REQUEST['type']);
@@ -42,12 +51,31 @@ if(isset($_REQUEST['pubkeySHA1'])) {
   $filter .= "AND publickeySHA1 = '".$pubkeySHA1."' ";
 }
 
-if($uinfo->mainRole=='RootAdmin')
+if ($uinfo->mainRole == 'RootAdmin' && !$onlyMine) {
   $userFilter = "1 ";
-else
-  $userFilter = "username='".mysqli_escape_string($db, $uinfo->username)."' ";
+} else {
+  $userFilter = "username='" . mysqli_escape_string($db, $uinfo->username) . "' ";
+}
 
-$r=mysqli_query($db,"SELECT * FROM ownership WHERE deleted IS NULL AND ".$userFilter.$filter) or die("query error: ".  mysqli_error($db));
+$limit = '';
+if (isset($_REQUEST['limit']) && is_numeric($_REQUEST['limit'])) {
+  $limit = ' LIMIT ' . $_REQUEST['limit'];
+}
+$offset = '';
+if (isset($_REQUEST['offset']) && is_numeric($_REQUEST['offset'])) {
+  $offset = ' OFFSET ' . $_REQUEST['offset'];
+}
+
+if($limit || $offset) {
+  $r=mysqli_query($db,"SELECT COUNT(*) FROM ownership WHERE $deleteFilter AND ".$userFilter.$filter) or die("query error: ".  mysqli_error($db));
+  $o = mysqli_fetch_array($r);
+  $count = $o[0];
+}
+
+$r=mysqli_query($db,"SELECT * FROM ownership WHERE $deleteFilter AND ".$userFilter.$filter.$limit.$offset) or die("query error: ".  mysqli_error($db));
+if(isset($count)) {
+  echo '{ "count":'.$count.", \"data\":\n";
+}
 echo "[\n";
 $i=0;
 while($o=mysqli_fetch_object($r)) {
@@ -56,8 +84,10 @@ while($o=mysqli_fetch_object($r)) {
   unset($o->id);
   if($o->publickeySHA1==null)
     unset($o->publickeySHA1);
-  unset($o->deleted);
-  unset($o->deletedBy);
+  if(!isset($_REQUEST['includeDeleted'])) {
+    unset($o->deleted);
+    unset($o->deletedBy);
+  }
   if($o->elementDetails!=null) {
     $o->elementDetails=json_decode($o->elementDetails);
   }
@@ -65,5 +95,9 @@ while($o=mysqli_fetch_object($r)) {
   $i++;
 }
 echo "]\n";
+
+if(isset($count)) {
+  echo "}";
+}
 
 ownership_access_log(['op'=>$OPERATION,'user'=>$uinfo->username,'type'=>isset($_REQUEST['type']) ? $_REQUEST['type'] : 'any','role'=>$uinfo->mainRole]);

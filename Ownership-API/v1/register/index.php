@@ -40,7 +40,7 @@ if($o==NULL) {
 if(!is_object($o)) {
   header("HTTP/1.1 400 BAD REQUEST");
   echo "no JSON object";
-    fwrite($log,date('c')." NO JSON\n");
+  fwrite($log,date('c')." NO JSON\n");
 
   exit;    
 }
@@ -58,7 +58,7 @@ foreach($mandatoryAttrs as $a) {
     exit;  
   }
 }
-$validTypes = array('AppID',"IOTID","ServiceURI","ServiceGraphID","DashboardID");
+$validTypes = array('AppID',"IOTID","ServiceURI","ServiceGraphID","DashboardID",'DAAppID');
 if(!in_array($o->elementType,$validTypes)) {
     header("HTTP/1.1 400 BAD REQUEST");
     echo '{"error":"invalid elementType '.$o->elementType.'"}';
@@ -76,13 +76,20 @@ else
 
 $q = "SELECT count(*) as count FROM ownership WHERE ".$userFilter.
         " AND elementId='".mysqli_escape_string($db, $o->elementId).
-        "' AND elementType='".mysqli_escape_string($db, $o->elementType)."'";
+        "' AND elementType='".mysqli_escape_string($db, $o->elementType)."' AND deleted IS NULL";
 
 $r = mysqli_query($db, $q) or die(mysqli_error($db));
 if($r && $c=mysqli_fetch_array($r)) {
   $idxAttrs = array(array('publickey','publickeySHA1'));
   if($c[0]>0) { //update data
     //update
+    //check username is valid
+    if(isset($o->username) && get_user_role($o->username)=='') { 
+      header("HTTP/1.1 400 BAD REQUEST");
+      echo '{"error":"invalid username '.$o->username.' attribute"}';
+      fwrite($log,date('c')." invalid username '".$o->username."' attribute\n");
+      exit;
+    }
     $attrs = array('username','elementName','elementUrl','elementDetails');
     $sets = array();
     foreach($attrs as $a) {
@@ -100,13 +107,13 @@ if($r && $c=mysqli_fetch_array($r)) {
 
     $update = "UPDATE ownership SET ".join(",",$sets)." WHERE ".$userFilter.
         " AND elementId='".mysqli_escape_string($db, $o->elementId).
-        "' AND elementType='".mysqli_escape_string($db, $o->elementType)."'";
+        "' AND elementType='".mysqli_escape_string($db, $o->elementType)."' AND deleted IS NULL";
     if(!mysqli_query($db,$update)) {
       fwrite($log,date('c')." UPDATE ownnership - query error ".  mysqli_error($db));
       exit;
     }
   } else { //insert data
-    $org = get_organization_user($uinfo->username);
+    $org = get_user_organization($uinfo->username);
     list($limit,$qry) = get_limit_user($db, $org, $uinfo->username, $uinfo->mainRole, $o->elementType);
     
     $q = "SELECT count(*) as count FROM ownership WHERE username='".mysqli_escape_string($db, $uinfo->username)."'".
