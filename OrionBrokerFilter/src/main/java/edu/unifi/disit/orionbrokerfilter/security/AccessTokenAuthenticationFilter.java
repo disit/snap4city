@@ -63,6 +63,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.unifi.disit.orionbrokerfilter.datamodel.CachedCredentials;
 import edu.unifi.disit.orionbrokerfilter.datamodel.Credentials;
+import edu.unifi.disit.orionbrokerfilter.datamodel.Ownership;
 import edu.unifi.disit.orionbrokerfilter.datamodel.Response;
 import edu.unifi.disit.orionbrokerfilter.exception.CredentialsNotValidException;
 
@@ -92,8 +93,8 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 	@Value("${spring.servicemapkb_endpoint}")
 	private String servicemapkb_endpoint;
 
-	@Value("${spring.orionbrokerkbURI}")
-	private String orionbrokerkbURI;
+	// @Value("${spring.orionbrokerkbURI}")
+	// private String orionbrokerkbURI;
 
 	@Value("${spring.elapsingcache.minutes}")
 	private Integer minutesElapsingCache;
@@ -106,6 +107,8 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 	HashMap<String, CachedCredentials> cachedCredentials = new HashMap<String, CachedCredentials>();
 
 	HashMap<String, String> cachedPksha1UsernameOwnership = new HashMap<String, String>();
+
+	HashMap<String, Ownership> cachedOwnership = new HashMap<String, Ownership>();
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws JsonProcessingException, IOException, ServletException {
@@ -172,6 +175,8 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 
 		String entityBody = IOUtils.toString(multiReadRequest.getInputStream(), StandardCharsets.UTF_8.toString());
 
+		logger.debug("searching sensor name in --{}--", entityBody);
+
 		// retrieve "attributes index
 		int startIndex = entityBody.indexOf("attributes");
 		if (startIndex == -1) {
@@ -184,8 +189,12 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		// calcolate startindex of sensor name
 		if (isWriteQuery)
 			startIndex = startIndex + 10 + 4 + 8;
-		else
-			startIndex = startIndex + 10 + 4;
+		else {
+			startIndex = startIndex + 10 + 3;
+			if (entityBody.indexOf("\"", startIndex) == startIndex) {
+				startIndex++;
+			}
+		}
 
 		if (startIndex > entityBody.length()) {
 			logger.warn(messages.getMessage("login.ko.sensornamenotvalid", null, multiReadRequest.getLocale()) + "(1) entityBody is {}", entityBody);
@@ -197,13 +206,13 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		if (endIndex == -1) {
 			// if the attribute field is empty, the sensor name is empty
 			logger.debug("detecting empty attributes, sensor name is empty-string (the delegation has to be formatted correctly)");
-			return "";
+			return null;
 		}
 
-		if (endIndex - startIndex >= 2)
+		if (endIndex - startIndex >= 3)
 			return entityBody.substring(startIndex, endIndex);
 		else
-			return "";// no sensor name are retrieved -> it's a subscription!
+			return null;// no sensor name are retrieved -> it's a subscription!
 	}
 
 	private void writeResponseError(ServletResponse response, String msg) throws JsonProcessingException, IOException {
@@ -233,8 +242,8 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 					logger.debug("The owner credentials are valid");
 					return;
 				} else {
-					logger.warn("The owner credential are not valid --> please update this information ASAP, since this function is going to be DEPRECATED in a while!!! {} {} {} {} {}", cc, k1, k2, elementId, queryType);
-					return;// return ok anyway //TODO to remove this condition!!!
+					logger.debug("The owner credential are NOT valid");
+					throw new CredentialsNotValidException(messages.getMessage("login.ko.credentialsnotvalid", null, lang));
 				}
 			} else {
 				logger.debug("The operation is READ on public");
@@ -301,7 +310,27 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 
 	private CachedCredentials getCachedCredentials(String elementId, String sensorName, Locale lang) throws CredentialsNotValidException, UnsupportedEncodingException {
 
-		String sensorUri = (sensorName == null) ? orionbrokerkbURI + elementId : orionbrokerkbURI + elementId + "/" + sensorName;
+		String accessToken = null;
+
+		Ownership o = cachedOwnership.get(elementId);
+		if (o == null) {
+			logger.debug("ownership not found in cache");
+		} else {
+			logger.debug("ownership found in cache: {}", o);
+			if (o.isElapsed()) {
+				logger.debug("ownership remove from cache since not valid anymore");
+				cachedOwnership.remove(elementId);
+				o = null;
+			}
+		}
+
+		if (o == null) {
+			accessToken = getAccessToken(lang);
+			o = getOwnership(accessToken, elementId, lang);
+			cachedOwnership.put(elementId, o);
+		}
+
+		String sensorUri = (sensorName == null) ? o.getElementUrl() : o.getElementUrl() + "/" + sensorName;
 
 		// retrieve cached credentials
 		CachedCredentials cc = cachedCredentials.get(sensorUri);
@@ -322,9 +351,13 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 			logger.debug("retrieving credentials");
 
 			cc = new CachedCredentials(minutesElapsingCache);
-			cc.setIsPublic(isPublicFromKB(elementId, lang));
-			String accessToken = getAccessToken(lang);
-			cc.setOwnerCredentials(getOwnerCredentials(accessToken, elementId, lang));
+			cc.setIsPublic(isPublicFromKB(o.getElementUrl(), lang));
+
+			cc.setOwnerCredentials(o);
+
+			if (accessToken == null)
+				accessToken = getAccessToken(lang);
+
 			cc = enrichDelegatedCredentials(cc, accessToken, sensorUri, lang);
 
 			cachedCredentials.put(sensorUri, cc);
@@ -337,10 +370,10 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 
 	// default value:private (old scenario from iotdirectory)
 	// if there is a string that contains "public", in the ow field, it is considered public
-	private boolean isPublicFromKB(String elementId, Locale lang) throws CredentialsNotValidException {
+	private boolean isPublicFromKB(String elementUrl, Locale lang) throws CredentialsNotValidException {
 
 		String queryKB = "select distinct ?ow { " +
-				"OPTIONAL {<" + orionbrokerkbURI + elementId + "> km4c:ownership ?ow.}" + "}";// assume that any elementId here are on this orion broker
+				"OPTIONAL {<" + elementUrl + "> km4c:ownership ?ow.}" + "}";// assume that any elementId here are on this orion broker
 
 		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
 		params.add("format", "json");
@@ -445,9 +478,9 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		return toreturn;
 	}
 
-	private Credentials getOwnerCredentials(String accessToken, String elementId, Locale lang) throws CredentialsNotValidException {
+	private Ownership getOwnership(String accessToken, String elementId, Locale lang) throws CredentialsNotValidException {
 
-		Credentials toreturn = new Credentials();
+		Ownership toreturn = null;
 
 		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
 		params.add("type", "IOTID");
@@ -478,39 +511,44 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 			}
 
 			JsonNode elNode = els.next();
-			JsonNode usernameNode = elNode.path("username");
 
+			// username - has to be present
+			JsonNode usernameNode = elNode.path("username");
 			if ((usernameNode == null) || (usernameNode.isNull()) || (usernameNode.isMissingNode())) {
 				logger.error("The retreived data does not contains username");
 				throw new CredentialsNotValidException(messages.getMessage("login.ko.configurationerror", null, lang));
 			}
 
-			String username = usernameNode.asText();
-
-			JsonNode pksha1Node = elNode.path("publickeySHA1");
-
-			String pksha1 = null;
-
-			if ((pksha1Node != null) && (!pksha1Node.isNull()) && (!pksha1Node.isMissingNode())) {
-				pksha1 = pksha1Node.asText();
+			// elementUrl - has to be present
+			JsonNode elementUrlNode = elNode.path("elementUrl");
+			if ((elementUrlNode == null) || (elementUrlNode.isNull()) || (elementUrlNode.isMissingNode())) {
+				logger.error("The retreived data does not contains elementUrlNode");
+				throw new CredentialsNotValidException(messages.getMessage("login.ko.configurationerror", null, lang));
 			}
 
+			// elementDetails - has to be present
 			JsonNode edNode = elNode.path("elementDetails");
-
 			if ((edNode == null) || (edNode.isNull()) || (edNode.isMissingNode())) {
 				logger.error("The retreived data does not contains elementDetails");
 				throw new CredentialsNotValidException(messages.getMessage("login.ko.configurationerror", null, lang));
 			}
 
+			// k1, k2 - has to be present
 			JsonNode k1Node = edNode.path("k1");
 			JsonNode k2Node = edNode.path("k2");
-
 			if ((k1Node == null) || (k1Node.isNull()) || ((k2Node == null) || (k2Node.isNull())) || (k1Node.isMissingNode()) || (k2Node.isMissingNode())) {
 				logger.error("The retreived data does not contains k1, k2");
 				throw new CredentialsNotValidException(messages.getMessage("login.ko.configurationerror", null, lang));
 			}
 
-			toreturn = new Credentials(k1Node.asText(), k2Node.asText(), username, pksha1);
+			// publickeySHA1 - can be missing
+			String pksha1 = null;
+			JsonNode pksha1Node = elNode.path("publickeySHA1");
+			if ((pksha1Node != null) && (!pksha1Node.isNull()) && (!pksha1Node.isMissingNode())) {
+				pksha1 = pksha1Node.asText();
+			}
+
+			toreturn = new Ownership(elementUrlNode.asText(), k1Node.asText(), k2Node.asText(), usernameNode.asText(), pksha1, minutesElapsingCache);
 		} catch (HttpClientErrorException | IOException e) {
 			logger.error("Trouble in getOwnerCredentials", e);
 			throw new CredentialsNotValidException(messages.getMessage("login.ko.networkproblems", null, lang));
