@@ -1,0 +1,620 @@
+<?php
+
+function og_simpleldap_group_block_info() {
+  $blocks = array();
+  $blocks['orggroups'] = array(
+    'info' => t('Organization Groups'),
+  );
+  
+  return $blocks;
+}
+
+function og_simpleldap_group_block_view($delta = '') {
+  global $user;
+  $user_data = user_load($user->uid); 
+  $block = array();
+  switch ($delta) {
+    case 'orggroups':
+      if (user_access('access content')) {
+          $block['subject'] = t('Organization Groups');
+          $html='';
+          if(isset($user_data->og_user_node['und'])) { 
+              foreach($user_data->og_user_node['und'] as $x) {
+                 $n=node_load($x['target_id']);
+                 if($n->type=='disitorg') {
+                     $query = db_select("og_membership",'o')
+                       ->fields('o',array('state'))
+                       ->condition('o.etid',$user->uid)
+                       ->condition('o.gid',$n->nid)
+                       ->condition('o.entity_type','user');
+                     $state = $query->execute()->fetchfield(0);
+                     $sstate = '';
+                     if($state==2)
+                       $sstate = '(Pending)';
+                     $html .= "<b>".l($n->title,"node/".$n->nid)."</b> $sstate<ul>"; //.var_export($n,true)."<br/>";
+                     
+                     //list all subgroups of the organization
+                     $query= db_select('og_membership','o')->distinct();
+                     $query->join('node','n','o.etid = n.nid');
+                     $query->fields('o',array('etid'))
+                       ->condition('o.gid', $n->nid)
+                       ->condition('n.type', 'disitGroup')
+                       ->condition('o.entity_type', 'node')
+                       ->orderBy('n.title');
+                     $query->addField('n','title');
+                     $r=$query->execute();
+                     foreach($r as $row) {
+                       // check if the user is subscribed to the group
+                        $query = db_select("og_membership",'o')
+                          ->fields('o',array('state'))
+                          ->condition('o.etid',$user->uid)
+                          ->condition('o.gid',$row->etid)
+                          ->condition('o.entity_type','user');
+                        $state = $query->execute()->fetchfield(0);
+                        $style = '';
+                        if($state==2)
+                          $style = 'font-style:italic';
+                        else if($state==1)
+                          $style = 'font-weight:bold';
+                        
+                        $html .= "<li style='$style'>".l($row->title,"node/".$row->etid)."</li>";
+                     }
+                     $html .= "</ul>";
+                 }
+              }
+           } else {
+              $html = "No organization set, subscribe to one of the following:";
+              $query = db_select('node','n')->fields('n',array('nid','title'))->condition('n.type','disitOrg')->orderBy('n.title');
+              $r=$query->execute();
+              $html .= "<ul>";
+              foreach($r as $row) {
+                $html .= "<li>".l($row->title,"node/".$row->nid)."</li>";
+              }
+              $html .= "</ul>";
+           }
+           $block['content'] = $html; //var_export($user_data, true);
+      }
+      else {
+          $block['content'] = t('No groups available.');
+      }
+    break;
+  }
+  return $block;
+}
+
+/*
+function og_simpleldap_group_user_login(&$edit, $account) {
+  if(isset($account->data['first_login_state'])) {
+    $first_login_state = $account->data['first_login_state'];
+    watchdog('og_simpleldap_group', "TEST login user $account->username state: $first_login_state");
+    if($first_login_state == "INSERT")
+      user_save($account, array("first_login_state"=>"LOGIN1"));
+    else if($first_login_state != "LOGINN")
+      user_save($account, array("first_login_state"=>"LOGINN"));            
+  } else {
+    watchdog('og_simpleldap_group', "TEST login user $account->username nostate");
+    user_save($account, array("first_login_state"=>"LOGINN"));            
+  }
+}
+
+function og_simpleldap_group_user_insert(&$edit, $account, $category) {
+  watchdog('og_simpleldap_group', "TEST added user $account->username");
+  user_save($account, array("first_login_state"=>"INSERT"));
+}
+
+function og_simpleldap_group_user_update(&$edit, $account, $category) {
+  if(isset($account->data['first_login_state'])) {
+    $first_login_state = $account->data['first_login_state'];
+    watchdog('og_simpleldap_group', "TEST updated user $account->username $first_login_state");
+    if($first_login_state == 'LOGIN1') {
+      user_save($account, array("first_login_state"=>"SAVED"));
+      user_logout_current_user();
+      drupal_goto("https://main.snap4city.org");
+    }
+  }
+}
+*/
+
+/**
+ * Gets called after an entity has been inserted/updated/deleted to database.
+ *
+ * @param $entity
+ *   An entity object
+ * @param string $entity
+ *   An string containing entity type name
+ * @param string $op
+ *   An string containing the operating that's taking place (insert/update/delete)
+ *
+ * @see hook_entity_postsave()
+ * @see hook_entity_postinsert()
+ * @see hook_entity_postupdate()
+ * @see hook_entity_postdelete()
+ */
+
+function og_simpleldap_group_entity_postsave($entity, $entity_type, $op) {
+    list($id) = entity_extract_ids($entity_type, $entity);
+    //watchdog('og_simpleldap_group', "GreenDog The {$op}d entity {$entity_type} id is {$id} from " . __FUNCTION__);   
+}
+
+/**
+ * Gets called after an entity has been inserted to database.
+ *
+ * @param $entity
+ *   An entity object
+ * @param string $entity
+ *   An string containing entity type name
+ *
+ * @see hook_entity_postsave()
+ * @see hook_entity_postinsert()
+ * @see hook_entity_postupdate()
+ * @see hook_entity_postdelete()
+ */
+function og_simpleldap_group_entity_postinsert($entity, $entity_type) {
+    global $user;
+    
+    list($id) = entity_extract_ids($entity_type, $entity); 
+
+    if(strcmp($entity_type,'og_membership')==0 || strcmp($entity_type,'og_membership_type_default')==0){        
+        // Get the live simple_ldap config.
+        $ldaphost = variable_get('simple_ldap_host');
+        $ldapport = variable_get('simple_ldap_port');
+        $starttls = variable_get('simple_ldap_starttls');
+        $binddn = variable_get('simple_ldap_binddn');
+        $bindpw = variable_get('simple_ldap_bindpw');
+        $basedn=simple_ldap_user_variable_get('simple_ldap_user_basedn');
+        
+        // Connect with LDAP
+        $ldap = ldap_connect($ldaphost, $ldapport);
+        ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, 3);
+        ldap_set_option($ldap, LDAP_OPT_REFERRALS, 0);
+        $ldapbind = ldap_bind($ldap, $binddn, $bindpw);
+
+        //Determine the type of inserted object
+        $typeQuery= db_select('og_membership','o')
+            ->fields('o',array('entity_type'))
+            ->condition('o.id', $id);
+        $type = $typeQuery->execute()->fetchfield(0);
+        //Are we adding user to a Group or Adding new organization or Adding a New Group?        
+        if(strcmp($type,'user')==0) { //is user membership
+            watchdog('og_simpleldap_group', "adding new user to group $entity->gid state: $entity->state " . __FUNCTION__);
+            if($entity->state==1) { //is active user?
+              _og_simpleldap_group_add_ldap_membership($ldap, $id, $entity, $basedn);
+            }
+        } else { //Is a new group  
+            openlog('Drupal Custom Module', LOG_NDELAY, LOG_USER);
+            syslog(LOG_NOTICE, "It's a Group");
+            //Get Group Name
+            $gidQuery= db_select('og_membership','o')
+                ->fields('o',array('etid','gid'))
+                ->condition('o.id', $id);
+
+            $childGid = $gidQuery->execute()->fetchfield(0);
+            $parentGid = $gidQuery->execute()->fetchfield(1);
+
+            $parentGroupNameQuery= db_select('node','n')
+                ->fields('n',array('title'))
+                ->condition('n.nid', $parentGid);
+
+            $parentGroupName = $parentGroupNameQuery->execute()->fetchfield(0);
+
+            $childGroupNameQuery= db_select('node','n')
+                ->fields('n',array('title'))
+                ->condition('n.nid', $childGid);   
+            $childGroupName = $childGroupNameQuery->execute()->fetchfield(0);
+
+            // prepare data
+            $group_info["cn"] = $childGroupName;
+            $group_info["ou"] = $parentGroupName;
+
+            $group_info["objectclass"] = "GroupOfNames";
+            $group_info["member"] = "cn=admin,".$basedn;
+
+            ldap_add($ldap,"cn=".$childGroupName.",ou=".$parentGroupName.",".$basedn,$group_info);
+        }            
+    }
+}
+
+/**
+ * Gets called after an entity has been updated in database.
+ *
+ * @param $entity
+ *   An entity object
+ * @param string $entity
+ *   An string containing entity type name
+ *
+ * @see hook_entity_postsave()
+ * @see hook_entity_postupdate()
+ * @see hook_entity_postinsert()
+ * @see hook_entity_postdelete()
+ */
+function og_simpleldap_group_entity_postupdate($entity, $entity_type) {
+    list($id) = entity_extract_ids($entity_type, $entity);
+    watchdog('og_simpleldap_group', "The updated entity {$entity_type} id is {$id} from " . __FUNCTION__);
+
+    if(strcmp($entity_type,'og_membership')==0){
+        if($entity->entity_type=="user") {
+            // Get the live simple_ldap config.
+            $ldaphost = variable_get('simple_ldap_host');
+            $ldapport = variable_get('simple_ldap_port');
+            $starttls = variable_get('simple_ldap_starttls');
+            $binddn = variable_get('simple_ldap_binddn');
+            $bindpw = variable_get('simple_ldap_bindpw');
+            $basedn=simple_ldap_user_variable_get('simple_ldap_user_basedn');
+
+            // Connect with LDAP
+            $ldap = ldap_connect($ldaphost, $ldapport);
+            ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, 3);
+            ldap_set_option($ldap, LDAP_OPT_REFERRALS, 0);
+            $ldapbind = ldap_bind($ldap, $binddn, $bindpw);
+            
+            if($entity->state==1) //active
+              _og_simpleldap_group_add_ldap_membership($ldap, $id, $entity, $basedn);
+            else
+              _og_simpleldap_group_remove_ldap_membership($ldap, $id, $entity, $basedn);
+        }
+    } else if(strcmp($entity_type,'user')==0){
+          //check if the user is in an organization group
+        $user_data = user_load($id); 
+        watchdog('og_simpleldap_group', "$id user: status $user_data->status");
+        if($user_data->status!=0 && !$user_data->access) { //user not blocked and never logged in
+          watchdog('og_simpleldap_group', "$id It's a new active user");
+          if(isset($user_data->og_user_node['und'])) { 
+              // Get the live simple_ldap config.
+              $ldaphost = variable_get('simple_ldap_host');
+              $ldapport = variable_get('simple_ldap_port');
+              $starttls = variable_get('simple_ldap_starttls');
+              $binddn = variable_get('simple_ldap_binddn');
+              $bindpw = variable_get('simple_ldap_bindpw');
+
+              $basedn = simple_ldap_user_variable_get('simple_ldap_user_basedn');
+
+              $ldap = ldap_connect($ldaphost, $ldapport);
+              ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, 3);
+              ldap_set_option($ldap, LDAP_OPT_REFERRALS, 0);
+
+              $ldapbind = ldap_bind($ldap, $binddn, $bindpw);
+              foreach($user_data->og_user_node['und'] as $x) {
+                $n=node_load($x['target_id']);
+                if($n->type=='disitorg') {
+                    $query = db_select("og_membership",'o')
+                           ->fields('o',array('gid','etid','state'))
+                           ->condition('o.etid',$id)
+                           ->condition('o.gid',$n->nid)
+                           ->condition('o.entity_type','user');
+                    $entity = $query->execute()->fetchObject();
+                    if($entity && $entity->state==1) { //active
+                        _og_simpleldap_group_add_ldap_membership($ldap, NULL, $entity, $basedn);                    
+                    } else {
+                        watchdog('og_simpleldap_group', "user update: user $id not active on group $n->nid" . __FUNCTION__);
+                    }
+                  }
+              }
+          } else {
+              watchdog('og_simpleldap_group', "user update NO og_user_node " . __FUNCTION__);          
+          }
+        }        
+        //Add to og default        
+/*        $groupIDQuery= db_select('node','n')
+                ->fields('n',array('nid'))
+                ->condition('n.title', 'Other')
+                ->condition('n.type', 'disitgroup');
+   
+        $groupID = $groupIDQuery->execute()->fetchfield(0);
+
+        watchdog('og_simpleldap_group', "Group ID Other {$groupID}");
+
+        $values = array(
+            'entity_type' => 'user',
+            'entity' => $id,
+            'field_name' => FALSE,
+            'state' => 1,
+        );
+                        
+        og_group('node', $groupID, $values);
+                    
+        // Get the live simple_ldap config.
+        $ldaphost = variable_get('simple_ldap_host');
+        $ldapport = variable_get('simple_ldap_port');
+        $starttls = variable_get('simple_ldap_starttls');
+        $binddn = variable_get('simple_ldap_binddn');
+        $bindpw = variable_get('simple_ldap_bindpw');
+
+        $basedn = simple_ldap_user_variable_get('simple_ldap_user_basedn');
+        
+        $ldap = ldap_connect($ldaphost, $ldapport);
+        ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, 3);
+        ldap_set_option($ldap, LDAP_OPT_REFERRALS, 0);
+
+        $ldapbind = ldap_bind($ldap, $binddn, $bindpw);
+
+        $userNameQuery= db_select('users','u')
+                ->fields('u',array('name'))
+                ->condition('u.uid', $id);
+   
+        $userName = $userNameQuery->execute()->fetchfield(0);
+        $dn="cn=".$userName.",".$basedn;
+        $ou_name = "ou=other,".$basedn;
+        $ou_info['l'] = $dn; // User's DN is added to group's 'member' array instead of memeberuid
+
+        watchdog('og_simpleldap_group', "Adding the user $userName in OU $ou_name In ".__FUNCTION__);
+        if(!ldap_mod_add($ldap,$ou_name,$ou_info)) {
+          _og_simpleldap_group_ldap_error($ldap);
+        }
+*/
+    }
+}
+
+function og_simpleldap_group_user_delete($account) {
+    watchdog('og_simpleldap_group', "Deleting the user $account->uid id from " . __FUNCTION__);
+    // Get the live simple_ldap config.
+    $ldaphost = variable_get('simple_ldap_host');
+    $ldapport = variable_get('simple_ldap_port');
+    $starttls = variable_get('simple_ldap_starttls');
+    $binddn = variable_get('simple_ldap_binddn');
+    $bindpw = variable_get('simple_ldap_bindpw');
+    $basedn=simple_ldap_user_variable_get('simple_ldap_user_basedn');
+
+    // Connect with LDAP
+    $ldap = ldap_connect($ldaphost, $ldapport);
+    ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, 3);
+    ldap_set_option($ldap, LDAP_OPT_REFERRALS, 0);
+    $ldapbind = ldap_bind($ldap, $binddn, $bindpw);
+        
+    foreach($account->og_user_node['und'] as $x) {
+      $n=node_load($x['target_id']);
+      if($n->type=='disitorg') {
+          $query = db_select("og_membership",'o')
+                 ->fields('o',array('gid','etid','state'))
+                 ->condition('o.etid',$account->uid)
+                 ->condition('o.gid',$n->nid)
+                 ->condition('o.entity_type','user');
+          $entity = $query->execute()->fetchObject();
+          if($entity) { //active
+              _og_simpleldap_group_remove_ldap_membership($ldap, NULL, $entity, $basedn);                    
+          } else {
+              watchdog('og_simpleldap_group', "user delete: user $id not found on group $n->nid" . __FUNCTION__);
+          }
+        }
+    }
+}
+
+/**
+ * Gets called after an entity has been deleted from database.
+ *
+ * @param $entity
+ *   An entity object
+ * @param string $entity
+ *   An string containing entity type name
+ *
+ * @see hook_entity_postsave()
+ * @see hook_entity_postinsert()
+ * @see hook_entity_postupdate()
+ * @see hook_entity_postdelete()
+ */
+function og_simpleldap_group_entity_postdelete($entity, $entity_type) {
+    list($id) = entity_extract_ids($entity_type, $entity);
+    watchdog('og_simpleldap_group', "The deleted entity {$entity_type} id is {$id} from " . __FUNCTION__);
+/*    if($entity_type=='user') {
+        // Get the live simple_ldap config.
+        $ldaphost = variable_get('simple_ldap_host');
+        $ldapport = variable_get('simple_ldap_port');
+        $starttls = variable_get('simple_ldap_starttls');
+        $binddn = variable_get('simple_ldap_binddn');
+        $bindpw = variable_get('simple_ldap_bindpw');
+        $basedn=simple_ldap_user_variable_get('simple_ldap_user_basedn');
+
+        // Connect with LDAP
+        $ldap = ldap_connect($ldaphost, $ldapport);
+        ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, 3);
+        ldap_set_option($ldap, LDAP_OPT_REFERRALS, 0);
+        $ldapbind = ldap_bind($ldap, $binddn, $bindpw);
+        
+        _og_simpleldap_group_remove_ldap_membership($ldap, $id, $entity, $basedn);      
+    } */
+}
+
+/**
+ * Gets called after a node has been inserted/updated/deleted to database.
+ *
+ * @param $node
+ *   A node object
+ * @param string $op
+ *   An string containing the operating that's taking place (insert/update/delete)
+ *
+ * @see hook_node_postinsert()
+ * @see hook_node_postupdate()
+ * @see hook_node_postdelete()
+ * @see hook_node_postsave()
+ */
+function og_simpleldap_group_node_postsave($node, $op) {
+    if (strcmp($node->type,'disitGroup')==0){  
+        watchdog('og_simpleldap_group', "disitGroup  The {$op}d node {$node->type} id is {$node->nid} from " . __FUNCTION__);
+    }
+    else if (strcmp($node->type,'disitOrg')==0){  
+        watchdog('og_simpleldap_group', "disitOrg   The {$op}d node {$node->type} id is {$node->nid} from " . __FUNCTION__);
+    }    
+}
+
+/**
+ * Gets called after a node has been inserted to database.
+ *
+ * @param $node
+ *   A node object
+ *
+ * @see hook_node_postsave()
+ * @see hook_node_postupdate()
+ * @see hook_node_postdelete()
+ * @see hook_node_postinsert()
+ */
+function og_simpleldap_group_node_postinsert($node) {
+if (strcmp($node->type,'disitGroup')==0){  
+        watchdog('og_simpleldap_group', "disitGroup  The {$op}d node {$node->type} id is {$node->nid} from " . __FUNCTION__);
+    }
+    else if (strcmp($node->type,'disitOrg')==0){  
+        watchdog('og_simpleldap_group', "disitOrg   The {$op}d node {$node->type} id is {$node->nid} from " . __FUNCTION__);
+    }
+}
+/**
+ * Gets called after a node has been updated to database.
+ *
+ * @param $node
+ *   A node object
+ *
+ * @see hook_node_postsave()
+ * @see hook_node_postinsert()
+ * @see hook_node_postdelete()
+ * @see hook_node_postupdate()
+ */
+function og_simpleldap_group_node_postupdate($node) {
+    $host = variable_get('simple_ldap_host');
+    $port = variable_get('simple_ldap_port');
+    $starttls = variable_get('simple_ldap_starttls');
+    $binddn = variable_get('simple_ldap_binddn');
+    $bindpw = variable_get('simple_ldap_bindpw');
+            
+    if (strcmp($node->type,'disitGroup')==0){  
+        watchdog('og_simpleldap_group', "disitGroup  The {$op}d node {$node->type} id is {$node->nid} from " . __FUNCTION__);
+        //ldap_search($link_identifier, $base_dn, $filter, $attributes, $attrsonly, $sizelimit, $timelimit, $deref);
+    }
+    else if (strcmp($node->type,'disitOrg')==0){  
+        watchdog('og_simpleldap_group', "disitOrg   The {$op}d node {$node->type} id is {$node->nid} from " . __FUNCTION__);
+        //ldap_search($link_identifier, $base_dn, $filter, $attributes, $attrsonly, $sizelimit, $timelimit, $deref);
+    }    
+}
+
+/**
+ * Gets called after a node has been deleted from database.
+ *
+ * @param $node
+ *   A node object
+ *
+ * @see hook_node_postsave()
+ * @see hook_node_postinsert()
+ * @see hook_node_postupdate()
+ * @see hook_node_postdelete()
+ */
+function og_simpleldap_group_node_postdelete($node) {
+    if (strcmp($node->type,'disitGroup')==0){  
+        watchdog('og_simpleldap_group', "The deleted node {$node->type} id is {$node->nid} from " . __FUNCTION__);
+    }
+}
+
+function _og_simpleldap_group_add_ldap_membership($ldap, $id, $entity, $basedn) {
+    list($userName, $userStatus, $groupName, $parentGid, $parentGroupName) = _og_simpleldap_group_get_data($id, $entity);
+    
+    if($userName && $userStatus!=0) {
+      $dn="cn=".$userName.",".$basedn;
+
+      if (strcmp($parentGid, '')==0){
+         $group_name = "ou=".$groupName.",".$basedn;
+         $group_info['l'] = $dn; // User's DN is added to group's 'member' array instead of memeberuid
+
+         //If exists
+         if(ldap_search($ldap,$group_name, "(cn=*)")!=false){
+            watchdog('og_simpleldap_group', "Writing the user $userName in OU $group_name In ".__FUNCTION__);
+            if(!ldap_mod_add($ldap,$group_name,$group_info)) {
+               _og_simpleldap_group_ldap_error($ldap);
+            }
+         } else{
+            watchdog('og_simpleldap_group', "Writing the user $userName in NEW OU $group_name In ".__FUNCTION__);
+            $group_info["objectClass"] = "organizationalUnit";
+            if(!ldap_add($ldap,$group_name,$group_info)) {
+               _og_simpleldap_group_ldap_error($ldap);
+            }
+         }
+      } else {
+          // watchdog('og_simpleldap_group', "Writing the new Group on Ldap ". __FUNCTION__);               
+          $group_name = "cn=".$groupName.",ou=".$parentGroupName.",".$basedn;
+          $group_info['member'] = $dn; // User's DN is added to group's 'member' array instead of memeberuid
+          watchdog('og_simpleldap_group', "Writing the user $userName in OU $group_name In ".__FUNCTION__);
+          if(!ldap_mod_add($ldap,$group_name,$group_info)) {
+               _og_simpleldap_group_ldap_error($ldap);
+          }
+      }  
+    } else {
+      watchdog('og_simpleldap_group', "user '$userName' is blocked not added to $groupName In ".__FUNCTION__);      
+    }
+}
+
+function _og_simpleldap_group_remove_ldap_membership($ldap, $id, $entity, $basedn) {
+    list($userName, $userStatus, $groupName, $parentGid, $parentGroupName) = _og_simpleldap_group_get_data($id, $entity);
+    if($userName===NULL) {
+      return;
+    }
+    
+    $dn="cn=".$userName.",".$basedn;
+
+    if (strcmp($parentGid, '')==0){
+       $group_name = "ou=".$groupName.",".$basedn;
+       $group_info['l'] = $dn; // User's DN is added to group's 'member' array instead of memeberuid
+
+       //If exists
+       if(ldap_search($ldap,$group_name, "(cn=*)")!=false){
+          watchdog('og_simpleldap_group', "removing user '$dn' in OU $group_name In ".__FUNCTION__);
+          if(!ldap_mod_del($ldap,$group_name,$group_info)) {
+             _og_simpleldap_group_ldap_error($ldap);
+          }
+       } else{
+          watchdog('og_simpleldap_group', "group not found on ldap  ".$group_name." In ".__FUNCTION__);
+       }
+    } else {
+        $group_name = "cn=".$groupName.",ou=".$parentGroupName.",".$basedn;
+        $group_info['member'] = $dn; // User's DN is added to group's 'member' array instead of memeberuid
+        watchdog('og_simpleldap_group', "removing user '$dn' in OU $group_name In ".__FUNCTION__);
+        if(!ldap_mod_del($ldap,$group_name,$group_info)) {
+             _og_simpleldap_group_ldap_error($ldap);
+        }
+    }  
+}
+
+function _og_simpleldap_group_ldap_error($ldap){
+    watchdog('og_simpleldap_group', "LDAP ERROR ".ldap_error($ldap));
+}
+
+function _og_simpleldap_group_get_data($id, $entity){
+    //Get Group Name
+    $gid = $entity->gid;
+    $etid =$entity->etid;
+
+    //select title from node where nid = $gid
+    $groupNameQuery= db_select('node','n')
+        ->fields('n',array('title'))
+        ->condition('n.nid', $gid);   
+    $groupName = $groupNameQuery->execute()->fetchfield(0);
+
+    //If it is a group then it must have a Parent Group but is not ok to check as following
+    //Get Parent Group Name
+    //select gid from og_membership where etid =$gid 
+    $parentGidQuery= db_select('og_membership','o')
+        ->fields('o',array('gid'))
+        ->condition('o.etid', $gid)
+        ->condition('o.entity_type', 'node');
+    $parentGid = $parentGidQuery->execute()->fetchfield(0);
+
+    //If parentGid is null -> the group is a new org
+    watchdog('og_simpleldap_group', "$gid parent Gid is $parentGid");
+
+    if (strcmp($parentGid, '')==0){
+      //select title from node where nid = $parentGid
+      $parentGroupNameQuery= db_select('node','n')
+          ->fields('n',array('title'))
+          ->condition('n.nid', $gid);
+    } else{
+      //select title from node where nid = $parentGid
+      $parentGroupNameQuery= db_select('node','n')
+          ->fields('n',array('title'))
+          ->condition('n.nid', $parentGid);
+    }
+    $parentGroupName = $parentGroupNameQuery->execute()->fetchfield(0);
+    //watchdog('og_simpleldap_group', "ParentGroupName is  ".$parentGroupName);
+
+    //Get the username 
+    $userNameQuery= db_select('users','u')
+        ->fields('u',array('name','status'))
+        ->condition('u.uid', $etid);
+
+    $userObj = $userNameQuery->execute()->fetchObject();
+    if($userObj)
+      return array($userObj->name, $userObj->status, $groupName, $parentGid, $parentGroupName);
+    return array(NULL, NULL, $groupName, $parentGid, $parentGroupName);
+}
