@@ -53,7 +53,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.unifi.disit.datamanager.datamodel.ActivityAccessType;
 import edu.unifi.disit.datamanager.datamodel.Response;
-
 import edu.unifi.disit.datamanager.exception.AccessTokenNotValidException;
 import edu.unifi.disit.datamanager.service.IActivityService;
 
@@ -67,6 +66,9 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 
 	@Value("${spring.openidconnect.userinfo_endpoint}")
 	private String userinfo_endpoint;
+
+	@Value("${spring.openidconnect.userinfo_endpoint_test}")
+	private String userinfo_endpoint_test;
 
 	@Autowired
 	private MessageSource messages;
@@ -139,70 +141,28 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 
 	private void validation(String accesstoken, Locale lang) throws AccessTokenNotValidException {
 
-		UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(userinfo_endpoint).build();
-
 		RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("Authorization", "Bearer " + accesstoken);
 		headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-
 		HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
 
 		try {
-			ResponseEntity<String> re = restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, entity, String.class);
-
-			String response = re.getBody();
-
-			JsonNode jsonNode = objectMapper.readTree(response);
-
-			// retrieve username
-			String username = null;
-			JsonNode jn = jsonNode.get("username");
-
-			if (jn != null)
-				username = jn.asText();
-
-			jn = jsonNode.get("preferred_username");
-
-			if ((username == null) && (jn != null))
-				username = jn.asText();
-
-			if (username == null) {
-				logger.error("username not found");
-				throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
-			}
-
-			// retrieve roles
-			List<String> roles = new ArrayList<String>();
-			Iterator<JsonNode> iroles = null;
-
-			jn = jsonNode.get("roles");
-
-			if (jn != null) {
-				iroles = jn.elements();
-			}
-
-			jn = jsonNode.get("role");
-
-			if ((iroles == null) && (jn != null)) {
-				iroles = jn.elements();
-			}
-
-			if (iroles == null) {
-				logger.error("roles not found");
-				throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
-			}
-
-			while (iroles.hasNext())
-				roles.add(iroles.next().asText());
-
-			logger.info("AccessToken username {} + Roles {}", username, roles.toArray());
-
-			authUser(username, roles);
-
+			checkValidationOnKeycloakServer(UriComponentsBuilder.fromHttpUrl(userinfo_endpoint).build(), restTemplate, entity, lang);// check validation on www.snap4city.org/auth keycloak server
 		} catch (HttpClientErrorException e) {
 			logger.warn("AccessToken WAS NOT VALIDATED HttpClientErrorException {}", e);
-			throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
+			try {
+				checkValidationOnKeycloakServer(UriComponentsBuilder.fromHttpUrl(userinfo_endpoint_test).build(), restTemplate, entity, lang);// check validation on www.snap4city.org/auth keycloak server
+			} catch (HttpClientErrorException e2) {
+				logger.error("AccessToken WAS NOT VALIDATED even on keycloak TEST HttpClientErrorException {}", e2);
+				throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
+			} catch (JsonProcessingException e2) {
+				logger.warn("AccessToken WAS NOT VALIDATED even on keycloak TEST  JsonProcessingException {}", e2);
+				throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
+			} catch (IOException e2) {
+				logger.warn("AccessToken WAS NOT VALIDATED even on keycloak TEST  IOException {}", e2);
+				throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
+			}
 		} catch (JsonProcessingException e) {
 			logger.warn("AccessToken WAS NOT VALIDATED JsonProcessingException {}", e);
 			throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
@@ -210,5 +170,64 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 			logger.warn("AccessToken WAS NOT VALIDATED IOException {}", e);
 			throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
 		}
+	}
+
+	private void checkValidationOnKeycloakServer(UriComponents uriComponents, RestTemplate restTemplate, HttpEntity<String> entity, Locale lang)
+			throws JsonProcessingException, IOException, HttpClientErrorException, AccessTokenNotValidException {
+
+		logger.info("AccessToken check on {}", uriComponents.toUri());
+
+		ResponseEntity<String> re = restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, entity, String.class);
+
+		String response = re.getBody();
+
+		logger.debug("got response:{}", response);
+
+		JsonNode jsonNode = objectMapper.readTree(response);
+
+		// retrieve username
+		String username = null;
+		JsonNode jn = jsonNode.get("username");
+
+		if (jn != null)
+			username = jn.asText();
+
+		jn = jsonNode.get("preferred_username");
+
+		if ((username == null) && (jn != null))
+			username = jn.asText();
+
+		if (username == null) {
+			logger.error("username not found");
+			throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
+		}
+
+		// retrieve roles
+		List<String> roles = new ArrayList<String>();
+		Iterator<JsonNode> iroles = null;
+
+		jn = jsonNode.get("roles");
+
+		if (jn != null) {
+			iroles = jn.elements();
+		}
+
+		jn = jsonNode.get("role");
+
+		if ((iroles == null) && (jn != null)) {
+			iroles = jn.elements();
+		}
+
+		if (iroles == null) {
+			logger.error("roles not found");
+			throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
+		}
+
+		while (iroles.hasNext())
+			roles.add(iroles.next().asText());
+
+		logger.info("AccessToken username {} + Roles {}", username, roles.toArray());
+
+		authUser(username, roles);
 	}
 }

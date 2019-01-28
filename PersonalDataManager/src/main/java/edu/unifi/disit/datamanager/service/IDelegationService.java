@@ -16,8 +16,10 @@ import java.util.List;
 import java.util.Locale;
 
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import edu.unifi.disit.datamanager.datamodel.Response;
+//import edu.unifi.disit.datamanager.datamodel.Response;
 import edu.unifi.disit.datamanager.datamodel.profiledb.Delegation;
 import edu.unifi.disit.datamanager.exception.CredentialsException;
 import edu.unifi.disit.datamanager.exception.DelegationNotValidException;
@@ -25,9 +27,9 @@ import edu.unifi.disit.datamanager.exception.LDAPException;
 
 public interface IDelegationService {
 
-	Response checkDelegationsFromUsername(String username, String variableName, String elementID, Locale lang) throws CredentialsException;
-
-	Response checkDelegationsFromApp(String elementID, Locale lang) throws CredentialsException;
+	// Response checkDelegationsFromUsername(String username, String variableName, String elementID, Locale lang) throws CredentialsException;
+	//
+	// Response checkDelegationsFromApp(String elementID, Locale lang) throws CredentialsException;
 
 	List<Delegation> getDelegationsDelegatedFromApp(String appId, String variableName, String motivation, Boolean deleted, String appOwner, String groupname, Locale lang)
 			throws DelegationNotValidException, CredentialsException, NoSuchMessageException, LDAPException;
@@ -47,4 +49,14 @@ public interface IDelegationService {
 	Delegation putDelegationFromUser(String username, Delegation delegation, Long delegationId, Locale lang) throws DelegationNotValidException, CredentialsException;
 
 	List<Delegation> stripUsernameDelegatedNull(List<Delegation> delegations);
+
+
+	//Aggiunti per KPI
+	
+	Delegation getDelegationById(Long id, Locale lang) throws NoSuchMessageException, CredentialsException;
+	
+	Page<Delegation> findByElementId(String elementId, Pageable pageable) throws NoSuchMessageException, CredentialsException;
+
+	List<Delegation> findByElementIdNoPages(String elementId) throws NoSuchMessageException, CredentialsException;
+
 }

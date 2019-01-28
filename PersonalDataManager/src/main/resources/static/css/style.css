@@ -1,0 +1,9 @@
+#loginForm {
+    text-align: center;
+    margin-top: 20%;
+}
+
+#cardLoginContainer {
+    display: inline-block;
+    width: 50%;
+}

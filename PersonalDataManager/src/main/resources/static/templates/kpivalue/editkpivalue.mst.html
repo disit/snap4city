@@ -1,0 +1,31 @@
+<div class="modal-dialog" role="document">
+    <form onsubmit="KPIValueTabler.saveKPIValue(); return false;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">KPI Value Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</input>
+                </button>
+            </div>
+            <div class="modal-body" style="padding: 0px;">
+                <!-- {{#kpivalue}} -->
+                <ul class="list-group" style="border: none;">
+                    <input hidden id="inputIdKPIValueEdit" value="{{id}}"></input>
+                    <input hidden id="inputKpiIdKPIValueEdit" value="{{kpiId}}"></input>
+                    <input hidden id="inputElapseTimeKPIValueEdit" value="{{elapseTime}}"></input>
+                    <li class="list-group-item"><b>Value *</b> <input id="inputValueKPIValueEdit" required class="form-control"
+                            type="{{validDataType}}" step="{{validStep}}" value="{{value}}"></input></li>
+                    <li class="list-group-item"><b>Data Time *</b> <input id="inputDataTimeKPIValueEdit" required class="form-control"
+                            type="datetime-local" value="{{dataTime}}"></input></li>
+                    <li class="list-group-item"><b>Insert Time *</b> <input id="inputInsertTimeKPIValueEdit" required class="form-control"
+                            type="datetime-local" value="{{insertTime}}"></input></li>
+                </ul>
+                <!-- {{/kpivalue}} -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn editDashBtn">Save</button>
+            </div>
+        </div>
+    </form>
+</div>

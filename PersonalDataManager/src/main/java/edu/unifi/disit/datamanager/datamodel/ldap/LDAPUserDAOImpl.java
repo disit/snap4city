@@ -116,14 +116,15 @@ public class LDAPUserDAOImpl implements LDAPUserDAO {
 	public boolean groupnameExist(String groupname) {
 
 		int startindexCN = groupname.indexOf("cn=");
-		if (startindexCN == -1)
-			return false;
+		// if (startindexCN == -1)
+		// return false;
+		//
+		// int endindexCN = groupname.indexOf(",", startindexCN + 3);
+		// if (endindexCN == -1)
+		// return false;
 
-		int endindexCN = groupname.indexOf(",", startindexCN + 3);
-		if (endindexCN == -1)
-			return false;
-
-		int startindexOU = groupname.indexOf("ou=", endindexCN);
+		// ou has always to exist
+		int startindexOU = groupname.indexOf("ou=");
 		if (startindexOU == -1)
 			return false;
 
@@ -131,19 +132,44 @@ public class LDAPUserDAOImpl implements LDAPUserDAO {
 		if (endindexOU == -1)
 			return false;
 
-		String cnGroupname = groupname.substring(startindexCN + 3, endindexCN);
 		String ouGroupname = groupname.substring(startindexOU + 3, endindexOU);
 
-		return ldapTemplate
-				.search(query()
-						.attributes("cn")
-						.where("objectClass").is("groupOfNames").and("cn").is(cnGroupname).and("ou").is(ouGroupname),
-						new AttributesMapper<String>() {
-							public String mapFromAttributes(Attributes attrs) throws NamingException {
-								return attrs.get("cn").get().toString();
-							}
-						})
-				.size() > 0;
+		// String cnGroupname = groupname.substring(startindexCN + 3, endindexCN);
+
+		if (startindexCN != -1) {
+			// group scenario
+			int endindexCN = groupname.indexOf(",", startindexCN + 3);
+
+			if (endindexCN == -1) {
+				return false;
+			}
+
+			String cnGroupname = groupname.substring(startindexCN + 3, endindexCN);
+
+			return ldapTemplate
+					.search(query()
+							.attributes("cn")
+							.where("objectClass").is("groupOfNames").and("cn").is(cnGroupname).and("ou").is(ouGroupname),
+							new AttributesMapper<String>() {
+								public String mapFromAttributes(Attributes attrs) throws NamingException {
+									return attrs.get("cn").get().toString();
+								}
+							})
+					.size() > 0;
+		} else {
+			// organization scenario
+			return ldapTemplate
+					.search(query()
+							.attributes("ou")
+							.where("objectClass").is("organizationalUnit").and("ou").is(ouGroupname),
+							new AttributesMapper<String>() {
+								public String mapFromAttributes(Attributes attrs) throws NamingException {
+									return attrs.get("ou").get().toString();
+								}
+							})
+					.size() > 0;
+
+		}
 	}
 
 	@Override

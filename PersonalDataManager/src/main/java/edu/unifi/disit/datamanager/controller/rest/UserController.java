@@ -46,6 +46,7 @@ import edu.unifi.disit.datamanager.exception.DelegationNotFoundException;
 import edu.unifi.disit.datamanager.exception.DelegationNotValidException;
 import edu.unifi.disit.datamanager.exception.LDAPException;
 import edu.unifi.disit.datamanager.exception.CredentialsException;
+import edu.unifi.disit.datamanager.service.IAccessService;
 import edu.unifi.disit.datamanager.service.IActivityService;
 import edu.unifi.disit.datamanager.service.IDataService;
 import edu.unifi.disit.datamanager.service.IDelegationService;
@@ -60,6 +61,9 @@ public class UserController {
 
 	@Autowired
 	IDataService dataService;
+
+	@Autowired
+	IAccessService accessService;
 
 	@Autowired
 	IActivityService activityService;
@@ -319,7 +323,7 @@ public class UserController {
 			logger.info("sourceRequest specified {}", sourceRequest);
 
 		try {
-			Response response = delegationService.checkDelegationsFromUsername(username, variableName, elementID, lang);
+			Response response = accessService.checkDelegationsFromUsername(username, variableName, elementID, lang);
 
 			activityService.saveActivityDelegationFromUsername(username, null, sourceRequest, null, null, ActivityAccessType.READ, ActivityDomainType.DELEGATION);
 

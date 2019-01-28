@@ -22,9 +22,10 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import edu.unifi.disit.datamanager.datamodel.Response;
 import edu.unifi.disit.datamanager.datamodel.ldap.LDAPUserDAO;
 import edu.unifi.disit.datamanager.datamodel.profiledb.Delegation;
 import edu.unifi.disit.datamanager.datamodel.profiledb.DelegationDAO;
@@ -53,6 +54,29 @@ public class DelegationServiceImpl implements IDelegationService {
 
 	@Autowired
 	ICredentialsService credentialsService;
+
+	
+	@Override
+	public Delegation getDelegationById(Long id, Locale lang) throws NoSuchMessageException, CredentialsException {
+		logger.debug("getDelegationById INVOKED on id {}", id);
+		return delegationRepo.findOne(id);
+	}
+	
+	@Override
+	public Page<Delegation> findByElementId(String elementId, Pageable pageable)
+			throws NoSuchMessageException, CredentialsException {
+		logger.debug("findByElementId INVOKED on elementId {}",  elementId);
+		return delegationRepo.findByElementIdAndDeleteTimeIsNull(elementId, pageable);
+	}
+	
+	@Override
+	public List<Delegation> findByElementIdNoPages(String elementId)
+			throws NoSuchMessageException, CredentialsException {
+		logger.debug("findByElementIdNoPages INVOKED on elementId {}",  elementId);
+		return delegationRepo.findByElementIdAndDeleteTimeIsNull(elementId);
+	}
+
+
 
 	@Override
 	// same as below
@@ -104,101 +128,6 @@ public class DelegationServiceImpl implements IDelegationService {
 		}
 
 		return delegationRepo.getDelegationDelegatedByUsername(appOwner, variableName, motivation, deleted, groupname, lang);
-	}
-
-	@Override
-	public Response checkDelegationsFromApp(String elementID, Locale lang) throws CredentialsException {
-		logger.debug("checkDelegations INVOKED on elementId {} ", elementID);
-
-		Response response = new Response(false, null);
-
-		// if the AT is from a RootAdmin
-		if (credentialsService.isRoot(lang)) {
-			response.setResult(true);
-			response.setMessage("ROOTADMIN");
-			return response;
-		}
-
-		String loggedUserName = credentialsService.getLoggedUsername(lang);
-
-		// if the AT is from the owner
-		String strippedElementID = elementID;
-		if (elementID.startsWith("http://") || elementID.startsWith("https://")) {// to enable iotdirectory scenario
-			strippedElementID = elementID.substring(elementID.lastIndexOf("/") + 1);
-			logger.debug("strippedElementID is: {}", strippedElementID);
-		}
-
-		List<Ownership> owns = ownershipRepo.findByElementId(strippedElementID);
-		for (Ownership own : owns)
-			if (own.getUsername().equals(loggedUserName)) {
-				response.setResult(true);
-				response.setMessage("OWNER");
-				return response;
-			}
-
-		List<String> groupnames = lu.getGroupAndOUnames(loggedUserName);
-
-		// check delegation
-		List<Delegation> mydelegations = delegationRepo.getDelegationDelegatorFromAppId(elementID, null, null, false);
-
-		for (Delegation d : mydelegations) {
-			if ((d.getUsernameDelegated() != null) && (d.getUsernameDelegated().equals("ANONYMOUS"))) {
-				response.setResult(true);
-				response.setMessage("PUBLIC");
-				return response;
-			}
-
-			if ((d.getUsernameDelegated() != null) && (d.getUsernameDelegated().equals(loggedUserName))) {
-				response.setResult(true);
-				response.setMessage("DELEGATED");
-				return response;
-			}
-
-			if ((d.getGroupnameDelegated() != null) && (groupnames.contains(d.getGroupnameDelegated()))) {
-				response.setResult(true);
-				response.setMessage("GROUP-DELEGATED");
-				return response;
-			}
-		}
-
-		return response;
-	}
-
-	@Override
-	// the owner of the elementId, specified in the accesstoken, can check if another user has been delegated to access elementId
-	public Response checkDelegationsFromUsername(String username, String variableName, String elementID, Locale lang) throws NoSuchMessageException, CredentialsException {
-		logger.debug("checkDelegations INVOKED on username {} variableName {} elementId {} ", username, variableName, elementID);
-
-		credentialsService.checkAppIdCredentials(elementID, lang);
-
-		Response response = new Response(false, null);
-
-		List<String> groupnames = lu.getGroupAndOUnames(username);
-
-		// check delegation
-		List<Delegation> mydelegations = getDelegationsDelegatorFromApp(elementID, variableName, null, false, lang);
-
-		for (Delegation d : mydelegations) {
-			if ((d.getUsernameDelegated() != null) && (d.getUsernameDelegated().equals("ANONYMOUS"))) {
-				response.setResult(true);
-				response.setMessage("PUBLIC");
-				return response;
-			}
-
-			if ((d.getUsernameDelegated() != null) && (d.getUsernameDelegated().equals(username))) {
-				response.setResult(true);
-				response.setMessage("DELEGATED");
-				return response;
-			}
-
-			if (groupnames.contains(d.getGroupnameDelegated())) {
-				response.setResult(true);
-				response.setMessage("GROUP-DELEGATED");
-				return response;
-			}
-		}
-
-		return response;
 	}
 
 	@Override

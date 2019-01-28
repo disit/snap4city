@@ -1,0 +1,24 @@
+<div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Are you sure to delete this My KPI Value</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</input>
+            </button>
+        </div>
+            <div class="modal-body" style="padding: 0px;">
+                    <!-- {{#kpivalue}} -->
+                    <ul class="list-group" style="border: none;">
+                        <li class="list-group-item"><b>ID</b> <span style="float: right;">{{id}}</span></li>
+                        <li class="list-group-item"><b>Value</b> <span style="float: right;">{{value}}</span></li>
+                        <li class="list-group-item"><b>Data Time</b> <span style="float: right;">{{dataTime}}</span></li>
+                        <li class="list-group-item"><b>Insert Time</b> <span style="float: right;">{{insertTime}}</span></li>
+                    </ul>
+                    <!-- {{/kpivalue}} -->
+                </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn deleteDashBtn" onclick="KPIValueTabler.deleteKPIValue('{{#kpivalue}}{{id}}{{/kpivalue}}');">Delete</button>
+        </div>
+    </div>
+</div>

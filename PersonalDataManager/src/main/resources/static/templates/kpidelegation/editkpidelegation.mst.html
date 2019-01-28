@@ -1,0 +1,27 @@
+<div class="modal-dialog" role="document">
+    <form onsubmit="KPIDelegationTabler.saveKPIDelegation(); return false;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">KPI Delegation Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</input>
+                </button>
+            </div>
+            <div class="modal-body" style="padding: 0px;">
+                <!-- {{#kpidelegation}} -->
+                <ul class="list-group" style="border: none;">
+                    <input hidden id="inputIdKPIDelegationEdit" value="{{id}}"></input>
+                    <input hidden id="inputElementIdKPIDelegationEdit" value="{{elementId}}"></input>
+                    <input hidden id="inputUsernameDelegatorKPIDelegationEdit" value="{{usernameDelegator}}"></input>
+                    <input hidden id="inputElementTypeKPIDelegationEdit" value="{{elementType}}"></input>
+                    <li class="list-group-item"><b>Username Delegated *</b> <input id="inputUsernameDelegatedKPIDelegationEdit" required class="form-control" value="{{usernameDelegated}}"></input></li>
+                </ul>
+                <!-- {{/kpidelegation}} -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn editDashBtn">Save</button>
+            </div>
+        </div>
+    </form>
+</div>

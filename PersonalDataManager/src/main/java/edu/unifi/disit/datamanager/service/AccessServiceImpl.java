@@ -18,6 +18,7 @@ import java.util.Locale;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.stereotype.Service;
 
 import edu.unifi.disit.datamanager.datamodel.Response;
@@ -44,6 +45,9 @@ public class AccessServiceImpl implements IAccessService {
 
 	@Autowired
 	ICredentialsService credentialsService;
+
+	@Autowired
+	IDelegationService delegationService;
 
 	@Override
 	public Response checkAccessFromApp(String elementID, Locale lang) throws CredentialsException {
@@ -94,6 +98,43 @@ public class AccessServiceImpl implements IAccessService {
 			}
 
 			if ((d.getGroupnameDelegated() != null) && (groupnames.contains(d.getGroupnameDelegated()))) {
+				response.setResult(true);
+				response.setMessage("GROUP-DELEGATED");
+				return response;
+			}
+		}
+
+		return response;
+	}
+
+	@Override
+	// the owner of the elementId, specified in the accesstoken, can check if another user has been delegated to access elementId
+	public Response checkDelegationsFromUsername(String username, String variableName, String elementID, Locale lang) throws NoSuchMessageException, CredentialsException {
+		logger.debug("checkDelegations INVOKED on username {} variableName {} elementId {} ", username, variableName, elementID);
+
+		credentialsService.checkAppIdCredentials(elementID, lang);
+
+		Response response = new Response(false, null);
+
+		List<String> groupnames = lu.getGroupAndOUnames(username);
+
+		// check delegation
+		List<Delegation> mydelegations = delegationService.getDelegationsDelegatorFromApp(elementID, variableName, null, false, lang);
+
+		for (Delegation d : mydelegations) {
+			if ((d.getUsernameDelegated() != null) && (d.getUsernameDelegated().equals("ANONYMOUS"))) {
+				response.setResult(true);
+				response.setMessage("PUBLIC");
+				return response;
+			}
+
+			if ((d.getUsernameDelegated() != null) && (d.getUsernameDelegated().equals(username))) {
+				response.setResult(true);
+				response.setMessage("DELEGATED");
+				return response;
+			}
+
+			if (groupnames.contains(d.getGroupnameDelegated())) {
 				response.setResult(true);
 				response.setMessage("GROUP-DELEGATED");
 				return response;

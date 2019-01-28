@@ -363,7 +363,7 @@ public class roleTest1 {
 				httpResponse.getStatusLine().getStatusCode(),
 				equalTo(HttpStatus.OK.value()));
 
-		assertEquals(2, result.size());
+		assertEquals(3, result.size());
 	}
 
 	@Test

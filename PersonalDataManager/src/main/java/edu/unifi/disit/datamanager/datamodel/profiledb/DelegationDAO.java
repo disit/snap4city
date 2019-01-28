@@ -15,6 +15,8 @@ package edu.unifi.disit.datamanager.datamodel.profiledb;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -27,5 +29,7 @@ public interface DelegationDAO extends JpaRepository<Delegation, Long>, Delegati
 	Delegation findByIdAndDeleteTimeIsNull(Long delegationId);
 
 	List<Delegation> findByDeleteTimeBefore(Date date);// used for proper delete
+
+	Page<Delegation> findByElementIdAndDeleteTimeIsNull(String elementId, Pageable pageable);
 
 }

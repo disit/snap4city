@@ -1,0 +1,30 @@
+<div class="modal-dialog" role="document">
+    <form onsubmit="KPIMetadataTabler.saveKPIMetadata(); return false;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">KPI Metadata Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</input>
+                </button>
+            </div>
+            <div class="modal-body" style="padding: 0px;">
+                <!-- {{#kpimetadata}} -->
+                <ul class="list-group" style="border: none;">
+                    <input hidden id="inputIdKPIMetadataEdit" value="{{id}}"></input>
+                    <input hidden id="inputKpiIdKPIMetadataEdit" value="{{kpiId}}"></input>
+                    <input hidden id="inputElapseTimeKPIMetadataEdit" value="{{elapseTime}}"></input>
+                    <li class="list-group-item"><b>Key *</b> <input required id="inputKeyKPIMetadataEdit" class="form-control"
+                            type="text" value="{{key}}"></input></li>
+                    <li class="list-group-item"><b>Value *</b> <input required id="inputValueKPIMetadataEdit" class="form-control"
+                            type="text" value="{{value}}"></input></li>
+
+                </ul>
+                <!-- {{/kpimetadata}} -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn editDashBtn">Save</button>
+            </div>
+        </div>
+    </form>
+</div>

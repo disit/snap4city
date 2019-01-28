@@ -1369,6 +1369,49 @@ public class delegationTest {
 	}
 
 	@Test
+	public void post_and_delete_group_delegationValid1_ou() throws ClientProtocolException, IOException {
+
+		// Given
+		HttpPost request = new HttpPost("http://localhost:8080/datamanager/api/v1/username/pb1/delegation?accessToken=" + getAccessTokenRoot() + "&sourceRequest=test");
+
+		Delegation delegation = new Delegation();
+		delegation.setUsernameDelegator("pb1");
+		delegation.setGroupnameDelegated("ou=Firenze,dc=foo,dc=example,dc=org");
+		delegation.setElementId("dash_id");
+		delegation.setElementType("DASHID");
+
+		request.setEntity(createEntity(delegation));
+		request.addHeader("Content-Type", "application/json; charset=utf8");
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		ObjectMapper mapper = new ObjectMapper();
+		Delegation result = mapper.readValue(EntityUtils.toString(httpResponse.getEntity()), new TypeReference<Delegation>() {
+		});
+
+		assertThat(
+				httpResponse.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.OK.value()));
+
+		assertEquals("pb1", result.getUsernameDelegator());
+		assertEquals("ou=Firenze,dc=foo,dc=example,dc=org", result.getGroupnameDelegated());
+
+		// Given
+		HttpDelete requestD = new HttpDelete("http://localhost:8080/datamanager/api/v1/username/pb1/delegation/" + result.getId() + "?accessToken=" + getAccessTokenRoot() + "&sourceRequest=test");
+
+		// When
+		HttpResponse httpResponseD = HttpClientBuilder.create().build().execute(requestD);
+
+		// Then
+		assertThat(
+				httpResponseD.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.OK.value()));
+
+	}
+
+	@Test
 	public void check_username_root() throws ClientProtocolException, IOException {
 		// Given
 		HttpUriRequest request = new HttpGet("http://localhost:8080/datamanager/api/v1/apps/d2799619ee16ae9ef5496859cb583eeec87a383af5d2ed51fc4cb1ca60b22f31/access/check?accessToken=" + getAccessTokenRoot() + "&sourceRequest=test");

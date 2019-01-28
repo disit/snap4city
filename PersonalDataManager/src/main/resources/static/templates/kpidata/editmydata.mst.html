@@ -1,0 +1,97 @@
+<div class="modal-dialog" role="document">
+    <form onsubmit="KPIDataTabler.saveKPIData(); return false;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">My Data Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</input>
+                </button>
+            </div>
+            <div class="modal-body" style="padding: 0px;">
+                <!-- {{#kpidata}} -->
+                <ul class="list-group" style="border: none;">
+                    <input hidden id="inputIdKPIDataEdit" value="{{id}}"></input>
+                    <input hidden id="inputOwnershipKPIDataEdit" value="{{ownership}}"></input>
+                    <input hidden id="inputUsernameKPIDataEdit" value="{{username}}"></input>
+                    <input hidden id="inputHealthinessKPIDataEdit" value="{{healthiness}}"></input>
+                    <input hidden id="inputInstanceUriKPIDataEdit" value="{{instanceUri}}"></input>
+                    <input hidden id="inputGetInstancesKPIDataEdit" value="{{getInstances}}"></input>
+                    <input hidden id="inputMetricKPIDataEdit" value="{{metric}}"></input>
+                    <input hidden id="inputSavedDirectKPIDataEdit" value="{{savedDirect}}"></input>
+                    <input hidden id="inputKBBasedKPIDataEdit" value="{{kbBased}}"></input>
+                    <input hidden id="inputSMBasedKPIDataEdit" value="{{smBased}}"></input>
+                    <input hidden id="inputAppIdKPIDataEdit" value="{{appId}}"></input>
+                    <input hidden id="inputAppNameKPIDataEdit" value="{{appName}}"></input>
+                    <input hidden id="inputWidgetsKPIDataEdit" value="{{widgets}}"></input>
+                    <input hidden id="inputParametersKPIDataEdit" value="{{parameters}}"></input>
+                    <input hidden id="inputMicroAppExtServIconKPIDataEdit" value="{{microAppExtServIcon}}"></input>
+                    <input hidden id="inputDBValuesLinkKPIDataEdit" value="{{dbValuesLink}}"></input>
+                    <input hidden id="inputDBValuesTypeKPIDataEdit" value="{{dbValuesType}}"></input>
+
+                    <input hidden id="inputHighLevelTypeKPIDataEdit" value="MyData"></input>
+                    <li class="list-group-item"><b>Nature *</b>
+                        <select id="selectNatureKPIDataEdit" class="custom-select custom-select"></select>
+                    <li class="list-group-item"><b>Sub Nature *</b> <select id="selectSubNatureKPIDataEdit" class="custom-select custom-select"></select></li>
+                    <li class="list-group-item"><b>Value Name *</b> <input  required id="inputValueNameKPIDataEdit" class="form-control"
+                            type="text" value="{{valueName}}"></input></li>
+                            <li class="list-group-item"><b>Data Type *</b>
+                                <select id="selectDataTypeKPIDataEdit" class="custom-select custom-select">
+                            <option value="integer" {{#integerSelected}} selected{{/integerSelected}}>integer</option>
+                                <option value="float" {{#floatSelected}} selected{{/floatSelected}}>float</option>
+                                <option value="percentage" {{#percentageSelected}} selected{{/percentageSelected}}>percentage</option> 
+                                <option value="string" {{#stringSelected}} selected{{/stringSelected}}>string</option>
+                                <option value="status" {{#statusSelected}} selected{{/statusSelected}}>status</option> 
+                        </select> </li>
+                    <li class="list-group-item"><b>Last Value *</b> <input required id="inputLastValueKPIDataEdit" class="form-control"
+                            type="text" value="{{lastValue}}"></input></li>
+                   <!--  <li class="list-group-item"><b>Instance Uri</b> <input id="inputInstanceUriKPIDataEdit" class="form-control" 
+                            type="text" value="{{instanceUri}}"></input></li>
+                    <li class="list-group-item"><b>Get Instances</b> <input id="inputGetInstancesKPIDataEdit" class="form-control"
+                            type="text" value="{{getInstances}}"></input></li> -->
+                    <li class="list-group-item"><b>Last Date</b> <input id="inputLastDateKPIDataEdit" class="form-control"
+                            type="datetime-local" value="{{lastDate}}"></input></li>
+                    <li class="list-group-item"><b>Last Check</b> <input id="inputLastCheckKPIDataEdit" class="form-control"
+                            type="datetime-local" value="{{lastCheck}}"></input></li>
+                     <!-- <li class="list-group-item"><b>Metric</b> <input id="inputMetricKPIDataEdit" class="form-control"
+                            type="text" value="{{metric}}"></input></li> -->
+                    <!-- <li class="list-group-item"><b>Saved Direct</b> <input id="inputSavedDirectKPIDataEdit" class="form-control"
+                            type="text" value="{{savedDirect}}"></input></li>
+                    <li class="list-group-item"><b>KB Based</b> <input id="inputKBBasedKPIDataEdit" class="form-control"
+                            type="text" value="{{kbBased}}"></input></li>
+                    <li class="list-group-item"><b>SM Based</b> <input id="inputSMBasedKPIDataEdit" class="form-control"
+                            type="text" value="{{smBased}}"></input></li>
+                    <li class="list-group-item"><b>App ID</b> <input id="inputAppIdKPIDataEdit" class="form-control"
+                            type="text" value="{{appId}}"></input></li>
+                    <li class="list-group-item"><b>App Name</b> <input id="inputAppNameKPIDataEdit" class="form-control"
+                            type="text" value="{{appName}}"></input></li>
+                    <li class="list-group-item"><b>Widgets</b> <input id="inputWidgetsKPIDataEdit" class="form-control"
+                            type="text" value="{{widgets}}"></input></li>
+                    <li class="list-group-item"><b>Parameters</b> <input id="inputParametersKPIDataEdit" class="form-control"
+                            type="text" value="{{parameters}}"></input></li>
+                    <li class="list-group-item"><b>MicroAppExtServIcon</b> <input id="inputMicroAppExtServIconKPIDataEdit" class="form-control"
+                            type="text" value="{{microAppExtServIcon}}"></input></li> -->
+                    <li class="list-group-item"><b>Description</b> <input id="inputDescriptionKPIDataEdit" class="form-control"
+                            type="text" value="{{description}}"></input></li>
+                    <li class="list-group-item"><b>Info</b> <input id="inputInfoKPIDataEdit" class="form-control" type="text"
+                            value="{{info}}"></input></li>
+                    <li class="list-group-item"><b>Latitude</b> <input id="inputLatitudeKPIDataEdit" class="form-control"
+                            type="text" value="{{latitude}}"></input></li>
+                    <li class="list-group-item"><b>Longitude</b> <input id="inputLongitudeKPIDataEdit" class="form-control"
+                            type="text" value="{{longitude}}"></input></li>
+                            <li class="list-group-item">
+                                <div id="mapContainer" style="width: 100%; height: 300px"></div>
+                        </li>
+  <!--                   <li class="list-group-item"><b>DB Values Link</b> <input id="inputDBValuesLinkKPIDataEdit" class="form-control"
+                            type="text" value="{{dbValuesLink}}"></input></li>
+                    <li class="list-group-item"><b>DB Values Type</b> <input id="inputDBValuesTypeKPIDataEdit" class="form-control"
+                            type="text" value="{{dbValuesType}}"></input></li> -->
+                </ul>
+                <!-- {{/kpidata}} -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn editDashBtn">Save</button>
+            </div>
+        </div>
+    </form>
+</div>
