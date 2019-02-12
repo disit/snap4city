@@ -651,7 +651,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 					JsonNode deNode = elNode.path("delegationDetails");
 
 					if ((deNode == null) || (deNode.isNull()) || (deNode.isMissingNode())) {
-						logger.error("The retrieved data does not contains delegationDetails");
+						logger.debug("The retrieved data does not contains delegationDetails (probably it's PUBLIC)");
 						// throw new CredentialsNotValidException(messages.getMessage("login.ko.configurationerror", null, lang));
 						continue;
 					}
