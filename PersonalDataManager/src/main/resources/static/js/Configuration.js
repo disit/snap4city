@@ -5,7 +5,7 @@ var Configuration = {
             APIClient.url = "https://www.snap4city.org/mypersonaldata/api/v1/";
             Authentication.url = "https://www.snap4city.org/auth/";
             Authentication.clientId = "js-kpi-client";
-            Authentication.clientSecret = "...secret..."";
+            Authentication.clientSecret = "...secret...";
         } else {
             if (location.hostname == "localhost") {
                 APIClient.url = "http://localhost:8080/datamanager/api/v1/";
