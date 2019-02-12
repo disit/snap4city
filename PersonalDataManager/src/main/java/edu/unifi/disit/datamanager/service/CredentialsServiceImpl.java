@@ -24,6 +24,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import edu.unifi.disit.datamanager.datamodel.UserRolesType;
+import edu.unifi.disit.datamanager.datamodel.ldap.LDAPUserDAO;
 import edu.unifi.disit.datamanager.datamodel.profiledb.Ownership;
 import edu.unifi.disit.datamanager.datamodel.profiledb.OwnershipDAO;
 import edu.unifi.disit.datamanager.exception.CredentialsException;
@@ -38,6 +39,9 @@ public class CredentialsServiceImpl implements ICredentialsService {
 
 	@Autowired
 	OwnershipDAO ownershipRepo;
+	
+	@Autowired
+	LDAPUserDAO ldapRepository;
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -84,5 +88,10 @@ public class CredentialsServiceImpl implements ICredentialsService {
 		List<String> roles = (List<String>) SecurityContextHolder.getContext().getAuthentication().getCredentials();
 
 		return (roles.contains(UserRolesType.RootAdmin.toString()));
+	}
+	
+	@Override
+	public String getOrganization(Locale lang) {
+		return ldapRepository.getOUnames(getLoggedUsername(new Locale("en"))).toString();
 	}
 }

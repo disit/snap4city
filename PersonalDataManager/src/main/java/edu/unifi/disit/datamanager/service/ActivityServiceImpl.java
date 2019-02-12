@@ -212,7 +212,7 @@ public class ActivityServiceImpl implements IActivityService {
 	private String getUsernames(List<Ownership> ownerships) {
 
 		if (ownerships.size() == 0)
-			logger.warn("Empty ownership retrieved");
+			logger.debug("Empty ownership retrieved");
 
 		String usernames = "";
 		for (int i = 0; i < ownerships.size(); i++) {
@@ -227,7 +227,7 @@ public class ActivityServiceImpl implements IActivityService {
 	private String getElementNames(List<Ownership> ownerships) {
 
 		if (ownerships.size() == 0)
-			logger.warn("Empty ownership retrieved");
+			logger.debug("Empty ownership retrieved");
 
 		String elementNames = "";
 		for (int i = 0; i < ownerships.size(); i++) {

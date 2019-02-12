@@ -1551,6 +1551,26 @@ public class dataTest {
 		assertEquals(2, result.size());
 	}
 
+	@Test
+	public void get_any_data_okrole() throws ClientProtocolException, IOException {
+
+		// Given
+		HttpUriRequest request = new HttpGet("http://localhost:8080/datamanager/api/v1/username/ANY/data?accessToken=" + getAccessTokenRoot() + "&sourceRequest=test");
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		ObjectMapper mapper = new ObjectMapper();
+		// List<Data> result =
+		mapper.readValue(EntityUtils.toString(httpResponse.getEntity()), new TypeReference<List<Data>>() {
+		});
+
+		assertThat(
+				httpResponse.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.OK.value()));
+	}
+
 	private String getAccessTokenRoot() throws IOException {
 		return get("accesstoken.rootuser=");
 	}

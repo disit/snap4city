@@ -4,30 +4,32 @@
                         <div class="modal-header">
                                 <h5 class="modal-title">My KPI Details</h5>
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</input>
+                                        <span aria-hidden="true">&times;</span>
                                 </button>
                         </div>
                         <div class="modal-body" style="padding: 0px;">
                                 <!-- {{#kpidata}} -->
                                 <ul class="list-group" style="border: none;">
-                                        <input hidden id="inputIdKPIDataEdit" value="{{id}}"></input>
-                                        <input hidden id="inputOwnershipKPIDataEdit" value="{{ownership}}"></input>
-                                        <input hidden id="inputUsernameKPIDataEdit" value="{{username}}"></input>
-                                        <input hidden id="inputHealthinessKPIDataEdit" value="{{healthiness}}"></input>
-                                        <input hidden id="inputInstanceUriKPIDataEdit" value="{{instanceUri}}"></input>
-                                        <input hidden id="inputGetInstancesKPIDataEdit" value="{{getInstances}}"></input>
-                                        <input hidden id="inputMetricKPIDataEdit" value="{{metric}}"></input>
-                                        <input hidden id="inputSavedDirectKPIDataEdit" value="{{savedDirect}}"></input>
-                                        <input hidden id="inputKBBasedKPIDataEdit" value="{{kbBased}}"></input>
-                                        <input hidden id="inputSMBasedKPIDataEdit" value="{{smBased}}"></input>
-                                        <input hidden id="inputAppIdKPIDataEdit" value="{{appId}}"></input>
-                                        <input hidden id="inputAppNameKPIDataEdit" value="{{appName}}"></input>
-                                        <input hidden id="inputWidgetsKPIDataEdit" value="{{widgets}}"></input>
-                                        <input hidden id="inputParametersKPIDataEdit" value="{{parameters}}"></input>
-                                        <input hidden id="inputMicroAppExtServIconKPIDataEdit" value="{{microAppExtServIcon}}"></input>
-                                        <input hidden id="inputDBValuesLinkKPIDataEdit" value="{{dbValuesLink}}"></input>
-                                        <input hidden id="inputDBValuesTypeKPIDataEdit" value="{{dbValuesType}}"></input>
-                                        <input hidden id="inputHighLevelTypeKPIDataEdit" value="MyKPI"></input>
+                                        <input type="hidden" id="inputIdKPIDataEdit" value="{{id}}"></input>
+                                        <input type="hidden" id="inputOwnershipKPIDataEdit" value="{{ownership}}"></input>
+                                        <input type="hidden" id="inputUsernameKPIDataEdit" value="{{username}}"></input>
+                                        <input type="hidden" id="inputHealthinessKPIDataEdit" value="{{healthiness}}"></input>
+                                        <input type="hidden" id="inputInstanceUriKPIDataEdit" value="{{instanceUri}}"></input>
+                                        <input type="hidden" id="inputGetInstancesKPIDataEdit" value="{{getInstances}}"></input>
+                                        <input type="hidden" id="inputMetricKPIDataEdit" value="{{metric}}"></input>
+                                        <input type="hidden" id="inputSavedDirectKPIDataEdit" value="{{savedDirect}}"></input>
+                                        <input type="hidden" id="inputKBBasedKPIDataEdit" value="{{kbBased}}"></input>
+                                        <input type="hidden" id="inputSMBasedKPIDataEdit" value="{{smBased}}"></input>
+                                        <input type="hidden" id="inputAppIdKPIDataEdit" value="{{appId}}"></input>
+                                        <input type="hidden" id="inputAppNameKPIDataEdit" value="{{appName}}"></input>
+                                        <input type="hidden" id="inputWidgetsKPIDataEdit" value="{{widgets}}"></input>
+                                        <input type="hidden" id="inputParametersKPIDataEdit" value="{{parameters}}"></input>
+                                        <input type="hidden" id="inputMicroAppExtServIconKPIDataEdit" value="{{microAppExtServIcon}}"></input>
+                                        <input type="hidden" id="inputDBValuesLinkKPIDataEdit" value="{{dbValuesLink}}"></input>
+                                        <input type="hidden" id="inputDBValuesTypeKPIDataEdit" value="{{dbValuesType}}"></input>
+                                        <input type="hidden" id="inputHighLevelTypeKPIDataEdit" value="MyKPI"></input>
+                                        <input type="hidden" id="inputLastDateKPIDataEdit" value="{{inputLastDateKPIDataEdit}}"></input>
+                                        <input type="hidden" id="inputLastValueKPIDataEdit" value="{{inputLastValueKPIDataEdit}}"></input>
                                         <li class="list-group-item"><b>Nature *</b>
                                                 <select id="selectNatureKPIDataEdit" class="custom-select custom-select"></select>
                                         <li class="list-group-item"><b>Sub Nature *</b> <select id="selectSubNatureKPIDataEdit"
@@ -51,10 +53,10 @@
                                         <li class="list-group-item"><b>Get Instances</b> <input id="inputGetInstancesKPIDataEdit"
                                                         class="form-control" type="text" value="{{getInstances}}"></input></li>
                                         -->
-                                        <li class="list-group-item"><b>Last Date</b> <input id="inputLastDateKPIDataEdit"
+                                        <!-- <li class="list-group-item"><b>Last Date</b> <input id="inputLastDateKPIDataEdit"
                                                         class="form-control" type="datetime-local" value="{{lastDate}}"></input></li>
                                         <li class="list-group-item"><b>Last Value</b> <input id="inputLastValueKPIDataEdit"
-                                                        class="form-control" type="text" value="{{lastValue}}"></input></li>
+                                                        class="form-control" type="text" value="{{lastValue}}"></input></li> -->
                                         <li class="list-group-item"><b>Last Check</b> <input id="inputLastCheckKPIDataEdit"
                                                         class="form-control" type="datetime-local" value="{{lastCheck}}"></input></li>
                                         <!-- <li class="list-group-item"><b>Metric</b> <input id="inputMetricKPIDataEdit" class="form-control"

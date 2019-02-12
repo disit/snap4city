@@ -5,7 +5,7 @@ var Configuration = {
             APIClient.url = "https://www.snap4city.org/mypersonaldata/api/v1/";
             Authentication.url = "https://www.snap4city.org/auth/";
             Authentication.clientId = "js-kpi-client";
-            Authentication.clientSecret = "b6195413-2a9f-4a88-a4d1-4bde372693fd";
+            Authentication.clientSecret = "...secret..."";
         } else {
             if (location.hostname == "localhost") {
                 APIClient.url = "http://localhost:8080/datamanager/api/v1/";
@@ -14,7 +14,7 @@ var Configuration = {
             }
             Authentication.url = "https://www.disit.org/auth/";
             Authentication.clientId = "js-kpi-client-test";
-            Authentication.clientSecret = "1999512a-0145-411a-9498-c6c3ad32b559"
+            Authentication.clientSecret = "...secret..."
         }
     }
 }

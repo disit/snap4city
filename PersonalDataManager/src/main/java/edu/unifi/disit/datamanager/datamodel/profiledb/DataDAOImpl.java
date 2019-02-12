@@ -63,7 +63,8 @@ public class DataDAOImpl implements DataDAOCustom {
 
 		List<Predicate> predicates = getCommonPredicates(cb, dataRoot, variableName, motivation, from, to);
 
-		predicates.add(cb.equal(dataRoot.get("username"), username));// username
+		if (!username.equals("ANY"))
+			predicates.add(cb.equal(dataRoot.get("username"), username));// username
 
 		criteria.where(cb.and(predicates.toArray(new Predicate[predicates.size()])));
 

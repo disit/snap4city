@@ -177,7 +177,6 @@ var KPIDataTabler = {
                 "valueName": $("#inputValueNameKPIDataEdit").val(),
                 "valueType": $("#inputValueTypeKPIDataEdit").val(),
                 "dataType": $("#selectDataTypeKPIDataEdit").val(),
-                "lastValue": $("#inputLastValueKPIDataEdit").val(),
                 "metric": $("#inputMetricKPIDataEdit").val(),
                 "description": $("#inputDescriptionKPIDataEdit").val(),
                 "info": $("#inputInfoKPIDataEdit").val(),
@@ -239,7 +238,10 @@ var KPIDataTabler = {
                 kpiData.healthiness = false;
             }
             if ($("#inputLastDateKPIDataEdit").val() != "") {
-                kpiData.lastDate = $("#inputLastDateKPIDataEdit").val() + ":00";
+                kpiData.lastDate = $("#inputLastDateKPIDataEdit").val();
+            }
+            if ($("#inputLastValueKPIDataEdit").val() != "") {
+                kpiData.lastValue = $("#inputLastValueKPIDataEdit").val();
             }
             if ($("#inputLastCheckKPIDataEdit").val() != "") {
                 kpiData.lastCheck = $("#inputLastCheckKPIDataEdit").val() + ":00";

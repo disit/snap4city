@@ -106,7 +106,6 @@ public class KPIDataDeserializer extends StdDeserializer<KPIData> {
 			try {
 				kpidata.setLastDate(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(jnode.get("lastDate").asText()));
 			} catch (ParseException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

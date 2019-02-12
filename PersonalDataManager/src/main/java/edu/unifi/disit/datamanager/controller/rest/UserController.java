@@ -15,6 +15,8 @@ package edu.unifi.disit.datamanager.controller.rest;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -25,7 +27,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.NoSuchMessageException;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -41,13 +42,14 @@ import edu.unifi.disit.datamanager.datamodel.ActivityDomainType;
 import edu.unifi.disit.datamanager.datamodel.Response;
 import edu.unifi.disit.datamanager.datamodel.profiledb.Data;
 import edu.unifi.disit.datamanager.datamodel.profiledb.Delegation;
+import edu.unifi.disit.datamanager.exception.CredentialsException;
 import edu.unifi.disit.datamanager.exception.DataNotValidException;
 import edu.unifi.disit.datamanager.exception.DelegationNotFoundException;
 import edu.unifi.disit.datamanager.exception.DelegationNotValidException;
 import edu.unifi.disit.datamanager.exception.LDAPException;
-import edu.unifi.disit.datamanager.exception.CredentialsException;
 import edu.unifi.disit.datamanager.service.IAccessService;
 import edu.unifi.disit.datamanager.service.IActivityService;
+import edu.unifi.disit.datamanager.service.ICredentialsService;
 import edu.unifi.disit.datamanager.service.IDataService;
 import edu.unifi.disit.datamanager.service.IDelegationService;
 
@@ -67,6 +69,9 @@ public class UserController {
 
 	@Autowired
 	IActivityService activityService;
+	
+	@Autowired
+	ICredentialsService credentialService;
 
 	// -------------------GET Data for app ---------------------------------------------
 	@RequestMapping(value = "/api/v1/username/{username}/data", method = RequestMethod.GET)
@@ -74,8 +79,8 @@ public class UserController {
 			@RequestParam("sourceRequest") String sourceRequest,
 			@RequestParam(value = "variableName", required = false) String variableName,
 			@RequestParam(value = "motivation", required = false) String motivation,
-			@RequestParam(value = "from", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") Date from,
-			@RequestParam(value = "to", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") Date to,
+			@RequestParam(value = "from", required = false) String from,
+			@RequestParam(value = "to", required = false) String to,
 			@RequestParam(value = "first", required = false, defaultValue = "0") Integer first,
 			@RequestParam(value = "last", required = false, defaultValue = "0") Integer last,
 			@RequestParam(value = "delegated", required = false, defaultValue = "false") Boolean delegated,
@@ -97,7 +102,8 @@ public class UserController {
 			logger.info("sourceRequest specified {}", sourceRequest);
 
 		try {
-			List<Data> datas = dataService.getDataFromUser(username, delegated, variableName, motivation, from, to, first, last, anonymous, lang);
+
+			List<Data> datas = dataService.getDataFromUser(username, delegated, variableName, motivation, convertDate(from), convertDate(to), first, last, anonymous, lang);
 
 			activityService.saveActivityFromUsername(username, datas, sourceRequest, variableName, motivation, ActivityAccessType.READ, ActivityDomainType.DATA);
 
@@ -124,6 +130,13 @@ public class UserController {
 					((HttpServletRequest) request).getRequestURI() + "?" + ((HttpServletRequest) request).getQueryString(), d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
+		} catch (ParseException e) {
+			logger.error("Parsing error {}", e);
+
+			activityService.saveActivityViolationFromUsername(username, sourceRequest, variableName, motivation, ActivityAccessType.READ,
+					((HttpServletRequest) request).getContextPath() + "?" + ((HttpServletRequest) request).getQueryString(), e.getMessage(), e, request.getRemoteAddr());
+
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) e.getMessage());
 		}
 	}
 
@@ -454,4 +467,38 @@ public class UserController {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
 	}
+private Date convertDate(String text_string) throws ParseException {
+		if ((text_string == null) || (text_string.isEmpty()))
+			return null;
+
+		Date text = null;
+
+		try {
+			text = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(text_string);
+		} catch (ParseException e) {
+			try {
+				text = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse(text_string);
+			} catch (ParseException e1) {
+				throw e1;
+			}
+		}
+		return text;
+	}
+
+// -------------------GET Data for app ---------------------------------------------
+		@RequestMapping(value = "/api/v1/username/organization", method = RequestMethod.GET)
+		public ResponseEntity<Object> getOrganizationV1(
+				@RequestParam("sourceRequest") String sourceRequest,
+				@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
+				HttpServletRequest request) {
+
+			logger.info("Requested getOrganizationV1");
+
+			try {
+				return new ResponseEntity<Object>(credentialService.getOrganization(lang), HttpStatus.OK);
+			} catch (NoSuchMessageException d) {
+				logger.error("Delegation not found {}", d);
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
+			}
+		}
 }

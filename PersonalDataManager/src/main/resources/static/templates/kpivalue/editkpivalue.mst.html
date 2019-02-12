@@ -4,15 +4,15 @@
             <div class="modal-header">
                 <h5 class="modal-title">KPI Value Details</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</input>
+                    <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body" style="padding: 0px;">
                 <!-- {{#kpivalue}} -->
                 <ul class="list-group" style="border: none;">
-                    <input hidden id="inputIdKPIValueEdit" value="{{id}}"></input>
-                    <input hidden id="inputKpiIdKPIValueEdit" value="{{kpiId}}"></input>
-                    <input hidden id="inputElapseTimeKPIValueEdit" value="{{elapseTime}}"></input>
+                    <input type="hidden" id="inputIdKPIValueEdit" value="{{id}}"></input>
+                    <input type="hidden" id="inputKpiIdKPIValueEdit" value="{{kpiId}}"></input>
+                    <input type="hidden" id="inputElapseTimeKPIValueEdit" value="{{elapseTime}}"></input>
                     <li class="list-group-item"><b>Value *</b> <input id="inputValueKPIValueEdit" required class="form-control"
                             type="{{validDataType}}" step="{{validStep}}" value="{{value}}"></input></li>
                     <li class="list-group-item"><b>Data Time *</b> <input id="inputDataTimeKPIValueEdit" required class="form-control"

@@ -29,4 +29,6 @@ public interface ICredentialsService {
 	public String getLoggedUsername(Locale lang);
 
 	public boolean isRoot(Locale lang);
+
+	public String getOrganization(Locale lang);
 }

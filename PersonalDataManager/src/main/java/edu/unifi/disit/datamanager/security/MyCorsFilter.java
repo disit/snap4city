@@ -13,7 +13,6 @@
 package edu.unifi.disit.datamanager.security;
 
 import java.io.IOException;
-import java.util.List;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -24,7 +23,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -33,8 +31,8 @@ import org.springframework.stereotype.Component;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class MyCorsFilter implements Filter {
 
-	@Value("#{'${cors.origins.accepted}'.split(',')}")
-	private List<String> originsAccepted;
+	//@Value("#{'${cors.origins.accepted}'.split(',')}")
+	//private List<String> originsAccepted;
 
 	public MyCorsFilter() {
 		super();
@@ -47,7 +45,7 @@ public class MyCorsFilter implements Filter {
 
 		String uri = request.getHeader("Origin");
 
-		if (originsAccepted.contains(uri)) {
+		//if (originsAccepted.contains(uri)) {
 
 			response.setHeader("Access-Control-Allow-Origin", uri);
 
@@ -58,7 +56,7 @@ public class MyCorsFilter implements Filter {
 			response.setHeader("Access-Control-Max-Age", "3600");
 			response.setHeader("Access-Control-Allow-Headers", "X-Requested-With, Authorization, Origin, Content-Type, Version");
 			response.setHeader("Access-Control-Expose-Headers", "X-Requested-With, Authorization, Origin, Content-Type");
-		}
+		//}
 
 		if (request.getMethod() != "OPTIONS") {
 			chain.doFilter(req, res);

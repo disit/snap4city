@@ -118,7 +118,6 @@ public class KPIValueController {
 					kpiDataService.saveKPIData(kpiData);
 				}
 			} catch (NoSuchMessageException | DataNotValidException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			kpiValueService.saveKPIValue(kpivalue);

@@ -301,6 +301,27 @@ public class roleTest1 {
 
 	}
 
+	@Test
+	public void get_any_data_korole() throws ClientProtocolException, IOException {
+
+		// Given
+		HttpUriRequest request = new HttpGet("http://localhost:8080/datamanager/api/v1/username/ANY/data?accessToken=" + getAccessTokenADifino() + "&sourceRequest=test");
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		assertThat(
+				httpResponse.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.UNAUTHORIZED.value()));
+
+		String entityMsg = IOUtils.toString(httpResponse.getEntity().getContent(), "UTF-8");
+
+		assertThat(
+				entityMsg,
+				startsWith("The logged user is not the same of the specified username"));
+	}
+
 	// -----------------------------------------------------------------------------delegation
 
 	@Test
