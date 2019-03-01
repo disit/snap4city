@@ -58,7 +58,7 @@ foreach($mandatoryAttrs as $a) {
     exit;  
   }
 }
-$validTypes = array('AppID',"IOTID","ServiceURI","ServiceGraphID","DashboardID",'DAAppID');
+$validTypes = array('AppID',"IOTID","ServiceURI","ServiceGraphID","DashboardID",'DAAppID','BrokerID','ModelID');
 if(!in_array($o->elementType,$validTypes)) {
     header("HTTP/1.1 400 BAD REQUEST");
     echo '{"error":"invalid elementType '.$o->elementType.'"}';
@@ -74,89 +74,116 @@ if($uinfo->mainRole=='RootAdmin')
 else
   $userFilter = "username='".mysqli_escape_string($db, $uinfo->username)."' ";
 
-$q = "SELECT count(*) as count FROM ownership WHERE ".$userFilter.
+$q = "SELECT username FROM ownership WHERE ".$userFilter.
         " AND elementId='".mysqli_escape_string($db, $o->elementId).
         "' AND elementType='".mysqli_escape_string($db, $o->elementType)."' AND deleted IS NULL";
 
 $r = mysqli_query($db, $q) or die(mysqli_error($db));
+$idxAttrs = array(array('publickey','publickeySHA1'));
 if($r && $c=mysqli_fetch_array($r)) {
-  $idxAttrs = array(array('publickey','publickeySHA1'));
-  if($c[0]>0) { //update data
-    //update
-    //check username is valid
-    if(isset($o->username) && get_user_role($o->username)=='') { 
-      header("HTTP/1.1 400 BAD REQUEST");
-      echo '{"error":"invalid username '.$o->username.' attribute"}';
-      fwrite($log,date('c')." invalid username '".$o->username."' attribute\n");
-      exit;
-    }
-    $attrs = array('username','elementName','elementUrl','elementDetails');
-    $sets = array();
-    foreach($attrs as $a) {
-      if(isset($o->$a))
-        $sets[] = "$a='".mysqli_escape_string($db, $o->$a)."'";
-    }
-    foreach($idxAttrs as $a) {
-      $a1 = $a[0];
-      $a2 = $a[1];
-      if(isset($o->elementDetails)) {
-        if(isset($elementDetails->$a1))
-          $sets[] = "$a2=SHA1('".mysqli_escape_string($db, $elementDetails->$a1)."')";    
-      }
-    }
+  //update
+  $curUsername = $c[0];
+  //check username is valid
+  if(isset($o->username) && ($urole = get_user_role($o->username))=='') { 
+    header("HTTP/1.1 400 BAD REQUEST");
+    echo '{"error":"invalid username '.$o->username.' attribute"}';
+    fwrite($log,date('c')." invalid username '".$o->username."' attribute\n");
+    exit;
+  }
+  //check if changing ownership exceeds the limit for the new user
+  if(isset($o->username) && $curUsername!=$o->username) {
+    $org = get_user_organization($o->username);
+    list($limit,$qry) = get_limit_user($db, $org, $o->username, $urole, $o->elementType);
 
-    $update = "UPDATE ownership SET ".join(",",$sets)." WHERE ".$userFilter.
-        " AND elementId='".mysqli_escape_string($db, $o->elementId).
-        "' AND elementType='".mysqli_escape_string($db, $o->elementType)."' AND deleted IS NULL";
-    if(!mysqli_query($db,$update)) {
-      fwrite($log,date('c')." UPDATE ownnership - query error ".  mysqli_error($db));
-      exit;
-    }
-  } else { //insert data
-    $org = get_user_organization($uinfo->username);
-    list($limit,$qry) = get_limit_user($db, $org, $uinfo->username, $uinfo->mainRole, $o->elementType);
-    
-    $q = "SELECT count(*) as count FROM ownership WHERE username='".mysqli_escape_string($db, $uinfo->username)."'".
+    $q = "SELECT count(*) as count FROM ownership WHERE username='".mysqli_escape_string($db, $o->username)."'".
         " AND elementType='".mysqli_escape_string($db, $o->elementType)."' AND deleted is NULL";
     $r = mysqli_query($db, $q);
-    if($r && ($c=mysqli_fetch_array($r)) && $c[0]<$limit) {
-      $o->username=$uinfo->username;
-      //insert
-      $attrs =  array_merge(array('username'), $mandatoryAttrs, $optionalAttrs);
-      $values = array();
-      foreach($attrs as $a) {
-        if(isset($o->$a))
-          $values[] = "'".mysqli_escape_string($db, $o->$a)."'";
-         else
-          $values[] = "NULL";
-      }
-      foreach($idxAttrs as $a) {
-        $a1 = $a[0];
-        $a2 = $a[1];
-        if(isset($o->elementDetails)) {
-          if(isset($elementDetails->$a1)) {
-            $attrs[] = $a2;
-            $values[] = "SHA1('".mysqli_escape_string($db, $elementDetails->$a1)."')";
-          }
-        }
-      }
-
-      $insert = "INSERT INTO ownership(".join(",", $attrs).") VALUES (".join(",",$values).")";
-
-      if(!mysqli_query($db,$insert)) {
-        fwrite($log,date('c')." INSERT ownnership - query error ".  mysqli_error($db));
-        exit;
-      }
-      $id=mysqli_insert_id($db);
-      $o->id=$id;
-    } else {
+    if($r && ($c=mysqli_fetch_array($r)) && $c[0]>=$limit) {
       header("HTTP/1.1 400 BAD REQUEST");
       echo '{"error":"reached limit of '.$limit.'","limit":'.$limit.',"current":'.$c[0].'}';
       fwrite($log,date('c')." for $org,".$uinfo->username.",".$uinfo->mainRole.":".$o->elementType." reached limit ".$c[0]."/$limit --".mysqli_error($db)."\n");
       exit;          
     }
   }
+  $attrs = array('username','elementName','elementUrl','elementDetails');
+  $sets = array();
+  foreach($attrs as $a) {
+    if(isset($o->$a))
+      $sets[] = "$a='".mysqli_escape_string($db, $o->$a)."'";
+  }
+  foreach($idxAttrs as $a) {
+    $a1 = $a[0];
+    $a2 = $a[1];
+    if(isset($o->elementDetails)) {
+      if(isset($elementDetails->$a1))
+        $sets[] = "$a2=SHA1('".mysqli_escape_string($db, $elementDetails->$a1)."')";    
+    }
+  }
+
+  $update = "UPDATE ownership SET ".join(",",$sets)." WHERE ".$userFilter.
+      " AND elementId='".mysqli_escape_string($db, $o->elementId).
+      "' AND elementType='".mysqli_escape_string($db, $o->elementType)."' AND deleted IS NULL";
+  if(!mysqli_query($db,$update)) {
+    fwrite($log,date('c')." UPDATE ownnership - query error ".  mysqli_error($db));
+    exit;
+  }
+  
+  //if changing ownership change also the delegations to the new user
+  if(isset($o->username) && $curUsername!=$o->username) {
+    $update = "UPDATE delegation SET username_delegator='".mysqli_escape_string($db, $o->username)."'"
+            . " WHERE element_id='".mysqli_escape_string($db, $o->elementId)."'"
+            . " AND element_type='".mysqli_escape_string($db, $o->elementType)."'"
+            . " AND delete_time IS NULL";
+    if(!mysqli_query($db,$update)) {
+      fwrite($log,date('c')." UPDATE delegation - query error ".  mysqli_error($db));
+      exit;
+    }    
+  }
+} else { //insert data
+  $org = get_user_organization($uinfo->username);
+  list($limit,$qry) = get_limit_user($db, $org, $uinfo->username, $uinfo->mainRole, $o->elementType);
+
+  $q = "SELECT count(*) as count FROM ownership WHERE username='".mysqli_escape_string($db, $uinfo->username)."'".
+      " AND elementType='".mysqli_escape_string($db, $o->elementType)."' AND deleted is NULL";
+  $r = mysqli_query($db, $q);
+  if($r && ($c=mysqli_fetch_array($r)) && $c[0]<$limit) {
+    $o->username=$uinfo->username;
+    //insert
+    $attrs =  array_merge(array('username'), $mandatoryAttrs, $optionalAttrs);
+    $values = array();
+    foreach($attrs as $a) {
+      if(isset($o->$a))
+        $values[] = "'".mysqli_escape_string($db, $o->$a)."'";
+       else
+        $values[] = "NULL";
+    }
+    foreach($idxAttrs as $a) {
+      $a1 = $a[0];
+      $a2 = $a[1];
+      if(isset($o->elementDetails)) {
+        if(isset($elementDetails->$a1)) {
+          $attrs[] = $a2;
+          $values[] = "SHA1('".mysqli_escape_string($db, $elementDetails->$a1)."')";
+        }
+      }
+    }
+
+    $insert = "INSERT INTO ownership(".join(",", $attrs).") VALUES (".join(",",$values).")";
+
+    if(!mysqli_query($db,$insert)) {
+      fwrite($log,date('c')." INSERT ownnership - query error ".  mysqli_error($db));
+      exit;
+    }
+    $id=mysqli_insert_id($db);
+    $o->id=$id;
+  } else {
+    header("HTTP/1.1 400 BAD REQUEST");
+    echo '{"error":"reached limit of '.$limit.'","limit":'.$limit.',"current":'.$c[0].'}';
+    fwrite($log,date('c')." for $org,".$uinfo->username.",".$uinfo->mainRole.":".$o->elementType." reached limit ".$c[0]."/$limit --".mysqli_error($db)."\n");
+    exit;          
+  }
 }
+
 if(isset($o->elementDetails)) {
   $o->elementDetails = json_decode($o->elementDetails);
 }
