@@ -1,0 +1,590 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "User Profiler API",
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "http://192.168.0.17:8080/userprofiler/api/v1"
+    }
+  ],
+  "paths": {
+    "/device": {
+      "get": {
+        "tags": [
+          "User Profiler"
+        ],
+        "summary": "Retrieve the listing of the available devices",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/summaryOfTheAvailableDevices"
+          }
+        }
+      }
+    },
+    "/device/{device_id}": {
+      "get": {
+        "tags": [
+          "User Profiler"
+        ],
+        "summary": "Retrieve full details about a given device",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/device_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/detailsOfTheDevice"
+          }
+        }
+      }
+    },
+    "/device/{device_id}/trips/aggregated": {
+      "get": {
+        "tags": [
+          "User Profiler"
+        ],
+        "summary": "Retrieve full details about trips and activities related to a given device",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/device_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/tripsAggregated"
+          }
+        }
+      }
+    },
+    "/device/{device_id}/location": {
+      "post": {
+        "tags": [
+          "User Profiler"
+        ],
+        "summary": "Post the location of a given device",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/device_id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "when",
+                  "profile",
+                  "terminal_lang"
+                ],
+                "properties": {
+                  "when": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "profile": {
+                    "type": "string"
+                  },
+                  "terminal_lang": {
+                    "type": "string"
+                  },
+                  "lang": {
+                    "type": "string",
+                    "default": "en",
+                    "example": "en"
+                  },
+                  "latitude": {
+                    "type": "number",
+                    "format": "double"
+                  },
+                  "longitude": {
+                    "type": "number",
+                    "format": "double"
+                  },
+                  "mobility_mode": {
+                    "type": "string"
+                  },
+                  "speed": {
+                    "type": "number",
+                    "format": "double"
+                  },
+                  "accuracy": {
+                    "type": "number",
+                    "format": "double"
+                  },
+                  "provider": {
+                    "type": "string"
+                  },
+                  "meanspeed": {
+                    "type": "number",
+                    "format": "double"
+                  },
+                  "accmagn": {
+                    "type": "number",
+                    "format": "double"
+                  },
+                  "accx": {
+                    "type": "number",
+                    "format": "double"
+                  },
+                  "accy": {
+                    "type": "number",
+                    "format": "double"
+                  },
+                  "accz": {
+                    "type": "number",
+                    "format": "double"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Done"
+          }
+        }
+      }
+    },
+    "/device/{device_id}/interest": {
+      "post": {
+        "tags": [
+          "User Profiler"
+        ],
+        "summary": "Post the interest for a given device",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/device_id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "serviceuri",
+                  "rate",
+                  "type"
+                ],
+                "properties": {
+                  "serviceuri": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "rate": {
+                    "type": "integer"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "lang": {
+                    "type": "string",
+                    "default": "en",
+                    "example": "en"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Done"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "device_id": {
+        "name": "device_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "example": "af97e11488be5af2408ab27ddd90d52ad763b5d4ff1e5f89e6fc378fdf785f75"
+      }
+    },
+    "schemas": {
+      "device": {
+        "type": "object",
+        "properties": {
+          "deviceId": {
+            "type": "string",
+            "example": "af97e11488be5af2408ab27ddd90d52ad763b5d4ff1e5f89e6fc378fdf785f75"
+          },
+          "lastUpdate": {
+            "type": "integer",
+            "format": "int64",
+            "example": 1532102266000
+          },
+          "currentPositionLat": {
+            "type": "number",
+            "format": "double",
+            "example": 43.7665
+          },
+          "currentPositionLong": {
+            "type": "number",
+            "format": "double",
+            "example": 11.26383
+          },
+          "currentPositionAccuracy": {
+            "type": "number",
+            "format": "double",
+            "example": 14.96199
+          },
+          "terminalAppID": {
+            "type": "string",
+            "example": "tdck-a"
+          },
+          "terminalModel": {
+            "type": "string",
+            "example": "osprey_u2"
+          },
+          "terminalVersion": {
+            "type": "string",
+            "example": "4.5.1"
+          },
+          "terminalInstallationDate": {
+            "type": "integer",
+            "format": "int64",
+            "example": 1509370150000
+          },
+          "terminal_profile": {
+            "type": "string",
+            "example": "citizen"
+          },
+          "terminal_language": {
+            "type": "string",
+            "example": "en"
+          },
+          "isAssessor": {
+            "type": "boolean",
+            "example": true
+          },
+          "userActivities": {
+            "type": "object",
+            "properties": {
+              "submitted_PHOTOS": {
+                "type": "integer",
+                "format": "int32",
+                "example": 0
+              },
+              "executed_ENGAGEMENTS": {
+                "type": "integer",
+                "format": "int32",
+                "example": 112
+              },
+              "submitted_STARS": {
+                "type": "integer",
+                "format": "int32",
+                "example": 21
+              },
+              "submitted_COMMENTS": {
+                "type": "integer",
+                "format": "int32",
+                "example": 1
+              }
+            }
+          },
+          "ppois": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "format": "int32",
+                  "example": 481394
+                },
+                "latitude": {
+                  "type": "number",
+                  "format": "double",
+                  "example": 43.76653
+                },
+                "longitude": {
+                  "type": "number",
+                  "format": "double",
+                  "example": 11.26389
+                },
+                "name": {
+                  "type": "string",
+                  "example": "HOME"
+                },
+                "accuracy": {
+                  "type": "number",
+                  "format": "double",
+                  "example": 0.999473
+                },
+                "cpz": {
+                  "type": "string",
+                  "example": "ZCS_1_D"
+                },
+                "address": {
+                  "type": "string",
+                  "example": "LUNGARNO DELLA ZECCA VECCHIA"
+                },
+                "municipality": {
+                  "type": "string",
+                  "example": "FIRENZE"
+                },
+                "number": {
+                  "type": "string",
+                  "example": 30
+                },
+                "confirmation": {
+                  "type": "boolean",
+                  "example": true
+                }
+              }
+            }
+          },
+          "ppoiPrevious": {
+            "type": "string",
+            "example": "HOME"
+          },
+          "ppoiCurrent": {
+            "type": "string",
+            "example": "HOME"
+          },
+          "ppoiNext": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "example": "HOME"
+              },
+              "accuracy": {
+                "type": "number",
+                "format": "double",
+                "example": 0
+              },
+              "howmany": {
+                "type": "integer",
+                "format": "int32",
+                "example": 0
+              },
+              "duration": {
+                "type": "integer",
+                "format": "int32",
+                "example": 0
+              },
+              "distance": {
+                "type": "number",
+                "format": "float",
+                "example": 0
+              },
+              "modality": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "ppoiPreviousHowlong": {
+            "type": "integer",
+            "format": "int32",
+            "example": 212
+          },
+          "ppoiPreviousDistance": {
+            "type": "number",
+            "format": "float",
+            "example": 0
+          },
+          "averageSpeed": {
+            "type": "number",
+            "format": "double",
+            "example": 0
+          },
+          "timelineCurrent": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "type": "integer",
+                "format": "int64",
+                "example": 1532101489000
+              },
+              "status": {
+                "type": "string",
+                "example": "Stay"
+              },
+              "seconds": {
+                "type": "integer",
+                "format": "int32",
+                "example": 777
+              },
+              "meters": {
+                "type": "integer",
+                "format": "int32",
+                "example": 122
+              },
+              "latitude": {
+                "type": "number",
+                "format": "double",
+                "example": 43.7665
+              },
+              "longitude": {
+                "type": "number",
+                "format": "double",
+                "example": 11.26387
+              },
+              "secondsLabel": {
+                "type": "string",
+                "example": "12 min 57 sec "
+              },
+              "metersLabel": {
+                "type": "string",
+                "example": "122 m "
+              }
+            }
+          },
+          "groups": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "GROUP_WALLET_REGISTERED"
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "summaryOfTheAvailableDevices": {
+        "description": "Available devices",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/device"
+              }
+            }
+          }
+        }
+      },
+      "detailsOfTheDevice": {
+        "description": "Full details about the device",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/device"
+            }
+          }
+        }
+      },
+      "tripsAggregated": {
+        "description": "It returns (a) _ppoisLabel_, the user PPOIs; (b) the movement of the user from a PPOI, in a slot-time, in a day of the week. For each movement, it is indicated how many times it has been observed, its destination, the accuracy, the duration, the distance, and the list of the used modalities (walk, public transport, ...).",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "ppoisLabel": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "example": "HOME"
+                  }
+                },
+                "trips": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "from": {
+                        "type": "integer",
+                        "format": "int32",
+                        "example": 2
+                      },
+                      "slot": {
+                        "description": "Allowed values are _0_ (21:00-5:00), _1_ (5:00-10:30), _2_ (10:30-14:00), _3_ (14:00-18:30), _4_ (18:30-21:00).",
+                        "type": "integer",
+                        "format": "int32",
+                        "enum": [
+                          0,
+                          1,
+                          2,
+                          3,
+                          4
+                        ],
+                        "example": 3
+                      },
+                      "day": {
+                        "description": "Allowed values are _0_ for Sunday, _1_ for Monday, _2_ for Tuesaday, ..., _6_ for Saturday.",
+                        "type": "integer",
+                        "format": "int32",
+                        "enum": [
+                          0,
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6
+                        ],
+                        "example": 0
+                      },
+                      "total": {
+                        "type": "integer",
+                        "format": "int32",
+                        "example": 0
+                      },
+                      "activity": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "to": {
+                              "type": "string",
+                              "example": "HOME"
+                            },
+                            "accuracy": {
+                              "type": "number",
+                              "format": "double",
+                              "example": 0
+                            },
+                            "howmany": {
+                              "type": "integer",
+                              "format": "int32",
+                              "example": 0
+                            },
+                            "duration": {
+                              "type": "integer",
+                              "format": "int32",
+                              "example": 0
+                            },
+                            "distance": {
+                              "type": "number",
+                              "format": "float",
+                              "example": 0
+                            },
+                            "modality": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -111,6 +111,7 @@ paths:
         - $ref: '#/components/parameters/variableName'
         - $ref: '#/components/parameters/motivation'
         - $ref: '#/components/parameters/deleted'  
+        - $ref: '#/components/parameters/groupname'  
       responses:
         200: 
           $ref: '#/components/responses/delegations'
@@ -138,6 +139,7 @@ paths:
         - $ref: '#/components/parameters/variableName'
         - $ref: '#/components/parameters/motivation'
         - $ref: '#/components/parameters/deleted'  
+        - $ref: '#/components/parameters/groupname'  
       responses:
         200: 
           $ref: '#/components/responses/delegations'
@@ -160,7 +162,7 @@ paths:
       description: It returns a JSON representation of the DELEGATIONS that the specified _APPID_ gave to an user. If _APPID_ starts with http%3A%2F%2F, it is decoded. If _usernameDelegated_ is set to _ANONYMOUS_, the delegation is public/anonymous. Null values for _appId_ and _appType_ mean the delegation is valid for an Annotation made by the user (out of the IOT-APP context). It does not return the group's delegations.
       parameters:
         - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/accessToken'       
+        - $ref: '#/components/parameters/accessTokenAppidOnly'       
         - $ref: '#/components/parameters/lang'        
         - $ref: '#/components/parameters/variableName'
         - $ref: '#/components/parameters/motivation'
@@ -207,6 +209,33 @@ paths:
           description: Not Implemented (if the invoked api is not supported anymore).          
     parameters:
       - $ref: '#/components/parameters/APPID'       
+
+  /v1/apps/{APPID}/access/check:
+    get:
+      tags: [From IoT App]
+      summary: Check Access
+      description: |
+        Check if the user specifeid in the _accessToken_ is able to access the specified _APPID_ (if _APPID_ starts with http%3A%2F%2F, it is uri decoded). If the access is granted, it returns a JSON messge having _result_ set to _true_ and _message_ set to one of _OWNER_, _ROOTADMIN_, _DELEGATED_, _GROUP-DELEGATED_, _PUBLIC_. Otherwise, it returns a JSON message having _result_ set to _false_.
+      parameters:
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/accessTokenBasic'       
+        - $ref: '#/components/parameters/lang'        
+      responses:
+        200:
+          $ref: '#/components/responses/accesscheck'
+        204:
+          description: No content (if no content is returned).
+        400:
+          description: Bad request (if an error arise parsing client request).           
+        401: 
+          description: Not Authorized (if an autherization error arise parsing client request).
+        500:
+          description: Internal Server Error (if an error arise on server side).
+        501:
+          description: Not Implemented (if the invoked api is not supported anymore).          
+    parameters:
+      - $ref: '#/components/parameters/APPID' 
+
   /v1/apps/{APPID}/delegations:
     delete:
       tags: [From IoT App]
@@ -239,7 +268,7 @@ paths:
       description: It returns a JSON representation of the DATA belonging to the specified _USERNAME_.
       parameters:
         - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/accessToken'
+        - $ref: '#/components/parameters/accessTokenUsername'
         - $ref: '#/components/parameters/lang'
         - $ref: '#/components/parameters/from'
         - $ref: '#/components/parameters/to'
@@ -268,7 +297,7 @@ paths:
       description: It stores a JSON representation of a DATA for the specified _USERNAME_. If the DATA are successfully stored, it returns HTTP 200 and a JSON representation of the DATA. If the DATA to store include the field _id_ an HTTP 400 is returned (and an explanation is provided in the _Entity_). Fields _insertTime_, _deleteTime_, _elapseTime_ are overriden by the server.
       parameters:
         - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/accessToken'
+        - $ref: '#/components/parameters/accessTokenUsername'
         - $ref: '#/components/parameters/lang'         
       requestBody:
         required: true
@@ -329,11 +358,12 @@ paths:
       description: "It returns a JSON representation of the DELEGATIONS that are given to the specified _USERNAME_ . If _usernameDelegated_ is set to _ANONYMOUS_, the delegation is public/anonymous. Null values for _appId_ and _appType_ mean the delegation is valid for an Annotation made by the user (out of the IOT-APP context). It does not return the group's delegations."
       parameters:
         - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/accessToken'       
+        - $ref: '#/components/parameters/accessTokenUsername'       
         - $ref: '#/components/parameters/lang'        
         - $ref: '#/components/parameters/variableName'
         - $ref: '#/components/parameters/motivation'
         - $ref: '#/components/parameters/deleted' 
+        - $ref: '#/components/parameters/groupname' 
       responses:
         200: 
           $ref: '#/components/responses/delegations'
@@ -356,11 +386,12 @@ paths:
       description: "Same as V1, but supporting group's delegations. It returns a JSON representation of the DELEGATIONS that are given to the specified _USERNAME_. If _usernameDelegated_ is set to _ANONYMOUS_, the delegation is public/anonymous. Null values for _appId_ and _appType_ mean the delegation is valid for an Annotation made by the user (out of the IOT-APP context)."
       parameters:
         - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/accessToken'       
+        - $ref: '#/components/parameters/accessTokenUsername'       
         - $ref: '#/components/parameters/lang'        
         - $ref: '#/components/parameters/variableName'
         - $ref: '#/components/parameters/motivation'
         - $ref: '#/components/parameters/deleted' 
+        - $ref: '#/components/parameters/groupname' 
       responses:
         200: 
           $ref: '#/components/responses/delegations'
@@ -384,7 +415,7 @@ paths:
       description: "It returns a JSON representation of the DELEGATIONS that the specified _USERNAME_ has given to an user. If _usernameDelegated_ is set to _ANONYMOUS_, the delegation is public/anonymous. Null values for _appId_ and _appType_ mean the delegation is valid for an Annotation made by the user (out of the IOT-APP context). It does not return the group's delegations."
       parameters:
         - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/accessToken'       
+        - $ref: '#/components/parameters/accessTokenUsername'       
         - $ref: '#/components/parameters/lang'        
         - $ref: '#/components/parameters/variableName'
         - $ref: '#/components/parameters/motivation'
@@ -411,7 +442,7 @@ paths:
       description: "Same as V1, but supporting group's delegations. It returns a JSON representation of the DELEGATIONS that the specified _USERNAME_ gave to an user and to a group. If _usernameDelegated_ is set to _ANONYMOUS_, the delegation is public/anonymous. Null values for _appId_ and _appType_ mean the delegation is valid for an Annotation made by the user (out of the IOT-APP context)."
       parameters:
         - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/accessToken'       
+        - $ref: '#/components/parameters/accessTokenUsername'       
         - $ref: '#/components/parameters/lang'        
         - $ref: '#/components/parameters/variableName'
         - $ref: '#/components/parameters/motivation'
@@ -432,14 +463,14 @@ paths:
     parameters:
       - $ref: '#/components/parameters/USERNAME'   
       
-  /v1/username/{USERNAME}/delegation/check:
+  /v1/username/{USERNAME}/delegations/check:
     get:
       tags: [From Username]
       summary: Check DELEGATIONS
-      description: "It allows to check if a DELEGATION exist for the given _USERNAME_, _elementID_ and _variableName_. If a delegation is found, a JSON messge is returned with _result_ set to _true_, and _message_ set to one of _OWNER_, _DELEGATED_, _GROUP-DELEGATED_, _PUBLIC_. If no DELEGATION can be found, a JSON message is returned with _result_ set to _false_."
+      description: "It allows to check if a DELEGATION exist for the given _USERNAME_, _elementID_ and _variableName_. If a delegation is found, a JSON messge is returned with _result_ set to _true_, and _message_ set to one of _DELEGATED_, _GROUP-DELEGATED_, _PUBLIC_. If no DELEGATION can be found, a JSON message is returned with _result_ set to _false_."
       parameters:
         - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/accessToken'   
+        - $ref: '#/components/parameters/accessTokenElementid'   
         - name: variableName
           in: query
           description: The variable name filter.
@@ -483,7 +514,7 @@ paths:
       description: It stores a JSON representation of a DELEGATION for the specified _USERNAME_. If the DELEGATION is successfully stored, it returns HTTP 200 and a JSON representation of the new DELEGATION. If the DELEGATION to be stored includes the field _id_ an HTTP 400 is returned (and an explanation is provided in the _Entity_). Fields _insertTime_, _deleteTime_, and _elapseTime_ are overriden by the server. It is checked that the username specified as DELEGATED exists in LDAP.
       parameters:
         - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/accessToken'
+        - $ref: '#/components/parameters/accessTokenUsername'
         - $ref: '#/components/parameters/lang'       
       requestBody:
         required: true
@@ -530,7 +561,7 @@ paths:
       description: It stores an update for the JSON representation of a DELEGATION for the specified _DELEGATION_ID_, belonging to the specified _USERNAME_. If the DELEGATION is successfully stored, it returns an HTTP 200 and a JSON representation of the new version of the DELEGATION. If the DELEGATION includes the field _id_ an HTTP 400 is returned (and an explanation is provided in the _Entity_). Fields _insertTime_, _deleteTime_, and _elapseTime_ are overriden by the server. It is checked that the username specified as DELEGATED exists in LDAP.
       parameters:
         - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/accessToken'
+        - $ref: '#/components/parameters/accessTokenUsername'
         - $ref: '#/components/parameters/lang'       
       requestBody:
         $ref: '#/components/requestBodies/putDelegation'
@@ -553,7 +584,7 @@ paths:
       description: It deletes a _DELEGATION_ID_ belonging to the specified _USERNAME_.
       parameters:
         - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/accessToken'        
+        - $ref: '#/components/parameters/accessTokenUsername'        
         - $ref: '#/components/parameters/lang'
       responses:
         200:
@@ -633,7 +664,7 @@ paths:
       summary: It returns ALL the DATA.
       parameters:
         - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/accessToken'        
+        - $ref: '#/components/parameters/accessTokenRootadminOnly'        
         - $ref: '#/components/parameters/lang'
         - name: last
           in: query
@@ -677,10 +708,45 @@ components:
     accessToken:
       name: accessToken
       in: query
-      description: The token that grants the access. It has to be valid and not elapsed.
+      description: The token that grants the access. It has to be valid, not elapsed and it has to belong to the owner of the _APPID_ or to an user with RootAdmin privileges.
       required: true
       schema: 
         type: string
+    accessTokenAppidOnly:
+      name: accessToken
+      in: query
+      description: The token that grants the access. It has to be valid, not elapsed and it has to belong to the owner of the _APPID_.
+      required: true
+      schema: 
+        type: string       
+    accessTokenUsername:
+      name: accessToken
+      in: query
+      description: The token that grants the access. It has to be valid, not elapsed and it has to belong to the _USERNAME_ or to an user with RootAdmin privileges.
+      required: true
+      schema: 
+        type: string       
+    accessTokenRootadminOnly:
+      name: accessToken
+      in: query
+      description: The token that grants the access. It has to be valid, not elapsed and it has to belong to an user with RootAdmin privilege.
+      required: true
+      schema: 
+        type: string     
+    accessTokenBasic:
+      name: accessTokenBasic
+      in: query
+      description: The token that grants the access. It has to be valid, and not elapsed.
+      required: true
+      schema: 
+        type: string       
+    accessTokenElementid:
+      name: accessToken
+      in: query
+      description: The token that grants the access. It has to be valid, not elapsed and it has to belong to the owner of the _elementID_ or to an user with RootAdmin privileges.
+      required: true
+      schema: 
+        type: string        
     variableName:
       name: variableName
       in: query
@@ -775,7 +841,7 @@ components:
     anonymous:
       name: anonymous
       in: query
-      description: If true, the API returns just the data from an APPID that has been configured as public. It defaults to _false_.
+      description: If true, the API returns just the data from an APPID that has been configured as public. It defaults to _false_. To be used with _delegated_ set to _true_.
       required: false
       schema:
         type: boolean
@@ -799,6 +865,14 @@ components:
         type: integer
         format: int32
       example: 615    
+    groupname:
+      name: groupname
+      in: query
+      description: "If specified, return just the delegation made from user in the specified group/ou. It has to be URL Encoded. Example of groupname are: (organization) ou=Firenze,dc=foo,dc=example,dc=org (group) cn=Firenze Servizi,ou=Firenze,dc=foo,dc=example,dc=org"
+      required: false
+      schema:
+        type: string
+        example: 
   responses:
     getData:
       description: A JSON array with the retrieved data is returned.
@@ -1014,7 +1088,22 @@ components:
                 example: cab5c0cbf1585a072488954723e198c1c16f6fe3bb220120ba4a25416e7ed9a3
               elementType:
                 type: string
-                example: AppID    
+                example: AppID   
+    accesscheck:
+      description: A JSON describing the access level of the user is returned.
+      content:
+        application/json:
+          schema:
+            type: object
+            required: 
+              - result
+            properties:
+              result: 
+                type: boolean
+                example: true
+              message:
+                type: string
+                enum: [OWNER,ROOTADMIN,DELEGATED,GROUP-DELEGATED,PUBLIC]
   requestBodies:
     putDelegation:
       content:

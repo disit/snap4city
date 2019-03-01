@@ -1,0 +1,1068 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Wallet API",
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "http://wallet.km4city.org"
+    }
+  ],
+  "paths": {
+    "/wallet/api/v1/registration": {
+      "post": {
+        "tags": [
+          "User Management"
+        ],
+        "summary": "Registration",
+        "description": "Register a new user in the system, and assign her a given _username_ (a valid email) and _password_. An optional _lang_ can be specified (default is _en_). If the registration is successfull, the API returns HTTP 200 and _result_ set to _true_. If the registration fails (username is null, not available, too short, not a valid e-mail, or password is empty or non-matching), the API again returns HTTP 200 but _result_ is set to _false_, and the field _message_ contains the error message, written in English or in the requested language.",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/walletRegistration"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/walletRegistration"
+          },
+          "500": {
+            "description": "Internal Server Error (unexpected error)."
+          },
+          "501": {
+            "description": "Not Implemented (client update required)."
+          }
+        }
+      }
+    },
+    "/wallet/api/v1/signin": {
+      "post": {
+        "tags": [
+          "User Management"
+        ],
+        "summary": "Sign in",
+        "description": "Log in with the given _username_ and _password_. An optional _remember-me_ parameter can be submitted (default is _off_). If the sign in is successfull, the API returns HTTP 200, and a session cookie _JSESSIONID_. If _remember-me_ was set to _on_, a persistent cookie is also provided back. If the sign in fails (invalid username/password), the API returns HTTP 401.",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/walletSignin"
+        },
+        "responses": {
+          "200": {
+            "description": "Sign in successfull. Cookies are sent."
+          },
+          "401": {
+            "description": "Sign in failed (invalid username/password)."
+          },
+          "500": {
+            "description": "Internal Server Error (unexpected error)."
+          },
+          "501": {
+            "description": "Not Implemented (client update required)."
+          }
+        }
+      }
+    },
+    "/wallet/api/v1/signinsocial": {
+      "post": {
+        "tags": [
+          "User Management"
+        ],
+        "summary": "Social sign in",
+        "description": "Log in with an access token. An optional _remember-me_ parameter can be submitted (default is _off_). An optional _lang_ parameter can be submitted (default is _en_). The API checks with social oauth2 if the access token is valid. If it is, it returns HTTP 200, a session-cookie _JSESSIONID_ and a persistent-cookie if it is the case (_remember-me_ set to _on_). If the sign in fails (invalid _accesstoken_, unrecognized _social_name_) it returns HTTP 401, _result_ set to _false_, and _message_ set to the error message. The expected format for the access token is \"social_name:accesstoken\". Allowed values for _social_name_ are \"google\", \"facebook\".",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/walletSocialSignin"
+        },
+        "responses": {
+          "200": {
+            "description": "Sign in successfull. Cookies are set."
+          },
+          "401": {
+            "$ref": "#/components/responses/walletSocialSigninFailed"
+          },
+          "500": {
+            "description": "Internal Server Error (unexpected error)."
+          },
+          "501": {
+            "description": "Not Implemented (client update required)."
+          }
+        }
+      }
+    },
+    "/wallet/api/v1/logout": {
+      "post": {
+        "tags": [
+          "User Management"
+        ],
+        "summary": "Logout",
+        "description": "The API removes the session cookie for the user specified in the _JSESSIONID_ cookie. Persistent cookies are also removed if any.",
+        "responses": {
+          "200": {
+            "description": "User is logged out."
+          },
+          "500": {
+            "description": "Internal Server Error (unexpected error)."
+          },
+          "501": {
+            "description": "Not Implemented (client update required)."
+          }
+        }
+      }
+    },
+    "/wallet/api/v1/delete": {
+      "post": {
+        "tags": [
+          "User Management"
+        ],
+        "summary": "Delete",
+        "description": "The API deletes the user specified in the _JSESSIONID_ cookie, and all data about her.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/walletDelete"
+          },
+          "500": {
+            "description": "Internal Server Error (unexpected error)."
+          },
+          "501": {
+            "description": "Not Implemented (client update required)."
+          }
+        }
+      }
+    },
+    "/wallet/api/v1/deviceid": {
+      "post": {
+        "tags": [
+          "Device Management"
+        ],
+        "summary": "Add device",
+        "description": "The API adds the given _device_id_ to the user specified by the _JSESSIONID_ cookie. An optional _lang_ can be specified (default is _en_). If the adding is successfull, the API returns HTTP 200 and _result_ set to _true_. If cookies are not embedded in the request, the API returns HTTP 302. If cookies do not allow a successful login, the API returns HTTP 401.",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/walletDeviceID"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/walletDeviceID"
+          },
+          "302": {
+            "description": "Cookies cannot be found in user request."
+          },
+          "401": {
+            "description": "Cookies do not allow a successful authentication."
+          },
+          "500": {
+            "description": "Internal Server Error (unexpected error)"
+          },
+          "501": {
+            "description": "Not Implemented (client update required)"
+          }
+        }
+      }
+    },
+    "/api/v1/lastlogin": {
+      "get": {
+        "tags": [
+          "Device Management"
+        ],
+        "summary": "Get last login",
+        "description": "Get the date of the last login of the user specified in the _JSESSIONID_ cookie. An optional _lang_ parameter can be submitted (default is _en_). In case of success, the API returns HTTP 200 and the timestamp in milliseconds. If cookies are not embedded in the request, the API returns HTTP 302. If cookies do not allow a successful login, the API returns HTTP 401.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/lang"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/walletLastLogin"
+          },
+          "302": {
+            "description": "Cookies cannot be found in user request."
+          },
+          "401": {
+            "description": "Cookies do not allow a successful authentication."
+          },
+          "500": {
+            "description": "Internal Server Error (unexpected error)"
+          },
+          "501": {
+            "description": "Not Implemented (client update required)"
+          }
+        }
+      }
+    },
+    "/api/v1/welcomemsg": {
+      "get": {
+        "tags": [
+          "Device Management"
+        ],
+        "summary": "Get welcome message",
+        "description": "Get the welcome message for the user specified in the _JSESSIONID_ cookie. An optional _lang_ parameter can be submitted (default is _en_). In case of success, the API returns HTTP 200 and a positional list of text strings. If cookies are not embedded in the request, the API returns HTTP 302. If cookies do not allow a successful login, the API returns HTTP 401.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/lang"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/walletWelcomemsg"
+          },
+          "302": {
+            "description": "Cookies cannot be found in user request."
+          },
+          "401": {
+            "description": "Cookies do not allow a successful authentication."
+          },
+          "500": {
+            "description": "Internal Server Error (unexpected error)"
+          },
+          "501": {
+            "description": "Not Implemented (client update required)"
+          }
+        }
+      }
+    },
+    "/api/v1/forgotpwd": {
+      "post": {
+        "tags": [
+          "Password Management"
+        ],
+        "summary": "Forgot password",
+        "description": "Send an e-mail to the specified _user_email_ to change password. An optional _lang_ parameter can be submitted (default is _en_). The _appid_ allows to customize the message.\n\nIf the operation completes successfully, the API returns HTTP 200, _result_ set to _true_, and a confirmation message in the _message_ field. Otherwise (e-mail not found, e-mail not reachable), the API returns HTTP 200 again, but _result_ is set to _false_, and an error message can be found in the _message_ field, written in English or in the required language if any.\n\nThe e-mail includes a link where the following can be found: (i) a unique _token_ available for 24 hours; (ii) an _id_ to enforce security; (iii) a _from_ parameter set to _changepwd_. The user is required to follow the link and fill in her new password.\n",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/walletForgotPwd"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/walletForgotPwd"
+          },
+          "500": {
+            "description": "Internal Server Error (unexpected error)"
+          },
+          "501": {
+            "description": "Not Implemented (client update required)"
+          }
+        }
+      }
+    },
+    "/api/v1/savepwd": {
+      "post": {
+        "tags": [
+          "Password Management"
+        ],
+        "summary": "Save new password",
+        "description": "Store a new _password_ for the user specified in the parameter _id_. An optional _lang_ parameter can be submitted (default is _en_). An optional _remember-me_ parameter can be submitted (default is _off_). The API checks if the specified _token_ is valid for the specified user. If it is, the API returns HTTP 200, _result_ set to _true_, a confirmation message in the _message_ field, a session cookie _JSESSIONID_. If _remember-me_ was set to _on_, a persistent cookie is also delivered. If the operation fails instead (expired or invalid token, empty password), the API returns a HTTP 200, _result_ set to _false_, and an error message in the _message_ field, written in English or in the requested language if any.\n",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/walletSavePwd"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/walletSavePwd"
+          },
+          "500": {
+            "description": "Internal Server Error (unexpected error)"
+          },
+          "501": {
+            "description": "Not Implemented (client update required)"
+          }
+        }
+      }
+    },
+    "/api/v1/feedback": {
+      "post": {
+        "tags": [
+          "Feedback Management"
+        ],
+        "summary": "Feedback a received token",
+        "description": "Tag a _token_ as _CONFIRMED_. An optional _lang_ parameter can be submitted (default is _en_). The API checks if the specified _token_ is valid. If it is, the API returns HTTP 200, and _result_ set to _true_. Otherwise, the API returns a HTTP 200 again, but _result_ is set to _false_, and an error message can be found in the _message_ field, written in English or in the required language if any. If cookies are not embedded in the request, the API returns HTTP 302. If cookies do not allow a successful login, the API returns HTTP 401.",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/walletFeedback"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/walletFeedback"
+          },
+          "302": {
+            "description": "Cookies cannot be found in user request."
+          },
+          "401": {
+            "description": "Cookies do not allow a successful authentication."
+          },
+          "500": {
+            "description": "Internal Server Error (unexpected error)"
+          },
+          "501": {
+            "description": "Not Implemented (client update required)"
+          }
+        }
+      }
+    },
+    "/api/v1/useractivites": {
+      "get": {
+        "tags": [
+          "User Profile"
+        ],
+        "summary": "Get user activities",
+        "description": "Get the activities of the user specified by the _JSESSIONID_ cookie. An optional _lang_ parameter can be submitted (default is _en_). An optional _refresh_ parameter can be submitted (default is _false_). If _refresh_ is set to _true_, a newly-generated response is provided back, otherwise the cached response is provided if any. If the operation is successful, the API returns HTTP 200 and a JSON representing the user activities. If cookies are not embedded in the request, the API returns HTTP 302. If cookies do not allow a successful login, the API returns HTTP 401.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/lang"
+          },
+          {
+            "$ref": "#/components/parameters/refresh"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/walletUserActivities"
+          },
+          "302": {
+            "description": "Cookies cannot be found in user request."
+          },
+          "401": {
+            "description": "Cookies do not allow a successful authentication."
+          },
+          "500": {
+            "description": "Internal Server Error (unexpected error)"
+          },
+          "501": {
+            "description": "Not Implemented (client update required)"
+          }
+        }
+      }
+    },
+    "/api/v1/useractivites/{activity}": {
+      "get": {
+        "tags": [
+          "User Profile"
+        ],
+        "summary": "Get detailed user activities",
+        "description": "Get a detailed list of _activity_ of the user specified in the _JSESSIONID_ cookie. An optional _lang_ parameter can be submitted (default is _en_). An optional _terminalID_ parameter can be submitted (default is _null_, and it means _any terminal_). Optional _from_ and _howmany_ parameters can be submitted to enable paging. If the operation is successful, the API returns HTTP 200 and a JSON representing the user activities. If cookies are not embedded in the request, the API returns HTTP 302. If cookies do not allow a successful login, the API returns HTTP 401.\n\nAllowed values for _activity_ are SUBMITTED_STARS (submittedstarsdetailed), SUBMITTED_COMMENTS (submittedcommentsdetailed), SUBMITTED_PHOTOS (submittedphotosdetailed), EXECUTED_ENGAGEMENTS (executedengagementsdetailed). For \"SUBMITTED_*\", the field _value_ in the response can indicate the number of the stars, the text of comments, or the photo’s URI. For \"EXECUTED ENGAGEMENTS\", the field _rule_name_label_ can be null, replaced by _rule_name_. _Points_ also can be null if the rule does not have any information.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/activity"
+          },
+          {
+            "$ref": "#/components/parameters/lang"
+          },
+          {
+            "$ref": "#/components/parameters/terminalID"
+          },
+          {
+            "$ref": "#/components/parameters/from"
+          },
+          {
+            "$ref": "#/components/parameters/howmany"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User Activities",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/responses/executedEngagements"
+                    },
+                    {
+                      "$ref": "#/components/responses/submittedSomething"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "Cookies cannot be found in user request."
+          },
+          "401": {
+            "description": "Cookies do not allow a successful authentication."
+          },
+          "500": {
+            "description": "Internal Server Error (unexpected error)"
+          },
+          "501": {
+            "description": "Not Implemented (client update required)"
+          }
+        }
+      }
+    },
+    "/api/v1/usermobility": {
+      "get": {
+        "tags": [
+          "User Profile"
+        ],
+        "summary": "Get User Mobilities",
+        "description": "Get the mobility activity of the user specified by the _JSESSIONID_ from an optional _from_ date to an optional _to_ date (default is from the beginning to _now_). An optional _lang_ parameter can be submitted (default is _en_). An optional _status_ string can be specified (default is all status). If the operation is successful, the API returns HTTP 200 and a JSON representing the user mobility activities. If cookies are not embedded in the request, the API returns HTTP 302. If cookies do not allow a successful login, the API returns HTTP 401.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/fromTimestamp"
+          },
+          {
+            "$ref": "#/components/parameters/toTimestamp"
+          },
+          {
+            "$ref": "#/components/parameters/lang"
+          },
+          {
+            "$ref": "#/components/parameters/status"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/walletUserMobilities"
+          },
+          "302": {
+            "description": "Cookies cannot be found in user request."
+          },
+          "401": {
+            "description": "Cookies do not allow a successful authentication."
+          },
+          "500": {
+            "description": "Internal Server Error (unexpected error)"
+          },
+          "501": {
+            "description": "Not Implemented (client update required)"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "lang": {
+        "name": "lang",
+        "in": "query",
+        "description": "Optional language",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "default": "en"
+        },
+        "example": "en"
+      },
+      "refresh": {
+        "name": "refresh",
+        "in": "query",
+        "description": "If set to _true_, a newly-generated response is provided back to the user. Otherwise, the cached version is provided if any.",
+        "required": false,
+        "schema": {
+          "type": "boolean",
+          "default": false
+        },
+        "example": false
+      },
+      "activity": {
+        "name": "activity",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "submittedstarsdetailed",
+            "submittedcommentsdetailed",
+            "submittedphotosdetailed",
+            "executedengagementsdetailed"
+          ]
+        },
+        "example": "submittedcommentsdetailed"
+      },
+      "terminalID": {
+        "name": "terminalID",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "example": "af97e11488be5af2408ab27ddd90d52ad763b5d4ff1e5f89e6fc378fdf785f75"
+      },
+      "from": {
+        "name": "from",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "example": 1
+      },
+      "howmany": {
+        "name": "howmany",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "example": 3
+      },
+      "fromTimestamp": {
+        "name": "from",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "example": 1479123742000
+      },
+      "toTimestamp": {
+        "name": "to",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "example": 1479123742000
+      },
+      "status": {
+        "name": "status",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "responses": {
+      "walletRegistration": {
+        "description": "Returned both for OK (_result_ = _true_) and KO (_result_ = _false_) responses. In case of failure, the _message_ field describes the error.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "result",
+                "message"
+              ],
+              "properties": {
+                "result": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "true"
+                }
+              }
+            }
+          }
+        }
+      },
+      "walletSocialSigninFailed": {
+        "description": "Sign in failed (invalid access token, or unrecognized _social_name_)",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "result",
+                "message"
+              ],
+              "properties": {
+                "result": {
+                  "type": "boolean",
+                  "enum": [
+                    false
+                  ]
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "walletDelete": {
+        "description": "Deleted",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "result",
+                "message"
+              ],
+              "properties": {
+                "result": {
+                  "type": "boolean",
+                  "enum": [
+                    true
+                  ],
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "true"
+                }
+              }
+            }
+          }
+        }
+      },
+      "walletDeviceID": {
+        "description": "Returned both for OK (_result_ = _true_) and KO (_result_ = _false_) responses. In case of failure, the _message_ field describes the error.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "result",
+                "message"
+              ],
+              "properties": {
+                "result": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "true"
+                }
+              }
+            }
+          }
+        }
+      },
+      "walletLastLogin": {
+        "description": "Timestamp of last login",
+        "content": {
+          "text/plain": {
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        }
+      },
+      "walletWelcomemsg": {
+        "description": "Welcome message and points",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "example": [
+                  "Welcome \"angelo.difino@gmail.com\"",
+                  "You got a total of \"20\" points"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "walletForgotPwd": {
+        "description": "Returned both for OK (_result_ = _true_) and KO (_result_ = _false_) responses. In case of failure, the _message_ field describes the error.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "result",
+                "message"
+              ],
+              "properties": {
+                "result": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "true"
+                }
+              }
+            }
+          }
+        }
+      },
+      "walletSavePwd": {
+        "description": "Returned both for OK (_result_ = _true_) and KO (_result_ = _false_) responses. In case of failure, the _message_ field describes the error.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "result",
+                "message"
+              ],
+              "properties": {
+                "result": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "true"
+                }
+              }
+            }
+          }
+        }
+      },
+      "walletFeedback": {
+        "description": "Returned both for OK (_result_ = _true_) and KO (_result_ = _false_) responses. In case of failure, the _message_ field describes the error.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "result",
+                "message"
+              ],
+              "properties": {
+                "result": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "true"
+                }
+              }
+            }
+          }
+        }
+      },
+      "walletUserActivities": {
+        "description": "User activities",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "label",
+                  "value"
+                ],
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "example": "SUBMITTED_PHOTOS"
+                  },
+                  "value": {
+                    "type": "integer",
+                    "format": "int32",
+                    "example": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "executedEngagements": {
+        "description": "Response provided when _activity_ is EXECUTED_ENGAGEMENT.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "time",
+                  "ruleName"
+                ],
+                "properties": {
+                  "time": {
+                    "type": "integer",
+                    "format": "int64",
+                    "example": 1479123742000
+                  },
+                  "ruleName": {
+                    "type": "string",
+                    "example": "prova"
+                  },
+                  "rule_name_label": {
+                    "type": "string",
+                    "example": "prova label"
+                  },
+                  "points": {
+                    "type": "integer",
+                    "format": "int32",
+                    "example": 10
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "submittedSomething": {
+        "description": "Response provided when _activity_ is \"SUBMITTED_*\"",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "time",
+                  "serviceUri",
+                  "text"
+                ],
+                "properties": {
+                  "time": {
+                    "type": "integer",
+                    "format": "int64",
+                    "example": 1479123742000
+                  },
+                  "serviceUri": {
+                    "type": "string",
+                    "format": "uri",
+                    "example": "http://www.disit.org/km4city/resource/6ceacbc32f1e6824ecb71017a668c2a3"
+                  },
+                  "text": {
+                    "type": "string",
+                    "example": "Biblioteca fornitissima e personale efficiente"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "walletUserMobilities": {
+        "description": "User Mobilities",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "example": "stay"
+                  },
+                  "seconds": {
+                    "type": "integer",
+                    "format": "int32",
+                    "example": 1278815
+                  },
+                  "meters": {
+                    "type": "integer",
+                    "format": "int32",
+                    "nullable": true,
+                    "example": 500
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "requestBodies": {
+      "walletRegistration": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "username",
+                "password"
+              ],
+              "properties": {
+                "username": {
+                  "type": "string",
+                  "format": "email",
+                  "example": "test@test.com"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "test"
+                },
+                "lang": {
+                  "type": "string",
+                  "default": "en",
+                  "example": "en"
+                }
+              }
+            }
+          }
+        }
+      },
+      "walletSignin": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "username",
+                "password"
+              ],
+              "properties": {
+                "username": {
+                  "type": "string",
+                  "format": "email",
+                  "example": "test@test.com"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "test"
+                },
+                "remember-me": {
+                  "type": "string",
+                  "enum": [
+                    "on",
+                    "off"
+                  ],
+                  "example": "off",
+                  "default": "off"
+                }
+              }
+            }
+          }
+        }
+      },
+      "walletSocialSignin": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "accesstoken"
+              ],
+              "properties": {
+                "accesstoken": {
+                  "type": "string",
+                  "example": "facebook:EAADZCeLIXHw0BABgKRHQrKHDm04c2TQvZAlNPXcBJFQoE6Xi8nQs14X4nSSzJL7ZAdZByZCYr9HlfTi7o9iqbtBP5gZABzas4TlGMCqlgXw6FmHxhi9N9Ve3tl3NEaAsqiZB4IaZCx4pZCzIZAB7ngG3Jx4ZBOXTPRvdhaGkT2zdUGaeAZDZD"
+                },
+                "remember-me": {
+                  "type": "string",
+                  "enum": [
+                    "on",
+                    "off"
+                  ],
+                  "example": "off",
+                  "default": "off"
+                },
+                "lang": {
+                  "type": "string",
+                  "default": "en",
+                  "example": "en"
+                }
+              }
+            }
+          }
+        }
+      },
+      "walletDeviceID": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "device_id"
+              ],
+              "properties": {
+                "device_id": {
+                  "type": "string",
+                  "example": "7846b4cf63d22afef4a3acf33d9ca0cde38d49e4e59bb6b34a163c847079ff20"
+                },
+                "lang": {
+                  "type": "string",
+                  "default": "en",
+                  "example": "en"
+                }
+              }
+            }
+          }
+        }
+      },
+      "walletForgotPwd": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "username",
+                "appid"
+              ],
+              "properties": {
+                "username": {
+                  "type": "string",
+                  "format": "email",
+                  "example": "test@test.com"
+                },
+                "appid": {
+                  "type": "string",
+                  "example": "tdck-a"
+                },
+                "lang": {
+                  "type": "string",
+                  "default": "en",
+                  "example": "en"
+                }
+              }
+            }
+          }
+        }
+      },
+      "walletSavePwd": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "id",
+                "token",
+                "password"
+              ],
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "format": "int32",
+                  "example": 19
+                },
+                "token": {
+                  "type": "string",
+                  "example": "bc9db89a-aad6-49a3-ac39-752680b18770"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "test"
+                },
+                "lang": {
+                  "type": "string",
+                  "default": "en",
+                  "example": "en"
+                }
+              }
+            }
+          }
+        }
+      },
+      "walletFeedback": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "token"
+              ],
+              "properties": {
+                "token": {
+                  "type": "string",
+                  "example": "bc9db89a-aad6-49a3-ac39-752680b18770"
+                },
+                "lang": {
+                  "type": "string",
+                  "default": "en",
+                  "example": "en"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

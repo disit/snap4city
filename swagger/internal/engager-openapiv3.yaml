@@ -1,0 +1,204 @@
+openapi: 3.0.1
+info: 
+  title: Engager API
+  version: '1.0'
+servers:
+  - url: http://engager.km4city.org
+paths:
+  /engine/api/engager:
+    get:
+      tags: [Engine]
+      summary: Engager Engine
+      parameters:
+        - $ref: '#/components/parameters/uid'
+        - $ref: '#/components/parameters/update'
+        - $ref: '#/components/parameters/selection'
+      responses:
+        200:
+          $ref: '#/components/responses/engagerEngine'
+  /engine/api/cancel-engagement:
+    get:
+      tags: [Engine]
+      summary: Cancel Engagement
+      parameters:
+        - $ref: '#/components/parameters/engagementId'
+      responses:
+        200:
+          $ref: '#/components/responses/cancelEngagement'
+  /api/survey-collector:
+    post:
+      tags: [Survey]
+      summary: Survey Collector
+      requestBody:
+        $ref: '#/components/requestBodies/surveyCollector'
+      responses:
+        200:
+          $ref: '#/components/responses/surveyCollector'
+components:
+  parameters:
+    uid:
+      name: uid
+      in: query
+      description: Device ID
+      required: true
+      schema: 
+        type: string
+      example: "7846b4cf63d22afef4a3acf33d9ca0cde38d49e4e59bb6b34a163c847079ff20"
+    update:
+      name: update
+      in: query
+      description: It indicates if the engagement status has to be updated (created -> sent).
+      required: false
+      schema: 
+        type: boolean
+        default: true
+    selection:
+      name: selection
+      in: query
+      description: Allowed values are "assistance", "engagement". It indicates the type of message to be retrieved. If the property cannot be found, both the two types of message are retrieved.
+      required: false
+      schema: 
+        type: string
+        enum: ["assistance","engagement"]
+    engagementId:
+      name: id
+      in: query
+      description: Engagement ID
+      required: true
+      schema: 
+        type: integer
+        format: int64
+      example: 4699311 
+  responses:
+    engagerEngine:
+      description: "OK"
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - assessor
+              - engagement
+              - assistance
+            properties:
+              assessor:
+                type: boolean
+                example: false
+              engagement:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      example: REQUEST_PHOTO
+                    msg:
+                      type: string
+                      example: "\"\"I Concerti al Cenacolo 2018\"\" presso Biblioteca delle Oblate  (fino a 2018-12-11)"
+                    classe:
+                      type: string
+                      example: "ENGAGEMENT"
+                    id:
+                      type: integer
+                      example: 4704206
+                    time_elapse:
+                      type: integer
+                      example: 86196159
+                    title:
+                      type: string
+                      example: "EVENTI in giornata"
+                    uri:
+                      type: string
+                      format: uri
+                      example: "http://www.disit.org/km4city/resource/Event_25013_a55e096656e35d3a9440b591f347b4d3"
+                    gps_lat:
+                      type: number
+                      format: float
+                      example: 43.772243
+                    gps_long:
+                      type: number
+                      format: float
+                      example: 11.260041
+                    time_created:
+                      type: integer
+                      format: int64
+                      example: 1544518730000
+                    serviceType:
+                      type: string
+                      example: "Event"
+                    serviceLabel:
+                      type: string
+                      example: "Musica classica, opera e balletto"
+                    serviceName:
+                      type: string
+                      example: "\"I Concerti al Cenacolo 2018\""
+                    action_bannedfor:
+                      type: integer
+                      format: int32
+                      example: 0
+                    action_howmany:
+                      type: integer
+                      format: int32
+                      example: 1
+                    action_rulename:
+                      type: string
+                      example: "daily_event_it"
+                    action_sendrate:
+                      type: integer
+                      format: int32
+                      example: 0
+                    points:
+                      type: integer
+                      format: int32
+                      example: 0
+              assistance:
+                type: array
+                items:
+                  type: object
+    cancelEngagement:
+      description: "OK"
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - result
+              - message
+            properties:
+              result:
+                type: string
+                example: "OK"
+              message:
+                type: string
+                nullable: true
+                example: null
+    surveyCollector:
+      description: "OK"
+  requestBodies:
+    surveyCollector:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                engagement_id:
+                  type: integer
+                  format: int64
+                  example: 4699311
+                user_id:
+                  type: string
+                  example: "7846b4cf63d22afef4a3acf33d9ca0cde38d49e4e59bb6b34a163c847079ff20"
+                survey_id:
+                  type: string
+                  example: "confirm_extrappoi_it"
+                completed_time:
+                  type: integer
+                  format: int64
+                  example: 1543956143329
+                survey_response:
+                  type: object
+                  properties:
+                    confirm_extrappoi: 
+                      type: string
+                      example: "no"

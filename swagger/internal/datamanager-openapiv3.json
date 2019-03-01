@@ -197,6 +197,9 @@
           },
           {
             "$ref": "#/components/parameters/deleted"
+          },
+          {
+            "$ref": "#/components/parameters/groupname"
           }
         ],
         "responses": {
@@ -251,6 +254,9 @@
           },
           {
             "$ref": "#/components/parameters/deleted"
+          },
+          {
+            "$ref": "#/components/parameters/groupname"
           }
         ],
         "responses": {
@@ -292,7 +298,7 @@
             "$ref": "#/components/parameters/sourceRequest"
           },
           {
-            "$ref": "#/components/parameters/accessToken"
+            "$ref": "#/components/parameters/accessTokenAppidOnly"
           },
           {
             "$ref": "#/components/parameters/lang"
@@ -388,6 +394,51 @@
         }
       ]
     },
+    "/v1/apps/{APPID}/access/check": {
+      "get": {
+        "tags": [
+          "From IoT App"
+        ],
+        "summary": "Check Access",
+        "description": "Check if the user specifeid in the _accessToken_ is able to access the specified _APPID_ (if _APPID_ starts with http%3A%2F%2F, it is uri decoded). If the access is granted, it returns a JSON messge having _result_ set to _true_ and _message_ set to one of _OWNER_, _ROOTADMIN_, _DELEGATED_, _GROUP-DELEGATED_, _PUBLIC_. Otherwise, it returns a JSON message having _result_ set to _false_.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/sourceRequest"
+          },
+          {
+            "$ref": "#/components/parameters/accessTokenBasic"
+          },
+          {
+            "$ref": "#/components/parameters/lang"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/accesscheck"
+          },
+          "204": {
+            "description": "No content (if no content is returned)."
+          },
+          "400": {
+            "description": "Bad request (if an error arise parsing client request)."
+          },
+          "401": {
+            "description": "Not Authorized (if an autherization error arise parsing client request)."
+          },
+          "500": {
+            "description": "Internal Server Error (if an error arise on server side)."
+          },
+          "501": {
+            "description": "Not Implemented (if the invoked api is not supported anymore)."
+          }
+        }
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/APPID"
+        }
+      ]
+    },
     "/v1/apps/{APPID}/delegations": {
       "delete": {
         "tags": [
@@ -445,7 +496,7 @@
             "$ref": "#/components/parameters/sourceRequest"
           },
           {
-            "$ref": "#/components/parameters/accessToken"
+            "$ref": "#/components/parameters/accessTokenUsername"
           },
           {
             "$ref": "#/components/parameters/lang"
@@ -507,7 +558,7 @@
             "$ref": "#/components/parameters/sourceRequest"
           },
           {
-            "$ref": "#/components/parameters/accessToken"
+            "$ref": "#/components/parameters/accessTokenUsername"
           },
           {
             "$ref": "#/components/parameters/lang"
@@ -602,7 +653,7 @@
             "$ref": "#/components/parameters/sourceRequest"
           },
           {
-            "$ref": "#/components/parameters/accessToken"
+            "$ref": "#/components/parameters/accessTokenUsername"
           },
           {
             "$ref": "#/components/parameters/lang"
@@ -615,6 +666,9 @@
           },
           {
             "$ref": "#/components/parameters/deleted"
+          },
+          {
+            "$ref": "#/components/parameters/groupname"
           }
         ],
         "responses": {
@@ -656,7 +710,7 @@
             "$ref": "#/components/parameters/sourceRequest"
           },
           {
-            "$ref": "#/components/parameters/accessToken"
+            "$ref": "#/components/parameters/accessTokenUsername"
           },
           {
             "$ref": "#/components/parameters/lang"
@@ -669,6 +723,9 @@
           },
           {
             "$ref": "#/components/parameters/deleted"
+          },
+          {
+            "$ref": "#/components/parameters/groupname"
           }
         ],
         "responses": {
@@ -710,7 +767,7 @@
             "$ref": "#/components/parameters/sourceRequest"
           },
           {
-            "$ref": "#/components/parameters/accessToken"
+            "$ref": "#/components/parameters/accessTokenUsername"
           },
           {
             "$ref": "#/components/parameters/lang"
@@ -764,7 +821,7 @@
             "$ref": "#/components/parameters/sourceRequest"
           },
           {
-            "$ref": "#/components/parameters/accessToken"
+            "$ref": "#/components/parameters/accessTokenUsername"
           },
           {
             "$ref": "#/components/parameters/lang"
@@ -806,19 +863,19 @@
         }
       ]
     },
-    "/v1/username/{USERNAME}/delegation/check": {
+    "/v1/username/{USERNAME}/delegations/check": {
       "get": {
         "tags": [
           "From Username"
         ],
         "summary": "Check DELEGATIONS",
-        "description": "It allows to check if a DELEGATION exist for the given _USERNAME_, _elementID_ and _variableName_. If a delegation is found, a JSON messge is returned with _result_ set to _true_, and _message_ set to one of _OWNER_, _DELEGATED_, _GROUP-DELEGATED_, _PUBLIC_. If no DELEGATION can be found, a JSON message is returned with _result_ set to _false_.",
+        "description": "It allows to check if a DELEGATION exist for the given _USERNAME_, _elementID_ and _variableName_. If a delegation is found, a JSON messge is returned with _result_ set to _true_, and _message_ set to one of _DELEGATED_, _GROUP-DELEGATED_, _PUBLIC_. If no DELEGATION can be found, a JSON message is returned with _result_ set to _false_.",
         "parameters": [
           {
             "$ref": "#/components/parameters/sourceRequest"
           },
           {
-            "$ref": "#/components/parameters/accessToken"
+            "$ref": "#/components/parameters/accessTokenElementid"
           },
           {
             "name": "variableName",
@@ -895,7 +952,7 @@
             "$ref": "#/components/parameters/sourceRequest"
           },
           {
-            "$ref": "#/components/parameters/accessToken"
+            "$ref": "#/components/parameters/accessTokenUsername"
           },
           {
             "$ref": "#/components/parameters/lang"
@@ -973,7 +1030,7 @@
             "$ref": "#/components/parameters/sourceRequest"
           },
           {
-            "$ref": "#/components/parameters/accessToken"
+            "$ref": "#/components/parameters/accessTokenUsername"
           },
           {
             "$ref": "#/components/parameters/lang"
@@ -1014,7 +1071,7 @@
             "$ref": "#/components/parameters/sourceRequest"
           },
           {
-            "$ref": "#/components/parameters/accessToken"
+            "$ref": "#/components/parameters/accessTokenUsername"
           },
           {
             "$ref": "#/components/parameters/lang"
@@ -1149,7 +1206,7 @@
             "$ref": "#/components/parameters/sourceRequest"
           },
           {
-            "$ref": "#/components/parameters/accessToken"
+            "$ref": "#/components/parameters/accessTokenRootadminOnly"
           },
           {
             "$ref": "#/components/parameters/lang"
@@ -1214,7 +1271,52 @@
       "accessToken": {
         "name": "accessToken",
         "in": "query",
-        "description": "The token that grants the access. It has to be valid and not elapsed.",
+        "description": "The token that grants the access. It has to be valid, not elapsed and it has to belong to the owner of the _APPID_ or to an user with RootAdmin privileges.",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "accessTokenAppidOnly": {
+        "name": "accessToken",
+        "in": "query",
+        "description": "The token that grants the access. It has to be valid, not elapsed and it has to belong to the owner of the _APPID_.",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "accessTokenUsername": {
+        "name": "accessToken",
+        "in": "query",
+        "description": "The token that grants the access. It has to be valid, not elapsed and it has to belong to the _USERNAME_ or to an user with RootAdmin privileges.",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "accessTokenRootadminOnly": {
+        "name": "accessToken",
+        "in": "query",
+        "description": "The token that grants the access. It has to be valid, not elapsed and it has to belong to an user with RootAdmin privilege.",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "accessTokenBasic": {
+        "name": "accessTokenBasic",
+        "in": "query",
+        "description": "The token that grants the access. It has to be valid, and not elapsed.",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "accessTokenElementid": {
+        "name": "accessToken",
+        "in": "query",
+        "description": "The token that grants the access. It has to be valid, not elapsed and it has to belong to the owner of the _elementID_ or to an user with RootAdmin privileges.",
         "required": true,
         "schema": {
           "type": "string"
@@ -1334,7 +1436,7 @@
       "anonymous": {
         "name": "anonymous",
         "in": "query",
-        "description": "If true, the API returns just the data from an APPID that has been configured as public. It defaults to _false_.",
+        "description": "If true, the API returns just the data from an APPID that has been configured as public. It defaults to _false_. To be used with _delegated_ set to _true_.",
         "required": false,
         "schema": {
           "type": "boolean",
@@ -1363,6 +1465,16 @@
           "format": "int32"
         },
         "example": 615
+      },
+      "groupname": {
+        "name": "groupname",
+        "in": "query",
+        "description": "If specified, return just the delegation made from user in the specified group/ou. It has to be URL Encoded. Example of groupname are: (organization) ou=Firenze,dc=foo,dc=example,dc=org (group) cn=Firenze Servizi,ou=Firenze,dc=foo,dc=example,dc=org",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "example": null
+        }
       }
     },
     "responses": {
@@ -1646,6 +1758,35 @@
                 "elementType": {
                   "type": "string",
                   "example": "AppID"
+                }
+              }
+            }
+          }
+        }
+      },
+      "accesscheck": {
+        "description": "A JSON describing the access level of the user is returned.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "result"
+              ],
+              "properties": {
+                "result": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "enum": [
+                    "OWNER",
+                    "ROOTADMIN",
+                    "DELEGATED",
+                    "GROUP-DELEGATED",
+                    "PUBLIC"
+                  ]
                 }
               }
             }

@@ -50,6 +50,12 @@ paths:
         - $ref: '#/components/parameters/info'
         - $ref: '#/components/parameters/serviceUri'
         - $ref: '#/components/parameters/realtime'
+        - $ref: '#/components/parameters/valueName'
+        - $ref: '#/components/parameters/fromTime'
+        - $ref: '#/components/parameters/toTime'
+        - $ref: '#/components/parameters/value_type'
+        - $ref: '#/components/parameters/graphUri'
+        - $ref: '#/components/parameters/fullCountParam'
       responses:
         200:
           description: |
@@ -418,6 +424,14 @@ paths:
       summary: Agency list    
       description: _Note:_ The information regarding timetable is acquired in GTFS format. Due to different names used in the previous version of the API that was only for buses, the names used in the API are not aligned with GTFS nomenclature in particular bus lines are mapped to GTFS routes and bus routes are mapped to GTFS trips. In the next version of the API names used may change to be aligned with GTFS.
       parameters:
+        - in: query
+          name: selection
+          description: |
+            Optional _lat;lng_ with a GPS position, or _lat1;lng1;lat2;lng2_ for a rectangular area or wkt:_string_ or geo:_geoid_ for a geographic area described as Well Known Text (see other request types for more details).
+            
+            _Example:_ 43.7756;11.2490
+          schema:
+            type: string      
         - in: query
           name: uid
           description: |
@@ -2694,7 +2708,45 @@ components:
       schema:
         type: boolean
         default: true
-      
+        
+    valueName:
+      in: query
+      name: valueName
+      description: To be used in requests for real-time values, to retrieve only the value of interest among the set of the available real-time values.
+      schema: 
+        type: string
+    fromTime:
+      in: query
+      name: fromTime
+      description: To be used in requests for real-time values, to indicate the date and time of start of the time interval of interest.
+      schema: 
+        type: string        
+        format: date-time
+    toTime:
+      in: query
+      name: toTime
+      description: To be used in requests for real-time values, to indicate the date and time of end of the time interval of interest.
+      schema: 
+        type: string        
+        format: date-time  
+    value_type:
+      in: query
+      name: value_type
+      description: To be used in requests for real-time values, to retrieve only values of the given type.
+      schema: 
+        type: string        
+    graphUri:
+      in: query
+      name: graphUri
+      description: To indicate the URI of the graph where resources have to be looked for.
+      schema: 
+        type: string       
+    fullCountParam:
+      in: query
+      name: fullCount
+      description: To indicate whether the full count of the retrieved resources have to be computed and provided back, or not. If set to _false_, an improvement in performances can be observed.
+      schema: 
+        type: boolean    
     range:
       in: query
       name: range

@@ -1,0 +1,406 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "description": "This is the heatmap server.  You can find out more about     Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).",
+    "version": "1.0.0",
+    "title": "Heatmap",
+    "termsOfService": "http://swagger.io/terms/",
+    "contact": {
+      "email": "info@disit.org"
+    },
+    "license": {
+      "name": "GNU Affero General Public License",
+      "url": "https://www.gnu.org/licenses/agpl-3.0.en.html"
+    }
+  },
+  "paths": {
+    "/data/{mapName}/{metricName}/{date}/{clustered}": {
+      "get": {
+        "summary": "Get heatmap data",
+        "description": "Returns heatmap data",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters supplied"
+          },
+          "404": {
+            "description": "Resource not found"
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "mapName",
+          "in": "path",
+          "required": true,
+          "description": "The map name",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "metricName",
+          "in": "path",
+          "required": true,
+          "description": "The metric's name",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "date",
+          "in": "path",
+          "required": true,
+          "description": "The date",
+          "example": "2019-01-01T00:00:00.000Z",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "clustered",
+          "in": "path",
+          "required": true,
+          "description": "Specify whether the heatmap data is clustered (1) or not (0)",
+          "schema": {
+            "type": "string",
+            "enum": [
+              0,
+              1
+            ]
+          }
+        }
+      ]
+    },
+    "/list": {
+      "get": {
+        "summary": "Get the maps' list",
+        "description": "Returns the maps' list",
+        "responses": {
+          "200": {
+            "description": "Status 200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/List"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/dataTime/{mapName}/{metricName}/{limit}/{clustered}": {
+      "get": {
+        "summary": "Get map's timestamps",
+        "description": "Return the timestamps of a map",
+        "responses": {
+          "200": {
+            "description": "Status 200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/List"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "mapName",
+          "in": "path",
+          "required": true,
+          "description": "The map’s name",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "metricName",
+          "in": "path",
+          "required": true,
+          "description": "The metric's name",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "path",
+          "required": true,
+          "description": "The results’ limit",
+          "schema": {
+            "type": "number",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "clustered",
+          "in": "path",
+          "required": true,
+          "description": "Specify whether the heatmap data is clustered (1) or not (0)",
+          "example": "0",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "/insert": {
+      "post": {
+        "summary": "Insert",
+        "description": "Insert a map",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DataInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Status 200"
+          }
+        }
+      }
+    },
+    "/insertArray": {
+      "post": {
+        "summary": "insertArray",
+        "description": "Insert a maps' array",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/DataInput"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Status 200"
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://heatmap.snap4city.org/"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "DataInput": {
+        "type": "object",
+        "required": [
+          "date",
+          "latitude",
+          "longitude",
+          "mapName",
+          "value"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The record's id"
+          },
+          "mapName": {
+            "type": "string",
+            "description": "The map's name"
+          },
+          "latitude": {
+            "type": "number",
+            "format": "double",
+            "description": "The geographic coordinate latitude in decimal format"
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double",
+            "description": "The geographic coordinate longitude in decimal format"
+          },
+          "value": {
+            "type": "number",
+            "format": "double",
+            "description": "The value"
+          },
+          "clustered": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Specify whether the data is clustered (1) or not (0)",
+            "default": 0,
+            "enum": [
+              0,
+              1
+            ]
+          },
+          "days": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The number of days in the past since date, considered for this value"
+          },
+          "date": {
+            "type": "string",
+            "description": "The value's date",
+            "pattern": "YYYY-mm-ddThh:mm:ssZ",
+            "example": "2019-01-01T00:00:00.000Z"
+          },
+          "description": {
+            "type": "string",
+            "description": "The map's description"
+          },
+          "metricName": {
+            "type": "string",
+            "description": "The metric's name"
+          }
+        },
+        "example": {
+          "mapName": "map",
+          "metricName": "metric",
+          "latitude": 43.11,
+          "longitude": 11.1,
+          "value": 100,
+          "clustered": 0,
+          "description": "a map test",
+          "days": 0,
+          "date": "2019-01-01T00:00:00Z"
+        }
+      },
+      "DataOutput": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "date": {
+                  "type": "string",
+                  "description": "The date",
+                  "pattern": "YYYY-mm-ddThh:mm:ssZ",
+                  "example": "2019-01-01T00:00:00.000Z"
+                },
+                "latitude": {
+                  "type": "number",
+                  "format": "double",
+                  "description": "The geographic coordinate latitude in decimal format"
+                },
+                "longitude": {
+                  "type": "number",
+                  "format": "double",
+                  "description": "The geographic coordinate longitude in decimal format"
+                },
+                "value": {
+                  "type": "number",
+                  "format": "double",
+                  "description": "The value"
+                }
+              }
+            }
+          },
+          "metadata": {
+            "type": "object",
+            "properties": {
+              "clustered": {
+                "type": "string",
+                "description": "Specify whether the heatmap data is clustered (1) or not (0)",
+                "default": "0",
+                "enum": [
+                  "0",
+                  "1"
+                ]
+              },
+              "date": {
+                "type": "string",
+                "description": "The date",
+                "pattern": "YYYY-mm-ddThh:mm:ssZ",
+                "example": "2019-01-01T00:00:00.000Z"
+              },
+              "days": {
+                "type": "number",
+                "format": "int64",
+                "description": "The number of days in the past since date, considered for this value"
+              },
+              "description": {
+                "type": "string",
+                "description": "The map’s description"
+              },
+              "mapName": {
+                "type": "string",
+                "description": "The map’s name"
+              },
+              "metricName": {
+                "type": "string",
+                "description": "The metric's name"
+              }
+            }
+          }
+        },
+        "description": "The returned maps' data",
+        "example": "{\n  \"data\": [\n    {\n      \"date\": \"2019-01-09T14:20:40Z\",\n      \"latitude\": 60.1743,\n      \"longitude\": 24.9806,\n      \"value\": 30.9361\n    },\n    {\n      \"date\": \"2019-01-09T14:20:40Z\",\n      \"latitude\": 60.1964,\n      \"longitude\": 24.952,\n      \"value\": 70.1903\n    }\n  ],\n  \"metadata\": {\n    \"clustered\": \"0\",\n    \"date\": \"2019-01-09T14:20:40Z\",\n    \"days\": \"0\",\n    \"description\": \"Average on 24H\",\n    \"mapName\": \"noiseLAeq\",\n    \"metricName\": \"noiseLAeq\"\n  }\n}"
+      },
+      "List": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "clustered": {
+              "type": "number",
+              "format": "int64",
+              "description": "Specify whether the heatmap data is clustered (1) or not (0)",
+              "enum": [
+                0,
+                1
+              ]
+            },
+            "date": {
+              "type": "string",
+              "description": "The date",
+              "pattern": "YYYY-mm-ddThh:mm:ssZ",
+              "example": "2019-01-01T00:00:00.000Z"
+            },
+            "days": {
+              "type": "number",
+              "format": "int64",
+              "description": "The number of days in the past since date, considered for this value",
+              "default": 0
+            },
+            "description": {
+              "type": "string",
+              "description": "The map’s description"
+            },
+            "mapName": {
+              "type": "string",
+              "description": "The map's name"
+            },
+            "metricsName": {
+              "type": "string",
+              "description": "The metric's name"
+            }
+          }
+        },
+        "example": "[\n  {\n    \"clustered\": 0,\n    \"date\": \"2019-01-09T14:11:16Z\",\n    \"days\": 0,\n    \"description\": \"Average on 12H\",\n    \"mapName\": \"noiseLAeq\",\n    \"metricName\": \"noiseLAeq\"\n  },\n  {\n    \"clustered\": 0,\n    \"date\": \"2019-01-09T14:10:40Z\",\n    \"days\": 0,\n    \"description\": \"Average on 12H\",\n    \"mapName\": \"noiseLAeq\",\n    \"metricName\": \"noiseLAeq\"\n  },\n  {\n    \"clustered\": 0,\n    \"date\": \"2019-01-09T14:11:29Z\",\n    \"days\": 0,\n    \"description\": \"Average on 12H\",\n    \"mapName\": \"noiseLAeq\",\n    \"metricName\": \"noiseLAeq\"\n  }\n  ]"
+      }
+    }
+  }
+}

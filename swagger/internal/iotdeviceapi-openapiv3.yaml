@@ -215,6 +215,10 @@ components:
           description: A free text string where a unique identifier for the device can be found.
           type: string
           example: ARDUINO_ST_4201
+        organization:
+          description: The organization that is responsible for the device.
+          type: string
+          example: Firenze
         type:
           description: A free text string that synthetically describes what the device measures, e.g. whether it is a temperature sensor, a traffic sensor, a presence detector, or what else.
           type: string
@@ -336,8 +340,6 @@ components:
               - data_type
               - value_type
               - value_unit
-              - value_refresh_rate
-              - healthiness_criteria
             properties:
               value_name:
                 description: A free text string that briefly indicates what type of detection the attribute represents, e.g. tempXX, humXX, thievesInLivingRoom.
@@ -360,11 +362,6 @@ components:
                 type: integer
                 format: int32
                 example: 60
-              healthiness_criteria:
-                description: 'A text string that indicates how it is possible to determine if the device is correctly producing output values as a result of the detections of the type that is represented by the device attribute. The allowed values are: refresh_rate (there is a problem if the expected refresh rate is not respected), different_values (there is a problem if the device produces in output the same value for more than consecutive_detections detections), or within_bounds (there is a problem if the output value does not fall within an interval that is described through the value_bounds property).'
-                type: string
-                enum: [refresh_rate, different_values, within_bounds]
-                example: refresh_rate
               different_values:
                 description: An integer number, see the _healthiness_criteria_ for details about its semantic.
                 type: integer
