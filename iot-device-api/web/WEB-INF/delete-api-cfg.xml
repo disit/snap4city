@@ -316,9 +316,8 @@
                                 </greater-than>
                             </pick-validator>
                         </validate>
-               
-                        
-                        
+                                       
+                        <!--
                         <validate ref="attribute-healtinesscriteria">
                             <pick-validator ref="basic">
                                 <same-cardinality id="attribute-healtinesscriteria.same-cardinality.attribute-valuename" lev="SEVERE" ref="attribute-valuename"/>
@@ -329,12 +328,14 @@
                                 </match>
                             </pick-validator>
                         </validate>
-                        
+                        -->
+                        <!--
                         <validate ref="attribute-refreshrate">
                             <pick-validator ref="basic">
                                 <same-cardinality id="attribute-refreshrate.same-cardinality.attribute-valuename" lev="SEVERE" ref="attribute-valuename"/>
                             </pick-validator>
                         </validate>
+                        -->
                         
                         <validate ref="attribute-valuename">
                             <pick-validator ref="basic">
@@ -382,8 +383,12 @@
 			<source ref="request-body"/>
 			<query>broker.name</query>
 		</data>
-				
 		<data id="broker-uri" type="uri" builder="template" loader="volatile">
+			<template>http://www.disit.org/km4city/resource/iot/{0}</template>
+			<param index="0" value="broker-uri-p0"/>
+		</data>
+                
+                <data id="reusable-broker-uri" type="string" builder="template" loader="volatile">
 			<template>http://www.disit.org/km4city/resource/iot/{0}</template>
 			<param index="0" value="broker-uri-p0"/>
 		</data>
@@ -392,14 +397,31 @@
 			<source ref="request-body"/>
 			<query>id</query>
 		</data>
-        
-		<data id="computed-service-uri" type="uri" builder="template" loader="volatile">
-			<template>{0}/{1}</template>
-			<param index="0" value="broker-uri"/>
-			<param index="1" value="service-uri-p1"/>
+<!-- -->        
+                <data id="service-uri-organization" type="string" builder="jsonp" loader="volatile">
+			<source ref="request-body"/>
+			<query>organization</query>
 		</data>
                 
-                <data id="received-service-uri" type="uri" builder="jsonp" loader="volatile">
+                <data id="computed-service-uri-with-org" type="string" builder="template" loader="volatile">
+			<template>{0}/{1}/{2}</template>
+			<param index="0" value="reusable-broker-uri"/>
+                        <param index="1" value="service-uri-organization"/>
+			<param index="2" value="service-uri-p1"/>
+		</data>
+                
+                <data id="computed-service-uri-without-org" type="string" builder="template" loader="volatile">
+			<template>{0}/{1}</template>
+			<param index="0" value="reusable-broker-uri"/>
+			<param index="1" value="service-uri-p1"/>
+		</data>
+        
+		<data id="computed-service-uri" type="string" builder="alternative" loader="volatile">
+                    <alternative ref="computed-service-uri-with-org"/>
+                    <alternative ref="computed-service-uri-without-org"/>
+		</data>
+<!-- -->                
+                <data id="received-service-uri" type="string" builder="jsonp" loader="volatile">
                     <source ref="request-body"/>
                     <query>uri</query>
                 </data>
@@ -408,8 +430,14 @@
                     <alternative ref="received-service-uri"/>
                     <alternative ref="computed-service-uri"/>
 		</data>
-		
-		<data id="iot-sensor-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#IoTSensor</data>
+                
+		<data id="reusable-service-uri" type="string" builder="alternative" loader="volatile" output="true">
+                    <alternative ref="received-service-uri"/>
+                    <alternative ref="computed-service-uri"/>
+                </data>
+                                
+		<data id="iot-sensor-uri-old" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#IoTSensor</data> 
+                <data id="iot-sensor-uri" type="uri" builder="const" loader="volatile">http://www.w3.org/ns/sosa/Sensor</data>
 		
 		<data id="iot-actuator-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#IoTActuator</data>
 
@@ -437,7 +465,7 @@
 		
 		<data id="my-frequency-uri" type="uri" builder="template" loader="volatile">
 			<template>{0}/frequency</template>
-			<param index="0" value="service-uri"/>
+			<param index="0" value="reusable-service-uri"/>
 		</data>
 		
 		<data id="frequency-uri" type="uri" builder="const" loader="volatile">http://www.w3.org/ns/ssn/Frequency</data>
@@ -448,7 +476,7 @@
 		
 		<data id="my-system-capability-uri" type="uri" builder="template" loader="volatile">
 			<template>{0}/systemCapability</template>
-			<param index="0" value="service-uri"/>
+			<param index="0" value="reusable-service-uri"/>
 		</data>
 		
 		<data id="system-capability-uri" type="uri" builder="const" loader="volatile">http://www.w3.org/ns/ssn/SystemCapability</data>
@@ -486,7 +514,13 @@
 				<case><if>actuator</if><then ref="iot-actuator-uri"/></case>
 			</switch>
 		</data>
-		
+                
+                <data id="device-type-old" type="uri" builder="switch" loader="volatile">
+			<switch ref="kind">
+				<case><if>sensor</if><then ref="iot-sensor-uri-old"/></case>
+				<case><if>actuator</if><then ref="iot-actuator-uri"/></case>
+			</switch>
+		</data>		
 
                 <data id="attribute-valuename" type="string" builder="jsonp" loader="volatile">
 			<source ref="request-body"/>
@@ -530,12 +564,47 @@
 		</data>
                 <data id="device-attribute-uri" type="uri" builder="template" loader="volatile">
                     <template>{0}/{1}</template>
-                    <param index="0" value="service-uri"/>
+                    <param index="0" value="reusable-service-uri"/>
                     <param index="1" value="attribute-valuename"/>
                 </data> 
                 <data id="sosa-is-observed-by-uri" type="uri" builder="const" loader="volatile">http://www.w3.org/ns/sosa/isObservedBy</data>
 
-		
+                <!-- value_type mapping -->
+                <data id="value_type_mapping" type="string" builder="template" loader="volatile">
+                    <template>select distinct ?s '{' graph &lt;urn:test:value_types_mapping&gt; '{' &lt;{0}&gt; &lt;http://purl.org/dc/terms/source&gt; ?s '}' . graph &lt;{1}&gt; '{' &lt;{2}&gt; &lt;{3}&gt; &lt;{4}&gt; ; ?p ?v '}' '}'</template>
+                    <param index="0" value="measure-uri"/>
+                    <param index="1" value="graph-uri"/>
+                    <param index="2" value="service-uri"/>
+                    <param index="3" value="is-a"/>
+                    <param index="4" value="iot-sensor-uri"/>
+                </data>
+                
+                <data id="value_type_mapping_result" type="string" builder="lookup" loader="volatile">
+			<lookup>
+				<priority>1</priority>
+				<provider>virtuoso-provider</provider>
+				<query ref="value_type_mapping" />
+			</lookup>
+		</data>
+                <data id="value_type_mapping_array" type="string" builder="jsonp" loader="volatile">
+			<source ref="value_type_mapping_result"/>
+			<query>s</query>                        
+		</data>
+                
+                <data id="readytouse_value_type_mapping_array" type="uri" builder="alternative" loader="volatile">
+			<alternative ref="value_type_mapping_array"/>
+                        <alternative ref="device-type-old"/>
+		</data>                                         	                 
+                       
+                <data id="graph-uri.service-uri.is-a.value_type_mapping_array" type="quad" builder="bean" loader="virtuoso">
+			<member name="graph" ref="graph-uri"/> 
+			<member name="subject" ref="service-uri"/> 
+			<member name="property" ref="is-a"/>
+			<member name="filler" ref="readytouse_value_type_mapping_array"/>
+		</data>	
+                
+                <!-- -->
+                
 		<data id="frequency" type="string" builder="jsonp" loader="volatile">
 			<source ref="request-body"/>
 			<query>frequency</query>
@@ -628,6 +697,15 @@
 			<member name="filler" ref="device-type"/>
 		</data>		
 		
+                <!-- -->
+                <data id="device-organization-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#organization</data>
+		<data id="graph-uri.service-uri.device-organization-uri.organization" type="quad" builder="bean" loader="virtuoso">
+			<member name="graph" ref="graph-uri"/> 
+			<member name="subject" ref="service-uri"/> 
+			<member name="property" ref="device-organization-uri"/>
+			<member name="filler" ref="service-uri-organization"/>
+		</data>	
+                <!-- -->                
                 
 		<data id="graph-uri.service-uri.schema-name-uri.model" type="quad" builder="bean" loader="virtuoso">
 			<member name="graph" ref="graph-uri"/> 
@@ -636,12 +714,14 @@
                         <member name="filler" ref="service-uri-p1"/>
 		</data>		
 		
+                <!--
 		<data id="graph-uri.my-sosa-procedure-uri.is-a.sosa-procedure-uri" type="quad" builder="bean" loader="virtuoso">
 			<member name="graph" ref="graph-uri"/> 
 			<member name="subject" ref="my-sosa-procedure-uri"/> 
 			<member name="property" ref="is-a"/>
 			<member name="filler" ref="sosa-procedure-uri"/>
-		</data>		
+		</data>	
+                -->	
 		
 		<data id="graph-uri.service-uri.implements-procedure-uri.my-sosa-procedure-uri" type="quad" builder="bean" loader="virtuoso">
 			<member name="graph" ref="graph-uri"/> 
@@ -885,11 +965,12 @@
 			<member name="property" ref="created-property-uri"/>
 			<member name="filler" ref="device-created"/> 
 		</data>
-        
+                
                 <data id="attribute-refreshrate-property-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#value_refresh_rate</data>
                 <data id="attribute-refreshrate" type="integer" builder="jsonp" loader="volatile">
 			<source ref="request-body"/>
 			<query>attributes.value_refresh_rate</query>
+                        <default>0</default> <!-- -->
 		</data>  
                 <data id="graph-uri.device-attribute-uri.attribute-refreshrate-property-uri.attribute-refreshrate" type="quad" builder="bean" loader="virtuoso">
 			<member name="graph" ref="graph-uri"/> 
@@ -898,6 +979,7 @@
 			<member name="filler" ref="attribute-refreshrate"/> 
 		</data>
                 
+                <!--
                 <data id="attribute-healthinesscriteria-property-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#healthiness_criteria</data>
                 <data id="attribute-healthinesscriteria" type="string" builder="jsonp" loader="volatile">
                     <source ref="request-body"/>
@@ -909,6 +991,7 @@
 			<member name="property" ref="attribute-healthinesscriteria-property-uri"/>
 			<member name="filler" ref="attribute-healthinesscriteria"/> 
 		</data>
+                -->
                 
                 <data id="attribute-differentvalues-property-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#different_values</data>
                 <data id="attribute-differentvalues" type="integer" builder="jsonp" loader="volatile">
@@ -998,6 +1081,9 @@
                 	<source ref="device-avail-json"/>
 			<query>avail</query>
                 </data>
+                
+                <!-- OLD -->
+                <!--
                 <data id="device-avail" type="string" builder="jsonp" loader="volatile">
 			<source ref="request-body"/>
 			<query>ownership</query>
@@ -1009,7 +1095,38 @@
 			<member name="property" ref="avail-property-uri"/>
 			<member name="filler" ref="device-avail"/> 
 		</data>
-
+                -->
+                <!-- NEW -->
+                <!-- Visibility -->
+                <data id="device-visib" type="string" builder="jsonp" loader="volatile">
+			<source ref="request-body"/>
+			<query>visibility</query>
+                        <default ref="device-avail-from-virtuoso"/>
+		</data>
+                <!-- Ownership -->
+                <data id="device-owner" type="string" builder="jsonp" loader="volatile">
+			<source ref="request-body"/>
+			<query>ownership</query>
+                        <default ref="device-visib"/>
+		</data>
+                <!-- Visibility || Ownership -->
+                <data id="device-ownership" type="string" builder="switch" loader="volatile">
+			<switch ref="device-owner">
+				<case><if>private</if><then>private</then></case>
+                                <case><if>MyOwnPrivate</if><then>private</then></case>
+				<case><if>public</if><then>public</then></case>
+                                <case><if>MyOwnPublic</if><then>public</then></case>                                
+			</switch>
+		</data>
+                <data id="graph-uri.service-uri.avail-property-uri.device-avail" type="quad" builder="bean" loader="virtuoso">
+			<member name="graph" ref="graph-uri"/> 
+			<member name="subject" ref="service-uri"/> 
+			<member name="property" ref="avail-property-uri"/>
+			<!-- <member name="filler" ref="device-avail"/> -->
+                        <member name="filler" ref="device-ownership"/>
+		</data>
+                <!-- END NEW -->     
+                              
 	</process>
 
 </api-cfg>

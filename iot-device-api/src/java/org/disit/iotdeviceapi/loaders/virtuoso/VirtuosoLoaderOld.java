@@ -28,7 +28,6 @@ import org.disit.iotdeviceapi.loaders.Loader;
 import org.disit.iotdeviceapi.utils.Const;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
-import org.openrdf.query.TupleQueryResult;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.sparql.SPARQLRepository;
@@ -38,7 +37,7 @@ import virtuoso.sesame2.driver.VirtuosoRepository;
  * 
  * @author Mirco Soderi @ DISIT DINFO UNIFI (mirco.soderi at unifi dot it)
  */
-public class VirtuosoLoader extends Loader {
+public class VirtuosoLoaderOld extends Loader {
 
     RepositoryConnection mRepositoryConnection;
     String deleteInsert;
@@ -80,7 +79,7 @@ public class VirtuosoLoader extends Loader {
         }
         catch(Exception e) {
             setStatus(Const.ERROR);
-            getXlogger().log(VirtuosoLoader.class.getName(), Level.SEVERE, "connect error", e);
+            getXlogger().log(VirtuosoLoaderOld.class.getName(), Level.SEVERE, "connect error", e);
         }
     }
 
@@ -94,7 +93,7 @@ public class VirtuosoLoader extends Loader {
         } 
         catch (Exception ex) {
             setStatus(Const.ERROR);
-            getXlogger().log(VirtuosoLoader.class.getName(), Level.SEVERE, "disconnect error", ex);
+            getXlogger().log(VirtuosoLoaderOld.class.getName(), Level.SEVERE, "disconnect error", ex);
         }
     }
 
@@ -133,7 +132,7 @@ public class VirtuosoLoader extends Loader {
                                     MessageFormat.format("INSERT '{' GRAPH {0} '{' {1} {2} {3} '}' '}' ", 
                                     new Object[]{queryGraph, querySubject, queryProperty, queryFiller}));
                             tq.evaluate();
-                            getXlogger().log(VirtuosoLoader.class.getName(), Level.INFO, "executed query", MessageFormat.format("INSERT '{' GRAPH {0} '{' {1} {2} {3} '}' '}' ", 
+                            getXlogger().log(VirtuosoLoaderOld.class.getName(), Level.INFO, "executed query", MessageFormat.format("INSERT '{' GRAPH {0} '{' {1} {2} {3} '}' '}' ", 
                                 new Object[]{queryGraph, querySubject, queryProperty, queryFiller}));
                         }
                     }
@@ -151,7 +150,7 @@ public class VirtuosoLoader extends Loader {
                                             MessageFormat.format("INSERT '{' GRAPH {0} '{' {1} {2} {3} '}' '}' ", 
                                                     new Object[]{queryGraph, querySubject, queryProperty, queryFiller}));
                                             tq.evaluate();
-                                            getXlogger().log(VirtuosoLoader.class.getName(), Level.INFO, "executed query", MessageFormat.format("INSERT '{' GRAPH {0} '{' {1} {2} {3} '}' '}' ", 
+                                            getXlogger().log(VirtuosoLoaderOld.class.getName(), Level.INFO, "executed query", MessageFormat.format("INSERT '{' GRAPH {0} '{' {1} {2} {3} '}' '}' ", 
                                                     new Object[]{queryGraph, querySubject, queryProperty, queryFiller}));
                                         }
                                     }
@@ -170,7 +169,7 @@ public class VirtuosoLoader extends Loader {
         } 
         catch (Exception ex) {
             setStatus(Const.ERROR);
-            getXlogger().log(VirtuosoLoader.class.getName(), Level.SEVERE, "load error", ex);
+            getXlogger().log(VirtuosoLoaderOld.class.getName(), Level.SEVERE, "load error", ex);
         } 
     }
     
@@ -210,7 +209,7 @@ public class VirtuosoLoader extends Loader {
                                     MessageFormat.format("DELETE '{' GRAPH {0} '{' {1} '}' '}' ", 
                                     new Object[]{queryGraph, deleteWhat}));
                             tq.evaluate();
-                            getXlogger().log(VirtuosoLoader.class.getName(), Level.INFO, "executed query", MessageFormat.format("DELETE '{' GRAPH {0} '{' {1} '}' '}' ", 
+                            getXlogger().log(VirtuosoLoaderOld.class.getName(), Level.INFO, "executed query", MessageFormat.format("DELETE '{' GRAPH {0} '{' {1} '}' '}' ", 
                                 new Object[]{queryGraph, deleteWhat}));
                         }
                     }
@@ -229,7 +228,7 @@ public class VirtuosoLoader extends Loader {
                                                     MessageFormat.format("DELETE '{' GRAPH {0} '{' {1} '}' '}' ", 
                                                     new Object[]{queryGraph, deleteWhat}));
                                             tq.evaluate();
-                                            getXlogger().log(VirtuosoLoader.class.getName(), Level.INFO, "executed query", MessageFormat.format("DELETE '{' GRAPH {0} '{' {1} '}' '}' ", 
+                                            getXlogger().log(VirtuosoLoaderOld.class.getName(), Level.INFO, "executed query", MessageFormat.format("DELETE '{' GRAPH {0} '{' {1} '}' '}' ", 
                                                 new Object[]{queryGraph, deleteWhat}));
                                         }
                                     }
@@ -248,7 +247,7 @@ public class VirtuosoLoader extends Loader {
         } 
         catch (Exception ex) {
             setStatus(Const.ERROR);
-            getXlogger().log(VirtuosoLoader.class.getName(), Level.SEVERE, "unload error", ex);
+            getXlogger().log(VirtuosoLoaderOld.class.getName(), Level.SEVERE, "unload error", ex);
         } 
     }
     
@@ -256,7 +255,7 @@ public class VirtuosoLoader extends Loader {
         
         try {
 
-            HashMap<String,HashMap<String,String[]>> queryPerGraphAndSubject = new HashMap<>();
+            HashMap<String,String[]> queryPerGraph = new HashMap<>();
             int varnum = 0;
             ArrayList<String> addedToDelete = new ArrayList<>();
 
@@ -287,9 +286,8 @@ public class VirtuosoLoader extends Loader {
                             String queryFiller = MessageFormat.format(getFormatting().get(fillers.getType()), new Object[]{ 
                                 fillers.getValue().length > 1 ? fillers.getValue()[i].toString() : fillers.getValue()[0].toString()
                             });
-                            if(!queryPerGraphAndSubject.containsKey(queryGraph)) {
-                                HashMap<String, String[]> bysubj = new HashMap<>();                                
-                                queryPerGraphAndSubject.put(queryGraph, bysubj);
+                            if(!queryPerGraph.containsKey(queryGraph)) {
+                                queryPerGraph.put(queryGraph, new String[]{new String(),new String()});
                             }
                             String addToDelete;
                             String _addToDelete;
@@ -304,14 +302,12 @@ public class VirtuosoLoader extends Loader {
                             if(!addedToDelete.contains(_addToDelete)) {
                                 varnum++;
                                 addedToDelete.add(_addToDelete);
-                                if(!queryPerGraphAndSubject.get(queryGraph).containsKey(querySubject)) queryPerGraphAndSubject.get(queryGraph).put(querySubject, new String[]{new String(), new String()});
-                                queryPerGraphAndSubject.get(queryGraph).get(querySubject)[0] = queryPerGraphAndSubject.get(queryGraph).get(querySubject)[0].concat(_addToDelete);
+                                queryPerGraph.get(queryGraph)[0] = queryPerGraph.get(queryGraph)[0].concat(_addToDelete);
                             }
                             String addToInsert = MessageFormat.format("{0} {1} {2} . ", new Object[]{querySubject, queryProperty, queryFiller});
-                            if(!queryPerGraphAndSubject.get(queryGraph).containsKey(querySubject)) queryPerGraphAndSubject.get(queryGraph).put(querySubject, new String[]{new String(), new String()});
-                            if(!queryPerGraphAndSubject.get(queryGraph).get(querySubject)[1].contains(" . ".concat(addToInsert))) {
+                            if(!queryPerGraph.get(queryGraph)[1].contains(" . ".concat(addToInsert))) {
                                 if(data.isTriggered()) {
-                                    queryPerGraphAndSubject.get(queryGraph).get(querySubject)[1] = queryPerGraphAndSubject.get(queryGraph).get(querySubject)[1].concat(addToInsert);
+                                    queryPerGraph.get(queryGraph)[1] = queryPerGraph.get(queryGraph)[1].concat(addToInsert);
                                 }
                             }
                         }
@@ -326,9 +322,8 @@ public class VirtuosoLoader extends Loader {
                                             String querySubject = MessageFormat.format(getFormatting().get(subjects.getType()), new Object[]{subject.toString()});
                                             String queryProperty = MessageFormat.format(getFormatting().get(properties.getType()), new Object[]{property.toString()});
                                             String queryFiller = MessageFormat.format(getFormatting().get(fillers.getType()), new Object[]{filler.toString()});
-                                            if(!queryPerGraphAndSubject.containsKey(queryGraph)) {
-                                                HashMap<String, String[]> bysubj = new HashMap<>();
-                                                queryPerGraphAndSubject.put(queryGraph, bysubj);
+                                            if(!queryPerGraph.containsKey(queryGraph)) {
+                                                queryPerGraph.put(queryGraph, new String[]{new String(),new String()});
                                             }
                                             String addToDelete;
                                             String _addToDelete;
@@ -343,14 +338,12 @@ public class VirtuosoLoader extends Loader {
                                             if(!addedToDelete.contains(_addToDelete)) {
                                                 addedToDelete.add(_addToDelete);
                                                 varnum++;
-                                                if(!queryPerGraphAndSubject.get(queryGraph).containsKey(querySubject)) queryPerGraphAndSubject.get(queryGraph).put(querySubject, new String[]{new String(), new String()});
-                                                queryPerGraphAndSubject.get(queryGraph).get(querySubject)[0] = queryPerGraphAndSubject.get(queryGraph).get(querySubject)[0].concat(_addToDelete);
+                                                queryPerGraph.get(queryGraph)[0] = queryPerGraph.get(queryGraph)[0].concat(_addToDelete);
                                             }
                                             String addToInsert = MessageFormat.format("{0} {1} {2} . ", new Object[]{querySubject, queryProperty, queryFiller});
-                                            if(!queryPerGraphAndSubject.get(queryGraph).containsKey(querySubject)) queryPerGraphAndSubject.get(queryGraph).put(querySubject, new String[]{new String(), new String()});
-                                            if(!queryPerGraphAndSubject.get(queryGraph).get(querySubject)[1].contains(" . ".concat(addToInsert))) {
+                                            if(!queryPerGraph.get(queryGraph)[1].contains(" . ".concat(addToInsert))) {
                                                 if(data.isTriggered()) {
-                                                    queryPerGraphAndSubject.get(queryGraph).get(querySubject)[1] = queryPerGraphAndSubject.get(queryGraph).get(querySubject)[1].concat(addToInsert);
+                                                    queryPerGraph.get(queryGraph)[1] = queryPerGraph.get(queryGraph)[1].concat(addToInsert);
                                                 }
                                             }
                                         }
@@ -361,52 +354,33 @@ public class VirtuosoLoader extends Loader {
                     }
                 }
             }
-            for(String graph: queryPerGraphAndSubject.keySet()) {
-                for(String subject: queryPerGraphAndSubject.get(graph).keySet()) {
-                    String delete = queryPerGraphAndSubject.get(graph).get(subject)[0];
-                    String insert = queryPerGraphAndSubject.get(graph).get(subject)[1];
-                    TupleQuery initq = this.mRepositoryConnection.prepareTupleQuery(QueryLanguage.SPARQL, MessageFormat.format("INSERT '{' GRAPH {0} '{' {0} {0} {0} '}' '}' ", graph));
-                    initq.evaluate();
-
-                    if((!deleteOnly) && (!(delete.isEmpty() || insert.isEmpty()))) {
-
-                        TupleQuery ptq = this.mRepositoryConnection.prepareTupleQuery(QueryLanguage.SPARQL, MessageFormat.format("SELECT * '{' GRAPH {0} '{' {1} ?p ?v '}' '}' ", new Object[]{graph, subject})); 
-                        TupleQueryResult ptqr = ptq.evaluate();
-                        
-                        if(ptqr.hasNext()) {
-                                
-                            TupleQuery tq = this.mRepositoryConnection.prepareTupleQuery(QueryLanguage.SPARQL, 
-                            MessageFormat.format("DELETE '{' GRAPH {0} '{' {1} '}'  '}' INSERT '{' GRAPH {0} '{' {2} '}' '}' WHERE '{' GRAPH {0} '{' {3} ?p ?v '}' '}' ", 
-                                    new Object[]{graph, delete, insert, subject}));        
-                            tq.evaluate(); 
-                            getXlogger().log(VirtuosoLoader.class.getName(), Level.INFO, "executed query", MessageFormat.format("DELETE '{' GRAPH {0} '{' {1} '}'  '}' INSERT '{' GRAPH {0} '{' {2} '}' '}' WHERE '{' GRAPH {0} '{' {3} ?p ?v '}' '}' ", 
-                                    new Object[]{graph, delete, insert, subject}));
-                        
-                        }
-                        else {
-                            TupleQuery tq = this.mRepositoryConnection.prepareTupleQuery(QueryLanguage.SPARQL, 
-                            MessageFormat.format("INSERT '{' GRAPH {0} '{' {1} '}' '}' ", 
-                                    new Object[]{graph, insert}));        
-                            tq.evaluate(); 
-                            getXlogger().log(VirtuosoLoader.class.getName(), Level.INFO, "executed query", MessageFormat.format("INSERT '{' GRAPH {0} '{' {1} '}' '}' ", 
-                                    new Object[]{graph, insert}));
-                        }
-                        
-                    }
-                    else if(deleteOnly) {
-                        TupleQuery tq = this.mRepositoryConnection.prepareTupleQuery(QueryLanguage.SPARQL, 
-                                MessageFormat.format("DELETE '{' GRAPH {0} '{' {1} '}'  '}' ", 
-                                new Object[]{graph, insert}));
-                        tq.evaluate(); 
-                        getXlogger().log(VirtuosoLoader.class.getName(), Level.INFO, "executed query", MessageFormat.format("DELETE '{' GRAPH {0} '{' {1} '}'  '}' ", 
-                                new Object[]{graph, insert}));
-                    }
+            for(String graph: queryPerGraph.keySet()) {
+                String delete = queryPerGraph.get(graph)[0];
+                String insert = queryPerGraph.get(graph)[1];
+                TupleQuery initq = this.mRepositoryConnection.prepareTupleQuery(QueryLanguage.SPARQL, MessageFormat.format("INSERT '{' GRAPH {0} '{' {0} {0} {0} '}' '}' ", graph));
+                initq.evaluate();
+                
+                if((!deleteOnly) && (!(delete.isEmpty() || insert.isEmpty()))) {
+                    TupleQuery tq = this.mRepositoryConnection.prepareTupleQuery(QueryLanguage.SPARQL, 
+                    MessageFormat.format("DELETE '{' GRAPH {0} '{' {1} '}'  '}' INSERT '{' GRAPH {0} '{' {2} '}' '}' WHERE '{' GRAPH {0} '{' ?s ?p ?v '}' '}' ", 
+                            new Object[]{graph, delete, insert}));        
+                    tq.evaluate(); 
+                    getXlogger().log(VirtuosoLoaderOld.class.getName(), Level.INFO, "executed query", MessageFormat.format("DELETE '{' GRAPH {0} '{' {1} '}'  '}' INSERT '{' GRAPH {0} '{' {2} '}' '}' WHERE '{' GRAPH {0} '{' ?s ?p ?v  '}' '}' ", 
+                            new Object[]{graph, delete, insert}));
+                }
+                else if(deleteOnly) {
+                    TupleQuery tq = this.mRepositoryConnection.prepareTupleQuery(QueryLanguage.SPARQL, 
+                            MessageFormat.format("DELETE '{' GRAPH {0} '{' {1} '}'  '}' ", 
+                            new Object[]{graph, insert}));
+                    tq.evaluate(); 
+                    getXlogger().log(VirtuosoLoaderOld.class.getName(), Level.INFO, "executed query", MessageFormat.format("DELETE '{' GRAPH {0} '{' {1} '}'  '}' ", 
+                            new Object[]{graph, insert}));
                 }
             }
         }
         catch(Exception e) {
             setStatus(Const.ERROR);
-            getXlogger().log(VirtuosoLoader.class.getName(), Level.SEVERE, "delete/insert error", e);
+            getXlogger().log(VirtuosoLoaderOld.class.getName(), Level.SEVERE, "delete/insert error", e);
         }
     }
     
