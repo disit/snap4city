@@ -255,24 +255,29 @@
                             <pick-validator ref="basic">
                                 <same-cardinality id="attribute-datatype.same-cardinality.attribute-valuename" lev="SEVERE" ref="attribute-valuename"/>
                                 <match id="attribute-datatype.allowed-values" op="or" lev="SEVERE">
-                                    <match-value>integer</match-value>
-                                    <match-value>float</match-value>
-                                    <match-value>string</match-value>
-                                    <match-value>bool/button/switch</match-value>
-                                    <match-value>binary</match-value>
-                                    <match-value>url</match-value>
-                                    <match-value>webpage/html</match-value>
-                                    <match-value>image</match-value>
-                                    <match-value>shape/path/wkt</match-value>
-                                    <match-value>identifier</match-value>
+                                    <match-value>binary</match-value> <!-- -->
+                                    <match-value>boolean</match-value> <!-- -->
+                                    <match-value>button</match-value>
+                                    <match-value>collection</match-value>
                                     <match-value>date</match-value>
-                                    <match-value>time</match-value>
-                                    <match-value>datetime/timestamp</match-value>
+                                    <match-value>datetime</match-value>
+                                    <match-value>float</match-value> <!-- -->
+                                    <match-value>html</match-value>
+                                    <match-value>identifier</match-value>
+                                    <match-value>image</match-value>
+                                    <match-value>integer</match-value> <!-- -->
                                     <match-value>json</match-value>
-                                    <match-value>xml</match-value>    
-                                    <match-value>set/collection</match-value>                                   
-                                    <match-value>vector</match-value>  
-                                    <match-value>boolean</match-value> 
+                                    <match-value>path</match-value>
+                                    <match-value>set</match-value>
+                                    <match-value>shape</match-value>
+                                    <match-value>string</match-value> <!-- -->
+                                    <match-value>switch</match-value>
+                                    <match-value>time</match-value>
+                                    <match-value>timestamp</match-value> <!-- -->
+                                    <match-value>url</match-value>
+                                    <match-value>vector</match-value>
+                                    <match-value>wkt</match-value>
+                                    <match-value>xml</match-value>
                                 </match>
                             </pick-validator>
                         </validate>
@@ -1140,7 +1145,7 @@
 			<member name="filler" ref="attribute-validity"/> 
 		</data>
                 
-                <!-- Private/Public device -->
+                <!-- Private/Public device (useless from 2019-04-16 onward) -->
                 <data id="avail-property-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#ownership</data>
                 <data id="device-avail-query" type="string" builder="template" loader="volatile">
 			<template>select ?avail '{' graph &lt;{0}&gt; '{' optional '{' &lt;{1}&gt; &lt;{2}&gt; ?v '}' . bind(if(bound(?v),str(?v),"public") as ?avail ) '}' '}' </template>
@@ -1184,14 +1189,14 @@
 			</switch>
 		</data>
                 
-                
+                <!--
                 <data id="graph-uri.service-uri.avail-property-uri.device-avail" type="quad" builder="bean" loader="virtuoso">
 			<member name="graph" ref="graph-uri"/> 
 			<member name="subject" ref="service-uri"/> 
 			<member name="property" ref="avail-property-uri"/>
-			<!-- <member name="filler" ref="device-avail"/> -->
                         <member name="filler" ref="device-ownership"/>
 		</data>
+                -->
 
 	</process>
 

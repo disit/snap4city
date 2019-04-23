@@ -15,31 +15,31 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package org.disit.iotdeviceapi;
 
-import org.disit.iotdeviceapi.builders.Builder;
+// import org.disit.iotdeviceapi.builders.Builder;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.lang.reflect.Constructor;
-import java.text.MessageFormat;
-import java.util.ArrayList;
+// import java.io.PrintWriter;
+// import java.lang.reflect.Constructor;
+// import java.text.MessageFormat;
+// import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.logging.Level;
+// import java.util.logging.Level;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.disit.iotdeviceapi.parser.ParserConst;
-import org.disit.iotdeviceapi.datatypes.Data;
-import org.disit.iotdeviceapi.repos.Repos;
+// import org.disit.iotdeviceapi.parser.ParserConst;
+// import org.disit.iotdeviceapi.datatypes.Data;
+// import org.disit.iotdeviceapi.repos.Repos;
 import org.disit.iotdeviceapi.loaders.Loader;
-import org.disit.iotdeviceapi.providers.Provider;
-import org.disit.iotdeviceapi.utils.Const;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.disit.iotdeviceapi.parser.Parser;
-import org.disit.iotdeviceapi.dataquality.Validator;
-import org.disit.iotdeviceapi.utils.IotDeviceApiException;
-import org.disit.iotdeviceapi.logging.XLogger;
+// import org.disit.iotdeviceapi.providers.Provider;
+// import org.disit.iotdeviceapi.utils.Const;
+// import org.w3c.dom.Element;
+// import org.w3c.dom.NodeList;
+// import org.disit.iotdeviceapi.parser.Parser;
+// import org.disit.iotdeviceapi.dataquality.Validator;
+// import org.disit.iotdeviceapi.utils.IotDeviceApiException;
+// import org.disit.iotdeviceapi.logging.XLogger;
 
 /**
  * 
@@ -64,8 +64,12 @@ public class MakePrivate extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
+        /*
         response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Warning", "Should send your requests via HTTP POST.");
+        */
+
+        response.sendError(405, "Ownership is not expected to be set for devices in KB from 2019-04-16 onward.");
            
     }
     
@@ -97,6 +101,10 @@ public class MakePrivate extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        processRequest(request, response);
+        
+        /* Ownership must not appear in KB. 2019-04-16
+        
         XLogger xlogger = null;
         Parser cfgParser;
         setStatus(Const.OK);
@@ -270,6 +278,7 @@ public class MakePrivate extends HttpServlet {
             response.setHeader("Warning", e.getMessage());
             
         }
+        */
  
     }
 
@@ -283,6 +292,7 @@ public class MakePrivate extends HttpServlet {
         return "This servlet builds and persists data based on a XML configuration.";
     }
     
+    /*
     private void setStatus(int status) {
         this.status = status;
     }
@@ -290,5 +300,6 @@ public class MakePrivate extends HttpServlet {
     public int getStatus() {
         return status;
     }
+    */
 
 }
