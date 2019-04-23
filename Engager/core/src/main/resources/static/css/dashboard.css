@@ -1,0 +1,3490 @@
+/*Source sans pro*/
+
+@font-face {
+    font-family: SourceSansProBlack;
+    src: url(../fonts/source-sans-pro/SourceSansPro-Black.ttf);
+}
+
+@font-face {
+    font-family: SourceSansProBlackItalic;
+    src: url(../fonts/source-sans-pro/SourceSansPro-BlackItalic.ttf);
+}
+
+@font-face {
+    font-family: SourceSansProBold;
+    src: url(../fonts/source-sans-pro/SourceSansPro-Bold.ttf);
+}
+
+@font-face {
+    font-family: SourceSansProBoldItalic;
+    src: url(../fonts/source-sans-pro/SourceSansPro-BoldItalic.ttf.ttf);
+}
+
+@font-face {
+    font-family: SourceSansProExtraLight;
+    src: url(../fonts/source-sans-pro/SourceSansPro-ExtraLight.ttf);
+}
+
+@font-face {
+    font-family: SourceSansProItalic;
+    src: url(../fonts/source-sans-pro/SourceSansPro-Italic.ttf);
+}
+
+@font-face {
+    font-family: SourceSansProLight;
+    src: url(../fonts/source-sans-pro/SourceSansPro-Light.ttf);
+}
+
+@font-face {
+    font-family: SourceSansProExtraLightItalic;
+    src: url(../fonts/source-sans-pro/SourceSansPro-ExtraLightItalic.ttf);
+}
+
+@font-face {
+    font-family: SourceSansProRegular;
+    src: url(../fonts/source-sans-pro/SourceSansPro-Regular.ttf);
+}
+
+@font-face {
+    font-family: SourceSansProRegular;
+    src: url(../fonts/source-sans-pro/SourceSansPro);
+}
+
+@font-face {
+    font-family: SourceSansProSemiBold;
+    src: url(../fonts/source-sans-pro/SourceSansPro-Semibold.ttf);
+}
+
+@font-face {
+    font-family: SourceSansProSemiBoldItalic;
+    src: url(../fonts/source-sans-pro/SourceSansPro-SemiboldItalic.ttf);
+}
+
+/*Cooper Hewitt*/
+@font-face {
+    font-family: CooperHewittBold;
+    src: url(../fonts/cooper-hewitt/CooperHewitt-Bold.otf);
+}
+
+@font-face {
+    font-family: CooperHewittBoldItalic;
+    src: url(../fonts/cooper-hewitt/CooperHewitt-BoldItalic.otf);
+}
+
+@font-face {
+    font-family: CooperHewittBook;
+    src: url(../fonts/cooper-hewitt/CooperHewitt-Book.otf);
+}
+
+@font-face {
+    font-family: CooperHewittBookItalic;
+    src: url(../fonts/cooper-hewitt/CooperHewitt-BookItalic.otf);
+}
+
+@font-face {
+    font-family: CooperHewittHeavy;
+    src: url(../fonts/cooper-hewitt/CooperHewitt-Heavy.otf);
+}
+
+@font-face {
+    font-family: CooperHewittHeavyItalic;
+    src: url(../fonts/cooper-hewitt/CooperHewitt-HeavyItalic.otf);
+}
+
+@font-face {
+    font-family: CooperHewittLight;
+    src: url(../fonts/cooper-hewitt/CooperHewitt-Light.otf);
+}
+
+@font-face {
+    font-family: CooperHewittLightItalic;
+    src: url(../fonts/cooper-hewitt/CooperHewitt-LightItalic.otf.otf);
+}
+
+@font-face {
+    font-family: CooperHewittMedium;
+    src: url(../fonts/cooper-hewitt/CooperHewitt-Medium.otf);
+}
+
+@font-face {
+    font-family: CooperHewittMediumItalic;
+    src: url(../fonts/cooper-hewitt/CooperHewitt-MediumItalic.otf.otf);
+}
+
+@font-face {
+    font-family: CooperHewittSemibold;
+    src: url(../fonts/cooper-hewitt/CooperHewitt-Semibold.otf);
+}
+
+@font-face {
+    font-family: CooperHewittSemiboldItalic;
+    src: url(../fonts/cooper-hewitt/CooperHewitt-SemiboldItalic.otf);
+}
+
+@font-face {
+    font-family: CooperHewittThin;
+    src: url(../fonts/cooper-hewitt/CooperHewitt-Thin.otf);
+}
+
+@font-face {
+    font-family: CooperHewittThinItalic;
+    src: url(../fonts/cooper-hewitt/CooperHewitt-ThinItalic.otf.otf);
+}
+
+@font-face {
+    font-family: Digital;
+    src: url(../fonts/digital/digital-7.ttf);
+}
+
+@font-face {
+    font-family: DigitalMono;
+    src: url(../fonts/digital/digital-7-mono.ttf);
+}
+
+@font-face {
+    font-family: DigitalMonoItalic;
+    src: url(../fonts/digital/digital-7-mono-italic.ttf);
+}
+
+@font-face {
+    font-family: DigitalItalic;
+    src: url(../fonts/digital/digital-7-italic.ttf);
+}
+
+@font-face {
+    font-family: JackFrost;
+    src: url(../fonts/jackFrost/JackFrost.otf);
+}
+
+@font-face {
+    font-family: Trench;
+    src: url(../fonts/Trench/trench.otf);
+}
+
+@font-face {
+    font-family: MerrymentHelicopter;
+    src: url(../fonts/MerrimentHelicopter/MerrimentHelicopter.otf);
+}
+
+@font-face {
+    font-family: ScienceFair;
+    src: url(../fonts/ScienceFair/ScienceFair.otf);
+}
+
+@font-face {
+    font-family: ScienceFairLight;
+    src: url(../fonts/ScienceFair/ScienceFairLight.otf);
+}
+
+@font-face {
+    font-family: ScienceFairLightItalic;
+    src: url(../fonts/ScienceFair/ScienceFairLightItalic.otf);
+}
+
+@font-face {
+    font-family: ScienceFairItalic;
+    src: url(../fonts/ScienceFair/ScienceFairItalic.otf);
+}
+
+@font-face {
+    font-family: Coolwonder;
+    src: url(../fonts/CoolWonder/Coolwonder.ttf);
+}
+
+@font-face {
+    font-family: Roboto-Black;
+    src: url(../fonts/Roboto/Roboto-Black.ttf);
+}
+
+@font-face {
+    font-family: Roboto-BlackItalic;
+    src: url(../fonts/Roboto/Roboto-BlackItalic.ttf);
+}
+
+@font-face {
+    font-family: Roboto-Bold;
+    src: url(../fonts/Roboto/Roboto-Bold.ttf);
+}
+
+@font-face {
+    font-family: Roboto-BoldCondensed;
+    src: url(../fonts/Roboto/Roboto-BoldCondensed.ttf);
+}
+
+@font-face {
+    font-family: Roboto-BoldCondensedItalic;
+    src: url(../fonts/Roboto/Roboto-BoldCondensedItalic.ttf);
+}
+
+@font-face {
+    font-family: Roboto-BoldItalic;
+    src: url(../fonts/Roboto/Roboto-BoldItalic.ttf);
+}
+
+@font-face {
+    font-family: Roboto-Condensed;
+    src: url(../fonts/Roboto/Roboto-Condensed.ttf);
+}
+
+@font-face {
+    font-family: Roboto-CondensedItalic;
+    src: url(../fonts/Roboto/Roboto-CondensedItalic.ttf);
+}
+
+@font-face {
+    font-family: Roboto-Italic;
+    src: url(../fonts/Roboto/Roboto-Italic.ttf);
+}
+
+@font-face {
+    font-family: Roboto-Light;
+    src: url(../fonts/Roboto/Roboto-Light.ttf);
+}
+
+@font-face {
+    font-family: Roboto-LightItalic;
+    src: url(../fonts/Roboto/Roboto-LightItalic.ttf);
+}
+
+@font-face {
+    font-family: Roboto-Medium;
+    src: url(../fonts/Roboto/Roboto-Medium.ttf);
+}
+
+@font-face {
+    font-family: Roboto-MediumItalic;
+    src: url(../fonts/Roboto/Roboto-MediumItalic.ttf);
+}
+
+@font-face {
+    font-family: Roboto-Regular;
+    src: url(../fonts/Roboto/Roboto-Regular.ttf);
+}
+
+@font-face {
+    font-family: Roboto-Thin;
+    src: url(../fonts/Roboto/Roboto-Thin.ttf);
+}
+
+@font-face {
+    font-family: Roboto-ThinItalic;
+    src: url(../fonts/Roboto/Roboto-ThinItalic.ttf);
+}
+
+@font-face {
+    font-family: Montserrat;
+    src: url(../fonts/montserrat/Montserrat-Regular.ttf);
+}
+
+@font-face {
+    font-family: VerdanaDownloaded;
+    src: url(../fonts/VERDANAB.TTF);
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html
+{
+    height: 100%;
+}
+
+body 
+{
+   width: 100%;
+   min-height: 100%;
+   font-family: 'Montserrat', 'Verdana', sans-serif;
+   font-weight: 400;
+}
+
+.noLink
+{
+    cursor: default;
+}
+
+.noLink:hover
+{
+    cursor: default;
+    background-color: red;/*#344AB8;*/
+}
+
+.centerWithFlex
+{
+    display: flex;
+    align-items: center; 
+    justify-content: center;
+    text-align: center;
+}
+
+.ui-autocomplete-list {
+    height: auto;
+    max-height: 100px;
+    overflow-y: auto;   /* prevent horizontal scrollbar */
+    overflow-x: hidden; /* add padding to account for vertical scrollbar */
+    z-index:1000 !important;
+}
+
+#alrLook, #alrLookM, label[for='alrLook'], label[for='alrLookM']
+{
+    display: none;
+}
+
+#xAxisDataset, #xAxisDatasetM, label[for='xAxisDataset'], label[for='xAxisDatasetM'], #lineWidth, #lineWidthM, label[for='lineWidth'], label[for='lineWidthM']
+{
+    display: none;
+}
+
+#chartType, #chartTypeM, label[for='chartType'], label[for='chartTypeM']
+{
+    display: none;
+}
+
+#barsColorsTableContainerM
+{
+    display: flex;
+    align-items: center; 
+    justify-content: center;
+    text-align: center;
+}
+
+#barsColorsTableContainer
+{
+    display: none;
+    display: flex;
+    align-items: center; 
+    justify-content: center;
+    text-align: center;
+}
+
+#modal-add-widget, #modal-modify-widget
+{
+    font-family: Verdana, sans-serif;
+    font-size: 12px;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.20);
+}
+
+#modalWidgetFieldsInfo, #dialog-information-widget
+{
+    font-family: Verdana, sans-serif;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.20);
+}
+
+#widgetInfoCkEditorTitleRow, #widgetInfoCkEditorTitle, #widgetInfoCkEditorTitleRowM, #widgetInfoCkEditorTitleM
+{
+    display: none;
+}
+
+#widgetInfoCkEditorTitleRowM.row, #widgetInfoCkEditorTitleRow.row
+{
+    margin-top: 20px;
+}
+
+#textAreaInfoWidget, #infoAxisSelect, #infoFieldSelect, label[for='infoAxisSelect'], label[for='infoFieldSelect']
+{
+    display: none;
+}
+
+#textAreaInfoWidgetM, #infoMainSelectM, #infoAxisSelectM, #infoFieldSelectM, label[for='infoMainSelectM'], label[for='infoAxisSelectM'], label[for='infoFieldSelectM']
+{
+    display: none;
+}
+
+#infoTextareaDiv .control-label
+{
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+.smallTopMargin
+{
+    margin-top: 5px;
+}
+
+.formElementCustomAspect
+{
+    font-size: 12px;
+    height: 29px;
+}
+
+.rowCenterContent
+{
+    /*display: flex; 
+    align-items: center; 
+    justify-content: center;*/
+}
+
+#showTableFirstCell, #tableFirstCellFontSize, #tableFirstCellFontColor, #rowsLabelsFontSize, #rowsLabelsFontColor, #colsLabelsFontSize,
+#colsLabelsFontColor, #rowsLabelsBckColor, #colsLabelsBckColor,
+#showTableFirstCellM, #tableFirstCellFontSizeM, #tableFirstCellFontColorM, #rowsLabelsFontSizeM, #rowsLabelsFontColorM, #colsLabelsFontSizeM,
+#colsLabelsFontColorM, #rowsLabelsBckColorM, #colsLabelsBckColorM,
+#alrThrFlag, #alrAxisSel, #alrFieldSel, #alrRangeMin, #alrRangeMax, #inputAlrRangeColor, #addAlrRangeBtn, #alrThrFlagM, #alrAxisSelM, 
+#alrFieldSelM, #alrRangeMinM, #alrRangeMaxM, #alrRangeColorM, #addAlrRangeBtnM, #delAlrRangeBtnM 
+{
+    display: none;
+}
+
+label[for='showTableFirstCell'], label[for='tableFirstCellFontSize'], label[for='tableFirstCellFontColor'], label[for='rowsLabelsFontSize'], label[for='rowsLabelsFontColor'] , label[for='colsLabelsFontSize'], 
+label[for='colsLabelsFontColor'], label[for='rowsLabelsBckColor'], label[for='colsLabelsBckColor'],
+label[for='showTableFirstCellM'], label[for='tableFirstCellFontSizeM'], label[for='tableFirstCellFontColorM'], label[for='rowsLabelsFontSizeM'], label[for='rowsLabelsFontColorM'] , label[for='colsLabelsFontSizeM'], 
+label[for='colsLabelsFontColorM'], label[for='rowsLabelsBckColorM'], label[for='colsLabelsBckColorM'],
+label[for='alrAxisSel'], label[for='alrFieldSel'], label[for='alrRangeMin'], label[for='alrRangeMax'], label[for='inputAlrRangeColor'], 
+label[for='alrThrFlagM'], label[for='alrAxisSelM'], label[for='alrRangeMinM'], label[for='alrRangeMaxM'], label[for='alrRangeColorM']
+{
+    display: none;
+}
+
+#widgetFirstCellFontColor, #widgetRowsLabelsFontColor, #widgetColsLabelsFontColor, #widgetRowsLabelsBckColor, #widgetColsLabelsBckColor
+{
+    display: none;
+}
+
+.thrRangeTableRadarContainer
+{
+    overflow-x: auto;
+}
+
+.thrRangeTableRadar
+{
+    display: table;
+    table-layout: auto; 
+}
+
+.thrRangeTableRadar td
+{
+    text-align: center;
+    vertical-align: middle;
+}
+
+.thrRangeTableRadar td.colorHeader
+{
+    max-width: 100px;
+}
+
+.thrRangeTableRadar td.descValue
+{
+    max-width: 75px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.thrRangeTableRadar td.descValue a
+{
+    max-width: 72px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.thrRangeTableRadar td.boundDesc
+{
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+}
+
+.thrRangeTableRadar td.boundValue
+{
+    max-width: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.thrRangeTableRadar td.boundValue a
+{
+    max-width: 55px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.thrRangeTableRadar td a, .thrRangeTableRadar td a:hover
+{
+    border-bottom: none;
+}
+
+.thrRangeTable
+{
+    /*Per avere colonne tutte della stessa larghezza*/
+    table-layout: fixed;
+    width: 95%;
+}
+
+.thrRangeTable tr
+{
+    
+}
+
+.thrRangeTable td
+{
+    text-align: center;
+    vertical-align: middle;
+}
+
+.thrRangeTable td a, .thrRangeTable td a:hover
+{
+    border-bottom: none;
+}
+
+.popover-content .form-group
+{
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+.ui-autocomplete-input {
+  border: none; 
+  font-size: 14px;
+  /*width: 300px;
+  height: 24px;
+  margin-bottom: 5px;
+  padding-top: 2px;
+  padding-top: 0px !important;*/
+  border: 1px solid #DDD !important; 
+  z-index: 1511;
+  position: relative;
+}
+/*.ui-menu .ui-menu-item a {
+  font-size: 12px;
+}*/
+.ui-autocomplete {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1510 !important;
+  float: left;
+  display: none;
+  background-color:rgba(255, 255, 255, 1.0);
+  /*min-width: 80px;
+  width: 80px;*/
+  padding: 4px 0;
+  margin: 2px 0 0 0;
+  list-style: none;
+  border-color: #ccc;
+  border-color: rgba(0, 0, 0, 0.2);
+  border-style: solid;
+  border-width: 1px;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+  -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+  -moz-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+  -webkit-background-clip: padding-box;
+  -moz-background-clip: padding;
+  background-clip: padding-box;
+  *border-right-width: 2px;
+  *border-bottom-width: 2px;
+}
+
+.ui-helper-hidden-accessible 
+{ 
+    display:none; 
+}
+
+/*.ui-menu-item > a.ui-corner-all {
+    display: block;
+    padding: 3px 15px;
+    clear: both;
+    font-weight: normal;
+    line-height: 18px;
+    color: #555555;
+    white-space: nowrap;
+    text-decoration: none;
+}
+.ui-state-hover, .ui-state-active {
+      color: #ffffff;
+      text-decoration: none;
+      background-color: #0088cc;
+      border-radius: 0px;
+      -webkit-border-radius: 0px;
+      -moz-border-radius: 0px;
+      background-image: none;
+}*/
+
+.pippo, .pippo:link, .pippo:visited, .pippo:hover, .pippo:active
+{
+    color: black;
+    text-decoration: none;
+    height: 100%; 
+    width: 100%; 
+    object-fit: contain;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.wellCustom
+{
+    padding-top:9px;
+    padding-bottom: 0px;
+    padding-left: 19px;
+    padding-right: 19px;
+}
+
+.wellCustom2left
+{
+    padding-top:9px;
+    padding-bottom: 0px;
+    padding-left: 19px;
+    padding-right: 19px;
+    width: 576px;
+    float: left;
+    margin-right: 14px;
+}
+
+.wellCustom2right
+{
+    padding-top:9px;
+    padding-bottom: 0px;
+    padding-left: 19px;
+    padding-right: 19px;
+    width: 576px;
+    float: left;
+}
+
+.wellCustomFooter
+{
+    padding-top:9px;
+    padding-bottom: 0px;
+    padding-left: 19px;
+    padding-right: 19px;
+    width: 1170px;
+    float: left;
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    -webkit-box-shadow: none;
+}
+
+.addWidgetParLabel
+{
+    padding-left: 5px; 
+    padding-right: 5px;
+}
+
+.info-modal
+{
+    margin-left: 10px;
+    margin-right: 10px;
+    text-align: center;
+}
+
+.noBorder
+{
+    border: none;
+}
+
+#wrapper 
+{
+    padding-left: 0;
+}
+
+#page-wrapper 
+{
+    width: 100%;
+    padding-left: 0px;
+    padding-right: 0px;
+    background-color: #fff;
+}
+
+#pageWrapperCfg 
+{
+    width: 100%;
+    padding-left: 0px;
+    padding-right: 0px;
+    background-color: #fff;
+    margin-top: 10px;
+}
+
+.huge 
+{
+    font-size: 50px;
+    line-height: normal;
+}
+
+@media(min-width:768px) 
+{
+    #wrapper 
+    {
+        padding-left: 225px;
+    }
+}
+
+/* Top Navigation */
+.navbar-inverse
+{
+    background-color: #337ab7;
+    border-color: #337ab7; 
+}
+
+.navbar-inverse .navbar-brand
+{
+    color:#fff;
+    font-size: 32px;
+}
+
+.top-nav 
+{
+    padding: 0 15px;
+}
+
+.top-nav>li 
+{
+    display: inline-block;
+    float: left;
+}
+
+.top-nav>li>a 
+{
+    padding-top: 15px;
+    padding-bottom: 15px;
+    line-height: 20px;
+    color: #fff;
+}
+
+.top-nav>li>a:hover,
+.top-nav>li>a:focus,
+.top-nav>.open>a,
+.top-nav>.open>a:hover,
+.top-nav>.open>a:focus 
+{
+    color: #337ab7;
+    background-color: #e3f2fd;
+}
+
+.top-nav>.open>.dropdown-menu {
+    float: left;
+    position: absolute;
+    margin-top: 0;
+    border: 1px solid rgba(0,0,0,.15);
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    background-color: #fff;
+    -webkit-box-shadow: 0 6px 12px rgba(0,0,0,.175);
+    box-shadow: 0 6px 12px rgba(0,0,0,.175);
+}
+
+.top-nav>.open>.dropdown-menu>li>a {
+    white-space: normal;
+}
+
+ul.message-dropdown {
+    padding: 0;
+    max-height: 250px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+li.message-preview {
+    width: 275px;
+    border-bottom: 1px solid rgba(0,0,0,.15);
+}
+
+li.message-preview>a {
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+li.message-footer {
+    margin: 5px 0;
+}
+
+ul.alert-dropdown {
+    width: 200px;
+}
+
+.glyphicon-user{
+    margin-right: 5px;
+}
+
+#navbar-cfg{
+    height: 100px;
+    /*border-bottom: 1px solid #337ab7;*/
+}
+
+.dashboard-subtitle
+{
+    /*font-size: 20px;
+    color: #fff !important;*/
+    text-decoration: none !important;
+}
+
+#modify-bar-dashboard{
+    /*max-width: 286px; */
+    float: left;
+    /*border-style: solid;
+    border-color: black;
+    border-width: 2px;*/
+}
+
+.textarea-metric{
+    max-width: 100%;
+}
+
+#dashboard-header-links
+{
+    /*height: 60px;
+    font-size: 30px;*/
+}
+
+.noMarginBottom
+{
+    margin-bottom: 0px;
+}
+
+.noPaddingTop
+{
+    padding-top: 0px;
+}
+
+@media(min-width:768px) 
+{
+    .side-nav 
+    {
+        position: fixed;
+        top: 51px;
+        left: 225px;
+        width: 225px;
+        margin-left: -225px;
+        border: none;
+        border-radius: 0;
+        overflow-y: auto;
+        background-color: #337ab7;
+        bottom: 0;
+        overflow-x: hidden;
+        padding-bottom: 40px;
+    }
+
+    .side-nav>li>a 
+    {
+        width: 225px;
+    }
+    
+    .navbar-inverse .navbar-nav>li>a:hover
+    {
+        color: #337ab7;
+    }
+
+    .navbar-inverse .navbar-nav>.active>a
+    {
+        background-color: #e3f2fd; 
+        color: #337ab7;
+        font-weight: bold;
+    }
+
+    .side-nav li a:hover, .side-nav li a:focus 
+    {
+        outline: none;
+        color: #337ab7 !important; 
+        background-color: #e3f2fd !important;
+    }
+}
+
+.navbar-inverse .navbar-nav>li>a
+{
+    color:#fff;
+    background-color: #344AB8;
+    font-weight: bold;
+}
+
+.navbar-inverse .navbar-nav>.active>a
+{
+    background-color: #e3f2fd; 
+    color: #337ab7;
+    font-weight: bold;
+}
+
+.side-nav li a:hover,
+.side-nav li a:focus 
+{
+    outline: none;
+    color: #337ab7 !important; 
+    background-color: #e3f2fd !important;
+}
+
+.side-nav>li>ul 
+{
+    padding: 0;
+}
+
+.side-nav>li>ul>li>a 
+{
+    display: block;
+    padding: 10px 15px 10px 38px;
+    text-decoration: none;
+    color: #999;
+}
+
+.side-nav>li>ul>li>a:hover 
+{
+    color: #fff;
+}
+
+#wrapper-dashboard
+{
+   display: none;
+}
+
+#authFormContainer
+{
+   display: none;
+   background: white;
+   position: absolute;
+   top: 50%;
+   left: 0%;
+   transform: translate(0%, -50%);
+}
+
+#wrapper-dashboard-cfg
+{
+    height: 100%;
+}
+
+#container-widgets-cfg
+{
+    background-color: #eee;
+    padding: 5px;
+    float: left;
+}
+
+#container-widgets
+{
+    background-color: #eee;
+    padding: 5px;
+    left: 0;
+    right: 0;
+    width: inherit;
+    z-index: 1;
+}
+
+#container-widgets-cfg li.gs-w {
+    cursor: pointer;
+    border:1px solid #dddddd !important; 
+}
+
+#container-widgets li.gs-w {
+    /*cursor: default !important;*/
+    border:1px solid #dddddd !important; 
+}
+
+.glyphicon-modify-widget {
+    font-size: 1.5em;
+}
+
+.logo_fi-bar{
+    padding-left:15px;
+    margin-top: 1px;
+}
+
+.footerLogos
+{
+    background-color: white;
+    float: right;
+    height: 45px;
+    font-size: 40px;
+    margin-right: 10px;
+}
+
+.footerLogo, .footerLogo:link, .footerLogo:visited, .footerLogo:active
+{
+    color: black;
+    display: block;
+    height: 100%;
+    float: left;
+    text-decoration: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.footerLogo:hover
+{
+    background-color: #eeeeee;
+    text-decoration: none;
+    display: block;
+    height: 100%;
+    float: left;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.footerLogo img
+{
+    height: 100%;
+}
+
+.link_twitter_vig-bar a
+{
+  color: #C0C0C0; 
+  text-decoration:none;
+  line-height: 40px;
+  font-size:28px;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+#inputFirstAidRowM, #inputFirstAidRow
+{
+   display: none;
+}
+
+#editDashboardMenu
+{
+   padding-left: 0px;
+   padding-right: 0px;
+   margin-bottom: 15px;
+   width: 100%;
+}
+
+#editDashboardMenu a
+{
+   color: black;
+}
+
+div.mainMenuIconContainer
+{
+   width: 25%;
+   height: 100%;
+   float: left;
+}
+
+div.mainMenuTextContainer
+{
+   width: 75%;
+   height: 100%;
+   float: left;
+}
+
+div.mainMenuItemContainer
+{
+   padding-left: 0px;
+   padding-right: 0px;
+   width: 144px;
+   height: 100%;
+   margin-right: 5px;
+   background-color: #e3f2fd;
+   float: left;
+}
+
+div.mainMenuItemContainer:hover
+{
+   background-color: #66ccff;
+   cursor: pointer;
+}
+
+#modalChangePlanStatus
+{
+   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+   text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+}
+
+#modalChangePlanStatusModalTitle.modal-header
+{
+   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+   text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+   font-size: 64px;
+   font-variant: small-caps;
+   font-weight: bold;
+   padding: 0px;
+}
+
+.modalChangePlanStatusLabel, #modalChangePlanStatusWait, #modalChangePlanStatusOk, #modalChangePlanStatusKo
+{
+   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+   text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+   font-size: 42px;
+   font-variant: small-caps;
+}
+
+#modalChangePlanStatusTitle
+{
+   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+   text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+   font-size: 38px;
+   font-variant: small-caps;
+   font-weight: bold;
+}
+
+#modalChangePlanStatusStatus
+{
+   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+   text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+   font-size: 38px;
+   font-variant: small-caps;
+   font-weight: bold;
+}
+
+#modalChangePlanStatusSelect, #modalChangePlanStatusSelect option
+{
+   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+   text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+   font-size: 38px;
+   font-variant: small-caps;
+   font-weight: bold;
+   width: 100%;
+   height: 100%;
+}
+
+#modalChangePlanStatusCancelBtn, #modalChangePlanStatusConfirmBtn
+{
+   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+   text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+   font-size: 36px;
+   font-variant: small-caps;
+}
+
+#modalChangePlanStatusCancelBtn
+{
+   margin-right: 15px;
+}
+
+#modalChangePlanStatusWait, #modalChangePlanStatusOk, #modalChangePlanStatusKo
+{
+    display: none;
+}
+
+#modalChangePlanStatusDialog.modal-lg
+{
+   width: 65%;
+}
+
+#addPoolMainContainer, #delPoolMainContainer, #poolsUsersMainContainer
+{
+    width: 100%;
+}
+
+#addPoolNewPoolUsersContainer
+{
+    width: 100%;
+    max-height: 450px;
+    overflow: auto;
+}
+
+#addPoolNewPoolUsersTable
+{
+    width: 100%;
+    border: none;
+}
+#addPoolNewPoolUsersTable th
+{
+    background: rgba(0, 162, 211, 1);
+    color: white;
+}
+
+#addPoolNewPoolUsersTable th.smallCell, td.smallCell, #addPoolNewPoolUsersTable th.bigCell, td.bigCell
+{
+    text-align: center;
+}
+
+#addPoolNewPoolUsersTable th, #addPoolNewPoolUsersTable td
+{
+    font-size: 0.65em;
+}
+
+.addUserToPoolUsername
+{
+    font-weight: bold;
+}
+
+.addPoolNewUserHideMobile
+{
+    display: none;
+}
+
+@media(min-width: 992px) 
+{
+    .addPoolNewUserHideMobile
+    {
+        display: flex;
+        align-items: center; 
+        justify-content: center;
+        text-align: center;
+    }
+    
+    #addPoolNewPoolUsersTable th, #addPoolNewPoolUsersTable td
+    {
+        font-size: 1em;
+    }
+    
+    #addPoolNewPoolUsersTable th.smallCell, td.smallCell
+    {
+        width: 20%;
+    }
+
+    #addPoolNewPoolUsersTable th.bigCell, td.bigCell
+    {
+        width: 40%;
+    }
+}
+
+
+
+#addPoolNewPoolUsersTable tr:nth-child(odd)
+{
+    background-color: white;
+}
+
+#addPoolNewPoolUsersTable tr:nth-child(even)
+{
+    background-color: rgb(230, 249, 255);
+}
+
+#addNewPoolButtonsContainer
+{
+    float: left;
+    width: 100%;
+    margin-top: 20px;
+}
+
+#addNewPoolButtonsContainer button.btn-secondary
+{
+    margin-right: 10px;
+}
+
+#delPoolMainContainer #buttonsContainer
+{
+    /*border: 1px solid greenyellow;*/
+    padding-top: 31px;
+}
+
+#delPoolMainContainer #buttonsContainer i.fa-arrow-circle-right, #delPoolMainContainer #buttonsContainer i.fa-arrow-circle-left 
+{
+    cursor: pointer;
+}
+
+#delPoolMainContainer #buttonsContainer div
+{
+    width: 100%;
+    height: auto;
+    float: left;
+    display: flex;
+    align-items: center; 
+    justify-content: center;
+    text-align: center;
+    border: 1px solid white; /*Non cancellarlo, sennÃ² li affianca*/
+}
+
+#delPoolMainSubContainer
+{
+    overflow: auto;
+    height: auto;
+    max-height: 250px;
+    display: flex;
+    align-items: center; 
+    justify-content: center;
+    text-align: center;
+}
+
+#delPoolTable, #outerMembersTable, #innerMembersTable
+{
+    font-size: 0.75em;
+    width: 100%;
+}
+
+@media(min-width:992px) 
+{
+    #delPoolTable, #outerMembersTable, #innerMembersTable
+    {
+        font-size: 1.2em;
+    }
+}
+
+#delPoolTable th, #outerMembersTable th, #innerMembersTable th
+{
+    background: rgba(0, 162, 211, 1);
+    color: white;
+}
+
+#delPoolTable tr:nth-child(odd)
+{
+    background-color: white;
+}
+
+#delPoolTable tr:nth-child(even)
+{
+    background-color: rgb(230, 249, 255);
+}
+
+#outerMembersTable tr:nth-child(odd), #innerMembersTable tr:nth-child(odd)
+{
+    background-color: white;
+}
+
+#outerMembersTable tr:nth-child(even), #innerMembersTable tr:nth-child(even)
+{
+    background-color: rgb(230, 249, 255);
+}
+
+#delPoolTable tr, #delPoolTable td, #delPoolTable th, #outerMembersTable tr, #outerMembersTable td, #outerMembersTable th, 
+#innerMembersTable tr, #innerMembersTable td, #innerMembersTable th
+{
+    text-align: center;
+}
+
+#delPoolTable td.smallCell, #delPoolTable th.smallCell
+{
+    width: 20%
+}
+
+#delPoolTable td.bigCell, #delPoolTable th.bigCell
+{
+    width: 40%
+}
+
+#delPoolTable td i.fa-remove
+{
+    cursor: pointer;
+}
+
+#delPoolTable a
+{
+    text-decoration: none;
+    border-bottom: none;
+}
+
+#editPoolsButtonsContainer
+{
+    display: none;
+}
+
+#editPoolsDiscardBtn, #editPoolsNamesDiscardBtn
+{
+    margin-left: 15px;
+}
+
+#outerUsersTableContainer, #innerUsersTableContainer
+{
+    width: 100%;
+    max-height: 400px;
+    overflow: auto;
+}
+
+#poolManagementRow
+{
+    display: none;
+    margin-top: 30px;
+}
+
+#innerUsersLabelContainer, #outerUsersLabelContainer
+{
+    display: flex;
+    align-items: flex-start; 
+    justify-content: flex-start;
+    width: 100%;
+    height: auto;
+}
+
+#saveUsersDataModal .modal-header, #discardUsersChangesModal .modal-header, #deleteUserModal .modal-header, #pageChangeModal .modal-header, 
+#addUserModal .modal-header, #addUserOkModal .modal-header, #addUserKoModal .modal-header, #addPoolOkModal .modal-header, #addPoolKoModal .modal-header,
+#deletePoolModal .modal-header, #deletePoolModal .modal-body, #delPoolOkModal .modal-header, #delPoolKoModal .modal-header, #editPoolsModal .modal-header,
+#editPoolsUndoModal .modal-header, #editPoolsLeavePageModal .modal-header, #editPoolsNamesModal .modal-header, #editPoolsNamesUndoModal .modal-header,
+#logoutViewModal .modal-header, #editUserModal .modal-header, #editUserOkModal .modal-header, #editUserKoModal .modal-header,
+#editAccountOkModal .modal-header, #editAccountKoModal .modal-header
+{
+    display: flex;
+    align-items: center; 
+    justify-content: center;
+    text-align: center;
+}
+
+#addUserModal .modal-body, #saveUsersDataModal .modal-body, #discardUsersChangesModal .modal-body, #deleteUserModal .modal-body, 
+#pageChangeModal .modal-body, #addUserOkModal .modal-body, #addUserKoModal .modal-body, #addPoolOkModal .modal-body, #addPoolKoModal .modal-body,
+#deletePoolModal .modal-body, #delPoolOkModal .modal-body, #editPoolsModal .modal-body, #editPoolsUndoModal .modal-body, #editPoolsLeavePageModal .modal-body,
+#editPoolsNamesModal .modal-body, #editPoolsNamesUndoModal .modal-body, #logoutViewModal .modal-body, #editUserModal .modal-body, #editUserOkModal .modal-body, 
+#editUserKoModal .modal-body, #editAccountOkModal .modal-body, #editAccountKoModal .modal-body
+{
+    height: auto;
+}
+
+#addUserAdminRoleChoiceOuterContainer, #addUserAdminPoolsChoiceOuterContainer, #logoutViewModal
+{
+    display: none;
+}
+
+#addUserPoolsContainer, #editUserPoolsContainer
+{
+    width: 100%;
+    height: 100px;
+    overflow: auto;
+}
+
+#addUserPoolsTable thead th, #editUserPoolsTable thead th
+{
+    background: rgba(0, 162, 211, 1);
+    color: white;
+}
+
+#addUserPoolsTable, #addUserPoolsTable tr, #addUserPoolsTable td, #editUserPoolsTable, #editUserPoolsTable tr, #editUserPoolsTable td /*#addUserExistingPoolsTable, #addUserExistingPoolsTable tr, 
+#addUserExistingPoolsTable td, #addUserAddUsersToNewPoolTable, #addUserAddUsersToNewPoolTable tr, #addUserAddUsersToNewPoolTable td*/
+{
+    width: 100%;
+    border: none;
+}
+
+#addUserPoolsTable tr:nth-child(odd), #editUserPoolsTable tr:nth-child(odd)/*, #addUserExistingPoolsTable tr:nth-child(odd), #addUserAddUsersToNewPoolTable tr:nth-child(odd)*/
+{
+    background-color: white;
+}
+
+#addUserPoolsTable tr:nth-child(even), #editUserPoolsTable tr:nth-child(even)/*#addUserExistingPoolsTable tr:nth-child(even), #addUserAddUsersToNewPoolTable tr:nth-child(even)*/
+{
+    background-color: rgb(230, 249, 255);
+}
+
+#addUserPoolsTable th, #editUserPoolsTable th
+{
+   text-align: center;
+}
+
+#addUserPoolsTable .addUserPoolsTableMakeAdminHeader, #addUserPoolsTable .addUserPoolsTableMakeAdminCheckbox,
+#editUserPoolsTable .editUserPoolsTableMakeAdminHeader, #editUserPoolsTable .editUserPoolsTableMakeAdminCheckbox
+{
+   display: none;
+}
+
+#addUserPoolsTable td.checkboxCell, #addUserExistingPoolsTable td.checkboxCell,
+#editUserPoolsTable td.checkboxCell, #editUserExistingPoolsTable td.checkboxCell  
+{
+    width: 20%;
+    text-align: center;
+}
+
+#addUserPoolsTable td.poolNameCell, #editUserPoolsTable td.poolNameCell
+{
+    width: 60%;
+    text-align: center;
+}
+
+.modalBodyInnerDiv
+{
+    height: auto;
+    width: 100%;
+    display: flex;
+    align-items: center; 
+    justify-content: center;
+    text-align: center;
+}
+
+.addUserFormSubfieldContainer, .editUserFormSubfieldContainer
+{
+    width: 100%;
+    height: auto;
+    display: flex;
+    align-items: center; 
+    justify-content: center;
+    text-align: center;
+}
+
+.poolsManagementSubfieldContainer
+{
+    width: 100%;
+    height: auto;
+    display: flex;
+    align-items: center; 
+    justify-content: center;
+    text-align: center;
+}
+
+#usernameMsgM
+{
+   color: #337ab7;
+}
+
+#usersTable2 i.fa-remove:hover, #usersTable2 i.fa-cog:hover
+{
+   cursor: pointer;
+}
+
+#editUserModalBody
+{
+   display: none;
+}
+
+#editAccountCancelBtn
+{
+   margin-right: 10px;
+}
+
+/*.accountEditSubfieldContainer input[type=text], .accountEditSubfieldContainer input[type=email], .accountEditSubfieldContainer input[type=password]
+{
+   text-align: center;
+}*/
+
+#accountActivationActivatingRow, #accountActivationOkRow, #accountActivationKoRow, #addUserModalCreating
+{
+   display: none;
+}
+
+/*label[for="inputDashboardVisibilityUsersTable"], #inputDashboardVisibilityUsersTableContainer
+{
+    display: none;
+}
+
+#inputDashboardVisibilityUsersTableContainer
+{
+    display: none;
+    max-height: 400px;
+    overflow: auto;
+}*/
+
+#inputDashboardVisibilityUsersTable
+{
+    display: none;
+}
+
+#inputDashboardVisibilityUsersTable
+{
+    width: 100%;
+}
+
+#inputDashboardVisibilityUsersTable tr, #inputDashboardVisibilityUsersTable td, #inputDashboardVisibilityUsersTable th
+{
+    text-align: center;
+}
+
+#inputDashboardVisibilityUsersTable th
+{
+    background-color: rgba(0, 162, 211, 1);
+    color: white;
+}
+
+#inputDashboardVisibilityUsersTable tr:nth-child(odd) td
+{
+    background-color: white;
+}
+
+#inputDashboardVisibilityUsersTable tr:nth-child(even) td
+{
+    background-color: rgb(230, 249, 255);
+}
+
+#inputDashboardVisibilityUsersTable .selectCell
+{
+    width: 20%;
+}
+
+#inputDashboardVisibilityUsersTable .usernameCell
+{
+    width: 80%;
+}
+
+#getVisibilityError
+{
+    display: none;
+}
+
+#logoutViewModalOk, #logoutViewModalKo, #logoutViewModalUserNotRegistered, #logoutViewModalQueryKo
+{
+    display: none;
+}
+
+.logoutViewModalRow
+{
+    width: 100%; 
+    float: left; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+}
+
+.logoutViewModalLabel
+{
+    width: 43%; 
+    float: left;
+    display: flex; 
+    justify-content: flex-end; 
+    align-items: center;
+    padding-right: 10px;
+}
+
+.logoutViewModalInput
+{
+    width: 57%; 
+    float: left;
+    display: flex; 
+    justify-content: flex-start; 
+    align-items: center;
+}
+
+.logoutViewModalInput input
+{
+    width: 150px;
+}
+
+#viewLogoutBtn
+{
+    display: none;
+}
+
+#newTabLinkOpenImpossibile
+{
+    font-family: Verdana;
+}
+
+#newTabLinkOpenImpossibile div.modal-header h4
+{
+    font-size: 18px;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.20);
+}
+
+#newTabLinkOpenImpossibileMsg, #newTabLinkOpenImpossibileIcon
+{
+    width: 100%;
+    text-align: center;
+}
+
+#newTabLinkOpenImpossibileIcon i.fa-frown-o
+{
+    font-size: 36px;
+}
+
+#gisTargetCenterDiv
+{
+    
+}
+
+#gisTargetCenterMapDiv
+{
+    height: 175px;
+}
+
+#gisTargetCenterMapDivM
+{
+    height: 175px;
+}
+
+#addGisQueryTableContainer, #editGisQueryTableContainer
+{
+    overflow-x: scroll;
+    margin-left: -15px;
+    margin-right: -15px;
+}
+
+#dashboardHeaderMenuTab
+{
+    width: 65px;
+    height: 20px;
+    font-family: Verdana, sans-serif;
+    font-variant: small-caps;
+    font-size: 14px;
+    display: flex;
+    align-items: center; 
+    justify-content: center;
+    text-align: center;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+}
+
+#dashboardHeaderMenu
+{
+    display: none;
+    width: 150px;
+    font-family: Verdana, sans-serif;
+    font-variant: small-caps;
+}
+
+/*#embedAutoLogoContainer
+{
+    display: none;
+}
+
+#embedAutoLogo
+{
+    width: 232px;
+    height: 30px;
+}*/
+
+#authorizedPagesTable
+{
+    width: 100%;
+}
+
+#authorizedPagesTable th, #authorizedPagesTable td
+{
+    text-align: center;
+    font-weight: normal;
+}
+
+#authorizedPagesTable th, #authorizedPagesTable td
+{
+    background-color: white;
+}
+
+#authorizedPagesTable i.fa-plus
+{
+    font-size: 24px;
+    color: #f3cf58;
+}
+
+#authorizedPagesTable i.fa-minus
+{
+    font-size: 24px;
+    color: #337ab7;
+}
+
+#authorizedPagesTable i.fa-plus:hover, #authorizedPagesTable i.fa-minus:hover 
+{
+    cursor: pointer;
+    color: red;
+}
+
+label[for='authorizedPages'], #authorizedPagesTable
+{
+    margin-top: 10px;
+}
+
+.editable-click, a.editable-click, a.editable-click:hover
+{
+    border-bottom: none!important;
+}
+
+#authorizedPagesTable th, #authorizedPagesTable td
+{
+    background-color: transparent;
+}
+
+#authorizedPagesTable thead tr
+{
+    background-color: rgba(0, 162, 211, 1);
+    color: white;
+}
+
+#authorizedPagesTable tbody tr:nth-child(odd)
+{
+    background-color: rgb(230, 249, 255);
+}
+
+#authorizedPagesTable tbody tr:nth-child(even)
+{
+    background-color: white;
+}
+
+#embedDashboardCode
+{
+    width: 100%;
+}
+
+#embedDashboardModal div.modal-dialog
+{
+    width: 95vw;
+}
+
+#modalEmbedDasboardBodyContent
+{
+    height: 80vh;
+}
+
+#embedPreviewContainer
+{
+    overflow: auto;
+    position: relative;
+}
+
+#embedDashboardModal .modal-title
+{
+    text-align: center;
+}
+
+
+#embedPreviewIframe
+{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#autofitAlert
+{
+    display: none;
+    font-family: Verdana, sans-serif;
+    background-color: black;
+    color: white;
+    opacity: 0.7;
+    width: 400px;
+    height: 400px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 999999;
+}
+
+#autofitAlertMsgContainer
+{
+    display: flex;
+    align-items: flex-end; 
+    justify-content: center;
+    text-align: center;
+}
+
+#autofitAlertIconContainer
+{
+    display: flex;
+    align-items: flex-start; 
+    justify-content: center;
+    text-align: center;
+}
+
+div.selectorMenuCustomIcon
+{
+    display: none;
+    width: 100%;
+    height: 100%;
+}
+
+#modal-add-metric div.modal-body, #modalEditMetric div.modal-body, #modalDelMetric div.modal-body, #modalAddWidgetType div.modal-body, 
+#modalEditWidgetType div.modal-body, #modalDelWidgetType div.modal-body, #modalAddDs div.modal-body, #modalEditDs div.modal-body,
+#modalDelDs div.modal-body, #saveDashboardModal div.modal-body, #modalDelWidget div.modal-body
+{
+    height: auto;
+}
+
+#delMetricOkMsg, #delMetricOkIcon, #delMetricKoMsg, #delMetricKoIcon, #addWidgetTypeLoadingMsg, #addWidgetTypeLoadingIcon, #addWidgetTypeOkMsg, #addWidgetTypeOkIcon, #addWidgetTypeKoMsg, #addWidgetTypeKoIcon,
+#delWidgetTypeLoadingMsg, #delWidgetTypeLoadingIcon, #delWidgetTypeOkMsg, #delWidgetTypeOkIcon, #delWidgetTypeKoMsg, #delWidgetTypeKoIcon,
+#editWidgetTypeLoadingMsg, #editWidgetTypeLoadingIcon, #editWidgetTypeOkMsg, #editWidgetTypeOkIcon, #editWidgetTypeKoMsg, #editWidgetTypeKoIcon,
+#addDsLoadingMsg, #addDsLoadingIcon, #addDsOkMsg, #addDsOkIcon, #addDsKoMsg, #addDsKoIcon,
+#editDsLoadingMsg, #editDsLoadingIcon, #editDsOkMsg, #editDsOkIcon, #editDsKoMsg, #editDsKoIcon,
+#delDsLoadingMsg, #delDsLoadingIcon, #delDsOkMsg, #delDsOkIcon, #delDsKoMsg, #delDsKoIcon
+{
+    display: none;
+}
+
+div.mainPageTitleContainer
+{
+    font-size: 28px;
+}
+
+body.guiPageBody
+{
+    width: 100vw;
+    height: 100vh;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    font-family: 'Montserrat';
+}
+
+#loginBody, #accountEnableBody
+{
+    background: url("../img/loginPageBackground.jpg") no-repeat center center;
+    background-size: cover;
+}
+
+body.dashboardViewBodyAuth 
+{
+   width: 100vw;
+   height: 100vh;
+   overflow-x: hidden;
+   overflow-y: hidden;
+   font-family: 'Montserrat';
+   background: url("../img/loginPageBackground.jpg") no-repeat center center;
+   background-size: cover;
+}
+
+#authFormDarkBackground
+{
+    display: none;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.55);
+    position: relative;
+}
+
+#logoutViewModal
+{
+    font-family: 'Montserrat';
+}
+
+/*PARTE NUOVA*/
+
+#modalEditDashboard, #modal-duplicate-dashboard, #embedDashboardModal
+{
+    font-family: 'Montserrat';
+}
+
+#embedDashboardModalBody, #embedDashboardModalFooter
+{
+    background: rgb(241, 245, 244);
+}
+
+.embedDashboardModalColumn, .embedDashboardModalColumnInner
+{
+    height: 100%;
+}
+
+.embedDashboardModalColumnInner
+{
+    background: white;
+}
+    
+.container-fluid
+{
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+.row
+{
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+#modal-add-widget .row, #modal-modify-widget .row
+{
+    margin-top: 5px;
+    margin-bottom: 10px !important;
+}
+
+#loginBody .row
+{
+    margin-left: -15px;
+    margin-right: -15px;
+}
+
+.navbar
+{
+    min-height: 0px;
+    margin-bottom: 0px;
+}
+
+.col-md-2, .col-md-10
+{
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+.centerWithFlex
+{
+    display: flex;
+    align-items: center; 
+    justify-content: center;
+    text-align: center;
+}
+
+.leftWithFlex
+{
+    display: flex;
+    align-items: flex-start; 
+    justify-content: flex-start;
+}
+
+#headerClaimCnt
+{
+    background-color: rgba(0, 162, 211, 1);
+    color: white;
+    height: 50px;
+    width: 100%;
+    float: left;
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+#mobHeaderClaimCnt
+{
+    background-color: rgba(0, 162, 211, 1);
+    color: white;
+    float: left;
+    font-size: 1em;
+    font-weight: bold;
+}
+
+#headerTitleCnt
+{
+    height: 75px;
+    font-size: 2em;
+    font-weight: bold;
+    background: rgba(51, 64, 69, 1);
+    color: white;
+}
+
+@media(min-width:992px) 
+{
+    #headerTitleCnt
+    {
+        height: 50px;
+    }
+}
+
+#headerMenuCnt
+{
+    height: 75px;
+    background: #eebb11;
+    font-size: 2em;
+    color: white;
+}
+
+#mainContainer
+{
+    margin-top: 75px;
+}
+
+@media(min-width:992px) 
+{
+    #mainContainer
+    {
+        margin-top: 100px;
+    }
+}
+
+#mainMenuCnt
+{
+    background-color: rgba(51, 64, 69, 1);
+    color: white;
+    height: 100vh;
+    /*overflow-y: auto;*/
+}
+
+#mainContentCnt
+{
+    overflow-y: auto;
+    background-color: rgba(138, 159, 168, 1);
+    font-size: 14px;
+}
+
+div.mainContentCellCnt
+{
+    background: white;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+#dashboardTotNumberCnt div.pageSingleDataCnt, #dashboardTotNumberCnt div.pageSingleDataLabel
+{
+    background: #f3cf58;
+}
+
+#dashboardTotActiveCnt div.pageSingleDataCnt, #dashboardTotActiveCnt div.pageSingleDataLabel
+{
+    background: rgb(69, 183, 175);
+}
+
+#dashboardTotPermCnt div.pageSingleDataCnt, #dashboardTotPermCnt div.pageSingleDataLabel
+{
+    background: #e37777;
+}
+
+#dashboardLastCnt div.lastDashName, #dashboardLastCnt div.pageSingleDataLabel
+{
+    background: rgba(0, 162, 211, 1);
+}
+
+div.mainContentRowDesc
+{
+    font-size: 1.6em;
+    color: rgba(51, 64, 69, 1);
+    margin-bottom: 14px;
+}
+
+div.accountEditDescContainer
+{
+    font-size: 1em;
+    color: rgba(51, 64, 69, 1);
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+div.accountEditIconContainer
+{
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+div.accountEditIconContainer i
+{
+    font-size: 1.1em;
+}
+
+@media(min-width:992px) 
+{
+    div.accountEditDescContainer
+    {
+        font-size: 1.4em;
+        margin-bottom: 10px;
+    }
+    
+    div.accountEditIconContainer
+    {
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+
+    div.accountEditIconContainer i
+    {
+        font-size: 1.5em;
+    }
+}
+
+#accountFirstName, #accountLastName, #accountOrganization, #accountEmail, #accountPassword, #accountPasswordConfirmation
+{
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    border-bottom: 1px solid rgba(0, 162, 211, 1);
+    width: 100%;
+    font-size: 1.2em;
+    margin-bottom: 10px;
+}
+
+#accountFirstNameMsg, #accountLastNameMsg, #accountOrganizationMsg, #accountEmailMsg, #accountPasswordMsg, #accountPasswordConfirmationMsg
+{
+    font-size: 0.95em;
+}
+
+
+
+div.pageSingleDataCnt
+{
+    padding-top: 14px;
+    padding-bottom: 14px;
+    font-size: 2em;
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+div.lastDashName
+{
+    padding-top: 14px;
+    padding-bottom: 14px;
+    font-size: 2em;
+    color: white;
+    font-weight: bold;
+}
+
+div.lastDashName a
+{
+    text-decoration: none;
+    color: white;
+}
+
+div.lastDashName a:hover
+{
+    text-decoration: none;
+    color: #f3cf58;
+}
+
+div.mainContentRow
+{
+    background: white;
+    margin-top: 15px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+div.pageSingleDataLabel
+{
+    font-size: 1.1em;
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+div.dashEditMenuItemCnt
+{
+    font-family: 'Montserrat';
+    color: #eeeeee;
+    font-size: 1em;
+    font-weight: 400;
+    border: none;
+    background-color: rgba(51, 64, 69, 1);
+    border-left: 1px solid #595959;
+    border-top: 1px solid #595959;
+    border-right: 1px solid #333333;
+    border-bottom: 1px solid #333333;
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+}
+
+div.dashEditMenuItemCnt:hover
+{
+    background: rgba(0, 162, 211, 1);
+    font-weight: bold;
+}
+
+div.dashEditMenuIconCnt, div.dashEditMenuTxtCnt
+{
+    /*width: 100%;
+    float: left;
+    display: flex;
+    align-items: center; 
+    justify-content: center;*/
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+    
+}
+
+div.dashEditMenuTxtCnt
+{
+    font-size: 1em;
+}
+
+div.dashEditMenuIconCnt
+{
+   font-size: 1.45em;
+}
+
+.mainMenuItemCnt, .mainMenuItemCnt a, .mobMainMenuItemCnt, .mobMainMenuItemCnt a, .mainMenuSubItemLink
+{
+    color: #eeeeee;
+}
+
+div.mainMenuItemCnt
+{
+    height: 25px;
+    font-size: 12px;
+    display: flex;
+    align-items: center; 
+    justify-content: flex-start;
+    border: none;
+    border-top: 1px solid #595959;
+    border-bottom: 1px solid #333333;
+    border-right: 1px solid #333333;
+    white-space: nowrap; 
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media(min-width:992px) 
+{
+    div.mainMenuItemCnt
+    {
+        height: 35px;
+        font-size: 0.95em;
+        font-weight: 400;
+        border: none;
+        border-top: 1px solid #595959;
+        border-bottom: 1px solid #333333;
+    }    
+}
+
+div.mainMenuSubItemCnt
+{
+    height: 20px;
+    font-size: 10px;
+    font-weight: 400;
+    display: flex;
+    align-items: center; 
+    justify-content: flex-start;
+    border: none;
+    border-top: 1px solid #364449;
+    border-right: 1px solid #364449;
+    background-color: rgba(76, 95, 103, 1);
+    white-space: nowrap; 
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media(min-width:992px) 
+{
+    div.mainMenuSubItemCnt
+    {
+        height: 25px;
+        font-size: 0.85em;
+        font-weight: 400;
+        border: none;
+        border-top: 1px solid #595959;
+        border-bottom: 1px solid #333333;
+    }    
+}
+
+div.mainMenuSubItemCnt:hover
+{
+    cursor: pointer;
+    background-color: rgba(0, 162, 211, 1);
+    color: white;
+}
+
+div.mobMainMenuItemCnt
+{
+    padding-top: 3px;
+    padding-bottom: 3px;
+    font-size: 0.65em;
+    font-weight: 400;
+    display: flex;
+    align-items: center; 
+    justify-content: flex-start;
+    border: none;
+    border-top: 1px solid #595959;
+    border-bottom: 1px solid #333333;
+}
+
+#mobMainMenuBtn
+{
+    font-size: 36px;
+}
+
+#porHr
+{
+    margin-bottom: 0px !important;
+}
+
+#landHr
+{
+    margin-top: 0px !important;
+    margin-bottom: 0px !important;
+}
+
+div.mainMenuItemCnt:hover
+{
+    cursor: pointer;
+    background: rgba(0, 162, 211, 1);
+}
+
+div.mainMenuItemCntActive
+{
+    background: rgba(0, 162, 211, 1);
+    font-weight: bold;
+}
+
+div.subMenuItemCntActive
+{
+    background: rgba(0, 162, 211, 1);
+    font-weight: bold;
+    color: white;
+}
+
+a.moduleLink:hover
+{
+    text-decoration: none;
+}
+
+.mainMenuUsrCnt
+{
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+.editDashBtn
+{
+    background-color: rgb(69, 183, 175);/*#5cb85c;*/
+    border: none;
+    color: white;
+    font-family: 'Montserrat';
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-bottom: 5px;
+}
+
+.deleteDashBtn
+{
+    background-color: rgb(183, 69, 84);/*#5cb85c;*/
+    border: none;
+    color: white;
+    font-family: 'Montserrat';
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-bottom: 5px;
+}
+
+.dashBtnCard
+{
+    border: none;
+    font-weight: normal;
+    background-color: rgba(51, 64, 69, 1);
+    color: white;
+    /*border-radius: 5px;*/
+    font-size: 11px;
+    margin-bottom: 10px;
+    width: 100px !important;
+}
+
+.dashBtnCard:hover
+{
+    background-color: rgba(0, 162, 211, 1);
+    font-weight: bold;
+}
+
+.viewDashBtn
+{
+    background-color: rgba(0, 162, 211, 1);
+    border: none;
+    color: white;
+    font-family: 'Montserrat';
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-bottom: 5px;
+}
+
+.viewDashBtnCard
+{
+    height: 100%;
+    border: none;
+    font-weight: bold;
+    /*text-transform: uppercase;*/
+}
+
+.undeletableDashBtn, .undeletableMetricBtn
+{
+    height: 20px;
+    background-color: transparent;
+    border: none;
+    color: rgba(0, 162, 211, 1);
+    font-family: 'Montserrat';
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.undeletableMetricBtn
+{
+    font-size: 10px;
+}
+
+.undeletableDashBtn:hover
+{
+    cursor: default;
+}
+
+#mainMenuUsrCnt
+{
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+#mainMenuUsrDetCnt
+{
+    font-size: 1em;
+    font-weight: normal;
+}
+
+#mobMainMenuUsrCnt, #mobMainMenuUsrDetCnt, #mobMainMenuUsrLogoutCnt
+{
+    font-size: 0.5em;
+    font-weight: normal;
+}
+
+@media(orientation: landscape)
+{
+    #mobMainMenuUsrCnt, #mobMainMenuUsrDetCnt, #mobMainMenuUsrLogoutCnt
+    {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+    
+    #mobMainMenuUsrCnt img
+    {
+        width: 20px;
+        height: 20px;
+    }
+    
+    #mobMainMenuUsrCnt
+    {
+        font-weight: bold;
+    }
+}
+
+#mainMenuUsrLogoutCnt
+{
+    display: none;
+}
+
+#mobMainMenuUsrLogoutBtn
+{
+    background: #e37777;
+}
+
+div.accountEditFieldContainer
+{
+    background: white;
+}
+
+div.modalHeader
+{
+    width: 100%;
+    background: rgba(51, 64, 69, 1);
+    font-size: 1.8em;
+    font-weight: bold;
+    color: white;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+
+div.modalBody
+{
+    background: white;
+    padding-top: 0px !important;
+    padding-bottom: 0px !important;
+}
+
+div.modalCell
+{
+    background: white;
+    margin-top: 15px;
+}
+
+.modalFieldLabelCnt
+{
+    font-size: 1em;
+    font-weight: bold;
+}
+
+.modalInputTxt
+{
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    border-bottom: 1px solid rgba(0, 162, 211, 1);
+    /*border-bottom: none;
+    background: rgb(230, 249, 255);*/
+    width: 100%;
+    text-align: left;
+    padding: 6px 0px;
+}
+
+.modalInputTxt:focus
+{
+    outline-style:none;
+    box-shadow:none;
+}
+
+.modalInputTxtArea
+{
+    border: 1px solid rgba(0, 162, 211, 1);
+    width: 100%;
+    text-align: left;
+}
+
+.modalInputTxtArea:focus
+{
+    outline-style:none;
+    box-shadow:none;
+}
+
+.cancelBtn
+{
+    color: white;
+    background: #f3cf58;
+}
+
+.confirmBtn
+{
+    color: white;
+    background: rgba(0, 162, 211, 1);
+}
+
+.modalDelMsg
+{
+    font-size: 1.2em;
+}
+
+.modalDelObjName
+{
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-top: 20px;
+}
+
+.modalFieldMsgCnt
+{
+    font-size: 0.8em;
+}
+
+#addUserPoolsRow
+{
+    margin-top: 20px;
+}
+
+#addMetricLoadingMsg, #addMetricLoadingIcon, #addMetricOkMsg, #addMetricOkIcon, #addMetricKoMsg, #addMetricKoIcon,
+#editMetricLoadingMsg, #editMetricLoadingIcon, #editMetricOkMsg, #editMetricOkIcon, #editMetricKoMsg, #editMetricKoIcon
+{
+    display: none;
+}
+
+#editPoolsNamesButtonsContainer, #editPoolsButtonsContainer
+{
+    margin-top: 15px;
+}
+
+#addUsersToPoolBtn, #delUsersFromPoolBtn
+{
+    color: rgba(0, 162, 211, 1);
+}
+
+#addUsersToPoolBtn:hover, #delUsersFromPoolBtn:hover
+{
+    color: rgb(69, 183, 175);
+}
+
+#delUsersFromPoolBtn:hover
+{
+    color: #e37777;
+}
+
+input[type="text"]:disabled
+{
+    background-color: transparent;
+}
+
+.customColorChoice .input-group-addon
+{
+    padding: 0px;
+    background-color: white;
+    border-radius: 0;
+    border: 1px solid rgba(0, 162, 211, 1);
+}
+
+#loginBody
+{
+    background: url("../img/loginPageBackground.jpg") no-repeat center center;
+    background-size: cover;
+}
+
+#loginBody div.container-fluid
+{
+    background: rgba(0, 0, 0, 0.55);
+}
+
+#loginMainTitle
+{
+    font-size: 2.4em;
+    font-weight: bold;
+    color: white;
+    background: rgba(0, 162, 211, 1);
+}
+
+#loginFooter
+{
+    font-size: 1.3em;
+    color: white;
+    background: rgba(0, 162, 211, 1);
+    font-weight: bold;
+}
+
+#loginFooter a
+{
+    color: #f3cf58;
+}
+
+#loginFormTitle
+{
+    width: 100%;
+    background: rgba(0, 162, 211, 1);
+    font-size: 1.6em;
+    font-weight: bold;
+    color: white;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+
+#loginFormContainer
+{
+    background: white;
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+#inputUsername:-webkit-autofill, #authFormContainer #username, #authFormContainer #password, #inputPassword:-webkit-autofill, 
+#enableAccountFormContainer #accountActivationPwd, #enableAccountFormContainer #accountActivationConfirmPwd  
+{
+    background-color: white !important;
+    -webkit-box-shadow: 0 0 0px 1000px white inset; /*Per rimuovere il giallo causato dal browser*/
+}
+
+#accountActivationConfirmPwdMsg, #accountActivationPwdMsg
+{
+    font-size: 0.9em;
+}
+
+#loginCancelBtn
+{
+    margin-right: 15px;
+}
+
+#loginRightCol
+{
+    
+}
+
+#loginBody .container-fluid
+{
+    height: 100%;
+}
+
+.loginFeaturesCell
+{
+    background: transparent;
+    margin-bottom: 30px;
+}
+
+.loginFeaturesCellTxt
+{
+    color: white;
+    font-size: 1.2em;
+    font-weight: bold;
+    text-align: center;
+}
+
+@media(min-width: 1600px) 
+{
+    .loginFeaturesCellTxt
+    {
+        font-size: 1.4em;
+    }
+}
+
+.loginFeaturesCellContent
+{
+    
+}
+
+.loginFeaturesCellContent i.fa
+{
+    color: white;
+    font-size: 3.5em;
+}
+
+#loginFeaturesContainer
+{
+    
+}
+
+#enableAccountFormContainer
+{
+    background: white;
+}
+
+#cloneDashboardModal
+{
+    font-family: 'Montserrat';
+}
+
+#cloningDashboardFormRow, #duplicateDashboardLoadingRow, #duplicateDashboardOkRow, #duplicateDashboardKoRow, #cloneDashboardModalFooter, #duplicateDashboardLoadingTitlesKoRow, #duplicateDashboardWarningRow
+{
+    display: none;
+}
+
+#cloneDashboardTitleMsg
+{
+    font-size: 12px;
+}
+
+#cloneDashboardTitleMsg.error
+{
+    font-style: italic;
+    font-weight: bold;
+    color: #f3cf58;
+}
+
+#cloneDashboardTitleMsg.ok
+{
+    font-style: italic;
+    font-weight: bold;
+    color: white;
+}
+
+#authFormMessage
+{
+    font-size: 0.9em;
+    color: red;
+}
+
+#loginFormMessage
+{
+    font-size: 0.9em;
+    color: red;
+}
+
+#sessionExpiringPopup
+{
+    display: none;
+    opacity: 0;
+    transition: opacity 1s linear;
+    position: fixed;
+    width: 225px;
+    height: 110px;
+    background: #ff6666;
+    font-family: 'Montserrat';
+    z-index: 999999;
+}
+
+#sessionExpiringPopupMsg
+{
+    padding-top: 5px;
+    padding-bottom: 5px;
+    font-size: 1.2em;
+}
+
+#sessionExpiringPopupTime
+{
+    padding-top: 5px;
+    padding-bottom: 5px;
+    font-size: 1.4em;
+    font-weight: bold;
+}
+
+#sessionExpiringPopupIcon
+{
+    padding-top: 5px;
+    padding-bottom: 5px;
+    font-size: 28px;
+}
+
+
+@media(max-width: 992px) 
+{
+    .accountEditFieldContainer 
+    {
+        margin-bottom: 15px;
+    }
+}
+
+@media(min-width: 992px) 
+{
+    .accountEditRow 
+    {
+        margin-top: 15px;
+    }
+}
+
+#mobMainMenuCnt
+{
+    display: none;
+    opacity: 0;
+    transition: opacity 0.35s linear;
+    position: fixed;
+    left: 0px;
+    width: 100vw;
+    background: rgba(51, 64, 69, 1);
+    z-index: 999999 !important;
+}
+
+#link_widgets_mng i
+{
+    color: #d84141;
+}
+
+#link_sources_mng i
+{
+    color: #ff66ff;
+}
+
+#link_pools_management i
+{
+    color: #59c0b9;
+}
+
+#link_metric_mng i
+{
+    color: #ff9933;
+}
+
+#link_user_register i
+{
+    color: #ccffff;
+}
+
+#notificatorLink i
+{
+    color: #9999ff;
+}
+
+#editAccountBtnRow
+{
+    margin-bottom: 30px;
+}
+
+@media(min-width: 992px) 
+{
+    #editAccountBtnRow
+    {
+        margin-bottom: 0px;
+    }
+}
+
+@media(orientation: portrait)
+{
+    #mobMainMenuUsrCnt
+    {
+        font-size: 0.65em;
+        font-weight: bold;
+    } 
+}
+
+@media(orientation: landscape)
+{
+    div.mobMainMenuItemCnt
+    {
+        border-left: 1px solid #595959;
+        border-right: 1px solid #333333;
+        border-top: 1px solid #595959;
+        border-bottom: 1px solid #333333;
+    }
+}
+
+#editModuleOkMsg, #editModuleLoadingMsg, #editModuleKoMsg
+{
+    display: none;
+}
+
+#modalEditModuleStd ul.nav, #modalEditModuleStd div.tab-content, #editModuleEnvLoadingMsg, #editModuleEnvOkMsg, #editModuleEnvKoMsg,
+#delModuleLoadingMsg, #delModuleOkMsg, #delModuleKoMsg
+{
+    display: none;
+}
+
+.editModuleEnvLabel
+{
+    float: left;
+    width: 33.3333%; 
+}
+
+#widgetEntityRow, #widgetAttributeRow, #widgetActuatorTypeRow,
+#selectMetricRow, #metricDescRow, #inputComuneRow, #widgetTypeRow, 
+#selectedMetricRow, #widgetLinkRow, #schedulerRow, #jobsAreasRow, #jobsGroupsRow, #jobsNamesRow,
+#selectMetricRowNR, #metricDescRowNR, #inputComuneRowNR, #widgetTypeRowNR, #selectedMetricRowNR, #widgetLinkRowNR
+{
+    display: none;
+}
+
+#widgetEntityRowM, #widgetAttributeRowM, #widgetActuatorTypeRowM, #metricWidgetMRow, #inputNameWidgetMRow, #select-widget-mRow, #inputComuneRowM,
+#urlWidgetMRow, #textarea-metric-widget-mRow, #schedulerRowM, #jobsAreasRowM, #jobsGroupsRowM, #jobsNamesRowM
+{
+    display: none;
+}
+
+#entityTypeRow, #entityDescRow, #entityAttrNameRow, #entityAttrDescRow, #entityAttrTypeRow, #entityAttrStartValueRow,
+#entityIdRowM, #entityTypeRowM, #entityDescRowM, #entityAttrNameRowM, #entityAttrDescRowM, #entityAttrTypeRowM, #widgetActuatorTypeRowM
+{
+    display: none;
+}
+
+#editDashboardMainContainerFluid
+{
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/*Direttive per lo spinner input*/
+.spinner 
+{
+  border-radius: 0px;
+  border: none;
+}
+
+#updateFrequencyHourContainer, #updateFrequencyMinContainer, #updateFrequencySecContainer,
+#oldDataEvalTimeHourContainer, #oldDataEvalTimeMinContainer, #oldDataEvalTimeSecContainer
+{
+    width: 33%;
+    float: left;
+}
+
+.spinner input 
+{
+    text-align: center;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    border-bottom: 1px solid rgba(0, 162, 211, 1);
+    border-radius: 0px;
+    box-shadow: none;
+}
+
+.spinner .input-group-btn-vertical 
+{
+  position: relative;
+  white-space: nowrap;
+  width: 1%;
+  vertical-align: middle;
+  display: table-cell;
+}
+
+.spinner .input-group-btn-vertical > .btn 
+{
+  display: block;
+  float: none;
+  width: 100%;
+  max-width: 100%;
+  padding: 8px;
+  margin-left: -1px;
+  position: relative;
+  border-radius: 0;
+  background-color: white;
+  border: none;
+}
+
+.spinner .input-group-btn-vertical > .btn:first-child 
+{
+  /*border-top-right-radius: 4px;*/
+}
+
+.spinner .input-group-btn-vertical > .btn:last-child 
+{
+  margin-top: 1px;
+  border-bottom: 1px solid rgba(0, 162, 211, 1);
+}
+
+.spinner .input-group-btn-vertical i
+{
+  position: absolute;
+  top: 0;
+  left: 4px;
+}
+
+#sameDataAlarmCount[readonly="true"], #sameDataAlarmCountM[readonly="true"], #updateFrequencyHour[readonly="true"], #updateFrequencyMin[readonly="true"], #updateFrequencySec[readonly="true"],
+#updateFrequencyHourM[readonly="true"], #updateFrequencyMinM[readonly="true"], #updateFrequencySecM[readonly="true"],
+#oldDataEvalTimeHour[readonly="true"], #oldDataEvalTimeMin[readonly="true"], #oldDataEvalTimeSec[readonly="true"],
+#oldDataEvalTimeHourM[readonly="true"], #oldDataEvalTimeMinM[readonly="true"], #oldDataEvalTimeSecM[readonly="true"]
+{
+    background-color: white;
+}
+
+#addMetricQueryTabServerRow, #editMetricQueryTabServerRow
+{
+    display: none;
+}
+
+#saveDashboardModalMsg
+{
+    font-size: 1.4em;
+}
+
+#saveDashboardModalIcon
+{
+    font-size: 2em;
+}
+
+#saveDashboardModalOkIcon, #saveDashboardModalKoIcon
+{
+    display: none;
+}
+
+#delWidgetOkMsg, #delWidgetKoMsg, #delWidgetRunningMsg
+{
+    display: none;
+}
+
+#iframePagemainContentCnt
+{
+    overflow-y: hidden;
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+    /*height: 100%;*/
+}
+
+#iframeApp
+{
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+#modalAddDashboardWizard
+{
+    color: white;
+}
+
+#modalAddDashboardWizard div.modal-dialog
+{
+    width: 98vw;
+}
+
+.modalAddDashboardWizardChoiceCnt
+{
+    font-weight: bold !important;
+    margin-top: 25px !important;
+}
+
+#modalAddDashboardWizardAvailabilityMsg
+{
+    display: none;
+    font-weight: bold;
+    color: #f3cf58;
+    margin-top: 25px !important;
+}
+
+.modalAddDashboardWizardChoiceCnt:hover
+{
+    cursor: pointer;
+    background-color: rgb(138, 159, 168) !important;
+    font-style: italic;
+}
+
+.modalAddDashboardWizardChoiceCntSelected
+{
+    background-color: rgb(138, 159, 168) !important;
+    font-style: italic;
+}
+
+.modalAddDashboardWizardChoicePic
+{
+    /*height: 210px;*/
+    width: 75%;
+    margin-left: 12.5%;
+    background-size: 100% auto;
+    background-repeat: no-repeat;
+    background-position: center center;
+}
+
+#modalAddDashboardWizardTitleAlreadyUsedMsg, #modalAddDashboardWizardTemplateMsg, #wizardTab1MsgCnt
+{
+    font-style: italic;
+    font-size: 12px;
+    font-weight: bold;
+    color: rgb(243, 207, 88);
+}
+
+#widgetInfoModal .modalHeader
+{
+    background-color: rgba(51, 64, 69, 1) !important;   
+}
+
+#widgetInfoModalFooter
+{
+    padding-top: 0px !important;
+}
+
+#widgetInfoModalBodyView
+{
+    background-color: rgba(108, 135, 147, 1) !important;
+    color: white;
+}
+
+#mainMenuScrollableCnt.col-md-12, .mainMenuScrollBtnsCnt.col-md-12
+{
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+}
+
+#mainMenuScrollableCnt
+{
+    
+}
+
+#mainMenuInnerCnt
+{
+    position: relative;
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+}
+
+#delDashRunningMsg, #delDashOkMsg, #delDashKoMsg, #limitsDashKoMsg
+{
+    display: none;
+}
+
+#dashToDelPic, #dashToClonePic
+{
+    height: 250px;
+}
+
+#dashToClonePic
+{
+    margin-top: 5px !important;
+    margin-bottom: 15px;
+}
+
+.dashboardsListCardVisibilityDiv
+{
+    color: white;
+    font-size: 11px;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+.dashboardsListCardIotDiv
+{
+    /*border: 1px solid red;*/
+    color: white;
+    font-weight: normal;
+    font-style: normal;
+    font-size: 12px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+#delDashModalBody, #delDashModalFooter, #delDashNameMsg, #cloneDashboardModalBody, #cloneDashboardModalFooter, #delegationsModalBody, #delegationsModalFooter,
+#iotAppsModalBody, #iotAppsModalFooter, #checkDashLimitsModalBody, #checkDashLimitsModalFooter
+{
+    background-color: rgba(108, 135, 147, 1) !important;
+}
+
+#delegationsModalBody
+{
+    min-height: 26vh;
+}
+
+#delDashNameMsg
+{
+    color: white !important;
+}
+
+#currentDashboardTitleCnt
+{
+    margin-bottom: 10px;
+}
+
+#currentDashboardTitle
+{
+    font-weight: bold; 
+    margin-top: 6px; 
+    color: white;
+}
+
+#cloneDashboardModal
+{
+    color: white;
+}
+
+#delegationsDashPic
+{
+    height: 250px;
+    margin-top: 0px !important;
+    margin-bottom: 15px;
+}
+
+.delegationsModalTxt
+{
+    font-weight: bold;
+    color: white;
+}
+
+#newDelegationLbl, #currentDelegationsLbl
+{
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+    font-weight: bold;
+    color: white;
+}
+
+#currentDelegationsLbl
+{
+    margin-top: 25px;
+}
+
+#newDelegationCnt
+{
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+}
+
+#newDelegation
+{
+    width: 100%;
+}
+
+#delegationsTableCnt
+{
+    max-height: 200px;
+    overflow-y: auto;
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+}
+
+#delegationsTable
+{
+    width: 100%;
+}
+
+#delegationsTable thead
+{
+    background-color: #576c75 !important;
+    color: white;
+}
+
+#delegationsTable td, #delegationsTable th
+{
+    text-align: center;
+}
+
+.removeDelegationBtn
+{
+    color: red;
+    font-size: 18px;
+}
+
+.delegatedName
+{
+    color: #576c75;
+}
+
+tr.delegationTableRow:nth-child(odd)
+{
+    background-color: #f9f9f9;
+}
+
+tr.delegationTableRow:nth-child(even)
+{
+    background-color: #ffffff;
+}
+
+.removeDelegationBtn:hover
+{
+    cursor: pointer;
+    color: #f3cf58;
+}
+
+#newDelegatedMsg, .delegationsModalMsg
+{
+    color: #f3cf58;
+    font-style: italic;
+    font-weight: bold;
+    font-size: 12px;
+    padding-left: 0px !important; 
+    padding-right: 0px !important;
+}
+
+span.dashboardListCardTypeSpan[data-hasIotModal="true"]:hover
+{
+    cursor: pointer;
+    color: rgb(255, 204, 0);
+}
+
+#iotAppsModal div.modal-dialog
+{
+   width: 98vw;
+}
+
+#iotAppsDashPic
+{
+    height: 155px;
+    margin-top: 0px !important;
+    /*margin-bottom: 15px;*/
+}
+
+#iotAppsTableCnt
+{
+    max-height: 300px;
+    overflow-y: auto;
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+}
+
+#iotAppsTable
+{
+    width: 100%;
+}
+
+#iotAppsTable thead
+{
+    background-color: #576c75 !important;
+    color: white;
+}
+
+#iotAppsTable td, #iotAppsTable th
+{
+    text-align: center;
+}
+
+.iotAppName
+{
+    color: #576c75;
+    margin-top: 0px !important;
+}
+
+tr.iotAppsTableRow:nth-child(odd)
+{
+    background-color: #f9f9f9;
+}
+
+tr.iotAppsTableRow:nth-child(even)
+{
+    background-color: #ffffff;
+}
+
+.iotAppName:hover
+{
+    cursor: pointer;
+    font-weight: bold;
+    background-color: #f3cf58;
+}
+
+#iotAppsIframe
+{
+    width: 100%;
+    height: 80vh;
+}
+
+.iotAppsModalLbl
+{
+    font-weight: bold;
+    color: white;
+    margin-top: 10px;
+}
+
+#iotAppsNoAppsCnt
+{
+    font-style: italic;
+    font-size: 12px;
+    font-weight: bold;
+    color: #f3cf58;
+}
+
+#delegationsModal div.modal-dialog
+{
+    width: 50vw;
+}
+
+.delegationsModalLbl
+{
+    font-weight: bold;
+    color: white;
+}
+
+#newOwnershipResultMsg, #newVisibilityResultMsg
+{
+    display: none;
+    font-weight: bold;
+    color: white;
+}
+
+#delegationsNotAvailableRow
+{
+    display: none;
+    font-weight: bold;
+    color: white;
+}
+
+/*div.modalScrOverlayDiv
+{
+    position: absolute;
+    top: 55px;
+    left: 0;
+    width: 90%;
+    margin-left: 5%;
+    background-color: black;
+    opacity: 0.05;
+    -webkit-transition: opacity 0.15s ease-in-out;
+    -ms-transition:     opacity 0.15s ease-in-out;
+    transition:         opacity 0.15s ease-in-out;
+}*/
+
+/**/
+
+#delegationsModal .nav-tabs > li.active > a, #delegationsModal .nav > li > a:hover, #delegationsModal .nav > li > a:focus
+{
+    background-color: transparent !important;
+    border-bottom: none !important;
+}
+
+#delegationsModal .nav > li > a:hover
+{
+    font-style: italic;
+}
+
+.modalFirstLbl
+{
+    margin-top: 15px;
+}
+
+/* Aggiunta per metriche HTTP - Jason Ravagli*/
+.invalid-field
+{
+    border: 2px solid red;
+}
+
+.error-feedback
+{
+    color: red;
+}
+
+.flex-center{
+    display: flex;
+    justify-content: center;
+}

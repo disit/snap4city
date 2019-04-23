@@ -1,0 +1,163 @@
+<!-- {{#response}} -->
+<div class="row" style="padding: 15px;">
+    <div class="col-sm-1">
+        <select id="selectSizeEngager" class="custom-select custom-select" onchange="EngagerPager.setCurrentSize($('#selectSizeEngager').val());EngagerTabler.renderTable();">
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="200">200</option>
+        </select>
+    </div>
+    
+     <div class="col-sm-5">
+        <button class="btn btn-warning" style="color: white; padding: 0.5rem;" type="button" onclick="EngagerTabler.editEngagerModal('disable');">
+            Disable<BR>Engagement</button>
+        <button class="btn btn-warning" style="color: white; padding: 0.5rem;" type="button" onclick="EngagerTabler.editEngagerModal('deleteall');">
+            Delete ALL</button>
+    </div>
+        
+    <div class="col-sm-3">
+        <div class="input-group" style="padding-right: 20px;">
+            <input type="text" id="inputFilterEngager" class="form-control" placeholder="Filter Table" aria-label="Filter Table"
+                aria-describedby="button-addon2" max="{{totalPages}}" min="1" \>
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="button" onclick="$('#inputFilterEngager').val('');EngagerFilter.setCurrentSearchKey(''); EngagerTabler.renderTable();"
+                    id="button-addon2" style="background-color: #eee;">&times;</button>
+            </div>
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="button" onclick="EngagerFilter.setCurrentSearchKey($('#inputFilterEngager').val()); EngagerTabler.renderTable();"
+                    id="button-addon2" style="background-color: #eee;">Search</button>
+            </div>
+        </div>
+    </div>
+</div>
+<table class="table table-striped table-bordered" style="background-color: white">
+    <thead>
+        <tr style="background: rgb(0, 162, 211); color: rgb(255, 255, 255); font-size: 1em;">
+            <th onclick="EngagerSorter.setSortOnField('id');EngagerTabler.renderTable();" style="cursor: pointer;">No.
+                {{#sortidASC}}&darr;{{/sortidASC}}
+                {{#sortidDESC}}&uarr;{{/sortidDESC}}</th>
+            <th onclick="EngagerSorter.setSortOnField('title');EngagerTabler.renderTable();" style="cursor: pointer;">Title
+                {{#sorttitleASC}}&darr;{{/sorttitleASC}}
+                {{#sorttitleDESC}}&uarr;{{/sorttitleDESC}}</th>
+            <th onclick="EngagerSorter.setSortOnField('subtitle');EngagerTabler.renderTable();" style="cursor: pointer;">Subtitle
+                {{#sortsubtitleASC}}&darr;{{/sortsubtitleASC}}
+                {{#sortsubtitleDESC}}&uarr;{{/sortsubtitleDESC}}</th>
+            <th onclick="EngagerSorter.setSortOnField('type');EngagerTabler.renderTable();" style="cursor: pointer;">Type
+                {{#sorttypeASC}}&darr;{{/sorttypeASC}} 
+                {{#sorttypeDESC}}&uarr;{{/sorttypeDESC}}</th>
+            <th onclick="EngagerSorter.setSortOnField('rulename');EngagerTabler.renderTable();" style="cursor: pointer;">Rulename
+                {{#sortrulenameASC}}&darr;{{/sortrulenameASC}} 
+                {{#sortrulenameDESC}}&uarr;{{/sortrulenameDESC}}</th>
+            <th onclick="EngagerSorter.setSortOnField('message');EngagerTabler.renderTable();" style="cursor: pointer;">Message
+                {{#sortmessageASC}}&darr;{{/sortmessageASC}} 
+                {{#sortmessageDESC}}&uarr;{{/sortmessageDESC}}</th>
+            <th onclick="EngagerSorter.setSortOnField('created');EngagerTabler.renderTable();" style="cursor: pointer;">Created
+                {{#sortcreatedASC}}&darr;{{/sortcreatedASC}}
+                {{#sortcreatedDESC}}&uarr;{{/sortcreatedDESC}}</th>
+            <th onclick="EngagerSorter.setSortOnField('elapse');EngagerTabler.renderTable();" style="cursor: pointer;">Elapse
+                {{#sortelapseASC}}&darr;{{/sortelapseASC}}
+                {{#sortelapseDESC}}&uarr;{{/sortelapseDESC}}</th>
+            <th onclick="EngagerSorter.setSortOnField('points');EngagerTabler.renderTable();" style="cursor: pointer;">Points
+                {{#sortpointsASC}}&darr;{{/sortpointsASC}} 
+                {{#sortpointsDESC}}&uarr;{{/sortpointsDESC}}</th>
+            <th onclick="EngagerSorter.setSortOnField('sendrate');EngagerTabler.renderTable();" style="cursor: pointer;">Sendrate
+                {{#sortsendrateASC}}&darr;{{/sortsendrateASC}} 
+                {{#sortsendrateDESC}}&uarr;{{/sortsendrateDESC}}</th>
+            <th onclick="EngagerSorter.setSortOnField('status');EngagerTabler.renderTable();" style="cursor: pointer;">Status
+                {{#sortstatusASC}}&darr;{{/sortstatusASC}} 
+                {{#sortstatusDESC}}&uarr;{{/sortstatusDESC}}</th>
+            <th onclick="EngagerSorter.setSortOnField('username');EngagerTabler.renderTable();" style="cursor: pointer;">Username
+                {{#sortusernameASC}}&darr;{{/sortusernameASC}} 
+                {{#sortusernameDESC}}&uarr;{{/sortusernameDESC}}</th>
+			<th>Controls</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- {{#content}} -->
+        <tr>
+            <td>{{id}}</td>
+            <td>{{title}}</td>
+            <td>{{subtitle}}</td>
+            <td>{{type}}</td>
+            <td>{{rulename}}</td>
+            <td>{{message}}</td>
+            <td>{{#timestampToDate}}{{created}}{{/timestampToDate}}</td>
+            <td>{{#timestampToDate}}{{elapse}}{{/timestampToDate}}</td>
+            <td>{{points}}</td>
+            <td>{{sendrate}}</td>
+			<td>{{status}}</td>
+            <td>{{username}}</td>
+            <td>
+                <button type="button" onclick="EngagerTabler.deleteEngagementModal({{id}}, '{{title}}', '{{rulename}}');"
+                    class="btn deleteDashBtn">Delete</button>
+            </td>
+        </tr>
+        <!-- {{/content}} -->
+    </tbody>
+</table>
+</div>
+
+<div class="row">
+    <div class="col-sm-3">
+        <div class="pagination" style="background-color: #eee; text-align: center">
+            <p>Showing <span class="badge">{{showingFrom}}</span> to
+                <span class="badge"> {{showingTo}}</span>
+                of
+                <span class="badge">{{totalElements}}</span>
+                Engagements</p>
+        </div>
+    </div>
+
+    <div class="col-sm-5 offset-sm-2">
+        <!-- Pagination Bar -->
+        <div th:fragment='paginationbar'>
+            <div class="text-center">
+                <ul class='pagination pagination-centered'>
+                    <li class="page-item {{#first}} disabled {{/first}}">
+                        <span class="page-link" style="color: #337ab7" onclick="EngagerPager.setCurrentPage(0); EngagerTabler.renderTable();">First</span>
+                    </li>
+                    <li class="page-item {{#first}} disabled {{/first}}">
+                        <span class="page-link" style="color: #337ab7" onclick="EngagerPager.setCurrentPage({{number}} - 1); EngagerTabler.renderTable();">&lt;</span>
+                    </li>
+                    <li class="page-item {{#disableTwoPreviousNumber}} disabled {{/disableTwoPreviousNumber}}">
+                        <span class="page-link" style="color: #337ab7" onclick="EngagerPager.setCurrentPage({{number}} - 2); EngagerTabler.renderTable();">{{twoPreviousNumber}}</span>
+                    </li>
+                    <li class="page-item {{#disablePreviousNumber}} disabled {{/disablePreviousNumber}}">
+                        <span class="page-link" style="color: #337ab7" onclick="EngagerPager.setCurrentPage({{number}} - 1); EngagerTabler.renderTable();">{{previousNumber}}</span>
+                    </li>
+                    <li class="page-item">
+                        <span class="page-link" style="background-color: #337ab7;border-color: #337ab7;color: white">
+                            {{labelNumber}}</span>
+                    </li>
+                    <li class="page-item {{#disableNextNumber}} disabled {{/disableNextNumber}}">
+                        <span class="page-link" style="color: #337ab7" onclick="EngagerPager.setCurrentPage({{number}} + 1); EngagerTabler.renderTable();">{{nextNumber}}</span>
+                    </li>
+                    <li class="page-item {{#disableTwoNextNumber}} disabled {{/disableTwoNextNumber}}">
+                        <span class="page-link" style="color: #337ab7" onclick="EngagerPager.setCurrentPage({{number}} + 2); EngagerTabler.renderTable();">{{twoNextNumber}}</span>
+                    </li>
+                    <li class="page-item {{#last}} disabled {{/last}}">
+                        <span class="page-link" style="color: #337ab7" onclick="EngagerPager.setCurrentPage({{number}} + 1); EngagerTabler.renderTable();">&gt;</span>
+                    </li>
+                    <li class="page-item {{#last}} disabled {{/last}}">
+                        <span class="page-link" style="color: #337ab7" onclick="EngagerPager.setCurrentPage({{totalPages}} - 1); EngagerTabler.renderTable();">Last</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-2">
+        <div class="input-group">
+            <input type="number" id="inputGoToPageKPIData" class="form-control" placeholder="Page Number" aria-label="Page Number"
+                aria-describedby="button-addon2" max="{{totalPages}}" min="1" \>
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="button" onclick="EngagerPager.setCurrentPage($('#inputGoToPageKPIData').val() - 1); EngagerTabler.renderTable();"
+                    id="button-addon2" style="background-color: #eee;">Go</button>
+            </div>
+        </div>
+    </div>
+    <!-- {{/response}} -->

@@ -1,0 +1,16 @@
+SEARCH
+A restourant around you (Antwerp citizens 1)
+NAVIGATE
+Yourself there
+GO
+In a park around you
+COMMENT 
+On the park
+MYPOI
+In an interesting area
+VOTE
+this application on the playstore
+SUBSCRIBE
+to some notification
+SOCIAL
+on the socials

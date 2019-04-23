@@ -1,0 +1,158 @@
+/* Snap4City Engager (SE)
+   Copyright (C) 2015 DISIT Lab http://www.disit.org - University of Florence
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as
+   published by the Free Software Foundation, either version 3 of the
+   License, or (at your option) any later version.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Affero General Public License for more details.
+   You should have received a copy of the GNU Affero General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>. */
+package edu.unifi.disit.snapengager.datamodel.profiledb;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+import com.disit.snap4city.PPOI;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@Entity
+@Table(name = "ppoi")
+public class Ppoi {
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "ppoi_id")
+	Long id;
+	@ManyToOne
+	@JoinColumn(name = "userprofile_id")
+	Userprofile userprofile;
+	private String name;
+	private String latitude;
+	private String longitude;
+
+	public Ppoi() {
+	}
+
+	public Ppoi(Long id, Userprofile userprofile, String name, String latitude, String longitude) {
+		super();
+		this.id = id;
+		this.userprofile = userprofile;
+		this.name = name;
+		this.latitude = latitude;
+		this.longitude = longitude;
+	}
+
+	public Ppoi(Userprofile userprofile, String name, String latitude, String longitude) {
+		super();
+		this.userprofile = userprofile;
+		this.name = name;
+		this.latitude = latitude;
+		this.longitude = longitude;
+	}
+
+	public Ppoi(String name, String latitude, String longitude) {
+		super();
+		this.name = name;
+		this.latitude = latitude;
+		this.longitude = longitude;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public Userprofile getUserprofile() {
+		return userprofile;
+	}
+
+	public void setUserprofile(Userprofile userprofile) {
+		this.userprofile = userprofile;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getLatitude() {
+		return latitude;
+	}
+
+	public void setLatitude(String latitude) {
+		this.latitude = latitude;
+	}
+
+	public String getLongitude() {
+		return longitude;
+	}
+
+	public void setLongitude(String longitude) {
+		this.longitude = longitude;
+	}
+
+	@Override
+	public String toString() {
+		return "Ppoi [id=" + id + ", userprofile=" + userprofile.getUsername() + ", name=" + name + ", latitude=" + latitude + ", longitude=" + longitude + "]";
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+
+		if ((obj == null) || (((Ppoi) obj).name == null) || (this.name == null))
+			return false;
+
+		if (!(obj instanceof Ppoi))
+			return false;
+		if (obj == this)
+			return true;
+		return this.name.equals(((Ppoi) obj).name);
+	}
+
+	// ppoi is modificable
+	// @Override
+	// public int hashCode() {
+	// int hash = 7;
+	// hash = 31 * hash + (name == null ? 0 : name.hashCode());
+	// hash = 31 * hash + (latitude == null ? 0 : latitude.hashCode());
+	// hash = 31 * hash + (longitude == null ? 0 : longitude.hashCode());
+	// return hash;
+	// }
+
+	// ppoi is not modificable TODO
+	@Override
+	public int hashCode() {
+		return name != null ? name.hashCode() : 0;
+	}
+
+	// fields in DROOLS can be null
+	public PPOI toDrools() {
+		PPOI p = new PPOI();
+
+		if (latitude != null)
+			p.setLatitude(Float.valueOf(latitude));
+		if (longitude != null)
+			p.setLongitude(Float.valueOf(longitude));
+		if (name != null)
+			p.setName(name);
+
+		return p;
+	}
+
+}

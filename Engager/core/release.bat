@@ -1,0 +1,1 @@
+call mvn clean install tomcat7:redeploy -Dtomcat-server=remote-deploy-s4c-9 -Dkie-server=remote-prod-93 -DlogFileFolder=c:\logs -Dspring.profiles.active=local -DskipTests
