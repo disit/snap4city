@@ -1,0 +1,90 @@
+body{
+ overflow-y: hidden;
+ margin: 0;
+}
+
+html{
+ margin: 0;
+}
+
+#container{
+  background-color: white !important;
+  height: 100%;
+}
+
+#container iframe
+{
+  height: 100%;
+  border: 0;
+  margin-top: 70px;
+  width: 100%;
+}
+
+/* style for header.php */
+.header {
+    /* border:2px solid red; */
+    width: 100%;
+    overflow: hidden;
+    border-bottom: 1px solid gray;
+    position: fixed;
+    left: 0;
+}
+.header .left-image {
+    /* background: url(icons/icaro.png) */
+    /* no-repeat; */
+    float: left;
+    /* border:2px solid green; */
+    padding-left: 10px;
+}
+.header .right-image {
+    /* background: url(icons/disit.jpg) */
+    /* no-repeat; */
+    float: rigth;
+    /* border:2px solid green; */
+}
+.header .text {
+    font: x-large sans-serif;
+    font-weight: bold;
+    text-shadow: 0px 1px 0px #fff;
+    padding: 10px;
+    margin-top: 2px;
+
+}
+.header a{
+    color:black;
+    text-decoration:none;
+}
+.header .image, 
+.header .text {
+    display: inline-block;
+    vertical-align: bottom;
+}
+#gradient { 
+    /* fallback */ 
+    background-color: #f5fff9; /* #A9ACB6 */
+    /* background-image: url(images/linear_bg_1.png); */
+    background-repeat: repeat-y; 
+    /* Safari 4-5, Chrome 1-9 */ background: -webkit-gradient(linear, left top, right top, from(#f5fff9), to(#A9ACB6)); 
+    /* Safari 5.1, Chrome 10+ */ background: -webkit-linear-gradient(left, #A9ACB6, #f5fff9); 
+    /* Firefox 3.6+ */ background: -moz-linear-gradient(left, #A9ACB6, #f5fff9); 
+    /* IE 10 */ background: -ms-linear-gradient(left, #A9ACB6, #f5fff9); 
+    /* Opera 11.10+ */ background: -o-linear-gradient(left, #A9ACB6, #f5fff9);
+}
+img.logo {
+    max-width: 100%;
+    height: 60px;
+    padding: 5px 0px;
+    margin-top: 3px;
+}
+span.subtext {
+    text-shadow: none;
+    font-size: 60%;
+    font-weight: bold;
+    padding: 5px 0px;
+    text-shadow: 0px 1px 0px rgba(255,255,255,.5); /* 50% white from bottom */
+}
+img.info {
+    max-width: 30%;
+    height: 25px;
+    vertical-align: bottom;
+}

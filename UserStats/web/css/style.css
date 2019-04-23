@@ -1,0 +1,40 @@
+/*
+tr.even{
+background-color:#fff;
+}
+tr.odd{
+background-color:#dadada;
+}
+*/
+
+th{white-space:nowrap;}
+
+.pagination{
+}
+.page-link{
+    float:left;
+    background-color:darkgray;
+    border:1px solid black;
+    text-align:center;
+    color:#ffffff;
+}
+.page-link a,.page-link span{
+    padding:5px 8px 5px 8px;
+    display:block;
+    color:#ffffff;
+}
+.page-link span{
+    background-color:#ffffff;
+    color:#000000;
+}
+.page-link:hover{
+    background-color:#ffffff;
+    color:#000000;
+}
+.page-link:hover a{
+    color:#000000;
+}
+#icon {
+    padding:0px 4px;
+}
+a.pointer { cursor: pointer; }
