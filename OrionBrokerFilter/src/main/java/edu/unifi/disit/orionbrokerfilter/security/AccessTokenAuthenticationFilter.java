@@ -93,8 +93,8 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 	@Value("${spring.servicemapkb_endpoint}")
 	private String servicemapkb_endpoint;
 
-	// @Value("${spring.orionbrokerkbURI}")
-	// private String orionbrokerkbURI;
+	@Value("${spring.prefixelementID}")
+	private String prefixelementID;
 
 	@Value("${spring.elapsingcache.minutes}")
 	private Integer minutesElapsingCache;
@@ -109,6 +109,11 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 	HashMap<String, String> cachedPksha1UsernameOwnership = new HashMap<String, String>();
 
 	HashMap<String, Ownership> cachedOwnership = new HashMap<String, Ownership>();
+
+	@Autowired
+	private RestTemplate restTemplate;
+
+	String refreshToken = null;
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws JsonProcessingException, IOException, ServletException {
@@ -141,11 +146,11 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 
 			try {
 
-				String sensorName = getSensorName(multiReadRequest, isWriteQuery(queryType));// can be null
+				String sensorName = getSensorName(multiReadRequest, isWriteQuery(queryType), elementId);// can be null
 				if (sensorName != null)
 					logger.debug("sensor's name {}", sensorName);
 
-				checkAuthorization(elementId, k1, k2, queryType, sensorName, pksha1, request.getLocale());
+				checkAuthorization(prefixelementID + ":" + elementId, k1, k2, queryType, sensorName, pksha1, request.getLocale());
 
 				logger.debug("Credentials ARE VALID");
 
@@ -171,7 +176,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		filterChain.doFilter(multiReadRequest, response);// DO WE NEED IT???
 	}
 
-	private String getSensorName(HttpServletRequest multiReadRequest, boolean isWriteQuery) throws IOException, NoSuchMessageException, CredentialsNotValidException {
+	private String getSensorName(HttpServletRequest multiReadRequest, boolean isWriteQuery, String elementId) throws IOException, NoSuchMessageException, CredentialsNotValidException {
 
 		String entityBody = IOUtils.toString(multiReadRequest.getInputStream(), StandardCharsets.UTF_8.toString());
 
@@ -209,10 +214,19 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 			return null;
 		}
 
-		if (endIndex - startIndex >= 3)
+		if (endIndex - startIndex >= 3) {
+			// a sensor name is retrieved -> it's a query or an update!
+
+			// ensure the elementid passed as parameter is included in the entityBody
+			if (entityBody.indexOf(elementId) == -1) {
+				logger.warn(messages.getMessage("login.ko.elementidnotvalid", null, multiReadRequest.getLocale()) + " entityBody is {}", entityBody);
+				throw new CredentialsNotValidException(messages.getMessage("login.ko.elementidnotvalid", null, multiReadRequest.getLocale()));
+			}
+
 			return entityBody.substring(startIndex, endIndex);
-		else
-			return null;// no sensor name are retrieved -> it's a subscription!
+		} else {
+			return null;// no sensor name are retrieved -> it's a subscription or unsubscription!
+		}
 	}
 
 	private void writeResponseError(ServletResponse response, String msg) throws JsonProcessingException, IOException {
@@ -330,7 +344,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 			cachedOwnership.put(elementId, o);
 		}
 
-		String sensorUri = (sensorName == null) ? o.getElementUrl() : o.getElementUrl() + "/" + sensorName;
+		String sensorUri = (sensorName == null) ? elementId : o.getElementUrl() + "/" + sensorName;
 
 		// retrieve cached credentials
 		CachedCredentials cc = cachedCredentials.get(sensorUri);
@@ -439,10 +453,14 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 
 	private String getAccessToken(Locale lang) throws CredentialsNotValidException {
 
+		if (refreshToken == null)
+			getRefreshToken(lang);
+
 		String toreturn = new String();
 
 		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
-		params.add("grant_type", "password");
+		params.add("grant_type", "refresh_token");
+		params.add("refresh_token", refreshToken);
 		params.add("client_id", clientId);
 		params.add("username", username);
 		params.add("password", password);
@@ -450,7 +468,6 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(token_endpoint).build();
 		logger.debug("query getAccessToken {}", uriComponents.toUri());
 
-		RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 		HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<MultiValueMap<String, String>>(params, headers);
@@ -465,17 +482,65 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 			JsonNode atNode = rootNode.path("access_token");
 
 			if ((atNode == null) || (atNode.isNull()) || (atNode.isMissingNode())) {
+				refreshToken = null; // force to re-login
 				logger.error("The retrieved data does not contains access_token");
 				throw new CredentialsNotValidException(messages.getMessage("login.ko.configurationerror", null, lang));
 			}
 
+			JsonNode rtNode = rootNode.path("refresh_token");
+
+			if ((rtNode == null) || (rtNode.isNull()) || (rtNode.isMissingNode())) {
+				refreshToken = null; // force to re-login
+				logger.error("The retrieved data does not contains refresh_token");
+				throw new CredentialsNotValidException(messages.getMessage("login.ko.configurationerror", null, lang));
+			}
+
+			refreshToken = rtNode.asText();
 			toreturn = atNode.asText();
 		} catch (HttpClientErrorException | IOException e) {
+			refreshToken = null; // force to re-login
 			logger.error("Trouble in getAccessToken", e);
 			throw new CredentialsNotValidException(messages.getMessage("login.ko.networkproblems", null, lang));
 		}
 
 		return toreturn;
+	}
+
+	public void getRefreshToken(Locale lang) throws CredentialsNotValidException {
+
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+		params.add("grant_type", "password");
+		params.add("client_id", clientId);
+		params.add("username", username);
+		params.add("password", password);
+
+		UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(token_endpoint).build();
+		logger.debug("Query getRefreshToken {}", uriComponents.toUri());
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+		HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<MultiValueMap<String, String>>(params, headers);
+
+		try {
+
+			ResponseEntity<String> response = restTemplate.exchange(uriComponents.toUri(), HttpMethod.POST, entity, String.class);
+			logger.debug("Response from getRefreshToken {}", response);
+
+			ObjectMapper objectMapper = new ObjectMapper();
+
+			JsonNode rootNode = objectMapper.readTree(response.getBody().getBytes());
+			JsonNode atNode = rootNode.path("refresh_token");
+
+			if ((atNode == null) || (atNode.isNull()) || (atNode.isMissingNode())) {
+				logger.error("The retrieved data does not contains access_token");
+				throw new CredentialsNotValidException(messages.getMessage("login.ko.configurationerror", null, lang));
+			}
+
+			refreshToken = atNode.asText();
+		} catch (HttpClientErrorException | IOException e) {
+			logger.error("Trouble in getAccessToken", e);
+			throw new CredentialsNotValidException(messages.getMessage("login.ko.networkproblems", null, lang));
+		}
 	}
 
 	private Ownership getOwnership(String accessToken, String elementId, Locale lang) throws CredentialsNotValidException {

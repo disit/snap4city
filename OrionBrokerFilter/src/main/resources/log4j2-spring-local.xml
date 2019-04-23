@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="INFO">
 	<Appenders>
-		<RollingFile name="MyFileAll" fileName="${sys:logFileFolder}/datamanager/datamanager-all.log" immediateFlush="true" append="true" filePattern="${sys:logFileFolder}/datamanager/datamanager-all-$${date:yyyy-MM}/%d{yyyy-MM-dd}-%i.log.gz">
+		<RollingFile name="MyFileAll" fileName="${sys:logFileFolder}/orionbrokerfilter/orionbrokerfilter-all.log" immediateFlush="true" append="true" filePattern="${sys:logFileFolder}/orionbrokerfilter/orionbrokerfilter-all-$${date:yyyy-MM}/%d{yyyy-MM-dd}-%i.log.gz">
 			<PatternLayout>
 				<Pattern>%d{yyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36}:%L - %msg%n</Pattern>
 			</PatternLayout>
@@ -11,7 +11,7 @@
 			</Policies>
 			<DefaultRolloverStrategy max="50" />
 		</RollingFile>
-		<RollingFile name="MyFileError" fileName="${sys:logFileFolder}/datamanager/datamanager-error.log" immediateFlush="true" append="true"	filePattern="${sys:logFileFolder}/datamanager/datamanager-error-$${date:yyyy-MM}/%d{yyyy-MM-dd}-%i.log.gz">
+		<RollingFile name="MyFileError" fileName="${sys:logFileFolder}/orionbrokerfilter/orionbrokerfilter-error.log" immediateFlush="true" append="true"	filePattern="${sys:logFileFolder}/orionbrokerfilter/orionbrokerfilter-error-$${date:yyyy-MM}/%d{yyyy-MM-dd}-%i.log.gz">
 			<ThresholdFilter level="error"/>
 			<PatternLayout>
 				<Pattern>%d{yyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36}:%L - %msg%n</Pattern>
@@ -22,7 +22,7 @@
 			</Policies>
 			<DefaultRolloverStrategy max="50" />
 		</RollingFile>
-		<RollingFile name="MyFileWarn" fileName="${sys:logFileFolder}/datamanager/datamanager-warn.log" immediateFlush="true" append="true"	filePattern="${sys:logFileFolder}/datamanager/datamanager-warn-$${date:yyyy-MM}/%d{yyyy-MM-dd}-%i.log.gz">
+		<RollingFile name="MyFileWarn" fileName="${sys:logFileFolder}/orionbrokerfilter/orionbrokerfilter-warn.log" immediateFlush="true" append="true"	filePattern="${sys:logFileFolder}/orionbrokerfilter/orionbrokerfilter-warn-$${date:yyyy-MM}/%d{yyyy-MM-dd}-%i.log.gz">
 			<ThresholdFilter level="warn"/>
 			<PatternLayout>
 				<Pattern>%d{yyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36}:%L - %msg%n</Pattern>

@@ -12,6 +12,11 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package edu.unifi.disit.orionbrokerfilter;
 
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -19,6 +24,10 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.web.client.RestTemplate;
 
 @EnableAutoConfiguration(exclude = { DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class })
 @SpringBootApplication
@@ -34,5 +43,28 @@ public class Application extends SpringBootServletInitializer {
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
 		return application.sources(applicationClass);
+	}
+
+	@Bean
+	public ClientHttpRequestFactory createRequestFactory(@Value("${connection.timeout}") String timeout) {
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
+		// connectionManager.setMaxTotal(maxTotalConn);
+		// connectionManager.setDefaultMaxPerRoute(maxPerChannel);
+
+		// httpRequestFactory.setConnectionRequestTimeout(60000);
+		// httpRequestFactory.setConnectTimeout(60000);
+		// httpRequestFactory.setReadTimeout(60000);
+
+		RequestConfig config = RequestConfig.custom().
+		/*		*/setConnectTimeout(Integer.parseInt(timeout)).
+		/*		*/setConnectionRequestTimeout(Integer.parseInt(timeout)).build();
+
+		CloseableHttpClient httpClient = HttpClientBuilder.create().setConnectionManager(connectionManager).setDefaultRequestConfig(config).build();
+		return new HttpComponentsClientHttpRequestFactory(httpClient);
+	}
+
+	@Bean
+	public RestTemplate restTemplate(ClientHttpRequestFactory factory) {
+		return new RestTemplate();
 	}
 }
