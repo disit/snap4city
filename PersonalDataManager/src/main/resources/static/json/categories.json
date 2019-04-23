@@ -164,6 +164,7 @@
 ,{"title": "Street Sweeping", "key": "Street_sweeping", "icon": "eng/Environment_Street_sweeping.png"}
 ,{"title": "Waste Collec. & Treatment", "key": "Waste_collection_and_treatment", "icon": "eng/Environment_Waste_collection_and_treatment.png"}
 ,{"title": "Weather Sensor", "key": "Weather_sensor", "icon": "eng/Environment_Weather_sensor.png"}
+,{"title": "People Counter", "key": "People_counter", "icon": "eng/Environment_Default.png"}
  ]},
 {"title": "Financial Service", "key": "FinancialService", "folder": "true", "icon": "eng/FinancialService.png", "children": [
 {"title": "Accountants", "key": "Accountants", "icon": "eng/FinancialService_Accountants.png"}

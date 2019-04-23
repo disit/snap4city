@@ -41,20 +41,20 @@ var KPIDelegationTabler = {
             }
         }
 
-        if(_response.previousNumber == "-"){
+        if (_response.previousNumber == "-") {
             _response.disablePreviousNumber = true;
         }
-        if(_response.twoPreviousNumber == "-"){
+        if (_response.twoPreviousNumber == "-") {
             _response.disableTwoPreviousNumber = true;
         }
-        if(_response.nextNumber == "-"){
+        if (_response.nextNumber == "-") {
             _response.disableNextNumber = true;
         }
-        if(_response.twoNextNumber == "-"){
+        if (_response.twoNextNumber == "-") {
             _response.disableTwoNextNumber = true;
         }
 
-        
+
         _response["sort" + _response.sort[0].property + _response.sort[0].direction] = true;
         _response.insertTime = Utility.timestampToFormatDate(_response.insertTime);
 
@@ -62,17 +62,21 @@ var KPIDelegationTabler = {
         _response.currentKPIData = KPIDataTabler.getCurrentKPIData(KPIDelegationTabler.currentKpiId);
 
         _response.timestampToDate = MustacheFunctions.timestampToDate;
-        
+
         _response.enableEdit = KPIDataTabler.enableEdit;
 
         console.log(_response);
         ViewManager.render({
             "response": _response
         }, "#kpidelegationtable", "templates/kpidelegation/kpidelegation.mst.html");
-        
-        $('table').DataTable({"searching": false,"paging":   false,
-        "ordering": false,
-        "info":     false, responsive: true});
+
+        $('table').DataTable({
+            "searching": false,
+            "paging": false,
+            "ordering": false,
+            "info": false,
+            responsive: true
+        });
 
         $('table').css("width", "");
 
@@ -80,13 +84,13 @@ var KPIDelegationTabler = {
         $('#selectSizeKPIDelegation').val(KPIDelegationPager.currentSize);
     },
 
-    editKPIDelegationModal: function (_id) {
+    editKPIDelegationModal: function (_kpiId, _id) {
         if (_id != null && _id != "") {
             KPIEditor.keycloak.updateToken(30).success(function () {
-                var query = QueryManager.createGetKPIDelegationByIdQuery(_id, KPIEditor.keycloak.token);
+                var query = QueryManager.createGetKPIDelegationByIdQuery(KPIEditor.keycloak.token, _kpiId, _id);
                 APIClient.executeGetQuery(query, KPIDelegationTabler.successEditKPIDelegationModal, KPIDelegationTabler.errorQuery);
             }).error(function () {
-                var query = QueryManager.createGetKPIDelegationByIdQuery(_id, Authentication.refreshTokenGetAccessToken());
+                var query = QueryManager.createGetKPIDelegationByIdQuery(Authentication.refreshTokenGetAccessToken(), _kpiId, _id);
                 APIClient.executeGetQuery(query, KPIDelegationTabler.successEditKPIDelegationModal, KPIDelegationTabler.errorQuery);
             });
         } else {
@@ -109,10 +113,11 @@ var KPIDelegationTabler = {
         $('#genericModal').modal('show');
     },
 
-    deleteKPIDelegationModal: function (_id, _usernameDelegated, _insertTime) {
+    deleteKPIDelegationModal: function (_id, _kpiId, _usernameDelegated, _insertTime) {
         ViewManager.render({
             "kpidelegation": {
                 "id": _id,
+                "kpiId": _kpiId,
                 "usernameDelegated": _usernameDelegated,
                 "insertTime": _insertTime
             }
@@ -122,8 +127,7 @@ var KPIDelegationTabler = {
 
     saveKPIDelegation: function () {
         kpiDelegation = {
-            "usernameDelegated": $("#inputUsernameDelegatedKPIDelegationEdit").val(),
-            "insertTime":new Date().getTime() 
+            "usernameDelegated": $("#inputUsernameDelegatedKPIDelegationEdit").val()
         }
 
         if ($("#inputElementIdKPIDelegationEdit").val() != "") {
@@ -134,26 +138,33 @@ var KPIDelegationTabler = {
         if ($("#inputIdKPIDelegationEdit").val() != "") {
             kpiDelegation.id = $("#inputIdKPIDelegationEdit").val();
         }
-        if ($("#inputElementTypeKPIDelegationEdit").val() != "") {
+        if (typeof $("#inputElementTypeKPIDelegationEdit").val() !=  "undefined" && $("#inputElementTypeKPIDelegationEdit").val() != "") {
             kpiDelegation.elementType = $("#inputElementTypeKPIDelegationEdit").val();
         } else {
             kpiDelegation.elementType = KPIDelegationTabler.currentHighLevelType;
         }
-        if ($("#inputUsernameDelegatorKPIDelegationEdit").val() != "") {
-            kpiDelegation.usernameDelegator = $("#inputUsernameDelegatorKPIDelegationEdit").val();
-        }
 
         console.log(kpiDelegation);
-        KPIEditor.keycloak.updateToken(30).success(function () {
-            var query = QueryManager.createSaveKPIDelegationQuery(KPIEditor.keycloak.token);
-            APIClient.executePostQuery(query, kpiDelegation, KPIDelegationTabler.successSaveKPIDelegation, KPIDelegationTabler.errorQuery);
-        }).error(function () {
-            var query = QueryManager.createSaveKPIDelegationQuery(Authentication.refreshTokenGetAccessToken());
-            APIClient.executePostQuery(query, kpiDelegation, KPIDelegationTabler.successSaveKPIDelegation, KPIDelegationTabler.errorQuery);
-        });
+        if (typeof kpiDelegation.id != "undefined") {
+            KPIEditor.keycloak.updateToken(30).success(function () {
+                var query = QueryManager.createPatchKPIDelegationQuery(KPIEditor.keycloak.token, kpiDelegation.elementId, kpiDelegation.id);
+                APIClient.executePatchQuery(query, kpiDelegation, KPIDelegationTabler.successSaveKPIDelegation, KPIDelegationTabler.errorQuery);
+            }).error(function () {
+                var query = QueryManager.createPatchKPIDelegationQuery(Authentication.refreshTokenGetAccessToken(), kpiDelegation.elementId, kpiDelegation.id);
+                APIClient.executePatchQuery(query, kpiDelegation, KPIDelegationTabler.successSaveKPIDelegation, KPIDelegationTabler.errorQuery);
+            });
+        } else {
+            KPIEditor.keycloak.updateToken(30).success(function () {
+                var query = QueryManager.createPostKPIDelegationQuery(KPIEditor.keycloak.token, kpiDelegation.elementId);
+                APIClient.executePostQuery(query, kpiDelegation, KPIDelegationTabler.successSaveKPIDelegation, KPIDelegationTabler.errorQuery);
+            }).error(function () {
+                var query = QueryManager.createPostKPIDelegationQuery(Authentication.refreshTokenGetAccessToken(), kpiDelegation.elementId);
+                APIClient.executePostQuery(query, kpiDelegation, KPIDelegationTabler.successSaveKPIDelegation, KPIDelegationTabler.errorQuery);
+            });
+        }
     },
 
-    getDelegations: function(_kpiId, successCallBack, errorCallBack){
+    getDelegations: function (_kpiId, successCallBack, errorCallBack) {
         KPIEditor.keycloak.updateToken(30).success(function () {
             var query = QueryManager.createGetKPIDelegationTableQuery(_kpiId, null, null, null, null, null, KPIEditor.keycloak.token);
             APIClient.executeGetQuery(query, successCallBack, errorCallBack);
@@ -163,61 +174,36 @@ var KPIDelegationTabler = {
         });
     },
 
-    createAnonymousDelegation: function(_kpiId, successCallBack){
-        kpiDelegation = {
-            "usernameDelegated": "ANONYMOUS",
-            "insertTime":new Date().getTime(),
-            "elementType": "MyKPI",
-            "elementId": _kpiId
-        }
+    deleteKPIDelegation(_kpiId, _id, successCallBack, errorCallBack) {
         KPIEditor.keycloak.updateToken(30).success(function () {
-            var query = QueryManager.createSaveKPIDelegationQuery(KPIEditor.keycloak.token);
-            APIClient.executePostQuery(query, kpiDelegation, successCallBack);
+            var query = QueryManager.createDeleteKPIDelegationQuery(KPIEditor.keycloak.token, _kpiId, _id);
+            if (successCallBack != null && errorCallBack != null) {
+                APIClient.executeDeleteQuery(query, successCallBack, errorCallBack);
+            } else {
+                APIClient.executeDeleteQuery(query, KPIDelegationTabler.successSaveKPIDelegation, KPIDelegationTabler.errorQuery);
+            }
         }).error(function () {
-            var query = QueryManager.createSaveKPIDelegationQuery(Authentication.refreshTokenGetAccessToken());
-            APIClient.executePostQuery(query, kpiDelegation, successCallBack);
-        });
-    },
-
-    deleteKPIDelegation(_id, successCallBack, errorCallBack) {
-        KPIEditor.keycloak.updateToken(30).success(function () {
-            var query = QueryManager.createGetKPIDelegationByIdQuery(_id, KPIEditor.keycloak.token);
-            APIClient.executeGetQuery(query, function (_response) {
-                _response.deleteTime = new Date().getTime();
-                var saveQuery = QueryManager.createSaveKPIDelegationQuery(KPIEditor.keycloak.token);
-                if (successCallBack != null && errorCallBack != null){
-                    APIClient.executePostQuery(saveQuery, _response, successCallBack, errorCallBack);
-                } else {
-                    APIClient.executePostQuery(saveQuery, _response, KPIDelegationTabler.successSaveKPIDelegation, KPIDelegationTabler.errorQuery);
-                }
-            }, KPIDelegationTabler.errorQuery);
-        }).error(function () {
-            var query = QueryManager.createGetKPIDelegationByIdQuery(_id, Authentication.refreshTokenGetAccessToken());
-            APIClient.executeGetQuery(query, function (_response) {
-                _response.deleteTime = new Date().getTime();
-                var saveQuery = QueryManager.createSaveKPIDelegationQuery(Authentication.refreshTokenGetAccessToken());
-                if (successCallBack != null && errorCallBack != null){
-                    APIClient.executePostQuery(saveQuery, _response, successCallBack, errorCallBack);
-                } else {
-                    APIClient.executePostQuery(saveQuery, _response, KPIDelegationTabler.successSaveKPIDelegation, KPIDelegationTabler.errorQuery);
-                }
-            }, KPIDelegationTabler.errorQuery);
+            var query = QueryManager.createDeleteKPIDelegationQuery(Authentication.refreshTokenGetAccessToken(), _kpiId, _id);
+            if (successCallBack != null && errorCallBack != null) {
+                APIClient.executeDeleteQuery(query, successCallBack, errorCallBack);
+            } else {
+                APIClient.executeDeleteQuery(query, KPIDelegationTabler.successSaveKPIDelegation, KPIDelegationTabler.errorQuery);
+            }
         });
     },
 
     successSaveKPIDelegation: function (_response) {
         console.log(_response);
         $('#genericModal').modal('hide');
-        KPIDelegationTabler.renderTable(_response.elementId, _response.highLevelType);
+        KPIDelegationTabler.renderTable(_response.elementId, _response.elementType);
     },
 
     errorQuery: function (_error) {
         console.log(_error);
-        if (_error.responseText != null){
+        if (_error.responseText != null) {
             alert(_error.responseText);
         }
         $('#genericModal').modal('hide');
-    },
-
+    }
 
 }

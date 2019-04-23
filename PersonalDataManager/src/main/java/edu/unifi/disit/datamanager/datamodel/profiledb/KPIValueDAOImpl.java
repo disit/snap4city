@@ -42,14 +42,15 @@ public class KPIValueDAOImpl implements KPIValueDAOCustom {
 		criteria.select(dataRoot);
 
 		if (last != 0) {
-			criteria.orderBy(cb.desc(dataRoot.get("insertTime")));
+			criteria.orderBy(cb.desc(dataRoot.get("dataTime")));
 		} else {
-			criteria.orderBy(cb.asc(dataRoot.get("insertTime")));
+			criteria.orderBy(cb.asc(dataRoot.get("dataTime")));
 		}
 
 		List<Predicate> predicates = getCommonPredicates(cb, dataRoot, from, to);
 
 		predicates.add(cb.equal(dataRoot.get("kpiId"), kpiId));//
+		predicates.add(cb.isNull(dataRoot.get("deleteTime")));
 
 		criteria.where(cb.and(predicates.toArray(new Predicate[predicates.size()])));
 
@@ -69,9 +70,9 @@ public class KPIValueDAOImpl implements KPIValueDAOCustom {
 	private List<Predicate> getCommonPredicates(CriteriaBuilder cb, Root<KPIValue> dataRoot, Date from, Date to) {
 		List<Predicate> predicates = new ArrayList<Predicate>();
 		if (from != null)
-			predicates.add(cb.greaterThan(dataRoot.get("insertTime"), from));
+			predicates.add(cb.greaterThan(dataRoot.get("dataTime"), from));
 		if (to != null)
-			predicates.add(cb.lessThan(dataRoot.get("insertTime"), to));
+			predicates.add(cb.lessThan(dataRoot.get("dataTime"), to));
 		return predicates;
 	}
 }

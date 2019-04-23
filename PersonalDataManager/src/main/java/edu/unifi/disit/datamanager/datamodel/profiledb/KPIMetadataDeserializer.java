@@ -14,8 +14,6 @@
 package edu.unifi.disit.datamanager.datamodel.profiledb;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -53,20 +51,6 @@ public class KPIMetadataDeserializer extends StdDeserializer<KPIMetadata> {
 		}
 		if (jnode.get("value") != null) {
 			kpimetadata.setValue(jnode.get("value").asText());
-		}
-		if (jnode.get("deleteTime") != null) {
-			try {
-				kpimetadata.setDeleteTime(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(jnode.get("deleteTime").asText()));
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
-		}
-		if (jnode.get("elapseTime") != null) {
-			try {
-				kpimetadata.setElapseTime(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(jnode.get("elapseTime").asText()));
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
 		}
 
 		return kpimetadata;

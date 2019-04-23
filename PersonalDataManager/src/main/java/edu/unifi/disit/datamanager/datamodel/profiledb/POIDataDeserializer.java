@@ -14,8 +14,7 @@
 package edu.unifi.disit.datamanager.datamodel.profiledb;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
 
 import com.fasterxml.jackson.core.JsonParser;
@@ -60,13 +59,6 @@ public class POIDataDeserializer extends StdDeserializer<POIData> {
 		if (jnode.get("description") != null) {
 			poidata.getKpidata().setDescription(jnode.get("description").asText());
 		}
-		if (jnode.get("deleteTime") != null) {
-			try {
-				poidata.getKpidata().setDeleteTime(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(jnode.get("deleteTime").asText()));
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
-		}
 		if (jnode.get("getInstances") != null) {
 			poidata.getKpidata().setGetInstances(jnode.get("getInstances").asText());
 		}
@@ -79,13 +71,6 @@ public class POIDataDeserializer extends StdDeserializer<POIData> {
 		if (jnode.get("info") != null) {
 			poidata.getKpidata().setInfo(jnode.get("info").asText());
 		}
-		if (jnode.get("insertTime") != null) {
-			try {
-				poidata.getKpidata().setInsertTime(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(jnode.get("insertTime").asText()));
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
-		}
 		if (jnode.get("instanceUri") != null) {
 			poidata.getKpidata().setInstanceUri(jnode.get("instanceUri").asText());
 		}
@@ -95,19 +80,10 @@ public class POIDataDeserializer extends StdDeserializer<POIData> {
 		if (jnode.get("valueName") != null) {
 			poidata.getKpidata().setValueName(jnode.get("valueName").asText());
 		}
-		if (jnode.get("lastCheck") != null) {
-			try {
-				poidata.getKpidata().setLastCheck(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(jnode.get("lastCheck").asText()));
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
-		}
 		if (jnode.get("lastDate") != null) {
-			try {
-				poidata.getKpidata().setLastDate(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(jnode.get("lastDate").asText()));
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
+			Date date = new Date();
+			date.setTime(jnode.get("lastDate").asLong());
+			poidata.getKpidata().setLastDate(date);
 		}
 		if (jnode.get("lastValue") != null) {
 			poidata.getKpidata().setLastValue(jnode.get("lastValue").asText());

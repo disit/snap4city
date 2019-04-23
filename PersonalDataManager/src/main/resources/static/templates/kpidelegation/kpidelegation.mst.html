@@ -19,7 +19,7 @@
 </div>
 <!-- {{/currentKPIData}} -->
 <div class="row" style="padding: 15px;">
-    <div class="col-sm-2">
+    <div class="col-md-2">
         <select id="selectSizeKPIDelegation" class="custom-select custom-select" onchange="KPIDelegationPager.setCurrentSize($('#selectSizeKPIDelegation').val());KPIDelegationTabler.renderTable('{{kpiId}}');">
             <option value="5">5</option>
             <option value="10">10</option>
@@ -30,15 +30,15 @@
             <option value="200">200</option>
         </select>
     </div>
-    <div class="col-sm-2 offset-sm-3">
+    <div class="col-md-2 offset-md-3" style="text-align: center; margin: 0.5rem;">
         <!-- {{#enableEdit}} -->
         <button class="btn btn-warning" style="color: white;padding: 0.5rem;" type="button" onclick="KPIDelegationTabler.editKPIDelegationModal('');">Add
             New My KPI Delegation</button>
         <!-- {{/enableEdit}} -->
 
     </div>
-    <div class="col-sm-2 offset-sm-3">
-        <div class="input-group" style="padding-right: 20px;">
+    <div class="col-nd-2 offset-nd-3">
+        <div class="input-group">
             <input type="text" id="inputFilterKPIDelegation" class="form-control" placeholder="Filter Table" aria-label="Filter Table"
                 aria-describedby="button-addon2" max="{{totalPages}}" min="1" \>
             <div class="input-group-append">
@@ -81,8 +81,8 @@
             <td>{{usernameDelegated}}</td>
             <td>{{#timestampToDate}}{{insertTime}}{{/timestampToDate}}</td>
             <!-- {{#enableEdit}} -->
-            <td><button type="button" onclick="KPIDelegationTabler.editKPIDelegationModal({{id}});" class=" btn editDashBtn">Edit</button>
-                <button type="button" onclick="KPIDelegationTabler.deleteKPIDelegationModal({{id}}, '{{usernameDelegated}}', '{{insertTime}}');"
+            <td><button type="button" onclick="KPIDelegationTabler.editKPIDelegationModal({{kpiId}},{{id}});" class=" btn editDashBtn">Edit</button>
+                <button type="button" onclick="KPIDelegationTabler.deleteKPIDelegationModal({{id}}, {{kpiId}}, '{{usernameDelegated}}', '{{insertTime}}');"
                     class="btn deleteDashBtn">Delete</button></td>
             <!-- {{/enableEdit}} -->
         </tr>
@@ -103,7 +103,7 @@
         </div>
     </div>
 
-    <div class="col-sm-5 offset-sm-2">
+    <div class="col-sm-6">
         <!-- Pagination Bar -->
         <div th:fragment='paginationbar'>
             <div class="text-center">
@@ -141,7 +141,7 @@
         </div>
     </div>
 
-    <div class="col-sm-2">
+    <div class="col-sm-3">
         <div class="input-group">
             <input type="number" id="inputGoToPageKPIDelegation" class="form-control" placeholder="Page Number"
                 aria-label="Page Number" aria-describedby="button-addon2" max="{{totalPages}}" min="1" \>

@@ -36,4 +36,6 @@ public interface IDataService {
 	Data postDataFromUser(String username, Data data, Locale lang) throws DataNotValidException, CredentialsException;
 
 	List<Data> getAllData(Boolean last, Locale lang) throws NoSuchMessageException, CredentialsException;
+
+	void deleteDataFromUser(String username, Long dataId, Locale lang) throws CredentialsException, DataNotValidException;
 }

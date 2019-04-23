@@ -85,6 +85,12 @@ public class KPIValueServiceImpl implements IKPIValueService {
 	}
 
 	@Override
+	public List<KPIValue> findByKpiIdGeoLocated(Long kpiId) throws NoSuchMessageException, CredentialsException {
+		logger.debug("findByKpiIdGeoLocated INVOKED on kpiId {}",  kpiId);
+		return kpiValueRepository.findByKpiIdAndDeleteTimeIsNullAndLatitudeIsNotNullAndLongitudeIsNotNullAndLatitudeNotLikeAndLongitudeNotLike(kpiId, "", "");
+	}
+	
+	@Override
 	public List<KPIValue> findByKpiIdFilteredNoPages(Long kpiId, String searchKey) {
 		logger.debug("findAllFilteredByKpiId INVOKED on searchKey {} kpiId {}",  searchKey, kpiId);
 		return kpiValueRepository.findByKpiIdAndValueContainingAllIgnoreCaseAndDeleteTimeIsNull(kpiId, searchKey);
@@ -104,6 +110,7 @@ public class KPIValueServiceImpl implements IKPIValueService {
 	@Override
 	public KPIValue saveKPIValue(KPIValue kpivalue) throws NoSuchMessageException, CredentialsException {
 		logger.debug("saveKPIValue INVOKED on kpivalue {}",  kpivalue.getId());
+		kpivalue.setInsertTime(new Date());
 		return kpiValueRepository.save(kpivalue);
 	}
 
@@ -113,6 +120,14 @@ public class KPIValueServiceImpl implements IKPIValueService {
 		kpiValueRepository.delete(id);
 		
 	}
+
+	@Override
+	public List<Date> getKPIValueDates(Long kpiId) throws NoSuchMessageException, CredentialsException {
+		logger.debug("getKPIValueDates INVOKED on kpiId {}",  kpiId);
+		return kpiValueRepository.findByKpiIdDistinctDateAndDeleteTimeIsNull(kpiId);
+	}
+
+	
 	
 	
 	

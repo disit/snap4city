@@ -116,17 +116,27 @@ var KPIDataTabler = {
         $('#genericModal').modal('show');
     },
 
-    editKPIDataModal: function (_id,_highLevelType) {
+    editKPIDataModal: function (_id, _highLevelType) {
         KPIDataTabler.currentHighLevelType = _highLevelType;
         if (_id != null && _id != "") {
-            KPIEditor.keycloak.updateToken(30).success(function () {
-                var query = QueryManager.createGetKPIDataByIdQuery(_id, KPIEditor.keycloak.token);
-                APIClient.executeGetQuery(query, KPIDataTabler.successEditKPIDataModal, KPIDataTabler.errorQuery);
-            }).error(function () {
-                var query = QueryManager.createGetKPIDataByIdQuery(_id, Authentication.refreshTokenGetAccessToken());
-                APIClient.executeGetQuery(query, KPIDataTabler.successEditKPIDataModal, KPIDataTabler.errorQuery);
-            });
-        } else {
+            if (_highLevelType != "MyPOI") {
+                KPIEditor.keycloak.updateToken(30).success(function () {
+                    var query = QueryManager.createGetKPIDataByIdQuery(_id, KPIEditor.keycloak.token);
+                    APIClient.executeGetQuery(query, KPIDataTabler.successEditKPIDataModal, KPIDataTabler.errorQuery);
+                }).error(function () {
+                    var query = QueryManager.createGetKPIDataByIdQuery(_id, Authentication.refreshTokenGetAccessToken());
+                    APIClient.executeGetQuery(query, KPIDataTabler.successEditKPIDataModal, KPIDataTabler.errorQuery);
+                });
+            } else {
+                KPIEditor.keycloak.updateToken(30).success(function () {
+                    var query = QueryManager.createGetMyPOIQuery(_id, KPIEditor.keycloak.token);
+                    APIClient.executeGetQuery(query, KPIDataTabler.successEditKPIDataModal, KPIDataTabler.errorQuery);
+                }).error(function () {
+                    var query = QueryManager.createGetMyPOIQuery(_id, Authentication.refreshTokenGetAccessToken());
+                    APIClient.executeGetQuery(query, KPIDataTabler.successEditKPIDataModal, KPIDataTabler.errorQuery);
+                });
+            }
+        } else if (_highLevelType != "changeownership") {
             KPIDataTabler.successEditKPIDataModal(null);
         }
     },
@@ -134,6 +144,12 @@ var KPIDataTabler = {
     successEditKPIDataModal: function (_response) {
         console.log(_response);
         if (_response != null && _response != "") {
+            if (_response.properties != null) {
+                _response = _response.properties;
+                for (var category in _response.kpidata) {
+                    _response[category] = _response.kpidata[category];
+                }
+            }
             if (_response.dataType != null) {
                 _response[_response.dataType + "Selected"] = true;
             }
@@ -142,19 +158,27 @@ var KPIDataTabler = {
             }
             _response.lastDate = Utility.timestampToFormatDate(_response.lastDate);
             _response.lastCheck = Utility.timestampToFormatDate(_response.lastCheck);
-        } else {
+        } else if (KPIDataTabler.currentHighLevelType != "changeownership") {
             _response = {};
             _response.highLevelType = KPIDataTabler.currentHighLevelType;
         }
-        ViewManager.render({
-            "kpidata": _response
-        }, "#genericModal", "templates/kpidata/edit" +_response.highLevelType.toLowerCase() +".mst.html");
-        $('#genericModal').modal('show');
-        
-        EditModalManager.createMap();
-        EditModalManager.createNatureSelection();
-        $("#selectNatureKPIDataEdit").val(_response.nature).trigger('change');
-        $("#selectSubNatureKPIDataEdit").val(_response.subNature);
+        if (KPIDataTabler.currentHighLevelType != "changeownership") {
+            ViewManager.render({
+                "kpidata": _response
+            }, "#genericModal", "templates/kpidata/edit" + _response.highLevelType.toLowerCase() + ".mst.html");
+            $('#genericModal').modal('show');
+            EditModalManager.currentLatitude = _response.latitude;
+            EditModalManager.currentLongitude = _response.longitude;
+            EditModalManager.checkOrganizationAndCreateMap("KPIDataEdit");
+            EditModalManager.createNatureSelection();
+            $("#selectNatureKPIDataEdit").val(_response.nature).trigger('change');
+            $("#selectSubNatureKPIDataEdit").val(_response.subNature);
+        } else {
+            ViewManager.render({
+                "kpidata": _response
+            }, "#genericModal", "templates/kpidata/editchangeownership.mst.html");
+            $('#genericModal').modal('show');
+        }
     },
 
     deleteKPIDataModal: function (_id, _highLevelType, _valueName) {
@@ -172,129 +196,114 @@ var KPIDataTabler = {
         if (kpiDataToSave == null) {
             kpiData = {
                 "highLevelType": $("#inputHighLevelTypeKPIDataEdit").val(),
-                "nature": $("#selectNatureKPIDataEdit").val(),
-                "subNature": $("#selectSubNatureKPIDataEdit").val(),
                 "valueName": $("#inputValueNameKPIDataEdit").val(),
                 "valueType": $("#inputValueTypeKPIDataEdit").val(),
-                "dataType": $("#selectDataTypeKPIDataEdit").val(),
                 "metric": $("#inputMetricKPIDataEdit").val(),
                 "description": $("#inputDescriptionKPIDataEdit").val(),
                 "info": $("#inputInfoKPIDataEdit").val(),
                 "latitude": $("#inputLatitudeKPIDataEdit").val(),
                 "longitude": $("#inputLongitudeKPIDataEdit").val(),
-                "insertTime": Utility.timestampToFormatDate(new Date().getTime()) + ":00"
+                "metadata": [{
+                        "key": "note",
+                        "value": $("#inputNoteMyPOIModal").val()
+                    },
+                    {
+                        "key": "address",
+                        "value": $("#inputAddressMyPOIModal").val()
+                    },
+                    {
+                        "key": "civic",
+                        "value": $("#inputCivicMyPOIModal").val()
+                    },
+                    {
+                        "key": "city",
+                        "value": $("#inputCityMyPOIModal").val()
+                    },
+                    {
+                        "key": "province",
+                        "value": $("#inputProvinceMyPOIModal").val()
+                    },
+                    {
+                        "key": "phone",
+                        "value": $("#inputPhoneMyPOIModal").val()
+                    },
+                    {
+                        "key": "fax",
+                        "value": $("#inputFaxMyPOIModal").val()
+                    },
+                    {
+                        "key": "website",
+                        "value": $("#inputWebsiteMyPOIModal").val()
+                    },
+                    {
+                        "key": "email",
+                        "value": $("#inputEmailMyPOIModal").val()
+                    }
+                ]
             }
 
+            if ($("#selectNatureKPIDataEdit").val() != "") {
+                kpiData.nature = $("#selectNatureKPIDataEdit").val();
+            }
+            if ($("#selectSubNatureKPIDataEdit").val() != "") {
+                kpiData.subNature = $("#selectSubNatureKPIDataEdit").val();
+            }
+            if ($("#selectDataTypeKPIDataEdit").val() != "") {
+                kpiData.dataType = $("#selectDataTypeKPIDataEdit").val();
+            }
             if ($("#inputIdKPIDataEdit").val() != "") {
                 kpiData.id = $("#inputIdKPIDataEdit").val();
-            }
-            if ($("#inputInstanceUriKPIDataEdit").val() != "") {
-                kpiData.instanceUri = $("#inputInstanceUriKPIDataEdit").val();
-            }
-            if ($("#inputGetInstancesKPIDataEdit").val() != "") {
-                kpiData.getInstances = $("#inputGetInstancesKPIDataEdit").val();
-            }
-            if ($("#inputSavedDirectKPIDataEdit").val() != "") {
-                kpiData.savedDirect = $("#inputSavedDirectKPIDataEdit").val();
-            }
-            if ($("#inputKBBasedKPIDataEdit").val() != "") {
-                kpiData.kbBased = $("#inputKBBasedKPIDataEdit").val();
-            }
-            if ($("#inputSMBasedKPIDataEdit").val() != "") {
-                kpiData.smBased = $("#inputSMBasedKPIDataEdit").val();
-            }
-            if ($("#inputAppIdKPIDataEdit").val() != "") {
-                kpiData.appId = $("#inputAppIdKPIDataEdit").val();
-            }
-            if ($("#inputAppNameKPIDataEdit").val() != "") {
-                kpiData.appName = $("#inputAppNameKPIDataEdit").val();
-            }
-            if ($("#inputWidgetsKPIDataEdit").val() != "") {
-                kpiData.widgets = $("#inputWidgetsKPIDataEdit").val();
-            }
-            if ($("#inputParametersKPIDataEdit").val() != "") {
-                kpiData.parameters = $("#inputParametersKPIDataEdit").val();
-            }
-            if ($("#inputMicroAppExtServIconKPIDataEdit").val() != "") {
-                kpiData.microAppExtServIcon = $("#inputMicroAppExtServIconKPIDataEdit").val();
-            }
-            if ($("#inputDBValuesLinkKPIDataEdit").val() != "") {
-                kpiData.dbValuesLink = $("#inputDBValuesLinkKPIDataEdit").val();
-            }
-            if ($("#inputDBValuesTypeKPIDataEdit").val() != "") {
-                kpiData.dbValuesType = $("#inputDBValuesTypeKPIDataEdit").val();
             }
             if ($("#inputUsernameKPIDataEdit").val() != "") {
                 kpiData.username = $("#inputUsernameKPIDataEdit").val();
             }
-            if ($("#inputOwnershipKPIDataEdit").val() != "") {
-                kpiData.ownership = $("#inputOwnershipKPIDataEdit").val();
-            } else {
-                kpiData.ownership = "private";
-            }
-            if ($("#inputHealthinessKPIDataEdit").val() != "") {
-                kpiData.healthiness = $("#inputHealthinessKPIDataEdit").val();
-            } else {
-                kpiData.healthiness = false;
-            }
-            if ($("#inputLastDateKPIDataEdit").val() != "") {
-                kpiData.lastDate = $("#inputLastDateKPIDataEdit").val();
+            if (typeof $("#inputLastDateKPIDataEdit").val() != "undefined" && $("#inputLastDateKPIDataEdit").val() != "") {
+                kpiData.lastDate = new Date($("#inputLastDateKPIDataEdit").val()).getTime();
             }
             if ($("#inputLastValueKPIDataEdit").val() != "") {
                 kpiData.lastValue = $("#inputLastValueKPIDataEdit").val();
-            }
-            if ($("#inputLastCheckKPIDataEdit").val() != "") {
-                kpiData.lastCheck = $("#inputLastCheckKPIDataEdit").val() + ":00";
             }
         } else {
             kpiData = kpiDataToSave;
         }
 
         console.log(kpiData);
-        KPIEditor.keycloak.updateToken(30).success(function () {
-            var query = QueryManager.createSaveKPIDataQuery(KPIEditor.keycloak.token);
-            APIClient.executePostQuery(query, kpiData, KPIDataTabler.successSaveKPIData, KPIDataTabler.errorQuery);
-        }).error(function () {
-            var query = QueryManager.createSaveKPIDataQuery(Authentication.refreshTokenGetAccessToken());
-            APIClient.executePostQuery(query, kpiData, KPIDataTabler.successSaveKPIData, KPIDataTabler.errorQuery);
-        });
+        if (kpiData.highLevelType != "MyPOI") {
+            if (typeof kpiData.id != "undefined") {
+                KPIEditor.keycloak.updateToken(30).success(function () {
+                    var query = QueryManager.createPatchKPIDataQuery(KPIEditor.keycloak.token, kpiData.id);
+                    APIClient.executePatchQuery(query, kpiData, KPIDataTabler.successSaveKPIData, KPIDataTabler.errorQuery);
+                }).error(function () {
+                    var query = QueryManager.createPatchKPIDataQuery(Authentication.refreshTokenGetAccessToken(), kpiData.id);
+                    APIClient.executePatchQuery(query, kpiData, KPIDataTabler.successSaveKPIData, KPIDataTabler.errorQuery);
+                });
+            } else {
+                KPIEditor.keycloak.updateToken(30).success(function () {
+                    var query = QueryManager.createPostKPIDataQuery(KPIEditor.keycloak.token);
+                    APIClient.executePostQuery(query, kpiData, KPIDataTabler.successSaveKPIData, KPIDataTabler.errorQuery);
+                }).error(function () {
+                    var query = QueryManager.createPostKPIDataQuery(Authentication.refreshTokenGetAccessToken());
+                    APIClient.executePostQuery(query, kpiData, KPIDataTabler.successSaveKPIData, KPIDataTabler.errorQuery);
+                });
+            }
+        } else {
+            KPIEditor.keycloak.updateToken(30).success(function () {
+                var query = QueryManager.createAddMyPOIQuery(KPIEditor.keycloak.token);
+                APIClient.executePostQuery(query, kpiData, KPIDataTabler.successSaveKPIData, KPIDataTabler.errorQuery);
+            }).error(function () {
+                var query = QueryManager.createAddMyPOIQuery(Authentication.refreshTokenGetAccessToken());
+                APIClient.executePostQuery(query, kpiData, KPIDataTabler.successSaveKPIData, KPIDataTabler.errorQuery);
+            });
+        }
     },
 
     deleteKPIData(_id) {
         KPIEditor.keycloak.updateToken(30).success(function () {
-            var query = QueryManager.createGetKPIDataByIdQuery(_id, KPIEditor.keycloak.token);
-            APIClient.executeGetQuery(query, function (_response) {
-                _response.deleteTime = Utility.timestampToFormatDate(new Date().getTime()) + ":00";
-                if (_response.lastDate != null) {
-                    _response.lastDate = Utility.timestampToFormatDate(_response.lastDate) + ":00";
-                }
-                if (_response.lastCheck != null) {
-                    _response.lastCheck = Utility.timestampToFormatDate(_response.lastCheck) + ":00";
-                }
-                if (_response.insertTime != null) {
-                    _response.insertTime = Utility.timestampToFormatDate(_response.insertTime) + ":00";
-                }
-                var saveQuery = QueryManager.createSaveKPIDataQuery(KPIEditor.keycloak.token);
-                APIClient.executePostQuery(saveQuery, _response, KPIDataTabler.successSaveKPIData, KPIDataTabler.errorQuery);
-
-            }, KPIDataTabler.errorQuery);
+            var query = QueryManager.createDeleteKPIDataQuery(KPIEditor.keycloak.token, _id);
+            APIClient.executeDeleteQuery(query, KPIDataTabler.successSaveKPIData, KPIDataTabler.errorQuery);
         }).error(function () {
-            var query = QueryManager.createGetKPIDataByIdQuery(_id, Authentication.refreshTokenGetAccessToken());
-            APIClient.executeGetQuery(query, function (_response) {
-                _response.deleteTime = Utility.timestampToFormatDate(new Date().getTime()) + ":00";
-                if (_response.lastDate != null) {
-                    _response.lastDate = Utility.timestampToFormatDate(_response.lastDate) + ":00";
-                }
-                if (_response.lastCheck != null) {
-                    _response.lastCheck = Utility.timestampToFormatDate(_response.lastCheck) + ":00";
-                }
-                if (_response.insertTime != null) {
-                    _response.insertTime = Utility.timestampToFormatDate(_response.insertTime) + ":00";
-                }
-
-                var saveQuery = QueryManager.createSaveKPIDataQuery(Authentication.refreshTokenGetAccessToken());
-                APIClient.executePostQuery(saveQuery, _response, KPIDataTabler.successSaveKPIData, KPIDataTabler.errorQuery);
-            }, KPIDataTabler.errorQuery);
+            var query = QueryManager.createDeleteKPIDataQuery(Authentication.refreshTokenGetAccessToken(), _id);
+            APIClient.executeDeleteQuery(query, KPIDataTabler.successSaveKPIData, KPIDataTabler.errorQuery);
         });
     },
 
@@ -325,56 +334,19 @@ var KPIDataTabler = {
     },
 
     makePublic: function (_kpiId) {
-        KPIDataTabler.currentMakePublicKPIId = _kpiId;
-        KPIDelegationTabler.createAnonymousDelegation(KPIDataTabler.currentMakePublicKPIId, KPIDataTabler.successCreatePublicDelegation, KPIDataTabler.errorQuery);
-    },
-
-    successCreatePublicDelegation: function () {
-        var kpiData = KPIDataTabler.getCurrentKPIData(KPIDataTabler.currentMakePublicKPIId);
-        kpiData.ownership = "public";
-        if (kpiData.lastDate != null) {
-            kpiData.lastDate = Utility.timestampToFormatDate(kpiData.lastDate) + ":00";
-        }
-        if (kpiData.lastCheck != null) {
-            kpiData.lastCheck = Utility.timestampToFormatDate(kpiData.lastCheck) + ":00";
-        }
-        if (kpiData.insertTime != null) {
-            kpiData.insertTime = Utility.timestampToFormatDate(kpiData.insertTime) + ":00";
+        kpiData = {
+            "id": _kpiId,
+            "ownership": "public"
         }
         KPIDataTabler.saveKPIData(kpiData);
     },
 
     makePrivate: function (_kpiId) {
-        KPIDataTabler.currentMakePublicKPIId = _kpiId;
-        KPIDelegationTabler.getDelegations(_kpiId, KPIDataTabler.successGetDelegationsForMakePrivate, KPIDataTabler.errorQuery);
-    },
-
-    successGetDelegationsForMakePrivate: function (_response) {
-        var currentDelegation = null
-        for (var i = 0; i < _response.length; i++) {
-            if (_response[i].usernameDelegated == "ANONYMOUS") {
-                currentDelegation = _response[i];
-            }
-        }
-        if (currentDelegation != null) {
-            KPIDelegationTabler.deleteKPIDelegation(currentDelegation.id, KPIDataTabler.successDeletePublicDelegation, KPIDataTabler.errorQuery);
-        }
-    },
-
-    successDeletePublicDelegation: function () {
-        var kpiData = KPIDataTabler.getCurrentKPIData(KPIDataTabler.currentMakePublicKPIId);
-        kpiData.ownership = "private";
-        if (kpiData.lastDate != null) {
-            kpiData.lastDate = Utility.timestampToFormatDate(kpiData.lastDate) + ":00";
-        }
-        if (kpiData.lastCheck != null) {
-            kpiData.lastCheck = Utility.timestampToFormatDate(kpiData.lastCheck) + ":00";
-        }
-        if (kpiData.insertTime != null) {
-            kpiData.insertTime = Utility.timestampToFormatDate(kpiData.insertTime) + ":00";
+        kpiData = {
+            "id": _kpiId,
+            "ownership": "private"
         }
         KPIDataTabler.saveKPIData(kpiData);
-    },
-
+    }
 
 }

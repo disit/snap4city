@@ -48,7 +48,7 @@ public class KPIMetadataSerializer extends StdSerializer<KPIMetadata> {
 		if (kpiMetadata.getElapseTime() != null) {
 			jgen.writeNumberField("elapseTime", kpiMetadata.getElapseTime().getTime());
 		}
-		if (kpiMetadata.getValue() != null) {
+		if (kpiMetadata.getKey() != null) {
 			jgen.writeStringField("key", kpiMetadata.getKey());
 		}
 		if (kpiMetadata.getValue() != null) {

@@ -283,6 +283,9 @@ public class DataDAOImpl implements DataDAOCustom {
 			predicates.add(cb.equal(dataRoot.get("variableName"), variableName));
 		if (motivation != null)
 			predicates.add(cb.equal(dataRoot.get("motivation"), motivation));
+
+		predicates.add(dataRoot.get("deleteTime").isNull());
+
 		return predicates;
 	}
 }

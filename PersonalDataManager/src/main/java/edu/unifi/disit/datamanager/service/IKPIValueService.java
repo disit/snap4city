@@ -34,6 +34,8 @@ public interface IKPIValueService {
 	Page<KPIValue> findByKpiIdFiltered(Long kpiId, String searchKey, Pageable pageable) throws NoSuchMessageException, CredentialsException;
 
 	List<KPIValue> findByKpiIdNoPages(Long kpiId)  throws NoSuchMessageException, CredentialsException;
+	
+	List<KPIValue> findByKpiIdGeoLocated(Long kpiId)  throws NoSuchMessageException, CredentialsException;
 
 	List<KPIValue> findByKpiIdFilteredNoPages(Long kpiId, String searchKey) throws NoSuchMessageException, CredentialsException;
 	
@@ -43,5 +45,6 @@ public interface IKPIValueService {
 
 	List<KPIValue> findByKpiIdNoPagesWithLimit(Long kpiId, Date from, Date to, Integer first, Integer last, Locale lang) throws NoSuchMessageException, DataNotValidException;
 
+	List<Date> getKPIValueDates(Long kpiId) throws NoSuchMessageException, CredentialsException;
 	
 }

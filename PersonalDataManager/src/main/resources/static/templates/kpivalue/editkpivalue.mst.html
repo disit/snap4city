@@ -12,13 +12,50 @@
                 <ul class="list-group" style="border: none;">
                     <input type="hidden" id="inputIdKPIValueEdit" value="{{id}}"></input>
                     <input type="hidden" id="inputKpiIdKPIValueEdit" value="{{kpiId}}"></input>
-                    <input type="hidden" id="inputElapseTimeKPIValueEdit" value="{{elapseTime}}"></input>
-                    <li class="list-group-item"><b>Value *</b> <input id="inputValueKPIValueEdit" required class="form-control"
-                            type="{{validDataType}}" step="{{validStep}}" value="{{value}}"></input></li>
-                    <li class="list-group-item"><b>Data Time *</b> <input id="inputDataTimeKPIValueEdit" required class="form-control"
-                            type="datetime-local" value="{{dataTime}}"></input></li>
-                    <li class="list-group-item"><b>Insert Time *</b> <input id="inputInsertTimeKPIValueEdit" required class="form-control"
-                            type="datetime-local" value="{{insertTime}}"></input></li>
+
+                    <li class="list-group-item">
+                        <div class="row">
+                            <div class="col-sm-4"><b>Value *</b></div>
+                            <div class="col-sm-8">
+                                <input id="inputValueKPIValueEdit" required class="form-control" type="{{validDataType}}"
+                                    step="{{validStep}}" value="{{value}}"></input>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="row">
+                            <div class="col-sm-4"><b>Data Time *</b></div>
+                            <div class="col-sm-8">
+                                <input id="inputDataTimeKPIValueEdit" required class="form-control" type="datetime-local"
+                                    value="{{dataTime}}"></input>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="row">
+                            <div class="col-sm-4"><b>Latitude</b></div>
+                            <div class="col-sm-8">
+                                <input disabled id="inputLatitudeKPIValueEdit" class="form-control" type="text" value="{{latitude}}"></input>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="row">
+                            <div class="col-sm-4"><b>Longitude</b></div>
+                            <div class="col-sm-8">
+                                <input disabled id="inputLongitudeKPIValueEdit" class="form-control" type="text" value="{{longitude}}"></input>
+                            </div>
+                        </div>
+                    </li>
+
+
+
+
+
+
+                    <li class="list-group-item">
+                        <div id="mapContainer" style="width: 100%; height: 250px"></div>
+                    </li>
                 </ul>
                 <!-- {{/kpivalue}} -->
             </div>

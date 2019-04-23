@@ -16,6 +16,7 @@ package edu.unifi.disit.datamanager.datamodel.profiledb;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -41,43 +42,51 @@ public class KPIValueDeserializer extends StdDeserializer<KPIValue> {
 		JsonNode jnode = jp.getCodec().readTree(jp);
 		KPIValue kpivalues = new KPIValue();
 
-		
-		if(jnode.get("id") != null) {
+		if (jnode.get("id") != null) {
 			kpivalues.setId(jnode.get("id").asLong());
 		}
-		if(jnode.get("kpiId") != null) {
+		if (jnode.get("kpiId") != null) {
 			kpivalues.setKpiId(jnode.get("kpiId").asLong());
 		}
 		if (jnode.get("dataTime") != null) {
-			try {
-				kpivalues.setDataTime(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(jnode.get("dataTime").asText()));
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
-		}
-		if (jnode.get("elapseTime") != null) {
-			try {
-				kpivalues.setElapseTime(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(jnode.get("elapseTime").asText()));
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
-		}
-		if (jnode.get("deleteTime") != null) {
-			try {
-				kpivalues.setDeleteTime(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(jnode.get("deleteTime").asText()));
-			} catch (ParseException e) {
-				e.printStackTrace();
+			Date date = new Date();
+			if (jnode.get("dataTime").asLong() != 0) {
+				date.setTime(jnode.get("dataTime").asLong());
+				kpivalues.setDataTime(date);
+			} else {
+				try {
+					kpivalues.setDataTime(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(jnode.get("dataTime").asText()));
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		if (jnode.get("insertTime") != null) {
-			try {
-				kpivalues.setInsertTime(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(jnode.get("insertTime").asText()));
-			} catch (ParseException e) {
-				e.printStackTrace();
+			Date date = new Date();
+			if (jnode.get("insertTime").asLong() != 0) {
+				date.setTime(jnode.get("insertTime").asLong());
+				kpivalues.setInsertTime(date);
+			} else {
+				try {
+					kpivalues.setDataTime(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(jnode.get("insertTime").asText()));
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
 			}
 		}
+		/*if (jnode.get("insertTime") != null) {
+			Date date = new Date();
+			date.setTime(jnode.get("insertTime").asLong());
+			kpivalues.setInsertTime(date);
+		}*/
 		if (jnode.get("value") != null) {
 			kpivalues.setValue(jnode.get("value").asText());
+		}
+		if (jnode.get("latitude") != null) {
+			kpivalues.setLatitude(jnode.get("latitude").asText());
+		}
+		if (jnode.get("longitude") != null) {
+			kpivalues.setLongitude(jnode.get("longitude").asText());
 		}
 
 		return kpivalues;

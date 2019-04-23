@@ -15,7 +15,6 @@ package edu.unifi.disit.datamanager.datamodel.profiledb;
 
 import java.util.Date;
 
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -55,12 +54,17 @@ public class KPIValue implements Comparable<KPIValue> {
 	private Date deleteTime;
 	@Column(name = "value")
 	private String value;
+	@Column(name = "latitude")
+	private String latitude;
+	@Column(name = "longitude")
+	private String longitude;
 
 	public KPIValue() {
 		super();
 	}
 
-	public KPIValue(Long id, Date insertTime, Date dataTime, Date elapseTime, Date deleteTime, String value) {
+	public KPIValue(Long id, Date insertTime, Date dataTime, Date elapseTime, Date deleteTime, String value,
+			String latitude, String longitude) {
 		super();
 		this.id = id;
 		this.insertTime = insertTime;
@@ -68,15 +72,20 @@ public class KPIValue implements Comparable<KPIValue> {
 		this.elapseTime = elapseTime;
 		this.deleteTime = deleteTime;
 		this.value = value;
+		this.latitude = latitude;
+		this.longitude = longitude;
 	}
 
-	public KPIValue(Date insertTime, Date dataTime, Date elapseTime, Date deleteTime, String value) {
+	public KPIValue(Date insertTime, Date dataTime, Date elapseTime, Date deleteTime, String value, String latitude,
+			String longitude) {
 		super();
 		this.insertTime = insertTime;
 		this.dataTime = dataTime;
 		this.elapseTime = elapseTime;
 		this.deleteTime = deleteTime;
 		this.value = value;
+		this.latitude = latitude;
+		this.longitude = longitude;
 	}
 
 	public Long getId() {
@@ -135,11 +144,64 @@ public class KPIValue implements Comparable<KPIValue> {
 		this.value = value;
 	}
 
+	public String getLatitude() {
+		return latitude;
+	}
+
+	public void setLatitude(String latitude) {
+		this.latitude = latitude;
+	}
+
+	public String getLongitude() {
+		return longitude;
+	}
+
+	public void setLongitude(String longitude) {
+		this.longitude = longitude;
+	}
+
 	@Override
 	public String toString() {
-		return "KPIValues [id=" + id + ", kpiId=" + kpiId + ", insertTime=" + insertTime
-				+ ", dataTime=" + dataTime + ", elapseTime=" + elapseTime + ", deleteTime=" + deleteTime + ", value="
-				+ value + "]";
+		return "KPIValue [id=" + id + ", kpiId=" + kpiId + ", insertTime=" + insertTime + ", dataTime=" + dataTime
+				+ ", elapseTime=" + elapseTime + ", deleteTime=" + deleteTime + ", value=" + value + ", latitude="
+				+ latitude + ", longitude=" + longitude + "]";
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((kpiId == null) ? 0 : kpiId.hashCode());
+		result = prime * result + ((value == null) ? 0 : value.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		KPIValue other = (KPIValue) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		if (kpiId == null) {
+			if (other.kpiId != null)
+				return false;
+		} else if (!kpiId.equals(other.kpiId))
+			return false;
+		if (value == null) {
+			if (other.value != null)
+				return false;
+		} else if (!value.equals(other.value))
+			return false;
+		return true;
 	}
 
 	@Override

@@ -28,15 +28,17 @@ public interface IKPIMetadataService {
 	KPIMetadata getKPIMetadataById(Long id, Locale lang) throws NoSuchMessageException, CredentialsException;
 
 	Page<KPIMetadata> findAllByKpiId(Long kpiId, Pageable pageable) throws NoSuchMessageException, CredentialsException;
-	
+
 	List<KPIMetadata> findByKpiIdNoPages(Long id) throws NoSuchMessageException, CredentialsException;
-	
-	Page<KPIMetadata> findAllFilteredByKpiId(Long kpiId, String searchKey, Pageable pageable) throws NoSuchMessageException, CredentialsException;
+
+	Page<KPIMetadata> findAllFilteredByKpiId(Long kpiId, String searchKey, Pageable pageable)
+			throws NoSuchMessageException, CredentialsException;
+
+	List<KPIMetadata> findFilteredByKpiIdNoPages(Long kpiId, String searchKey)
+			throws NoSuchMessageException, CredentialsException;
 
 	KPIMetadata saveKPIMetadata(KPIMetadata kpiMetadata) throws NoSuchMessageException, CredentialsException;
 
 	void deleteKPIMetadata(Long id) throws NoSuchMessageException, CredentialsException;
 
-	
-	
 }

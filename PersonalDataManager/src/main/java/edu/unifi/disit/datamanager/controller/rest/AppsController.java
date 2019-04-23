@@ -187,12 +187,16 @@ public class AppsController {
 			@RequestParam(value = "motivation", required = false) String motivation,
 			@RequestParam("sourceRequest") String sourceRequest,
 			@RequestParam(value = "deleted", required = false, defaultValue = "false") Boolean deleted,
+			@RequestParam(value = "elementType", required = false) String elementType,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) throws UnsupportedEncodingException {
 
 		logger.info("Requested getDelegatorV1 for appid {} deleted {} lang {}", appId, deleted, lang);
 
-		ResponseEntity<Object> toreturn = getDelegatorV2(appId, variableName, motivation, sourceRequest, deleted, lang, request);
+		if (elementType != null)
+			logger.info("elementType specified {}", elementType);
+
+		ResponseEntity<Object> toreturn = getDelegatorV2(appId, variableName, motivation, sourceRequest, deleted, elementType, lang, request);
 
 		if (toreturn.getStatusCode().compareTo(HttpStatus.OK) == 0) {
 			toreturn = new ResponseEntity<Object>(delegationService.stripUsernameDelegatedNull((List<Delegation>) toreturn.getBody()), HttpStatus.OK);
@@ -208,6 +212,7 @@ public class AppsController {
 			@RequestParam(value = "motivation", required = false) String motivation,
 			@RequestParam("sourceRequest") String sourceRequest,
 			@RequestParam(value = "deleted", required = false, defaultValue = "false") Boolean deleted,
+			@RequestParam(value = "elementType", required = false) String elementType,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) throws UnsupportedEncodingException {
 
@@ -224,9 +229,11 @@ public class AppsController {
 			appId = URLDecoder.decode(appId, StandardCharsets.UTF_8.toString());
 			logger.info("appid decoded to {}", appId);
 		}
+		if (elementType != null)
+			logger.info("elementType specified {}", elementType);
 
 		try {
-			List<Delegation> delegations = delegationService.getDelegationsDelegatorFromApp(appId, variableName, motivation, deleted, lang);
+			List<Delegation> delegations = delegationService.getDelegationsDelegatorFromApp(appId, variableName, motivation, deleted, elementType, lang);
 
 			activityService.saveActivityDelegationFromAppId(appId, null, sourceRequest, variableName, motivation, ActivityAccessType.READ, ActivityDomainType.DELEGATION);
 
@@ -261,11 +268,15 @@ public class AppsController {
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			@RequestParam(value = "appOwner", required = false) String appOwner,
 			@RequestParam(value = "groupname", required = false) String groupname,
+			@RequestParam(value = "elementType", required = false) String elementType,
 			HttpServletRequest request) throws UnsupportedEncodingException {
 
 		logger.info("Requested getDelegatedV1 for appid {} deleted {} lang {}", appId, deleted, lang);
 
-		ResponseEntity<Object> toreturn = getDelegatedV2(appId, variableName, motivation, sourceRequest, deleted, lang, appOwner, groupname, request);
+		if (elementType != null)
+			logger.info("elementType specified {}", elementType);
+
+		ResponseEntity<Object> toreturn = getDelegatedV2(appId, variableName, motivation, sourceRequest, deleted, lang, appOwner, groupname, elementType, request);
 
 		if (toreturn.getStatusCode().compareTo(HttpStatus.OK) == 0) {
 			toreturn = new ResponseEntity<Object>(delegationService.stripUsernameDelegatedNull((List<Delegation>) toreturn.getBody()), HttpStatus.OK);
@@ -284,6 +295,7 @@ public class AppsController {
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			@RequestParam(value = "appOwner", required = false) String appOwner,
 			@RequestParam(value = "groupname", required = false) String groupname,
+			@RequestParam(value = "elementType", required = false) String elementType,
 			HttpServletRequest request) throws UnsupportedEncodingException {
 
 		logger.info("Requested getDelegatedV2 for appid {} deleted {} lang {}", appId, deleted, lang);
@@ -305,9 +317,11 @@ public class AppsController {
 			groupname = URLDecoder.decode(groupname, StandardCharsets.UTF_8.toString());
 			logger.info("groupname decoded to {}", groupname);
 		}
+		if (elementType != null)
+			logger.info("elementType specified {}", elementType);
 
 		try {
-			List<Delegation> delegations = delegationService.getDelegationsDelegatedFromApp(appId, variableName, motivation, deleted, appOwner, groupname, lang);
+			List<Delegation> delegations = delegationService.getDelegationsDelegatedFromApp(appId, variableName, motivation, deleted, appOwner, groupname, elementType, lang);
 
 			activityService.saveActivityDelegationFromAppId(appId, null, sourceRequest, variableName, motivation, ActivityAccessType.READ, ActivityDomainType.DELEGATION);
 

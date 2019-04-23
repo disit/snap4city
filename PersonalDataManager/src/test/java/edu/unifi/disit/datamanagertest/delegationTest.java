@@ -173,6 +173,42 @@ public class delegationTest {
 	}
 
 	@Test
+	public void get_delegated_usernameExist2_V1_elementType_ok1() throws ClientProtocolException, IOException {
+
+		// Given
+		HttpUriRequest request = new HttpGet("http://localhost:8080/datamanager/api/v1/username/adifino/delegated?accessToken=" + getAccessTokenRoot() + "&sourceRequest=test&elementType=DASHID");
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		assertThat(
+				httpResponse.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.NO_CONTENT.value()));
+	}
+
+	@Test
+	public void get_delegated_usernameExist2_V1_elementType_ok2() throws ClientProtocolException, IOException {
+
+		// Given
+		HttpUriRequest request = new HttpGet("http://localhost:8080/datamanager/api/v1/username/adifino/delegated?accessToken=" + getAccessTokenRoot() + "&sourceRequest=test&elementType=AppID");
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		ObjectMapper mapper = new ObjectMapper();
+		List<Delegation> result = mapper.readValue(EntityUtils.toString(httpResponse.getEntity()), new TypeReference<List<Delegation>>() {
+		});
+
+		assertThat(
+				httpResponse.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.OK.value()));
+
+		assertEquals(3, result.size());
+	}
+
+	@Test
 	public void get_delegated_usernameExist2_V2() throws ClientProtocolException, IOException {
 
 		// Given
@@ -914,13 +950,15 @@ public class delegationTest {
 	@Test
 	public void post_delegationValid1() throws ClientProtocolException, IOException {
 
+		Long time = System.currentTimeMillis();
+
 		// Given
 		HttpPost request = new HttpPost("http://localhost:8080/datamanager/api/v1/username/pb1/delegation?accessToken=" + getAccessTokenRoot() + "&sourceRequest=test");
 
 		Delegation delegation = new Delegation();
 		delegation.setUsernameDelegator("pb1");
 		delegation.setUsernameDelegated("badii");
-		delegation.setElementId("dash_id");
+		delegation.setElementId("dash_id" + time);
 		delegation.setElementType("DASHID");
 
 		request.setEntity(createEntity(delegation));
@@ -933,17 +971,35 @@ public class delegationTest {
 		assertThat(
 				httpResponse.getStatusLine().getStatusCode(),
 				equalTo(HttpStatus.OK.value()));
+
+		// do it twice.... next one has to fail
+
+		// When
+		HttpResponse httpResponse2 = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		assertThat(
+				httpResponse2.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.BAD_REQUEST.value()));
+
+		String entityMsg = IOUtils.toString(httpResponse2.getEntity().getContent(), "UTF-8");
+
+		assertThat(
+				entityMsg,
+				startsWith("The passed DELEGATION is already present"));
 	}
 
 	@Test
 	public void post_delegationValid2() throws ClientProtocolException, IOException {
 
+		Long time = System.currentTimeMillis();
+
 		// Given
 		HttpPost request = new HttpPost("http://localhost:8080/datamanager/api/v1/username/pb1/delegation?accessToken=" + getAccessTokenRoot() + "&sourceRequest=test");
 
 		Delegation delegation = new Delegation();
 		delegation.setUsernameDelegated("badii");
-		delegation.setElementId("dash_id");
+		delegation.setElementId("dash_id" + time);
 		delegation.setElementType("DASHID");
 
 		request.setEntity(createEntity(delegation));
@@ -956,17 +1012,36 @@ public class delegationTest {
 		assertThat(
 				httpResponse.getStatusLine().getStatusCode(),
 				equalTo(HttpStatus.OK.value()));
+
+		// do it twice.... next one has to fail
+
+		// When
+		HttpResponse httpResponse2 = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		assertThat(
+				httpResponse2.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.BAD_REQUEST.value()));
+
+		String entityMsg = IOUtils.toString(httpResponse2.getEntity().getContent(), "UTF-8");
+
+		assertThat(
+				entityMsg,
+				startsWith("The passed DELEGATION is already present"));
+
 	}
 
 	@Test
 	public void post_delegationValid_details() throws ClientProtocolException, IOException {
+
+		Long time = System.currentTimeMillis();
 
 		// Given
 		HttpPost request = new HttpPost("http://localhost:8080/datamanager/api/v1/username/pb1/delegation?accessToken=" + getAccessTokenRoot() + "&sourceRequest=test");
 
 		Delegation delegation = new Delegation();
 		delegation.setUsernameDelegated("badii");
-		delegation.setElementId("dash_id");
+		delegation.setElementId("dash_id" + time);
 		delegation.setElementType("DASHID");
 		delegation.setDelegationDetails("{\"k1\":\"1c1a98a0-4f13-47aa-930d-25302edebfcd\",\"k2\":\"19973b84-f6d4-4e28-b04a-6608aad39c4b\"}");
 
@@ -980,6 +1055,22 @@ public class delegationTest {
 		assertThat(
 				httpResponse.getStatusLine().getStatusCode(),
 				equalTo(HttpStatus.OK.value()));
+
+		// do it twice.... next one has to fail
+
+		// When
+		HttpResponse httpResponse2 = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		assertThat(
+				httpResponse2.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.BAD_REQUEST.value()));
+
+		String entityMsg = IOUtils.toString(httpResponse2.getEntity().getContent(), "UTF-8");
+
+		assertThat(
+				entityMsg,
+				startsWith("The passed DELEGATION is already present"));
 	}
 
 	@Test

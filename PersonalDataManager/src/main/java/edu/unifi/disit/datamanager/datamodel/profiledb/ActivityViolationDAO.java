@@ -12,10 +12,15 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package edu.unifi.disit.datamanager.datamodel.profiledb;
 
+import java.util.Date;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ActivityViolationDAO extends JpaRepository<ActivityViolation, Long> {
+
+	List<ActivityViolation> findByTimeBefore(Date time);
 
 }

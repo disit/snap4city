@@ -42,6 +42,14 @@ public class POIData {
 		this.listKPIValue = listKPIValue;
 		this.listKPIMetadata = listKPIMetadata;
 	}
+	
+	public POIData(KPIData kpidata) {
+		this(kpidata, new ArrayList<KPIValue>(), new ArrayList<KPIMetadata>());
+	}
+
+	public POIData(KPIData kpidata, List<KPIMetadata> listKPIMetadata) {
+		this(kpidata, new ArrayList<KPIValue>(), listKPIMetadata);
+	}
 
 	public KPIData getKpidata() {
 		return kpidata;

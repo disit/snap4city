@@ -82,7 +82,7 @@ public class AccessServiceImpl implements IAccessService {
 		List<String> groupnames = lu.getGroupAndOUnames(loggedUserName);
 
 		// check delegation
-		List<Delegation> mydelegations = delegationRepo.getDelegationDelegatorFromAppId(elementID, null, null, false);
+		List<Delegation> mydelegations = delegationRepo.getDelegationDelegatorFromAppId(elementID, null, null, false, null);
 
 		for (Delegation d : mydelegations) {
 			if ((d.getUsernameDelegated() != null) && (d.getUsernameDelegated().equals("ANONYMOUS"))) {
@@ -91,7 +91,7 @@ public class AccessServiceImpl implements IAccessService {
 				return response;
 			}
 
-			if ((d.getUsernameDelegated() != null) && (d.getUsernameDelegated().equals(loggedUserName))) {
+			if ((d.getUsernameDelegated() != null) && (d.getUsernameDelegated().toLowerCase().equals(loggedUserName.toLowerCase()))) {
 				response.setResult(true);
 				response.setMessage("DELEGATED");
 				return response;
@@ -119,7 +119,7 @@ public class AccessServiceImpl implements IAccessService {
 		List<String> groupnames = lu.getGroupAndOUnames(username);
 
 		// check delegation
-		List<Delegation> mydelegations = delegationService.getDelegationsDelegatorFromApp(elementID, variableName, null, false, lang);
+		List<Delegation> mydelegations = delegationService.getDelegationsDelegatorFromApp(elementID, variableName, null, false, null, lang);
 
 		for (Delegation d : mydelegations) {
 			if ((d.getUsernameDelegated() != null) && (d.getUsernameDelegated().equals("ANONYMOUS"))) {

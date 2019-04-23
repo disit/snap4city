@@ -69,7 +69,7 @@ public class UserController {
 
 	@Autowired
 	IActivityService activityService;
-	
+
 	@Autowired
 	ICredentialsService credentialService;
 
@@ -187,12 +187,13 @@ public class UserController {
 			@RequestParam(value = "variableName", required = false) String variableName,
 			@RequestParam(value = "motivation", required = false) String motivation,
 			@RequestParam(value = "deleted", required = false, defaultValue = "false") Boolean deleted,
+			@RequestParam(value = "elementType", required = false) String elementType,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) {
 
 		logger.info("Requested getDelegatorV1 for {} lang {}", username, lang);
 
-		ResponseEntity<Object> toreturn = getDelegatorV2(username, sourceRequest, variableName, motivation, deleted, lang, request);
+		ResponseEntity<Object> toreturn = getDelegatorV2(username, sourceRequest, variableName, motivation, deleted, elementType, lang, request);
 
 		if (toreturn.getStatusCode().compareTo(HttpStatus.OK) == 0) {
 			toreturn = new ResponseEntity<Object>(delegationService.stripUsernameDelegatedNull((List<Delegation>) toreturn.getBody()), HttpStatus.OK);
@@ -208,6 +209,7 @@ public class UserController {
 			@RequestParam(value = "variableName", required = false) String variableName,
 			@RequestParam(value = "motivation", required = false) String motivation,
 			@RequestParam(value = "deleted", required = false, defaultValue = "false") Boolean deleted,
+			@RequestParam(value = "elementType", required = false) String elementType,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) {
 
@@ -221,7 +223,7 @@ public class UserController {
 			logger.info("sourceRequest specified {}", sourceRequest);
 
 		try {
-			List<Delegation> delegations = delegationService.getDelegationsDelegatorForUsername(username, variableName, motivation, deleted, lang);
+			List<Delegation> delegations = delegationService.getDelegationsDelegatorForUsername(username, variableName, motivation, deleted, elementType, lang);
 
 			activityService.saveActivityDelegationFromUsername(username, null, sourceRequest, variableName, motivation, ActivityAccessType.READ, ActivityDomainType.DELEGATION);
 
@@ -254,12 +256,13 @@ public class UserController {
 			@RequestParam(value = "motivation", required = false) String motivation,
 			@RequestParam(value = "deleted", required = false, defaultValue = "false") Boolean deleted,
 			@RequestParam(value = "groupname", required = false) String groupname,
+			@RequestParam(value = "elementType", required = false) String elementType,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) throws UnsupportedEncodingException {
 
 		logger.info("Requested getDelegatedV1 for {} lang {}", username, lang);
 
-		ResponseEntity<Object> toreturn = getDelegatedV2(username, sourceRequest, variableName, motivation, deleted, groupname, lang, request);
+		ResponseEntity<Object> toreturn = getDelegatedV2(username, sourceRequest, variableName, motivation, deleted, groupname, elementType, lang, request);
 
 		if (toreturn.getStatusCode().compareTo(HttpStatus.OK) == 0) {
 			toreturn = new ResponseEntity<Object>(delegationService.stripUsernameDelegatedNull((List<Delegation>) toreturn.getBody()), HttpStatus.OK);
@@ -276,6 +279,7 @@ public class UserController {
 			@RequestParam(value = "motivation", required = false) String motivation,
 			@RequestParam(value = "deleted", required = false, defaultValue = "false") Boolean deleted,
 			@RequestParam(value = "groupname", required = false) String groupname,
+			@RequestParam(value = "elementType", required = false) String elementType,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) throws UnsupportedEncodingException {
 
@@ -294,7 +298,7 @@ public class UserController {
 		}
 
 		try {
-			List<Delegation> delegations = delegationService.getDelegationsDelegatedForUsername(username, variableName, motivation, deleted, groupname, lang);
+			List<Delegation> delegations = delegationService.getDelegationsDelegatedForUsername(username, variableName, motivation, deleted, groupname, elementType, lang);
 
 			activityService.saveActivityDelegationFromUsername(username, null, sourceRequest, variableName, motivation, ActivityAccessType.READ, ActivityDomainType.DELEGATION);
 
@@ -467,7 +471,8 @@ public class UserController {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
 	}
-private Date convertDate(String text_string) throws ParseException {
+
+	private Date convertDate(String text_string) throws ParseException {
 		if ((text_string == null) || (text_string.isEmpty()))
 			return null;
 
@@ -485,20 +490,59 @@ private Date convertDate(String text_string) throws ParseException {
 		return text;
 	}
 
-// -------------------GET Data for app ---------------------------------------------
-		@RequestMapping(value = "/api/v1/username/organization", method = RequestMethod.GET)
-		public ResponseEntity<Object> getOrganizationV1(
-				@RequestParam("sourceRequest") String sourceRequest,
-				@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
-				HttpServletRequest request) {
+	// -------------------GET Data for app ---------------------------------------------
+	@RequestMapping(value = "/api/v1/username/organization", method = RequestMethod.GET)
+	public ResponseEntity<Object> getOrganizationV1(
+			@RequestParam("sourceRequest") String sourceRequest,
+			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
+			HttpServletRequest request) {
 
-			logger.info("Requested getOrganizationV1");
+		logger.info("Requested getOrganizationV1");
 
-			try {
-				return new ResponseEntity<Object>(credentialService.getOrganization(lang), HttpStatus.OK);
-			} catch (NoSuchMessageException d) {
-				logger.error("Delegation not found {}", d);
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
-			}
+		try {
+			return new ResponseEntity<Object>(credentialService.getOrganization(lang), HttpStatus.OK);
+		} catch (NoSuchMessageException d) {
+			logger.error("Delegation not found {}", d);
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		}
+	}
+
+	// -------------------DELETE Data for username ---------------------------------------------
+	@RequestMapping(value = "/api/v1/username/{username}/data/{dataid}", method = RequestMethod.DELETE)
+	public ResponseEntity<Object> deleteDataV1(@PathVariable("username") String username,
+			@PathVariable("dataid") Long dataId,
+			@RequestParam("sourceRequest") String sourceRequest,
+			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
+			HttpServletRequest request) {
+
+		logger.info("Requested deleteDataV1 {} for {}, lang {}", dataId, username, lang);
+
+		if (sourceRequest != null)
+			logger.info("sourceRequest specified {}", sourceRequest);
+
+		try {
+			dataService.deleteDataFromUser(username, dataId, lang);
+
+			activityService.saveActivityDelegationFromUsername(username, null, sourceRequest, null, null, ActivityAccessType.DELETE, ActivityDomainType.DATA);
+
+			logger.info("Deleted {}", dataId);
+
+			return new ResponseEntity<Object>(HttpStatus.OK);
+		} catch (DataNotValidException d) {
+			logger.error("Data not valid {}", d);
+
+			activityService.saveActivityViolationFromUsername(username, sourceRequest, null, null, ActivityAccessType.DELETE, ((HttpServletRequest) request).getContextPath() + "?" + ((HttpServletRequest) request).getQueryString(),
+					d.getMessage(), d, request.getRemoteAddr());
+
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
+		} catch (CredentialsException d) {
+			logger.warn("Rights exception", d);
+
+			activityService.saveActivityViolationFromUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), null, null, null, ActivityAccessType.DELETE,
+					((HttpServletRequest) request).getRequestURI() + "?" + ((HttpServletRequest) request).getQueryString(), d.getMessage(), d, request.getRemoteAddr());
+
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
+		}
+	}
+
 }

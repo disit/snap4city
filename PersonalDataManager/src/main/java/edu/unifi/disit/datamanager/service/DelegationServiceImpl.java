@@ -55,63 +55,75 @@ public class DelegationServiceImpl implements IDelegationService {
 	@Autowired
 	ICredentialsService credentialsService;
 
-	
 	@Override
 	public Delegation getDelegationById(Long id, Locale lang) throws NoSuchMessageException, CredentialsException {
 		logger.debug("getDelegationById INVOKED on id {}", id);
 		return delegationRepo.findOne(id);
 	}
-	
+
 	@Override
 	public Page<Delegation> findByElementId(String elementId, Pageable pageable)
 			throws NoSuchMessageException, CredentialsException {
-		logger.debug("findByElementId INVOKED on elementId {}",  elementId);
+		logger.debug("findByElementId INVOKED on elementId {}", elementId);
 		return delegationRepo.findByElementIdAndDeleteTimeIsNull(elementId, pageable);
 	}
-	
+
+	@Override
+	public Page<Delegation> findByElementIdWithoutAnonymous(String elementId, Pageable pageable)
+			throws NoSuchMessageException, CredentialsException {
+		logger.debug("findByElementId INVOKED on elementId {} usernameDelegated", elementId, "ANONYMOUS");
+		return delegationRepo.findByElementIdAndDeleteTimeIsNullAndUsernameDelegatedNotLike(elementId, "ANONYMOUS", pageable);
+	}
+
 	@Override
 	public List<Delegation> findByElementIdNoPages(String elementId)
 			throws NoSuchMessageException, CredentialsException {
-		logger.debug("findByElementIdNoPages INVOKED on elementId {}",  elementId);
+		logger.debug("findByElementIdNoPages INVOKED on elementId {}", elementId);
 		return delegationRepo.findByElementIdAndDeleteTimeIsNull(elementId);
 	}
 
-
+	@Override
+	public List<Delegation> findByElementIdNoPagesWithoutAnonymous(String elementId)
+			throws NoSuchMessageException, CredentialsException {
+		logger.debug("findByElementId INVOKED on elementId {} usernameDelegated", elementId, "ANONYMOUS");
+		return delegationRepo.findByElementIdAndDeleteTimeIsNullAndUsernameDelegatedNotLike(elementId, "ANONYMOUS");
+	}
 
 	@Override
 	// same as below
-	public List<Delegation> getDelegationsDelegatedForUsername(String username, String variableName, String motivation, Boolean deleted, String groupname, Locale lang) throws NoSuchMessageException, CredentialsException, LDAPException {
+	public List<Delegation> getDelegationsDelegatedForUsername(String username, String variableName, String motivation, Boolean deleted, String groupname, String elementType, Locale lang)
+			throws NoSuchMessageException, CredentialsException, LDAPException {
 		logger.debug("getDelegationsDelegatedForUsername INVOKED on username {} variableName {} motivation {} deleted {} groupname {}", username, variableName, motivation, deleted, groupname);
 
 		if (!username.equals("ANONYMOUS"))// avoid check credentials for PUBLIC elements
 			credentialsService.checkUsernameCredentials(username, lang);
 
-		return delegationRepo.getDelegationDelegatedByUsername(username, variableName, motivation, deleted, groupname, lang);
+		return delegationRepo.getDelegationDelegatedByUsername(username, variableName, motivation, deleted, groupname, elementType, lang);
 	}
 
 	@Override
 	// same as above
-	public List<Delegation> getDelegationsDelegatorForUsername(String username, String variableName, String motivation, Boolean deleted, Locale lang) throws NoSuchMessageException, CredentialsException {
+	public List<Delegation> getDelegationsDelegatorForUsername(String username, String variableName, String motivation, Boolean deleted, String elementType, Locale lang) throws NoSuchMessageException, CredentialsException {
 		logger.debug("getDelegationsDelegatorForUsername INVOKED on username {} variableName {} motivation {} deleted {}", username, variableName, motivation, deleted);
 
 		credentialsService.checkUsernameCredentials(username, lang);
 
-		return delegationRepo.getDelegationDelegatorByUsername(username, variableName, motivation, deleted);
+		return delegationRepo.getDelegationDelegatorByUsername(username, variableName, motivation, deleted, elementType);
 	}
 
 	@Override
 	// same as above
-	public List<Delegation> getDelegationsDelegatorFromApp(String appId, String variableName, String motivation, Boolean deleted, Locale lang) throws NoSuchMessageException, CredentialsException {
+	public List<Delegation> getDelegationsDelegatorFromApp(String appId, String variableName, String motivation, Boolean deleted, String elementType, Locale lang) throws NoSuchMessageException, CredentialsException {
 		logger.debug("getDelegationsDelegatorFromApp INVOKED on appid {} variableName {} motivation {} deleted {}", appId, variableName, motivation, deleted);
 
 		credentialsService.checkAppIdCredentials(appId, lang);
 
-		return delegationRepo.getDelegationDelegatorFromAppId(appId, variableName, motivation, deleted);
+		return delegationRepo.getDelegationDelegatorFromAppId(appId, variableName, motivation, deleted, elementType);
 
 	}
 
 	@Override
-	public List<Delegation> getDelegationsDelegatedFromApp(String appId, String variableName, String motivation, Boolean deleted, String appOwner, String groupname, Locale lang)
+	public List<Delegation> getDelegationsDelegatedFromApp(String appId, String variableName, String motivation, Boolean deleted, String appOwner, String groupname, String elementType, Locale lang)
 			throws DelegationNotValidException, NoSuchMessageException, CredentialsException, LDAPException {
 		logger.debug("getDelegationsDelegatedFromApp INVOKED on appid {} variableName {} motivation {} appOwner {} deleted {}", appId, variableName, motivation, appOwner, deleted);
 
@@ -127,7 +139,7 @@ public class DelegationServiceImpl implements IDelegationService {
 			appOwner = owns.get(0).getUsername();
 		}
 
-		return delegationRepo.getDelegationDelegatedByUsername(appOwner, variableName, motivation, deleted, groupname, lang);
+		return delegationRepo.getDelegationDelegatedByUsername(appOwner, variableName, motivation, deleted, groupname, elementType, lang);
 	}
 
 	@Override
@@ -152,6 +164,10 @@ public class DelegationServiceImpl implements IDelegationService {
 				// check groupname exist
 				&& ((delegation.getGroupnameDelegated() == null) || ((!lu.groupnameExist(delegation.getGroupnameDelegated())))))
 			throw new DelegationNotValidException(messages.getMessage("postdelegation.ko.delegatednotrecognized", null, lang));
+
+		// check that this delegation does not exist already
+		if (delegationRepo.getSameDelegation(delegation, lang).size() != 0)
+			throw new DelegationNotValidException(messages.getMessage("postdelegation.ko.delegationalreadypresent", null, lang));
 
 		// update delegation insert time
 		delegation.setInsertTime(new Date());

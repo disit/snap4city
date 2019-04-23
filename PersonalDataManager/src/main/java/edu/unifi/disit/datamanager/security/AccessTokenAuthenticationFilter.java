@@ -85,7 +85,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		if (((HttpServletRequest) request).getMethod().equals("POST"))
 			activityType = ActivityAccessType.WRITE;
 
-		if (accessToken != null) {
+		if ((accessToken != null) && (accessToken.length() != 0)) {
 
 			try {
 
@@ -112,7 +112,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 
 		} else {
 
-			logger.error("Access token NOT PRESENT");
+			logger.warn("Access token NOT PRESENT");
 
 			activityService.saveActivityViolationFromUsername(null, req.getParameter("sourceRequest"), req.getParameter("variableName"), req.getParameter("motivation"), activityType,
 					((HttpServletRequest) request).getContextPath() + "?" + ((HttpServletRequest) request).getQueryString(),

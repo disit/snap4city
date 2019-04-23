@@ -24,12 +24,16 @@ import org.springframework.stereotype.Repository;
 // all with contrains: AndDeleteTimeIsNull
 public interface DelegationDAO extends JpaRepository<Delegation, Long>, DelegationDAOCustom {
 
-	List<Delegation> findByElementIdAndDeleteTimeIsNull(String appId);
+	List<Delegation> findByElementIdAndDeleteTimeIsNull(String elementId);
+	
+	List<Delegation> findByElementIdAndDeleteTimeIsNullAndUsernameDelegatedNotLike(String elementId, String usernameDelegated);
 
 	Delegation findByIdAndDeleteTimeIsNull(Long delegationId);
 
 	List<Delegation> findByDeleteTimeBefore(Date date);// used for proper delete
 
 	Page<Delegation> findByElementIdAndDeleteTimeIsNull(String elementId, Pageable pageable);
+	
+	Page<Delegation> findByElementIdAndDeleteTimeIsNullAndUsernameDelegatedNotLike(String elementId, String usernameDelegated, Pageable pageable);
 
 }

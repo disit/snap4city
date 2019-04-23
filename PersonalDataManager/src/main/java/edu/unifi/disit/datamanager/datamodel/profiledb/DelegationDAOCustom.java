@@ -19,9 +19,11 @@ import edu.unifi.disit.datamanager.exception.LDAPException;
 
 public interface DelegationDAOCustom {
 
-	List<Delegation> getDelegationDelegatedByUsername(String username, String variableName, String motivation, Boolean deleted, String groupname, Locale lang) throws LDAPException;
+	List<Delegation> getDelegationDelegatedByUsername(String username, String variableName, String motivation, Boolean deleted, String groupname, String elementType, Locale lang) throws LDAPException;
 
-	List<Delegation> getDelegationDelegatorByUsername(String username, String variableName, String motivation, Boolean deleted);
+	List<Delegation> getDelegationDelegatorByUsername(String username, String variableName, String motivation, Boolean deleted, String elementType);
 
-	List<Delegation> getDelegationDelegatorFromAppId(String appId, String variableName, String motivation, Boolean deleted);
+	List<Delegation> getDelegationDelegatorFromAppId(String appId, String variableName, String motivation, Boolean deleted, String elementType);
+
+	List<Delegation> getSameDelegation(Delegation d, Locale lang);
 }

@@ -57,6 +57,12 @@ public class KPIValueSerializer extends StdSerializer<KPIValue> {
 		if (kpiValues.getValue() != null) {
 			jgen.writeStringField("value", kpiValues.getValue());
 		}
+		if (kpiValues.getLatitude() != null) {
+			jgen.writeStringField("latitude", kpiValues.getLatitude());
+		}
+		if (kpiValues.getLongitude() != null) {
+			jgen.writeStringField("longitude", kpiValues.getLongitude());
+		}
 
 		jgen.writeEndObject();
 	}

@@ -1,9 +1,9 @@
-#loginForm {
+.initForm {
     text-align: center;
-    margin-top: 20%;
+    margin-top: 40%;
 }
 
-#cardLoginContainer {
+.cardContainer {
     display: inline-block;
     width: 50%;
 }

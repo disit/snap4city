@@ -13,7 +13,16 @@
    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA. */
 package edu.unifi.disit.datamanager.datamodel.profiledb;
 
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 public interface KPIDataDAOCustom {
+
+	List<KPIData> findKPIDataFilteredList(String username, String highLevelType, String searchKey);
+
+	Page<KPIData> findKPIDataFilteredPage(String username, String highLevelType, String searchKey, Pageable pageable);
 
 	//List<KPIData> getDataByUsername(String username, String variableName, String motivation, Date from, Date to, Integer first, Integer last);
 

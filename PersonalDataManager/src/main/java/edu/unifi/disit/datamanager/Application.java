@@ -12,10 +12,14 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package edu.unifi.disit.datamanager;
 
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.web.servlet.ServletContextInitializer;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.ldap.core.LdapTemplate;
@@ -71,4 +75,16 @@ public class Application extends SpringBootServletInitializer {
 	public LDAPUserDAO ldapUserDAO() {
 		return new LDAPUserDAOImpl();
 	}
+
+	@Bean
+	public ServletContextInitializer servletContextInitializer(@Value("${secure.cookie}") boolean secure) {
+		return new ServletContextInitializer() {
+
+			@Override
+			public void onStartup(ServletContext servletContext) throws ServletException {
+				servletContext.getSessionCookieConfig().setSecure(secure);
+			}
+		};
+	}
+
 }

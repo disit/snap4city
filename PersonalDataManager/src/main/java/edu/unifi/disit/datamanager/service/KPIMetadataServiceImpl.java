@@ -67,8 +67,6 @@ public class KPIMetadataServiceImpl implements IKPIMetadataService {
 		logger.debug("findAllByKpiId INVOKED on kpiId {}",  kpiId);
 		return kpiMetadataRepository.findByKpiIdAndDeleteTimeIsNull(kpiId, pageable);
 	}
-	
-	
 
 	@Override
 	public List<KPIMetadata> findByKpiIdNoPages(Long kpiId) throws NoSuchMessageException, CredentialsException {
@@ -81,6 +79,14 @@ public class KPIMetadataServiceImpl implements IKPIMetadataService {
 			throws NoSuchMessageException, CredentialsException {
 		logger.debug("findAllFilteredByKpiId INVOKED on searchKey {} kpiId {}",  searchKey, kpiId);
 		return kpiMetadataRepository.findByKpiIdAndValueContainingOrKeyContainingAllIgnoreCaseAndDeleteTimeIsNull(kpiId, searchKey, searchKey, pageable);
+	
+	}
+	
+	@Override
+	public List<KPIMetadata> findFilteredByKpiIdNoPages(Long kpiId, String searchKey)
+			throws NoSuchMessageException, CredentialsException {
+		logger.debug("findAllFilteredByKpiId INVOKED on searchKey {} kpiId {}",  searchKey, kpiId);
+		return kpiMetadataRepository.findByKpiIdAndValueContainingOrKeyContainingAllIgnoreCaseAndDeleteTimeIsNull(kpiId, searchKey, searchKey);
 	
 	}
 

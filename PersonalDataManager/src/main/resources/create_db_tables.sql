@@ -16,7 +16,7 @@ CREATE TABLE `profiledb`.`activity` (
   `domain` varchar(255) DEFAULT NULL,
   `delete_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8676151 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `profiledb`.`activity_violation` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -33,7 +33,7 @@ CREATE TABLE `profiledb`.`activity_violation` (
   `app_name` varchar(255) DEFAULT NULL,
   `ip_address` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=951533 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `profiledb`.`data` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -49,7 +49,7 @@ CREATE TABLE `profiledb`.`data` (
   `variable_value` varchar(255) DEFAULT NULL,
   `variable_unit` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=327446 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `profiledb`.`delegation` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -64,7 +64,7 @@ CREATE TABLE `profiledb`.`delegation` (
   `delegation_details` text,
   `groupname_delegated` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=903 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `profiledb`.`kpidata` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -101,7 +101,7 @@ CREATE TABLE `profiledb`.`kpidata` (
   `db_values_type` varchar(128) DEFAULT NULL,
   `db_values_link` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=17055895 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `profiledb`.`kpimetadata` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -111,15 +111,45 @@ CREATE TABLE `profiledb`.`kpimetadata` (
   `delete_time` timestamp NULL DEFAULT NULL,
   `elapse_time` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=153 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `profiledb`.`kpivalues` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `kpi_id` bigint(20) DEFAULT NULL,
   `insert_time` timestamp NULL DEFAULT NULL,
-  `value` varchar(128) DEFAULT NULL,
+  `value` varchar(256) DEFAULT NULL,
   `data_time` timestamp NULL DEFAULT NULL,
   `elapse_time` timestamp NULL DEFAULT NULL,
   `delete_time` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=42063 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;
+
+CREATE TABLE `kpiactivity_violation` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `username` varchar(128) DEFAULT NULL,
+  `kpi_id` bigint(20) DEFAULT NULL,
+  `source_request` varchar(255) DEFAULT NULL,
+  `access_type` varchar(255) DEFAULT NULL,
+  `domain` varchar(255) DEFAULT NULL,
+  `insert_time` datetime DEFAULT NULL,
+  `delete_time` datetime DEFAULT NULL,
+  `elapse_time` datetime DEFAULT NULL,
+  `query` varchar(4096) DEFAULT NULL,
+  `error_message` varchar(255) DEFAULT NULL,
+  `stacktrace` blob,
+  `ip_address` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;
+
+CREATE TABLE `kpiactivity` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `username` varchar(128) DEFAULT NULL,
+  `kpi_id` bigint(20) DEFAULT NULL,
+  `source_request` varchar(255) DEFAULT NULL,
+  `access_type` varchar(255) DEFAULT NULL,
+  `domain` varchar(255) DEFAULT NULL,
+  `insert_time` datetime DEFAULT NULL,
+  `delete_time` datetime DEFAULT NULL,
+  `elapse_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;

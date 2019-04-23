@@ -31,5 +31,8 @@ public interface KPIMetadataDAO extends JpaRepository<KPIMetadata, Long>, KPIMet
 	
 	Page<KPIMetadata> findByKpiIdAndValueContainingOrKeyContainingAllIgnoreCaseAndDeleteTimeIsNull(Long kpiId, String value, String key, Pageable pageable);
 
-	List<KPIMetadata> findByKpiIdAndDeleteTimeIsNull(Long kpiId); 
+	List<KPIMetadata> findByKpiIdAndDeleteTimeIsNull(Long kpiId);
+
+	List<KPIMetadata> findByKpiIdAndValueContainingOrKeyContainingAllIgnoreCaseAndDeleteTimeIsNull(Long kpiId,
+			String value, String key); 
 }

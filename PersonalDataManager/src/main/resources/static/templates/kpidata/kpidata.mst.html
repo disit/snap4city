@@ -1,6 +1,6 @@
 <!-- {{#response}} -->
 <div class="row" style="padding: 15px;">
-    <div class="col-sm-1">
+    <div class="col-md-1">
         <select id="selectSizeKPIData" class="custom-select custom-select" onchange="KPIDataPager.setCurrentSize($('#selectSizeKPIData').val());KPIDataTabler.renderTable();">
             <option value="5">5</option>
             <option value="10">10</option>
@@ -11,8 +11,8 @@
             <option value="200">200</option>
         </select>
     </div>
-    <div class="col-sm-3">
-        <div class="alert alert-light" style="padding: 0.375rem 0.75rem;">
+    <div class="col-md-3">
+        <div class="alert alert-light" style="padding: 0.375rem 0.75rem;margin-top: 0.5rem;">
             <div class="form-check form-check-inline" onclick="KPIDataTabler.setPrivacy();">
                 <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value=""
                     checked>
@@ -28,13 +28,16 @@
             </div>
         </div>
     </div>
-    <div class="col-sm-5">
-        <button class="btn btn-warning" style="color: white; padding: 0.5rem;" type="button" onclick="KPIDataTabler.editKPIDataModal('', 'MyKPI');">Add My KPI</button>
-        <button class="btn btn-warning" style="color: white; padding: 0.5rem;" type="button" onclick="KPIDataTabler.editKPIDataModal('', 'MyPOI');">Add My POI</button>
-        <button class="btn btn-warning" style="color: white; padding: 0.5rem;" type="button" onclick="KPIDataTabler.editKPIDataModal('', 'MyData');">Add My Data</button>
+    <div class="col-md-5" style="text-align: center; margin-bottom: 1rem;">
+        <button class="btn btn-warning" style="color: white; padding: 0.5rem;" type="button" onclick="KPIDataTabler.editKPIDataModal('', 'MyKPI');">Add
+			 My KPI</button>
+        <button class="btn btn-warning" style="color: white; padding: 0.5rem;" type="button" onclick="KPIDataTabler.editKPIDataModal('', 'MyPOI');">Add
+			 My POI</button>
+        <button class="btn btn-warning" style="color: white; padding: 0.5rem;" type="button" onclick="KPIDataTabler.editKPIDataModal('', 'MyData');">Add
+			 My Data</button>
     </div>
-    <div class="col-sm-3">
-        <div class="input-group" style="padding-right: 20px;">
+    <div class="col-md-3">
+        <div class="input-group">
             <input type="text" id="inputFilterKPIData" class="form-control" placeholder="Filter Table" aria-label="Filter Table"
                 aria-describedby="button-addon2" max="{{totalPages}}" min="1" \>
             <div class="input-group-append">
@@ -106,7 +109,7 @@
         <td>{{dataType}}</td>
         <td>{{#timestampToDate}}{{lastDate}}{{/timestampToDate}}</td>
         <td>{{lastValue}}</td>
-        <td>{{ownership}} 
+            <td>{{ownership}}
             <!-- {{#enableEdit}} -->
             <!-- {{^isPublic}} -->
             <button type="button" onclick="KPIDataTabler.makePublic({{id}});" class="btn editDashBtn">Make Public
@@ -116,11 +119,12 @@
             <button type="button" onclick="KPIDataTabler.makePrivate({{id}});" class="btn editDashBtn">Make Private
             </button>
             <!-- {{/isPublic}} -->
-            <!-- {{/enableEdit}} --></td>
+            <!-- {{/enableEdit}} -->
+		</td>
         <td>{{username}}</td>
         <td><button type="button" onclick="KPIDataTabler.showKPIDataModal({{id}});" class="btn viewDashBtn">View</button>
             <!-- {{#enableEdit}} -->
-            <button type="button" onclick="KPIDataTabler.editKPIDataModal({{id}});" class=" btn editDashBtn">Edit</button>
+            <button type="button" onclick="KPIDataTabler.editKPIDataModal({{id}}, '{{highLevelType}}');" class=" btn editDashBtn">Edit</button>
             <button type="button" onclick="KPIDataTabler.deleteKPIDataModal({{id}}, '{{highLevelType}}', '{{valueName}}');"
                 class="btn deleteDashBtn">Delete</button>
             <!-- {{/enableEdit}} -->
@@ -133,6 +137,8 @@
             
             <button type="button" onclick="KPIDelegationTabler.renderTable({{id}}, '{{highLevelType}}');" class="btn editDashBtn">Delegate
                 Users</button>
+                <button type="button" onclick="KPIDataTabler.editKPIDataModal({{id}}, 'changeownership');" class="btn editDashBtn">Change
+                    Ownership</button>
             <!--  <button type="button" onclick="KPIDelegationTabler.renderTable({{id}}, '{{highLevelType}}');" class="btn editDashBtn">Delegate
                 Groups</button> -->
         </td>
@@ -155,7 +161,7 @@
         </div>
     </div>
 
-    <div class="col-sm-5 offset-sm-2">
+    <div class="col-sm-6">
         <!-- Pagination Bar -->
         <div th:fragment='paginationbar'>
             <div class="text-center">
@@ -193,7 +199,7 @@
         </div>
     </div>
 
-    <div class="col-sm-2">
+    <div class="col-sm-3">
         <div class="input-group">
             <input type="number" id="inputGoToPageKPIData" class="form-control" placeholder="Page Number" aria-label="Page Number"
                 aria-describedby="button-addon2" max="{{totalPages}}" min="1" \>

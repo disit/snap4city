@@ -147,8 +147,8 @@ public class DataServiceImpl implements IDataService {
 		credentialsService.checkUsernameCredentials(username, lang);// enforcement credentials
 
 		// check if id is specified
-		if (data.getId() != null)
-			throw new DataNotValidException(messages.getMessage("postdata.ko.idnotnull", null, lang));
+		// if (data.getId() != null)
+		// throw new DataNotValidException(messages.getMessage("postdata.ko.idnotnull", null, lang));
 
 		// check if the username is null, eventually populate
 		if (data.getUsername() == null)
@@ -221,5 +221,21 @@ public class DataServiceImpl implements IDataService {
 			data.setUsername(null);
 		}
 		return toreturn;
+	}
+
+	@Override
+	public void deleteDataFromUser(String username, Long dataId, Locale lang) throws DataNotValidException, CredentialsException {
+		logger.debug("deleteDataFromUser INVOKED on username {}, dataId {} {}", username, dataId, lang);
+
+		credentialsService.checkUsernameCredentials(username, lang);// enforcement credentials
+
+		Data todelete = dataRepo.findById(dataId);
+
+		if (todelete == null)
+			throw new DataNotValidException(messages.getMessage("deletedata.ko.dataidnotfound", null, lang));
+
+		todelete.setDeleteTime(new Date());
+
+		dataRepo.saveAndFlush(todelete);
 	}
 }

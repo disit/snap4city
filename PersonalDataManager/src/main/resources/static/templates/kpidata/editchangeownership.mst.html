@@ -1,0 +1,32 @@
+<div class="modal-dialog" role="document">
+    <form onsubmit="KPIDataTabler.saveKPIData(); return false;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">KPI Change Ownership</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" style="padding: 0px;">
+                <!-- {{#kpidata}} -->
+                <ul class="list-group" style="border: none;">
+                    <input type="hidden" id="inputIdKPIDataEdit" value="{{id}}"></input>
+       
+                    <li class="list-group-item">
+                        <div class="row">
+                            <div class="col-sm-4"><b>New Owner Username *</b></div>
+                            <div class="col-sm-8">
+                                <input id="inputUsernameKPIDataEdit" required class="form-control" type="text"></input>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+                <!-- {{/kpidata}} -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn editDashBtn">Change Owner</button>
+            </div>
+        </div>
+    </form>
+</div>

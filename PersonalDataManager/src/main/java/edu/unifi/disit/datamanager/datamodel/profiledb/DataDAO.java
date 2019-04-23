@@ -29,4 +29,6 @@ public interface DataDAO extends JpaRepository<Data, Long>, DataDAOCustom {
 
 	@Query("SELECT d1 FROM Data d1 WHERE d1.id = (SELECT MAX(d2.id) FROM Data d2 WHERE d1.username = d2.username AND d1.appId = d2.appId AND d1.motivation = d2.motivation AND d1.variableName = d2.variableName)")
 	List<Data> findLastData();
+
+	Data findById(Long dataId);
 }

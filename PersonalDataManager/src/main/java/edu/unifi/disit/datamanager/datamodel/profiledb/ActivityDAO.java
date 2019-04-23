@@ -12,6 +12,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package edu.unifi.disit.datamanager.datamodel.profiledb;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,4 +24,6 @@ public interface ActivityDAO extends JpaRepository<Activity, Long> {
 	List<Activity> findByDelegatedAppIdAndDeleteTimeIsNull(String appId);
 
 	List<Activity> findByAppIdAndDelegatedAppIdIsNullAndDeleteTimeIsNull(String appId);
+
+	List<Activity> findByTimeBefore(Date time);
 }

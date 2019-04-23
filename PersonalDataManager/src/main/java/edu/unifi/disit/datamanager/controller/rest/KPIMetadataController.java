@@ -13,29 +13,44 @@
    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA. */
 package edu.unifi.disit.datamanager.controller.rest;
 
+import java.lang.reflect.Field;
+import java.util.Date;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.ReflectionUtils;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import edu.unifi.disit.datamanager.datamodel.ActivityAccessType;
+import edu.unifi.disit.datamanager.datamodel.KPIActivityDomainType;
+import edu.unifi.disit.datamanager.datamodel.profiledb.KPIData;
 import edu.unifi.disit.datamanager.datamodel.profiledb.KPIMetadata;
 import edu.unifi.disit.datamanager.exception.CredentialsException;
+import edu.unifi.disit.datamanager.service.IAccessService;
 import edu.unifi.disit.datamanager.service.ICredentialsService;
+import edu.unifi.disit.datamanager.service.IKPIActivityService;
+import edu.unifi.disit.datamanager.service.IKPIDataService;
 import edu.unifi.disit.datamanager.service.IKPIMetadataService;
 
 @RestController
@@ -46,96 +61,412 @@ public class KPIMetadataController {
 	@Autowired
 	IKPIMetadataService kpiMetadataService;
 
-	//@Autowired
-	//IActivityService activityService;
+	@Autowired
+	IKPIDataService kpiDataService;
+
+	@Autowired
+	IAccessService accessService;
+
+	@Autowired
+	IKPIActivityService kpiActivityService;
 
 	@Autowired
 	ICredentialsService credentialService;
 
-	// -------------------GET KPI Data From ID ------------------------------------
-	@RequestMapping(value = "/api/v1/kpimetadata/{id}", method = RequestMethod.GET)
-	public ResponseEntity<Object> getKPIMetadataV1ById(@PathVariable("id") Long id,
+	// -------------------GET KPI Metadata From ID
+	// ------------------------------------
+	@GetMapping("/api/v1/kpidata/{kpiId}/metadata/{id}")
+	public ResponseEntity<Object> getKPIMetadataV1ById(@PathVariable("kpiId") Long kpiId, @PathVariable("id") Long id,
 			@RequestParam(value = "sourceRequest") String sourceRequest,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) {
 
-		logger.info("Requested getKPIMetadataV1ById id {} lang {}", id, lang);
+		logger.info("Requested getKPIMetadataV1ById id {} lang {} sourceRequest {}", id, lang, sourceRequest);
 
 		try {
+
+			KPIData kpiData = kpiDataService.getKPIDataById(kpiId, lang);
+			if (kpiData == null) {
+				logger.warn("Wrong KPI Data");
+				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
+						sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.METADATA,
+						((HttpServletRequest) request).getRequestURI() + "?"
+								+ ((HttpServletRequest) request).getQueryString(),
+						"Wrong KPI Data", null, request.getRemoteAddr());
+				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+			} else if (!kpiData.getUsername().equals(credentialService.getLoggedUsername(lang))
+					&& !accessService.checkAccessFromApp(Long.toString(kpiId), lang).getResult()) {
+				throw new CredentialsException();
+			}
+
 			KPIMetadata kpimetadata = kpiMetadataService.getKPIMetadataById(id, lang);
 
 			if (kpimetadata == null) {
 				logger.info("No data found");
+
+				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
+						sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.METADATA,
+						((HttpServletRequest) request).getRequestURI() + "?"
+								+ ((HttpServletRequest) request).getQueryString(),
+						"No data found", null, request.getRemoteAddr());
+
 				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
 			} else {
-				logger.info("Returning kpidata {}", kpimetadata.getId());
+				logger.info("Returning kpimetadata {}", kpimetadata.getId());
+
+				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
+						kpiData.getId(), ActivityAccessType.READ, KPIActivityDomainType.METADATA);
+
 				return new ResponseEntity<Object>(kpimetadata, HttpStatus.OK);
 			}
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
+
+			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
+					sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.METADATA,
+					((HttpServletRequest) request).getRequestURI() + "?"
+							+ ((HttpServletRequest) request).getQueryString(),
+					d.getMessage(), d, request.getRemoteAddr());
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
 	}
 
-	@RequestMapping(value = "/api/v1/kpimetadata/save", method = RequestMethod.POST)
-	public ResponseEntity<Object> saveKPIMetadataV1(@RequestBody KPIMetadata kpimetadata,
-			@RequestParam(value = "sourceRequest") String sourceRequest) {
+	// -------------------POST New KPI Metadata ------------------------------------
+	@PostMapping("/api/v1/kpidata/{kpiId}/metadata")
+	public ResponseEntity<Object> postKPIMetadataV1(@PathVariable("kpiId") Long kpiId,
+			@RequestBody KPIMetadata kpiMetadata, @RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
+			HttpServletRequest request) {
 
-		logger.info("Requested saveKPIMetadataV1 id {}", kpimetadata.getId());
+		logger.info("Requested postKPIMetadataV1 id {} sourceRequest {}", kpiMetadata.getId(), sourceRequest);
+
 		try {
-			kpiMetadataService.saveKPIMetadata(kpimetadata);
-			return new ResponseEntity<Object>(kpimetadata, HttpStatus.OK);
+
+			KPIData kpiData = kpiDataService.getKPIDataById(kpiId, lang);
+
+			if (kpiData == null) {
+				logger.warn("Wrong KPI Data");
+				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
+						sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.METADATA,
+						((HttpServletRequest) request).getRequestURI() + "?"
+								+ ((HttpServletRequest) request).getQueryString(),
+						"Wrong KPI Data", null, request.getRemoteAddr());
+				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+			} else if (!kpiData.getUsername().equals(credentialService.getLoggedUsername(lang))
+					&& !accessService.checkAccessFromApp(Long.toString(kpiId), lang).getResult()) {
+				throw new CredentialsException();
+			}
+
+			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, kpiId,
+					ActivityAccessType.WRITE, KPIActivityDomainType.METADATA);
+
+			kpiMetadata.setKpiId(kpiId);
+			kpiMetadataService.saveKPIMetadata(kpiMetadata);
+			logger.info("Posted kpiMetadata {}", kpiMetadata.getId());
+
+			return new ResponseEntity<Object>(kpiMetadata, HttpStatus.OK);
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
+
+			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
+					sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.METADATA,
+					((HttpServletRequest) request).getRequestURI() + "?"
+							+ ((HttpServletRequest) request).getQueryString(),
+					d.getMessage(), d, request.getRemoteAddr());
+
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
 	}
 
-	// -------------------GET ALL KPI Data Pageable
+	// -------------------PUT New KPI Metadata ------------------------------------
+	@PutMapping("/api/v1/kpidata/{kpiId}/metadata/{id}")
+	public ResponseEntity<Object> putKPIMetadataV1(@PathVariable("kpiId") Long kpiId, @PathVariable("id") Long id,
+			@RequestBody KPIMetadata kpiMetadata, @RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
+			HttpServletRequest request) {
+
+		logger.info("Requested putKPIMetadataV1 id {} sourceRequest {}", id, sourceRequest);
+
+		try {
+
+			KPIData kpiData = kpiDataService.getKPIDataById(kpiId, lang);
+
+			if (kpiData == null) {
+				logger.warn("Wrong KPI Data");
+				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
+						sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.METADATA,
+						((HttpServletRequest) request).getRequestURI() + "?"
+								+ ((HttpServletRequest) request).getQueryString(),
+						"Wrong KPI Data", null, request.getRemoteAddr());
+				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+			} else if (!kpiData.getUsername().equals(credentialService.getLoggedUsername(lang))
+					&& !accessService.checkAccessFromApp(Long.toString(kpiId), lang).getResult()) {
+				throw new CredentialsException();
+			}
+
+			KPIMetadata oldKpiMetadata = kpiMetadataService.getKPIMetadataById(id, lang);
+			if (oldKpiMetadata == null) {
+				logger.info("No data found");
+
+				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
+						sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.METADATA,
+						((HttpServletRequest) request).getRequestURI() + "?"
+								+ ((HttpServletRequest) request).getQueryString(),
+						"No data found", null, request.getRemoteAddr());
+
+				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+			}
+
+			kpiMetadata.setId(oldKpiMetadata.getId());
+			KPIMetadata newKpiMetadata = kpiMetadataService.saveKPIMetadata(oldKpiMetadata);
+
+			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, kpiId,
+					ActivityAccessType.WRITE, KPIActivityDomainType.METADATA);
+			logger.info("Putted kpimetadata {}", kpiMetadata.getId());
+			return new ResponseEntity<Object>(newKpiMetadata, HttpStatus.OK);
+		} catch (CredentialsException d) {
+			logger.warn("Rights exception", d);
+
+			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
+					sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.METADATA,
+					((HttpServletRequest) request).getRequestURI() + "?"
+							+ ((HttpServletRequest) request).getQueryString(),
+					d.getMessage(), d, request.getRemoteAddr());
+
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
+		}
+	}
+
+	// -------------------PATCH New KPI Metadata
 	// ------------------------------------
-	@RequestMapping(value = "/api/v1/kpidata/{kpiId}/metadata", method = RequestMethod.GET)
+	@PatchMapping("/api/v1/kpidata/{kpiId}/metadata/{id}")
+	public ResponseEntity<Object> patchKPIMetadataV1(@PathVariable("kpiId") Long kpiId, @PathVariable("id") Long id,
+			@RequestBody Map<String, Object> fields, @RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
+			HttpServletRequest request) {
+
+		logger.info("Requested patchKPIMetadataV1 id {} sourceRequest {}", id, sourceRequest);
+
+		try {
+
+			KPIData kpiData = kpiDataService.getKPIDataById(kpiId, lang);
+
+			if (kpiData == null) {
+				logger.warn("Wrong KPI Data");
+				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
+						sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.METADATA,
+						((HttpServletRequest) request).getRequestURI() + "?"
+								+ ((HttpServletRequest) request).getQueryString(),
+						"Wrong KPI Data", null, request.getRemoteAddr());
+				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+			} else if (!kpiData.getUsername().equals(credentialService.getLoggedUsername(lang))
+					&& !accessService.checkAccessFromApp(Long.toString(kpiId), lang).getResult()) {
+				throw new CredentialsException();
+			}
+
+			KPIMetadata oldKpiMetadata = kpiMetadataService.getKPIMetadataById(id, lang);
+			if (oldKpiMetadata == null) {
+				logger.info("No data found");
+
+				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
+						sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.METADATA,
+						((HttpServletRequest) request).getRequestURI() + "?"
+								+ ((HttpServletRequest) request).getQueryString(),
+						"No data found", null, request.getRemoteAddr());
+
+				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+			}
+
+			// Problem with cast of int to long, but the id is also present and it must be
+			// the same
+			fields.remove("id");
+			fields.remove("kpiId");
+			// Map key is field name, v is value
+			fields.forEach((k, v) -> {
+				// use reflection to get field k on manager and set it to value k
+				Field field = ReflectionUtils.findField(KPIMetadata.class, k);
+
+				if (field != null && v != null) {
+					ReflectionUtils.makeAccessible(field);
+					ReflectionUtils.setField(field, oldKpiMetadata, (field.getType()).cast(v));
+				}
+			});
+
+			KPIMetadata newKpiMetadata = kpiMetadataService.saveKPIMetadata(oldKpiMetadata);
+			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, kpiId,
+					ActivityAccessType.WRITE, KPIActivityDomainType.METADATA);
+
+			logger.info("Patched kpimetadata {}", newKpiMetadata.getId());
+			return new ResponseEntity<Object>(newKpiMetadata, HttpStatus.OK);
+		} catch (CredentialsException d) {
+			logger.warn("Rights exception", d);
+
+			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
+					sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.METADATA,
+					((HttpServletRequest) request).getRequestURI() + "?"
+							+ ((HttpServletRequest) request).getQueryString(),
+					d.getMessage(), d, request.getRemoteAddr());
+
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
+		}
+	}
+
+	// -------------------DELETE New KPI Metadata
+	// ------------------------------------
+	@DeleteMapping("/api/v1/kpidata/{kpiId}/metadata/{id}")
+	public ResponseEntity<Object> deleteKPIMetadataV1(@PathVariable("kpiId") Long kpiId, @PathVariable("id") Long id,
+			@RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
+			HttpServletRequest request) {
+
+		logger.info("Requested putKPIValueV1 id {} sourceRequest {}", id, sourceRequest);
+
+		try {
+
+			KPIData kpiData = kpiDataService.getKPIDataById(kpiId, lang);
+
+			if (kpiData == null) {
+				logger.warn("Wrong KPI Data");
+				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
+						sourceRequest, kpiId, ActivityAccessType.DELETE, KPIActivityDomainType.METADATA,
+						((HttpServletRequest) request).getRequestURI() + "?"
+								+ ((HttpServletRequest) request).getQueryString(),
+						"Wrong KPI Data", null, request.getRemoteAddr());
+				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+			} else if (!kpiData.getUsername().equals(credentialService.getLoggedUsername(lang))
+					&& !accessService.checkAccessFromApp(Long.toString(kpiId), lang).getResult()) {
+				throw new CredentialsException();
+			}
+
+			KPIMetadata kpiMetadataToDelete = kpiMetadataService.getKPIMetadataById(id, lang);
+			if (kpiMetadataToDelete == null) {
+				logger.info("No data found");
+
+				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
+						sourceRequest, kpiId, ActivityAccessType.DELETE, KPIActivityDomainType.METADATA,
+						((HttpServletRequest) request).getRequestURI() + "?"
+								+ ((HttpServletRequest) request).getQueryString(),
+						"No data found", null, request.getRemoteAddr());
+
+				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+			}
+
+			kpiMetadataToDelete.setDeleteTime(new Date());
+			KPIMetadata newKpiMetadata = kpiMetadataService.saveKPIMetadata(kpiMetadataToDelete);
+
+			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, kpiId,
+					ActivityAccessType.DELETE, KPIActivityDomainType.METADATA);
+			logger.info("Deleted kpivalue {}", id);
+			return new ResponseEntity<Object>(newKpiMetadata, HttpStatus.OK);
+		} catch (CredentialsException d) {
+			logger.warn("Rights exception", d);
+
+			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
+					sourceRequest, kpiId, ActivityAccessType.DELETE, KPIActivityDomainType.METADATA,
+					((HttpServletRequest) request).getRequestURI() + "?"
+							+ ((HttpServletRequest) request).getQueryString(),
+					d.getMessage(), d, request.getRemoteAddr());
+
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
+		}
+	}
+
+	// -------------------GET ALL KPI Data Metadata Pageable
+	// ---------------------------------
+	@GetMapping("/api/v1/kpidata/{kpiId}/metadata")
 	public ResponseEntity<Object> getAllKPIMetadataV1Pageable(@PathVariable("kpiId") Long kpiId,
 			@RequestParam(value = "sourceRequest") String sourceRequest,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
-			@RequestParam(value = "pageNumber", required = true) int pageNumber,
-			@RequestParam(value = "pageSize", required = true, defaultValue = "10") int pageSize,
-			@RequestParam(value = "sortDirection", required = false, defaultValue = "asc") String sortDirection,
-			@RequestParam(value = "sortBy", required = false, defaultValue = "id") String sortBy,
+			@RequestParam(value = "pageNumber", required = false, defaultValue = "-1") int pageNumber,
+			@RequestParam(value = "pageSize", required = false, defaultValue = "10") int pageSize,
+			@RequestParam(value = "sortDirection", required = false, defaultValue = "desc") String sortDirection,
+			@RequestParam(value = "sortBy", required = false, defaultValue = "insert_time") String sortBy,
 			@RequestParam(value = "searchKey", required = false, defaultValue = "") String searchKey,
 			HttpServletRequest request) {
 
-		logger.info("Requested getAllKPIMetadataV1Pageable pageNumber {} pageSize {} sortDirection {} sortBy {} searchKey {} kpiId {}",
+		logger.info(
+				"Requested getAllKPIMetadataV1Pageable pageNumber {} pageSize {} sortDirection {} sortBy {} searchKey {} kpiId {}",
 				pageNumber, pageSize, sortDirection, sortBy, searchKey, kpiId);
 
 		try {
-			Page<KPIMetadata> pageKpiMetadata = null;
-				if (searchKey.equals("")) {
-					pageKpiMetadata = kpiMetadataService.findAllByKpiId(kpiId, new PageRequest(pageNumber, pageSize,
-							new Sort(Direction.fromString(sortDirection), sortBy)));
-				} else {
-					pageKpiMetadata = kpiMetadataService.findAllFilteredByKpiId(kpiId, searchKey, new PageRequest(pageNumber, pageSize,
-							new Sort(Direction.fromString(sortDirection), sortBy)));
-				}
-			
-			// activityService.saveActivityFromUsername(null, datas, sourceRequest, null,
-			// null, ActivityAccessType.READ, ActivityDomainType.DATA);
-
-			if (pageKpiMetadata == null) {
-				logger.info("No data found");
+			KPIData kpiData = kpiDataService.getKPIDataById(kpiId, lang);
+			if (kpiData == null) {
+				logger.warn("Wrong KPI Data");
+				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
+						sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.METADATA,
+						((HttpServletRequest) request).getRequestURI() + "?"
+								+ ((HttpServletRequest) request).getQueryString(),
+						"Wrong KPI Data", null, request.getRemoteAddr());
 				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
-			} else {
-				logger.info("Returning kpidatapage ");
-				return new ResponseEntity<Object>(pageKpiMetadata, HttpStatus.OK);
+			} else if (!kpiData.getUsername().equals(credentialService.getLoggedUsername(lang))
+					&& !accessService.checkAccessFromApp(Long.toString(kpiId), lang).getResult()) {
+				throw new CredentialsException();
 			}
+
+			Page<KPIMetadata> pageKpiMetadata = null;
+			List<KPIMetadata> listKpiMetadata = null;
+			if (pageNumber != -1) {
+				if (searchKey.equals("")) {
+					pageKpiMetadata = kpiMetadataService.findAllByKpiId(kpiId,
+							new PageRequest(pageNumber, pageSize, new Sort(Direction.fromString(sortDirection), sortBy)));
+				} else {
+					pageKpiMetadata = kpiMetadataService.findAllFilteredByKpiId(kpiId, searchKey,
+							new PageRequest(pageNumber, pageSize, new Sort(Direction.fromString(sortDirection), sortBy)));
+				}
+			} else {
+				if (searchKey.equals("")) {
+					listKpiMetadata = kpiMetadataService.findByKpiIdNoPages(kpiId);
+				} else {
+					listKpiMetadata = kpiMetadataService.findFilteredByKpiIdNoPages(kpiId, searchKey);
+				}
+			}
+			
+
+			if (pageKpiMetadata == null && listKpiMetadata == null) {
+				logger.info("No metadata data found");
+
+				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
+						sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.METADATA,
+						((HttpServletRequest) request).getRequestURI() + "?"
+								+ ((HttpServletRequest) request).getQueryString(),
+						"No metadata data found", null, request.getRemoteAddr());
+				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+			} else if (pageKpiMetadata != null) {
+				logger.info("Returning KpiVMetadataPage ");
+
+				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
+						kpiId, ActivityAccessType.READ, KPIActivityDomainType.METADATA);
+
+				return new ResponseEntity<Object>(pageKpiMetadata, HttpStatus.OK);
+			} else if (listKpiMetadata != null) {
+				logger.info("Returning KpiMetadataList ");
+
+				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
+						kpiId, ActivityAccessType.READ, KPIActivityDomainType.METADATA);
+
+				return new ResponseEntity<Object>(listKpiMetadata, HttpStatus.OK);
+			}
+			return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
 
+			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
+					sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.METADATA,
+					((HttpServletRequest) request).getRequestURI() + "?"
+							+ ((HttpServletRequest) request).getQueryString(),
+					d.getMessage(), d, request.getRemoteAddr());
+
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
-		} catch (IllegalArgumentException d) {
+		} catch (IllegalArgumentException | NoSuchMessageException d) {
 			logger.warn("Wrong Arguments", d);
+
+			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
+					sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.METADATA,
+					((HttpServletRequest) request).getRequestURI() + "?"
+							+ ((HttpServletRequest) request).getQueryString(),
+					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		}
 	}
-
 }

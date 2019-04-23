@@ -12,9 +12,16 @@
                 <ul class="list-group" style="border: none;">
                     <input type="hidden" id="inputIdKPIDelegationEdit" value="{{id}}"></input>
                     <input type="hidden" id="inputElementIdKPIDelegationEdit" value="{{elementId}}"></input>
-                    <input type="hidden" id="inputUsernameDelegatorKPIDelegationEdit" value="{{usernameDelegator}}"></input>
-                    <input type="hidden" id="inputElementTypeKPIDelegationEdit" value="{{elementType}}"></input>
-                    <li class="list-group-item"><b>Username Delegated *</b> <input id="inputUsernameDelegatedKPIDelegationEdit" required class="form-control" value="{{usernameDelegated}}"></input></li>
+
+                    <li class="list-group-item">
+                        <div class="row">
+                            <div class="col-sm-4"><b>Username Delegated *</b></div>
+                            <div class="col-sm-8">
+                                <input id="inputUsernameDelegatedKPIDelegationEdit" required class="form-control" type="text"
+                                    value="{{usernameDelegated}}"></input>
+                            </div>
+                        </div>
+                    </li>
                 </ul>
                 <!-- {{/kpidelegation}} -->
             </div>

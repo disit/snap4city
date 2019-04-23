@@ -17,7 +17,11 @@ var KPIEditor = {
                     KPIDataTabler.renderTable();
                     console.log("AUTHENTICATED");
                 } else {
-                    $("#loginForm").show();
+					  if (location.hostname == "www.snap4city.org") {
+						  KPIEditor.keycloak.login();
+					 } else {
+							$("#loginForm").show();
+					 }
                 }
             }).error(function () {
             

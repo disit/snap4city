@@ -22,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 
 import edu.unifi.disit.datamanager.datamodel.profiledb.KPIData;
 import edu.unifi.disit.datamanager.exception.CredentialsException;
+import edu.unifi.disit.datamanager.exception.DelegationNotValidException;
 
 public interface IKPIDataService {
 
@@ -77,6 +78,14 @@ public interface IKPIDataService {
 
 	List<KPIData> findByUsernameDelegatedByHighLevelTypeByOrganizationFilteredNoPages(String string, String elementType,
 			String highLevelType, String searchKey);
+
+	boolean makeKPIDataPublic(String username, Long kpiId, String elementType, Locale lang) throws DelegationNotValidException, CredentialsException;
+
+	boolean makeKPIDataPrivate(Long kpiId, Locale lang)
+			throws DelegationNotValidException, CredentialsException;
+
+	boolean updateUsernameDelegatorOnOwnershipChange(String newOwner, Long kpiId, Locale lang)
+			throws DelegationNotValidException, CredentialsException;
 	
 	
 

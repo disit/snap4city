@@ -1,7 +1,8 @@
 var EditModalManager = {
 
     createMap: function () {
-        map = L.map('mapContainer').setView([43.78, 11.23], 9);
+
+        map = L.map('mapContainer').setView(EditModalManager.currentCoordinates, 9);
         L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
@@ -57,8 +58,8 @@ var EditModalManager = {
                 marker = layer.toGeoJSON();
             });
 
-            $("#inputLatitudeKPIDataEdit").val(marker.geometry.coordinates[1]);
-            $("#inputLongitudeKPIDataEdit").val(marker.geometry.coordinates[0]);
+            $("#inputLatitude" + EditModalManager.editType).val(marker.geometry.coordinates[1]);
+            $("#inputLongitude" + EditModalManager.editType).val(marker.geometry.coordinates[0]);
         });
 
         map.on('draw:edited', function (e) {
@@ -76,17 +77,79 @@ var EditModalManager = {
                 marker = layer.toGeoJSON();
             });
 
-            $("#inputLatitudeKPIDataEdit").val(marker.geometry.coordinates[1]);
-            $("#inputLongitudeKPIDataEdit").val(marker.geometry.coordinates[0]);
+            $("#inputLatitude" + EditModalManager.editType).val(marker.geometry.coordinates[1]);
+            $("#inputLongitude" + EditModalManager.editType).val(marker.geometry.coordinates[0]);
         });
 
         map.on('draw:deleted', function (e) {
             drawControl.addTo(map);
-            $("#inputLatitudeKPIDataEdit").val(0);
-            $("#inputLongitudeKPIDataEdit").val(0);
+            $("#inputLatitude" + EditModalManager.editType).val("");
+            $("#inputLongitude" + EditModalManager.editType).val("");
         });
 
+        if (EditModalManager.currentLatitude != null && EditModalManager.currentLatitude != "" && EditModalManager.currentLongitude != null && EditModalManager.currentLongitude != "") {
+            L.marker([
+                EditModalManager.currentLatitude,
+                EditModalManager.currentLongitude
+            ]).addTo(drawnItems);
+
+            drawControl.remove();
+
+            map.setView([EditModalManager.currentLatitude,EditModalManager.currentLongitude], 11);
+
+            EditModalManager.currentLatitude = null;
+            EditModalManager.currentLongitude = null;
+        }
+
         map.invalidateSize(true);
+    },
+
+
+    checkOrganizationAndCreateMap: function (editType) {
+        EditModalManager.editType = editType;
+        KPIEditor.keycloak.updateToken(30).success(function () {
+            var query = QueryManager.createGetUsernameOrganizationQuery(KPIEditor.keycloak.token);
+            APIClient.executeGetQuery(query, EditModalManager.successCheckOrganization, EditModalManager.errorCheckOrganization);
+        }).error(function () {
+            var query = QueryManager.createGetUsernameOrganizationQuery(Authentication.refreshTokenGetAccessToken());
+            APIClient.executeGetQuery(query, EditModalManager.successCheckOrganization, EditModalManager.errorCheckOrganization);
+
+        });
+    },
+
+    successCheckOrganization: function (_data) {
+        if (_data != null) {
+            var organization = _data.substring(_data.indexOf("=") + 1, _data.indexOf(","));
+            if (organization.toLowerCase() == "helsinki") {
+                EditModalManager.currentCoordinates = [60.169286, 24.939103];
+            } else if (organization.toLowerCase() == "antwerp") {
+                EditModalManager.currentCoordinates = [51.216784, 4.405688];
+            } else {
+                EditModalManager.currentCoordinates = [43.78, 11.23];
+            }
+        } else {
+            EditModalManager.currentCoordinates = [43.78, 11.23];
+        }
+
+        EditModalManager.createMap();
+    },
+
+    errorCheckOrganization: function (_error) {
+        console.log(_error);
+        if (_error != null) {
+            var organization = _error.substring(_error.indexOf("=") + 1, _error.indexOf(","));
+            if (organization.toLowerCase() == "helsinki") {
+                EditModalManager.currentCoordinates = [60.169286, 24.939103];
+            } else if (organization.toLowerCase() == "antwerp") {
+                EditModalManager.currentCoordinates = [51.216784, 4.405688];
+            } else {
+                EditModalManager.currentCoordinates = [43.78, 11.23];
+            }
+        } else {
+            EditModalManager.currentCoordinates = [43.78, 11.23];
+        }
+
+        EditModalManager.createMap();
     },
 
     createNatureSelection: function () {

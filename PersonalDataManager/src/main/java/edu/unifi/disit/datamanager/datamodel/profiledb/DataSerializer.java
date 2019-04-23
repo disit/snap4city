@@ -35,8 +35,8 @@ public class DataSerializer extends StdSerializer<Data> {
 
 		jgen.writeStartObject();
 
-		// if (value.getId() != null)
-		// jgen.writeNumberField("id", value.getId());
+		if (value.getId() != null)
+			jgen.writeNumberField("id", value.getId());
 
 		if (value.getUsername() != null)
 			jgen.writeStringField("username", value.getUsername());

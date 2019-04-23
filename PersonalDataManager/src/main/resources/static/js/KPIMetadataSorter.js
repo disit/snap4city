@@ -1,5 +1,5 @@
 var KPIMetadataSorter = {
-    currentSortDirection: "asc",
+    currentSortDirection: "desc",
     currentSortBy: "id",
 
     setSortOnField: function (field) {

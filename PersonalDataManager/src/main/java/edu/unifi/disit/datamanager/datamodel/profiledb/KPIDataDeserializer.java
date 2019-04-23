@@ -16,6 +16,7 @@ package edu.unifi.disit.datamanager.datamodel.profiledb;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -60,13 +61,6 @@ public class KPIDataDeserializer extends StdDeserializer<KPIData> {
 		if (jnode.get("description") != null) {
 			kpidata.setDescription(jnode.get("description").asText());
 		}
-		if (jnode.get("deleteTime") != null) {
-			try {
-				kpidata.setDeleteTime(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(jnode.get("deleteTime").asText()));
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
-		}
 		if (jnode.get("getInstances") != null) {
 			kpidata.setGetInstances(jnode.get("getInstances").asText());
 		}
@@ -79,13 +73,6 @@ public class KPIDataDeserializer extends StdDeserializer<KPIData> {
 		if (jnode.get("info") != null) {
 			kpidata.setInfo(jnode.get("info").asText());
 		}
-		if (jnode.get("insertTime") != null) {
-			try {
-				kpidata.setInsertTime(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(jnode.get("insertTime").asText()));
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
-		}
 		if (jnode.get("instanceUri") != null) {
 			kpidata.setInstanceUri(jnode.get("instanceUri").asText());
 		}
@@ -95,18 +82,22 @@ public class KPIDataDeserializer extends StdDeserializer<KPIData> {
 		if (jnode.get("valueName") != null) {
 			kpidata.setValueName(jnode.get("valueName").asText());
 		}
-		if (jnode.get("lastCheck") != null) {
-			try {
-				kpidata.setLastCheck(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(jnode.get("lastCheck").asText()));
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
-		}
+		/*if (jnode.get("lastDate") != null) {
+			Date date = new Date();
+			date.setTime(jnode.get("lastDate").asLong());
+			kpidata.setLastDate(date);
+		}*/
 		if (jnode.get("lastDate") != null) {
-			try {
-				kpidata.setLastDate(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(jnode.get("lastDate").asText()));
-			} catch (ParseException e) {
-				e.printStackTrace();
+			Date date = new Date();
+			if (jnode.get("lastDate").asLong() != 0) {
+				date.setTime(jnode.get("lastDate").asLong());
+				kpidata.setLastDate(date);
+			} else {
+				try {
+					kpidata.setLastDate(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(jnode.get("lastDate").asText()));
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		if (jnode.get("lastValue") != null) {

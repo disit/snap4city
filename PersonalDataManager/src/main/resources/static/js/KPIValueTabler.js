@@ -41,16 +41,16 @@ var KPIValueTabler = {
             }
         }
 
-        if(_response.previousNumber == "-"){
+        if (_response.previousNumber == "-") {
             _response.disablePreviousNumber = true;
         }
-        if(_response.twoPreviousNumber == "-"){
+        if (_response.twoPreviousNumber == "-") {
             _response.disableTwoPreviousNumber = true;
         }
-        if(_response.nextNumber == "-"){
+        if (_response.nextNumber == "-") {
             _response.disableNextNumber = true;
         }
-        if(_response.twoNextNumber == "-"){
+        if (_response.twoNextNumber == "-") {
             _response.disableTwoNextNumber = true;
         }
 
@@ -58,7 +58,7 @@ var KPIValueTabler = {
 
         _response.insertTime = Utility.timestampToFormatDate(_response.insertTime);
         _response.dataTime = Utility.timestampToFormatDate(_response.dataTime);
-        
+
         _response.kpiId = KPIValueTabler.currentKpiId;
         _response.kpiDataType = KPIValueTabler.currentKpiDataType;
         _response.currentKPIData = KPIDataTabler.getCurrentKPIData(KPIValueTabler.currentKpiId);
@@ -72,23 +72,27 @@ var KPIValueTabler = {
             "response": _response
         }, "#kpivaluetable", "templates/kpivalue/kpivalue.mst.html");
 
-        $('table').DataTable({"searching": false,"paging":   false,
-        "ordering": false,
-        "info":     false, responsive: true});
+        $('table').DataTable({
+            "searching": false,
+            "paging": false,
+            "ordering": false,
+            "info": false,
+            responsive: true
+        });
 
         $('table').css("width", "");
-        
+
         $('#inputFilterKPIValue').val(KPIValueFilter.currentSearchKey);
         $('#selectSizeKPIValue').val(KPIValuePager.currentSize);
     },
 
-    editKPIValueModal: function (_id) {
+    editKPIValueModal: function (_kpiId, _id) {
         if (_id != null && _id != "") {
             KPIEditor.keycloak.updateToken(30).success(function () {
-                var query = QueryManager.createGetKPIValueByIdQuery(_id, KPIEditor.keycloak.token);
+                var query = QueryManager.createGetKPIValueByIdQuery(KPIEditor.keycloak.token, _kpiId, _id);
                 APIClient.executeGetQuery(query, KPIValueTabler.successEditKPIValueModal, KPIValueTabler.errorQuery);
             }).error(function () {
-                var query = QueryManager.createGetKPIValueByIdQuery(_id, Authentication.refreshTokenGetAccessToken());
+                var query = QueryManager.createGetKPIValueByIdQuery(Authentication.refreshTokenGetAccessToken(), _kpiId, _id);
                 APIClient.executeGetQuery(query, KPIValueTabler.successEditKPIValueModal, KPIValueTabler.errorQuery);
             });
         } else {
@@ -107,29 +111,33 @@ var KPIValueTabler = {
             _response = {};
         }
 
-        if (KPIValueTabler.currentKpiDataType == "integer"){
+        if (KPIValueTabler.currentKpiDataType == "integer") {
             _response.validDataType = "number";
             _response.validStep = 1;
-        } else if (KPIValueTabler.currentKpiDataType == "float"){
+        } else if (KPIValueTabler.currentKpiDataType == "float") {
             _response.validDataType = "number";
             _response.validStep = 0.01;
-        } else if (KPIValueTabler.currentKpiDataType == "status"){
+        } else if (KPIValueTabler.currentKpiDataType == "status") {
             _response.validDataType = "text";
         }
         ViewManager.render({
             "kpivalue": _response
         }, "#genericModal", "templates/kpivalue/editkpivalue.mst.html");
         $('#genericModal').modal('show');
+        EditModalManager.currentLatitude = _response.latitude;
+        EditModalManager.currentLongitude = _response.longitude;
+        EditModalManager.checkOrganizationAndCreateMap("KPIValueEdit");
     },
 
-    deleteKPIValueModal: function (_id, _kpiId, _value, _dataTime, _insertTime) {
+    deleteKPIValueModal: function (_id, _kpiId, _value, _dataTime, _insertTime, _latitude, _longitude) {
         ViewManager.render({
             "kpivalue": {
                 "id": _id,
                 "kpiId": _kpiId,
                 "dataTime": _dataTime,
-                "insertTime": _insertTime,
-                "value": _value
+                "value": _value,
+                "latitude": _latitude,
+                "longitude": _longitude
             }
         }, "#genericModal", "templates/kpivalue/deletekpivalue.mst.html");
         $('#genericModal').modal('show');
@@ -137,7 +145,14 @@ var KPIValueTabler = {
 
     saveKPIValue: function () {
         kpiValue = {
-            "value": $("#inputValueKPIValueEdit").val()
+            "value": $("#inputValueKPIValueEdit").val(),
+            "latitude": $("#inputLatitudeKPIValueEdit").val(),
+            "longitude": $("#inputLongitudeKPIValueEdit").val(),
+            "dataTime": new Date($("#inputDataTimeKPIValueEdit").val()).getTime()
+        }
+
+        if ($("#inputIdKPIValueEdit").val() != "") {
+            kpiValue.id = $("#inputIdKPIValueEdit").val();
         }
 
         if ($("#inputKpiIdKPIValueEdit").val() != "") {
@@ -145,62 +160,34 @@ var KPIValueTabler = {
         } else {
             kpiValue.kpiId = KPIValueTabler.currentKpiId;
         }
-        if ($("#inputIdKPIValueEdit").val() != "") {
-            kpiValue.id = $("#inputIdKPIValueEdit").val();
-        }
-        if ($("#inputDataTimeKPIValueEdit").val() != "") {
-            kpiValue.dataTime = $("#inputDataTimeKPIValueEdit").val() + ":00";
-        }
-        if ($("#inputElapseTimeKPIValueEdit").val() != "") {
-            kpiValue.elapseTime = $("#inputElapseTimeKPIValueEdit").val() + ":00";
-        }
-        if ($("#inputInsertTimeKPIValueEdit").val() != "") {
-            kpiValue.insertTime = $("#inputInsertTimeKPIValueEdit").val() + ":00";
-        }
 
         console.log(kpiValue);
-        KPIEditor.keycloak.updateToken(30).success(function () {
-            var query = QueryManager.createSaveKPIValueQuery(KPIEditor.keycloak.token);
-            APIClient.executePostQuery(query, kpiValue, KPIValueTabler.successSaveKPIValue, KPIValueTabler.errorQuery);
-        }).error(function () {
-            var query = QueryManager.createSaveKPIValueQuery(Authentication.refreshTokenGetAccessToken());
-            APIClient.executePostQuery(query, kpiValue, KPIValueTabler.successSaveKPIValue, KPIValueTabler.errorQuery);
-        });
+        if (typeof kpiValue.id != "undefined") {
+            KPIEditor.keycloak.updateToken(30).success(function () {
+                var query = QueryManager.createPatchKPIValueQuery(KPIEditor.keycloak.token, kpiValue.kpiId, kpiValue.id);
+                APIClient.executePatchQuery(query, kpiValue, KPIValueTabler.successSaveKPIValue, KPIValueTabler.errorQuery);
+            }).error(function () {
+                var query = QueryManager.createPatchKPIValueQuery(Authentication.refreshTokenGetAccessToken(), kpiValue.kpiId, kpiValue.id);
+                APIClient.executePatchQuery(query, kpiValue, KPIValueTabler.successSaveKPIValue, KPIValueTabler.errorQuery);
+            });
+        } else {
+            KPIEditor.keycloak.updateToken(30).success(function () {
+                var query = QueryManager.createPostKPIValueQuery(KPIEditor.keycloak.token, kpiValue.kpiId);
+                APIClient.executePostQuery(query, kpiValue, KPIValueTabler.successSaveKPIValue, KPIValueTabler.errorQuery);
+            }).error(function () {
+                var query = QueryManager.createPostKPIValueQuery(Authentication.refreshTokenGetAccessToken(), kpiValue.kpiId);
+                APIClient.executePostQuery(query, kpiValue, KPIValueTabler.successSaveKPIValue, KPIValueTabler.errorQuery);
+            });
+        }
     },
 
-    deleteKPIValue(_id) {
+    deleteKPIValue(_kpiId, _id) {
         KPIEditor.keycloak.updateToken(30).success(function () {
-            var query = QueryManager.createGetKPIValueByIdQuery(_id, KPIEditor.keycloak.token);
-            APIClient.executeGetQuery(query, function (_response) {
-                _response.deleteTime = Utility.timestampToFormatDate(new Date().getTime()) + ":00";
-                if (_response.dataTime != null) {
-                    _response.dataTime = Utility.timestampToFormatDate(_response.dataTime) + ":00";
-                }
-                if (_response.elapseTime != null) {
-                    _response.elapseTime = Utility.timestampToFormatDate(_response.elapseTime) + ":00";
-                }
-                if (_response.insertTime != null) {
-                    _response.insertTime = Utility.timestampToFormatDate(_response.insertTime) + ":00";
-                }
-                var saveQuery = QueryManager.createSaveKPIValueQuery(KPIEditor.keycloak.token);
-                APIClient.executePostQuery(saveQuery, _response, KPIValueTabler.successSaveKPIValue, KPIValueTabler.errorQuery);
-            }, KPIValueTabler.errorQuery);
+                var query = QueryManager.createDeleteKPIValueQuery(KPIEditor.keycloak.token, _kpiId, _id);
+                APIClient.executeDeleteQuery(query, KPIValueTabler.successSaveKPIValue, KPIValueTabler.errorQuery);
         }).error(function () {
-            var query = QueryManager.createGetKPIValueByIdQuery(_id, Authentication.refreshTokenGetAccessToken());
-            APIClient.executeGetQuery(query, function (_response) {
-                _response.deleteTime = Utility.timestampToFormatDate(new Date().getTime()) + ":00";
-                if (_response.dataTime != null) {
-                    _response.dataTime = Utility.timestampToFormatDate(_response.dataTime) + ":00";
-                }
-                if (_response.elapseTime != null) {
-                    _response.elapseTime = Utility.timestampToFormatDate(_response.elapseTime) + ":00";
-                }
-                if (_response.insertTime != null) {
-                    _response.insertTime = Utility.timestampToFormatDate(_response.insertTime) + ":00";
-                }
-                var saveQuery = QueryManager.createSaveKPIValueQuery(Authentication.refreshTokenGetAccessToken());
-                APIClient.executePostQuery(saveQuery, _response, KPIValueTabler.successSaveKPIValue, KPIValueTabler.errorQuery);
-            }, KPIValueTabler.errorQuery);
+                var query = QueryManager.createDeleteKPIValueQuery(Authentication.refreshTokenGetAccessToken(), _kpiId, _id);
+                APIClient.executeDeleteQuery(query, KPIValueTabler.successSaveKPIValue, KPIValueTabler.errorQuery);
         });
     },
 
@@ -212,7 +199,7 @@ var KPIValueTabler = {
 
     errorQuery: function (_error) {
         console.log(_error);
-        if (_error.responseText != null){
+        if (_error.responseText != null) {
             alert(_error.responseText);
         }
         $('#genericModal').modal('hide');

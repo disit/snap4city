@@ -40,19 +40,19 @@ var KPIMetadataTabler = {
         }
 
 
-        if(_response.previousNumber == "-"){
+        if (_response.previousNumber == "-") {
             _response.disablePreviousNumber = true;
         }
-        if(_response.twoPreviousNumber == "-"){
+        if (_response.twoPreviousNumber == "-") {
             _response.disableTwoPreviousNumber = true;
         }
-        if(_response.nextNumber == "-"){
+        if (_response.nextNumber == "-") {
             _response.disableNextNumber = true;
         }
-        if(_response.twoNextNumber == "-"){
+        if (_response.twoNextNumber == "-") {
             _response.disableTwoNextNumber = true;
         }
-        
+
         _response["sort" + _response.sort[0].property + _response.sort[0].direction] = true;
         _response.kpiId = KPIMetadataTabler.currentKpiId;
         _response.currentKPIData = KPIDataTabler.getCurrentKPIData(KPIMetadataTabler.currentKpiId);
@@ -64,23 +64,27 @@ var KPIMetadataTabler = {
             "response": _response
         }, "#kpimetadatatable", "templates/kpimetadata/kpimetadata.mst.html");
 
-        $('table').DataTable({"searching": false,"paging":   false,
-        "ordering": false,
-        "info":     false, responsive: true});
+        $('table').DataTable({
+            "searching": false,
+            "paging": false,
+            "ordering": false,
+            "info": false,
+            responsive: true
+        });
 
         $('table').css("width", "");
-        
+
         $('#inputFilterKPIMetadata').val(KPIMetadataFilter.currentSearchKey);
         $('#selectSizeKPIMetadata').val(KPIMetadataPager.currentSize);
     },
 
-    editKPIMetadataModal: function (_id) {
+    editKPIMetadataModal: function (_kpiId, _id) {
         if (_id != null && _id != "") {
             KPIEditor.keycloak.updateToken(30).success(function () {
-                var query = QueryManager.createGetKPIMetadataByIdQuery(_id, KPIEditor.keycloak.token);
+                var query = QueryManager.createGetKPIMetadataByIdQuery(KPIEditor.keycloak.token, _kpiId, _id);
                 APIClient.executeGetQuery(query, KPIMetadataTabler.successEditKPIMetadataModal, KPIMetadataTabler.errorQuery);
             }).error(function () {
-                var query = QueryManager.createGetKPIMetadataByIdQuery(_id, Authentication.refreshTokenGetAccessToken());
+                var query = QueryManager.createGetKPIMetadataByIdQuery(Authentication.refreshTokenGetAccessToken(), _kpiId, _id);
                 APIClient.executeGetQuery(query, KPIMetadataTabler.successEditKPIMetadataModal, KPIMetadataTabler.errorQuery);
             });
         } else {
@@ -129,41 +133,34 @@ var KPIMetadataTabler = {
         if ($("#inputIdKPIMetadataEdit").val() != "") {
             kpiMetadata.id = $("#inputIdKPIMetadataEdit").val();
         }
-        if ($("#inputElapseTimeKPIMetadataEdit").val() != "") {
-            kpiValue.elapseTime = $("#inputElapseTimeKPIMetadataEdit").val() + ":00";
-        }
 
         console.log(kpiMetadata);
-        KPIEditor.keycloak.updateToken(30).success(function () {
-            var query = QueryManager.createSaveKPIMetadataQuery(KPIEditor.keycloak.token);
-            APIClient.executePostQuery(query, kpiMetadata, KPIMetadataTabler.successSaveKPIMetadata, KPIMetadataTabler.errorQuery);
-        }).error(function () {
-            var query = QueryManager.createSaveKPIMetadataQuery(Authentication.refreshTokenGetAccessToken());
-            APIClient.executePostQuery(query, kpiMetadata, KPIMetadataTabler.successSaveKPIMetadata, KPIMetadataTabler.errorQuery);
-        });
+        if (typeof kpiMetadata.id != "undefined") {
+            KPIEditor.keycloak.updateToken(30).success(function () {
+                var query = QueryManager.createPatchKPIMetadataQuery(KPIEditor.keycloak.token, kpiMetadata.kpiId, kpiMetadata.id);
+                APIClient.executePatchQuery(query, kpiMetadata, KPIMetadataTabler.successSaveKPIMetadata, KPIMetadataTabler.errorQuery);
+            }).error(function () {
+                var query = QueryManager.createPatchKPIMetadataQuery(Authentication.refreshTokenGetAccessToken(), kpiMetadata.kpiId, kpiMetadata.id);
+                APIClient.executePatchQuery(query, kpiMetadata, KPIMetadataTabler.successSaveKPIMetadata, KPIMetadataTabler.errorQuery);
+            });
+        } else {
+            KPIEditor.keycloak.updateToken(30).success(function () {
+                var query = QueryManager.createPostKPIMetadataQuery(KPIEditor.keycloak.token, kpiMetadata.kpiId);
+                APIClient.executePostQuery(query, kpiMetadata, KPIMetadataTabler.successSaveKPIMetadata, KPIMetadataTabler.errorQuery);
+            }).error(function () {
+                var query = QueryManager.createPostKPIMetadataQuery(Authentication.refreshTokenGetAccessToken(), kpiMetadata.kpiId);
+                APIClient.executePostQuery(query, kpiMetadata, KPIMetadataTabler.successSaveKPIMetadata, KPIMetadataTabler.errorQuery);
+            });
+        }
     },
 
-    deleteKPIMetadata(_id) {
+    deleteKPIMetadata(_kpiId, _id) {
         KPIEditor.keycloak.updateToken(30).success(function () {
-            var query = QueryManager.createGetKPIMetadataByIdQuery(_id, KPIEditor.keycloak.token);
-            APIClient.executeGetQuery(query, function (_response) {
-                _response.deleteTime = Utility.timestampToFormatDate(new Date().getTime()) + ":00";
-                if (_response.elapseTime != null) {
-                    _response.elapseTime = Utility.timestampToFormatDate(_response.elapseTime) + ":00";
-                }
-                var saveQuery = QueryManager.createSaveKPIMetadataQuery(KPIEditor.keycloak.token);
-                APIClient.executePostQuery(saveQuery, _response, KPIMetadataTabler.successSaveKPIMetadata, KPIMetadataTabler.errorQuery);
-            }, KPIMetadataTabler.errorQuery);
+            var query = QueryManager.createDeleteKPIMetadataQuery(KPIEditor.keycloak.token, _kpiId, _id);
+            APIClient.executeDeleteQuery(query, KPIMetadataTabler.successSaveKPIMetadata, KPIMetadataTabler.errorQuery);
         }).error(function () {
-            var query = QueryManager.createGetKPIMetadataByIdQuery(_id, Authentication.refreshTokenGetAccessToken());
-            APIClient.executeGetQuery(query, function (_response) {
-                _response.deleteTime = Utility.timestampToFormatDate(new Date().getTime()) + ":00";
-                if (_response.elapseTime != null) {
-                    _response.elapseTime = Utility.timestampToFormatDate(_response.elapseTime) + ":00";
-                }
-                var saveQuery = QueryManager.createSaveKPIMetadataQuery(Authentication.refreshTokenGetAccessToken());
-                APIClient.executePostQuery(saveQuery, _response, KPIMetadataTabler.successSaveKPIMetadata, KPIMetadataTabler.errorQuery);
-            }, KPIMetadataTabler.errorQuery);
+            var query = QueryManager.createDeleteKPIMetadataQuery(Authentication.refreshTokenGetAccessToken(), _kpiId, _id);
+            APIClient.executeDeleteQuery(query, KPIMetadataTabler.successSaveKPIMetadata, KPIMetadataTabler.errorQuery);
         });
     },
 
@@ -175,7 +172,7 @@ var KPIMetadataTabler = {
 
     errorQuery: function (_error) {
         console.log(_error);
-        if (_error.responseText != null){
+        if (_error.responseText != null) {
             alert(_error.responseText);
         }
         $('#genericModal').modal('hide');

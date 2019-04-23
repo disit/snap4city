@@ -1,5 +1,5 @@
 var KPIDelegationSorter = {
-    currentSortDirection: "asc",
+    currentSortDirection: "desc",
     currentSortBy: "id",
 
     setSortOnField: function (field) {

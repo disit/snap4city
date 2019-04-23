@@ -31,14 +31,15 @@ public interface IDelegationService {
 	//
 	// Response checkDelegationsFromApp(String elementID, Locale lang) throws CredentialsException;
 
-	List<Delegation> getDelegationsDelegatedFromApp(String appId, String variableName, String motivation, Boolean deleted, String appOwner, String groupname, Locale lang)
+	List<Delegation> getDelegationsDelegatedFromApp(String appId, String variableName, String motivation, Boolean deleted, String appOwner, String groupname, String elementType, Locale lang)
 			throws DelegationNotValidException, CredentialsException, NoSuchMessageException, LDAPException;
 
-	List<Delegation> getDelegationsDelegatorFromApp(String appId, String variableName, String motivation, Boolean deleted, Locale lang) throws CredentialsException;
+	List<Delegation> getDelegationsDelegatorFromApp(String appId, String variableName, String motivation, Boolean deleted, String elementType, Locale lang) throws CredentialsException;
 
-	List<Delegation> getDelegationsDelegatedForUsername(String username, String variableName, String motivation, Boolean deleted, String groupname, Locale lang) throws CredentialsException, NoSuchMessageException, LDAPException;
+	List<Delegation> getDelegationsDelegatedForUsername(String username, String variableName, String motivation, Boolean deleted, String groupname, String elementType, Locale lang)
+			throws CredentialsException, NoSuchMessageException, LDAPException;
 
-	List<Delegation> getDelegationsDelegatorForUsername(String username, String variableName, String motivation, Boolean deleted, Locale lang) throws CredentialsException;
+	List<Delegation> getDelegationsDelegatorForUsername(String username, String variableName, String motivation, Boolean deleted, String elementType, Locale lang) throws CredentialsException;
 
 	Delegation postDelegationFromUser(String username, Delegation delegation, Locale lang) throws DelegationNotValidException, CredentialsException;
 
@@ -50,13 +51,18 @@ public interface IDelegationService {
 
 	List<Delegation> stripUsernameDelegatedNull(List<Delegation> delegations);
 
+	// Aggiunti per KPI
 
-	//Aggiunti per KPI
-	
 	Delegation getDelegationById(Long id, Locale lang) throws NoSuchMessageException, CredentialsException;
-	
+
 	Page<Delegation> findByElementId(String elementId, Pageable pageable) throws NoSuchMessageException, CredentialsException;
 
+	Page<Delegation> findByElementIdWithoutAnonymous(String elementId, Pageable pageable)
+			throws NoSuchMessageException, CredentialsException;
+
 	List<Delegation> findByElementIdNoPages(String elementId) throws NoSuchMessageException, CredentialsException;
+
+	List<Delegation> findByElementIdNoPagesWithoutAnonymous(String elementId)
+			throws NoSuchMessageException, CredentialsException;
 
 }

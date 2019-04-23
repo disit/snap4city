@@ -501,12 +501,14 @@ public class roleTest1 {
 	@Test
 	public void post_delegationValid2_roleok() throws ClientProtocolException, IOException {
 
+		Long time = System.currentTimeMillis();
+
 		// Given
 		HttpPost request = new HttpPost("http://localhost:8080/datamanager/api/v1/username/angelo.difino/delegation?accessToken=" + getAccessTokenADifino() + "&sourceRequest=test");
 
 		Delegation delegation = new Delegation();
 		delegation.setUsernameDelegated("badii");
-		delegation.setElementId("dash_id");
+		delegation.setElementId("dash_id" + time);
 		delegation.setElementType("DASHID");
 
 		request.setEntity(createEntity(delegation));

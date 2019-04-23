@@ -12,11 +12,24 @@
                 <ul class="list-group" style="border: none;">
                     <input type="hidden" id="inputIdKPIMetadataEdit" value="{{id}}"></input>
                     <input type="hidden" id="inputKpiIdKPIMetadataEdit" value="{{kpiId}}"></input>
-                    <input type="hidden" id="inputElapseTimeKPIMetadataEdit" value="{{elapseTime}}"></input>
-                    <li class="list-group-item"><b>Key *</b> <input required id="inputKeyKPIMetadataEdit" class="form-control"
-                            type="text" value="{{key}}"></input></li>
-                    <li class="list-group-item"><b>Value *</b> <input required id="inputValueKPIMetadataEdit" class="form-control"
-                            type="text" value="{{value}}"></input></li>
+
+                    <li class="list-group-item">
+                        <div class="row">
+                            <div class="col-sm-4"><b>Key *</b></div>
+                            <div class="col-sm-8">
+                                <input id="inputKeyKPIMetadataEdit" required class="form-control" type="text" value="{{key}}"></input>
+                            </div>
+                        </div>
+                    </li>
+
+                    <li class="list-group-item">
+                        <div class="row">
+                            <div class="col-sm-4"><b>Value *</b></div>
+                            <div class="col-sm-8">
+                                <input id="inputValueKPIMetadataEdit" required class="form-control" type="text" value="{{value}}"></input>
+                            </div>
+                        </div>
+                    </li>
 
                 </ul>
                 <!-- {{/kpimetadata}} -->

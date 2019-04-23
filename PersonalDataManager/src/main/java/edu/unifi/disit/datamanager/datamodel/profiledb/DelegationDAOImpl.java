@@ -41,8 +41,44 @@ public class DelegationDAOImpl implements DelegationDAOCustom {
 	@PersistenceContext
 	EntityManager entityManager;
 
+	// used for check existence before new insert
 	@Override
-	public List<Delegation> getDelegationDelegatedByUsername(String username, String variableName, String motivation, Boolean deleted, String groupnamefilter, Locale lang) throws LDAPException {
+	public List<Delegation> getSameDelegation(Delegation d, Locale lang) {
+
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<Delegation> criteria = cb.createQuery(Delegation.class);
+
+		// mainquery
+		Root<Delegation> delegationRoot = criteria.from(Delegation.class);
+		criteria.select(delegationRoot);
+
+		List<Predicate> predicates = getCommonPredicates(cb, delegationRoot, d.getVariableName(), d.getMotivation(), false, d.getElementType());
+
+		if (d.getUsernameDelegator() != null)
+			predicates.add(cb.equal(delegationRoot.get("usernameDelegator"), d.getUsernameDelegator()));
+
+		if (d.getUsernameDelegated() != null)
+			predicates.add(cb.equal(delegationRoot.get("usernameDelegated"), d.getUsernameDelegated()));
+
+		if (d.getElementId() != null)
+			predicates.add(cb.equal(delegationRoot.get("elementId"), d.getElementId()));
+
+		if (d.getElementType() != null)
+			predicates.add(cb.equal(delegationRoot.get("elementType"), d.getElementType()));
+
+		if (d.getDelegationDetails() != null)
+			predicates.add(cb.equal(delegationRoot.get("delegationDetails"), d.getDelegationDetails()));
+
+		if (d.getGroupnameDelegated() != null)
+			predicates.add(cb.equal(delegationRoot.get("groupnameDelegated"), d.getGroupnameDelegated()));
+
+		criteria.where(cb.and(predicates.toArray(new Predicate[predicates.size()])));
+
+		return entityManager.createQuery(criteria).getResultList();
+	}
+
+	@Override
+	public List<Delegation> getDelegationDelegatedByUsername(String username, String variableName, String motivation, Boolean deleted, String groupnamefilter, String elementType, Locale lang) throws LDAPException {
 
 		List<String> groupnames = lu.getGroupAndOUnames(username);
 
@@ -55,7 +91,7 @@ public class DelegationDAOImpl implements DelegationDAOCustom {
 		Path<Object> pathDelegatedGroup = delegationRoot.get("groupnameDelegated"); // field to map with groupname i belong
 		Path<Object> pathDelegatorGroup = delegationRoot.get("usernameDelegator"); // field to map with usernameDelegator from groupnamefilter
 
-		List<Predicate> predicates = getCommonPredicates(cb, delegationRoot, variableName, motivation, deleted);
+		List<Predicate> predicates = getCommonPredicates(cb, delegationRoot, variableName, motivation, deleted, elementType);
 
 		Predicate predicate1 = cb.conjunction();
 		Predicate predicate2 = cb.conjunction();
@@ -78,7 +114,7 @@ public class DelegationDAOImpl implements DelegationDAOCustom {
 	}
 
 	@Override
-	public List<Delegation> getDelegationDelegatorByUsername(String username, String variableName, String motivation, Boolean deleted) {
+	public List<Delegation> getDelegationDelegatorByUsername(String username, String variableName, String motivation, Boolean deleted, String elementType) {
 		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Delegation> criteria = cb.createQuery(Delegation.class);
 
@@ -86,7 +122,7 @@ public class DelegationDAOImpl implements DelegationDAOCustom {
 		Root<Delegation> delegationRoot = criteria.from(Delegation.class);
 		criteria.select(delegationRoot);
 
-		List<Predicate> predicates = getCommonPredicates(cb, delegationRoot, variableName, motivation, deleted);
+		List<Predicate> predicates = getCommonPredicates(cb, delegationRoot, variableName, motivation, deleted, elementType);
 
 		predicates.add(cb.equal(delegationRoot.get("usernameDelegator"), username));// username
 
@@ -96,7 +132,7 @@ public class DelegationDAOImpl implements DelegationDAOCustom {
 	}
 
 	@Override
-	public List<Delegation> getDelegationDelegatorFromAppId(String appId, String variableName, String motivation, Boolean deleted) {
+	public List<Delegation> getDelegationDelegatorFromAppId(String appId, String variableName, String motivation, Boolean deleted, String elementType) {
 		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Delegation> criteria = cb.createQuery(Delegation.class);
 
@@ -104,7 +140,7 @@ public class DelegationDAOImpl implements DelegationDAOCustom {
 		Root<Delegation> delegationRoot = criteria.from(Delegation.class);
 		criteria.select(delegationRoot);
 
-		List<Predicate> predicates = getCommonPredicates(cb, delegationRoot, variableName, motivation, deleted);
+		List<Predicate> predicates = getCommonPredicates(cb, delegationRoot, variableName, motivation, deleted, elementType);
 
 		predicates.add(cb.equal(delegationRoot.get("elementId"), appId));// appId
 
@@ -113,14 +149,16 @@ public class DelegationDAOImpl implements DelegationDAOCustom {
 		return entityManager.createQuery(criteria).getResultList();
 	}
 
-	private List<Predicate> getCommonPredicates(CriteriaBuilder cb, Root<Delegation> dataRoot, String variableName, String motivation, Boolean deleted) {
+	private List<Predicate> getCommonPredicates(CriteriaBuilder cb, Root<Delegation> delegationRoot, String variableName, String motivation, Boolean deleted, String elementType) {
 		List<Predicate> predicates = new ArrayList<Predicate>();
 		if (variableName != null)
-			predicates.add(cb.equal(dataRoot.get("variableName"), variableName));
+			predicates.add(cb.equal(delegationRoot.get("variableName"), variableName));
 		if (motivation != null)
-			predicates.add(cb.equal(dataRoot.get("motivation"), motivation));
+			predicates.add(cb.equal(delegationRoot.get("motivation"), motivation));
+		if (elementType != null)
+			predicates.add(cb.equal(delegationRoot.get("elementType"), elementType));
 		if (!deleted)
-			predicates.add(dataRoot.get("deleteTime").isNull());
+			predicates.add(delegationRoot.get("deleteTime").isNull());
 		return predicates;
 	}
 }
