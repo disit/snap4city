@@ -48,7 +48,10 @@ function http_post($url, $data, $mimetype) {
   $result = @file_get_contents($url, false, $context);
   //echo "result:$result\n";
   //var_dump($http_response_header);
-  return array("httpcode"=>explode(" ",$http_response_header[0])[1],"result"=>json_decode($result, true));
+  $r = json_decode($result, true);
+  if($r===NULL)
+    $r = $result;
+  return array("httpcode"=>explode(" ",$http_response_header[0])[1],"result"=>$r);
 }
 
 function http_delete($url) {

@@ -104,7 +104,7 @@ function updateConf() {
         }
         if(appId.startsWith("/pt")) {
           path = "portia"+appId;
-          path2 = "";
+          path2 = path;
         }
         if(appId.startsWith("/nrr-test-")) {
           path = "nodered/nrt"+Number(appId.substr(10));

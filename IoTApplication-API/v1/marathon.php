@@ -86,36 +86,63 @@ function new_plumber($aid, $uname, $aname, $image, $r_file, $health) {
   }
 }
 
-function stop_nodered($db,$uid,$aid) {
-  /*
-  if($r=mysqli_query($db, "SELECT container_id,host FROM application WHERE id='$aid' AND uid='$uid' AND status='RUNNING'") or die(mysqli_error($db))) {
-    if($o=mysqli_fetch_object($r)) {
-    } else {
-        echo "{error:\"cannot find running container $aid for user $uid\"}";      
+function new_portia($aid, $uname, $aname, $image, $health) {
+  include '../config.php';
+  
+  //prepare the /data dir for portia
+  $out = array();
+  $ret = null;
+  exec($portia_script.' '.$aid, $out, $ret);
+  
+  $result=new_marathon_portia_container($marathon_url, $image, $aid, $uname, $health);
+  if($result && !isset($result['error'])) {
+    $did = "";
+    if(is_string($result)) {
+      $did = $result;
     }
-  }*/
+    else if(count($result["tasks"])==0){
+      $did = $result["deployments"][0]["id"];
+    } else {
+      $id = $result["tasks"][0]["id"];
+    }
+    
+    $url = "https://iot-app.snap4city.org/portia/$aid";
+    return array("id"=>$aid,"url"=>$url,'name'=>$aname);
+  } else {
+    return array('error'=>"cannot create container ".$result['error']);
+  }
+}
+
+function run_portia_crawler($aid, $project, $spider, $postTo,  $image) {
+  include '../config.php';
+  
+  //prepare the /data dir for portia
+  //$out = array();
+  //$ret = null;
+  //exec($portia_script.' '.$aid, $out, $ret);
+  
+  $result=run_marathon_portia_crawler($marathon_url, $image, $aid, $project, $spider, $postTo);
+  if($result && !isset($result['error'])) {
+    $did = "";
+    if(is_string($result)) {
+      $did = $result;
+    }
+    else if(count($result["tasks"])==0){
+      $did = $result["deployments"][0]["id"];
+    } else {
+      $id = $result["tasks"][0]["id"];
+    }
+    
+    return array("id"=>$aid."-crawler");
+  } else {
+    return array('error'=>"cannot create container ".$result['error']);
+  }
+}
+
+function stop_nodered($db,$uid,$aid) {
 }
 
 function start_nodered($db,$uid,$aid) {
-  /*
-  if($r=mysqli_query($db, "SELECT container_id,host FROM application WHERE id='$aid' AND uid='$uid' AND status='STOPPED'") or die(mysqli_error($db))) {
-    if($o=mysqli_fetch_object($r)) {
-      $host = $o->host;
-      $id= $o->container_id;
-      $result = http_post("http://$host:3000/v1.30/containers/$id/start","","");
-      if($result["httpcode"]==204) {
-        mysqli_query($db, "UPDATE application SET status='RUNNING',status_description='' WHERE id=$aid") or die(mysqli_error($db));
-        echo "{}";
-      } else {
-        $msg = $result["result"]["message"];
-        echo "{error:\"cannot stop container $msg\"}";
-      }
-    } else {
-        echo "{error:\"cannot find stopped container $aid for user $uid\"}";      
-    }
-  } 
-   * 
-   */ 
 }
 
 function rm_app($db,$uid,$aid) {
@@ -138,6 +165,61 @@ function restart_app($db,$uid,$aid) {
   }
   else {
     echo "{error:\"failed restart of app $aid\"}";
+  }  
+}
+
+function upgrade_app($db, $uid, $aid, $app) {
+  include '../config.php';
+  //var_dump($app);
+  $image = '';
+  switch($app['elementDetails']['type']) {
+    case 'basic':
+      $image = $nodered_basic_img;
+      break;
+    case 'advanced':
+      $image = $nodered_adv_img;
+      break;
+    case 'plumber':
+      $image = $plumber_img;
+      break;
+    case 'portia':
+      $image = $portia_img;
+      break;
+    default:
+      //error
+      echo "{error:\"failed upgrade of app $aid invalid app type '".$app['elementDetails']['type']."'\"}";
+      return;
+  }
+  
+  if($app['elementDetails']['image'] == $image) {
+    echo "{error:\"app $aid already uses image '".$image."'\"}";
+    return;
+  }
+  // update image on ownership
+  $app['elementDetails']['image'] = $image;
+  
+  if(isset($_REQUEST['accessToken'])) {
+    $result = http_post($ownership_api_url."/v1/register/?accessToken=".$_REQUEST['accessToken'], json_encode($app), "application/json");
+    //var_dump($result);
+  } else if(isset($_REQUEST['username'])){
+    $result = http_post($ownership_api_url."/v1/register/?username=".$_REQUEST['username'], json_encode($app), "application/json");
+    //var_dump($result);
+  }
+  if($result['httpcode']!=200) {
+    echo "{error:\"failed upgrade of app $aid - failed update of ownership\"}";
+    return;
+  }
+  
+  // update image on disces_em
+  update_image_on_disces_em($aid, $image);
+  
+  // delete app on marathon only so disces_em will restart it with the new image
+  $result = http_delete($marathon_url."/v2/apps/".$aid);
+  if($result["httpcode"]==200) {
+    echo json_encode($result["result"]);
+  }
+  else {
+    echo "{error:\"failed upgrade of app $aid\"}";
   }  
 }
 
@@ -290,68 +372,149 @@ function new_marathon_plumber_container($base_url,$image, $id, $uname, $health) 
   }
   return "";
 }
-/*function new_marathon_plumber_container($base_url,$image, $id) {
+
+function new_marathon_portia_container($base_url,$image, $id, $uname, $health) {
+  include '../config.php';
+
+  $healthCheck = '';
+  if($health!=NULL) {
+    $healthCheck ='    "healthChecks": [{
+        "maxConsecutiveFailures": '.$appHealthChecksMaxConsecutiveFailures.', 
+        "protocol": "MESOS_HTTP", 
+        "portIndex": 0, 
+        "gracePeriodSeconds": '.$appHealthChecksGracePeriodSeconds.' , 
+        "path": "/'.$health.'", 
+        "timeoutSeconds": '.$appHealthChecksTimeoutSeconds.', 
+        "intervalSeconds": '.$appHealthChecksIntervalSeconds.'}],';
+  }
+  
   $json = '{
-    "cmd": "Rscript /root/Snap4City/Snap4CityStatistics/RunRestApi.R",
     "id": "'. $id .'",
-    "labels": {
-      "HAPROXY_GROUP":"external",
-      "HAPROXY_0_VHOST":"nr.snap4city.org",
-      "HAPROXY_0_PATH":"/plumber/'. $id .'/",
-      "HAPROXY_0_HTTP_BACKEND_PROXYPASS_PATH":"/plumber/'. $id .'/"
-    },
+    "cmd": "/app/entry '. $id .' ' . $uname .'",
     "container": {
         "type": "DOCKER", 
         "docker": {
-            "network": "BRIDGE", 
-            "image": "disit/plumber:version7",
-            "portMappings": [
-              {
-                "containerPort": 8080,
-                "hostPort": 0,
-                "protocol": "tcp",
-                "name": "http"
-              }]
+            "image": "'. $image .'"
         },
         "volumes": [
-        {
-            "containerPath": "/root",
-            "hostPath": "/mnt/R",
+          {
+            "containerPath": "/app/data/projects",
+            "hostPath": "/mnt/data/portia/'. $id .'/projects",
             "mode": "RW"
-        }
-    ]        
+          }],
+        "portMappings": [
+            {
+              "containerPort": 9001,
+              "hostPort": 0,
+              "labels": {},
+              "name": "http",
+              "protocol": "tcp",
+              "servicePort": 10040
+            }
+        ]    
     },
-    "cpus": 0.095, 
-    "portDefinitions": [{"name": null, "protocol": "tcp", "port": 0, "labels": null}],
-    "instances": 1, 
+    "cpus": '.$portia_cpu.', 
+    "networks": [
+      {
+      "mode": "container/bridge"
+      }
+    ],
+    "portDefinitions": [],
+    "instances": 1,
+    "constraints": [["@hostname", "UNLIKE", "mesos[1-3]t"]],
     "env": {}, 
-    "mem": 140, 
-    "disk": 128, 
-    "healthChecks": [{
-        "maxConsecutiveFailures": 0, 
-        "protocol": "HTTP", 
-        "portIndex": 0, 
-        "gracePeriodSeconds": 240, 
-        "path": "/sum?a=1&b=1", 
-        "timeoutSeconds": 10, 
-        "intervalSeconds": 15}], 
+    "mem": '.$portia_mem.', 
+    "disk": 128,
+    '.$healthCheck.'
     "appId": "'. $id .'"
 }';
-  $out = array();
-  $ret = null;
-  //exec("/home/ubuntu/add-nodered.sh $id",$out,$ret);
-  $result = http_post($base_url."/v2/apps",$json, "application/json");
-  if($result["httpcode"]==201)
+  $log=fopen($logDir."/marathon.log","a");
+  fwrite($log,date('c')." ".$json."\n\n");
+  $result = http_post($base_url."/v2/apps", $json, "application/json");
+  fwrite($log,date('c')." ".var_export($result,true)); 
+  if($result["httpcode"]==201) {
+    store_on_disces_em($id, $json);
     return $result["result"];
-  else if($result["httpcode"]==200)
+  }
+  else if($result["httpcode"]==200) {
+    store_on_disces_em($id, $json);
     return $result["result"]["deploymentId"];
-  else {
-    var_dump($result);
-    return "";
+  } else {
+    return array('error'=>$result["httpcode"]." ".var_export($result["result"],true));
   }
   return "";
 }
-*/
+
+function run_marathon_portia_crawler($base_url, $image, $portia_id, $project, $spider, $postTo) {
+  include '../config.php';
+  
+  $outFile = $spider .'.json';
+  $postResult = '';
+  if(isset($postTo) && $postTo) {
+    $postResult = ' ; curl -X POST --header \\"Content-Type:application/json\\" -d @/mnt/'.$outFile.' '.$postTo .' >> /mnt/post.log';
+  }
+  
+  $id = $portia_id.'crawler';
+  $json = '{
+    "id": "'. $id .'",
+    "cmd": "rm /mnt/'. $outFile .' ; portiacrawl /app/data/projects/'.$project.' '.$spider.' -o /mnt/'. $outFile. $postResult .' ; sleep 1m ; curl -X DELETE '.$base_url.'/v2/apps/'.$id.'",
+    "container": {
+        "type": "DOCKER", 
+        "docker": {
+            "image": "'. $image .'"
+        },
+        "volumes": [
+          {
+            "containerPath": "/app/data/projects",
+            "hostPath": "/mnt/data/portia/'. $portia_id .'/projects",
+            "mode": "RW"
+          },{
+            "containerPath": "/mnt",
+            "hostPath": "/mnt/data/portia/'. $portia_id .'/outs",
+            "mode": "RW"
+          }],
+        "portMappings": [
+            {
+              "containerPort": 9001,
+              "hostPort": 0,
+              "labels": {},
+              "name": "http",
+              "protocol": "tcp",
+              "servicePort": 10040
+            }
+        ]    
+    },
+    "cpus": '.$portia_crawler_cpu.', 
+    "networks": [
+      {
+      "mode": "container/bridge"
+      }
+    ],
+    "portDefinitions": [],
+    "instances": 1,
+    "constraints": [["@hostname", "UNLIKE", "mesos[1-3]t"]],
+    "env": {}, 
+    "mem": '.$portia_crawler_mem.', 
+    "disk": 128,
+    "appId": "'. $id .'"
+}';
+  $log=fopen($logDir."/marathon.log","a");
+  fwrite($log,date('c')." ".$json."\n\n");
+  $result = http_post($base_url."/v2/apps", $json, "application/json");
+  fwrite($log,date('c')." ".var_export($result,true)); 
+  if($result["httpcode"]==201) {
+    //store_on_disces_em($id, $json);
+    return $result["result"];
+  }
+  else if($result["httpcode"]==200) {
+    //store_on_disces_em($id, $json);
+    return $result["result"]["deploymentId"];
+  } else {
+    return array('error'=>$result["httpcode"]." ".var_export($result["result"],true));
+  }
+  return "";
+}
+
 function random_str($length, $keyspace = '0123456789abcdefghijklmnopqrstuvwxyz')
 {
     $pieces = [];
