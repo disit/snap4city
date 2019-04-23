@@ -58,7 +58,7 @@ foreach($mandatoryAttrs as $a) {
     exit;  
   }
 }
-$validTypes = array('AppID',"IOTID","ServiceURI","ServiceGraphID","DashboardID",'DAAppID','BrokerID','ModelID');
+$validTypes = array('AppID',"IOTID","ServiceURI","ServiceGraphID","DashboardID",'DAAppID','BrokerID','ModelID','PortiaID','HeatmapID');
 if(!in_array($o->elementType,$validTypes)) {
     header("HTTP/1.1 400 BAD REQUEST");
     echo '{"error":"invalid elementType '.$o->elementType.'"}';
