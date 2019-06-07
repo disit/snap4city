@@ -3,6 +3,11 @@
 //http://www.webslesson.info/2017/04/jquery-bootgrid-server-side-processing-using-ajax-php.html
 include("connection.php");
 
+if (!isset($_REQUEST["db"]) || $_REQUEST["db"] != "iot" || !isset($_REQUEST["table"]) || ($_REQUEST["table"] != "data" && $_REQUEST["table"] != "links" && $_REQUEST["table"] != "rules")) {
+    echo 'Error';
+    exit();
+}
+
 if (isset($_POST["operation"])) {
     if ($_POST["operation"] == "Add") {
         /* $name = mysqli_real_escape_string($connection, $_POST["name"]);
@@ -24,7 +29,7 @@ if (isset($_POST["operation"])) {
                 $v .= "'" . mysqli_real_escape_string($connection, $_REQUEST[$fields[$i]]) . "'" . ($i != count($fields) - 1 ? "," : "");
             }
         }
-        $query = "INSERT INTO " . $_REQUEST["dbName"] . "." . $_REQUEST["tableName"] . " (" . $f . ") VALUES (" . $v . ")";
+        $query = "INSERT INTO " . mysqli_real_escape_string($connection, $_REQUEST["dbName"]) . "." . mysqli_real_escape_string($connection, $_REQUEST["tableName"]) . " (" . $f . ") VALUES (" . $v . ")";
         //file_put_contents("prova.txt", $query);
         if (mysqli_query($connection, $query)) {
             echo 'Row Inserted';
@@ -45,7 +50,7 @@ if (isset($_POST["operation"])) {
                 $v .= "`" . $fields[$i] . "`='" . mysqli_real_escape_string($connection, $_REQUEST[$fields[$i]]) . "'" . ($i != count($fields) - 1 ? "," : "");
             }
         }
-        $query = "UPDATE " . $_REQUEST["dbName"] . "." . $_REQUEST["tableName"] . " SET " . $v . "  WHERE id = '" . $_REQUEST["id"] . "'";
+        $query = "UPDATE " . $_REQUEST["dbName"] . "." . mysqli_real_escape_string($connection, $_REQUEST["tableName"]) . " SET " . $v . "  WHERE id = '" . mysqli_real_escape_string($connection, $_REQUEST["id"]) . "'";
         //file_put_contents("prova.txt", $query);
         if (mysqli_query($connection, $query)) {
             echo 'Row Updated';

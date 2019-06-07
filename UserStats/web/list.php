@@ -1,10 +1,10 @@
 <?php
 include_once("connection.php");
-if (!isset($_REQUEST['db']) || !isset($_REQUEST['table']) || ($_REQUEST['table'] != 'data' && $_REQUEST['table'] != 'links' && $_REQUEST['table'] != 'rules')) {
+if ($_REQUEST["db"] != "iot" || ($_REQUEST["table"] != "data" && $_REQUEST["table"] != "links" && $_REQUEST["table"] != "rules")) {
     echo 'Error';
     exit();
 }
-$query = "SELECT `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_SCHEMA` = '" . $_REQUEST['db'] . "' AND `TABLE_NAME` = '" . $_REQUEST['table'] . "'";
+$query = "SELECT `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_SCHEMA` = '" . mysqli_real_escape_string($connection, $_REQUEST['db']) . "' AND `TABLE_NAME` = '" . mysqli_real_escape_string($connection, $_REQUEST['table']) . "'";
 $result = mysqli_query($connection, $query);
 $fields = array();
 $th = '';
@@ -16,9 +16,24 @@ while ($row = $result->fetch_row()) {
       $tt .= '<th>' . str_replace("_", " ", $row[0]) . '</th>';
       } */
     if (strpos($row[0], "iot") !== false) {
+     if($row[0] == "iot_db_storage_tx" || $row[0] == "iot_db_storage_rx" || $row[0] == "iot_filesystem_storage_tx" || $row[0] == "iot_filesystem_storage_rx" ||
+        $row[0] == "iot_db_request_tx" || $row[0] == "iot_db_request_rx" || $row[0] == "iot_ascapi_tx" || $row[0] == "iot_ascapi_rx" || $row[0] == "iot_disces_tx" ||
+        $row[0] == "iot_disces_rx" || $row[0] == "iot_dashboard_tx" || $row[0] == "iot_dashboard_rx" | $row[0] == "iot_datagate_tx" || $row[0] == "iot_datagate_rx" ||
+        $row[0] == "iot_external_service_tx" || $row[0] == "iot_external_service_rx" || $row[0] == "iot_iot_service_tx" || $row[0] == "iot_iot_service_rx" ||
+        $row[0] == "iot_mapping_tx" || $row[0] == "iot_mapping_rx" || $row[0] == "iot_microserviceusercreated_tx" || $row[0] == "iot_microserviceusercreated_rx" ||
+        $row[0] == "iot_mydata_tx" || $row[0] == "iot_mydata_rx" || $row[0] == "iot_notificator_tx" || $row[0] == "iot_notificator_rx" || $row[0] == "iot_rstatistics_tx" ||
+        $row[0] == "iot_rstatistics_rx" || $row[0] == "iot_sigfox_tx" || $row[0] == "iot_sigfox_rx" || $row[0] == "iot_undefined_tx" || $row[0] == "iot_undefined_rx" ||
+        $row[0] == "iot_tx" || $row[0] == "iot_rx" || $row[0] == "iot_reads" || $row[0] == "iot_writes") {
+        $th .= '<th data-column-id="' . $row[0] . '" data-type="numeric" data-visible="false" data-formatter="iot">' . str_replace("_", " ", $row[0]) . '</th>';
+     } else {
         $th .= '<th data-column-id="' . $row[0] . '" data-type="numeric" data-formatter="iot">' . str_replace("_", " ", $row[0]) . '</th>';
+       }
     } else {
-        $th .= '<th data-column-id="' . $row[0] . '" data-type="numeric" data-formatter="' . $row[0] . '">' . str_replace("_", " ", $row[0]) . '</th>';
+        if($row[0] == "etl_writes") {
+         $th .= '<th data-column-id="' . $row[0] . '" data-type="numeric" data-visible="false" data-formatter="' . $row[0] . '">' . str_replace("_", " ", $row[0]) . '</th>';
+        } else {
+           $th .= '<th data-column-id="' . $row[0] . '" data-type="numeric" data-formatter="' . $row[0] . '">' . str_replace("_", " ", $row[0]) . '</th>';
+        }
     }
     $fields[] = $row[0];
 

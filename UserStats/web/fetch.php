@@ -39,7 +39,7 @@ if($_SESSION["role"] != "RootAdmin") {
     'current' => intval($_POST["current"]),
     'rowCount' => 10,
     'total' => intval(0),
-    'rows' => null 
+    'rows' => null
 );
  $connection->close();
  echo json_encode($output);
@@ -96,9 +96,9 @@ if ($_REQUEST["days"] == 1) {
             "IF(dashboards_accesses IS NOT NULL, dashboards_accesses, 0) AS dashboards_accesses, " .
             "IF(dashboards_minutes IS NOT NULL, dashboards_minutes, 0) AS dashboards_minutes, " .
             "a.date " .
-            "FROM " . $_REQUEST["db"] . "." . $_REQUEST["table"] . " a " .
-            "LEFT JOIN " . $_REQUEST["db"] . ".roles_levels b ON a.username = b.username " .
-            "WHERE a.date >= CURDATE() - INTERVAL " . $_REQUEST["days"] . " DAY";
+            "FROM " . mysqli_real_escape_string($connection, $_REQUEST["db"]) . "." . mysqli_real_escape_string($connection, $_REQUEST["table"]) . " a " .
+            "LEFT JOIN " . mysqli_real_escape_string($connection, $_REQUEST["db"]) . ".roles_levels b ON a.username = b.username " .
+            "WHERE a.date >= CURDATE() - INTERVAL " . mysqli_real_escape_string($connection, $_REQUEST["days"]) . " DAY";
 } else if (($_REQUEST["days"] == 7 || $_REQUEST["days"] == 30 || $_REQUEST["days"] == 90) && $_REQUEST["db"] == 'iot' && $_REQUEST["table"] == 'data') {
     /*
      * $query .= "SELECT @i:=@i+1 AS id, username, " .
@@ -190,22 +190,22 @@ if ($_REQUEST["days"] == 1) {
             "IF(SUM(dashboards_accesses) IS NOT NULL, SUM(dashboards_accesses), 0) AS dashboards_accesses, " .
             "IF(SUM(dashboards_minutes) IS NOT NULL, SUM(dashboards_minutes), 0) AS dashboards_minutes, " .
             "'' AS date " .
-            "FROM " . $_REQUEST["db"] . "." . $_REQUEST["table"] . " a " .
-            "LEFT JOIN " . $_REQUEST["db"] . ".roles_levels b ON a.username = b.username, " .
-            "(SELECT @i:=0) AS f WHERE a.date >= CURDATE() - INTERVAL " . $_REQUEST["days"] . " DAY";
+            "FROM " . mysqli_real_escape_string($connection, $_REQUEST["db"]) . "." . mysqli_real_escape_string($connection, $_REQUEST["table"]) . " a " .
+            "LEFT JOIN " . mysqli_real_escape_string($connection, $_REQUEST["db"]) . ".roles_levels b ON a.username = b.username, " .
+            "(SELECT @i:=0) AS f WHERE a.date >= CURDATE() - INTERVAL " . mysqli_real_escape_string($connection, $_REQUEST["days"]) . " DAY";
 }
 
 if ($_REQUEST["table"] == "links" || $_REQUEST["table"] == "rules") {
-    $query = "SELECT * FROM " . $_REQUEST["db"] . "." . $_REQUEST["table"];
+    $query = "SELECT * FROM " . mysqli_real_escape_string($connection, $_REQUEST["db"]) . "." . mysqli_real_escape_string($connection, $_REQUEST["table"]);
 }
 
 if (!empty($_REQUEST["searchPhrase"])) {
     $fields = json_decode(urldecode($_REQUEST["fields"]));
     for ($i = 0; $i < count($fields); $i++) {
         if ($i == 0) {
-            $query .= 'AND (`' . $fields[$i] . '` LIKE "%' . $_REQUEST["searchPhrase"] . '%" ';
+            $query .= "AND (" . $fields[$i] . " LIKE '%" . mysqli_real_escape_string($connection, $_REQUEST["searchPhrase"]) . "%'";
         } else {
-            $query .= 'OR `' . $fields[$i] . '` LIKE "%' . $_REQUEST["searchPhrase"] . '%" ';
+            $query .= "OR " . $fields[$i] . " LIKE '%" . mysqli_real_escape_string($connection, $_REQUEST["searchPhrase"]) . "%'";
         }
     }
     $query .= ')';
@@ -219,22 +219,22 @@ if (($_REQUEST["days"] == 7 || $_REQUEST["days"] == 30 || $_REQUEST["days"] == 9
 $result = mysqli_query($connection, $query);
 $total_records = mysqli_num_rows($result);
 
-$order_by = '';
+$order_by = "";
 
 if (isset($_POST["sort"]) && is_array($_POST["sort"])) {
     foreach ($_POST["sort"] as $key => $value) {
-        $order_by .= " $key $value, ";
+        $order_by .= mysqli_real_escape_string($connection, $key) . " " . mysqli_real_escape_string($connection, $value) . ", ";
     }
 } else {
-    $query .= ' ORDER BY id DESC ';
+    $query .= " ORDER BY id DESC ";
 }
 
-if ($order_by != '') {
-    $query .= ' ORDER BY ' . substr($order_by, 0, -2);
+if ($order_by != "") {
+    $query .= " ORDER BY " . substr($order_by, 0, -2);
 }
 
 if ($records_per_page != -1) {
-    $query .= " LIMIT " . $start_from . ", " . $records_per_page;
+    $query .= " LIMIT " . mysqli_real_escape_string($connection, $start_from) . ", " . mysqli_real_escape_string($connection, $records_per_page);
 }
 
 $result = mysqli_query($connection, $query);

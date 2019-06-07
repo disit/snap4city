@@ -28,14 +28,14 @@ if (!isset($_SESSION["role"])) {
 $user_data = array();
 
 //$query = "SELECT * FROM iot.data where username = '" . $_SESSION["username"] . "' ORDER BY date DESC LIMIT 1";
-$query = "SELECT a.*, b.organizations FROM iot.data a LEFT JOIN iot.roles_levels b ON a.username = b.username WHERE a.username = '" . $_SESSION["username"] . "' ORDER BY a.date DESC LIMIT 1";
+$query = "SELECT a.*, b.organizations FROM iot.data a LEFT JOIN iot.roles_levels b ON a.username = b.username WHERE a.username = '" . mysqli_real_escape_string($connection, $_SESSION["username"]) . "' ORDER BY a.date DESC LIMIT 1";
 $result = mysqli_query($connection, $query);
 while ($row = mysqli_fetch_assoc($result)) {
        $user_data = $row;
 }
 // if this is a new user set all fields to 0
 if(count($user_data) == 0) {
- $query = "SELECT *, 0 AS dashboards, 0 AS dashboards_public, 0 AS dashboards_private, 0 AS dashboards_accesses, 0 AS dashboards_minutes, 0 AS iot_devices, 0 AS iot_devices_public, 0 AS iot_devices_private, 0 AS iot_tx, 0 AS iot_rx, 0 AS iot_applications FROM iot.roles_levels WHERE username = '" . $_SESSION["username"] . "'";
+ $query = "SELECT *, 0 AS dashboards, 0 AS dashboards_public, 0 AS dashboards_private, 0 AS dashboards_accesses, 0 AS dashboards_minutes, 0 AS iot_devices, 0 AS iot_devices_public, 0 AS iot_devices_private, 0 AS iot_tx, 0 AS iot_rx, 0 AS iot_applications FROM iot.roles_levels WHERE username = '" . mysqli_real_escape_string($connection, $_SESSION["username"]) . "'";
  $result = mysqli_query($connection, $query);
  while ($row = mysqli_fetch_assoc($result)) {
        $user_data = $row;

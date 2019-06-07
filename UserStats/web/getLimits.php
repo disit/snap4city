@@ -44,7 +44,7 @@ function getLimits($username) {
     $accessToken = getToken();
     if($username != null) {
      $json = file_get_contents("http://192.168.0.10/ownership-api/v1/limits/?accessToken=" . $accessToken . "&username=" . $username);
-    } 
+    }
     else {
      $json = file_get_contents("http://192.168.0.10/ownership-api/v1/limits/?accessToken=" . $accessToken);
     }

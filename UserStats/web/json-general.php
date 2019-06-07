@@ -4,7 +4,7 @@ include("connection.php");
 
 // motivation for each user in the last x days
 if (isset($_REQUEST["field"]) && isset($_REQUEST["username"]) && $_REQUEST["username"] == "all" && isset($_REQUEST["days"])) {
-    $query = "SELECT username, UNIX_TIMESTAMP(date) * 1000 AS timestamp, IF(SUM(" . $_REQUEST["field"] . ") IS NOT NULL, SUM(" . $_REQUEST["field"] . "), 0) AS " . $_REQUEST["field"] . " FROM " . $_REQUEST["db"] . "." . $_REQUEST["table"] . " WHERE date >= CURDATE() - INTERVAL " . $_REQUEST["days"] . " DAY GROUP BY username";
+    $query = "SELECT username, UNIX_TIMESTAMP(date) * 1000 AS timestamp, IF(SUM(" . mysqli_real_escape_string($connection, $_REQUEST["field"]) . ") IS NOT NULL, SUM(" . mysqli_real_escape_string($connection, $_REQUEST["field"]) . "), 0) AS " . mysqli_real_escape_string($connection, $_REQUEST["field"]) . " FROM " . mysqli_real_escape_string($connection, $_REQUEST["db"]) . "." . mysqli_real_escape_string($connection, $_REQUEST["table"]) . " WHERE date >= CURDATE() - INTERVAL " . mysqli_real_escape_string($connection, $_REQUEST["days"]) . " DAY GROUP BY username";
 
     $result = mysqli_query($connection, $query);
 
@@ -19,7 +19,7 @@ else if (isset($_REQUEST["db"]) && isset($_REQUEST["table"]) && isset($_REQUEST[
     // get the users' list
     $usernames = array();
 
-    $query = "SELECT DISTINCT(username) FROM " . $_REQUEST["db"] . "." . $_REQUEST["table"] . " WHERE date >= CURDATE() - INTERVAL " . $_REQUEST["days"] . " DAY";
+    $query = "SELECT DISTINCT(username) FROM " . mysqli_real_escape_string($connection, $_REQUEST["db"]) . "." . mysqli_real_escape_string($connection, $_REQUEST["table"]) . " WHERE date >= CURDATE() - INTERVAL " . mysqli_real_escape_string($connection, $_REQUEST["days"]) . " DAY";
 
     $result = mysqli_query($connection, $query);
 
@@ -61,7 +61,7 @@ else if (isset($_REQUEST["db"]) && isset($_REQUEST["table"]) && isset($_REQUEST[
                 "IF(SUM(iot_sigfox_rx) IS NOT NULL, SUM(iot_sigfox_rx), 0) AS iot_sigfox_rx, " .
                 "IF(SUM(iot_undefined_tx) IS NOT NULL, SUM(iot_undefined_tx), 0) AS iot_undefined_tx, " .
                 "IF(SUM(iot_undefined_rx) IS NOT NULL, SUM(iot_undefined_rx), 0) AS iot_undefined_rx    " .
-                "FROM " . $_REQUEST["db"] . "." . $_REQUEST["table"] . " WHERE username = '" . $username . "' AND date >= CURDATE() - INTERVAL " . $_REQUEST["days"] . " DAY";
+                "FROM " . mysqli_real_escape_string($connection, $_REQUEST["db"]) . "." . mysqli_real_escape_string($connection, $_REQUEST["table"]) . " WHERE username = '" . mysqli_real_escape_string($connection, $username) . "' AND date >= CURDATE() - INTERVAL " . mysqli_real_escape_string($connection, $_REQUEST["days"]) . " DAY";
 
         $result = mysqli_query($connection, $query);
 
@@ -106,10 +106,10 @@ else if (isset($_REQUEST["db"]) && isset($_REQUEST["table"]) && isset($_REQUEST[
 }
 // kB (tx, rx) per user (Area Manager) per day (2 users)
 else if (isset($_REQUEST["field"]) && isset($_REQUEST["role"]) && $_REQUEST["role"] == "AreaManager") {
-    $query = "SELECT CEIL(SUM(" . $_REQUEST["field"] . ")/2) AS " . $_REQUEST["field"] . ", 
-        UNIX_TIMESTAMP(date) * 1000 AS timestamp
-        FROM " . $_REQUEST["db"] . "." . $_REQUEST["table"] . "
-        WHERE (username = 'disit' OR username = 'snap4city') GROUP BY date(date)";
+    $query = "SELECT CEIL(SUM(" . mysqli_real_escape_string($connection, $_REQUEST["field"]) . ")/2) AS " . mysqli_real_escape_string($connection, $_REQUEST["field"]) . ", " .
+        "UNIX_TIMESTAMP(date) * 1000 AS timestamp " .
+        "FROM " . mysqli_real_escape_string($connection, $_REQUEST["db"]) . "." . mysqli_real_escape_string($connection, $_REQUEST["table"]) . " " .
+        "WHERE (username = 'disit' OR username = 'snap4city') GROUP BY date(date)";
 
     $result = mysqli_query($connection, $query);
 
@@ -119,11 +119,11 @@ else if (isset($_REQUEST["field"]) && isset($_REQUEST["role"]) && $_REQUEST["rol
 }
 // kB (tx, rx) per user (Manager) per day (6 users)
 else if (isset($_REQUEST["field"]) && isset($_REQUEST["role"]) && $_REQUEST["role"] == "Manager") {
-    $query = "SELECT CEIL(SUM(" . $_REQUEST["field"] . ")/6) AS " . $_REQUEST["field"] . ", 
-        UNIX_TIMESTAMP(date) * 1000 AS timestamp
-        FROM " . $_REQUEST["db"] . "." . $_REQUEST["table"] . "
-        WHERE (username = 'adifino' OR username = 'badii' OR username = 'PaoloNesi' 
-        OR username = 'nicola.mitolo' OR username = 'pb1' OR username = 'pb3') GROUP BY date(date)";
+    $query = "SELECT CEIL(SUM(" . mysqli_real_escape_string($connection, $_REQUEST["field"]) . ")/6) AS " . mysqli_real_escape_string($connection, $_REQUEST["field"]) . ", " .
+        "UNIX_TIMESTAMP(date) * 1000 AS timestamp " .
+        "FROM " . mysqli_real_escape_string($connection, $_REQUEST["db"]) . "." . mysqli_real_escape_string($connection, $_REQUEST["table"]) . " " .
+        "WHERE (username = 'adifino' OR username = 'badii' OR username = 'PaoloNesi'" .
+        "OR username = 'nicola.mitolo' OR username = 'pb1' OR username = 'pb3') GROUP BY date(date)";
 
     $result = mysqli_query($connection, $query);
 
@@ -146,11 +146,11 @@ else if (isset($_REQUEST["role"]) && $_REQUEST["role"] == "AreaManager" && isset
 }
 // kB (tx, rx) (Manager) sum (6 users)
 else if (isset($_REQUEST["role"]) && $_REQUEST["role"] == "Manager" && isset($_REQUEST["time"]) && $_REQUEST["time"] == "all") {
-    $query = "SELECT SUM(iot_tx)/(6*(datediff(date(max(date)), date(min(date)))-1)) AS iot_tx, 
-        SUM(iot_rx)/(6*(datediff(date(max(date)), date(min(date)))-1)) AS iot_rx
-        FROM iot.data 
-        WHERE (username = 'adifino' OR username = 'badii' OR username = 'PaoloNesi' 
-        OR username = 'nicola.mitolo' OR username = 'pb1' OR username = 'pb3') AND date < date(NOW())";
+    $query = "SELECT SUM(iot_tx)/(6*(datediff(date(max(date)), date(min(date)))-1)) AS iot_tx, " .
+        "SUM(iot_rx)/(6*(datediff(date(max(date)), date(min(date)))-1)) AS iot_rx " .
+        "FROM iot.data " .
+        "WHERE (username = 'adifino' OR username = 'badii' OR username = 'PaoloNesi'" .
+        "OR username = 'nicola.mitolo' OR username = 'pb1' OR username = 'pb3') AND date < date(NOW())";
 
     $result = mysqli_query($connection, $query);
 
@@ -160,10 +160,10 @@ else if (isset($_REQUEST["role"]) && $_REQUEST["role"] == "Manager" && isset($_R
 }
 // IoT reads (Area Manager) sum (2 users)
 else if (isset($_REQUEST["field"]) && $_REQUEST["field"] == 'iot_reads' && isset($_REQUEST["role"]) && $_REQUEST["role"] == "AreaManager" && isset($_REQUEST["time"]) && $_REQUEST["time"] == "all") {
-    $query = "SELECT SUM(iot_reads)/2 AS iot_reads,
-        UNIX_TIMESTAMP(date) * 1000 AS timestamp,
-        FROM iot.data 
-        WHERE (username = 'disit' OR username = 'snap4city') GROUP BY date(date)";
+    $query = "SELECT SUM(iot_reads)/2 AS iot_reads, " .
+        "UNIX_TIMESTAMP(date) * 1000 AS timestamp, " .
+        "FROM iot.data " . 
+        "WHERE (username = 'disit' OR username = 'snap4city') GROUP BY date(date)";
 
     $result = mysqli_query($connection, $query);
 
@@ -173,11 +173,11 @@ else if (isset($_REQUEST["field"]) && $_REQUEST["field"] == 'iot_reads' && isset
 }
 // IoT reads (Manager) sum (6 users)
 else if (isset($_REQUEST["field"]) && $_REQUEST["field"] == 'iot_reads' && isset($_REQUEST["role"]) && $_REQUEST["role"] == "Manager") {
-    $query = "SELECT SUM(iot_reads)/6 AS iot_reads,
-        UNIX_TIMESTAMP(date) * 1000 AS timestamp,
-        FROM iot.data 
-        WHERE (username = 'adifino' OR username = 'badii' OR username = 'PaoloNesi' 
-        OR username = 'nicola.mitolo' OR username = 'pb1' OR username = 'pb3') AND date < date(NOW()) GROUP BY date(date)";
+    $query = "SELECT SUM(iot_reads)/6 AS iot_reads, " .
+        "UNIX_TIMESTAMP(date) * 1000 AS timestamp, " .
+        "FROM iot.data " .
+        "WHERE (username = 'adifino' OR username = 'badii' OR username = 'PaoloNesi'" .
+        "OR username = 'nicola.mitolo' OR username = 'pb1' OR username = 'pb3') AND date < date(NOW()) GROUP BY date(date)";
 
     $result = mysqli_query($connection, $query);
 
@@ -187,10 +187,10 @@ else if (isset($_REQUEST["field"]) && $_REQUEST["field"] == 'iot_reads' && isset
 }
 // IoT writes (Area Manager) sum (2 users)
 else if (isset($_REQUEST["field"]) && $_REQUEST["field"] == 'iot_writes' && isset($_REQUEST["role"]) && $_REQUEST["role"] == "AreaManager") {
-    $query = "SELECT SUM(iot_writes)/2 AS iot_writes,
-        UNIX_TIMESTAMP(date) * 1000 AS timestamp,
-        FROM iot.data 
-        WHERE (username = 'disit' OR username = 'snap4city') AND date < date(NOW()) GROUP BY date(date)";
+    $query = "SELECT SUM(iot_writes)/2 AS iot_writes, " .
+        "UNIX_TIMESTAMP(date) * 1000 AS timestamp, " .
+        "FROM iot.data " .
+        "WHERE (username = 'disit' OR username = 'snap4city') AND date < date(NOW()) GROUP BY date(date)";
 
     $result = mysqli_query($connection, $query);
 
@@ -200,11 +200,11 @@ else if (isset($_REQUEST["field"]) && $_REQUEST["field"] == 'iot_writes' && isse
 }
 // IoT writes (Manager) sum (6 users)
 else if (isset($_REQUEST["field"]) && $_REQUEST["field"] == 'iot_writes' && isset($_REQUEST["role"]) && $_REQUEST["role"] == "Manager" && isset($_REQUEST["time"]) && $_REQUEST["time"] == "all") {
-    $query = "SELECT SUM(iot_writes)/6 AS iot_writes,
-        UNIX_TIMESTAMP(date) * 1000 AS timestamp,
-        FROM iot.data 
-        WHERE (username = 'adifino' OR username = 'badii' OR username = 'PaoloNesi' 
-        OR username = 'nicola.mitolo' OR username = 'pb1' OR username = 'pb3') AND date < date(NOW()) GROUP BY date(date)";
+    $query = "SELECT SUM(iot_writes)/6 AS iot_writes, " .
+        "UNIX_TIMESTAMP(date) * 1000 AS timestamp, " .
+        "FROM iot.data " .
+        "WHERE (username = 'adifino' OR username = 'badii' OR username = 'PaoloNesi'" .
+        "OR username = 'nicola.mitolo' OR username = 'pb1' OR username = 'pb3') AND date < date(NOW()) GROUP BY date(date)";
 
     $result = mysqli_query($connection, $query);
 
@@ -214,18 +214,27 @@ else if (isset($_REQUEST["field"]) && $_REQUEST["field"] == 'iot_writes' && isse
 }
 // ETL writes ('disit' user) sum
 else if (isset($_REQUEST["field"]) && $_REQUEST["field"] == 'etl_writes') {
-    $query = "SELECT SUM(etl_writes) AS etl_writes,
-        UNIX_TIMESTAMP(date) * 1000 AS timestamp
-        FROM iot.data 
-        WHERE (username = 'disit') AND date < date(NOW()) GROUP BY date(date)";
+    $query = "SELECT SUM(etl_writes) AS etl_writes, " .
+        "UNIX_TIMESTAMP(date) * 1000 AS timestamp " .
+        "FROM iot.data " .
+        "WHERE (username = 'disit') AND date < date(NOW()) GROUP BY date(date)";
 
     $result = mysqli_query($connection, $query);
 
     while ($row = mysqli_fetch_assoc($result)) {
         $data[] = array(intval($row["timestamp"]), intval($row['etl_writes']));
     }
+}
+// Dashboards minutes (total per day)
+else if (isset($_REQUEST["field"]) && $_REQUEST["field"] == 'dashboards_minutes') {
+    $query = "SELECT SUM(dashboards_minutes) AS minutes, UNIX_TIMESTAMP(date) * 1000 AS timestamp FROM " . mysqli_real_escape_string($connection, $_REQUEST["db"]) . "." . mysqli_real_escape_string($connection, $_REQUEST["table"]) . " GROUP by date(date) having minutes > 0 ORDER BY date";
+    $result = mysqli_query($connection, $query);
+
+    while ($row = mysqli_fetch_assoc($result)) {
+        $data[] = array(intval($row["timestamp"]), intval($row['minutes']));
+    }
 } else {
-    $query = "SELECT UNIX_TIMESTAMP(date) * 1000 AS timestamp, IF(SUM(" . $_REQUEST["field"] . ") IS NOT NULL, SUM(" . $_REQUEST["field"] . "), 0) AS " . $_REQUEST["field"] . " FROM " . $_REQUEST["db"] . "." . $_REQUEST["table"] . " GROUP BY date";
+    $query = "SELECT UNIX_TIMESTAMP(date) * 1000 AS timestamp, IF(SUM(" . mysqli_real_escape_string($connection, $_REQUEST["field"]) . ") IS NOT NULL, SUM(" . mysqli_real_escape_string($connection, $_REQUEST["field"]) . "), 0) AS " . mysqli_real_escape_string($connection, $_REQUEST["field"]) . " FROM " . mysqli_real_escape_string($connection, $_REQUEST["db"]) . "." . mysqli_real_escape_string($connection, $_REQUEST["table"]) . " GROUP BY date";
 
     $result = mysqli_query($connection, $query);
 

@@ -7,7 +7,7 @@ if ($_REQUEST["json"]) {
 }
 include("connection.php");
 
-$query = "SELECT UNIX_TIMESTAMP(date) * 1000 AS timestamp, IF(SUM(" . $_REQUEST["field"] . ") IS NOT NULL, SUM(" . $_REQUEST["field"] . "), 0) AS " . $_REQUEST["field"] . " FROM " . $_REQUEST["db"] . "." . $_REQUEST["table"] . " WHERE username = '" . $_REQUEST["username"] . "' GROUP BY date ORDER BY date"; // . " WHERE date >= CURDATE() - INTERVAL " . $_REQUEST["days"] . " DAY ";
+$query = "SELECT UNIX_TIMESTAMP(date) * 1000 AS timestamp, IF(SUM(" . mysqli_real_escape_string($connection, $_REQUEST["field"]) . ") IS NOT NULL, SUM(" . mysqli_real_escape_string($connection, $_REQUEST["field"]) . "), 0) AS " . mysqli_real_escape_string($connection, $_REQUEST["field"]) . " FROM " . mysqli_real_escape_string($connection, $_REQUEST["db"]) . "." . mysqli_real_escape_string($connection, $_REQUEST["table"]) . " WHERE username = '" . mysqli_real_escape_string($connection, $_REQUEST["username"]) . "' GROUP BY date ORDER BY date"; // . " WHERE date >= CURDATE() - INTERVAL " . $_REQUEST["days"] . " DAY ";
 $result = mysqli_query($connection, $query);
 
 while ($row = mysqli_fetch_assoc($result)) {

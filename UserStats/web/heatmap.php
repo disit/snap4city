@@ -7,22 +7,22 @@ $data = array();
 
 if (isset($_REQUEST["days"]) && isset($_REQUEST["latitude_min"]) && isset($_REQUEST["latitude_max"]) &&
         isset($_REQUEST["longitude_min"]) && isset($_REQUEST["longitude_max"]) && isset($_REQUEST["dataset"])) {
-    $query = "SELECT latitude, longitude, num FROM iot.heatmap WHERE date >= NOW() - INTERVAL " . $_REQUEST["days"] . " DAY AND dataset = '" . $_REQUEST["dataset"] . "'" .
-            " AND latitude >= " . $_REQUEST["latitude_min"] .
-            " AND latitude <= " . $_REQUEST["latitude_max"] .
-            " AND longitude >= " . $_REQUEST["longitude_min"] .
-            " AND longitude <= " . $_REQUEST["longitude_max"];
+    $query = "SELECT latitude, longitude, num FROM iot.heatmap WHERE date >= NOW() - INTERVAL " . mysqli_real_escape_string($connection, $_REQUEST["days"]) . " DAY AND dataset = '" . mysqli_real_escape_string($connection, $_REQUEST["dataset"]) . "'" .
+            " AND latitude >= " . mysqli_real_escape_string($connection, $_REQUEST["latitude_min"]) .
+            " AND latitude <= " . mysqli_real_escape_string($connection, $_REQUEST["latitude_max"]) .
+            " AND longitude >= " . mysqli_real_escape_string($connection, $_REQUEST["longitude_min"]) .
+            " AND longitude <= " . mysqli_real_escape_string($connection, $_REQUEST["longitude_max"]);
     $result = mysqli_query($connection, $query);
     while ($row = mysqli_fetch_assoc($result)) {
         $data[] = array("lat" => doubleval($row["latitude"]), "lng" => doubleval($row["longitude"]), "count" => intval($row["num"]));
     }
 } else if (isset($_REQUEST["date"]) && isset($_REQUEST["latitude_min"]) && isset($_REQUEST["latitude_max"]) &&
         isset($_REQUEST["longitude_min"]) && isset($_REQUEST["longitude_max"]) && isset($_REQUEST["dataset"])) {
-    $query = "SELECT latitude, longitude, num FROM iot.heatmap WHERE date ='" . $_REQUEST["date"] . "' AND dataset = '" . $_REQUEST["dataset"] . "'" .
-            " AND latitude >= " . $_REQUEST["latitude_min"] .
-            " AND latitude <= " . $_REQUEST["latitude_max"] .
-            " AND longitude >= " . $_REQUEST["longitude_min"] .
-            " AND longitude <= " . $_REQUEST["longitude_max"];
+    $query = "SELECT latitude, longitude, num FROM iot.heatmap WHERE date ='" . mysqli_real_escape_string($connection, $_REQUEST["date"]) . "' AND dataset = '" . mysqli_real_escape_string($connection, $_REQUEST["dataset"]) . "'" .
+            " AND latitude >= " . mysqli_real_escape_string($connection, $_REQUEST["latitude_min"]) .
+            " AND latitude <= " . mysqli_real_escape_string($connection, $_REQUEST["latitude_max"]) .
+            " AND longitude >= " . mysqli_real_escape_string($connection, $_REQUEST["longitude_min"]) .
+            " AND longitude <= " . mysqli_real_escape_string($connection, $_REQUEST["longitude_max"]);
     $result = mysqli_query($connection, $query);
     while ($row = mysqli_fetch_assoc($result)) {
         $data[] = array("lat" => doubleval($row["latitude"]), "lng" => doubleval($row["longitude"]), "count" => intval($row["num"]));

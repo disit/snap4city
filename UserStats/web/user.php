@@ -68,7 +68,7 @@ if (!isset($_SESSION["role"])) {
 
 include("connection.php");
 
-$query = "SELECT role, level FROM iot.roles_levels WHERE username = '" . $_SESSION["username"] . "'";
+$query = "SELECT role, level FROM iot.roles_levels WHERE username = '" . mysqli_real_escape_string($connection, $_SESSION["username"]) . "'";
 
 $result = mysqli_query($connection, $query);
 
@@ -344,8 +344,9 @@ if (count($users) == 0) {
         <p>
             <b>User's Limits: </b>
             <?php
-            $keys = array("DashboardID" => "Dashboards", "AppID" => "IoT Apps", "IOTID" => "IoT Devices");
+            $keys = array("DashboardID" => "Dashboards", "AppID" => "IoT Apps", "IOTID" => "IoT Devices", "DAAppID" => "Data Analytics Apps");
             $i = 0;
+            file_put_contents("log.txt", json_encode($limits));
             foreach ($limits as $limit) {
                 echo ($i != 0 ? ", " : "" ) . $keys[$limit["elementType"]] . ": " . "<span id=\"" . $limit["elementType"] . "\">" . $limit["limit"] . "</span>";
                 $i++;

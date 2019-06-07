@@ -21,7 +21,7 @@ $username = ($_SESSION["role"] == "RootAdmin" && isset($_REQUEST["username"])) ?
 $role = "";
 $level = "";
 
-$query = "SELECT * FROM iot.roles_levels WHERE username = '" . $username . "'";
+$query = "SELECT * FROM iot.roles_levels WHERE username = '" . mysqli_real_escape_string($connection, $username) . "'";
 
 $result = mysqli_query($connection, $query);
 while ($row = mysqli_fetch_assoc($result)) {
@@ -33,7 +33,7 @@ if (isset($username) && isset($_REQUEST["date"])) {
     $year_month = explode("-", $_REQUEST["date"]);
     // if date is yyyy-mm-dd
     if (count($year_month) == 3) {
-        $query = "SELECT * FROM iot.data a LEFT JOIN iot.roles_levels b ON a.username = b.username WHERE a.username = '" . $username . "' AND a.date = '" . $_REQUEST["date"] . "'";
+        $query = "SELECT * FROM iot.data a LEFT JOIN iot.roles_levels b ON a.username = b.username WHERE a.username = '" . mysqli_real_escape_string($connection, $username) . "' AND a.date = '" . mysqli_real_escape_string($connection, $_REQUEST["date"]) . "'";
     }
     // if date is yyyy-mm
     else if (count($year_month) == 2) {
@@ -62,7 +62,7 @@ if (isset($username) && isset($_REQUEST["date"])) {
                   SUM(iot_reads) AS iot_reads, SUM(iot_writes) AS iot_writes,
                   SUM(etl_writes) AS etl_writes,
                   a.date
-                  FROM iot.data a LEFT JOIN iot.roles_levels b ON a.username = b.username WHERE a.username = '" . $username . "' AND YEAR(a.date) = '" . $year_month[0] . "' AND MONTH(a.date) = '" . $year_month[1] . "'";
+                  FROM iot.data a LEFT JOIN iot.roles_levels b ON a.username = b.username WHERE a.username = '" . mysqli_real_escape_string($connection, $username) . "' AND YEAR(a.date) = '" . mysqli_real_escape_string($connection, $year_month[0]) . "' AND MONTH(a.date) = '" . mysqli_real_escape_string($connection, $year_month[1]) . "'";
     }
     // if date is not set
     else if (count($year_month) == 1) {
@@ -71,7 +71,7 @@ if (isset($username) && isset($_REQUEST["date"])) {
         } else if ($_REQUEST["date"] == "Last 30 days") {
             $days = 30;
         }
-        $query = "SELECT a.username, role, level, SUM(iot_db_storage_tx) AS iot_db_storage_tx, SUM(iot_db_storage_rx) AS iot_db_storage_rx, 
+        $query = "SELECT a.username, role, level, SUM(iot_db_storage_tx) AS iot_db_storage_tx, SUM(iot_db_storage_rx) AS iot_db_storage_rx,
                   SUM(iot_filesystem_storage_tx) AS iot_filesystem_storage_tx, SUM(iot_filesystem_storage_rx) AS iot_filesystem_storage_rx,
                   SUM(iot_db_request_tx) AS iot_db_request_tx, SUM(iot_db_request_rx) AS iot_db_request_rx,
                   SUM(iot_ascapi_tx) AS iot_ascapi_tx, SUM(iot_ascapi_rx) AS iot_ascapi_rx,
@@ -95,7 +95,7 @@ if (isset($username) && isset($_REQUEST["date"])) {
                   SUM(iot_reads) AS iot_reads, SUM(iot_writes) AS iot_writes,
                   SUM(etl_writes) AS etl_writes,
                   a.date
-                  FROM iot.data a LEFT JOIN iot.roles_levels b ON a.username = b.username WHERE a.username = '" . $username . "' AND a.date > NOW() - INTERVAL " . $days . " DAY";
+                  FROM iot.data a LEFT JOIN iot.roles_levels b ON a.username = b.username WHERE a.username = '" . mysqli_real_escape_string($connection, $username) . "' AND a.date > NOW() - INTERVAL " . mysqli_real_escape_string($connection, $days) . " DAY";
     }
     $result = mysqli_query($connection, $query);
     while ($row = mysqli_fetch_assoc($result)) {
@@ -106,11 +106,11 @@ if (isset($username) && isset($_REQUEST["date"])) {
     $connection = mysqli_connect("localhost", "user", "passw", "processloader_db");
     // if date is yyyy-mm-dd
     if (count($year_month) == 3) {
-        $query = "SELECT file_type, COUNT(*) AS num FROM processloader_db.uploaded_files WHERE username = '" . $username . "' AND creation_date <= '" . $_REQUEST["date"] . " 23:59:59' GROUP BY file_type";
+        $query = "SELECT file_type, COUNT(*) AS num FROM processloader_db.uploaded_files WHERE username = '" . mysqli_real_escape_string($connection, $username) . "' AND creation_date <= '" . mysqli_real_escape_string($connection, $_REQUEST["date"]) . " 23:59:59' GROUP BY file_type";
     }
     // if date is yyyy-mm
     else if (count($year_month) == 2) {
-        $query = "SELECT file_type, COUNT(*) AS num FROM processloader_db.uploaded_files WHERE username = '" . $username . "' AND YEAR(creation_date) = '" . $year_month[0] . "' AND MONTH(creation_date) = '" . $year_month[1] . "' GROUP BY file_type";
+        $query = "SELECT file_type, COUNT(*) AS num FROM processloader_db.uploaded_files WHERE username = '" . mysqli_real_escape_string($connection, $username) . "' AND YEAR(creation_date) = '" . mysqli_real_escape_string($connection, $year_month[0]) . "' AND MONTH(creation_date) = '" . mysqli_real_escape_string($connection, $year_month[1]) . "' GROUP BY file_type";
     }
     $result = mysqli_query($connection, $query);
     while ($row = mysqli_fetch_assoc($result)) {

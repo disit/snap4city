@@ -14,18 +14,18 @@ $ip = (isset($_REQUEST['ip_address'])) ? (" AND IP_ADDRESS = '" . $_REQUEST['ip_
 
 if (isset($_REQUEST['startAt']) && isset($_REQUEST['endAt'])) {
     if (strtotime($_REQUEST['startAt']) < strtotime($_REQUEST['endAt'])) {
-        $sql = "SELECT DATE, IP_ADDRESS, " . $_REQUEST['metric_name'] . " FROM quartz.QRTZ_NODES WHERE DATE >= '" . $_REQUEST['startAt'] . "' AND DATE <= '" . $_REQUEST['endAt'] . "'" . $ip . " ORDER BY DATE ASC";
+        $sql = "SELECT DATE, IP_ADDRESS, " . mysqli_real_escape_string($link, $_REQUEST['metric_name']) . " FROM quartz.QRTZ_NODES WHERE DATE >= '" . mysqli_real_escape_string($link, $_REQUEST['startAt']) . "' AND DATE <= '" . mysqli_real_escape_string($link, $_REQUEST['endAt']) . "'" . mysqli_real_escape_string($link, $ip) . " ORDER BY DATE ASC";
         if ($_REQUEST['metric_name'] == "JOBS_PER_HOUR") {
-            $sql = "SELECT DATE, IP_ADDRESS, JOBS_EXECUTED * 3600/(UNIX_TIMESTAMP(DATE)-UNIX_TIMESTAMP(RUNNING_SINCE)) AS JOBS_PER_HOUR FROM quartz.QRTZ_NODES WHERE DATE >= '" . $_REQUEST['startAt'] . "' AND DATE <= '" . $_REQUEST['endAt'] . "'" . $ip . " ORDER BY DATE ASC";
+            $sql = "SELECT DATE, IP_ADDRESS, JOBS_EXECUTED * 3600/(UNIX_TIMESTAMP(DATE)-UNIX_TIMESTAMP(RUNNING_SINCE)) AS JOBS_PER_HOUR FROM quartz.QRTZ_NODES WHERE DATE >= '" . mysqli_real_escape_string($link, $_REQUEST['startAt']) . "' AND DATE <= '" . mysqli_real_escape_string($link, $_REQUEST['endAt']) . "'" . mysqli_real_escape_string($link, $ip) . " ORDER BY DATE ASC";
         }
     } else {
         echo 'Start Time must be <= End Time';
         $error = "error";
     }
 } else {
-    $sql = "SELECT DATE, IP_ADDRESS, " . $_REQUEST['metric_name'] . " FROM quartz.QRTZ_NODES WHERE DATE >= NOW() - INTERVAL 1 HOUR " . $ip . " ORDER BY DATE ASC";
+    $sql = "SELECT DATE, IP_ADDRESS, " . mysqli_real_escape_string($link, $_REQUEST['metric_name']) . " FROM quartz.QRTZ_NODES WHERE DATE >= NOW() - INTERVAL 1 HOUR " . mysqli_real_escape_string($link, $ip) . " ORDER BY DATE ASC";
     if ($_REQUEST['metric_name'] == "JOBS_PER_HOUR") {
-        $sql = "SELECT DATE, IP_ADDRESS, JOBS_EXECUTED * 3600/(UNIX_TIMESTAMP(DATE)-UNIX_TIMESTAMP(RUNNING_SINCE)) AS JOBS_PER_HOUR FROM quartz.QRTZ_NODES WHERE DATE >= NOW() - INTERVAL 1 HOUR " . $ip . " ORDER BY DATE ASC";
+        $sql = "SELECT DATE, IP_ADDRESS, JOBS_EXECUTED * 3600/(UNIX_TIMESTAMP(DATE)-UNIX_TIMESTAMP(RUNNING_SINCE)) AS JOBS_PER_HOUR FROM quartz.QRTZ_NODES WHERE DATE >= NOW() - INTERVAL 1 HOUR " . mysqli_real_escape_string($link, $ip) . " ORDER BY DATE ASC";
     }
 }
 

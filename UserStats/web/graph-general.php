@@ -62,6 +62,8 @@ $users_dashboards = file_get_contents("http://localhost/userstats/json-general.p
 $users_devices = file_get_contents("http://localhost/userstats/json-general.php?db=iot&table=users&field=devices");
 $users_total = file_get_contents("http://localhost/userstats/json-general.php?db=iot&table=users&field=total");
 
+$dashboards_minutes = file_get_contents("http://localhost/userstats/json-general.php?db=iot&table=data&field=dashboards_minutes");
+
 // average of bytes (tx, rx) for Area Manager users until last day
 $iot_tx_rx_areamanger_average = json_decode(file_get_contents("http://localhost/userstats/json-general.php?db=iot&table=data&role=AreaManager&time=all"));
 // average of bytes (tx, rx) for Manager users until last day
@@ -810,6 +812,58 @@ $iot_tx_rx_manger_average = json_decode(file_get_contents("http://localhost/user
                 });
             });
 
+            // Dashboards minutes
+            //$.getJSON('json.php?json=1', function (data) {
+            $(function () {
+                // create the chart
+                Highcharts.stockChart('dashboardsMinutes', {
+                    chart: {
+                        alignTicks: false
+                    },
+                    rangeSelector: {
+                        selected: 1
+                    },
+                    title: {
+                        text: 'Dashboards (minutes)'
+                    },
+                    plotOptions: {
+                        column: {
+                            stacking: 'normal',
+                            dataLabels: {
+                                enabled: false,
+                                color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white',
+                                style: {
+                                    textShadow: '0 0 3px black'
+                                }
+                            },
+                            pointWidth: 20,
+                            pointPadding: 0.5, // Defaults to 0.1
+                            groupPadding: 0.5 // Defaults to 0.2
+                        },
+                    },
+                    yAxis: {
+                        minorTickInterval: 0.1
+                    },
+                    series: [{
+                            type: 'column',
+                            name: 'public',
+                            data: <?php echo str_replace("\"", "", $dashboards_minutes); ?>,
+                            dataGrouping: {
+                                units: [[
+                                        'day', // unit name
+                                        [1] // allowed multiples
+                                    ], [
+                                        'month',
+                                        [1, 2, 3, 4, 5, 6]
+                                    ]]
+                            }
+                        }],
+                    legend: {
+                        enabled: true
+                    }
+                });
+            });
+
             // IoT users
             //$.getJSON('json.php?json=1', function (data) {
             $(function () {
@@ -1330,6 +1384,7 @@ $iot_tx_rx_manger_average = json_decode(file_get_contents("http://localhost/user
         <div id="iotapps" style="height: 400px"></div>
         <div id="devices" style="height: 400px"></div>
         <div id="dashboards" style="height: 400px"></div>
+        <div id="dashboardsMinutes" style="height: 400px"</div>
         <div id="usersiot" style="height: 400px"></div>
         <div id="usersdashboards" style="height: 400px"></div>
         <div id="usersdevices" style="height: 400px"></div>
