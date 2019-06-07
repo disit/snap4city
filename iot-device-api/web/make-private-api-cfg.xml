@@ -138,7 +138,8 @@
                 
                 <data id="is-a" type="uri" builder="const" loader="volatile">http://www.w3.org/1999/02/22-rdf-syntax-ns#type</data>
 
-                <data id="iot-sensor-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#IoTSensor</data>
+		<!-- <data id="iot-sensor-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#IoTSensor</data> -->
+                <data id="iot-sensor-uri" type="uri" builder="const" loader="volatile">http://www.w3.org/ns/sosa/Sensor</data>
 		
 		<data id="iot-actuator-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#IoTActuator</data>
 

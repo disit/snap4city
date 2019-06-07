@@ -577,12 +577,14 @@
 
                 <!-- value_type mapping -->
                 <data id="value_type_mapping" type="string" builder="template" loader="volatile">
-                    <template>select distinct ?s '{' graph &lt;urn:test:value_types_mapping&gt; '{' &lt;{0}&gt; &lt;http://purl.org/dc/terms/source&gt; ?s '}' . graph &lt;{1}&gt; '{' &lt;{2}&gt; &lt;{3}&gt; &lt;{4}&gt; ; ?p ?v '}' '}'</template>
+                    <!-- <template>select distinct ?s '{' graph &lt;urn:test:value_types_mapping&gt; '{' &lt;{0}&gt; &lt;http://purl.org/dc/terms/source&gt; ?s '}' . graph &lt;{1}&gt; '{' &lt;{2}&gt; &lt;{3}&gt; &lt;{4}&gt; ; ?p ?v '}' '}'</template> -->
+                    <template>select distinct ?s '{' graph &lt;urn:test:value_types_mapping&gt; '{' &lt;{0}&gt; &lt;http://purl.org/dc/terms/source&gt; ?s '}' . filter("{1}" = "sensor") '}'</template>
                     <param index="0" value="measure-uri"/>
-                    <param index="1" value="graph-uri"/>
+                    <param index="1" value="kind"/>
+                    <!-- <param index="1" value="graph-uri"/>
                     <param index="2" value="service-uri"/>
                     <param index="3" value="is-a"/>
-                    <param index="4" value="iot-sensor-uri"/>
+                    <param index="4" value="iot-sensor-uri"/> -->
                 </data>
                 
                 <data id="value_type_mapping_result" type="string" builder="lookup" loader="volatile">
