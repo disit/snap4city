@@ -68,7 +68,7 @@ switch ($op) {
       echo json_encode($app);
     } else {
       header("HTTP/1.1 400 BAD REQUEST");
-      echo "{error:\"invalid user name '$uname' or app name '$name' or type '$type'\"}";
+      echo "{\"error\":\"invalid user name '$uname' or app name '$name' or type '$type'\"}";
     }      
     break;
   case 'new_plumber':
@@ -107,16 +107,16 @@ switch ($op) {
             echo json_encode($app);
           } else {
             header("HTTP/1.1 400 BAD REQUEST");
-            echo "{error:\"missing R_file\"}";      
+            echo "{\"error\":\"missing R_file\"}";      
           }
         } else {
             header("HTTP/1.1 400 BAD REQUEST");
-            echo "{error:\"use POST method\"}";                
+            echo "{\"error\":\"use POST method\"}";                
         }
       }
     } else {
       header("HTTP/1.1 400 BAD REQUEST");
-      echo "{error:\"invalid user name '$uname' or app name '$name' or missing id\"}";
+      echo "{\"error\":\"invalid user name '$uname' or app name '$name' or missing id\"}";
     }      
     break;
   case 'new_portia':
@@ -137,7 +137,7 @@ switch ($op) {
       echo json_encode($app);
     } else {
       header("HTTP/1.1 400 BAD REQUEST");
-      echo "{error:\"invalid user name '$uname' or app name '$name' or type '$type'\"}";
+      echo "{\"error\":\"invalid user name '$uname' or app name '$name' or type '$type'\"}";
     }      
     break;
   case 'run_portia_crawler':
@@ -145,7 +145,7 @@ switch ($op) {
       $portia_apps = get_apps("PortiaID", "true"); //onlyMine
       if(count($portia_apps)==0) {
         header("HTTP/1.1 400 BAD REQUEST");
-        echo "{error:\"no portia app found for $uname \"}";        
+        echo "{\"error\":\"no portia app found for $uname \"}";        
         return;
       }
       $aid = $portia_apps[0]['id'];
@@ -162,11 +162,11 @@ switch ($op) {
         echo json_encode($r);
       } else {
         header("HTTP/1.1 400 BAD REQUEST");
-        echo "{error:\"missing project and/or crawler parameters\"}";        
+        echo "{\"error\":\"missing project and/or crawler parameters\"}";        
       }
     } else {
       header("HTTP/1.1 400 BAD REQUEST");
-      echo "{error:\"invalid user name '$uname' or app id '$aid'\"}";
+      echo "{\"error\":\"invalid user name '$uname' or app id '$aid'\"}";
     }
     break;
   case 'restart_app':
@@ -177,7 +177,7 @@ switch ($op) {
       }
     } else {
       header("HTTP/1.1 400 BAD REQUEST");
-      echo "{error:\"invalid uname or id\"}";
+      echo "{\"error\":\"invalid uname or id\"}";
     }
     break;
   case 'upgrade_app':
@@ -188,7 +188,7 @@ switch ($op) {
       }
     } else {
       header("HTTP/1.1 400 BAD REQUEST");
-      echo "{error:\"invalid uname or id\"}";
+      echo "{\"error\":\"invalid uname or id\"}";
     }
     break;
   case 'rm_app':
@@ -210,7 +210,7 @@ switch ($op) {
       }
     } else {
       header("HTTP/1.1 400 BAD REQUEST");
-      echo "{error:\"invalid uname or id\"}";
+      echo "{\"error\":\"invalid uname or id\"}";
     }
     break;
   case 'status':
@@ -218,12 +218,12 @@ switch ($op) {
       status_app($db,$uname,$aid);
     } else {
       header("HTTP/1.1 400 BAD REQUEST");
-      echo "{error:\"invalid uname or id\"}";
+      echo "{\"error\":\"invalid uname or id\"}";
     }
     break;
   default:
     header("HTTP/1.1 400 BAD REQUEST");
-    echo "{error: \"operation '$op' is not valid\"}";
+    echo "{\"error\": \"operation '$op' is not valid\"}";
 }
 
 function register_app($app) {

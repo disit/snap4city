@@ -457,7 +457,7 @@ function run_marathon_portia_crawler($base_url, $image, $portia_id, $project, $s
   $id = $portia_id.'crawler';
   $json = '{
     "id": "'. $id .'",
-    "cmd": "rm /mnt/'. $outFile .' ; portiacrawl /app/data/projects/'.$project.' '.$spider.' -o /mnt/'. $outFile. $postResult .' ; sleep 1m ; curl -X DELETE '.$base_url.'/v2/apps/'.$id.'",
+    "cmd": "rm /mnt/'. $outFile .' ; portiacrawl /app/data/projects/'.$project.' '.$spider.' -o /mnt/'. $outFile. $postResult .' ; curl -X DELETE '.$base_url.'/v2/apps/'.$id.'",
     "container": {
         "type": "DOCKER", 
         "docker": {
