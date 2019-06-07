@@ -1,0 +1,26 @@
+[{
+		"icon": "fas fa-search",
+		"action": "SEARCH",
+		"label": "SEARCH",
+		"message": "Find a Bar/Pizzeria around you"
+},{
+		"icon": "fas fa-code-branch",
+		"action": "GO",
+		"label": "GO",
+		"message": "Use the navigator to move towards your searched place"
+},{
+		"icon": "fas fa-map-marked-alt",
+		"action": "MY_POI",
+		"label": "MY POI",
+		"message": "Save as your MyPOI an interesting service or point of the city"
+},{
+		"icon": "fas fa-bell",
+		"action": "BE_NOTIFIED",
+		"label": "BE INFORMED",
+		"message": "Subscribe to be informed when the Pollution is over the regular value"
+},{
+		"icon": "fas fa-star",
+		"action": "RATE",
+		"label": "RATE",
+		"message": "Assign a rate to this application on the Play Store"
+},{		"icon": "fas fa-comments",		"action": "FORUM",		"label": "FORUM",		"message": "Leave a comment or write a question on Snap4City forum"}]

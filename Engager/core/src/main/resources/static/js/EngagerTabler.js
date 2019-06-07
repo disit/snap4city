@@ -82,6 +82,10 @@ var EngagerTabler = {
 
         for (var i = 0; i < _response.content.length; i++) {
             _response.content[i].isPublic = (_response.content[i].ownership == "public");
+            if (_response.content[i].message.length>30)
+            	_response.content[i].messageshort=_response.content[i].message.substring(0,30)+"[...]";
+            else
+            	_response.content[i].messageshort=_response.content[i].message;
         }
 
         ViewManager.renderTable({

@@ -23,4 +23,6 @@ public interface ISensorService {
 	public Date getLastDate(String mapname, Locale lang) throws IOException;
 
 	public void update(Sensor sensore, Locale lang) throws IOException;
+
+	boolean checkSensorValidity(String heatmapname, String latit, String longit);
 }

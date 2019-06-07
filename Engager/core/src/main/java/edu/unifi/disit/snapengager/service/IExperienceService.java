@@ -12,12 +12,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package edu.unifi.disit.snapengager.service;
 
-import java.util.List;
 import java.util.Locale;
-
-import edu.unifi.disit.snapengager.datamodel.Experience;
 
 public interface IExperienceService {
 
-	List<Experience> getRandomize(String org, String group, Locale lang) throws Exception;
+	String getRandomize(String org, String group, Locale lang) throws Exception;
 }

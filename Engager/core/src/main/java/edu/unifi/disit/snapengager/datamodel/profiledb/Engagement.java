@@ -12,9 +12,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package edu.unifi.disit.snapengager.datamodel.profiledb;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -27,6 +28,8 @@ import org.hibernate.annotations.Type;
 
 import com.disit.snap4city.ENGAGEMENT;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.unifi.disit.snap4city.engager_utils.EngagementType;
 import edu.unifi.disit.snapengager.datamodel.EngagementStatusType;
@@ -50,7 +53,6 @@ public class Engagement {
 	private Date created;
 	@Type(type = "timestamp")
 	private Date elapse;
-	@Column(name = "points")
 	private Integer points;
 	private Integer sendrate;
 	// internal use
@@ -110,8 +112,9 @@ public class Engagement {
 		if (e.getMessage() != null)
 			this.message = e.getMessage();
 		this.created = new Date();
-		if (e.getElapse() != null)
-			this.elapse = new Date(System.currentTimeMillis() + e.getElapse() * 60 * 1000);
+
+		setElapsing(e);
+
 		// DEFAULT Elapse is null
 		if (e.getPoints() != null)
 			this.points = e.getPoints();
@@ -240,5 +243,29 @@ public class Engagement {
 	public String toString() {
 		return "Engagement [id=" + id + ", username=" + username + ", title=" + title + ", subtitle=" + subtitle + ", type=" + type + ", rulename=" + rulename + ", message=" + message + ", created=" + created + ", elapse=" + elapse
 				+ ", points=" + points + ", status=" + status + ", sendrate=" + sendrate + ", deleted=" + deleted + "]";
+	}
+
+	private void setElapsing(ENGAGEMENT e) {
+		if (e.getElapse() != null)
+			this.elapse = new Date(System.currentTimeMillis() + e.getElapse() * 60 * 1000);
+
+		// if this is an engagement of type==EVENT, check the duration of the event
+		if (e.getType().equalsIgnoreCase(EngagementType.EVENT.toString())) {
+			ObjectMapper mapper = new ObjectMapper();
+			try {
+				JsonNode actualObj = mapper.readTree(e.getMessage());
+				JsonNode jsonNode1 = actualObj.get("endDate");
+
+				Calendar c = Calendar.getInstance();
+				c.setTime(new SimpleDateFormat("yyyy-MM-dd").parse(jsonNode1.asText()));
+				c.add(Calendar.HOUR, 24);
+
+				if (this.elapse.after(c.getTime()))
+					this.elapse = c.getTime();
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
 	}
 }

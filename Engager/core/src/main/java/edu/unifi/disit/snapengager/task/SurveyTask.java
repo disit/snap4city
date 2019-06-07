@@ -93,7 +93,6 @@ public class SurveyTask implements SchedulingConfigurer {
 
 	private void myTask() throws Exception {
 		Locale lang = new Locale("en");
-
 		Hashtable<String, Boolean> assistanceEnabled = dataservice.getAssistanceEnabled(lang);
 
 		for (Data submittedSurvey : dataservice.getSurveyData(lang)) {
@@ -103,11 +102,6 @@ public class SurveyTask implements SchedulingConfigurer {
 				if (up == null)
 					up = new Userprofile(submittedSurvey.getUsername());
 				upservice.addExecuted(up, createEngagementExecuted(submittedSurvey, lang), lang);
-			} else {
-				// if the user is not enabled, remove completly the up with its cached groups, executeds, ppois, subscriptions
-				Userprofile up = upservice.get(submittedSurvey.getUsername(), lang);
-				if (up != null)
-					upservice.delete(up, lang);
 			}
 		}
 	}
@@ -116,14 +110,12 @@ public class SurveyTask implements SchedulingConfigurer {
 		ObjectMapper objectMapper = new ObjectMapper();
 
 		String s = StringEscapeUtils.unescapeJson(submittedSurvey.getVariableValue());
-
 		JsonNode rootNode = objectMapper.readTree(s);
 		JsonNode engNode = rootNode.path("engagement_id");
 
 		if ((engNode == null) || (engNode.isNull()) || (engNode.isMissingNode())) {
 			logger.error("The retrieved survey does not contains engagement_id");
 			throw new IOException(messages.getMessage("survey.ko.notvalidresponse", new Object[] { "engagement_id" }, lang));
-
 		}
 
 		Engagement e = engaservice.get(new Long(engNode.asLong()), lang);

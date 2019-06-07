@@ -26,7 +26,7 @@ public enum RoleType {
 		return text;
 	}
 
-	public static RoleType fromString(String text) {
+	public static RoleType fromString(String text) throws IllegalArgumentException {
 		switch (text) {
 		case "Observer":
 			return RoleType.OBSERVER;

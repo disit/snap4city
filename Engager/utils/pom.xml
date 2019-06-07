@@ -5,7 +5,7 @@
  
 	<groupId>edu.unifi.disit.snap4city</groupId>
 	<artifactId>engager-utils</artifactId>
-	<version>0.1.4</version>
+	<version>0.1.12</version>
 	<name>engager-utils</name>
 	
 	<properties>

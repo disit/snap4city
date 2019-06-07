@@ -24,7 +24,11 @@ public enum GroupType {
 	// DISIT
 	DEVELOPER("Developer"), OPERATIVO("Operativo"),
 	// FIRENZE
-	AMBIENTE("Ambiente"), SINDACO("Sindaco");
+	AMBIENTE("Ambiente"), SINDACO("Sindaco"),
+	// TOSCANA
+	CITTADINO("Cittadino"), PENDOLARE("Pendolare"), STUDENTE("Studente"), TURISTA("Turista"),
+	// SARDEGNA
+	CAGLIARI("Cagliari");
 
 	private final String text;
 
@@ -78,7 +82,18 @@ public enum GroupType {
 			return GroupType.AMBIENTE;
 		case "Sindaco":
 			return GroupType.SINDACO;
-
+		// TOSCANA
+		case "Cittadino":
+			return GroupType.CITTADINO;
+		case "Pendolare":
+			return GroupType.PENDOLARE;
+		case "Studente":
+			return GroupType.STUDENTE;
+		case "Turista":
+			return GroupType.TURISTA;
+		// SARDEGNA
+		case "Cagliari":
+			return GroupType.CAGLIARI;
 		default:
 			throw new IllegalArgumentException("Profile [" + text + "] not supported.");
 		}

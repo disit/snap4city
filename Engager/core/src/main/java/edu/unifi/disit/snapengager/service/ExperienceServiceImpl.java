@@ -15,10 +15,9 @@ package edu.unifi.disit.snapengager.service;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
@@ -26,8 +25,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import edu.unifi.disit.snapengager.datamodel.Experience;
 
 @Service
 public class ExperienceServiceImpl implements IExperienceService {
@@ -38,31 +35,37 @@ public class ExperienceServiceImpl implements IExperienceService {
 	private String experiencePath;
 
 	@Override
-	public List<Experience> getRandomize(String org, String group, Locale lang) throws Exception {
+	public String getRandomize(String org, String group, Locale lang) throws Exception {
 		String path = experiencePath + File.separator + org + File.separator + group;
 
 		Random r = new Random(System.currentTimeMillis());
-		Integer i = r.nextInt(new File(path).listFiles().length) + 1;
+
+		String[] st = new File(path).list(new FilenameFilter() {
+			@Override
+			public boolean accept(File dir, String name) {
+				return name.matches(".*" + lang.toString() + ".*\\.txt");
+			}
+		});
+
+		Integer i = r.nextInt(st.length) + 1;
 
 		return create(new File(path + File.separator + i.toString() + "_" + lang + ".txt"));
 
 	}
 
-	private List<Experience> create(File input) throws IOException {
+	private String create(File input) throws IOException {
 
 		logger.debug("Randomized called on {}", input.getAbsolutePath());
 
 		BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(input)));
-		List<Experience> toreturn = new ArrayList<Experience>();
-		String action;
+		StringBuffer toreturn = new StringBuffer();
+		String line;
 
-		while ((action = reader.readLine()) != null) {
-			String text = reader.readLine();
-			Experience e = new Experience(action, text);
-			toreturn.add(e);
+		while ((line = reader.readLine()) != null) {
+			toreturn.append(line);
 		}
 
 		reader.close();
-		return toreturn;
+		return toreturn.toString();
 	}
 }

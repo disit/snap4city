@@ -156,7 +156,7 @@ public class EngagementService implements IEngagementService {
 		List<String> emails = ldaprepo.getEmails(e.getUsername());
 		if (emails.size() != 0) {
 			String recipientAddress = emails.get(0);
-			String subject = "Alert from snap4City";
+			String subject = "Alert from Snap4City";
 			return new OnPreparationEmailCompleteEvent(recipientAddress, subject, e.getMessage(), EmailScenarioType.SENSOR_SUBSCRIPTION, lang);
 		} else {
 			logger.error("no mail found for user {}", e.getUsername());

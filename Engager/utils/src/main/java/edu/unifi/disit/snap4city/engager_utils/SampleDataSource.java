@@ -30,6 +30,8 @@ public class SampleDataSource {
 		d.add(OrganizationType.DISIT.toString());
 		d.add(OrganizationType.FIRENZE.toString());
 		d.add(OrganizationType.HELSINKI.toString());
+		d.add(OrganizationType.TOSCANA.toString());
+		d.add(OrganizationType.SARDEGNA.toString());
 		return d;
 	}
 
@@ -57,6 +59,13 @@ public class SampleDataSource {
 		// FIRENZE
 		d.add(GroupType.AMBIENTE.toString());
 		d.add(GroupType.SINDACO.toString());
+		// TOSCANA
+		d.add(GroupType.CITTADINO.toString());
+		d.add(GroupType.PENDOLARE.toString());
+		d.add(GroupType.STUDENTE.toString());
+		d.add(GroupType.TURISTA.toString());
+		// SARDEGNA
+		d.add(GroupType.CAGLIARI.toString());
 		return d;
 	}
 
@@ -94,19 +103,31 @@ public class SampleDataSource {
 		d.add("EnfuserHelsinkiEnfuserAirQualityIndex");
 		d.add("EnfuserHelsinkiHighDensityPM10");
 		d.add("EnfuserHelsinkiHighDensityPM25");
+		d.add("GRALheatmapHelsinki3mPM");
+		d.add("AirQualityPM10Average2HourHelsinkiJ");// nuove
+		d.add("AirQualityPM2_5Average2HourHelsinkiJ");// nuove
+		d.add("EAQI1hourAverageHelsinkiJ");// nuove
+
 		d.add("AirTemperatureAverage2HourAntwerp");// antwerp
 		d.add("AirHumidityAverage2HourAntwerp");
 		d.add("AirQualityPM10Average2HourAntwerp");
 		d.add("AirQualityPM2_5Average2HourAntwerp");
-		d.add("BikeFeelingAntwerp");
-		d.add("EAQI1hourAverageAntwerp");// florence
-		d.add("FlorenceAccidentsDensity");
+		d.add("AirQualityNO2Average2HourAntwerp");
+		d.add("AirQualitySO2Average2HourAntwerp");
+		d.add("AirQualityO3Average2HourAntwerp");
+		d.add("AirQualityNOAverage2HourAntwerp");
+		d.add("BikeFeelingAntwerp");// not used yet
+		d.add("EAQI1hourAverageAntwerp");
+
+		d.add("FlorenceAccidentsDensity");// florence
 		d.add("WindSpeedAverage2HourFlorence");
 		d.add("AirTemperatureAverage2HourFlorence");
 		d.add("AirHumidityAverage2HourFlorence");
 		d.add("PM10Average24HourFlorence");
 		d.add("PM2_5Average24HourFlorence");
 		d.add("NO2Average24HourFlorence");
+		d.add("COAverage24HourFlorence");// nuove
+		d.add("BenzeneAverage24HourFlorence");// nuove
 		return d;
 	}
 
@@ -117,6 +138,17 @@ public class SampleDataSource {
 		d.add(EngagementType.SUBSCRIPTION.toString());
 		d.add(EngagementType.SURVEY.toString());
 		d.add(EngagementType.EVENT.toString());
+		d.add(EngagementType.REQUEST_COMMENT.toString());
+		return d;
+	}
+
+	public List<String> getListLangTypes() {
+		List<String> d = new ArrayList<String>();
+		d.add(LanguageType.ENG.toString());
+		d.add(LanguageType.ITA.toString());
+		d.add(LanguageType.ESP.toString());
+		d.add(LanguageType.DEU.toString());
+		d.add(LanguageType.FRA.toString());
 		return d;
 	}
 }

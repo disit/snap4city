@@ -120,7 +120,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 
 		headers.add("Authorization", "Bearer " + accesstoken);
 		headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-		HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+		HttpEntity<String> entity = new HttpEntity<>(headers);
 
 		try {
 			checkValidationOnKeycloakServer(UriComponentsBuilder.fromHttpUrl(endpoint + "/userinfo").build(), entity, lang);// check validation on www.snap4city.org/auth keycloak server
@@ -156,7 +156,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 
 		String response = re.getBody();
 
-		logger.debug("got response:{}", response);
+		// logger.debug("got response:{}", response);
 
 		JsonNode jsonNode = objectMapper.readTree(response);
 

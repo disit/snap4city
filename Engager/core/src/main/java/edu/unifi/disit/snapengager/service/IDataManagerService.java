@@ -17,13 +17,18 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 
+import edu.unifi.disit.snap4city.engager_utils.OrganizationType;
 import edu.unifi.disit.snapengager.datamodel.Data;
-import edu.unifi.disit.snapengager.datamodel.KPIData;
+import edu.unifi.disit.snapengager.datamodel.Organization;
+import edu.unifi.disit.snapengager.datamodel.Poi;
+import edu.unifi.disit.snapengager.datamodel.datamanagerdb.KPIData;
 import edu.unifi.disit.snapengager.datamodel.drupaldb.DrupalData;
 import edu.unifi.disit.snapengager.datamodel.profiledb.Event;
 import edu.unifi.disit.snapengager.exception.CredentialsException;
 
 public interface IDataManagerService {
+
+	public List<Data> getAllSurveyData(Locale lang) throws CredentialsException, IOException;
 
 	public List<Data> getSurveyData(Locale lang) throws CredentialsException, IOException;
 
@@ -37,7 +42,14 @@ public interface IDataManagerService {
 
 	public Hashtable<String, Boolean> getAssistanceEnabled(Locale lang) throws CredentialsException, IOException;
 
-	public List<Event> getEventData(String organization, Locale lang) throws CredentialsException, IOException;
+	public List<Event> getEventData(OrganizationType organization, Locale lang) throws CredentialsException, IOException;
 
-	public List<DrupalData> getLastDrupalData(Locale lang);
+	public List<DrupalData> getDrupalData(Locale lang);
+
+	public List<Data> getLangData(Locale lang) throws CredentialsException, IOException;
+
+	public List<Poi> getPoiData(String organization, String latitude, String longitude, Locale lang) throws CredentialsException, IOException;
+
+	Organization getOrganizationInfo(OrganizationType organizationType, Locale lang) throws IOException;
+
 }

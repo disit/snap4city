@@ -273,7 +273,7 @@ public class LDAPUserDAOImpl implements LDAPUserDAO {
 								// TODO extract CN
 								String toextract = (String) i.next();
 								if (toextract.length() != 0)
-									usernames.add(extractUsername(toextract, lang));
+									usernames.add(extractUsername(toextract, lang).toLowerCase());
 							}
 						}
 						return new LDAPEntity(name, usernames);
@@ -298,7 +298,7 @@ public class LDAPUserDAOImpl implements LDAPUserDAO {
 								// TODO extract CN
 								String toextract = (String) i.next();
 								if (toextract.length() != 0)
-									usernames.add(extractUsername(toextract, lang));
+									usernames.add(extractUsername(toextract, lang).toLowerCase());
 							}
 						}
 						return new LDAPEntity(name, usernames);
@@ -320,7 +320,7 @@ public class LDAPUserDAOImpl implements LDAPUserDAO {
 								// TODO extract CN
 								String toextract = (String) i.next();
 								if (toextract.length() != 0)
-									usernames.add(extractUsername(toextract, lang));
+									usernames.add(extractUsername(toextract, lang).toLowerCase());
 							}
 						}
 						return new LDAPEntity(name, usernames);

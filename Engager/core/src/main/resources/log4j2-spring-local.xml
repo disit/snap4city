@@ -55,6 +55,7 @@
 		<Logger name="org.eclipse.aether.internal" level="warn" />
 		<Logger name="com.mchange.v2.c3p0" level="warn" />
 		<Logger name="Sisu" level="warn" />
+		<Logger name="org.drools.workbench.models.guided.template.backend" level="warn" />
 	
 	</Loggers>
 </Configuration>

@@ -65,18 +65,22 @@ public class Userprofile {
 	@Type(type = "timestamp")
 	private Date lastlogin;
 	@Type(type = "timestamp")
+	private Date firstlogin;
+	@Type(type = "timestamp")
 	private Date registrationdate;
 	private String timezone;
 	@OneToMany(mappedBy = "userprofile", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	private Set<Ppoi> ppois;
 	@OneToMany(mappedBy = "userprofile", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	private Set<Subscription> subscriptions;
+	@OneToMany(mappedBy = "userprofile", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+	private Set<ActiveTime> activetime;
 
 	public Userprofile() {
 		super();
 	}
 
-	public Userprofile(String username, String organization, String groupname, String language, GroupType profile, Byte age, GenderType gender, Date lastupdate, Date lastlogin, Date registrationdate, String timezone) {
+	public Userprofile(String username, String organization, String groupname, String language, GroupType profile, Byte age, GenderType gender, Date lastupdate, Date lastlogin, Date firstlogin, Date registrationdate, String timezone) {
 		super();
 		this.username = username;
 		this.organization = organization;
@@ -85,11 +89,14 @@ public class Userprofile {
 		this.gender = gender;
 		this.lastupdate = lastupdate;
 		this.lastlogin = lastlogin;
+		this.firstlogin = firstlogin;
 		this.registrationdate = registrationdate;
 		this.timezone = timezone;
+
 	}
 
-	public Userprofile(Long id, String username, String organization, String groupname, String language, GroupType profile, Byte age, GenderType gender, Date lastupdate, Date lastlogin, Date registrationdate, String timezone) {
+	public Userprofile(Long id, String username, String organization, String groupname, String language, GroupType profile, Byte age, GenderType gender, Date lastupdate, Date lastlogin, Date firstlogin, Date registrationdate,
+			String timezone) {
 		super();
 		this.id = id;
 		this.username = username;
@@ -99,6 +106,7 @@ public class Userprofile {
 		this.gender = gender;
 		this.lastupdate = lastupdate;
 		this.lastlogin = lastlogin;
+		this.firstlogin = firstlogin;
 		this.registrationdate = registrationdate;
 		this.timezone = timezone;
 	}
@@ -235,10 +243,26 @@ public class Userprofile {
 		this.timezone = timezone;
 	}
 
+	public Set<ActiveTime> getActivetime() {
+		return activetime;
+	}
+
+	public void setActivetime(Set<ActiveTime> activetime) {
+		this.activetime = activetime;
+	}
+
+	public Date getFirstlogin() {
+		return firstlogin;
+	}
+
+	public void setFirstlogin(Date firstlogin) {
+		this.firstlogin = firstlogin;
+	}
+
 	@Override
 	public String toString() {
-		return "Userprofile [id=" + id + ", username=" + username + ", organization=" + organization + ", groupnames=" + groupnames + ", role=" + role + ", language=" + language + ", age=" + age + ", gender=" + gender + ", executeds="
-				+ executeds + ", lastupdate=" + lastupdate + ", lastlogin=" + lastlogin + ", registrationdate=" + registrationdate + ", timezone=" + timezone + ", ppois=" + ppois + ", subscriptions=" + subscriptions + "]";
+		return "Userprofile [id=" + id + ", username=" + username + ", organization=" + organization + ", groupnames=" + groupnames + ", role=" + role + ", language=" + language + ", age=" + age
+				+ ", gender=" + gender + ", lastupdate=" + lastupdate + ", lastlogin=" + lastlogin + ", first=" + firstlogin + ", registrationdate=" + registrationdate + ", timezone=" + timezone + "]";
 	}
 
 	// fields in DROOLS can be null

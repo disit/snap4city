@@ -2,13 +2,26 @@
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head/>
 <body>
-<a href="https://www.snap4city.org"><img src="https://www.snap4city.org/drupal/sites/default/files/styles/thumbnail/public/pictures/picture-120-1547486581.png"/></a>
 
-<span th:text="${body}">An anomalo sensor value has been found around a ppoi of yours</span>
 
-<span th:text="${body_cancel}">You received this email since you subscribed your interest in being notify about. To manage your subscription please update your profile </span> <a href="https://main.snap4city.org"><span th:text="${here}">here</span></a>
 
-<a href="https://www.km4city.org/"><img src="https://www.snap4city.org/drupal/sites/default/files/files/km4city-banner-mino.png"/></a>
+<div>Alert from Snap4City!</div>
+
+<div>
+<span th:text="${body}">It has been detected an high value</span>
+<span th:text="${body_cancel}">You received this email since you subscribed a notification in the snap4City framework. To manage your subscriptions please update your profile </span> 
+<a href="https://main.snap4city.org">
+<span th:text="${here}">here</span></a>
+</div>
+
+<div>
+<a href="https://www.snap4city.org">
+<img src="https://www.snap4city.org/drupal/sites/default/files/styles/thumbnail/public/pictures/picture-120-1547486581.png" style="border-width: 1px; border-style: solid; margin: 2px auto; height: 69px; display: block;"/>
+</a>
+<a href="https://www.km4city.org/">
+<img src="https://www.snap4city.org/drupal/sites/default/files/files/km4city-banner-mino.png" style="border-width: 1px; border-style: solid; margin: 2px auto; width: 230px; height: 69px; display: block;"/>
+</a>
+</div>
 
 </body>
 </html>

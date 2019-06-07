@@ -15,6 +15,7 @@ package edu.unifi.disit.snapengager.task;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Locale;
 
 import org.apache.logging.log4j.LogManager;
@@ -32,6 +33,9 @@ import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
 
 import edu.unifi.disit.snapengager.datamodel.Data;
+import edu.unifi.disit.snapengager.datamodel.datamanagerdb.KPIData;
+import edu.unifi.disit.snapengager.datamodel.datamanagerdb.KPIDataDAO;
+import edu.unifi.disit.snapengager.datamodel.datamanagerdb.KPIValueDAO;
 import edu.unifi.disit.snapengager.datamodel.profiledb.Userprofile;
 import edu.unifi.disit.snapengager.exception.CredentialsException;
 import edu.unifi.disit.snapengager.exception.UserprofileException;
@@ -55,6 +59,12 @@ public class LastLoginTask implements SchedulingConfigurer {
 
 	@Autowired
 	IDataManagerService dataservice;
+
+	@Autowired
+	private KPIDataDAO kpidatarepo;
+
+	@Autowired
+	KPIValueDAO kvrepo;
 
 	@Override
 	public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
@@ -81,7 +91,6 @@ public class LastLoginTask implements SchedulingConfigurer {
 
 	private void myTask() throws CredentialsException, IOException, UserprofileException {
 		Locale lang = new Locale("en");
-
 		Hashtable<String, Boolean> assistanceEnabled = dataservice.getAssistanceEnabled(lang);
 
 		for (Data lastlogin : dataservice.getLastLoginData(lang)) {
@@ -92,11 +101,24 @@ public class LastLoginTask implements SchedulingConfigurer {
 					up = new Userprofile(lastlogin.getUsername());
 				up.setLastlogin(new Date(Long.parseLong(lastlogin.getVariableValue())));
 				upservice.save(up, lang);
-			} else {
-				// if the user is not enabled, remove completly the up with its cached groups, executeds, ppois, subscriptions
-				Userprofile up = upservice.get(lastlogin.getUsername(), lang);
-				if (up != null)
-					upservice.delete(up, lang);
+			}
+		}
+
+		// update first login
+		for (Userprofile up : upservice.getAll(lang)) {
+			logger.debug("Analyze {}", up.getUsername());
+			if (up.getFirstlogin() == null) {
+				List<KPIData> kpidatas = kpidatarepo.findByUsernameAndValueNameContainingAndDeleteTimeIsNull(up.getUsername(), "AppUsage");
+				Date firstlogin = up.getLastlogin();
+				for (KPIData kpidata : kpidatas) {
+					Date tempo = kvrepo.findTopByKpiIdOrderById(kpidata.getId()).getDataTime();
+					if (tempo != null && tempo.before(firstlogin))
+						firstlogin = tempo;
+				}
+				if (firstlogin != null) {
+					up.setFirstlogin(firstlogin);
+					upservice.save(up, lang);
+				}
 			}
 		}
 	}

@@ -54,7 +54,7 @@ public class EventDeserializer extends StdDeserializer<Event> {
 
 		JsonNode properties = feature.path("properties");
 
-		event.setName(properties.get("name").textValue());
+		event.setName(properties.get("name").textValue().replace("\"", "\\\""));
 		event.setServiceUri(properties.get("serviceUri").textValue());
 		if (properties.get("categoryIT") != null)
 			event.setTypeLabel(properties.get("categoryIT").textValue()); // beware, this is specific for Italian

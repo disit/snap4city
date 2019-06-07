@@ -82,11 +82,10 @@ public class SubscriptionTask implements SchedulingConfigurer {
 
 	private void myTask() throws CredentialsException, IOException, UserprofileException {
 		Locale lang = new Locale("en");
+		Hashtable<String, Boolean> assistanceEnabled = dataservice.getAssistanceEnabled(lang);
 
 		// remove all subscriptions
 		upservice.removeAllSubscriptions(lang);
-
-		Hashtable<String, Boolean> assistanceEnabled = dataservice.getAssistanceEnabled(lang);
 
 		for (Data subscription : dataservice.getSubscriptionData(lang)) {
 			// check if the user has enable the assistance
@@ -96,11 +95,6 @@ public class SubscriptionTask implements SchedulingConfigurer {
 					up = new Userprofile(subscription.getUsername());
 				up.addSubscription(new Subscription(subscription.getVariableValue()));
 				upservice.save(up, lang);
-			} else {
-				// if the user is not enabled, remove completly the up with its cached groups, executeds, ppois, subscriptions
-				Userprofile up = upservice.get(subscription.getUsername(), lang);
-				if (up != null)
-					upservice.delete(up, lang);
 			}
 		}
 	}

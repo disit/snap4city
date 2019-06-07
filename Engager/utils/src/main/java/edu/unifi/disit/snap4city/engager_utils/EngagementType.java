@@ -13,7 +13,7 @@
 package edu.unifi.disit.snap4city.engager_utils;
 
 public enum EngagementType {
-	SURVEY("SURVEY"), ALERT("ALERT"), REWARD("REWARD"), SUBSCRIPTION("SUBSCRIPTION"), EVENT("EVENT");
+	SURVEY("SURVEY"), ALERT("ALERT"), REWARD("REWARD"), SUBSCRIPTION("SUBSCRIPTION"), EVENT("EVENT"), REQUEST_COMMENT("REQUEST_COMMENT");
 
 	private final String text;
 
@@ -38,6 +38,8 @@ public enum EngagementType {
 			return EngagementType.SUBSCRIPTION;
 		case "EVENT":
 			return EngagementType.EVENT;
+		case "REQUEST_COMMENT":
+			return EngagementType.REQUEST_COMMENT;
 		default:
 			throw new IllegalArgumentException("Profile [" + text + "] not supported.");
 		}

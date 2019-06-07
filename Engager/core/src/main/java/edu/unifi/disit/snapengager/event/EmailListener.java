@@ -95,7 +95,7 @@ public class EmailListener implements ApplicationListener<OnPreparationEmailComp
 			throw new Exception(messages.getMessage("login.ko.configurationerror", null, lang));// TODO
 		}
 
-		s = s + ". SUBSCRIPT name is " + subNameNode.asText();
+		s = s + " (for subscription \"" + subNameNode.asText();
 
 		JsonNode ppoiNode = rootNode.path("poi_name");
 		if ((ppoiNode == null) || (ppoiNode.isNull()) || (ppoiNode.isMissingNode())) {
@@ -103,7 +103,7 @@ public class EmailListener implements ApplicationListener<OnPreparationEmailComp
 			throw new Exception(messages.getMessage("login.ko.configurationerror", null, lang));// TODO
 		}
 
-		s = s + ". PPOI name is " + ppoiNode.asText();
+		s = s + "\") around a personal POI of yours (named \" " + ppoiNode.asText();
 
 		JsonNode valueNode = rootNode.path("value");
 		if ((valueNode == null) || (valueNode.isNull()) || (valueNode.isMissingNode())) {
@@ -111,7 +111,7 @@ public class EmailListener implements ApplicationListener<OnPreparationEmailComp
 			throw new Exception(messages.getMessage("login.ko.configurationerror", null, lang));// TODO
 		}
 
-		s = s + ". Value is " + valueNode.asText();
+		s = s + "\"). The current observed value is " + valueNode.asText() + ".";
 
 		return s;
 	}

@@ -102,43 +102,59 @@ public class SensorTask implements SchedulingConfigurer {
 	private void myTask() throws IOException {
 		Locale lang = new Locale("en");
 
-		// for any available maps
+		// for any available heatmaps
 		for (Sensortype sensor : sensortypeRepo.findAll()) {
 			String mapname = sensor.getName();
 			logger.debug("cycling on {}", mapname);
 
-			// retrieve last entry of this heatmap
-			Date last = laservice.getLastUpdate(DatasetType.SENSOR.toString() + "_" + mapname, lang);
+			try {
 
-			// retrieve current entry available
-			Date current = sensorservice.getLastDate(mapname, lang);
+				// retrieve date of last cached entry of this heatmap (on engager)
+				Date last = laservice.getLastUpdate(DatasetType.SENSOR.toString() + "_" + mapname, lang);
 
-			// for any ppoi of the users (TODO eventually here we can get just the ppoi of the active users)
-			for (Ppoi ppoi : ppoiRepo.findAll()) {
-				logger.debug("cycling on {}", ppoi.getName());
+				// retrieve date of last updated entry of this heatmap (from heatmap server)
+				Date current = sensorservice.getLastDate(mapname, lang);
 
-				// retrieve the old value
-				List<Sensor> s = sensorRepo.findByLatitudeAndLongitudeAndMapname(ppoi.getLatitude(), ppoi.getLongitude(), mapname);
+				// for any ppoi of the users
+				// TODO avoid considering ppoi of user not active
+				for (Ppoi ppoi : ppoiRepo.findAll()) {
 
-				// if this map is recent (or old value is missing), update
-				if ((current.after(last) || (s.size() == 0))) {
+					String latit = ppoi.getLatitudeAprox();
+					String longit = ppoi.getLongitudeAprox();
 
-					Sensor sensore = null;
-					if (s.size() == 0) {
-						sensore = new Sensor(ppoi.getLatitude(), ppoi.getLongitude(), current, mapname);
-					} else if (s.size() > 1) {
-						// throw error TODO
+					if (sensorservice.checkSensorValidity(mapname, latit, longit)) {
+						logger.debug("cycling on {}", ppoi.getName());
+
+						// retrieve cached value (on engager)
+						List<Sensor> cachedSensor = sensorRepo.findByLatitudeAndLongitudeAndMapname(latit, longit, mapname);
+
+						// for this heatmap on this ppoi: if there is an update or there is not yet a cached value
+						if ((current.after(last) || (cachedSensor.size() == 0))) {
+
+							Sensor updatedSensor = null;
+							if (cachedSensor.size() == 0) {
+								updatedSensor = new Sensor(latit, longit, current, mapname);
+							} else {
+								updatedSensor = cachedSensor.get(0);
+								updatedSensor.setInsertdate(current);
+								if (cachedSensor.size() > 1)
+									logger.warn("there is more than a value cached for heatmap {} ppoi {}. Ignoring and use first one", mapname, ppoi);
+							}
+
+							// retrieve updated value (from heatmap server)
+							sensorservice.update(updatedSensor, lang);
+						}
 					} else {
-						sensore = s.get(0);
-						sensore.setInsertdate(current);
+						logger.debug("skipping {}", ppoi.getName());
 					}
-
-					sensorservice.update(sensore, lang);
 				}
 
 				// update last entry
 				laservice.updateLastUpdate(DatasetType.SENSOR.toString() + "_" + mapname, current, lang);
+			} catch (IOException ioe) {
+				logger.warn("Error catched in sensoring {}", ioe);
 			}
 		}
 	}
+
 }

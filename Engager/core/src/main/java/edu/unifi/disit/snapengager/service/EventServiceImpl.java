@@ -34,6 +34,14 @@ public class EventServiceImpl implements IEventService {
 
 	@Override
 	public Event getRandomEvent(String organization, Locale lang) {
+
+		// TODO patch DISIT to Firenze
+		if (organization.equals("DISIT"))
+			organization = "Firenze";
+
+		if (organization.equals("Toscana"))
+			organization = "Firenze";
+
 		List<Event> events = eventRepo.findByOrganization(organization);
 
 		int size = events.size();

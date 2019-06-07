@@ -14,9 +14,9 @@
     
      <div class="col-sm-5">
         <button class="btn btn-warning" style="color: white; padding: 0.5rem;" type="button" onclick="EngagerTabler.editEngagerModal('disable');">
-            Disable<BR>Engagement</button>
+            Disable<BR>Engagement</button><span title="Delete all the Engagement message sent by the Snap4City platform and disable any further Engagement Support from the Snap4City platform. It can affect the number of features you can make use"><img src="img/i.svg" height="20" width="20"/></span>
         <button class="btn btn-warning" style="color: white; padding: 0.5rem;" type="button" onclick="EngagerTabler.editEngagerModal('deleteall');">
-            Delete ALL</button>
+            Delete ALL</button><span title="Delete all the Engagement message sent by the Snap4City platform"><img src="img/i.svg" height="20" width="20"/></span> 
     </div>
         
     <div class="col-sm-3">
@@ -84,7 +84,7 @@
             <td>{{subtitle}}</td>
             <td>{{type}}</td>
             <td>{{rulename}}</td>
-            <td>{{message}}</td>
+            <td><span title="{{message}}">{{messageshort}}</span></td>
             <td>{{#timestampToDate}}{{created}}{{/timestampToDate}}</td>
             <td>{{#timestampToDate}}{{elapse}}{{/timestampToDate}}</td>
             <td>{{points}}</td>

@@ -31,7 +31,7 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
 
-import edu.unifi.disit.snapengager.datamodel.KPIData;
+import edu.unifi.disit.snapengager.datamodel.datamanagerdb.KPIData;
 import edu.unifi.disit.snapengager.datamodel.profiledb.Ppoi;
 import edu.unifi.disit.snapengager.datamodel.profiledb.Userprofile;
 import edu.unifi.disit.snapengager.exception.CredentialsException;
@@ -86,47 +86,33 @@ public class PpoiTask implements SchedulingConfigurer {
 
 	private void myTask() throws CredentialsException, IOException, UserprofileException {
 		Locale lang = new Locale("en");
+		Hashtable<String, Boolean> assistanceEnabled = dataservice.getAssistanceEnabled(lang);
 
 		// remove all ppois
 		upservice.removeAllPpois(lang);
 
-		Hashtable<String, Boolean> assistanceEnabled = dataservice.getAssistanceEnabled(lang);
-
 		// -------------------------------------------------------------MYPOI
-		logger.debug("updating MYPOI");
 		for (KPIData ppoi : dataservice.getPpoiKpidata(lang)) {
 			logger.debug("updating ppoi {}", ppoi);
-
 			Userprofile up = upservice.get(ppoi.getUsername(), lang);
-
 			// check if the user has enable the assistance
 			if ((assistanceEnabled.get(ppoi.getUsername()) != null) && (assistanceEnabled.get(ppoi.getUsername()))) {
 				if (up == null)
 					up = new Userprofile(ppoi.getUsername());
-				upservice.addPpoi(up, new Ppoi(ppoi.getValueName(), String.valueOf(ppoi.getLatitude()), String.valueOf(ppoi.getLongitude())), lang);
-			} else {
-				// if the user is not enabled, remove completly the up with its cached groups, executeds, ppois, subscriptions
-				if (up != null)
-					upservice.delete(up, lang);
+				upservice.addPpoi(up, new Ppoi(ppoi.getValueName(), String.valueOf(ppoi.getLatitude()), String.valueOf(ppoi.getLongitude()), null), lang);
 			}
 		}
 
 		// -------------------------------------------------------------MY CURRENT POSITION
-		logger.debug("updating Current Position");
 		for (KPIData ppoi : dataservice.getLocationKpidata(lang)) {
-			logger.debug("updating ppoi {}", ppoi);
+			logger.debug("updating current-location ppoi {}", ppoi);
 			// check if the user has enable the assistance
 			if ((assistanceEnabled.get(ppoi.getUsername()) != null) && (assistanceEnabled.get(ppoi.getUsername()))) {
 				Userprofile up = upservice.get(ppoi.getUsername(), lang);
 				if (up == null)
 					up = new Userprofile(ppoi.getUsername());
-				if ((ppoi.getLatitude() != null) && (ppoi.getLongitude() != null))
-					upservice.addPpoi(up, new Ppoi("current-location", String.valueOf(ppoi.getLatitude()), String.valueOf(ppoi.getLongitude())), lang);
-			} else {
-				// if the user is not enabled, remove completly the up with its cached groups, executeds, ppois, subscriptions
-				Userprofile up = upservice.get(ppoi.getUsername(), lang);
-				if (up != null)
-					upservice.delete(up, lang);
+				if ((ppoi.getLastLatitude() != null) && (ppoi.getLastLongitude() != null))
+					upservice.addPpoi(up, new Ppoi("current-location", String.valueOf(ppoi.getLastLatitude()), String.valueOf(ppoi.getLastLongitude()), ppoi.getLastDate()), lang);
 			}
 		}
 	}

@@ -81,23 +81,17 @@ public class DrupalTask implements SchedulingConfigurer {
 
 	private void myTask() throws CredentialsException, IOException, UserprofileException {
 		Locale lang = new Locale("en");
-
 		Hashtable<String, Boolean> assistanceEnabled = dataservice.getAssistanceEnabled(lang);
 
-		for (DrupalData drupaldata : dataservice.getLastDrupalData(lang)) {
+		for (DrupalData drupaldata : dataservice.getDrupalData(lang)) {
 			// check if the user has enable the assistance
-			if ((assistanceEnabled.get(drupaldata.getName()) != null) && (assistanceEnabled.get(drupaldata.getName()))) {
-				Userprofile up = upservice.get(drupaldata.getName(), lang);
+			if ((assistanceEnabled.get(drupaldata.getName().toLowerCase()) != null) && (assistanceEnabled.get(drupaldata.getName().toLowerCase()))) {
+				Userprofile up = upservice.get(drupaldata.getName().toLowerCase(), lang);
 				if (up == null)
 					up = new Userprofile(drupaldata.getName());
 				up.setRegistrationdate(new Date(drupaldata.getCreated() * 1000));
 				up.setTimezone(drupaldata.getTimezone());
 				upservice.save(up, lang);
-			} else {
-				// if the user is not enabled, remove completly the up with its cached groups, executeds, ppois, subscriptions
-				Userprofile up = upservice.get(drupaldata.getName(), lang);
-				if (up != null)
-					upservice.delete(up, lang);
 			}
 		}
 	}

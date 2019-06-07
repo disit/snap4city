@@ -20,8 +20,11 @@ var QueryManager = {
     
     createDeleteAllEngagementQuery: function (accessToken) {
         return "engagements?sourceRequest=" + QueryManager.sourceRequest + "&accessToken=" + accessToken;
+    },
+        
+    createSurvey1ResponseTableQuery:function(questionNumber, organization, accessToken){
+    	return "survey1?question="+questionNumber+"&sourceRequest=" + QueryManager.sourceRequest +"&organization="+organization + "&accessToken=" + accessToken.token;
     }
-    
     
     /*
     

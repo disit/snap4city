@@ -13,7 +13,7 @@
 package edu.unifi.disit.snap4city.engager_utils;
 
 public enum OrganizationType {
-	ANTWERP("Antwerp"), DISIT("DISIT"), FIRENZE("Firenze"), HELSINKI("Helsinki");
+	ANTWERP("Antwerp"), HELSINKI("Helsinki"), DISIT("DISIT"), FIRENZE("Firenze"), TOSCANA("Toscana"), SARDEGNA("Sardegna");
 
 	private final String text;
 

@@ -91,14 +91,13 @@ public class LdapTask implements SchedulingConfigurer {
 
 	private void myTask() throws LDAPException, UserprofileException, CredentialsException, IOException {
 		Locale lang = new Locale("en");
+		Hashtable<String, Boolean> assistanceEnabled = dataservice.getAssistanceEnabled(lang);
 
 		logger.debug("retrieve all avaiable groups");
 		List<LDAPEntity> groups = ldaprepo.getAllGroups(lang);
 
 		logger.debug("retrieve all avaiable roles");
 		List<LDAPEntity> roles = ldaprepo.getAllRoles(lang);
-
-		Hashtable<String, Boolean> assistanceEnabled = dataservice.getAssistanceEnabled(lang);
 
 		// cycling on organization (a user has always be in an organization)
 		for (LDAPEntity ou : ldaprepo.getAllOrganization(lang)) {
@@ -115,7 +114,6 @@ public class LdapTask implements SchedulingConfigurer {
 						up.removeAllGroups();
 						// upservice.save(up, lang);// TODO make it better
 					}
-
 					// enrich organization
 					up.setOrganization(ou.getName());
 					// enrich group
@@ -125,14 +123,15 @@ public class LdapTask implements SchedulingConfigurer {
 						up.addGroupnames(myGroups);// add groups
 					// enrich role
 					LDAPEntity role = retrieveMyEntity(username, roles);
-					if (role != null)
-						up.setRole(RoleType.fromString(role.getName()));// override role
+					if (role != null) {
+						try {
+							up.setRole(RoleType.fromString(role.getName()));// override role
+						} catch (IllegalArgumentException iae) {
+							logger.warn("catched/ignoring ROLE {}", iae.getMessage());
+							continue;
+						}
+					}
 					upservice.save(up, lang);
-				} else {
-					// if the user is not enabled, remove completly the up with its cached groups, executeds, ppois, subscriptions
-					Userprofile up = upservice.get(username, lang);
-					if (up != null)
-						upservice.delete(up, lang);
 				}
 			}
 		}
@@ -148,17 +147,15 @@ public class LdapTask implements SchedulingConfigurer {
 	// group can return more than one groups
 	private Set<Groupname> retrieveMyEntities(String username, List<LDAPEntity> entities) {
 		Set<Groupname> toreturn = new HashSet<Groupname>();
-
 		for (LDAPEntity entity : entities)
 			if (entity.getUsernames().contains(username)) {
 				try {
 					toreturn.add(new Groupname(entity.getName()));
 				} catch (IllegalArgumentException iae) {
-					logger.warn("catched/ignoring {}", iae.getMessage());
+					logger.warn("catched/ignoring GROUPNAME {}", iae.getMessage());
 					continue;
 				}
 			}
-
 		return toreturn;
 	}
 }

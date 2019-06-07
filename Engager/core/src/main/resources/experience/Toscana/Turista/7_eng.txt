@@ -1,0 +1,26 @@
+[{
+		"icon": "fas fa-map-marker-alt",
+		"action": "SEARCH",
+		"label": "SEARCH",
+		"message": "Find a Fitness Center/Garden around you"
+},{
+		"icon": "fas fa-code-branch",
+		"action": "GO",
+		"label": "GO",
+		"message": "Use the navigator to move towards your searched place"
+},{
+		"icon": "fas fa-comments",
+		"action": "COMMENT",
+		"label": "COMMENT",
+		"message": "Leave a comment whenever you reach your target"
+},{
+		"icon": "fas fa-bell",
+		"action": "BE_NOTIFIED",
+		"label": "BE INFORMED",
+		"message": "Subscribe to be informed when the Temperature is over the regular value"
+},{
+		"icon": "fas fa-star",
+		"action": "RATE",
+		"label": "RATE",
+		"message": "Assign a rate to this application on the Play Store"
+},{		"icon": "fas fa-comments",		"action": "FORUM",		"label": "FORUM",		"message": "Leave a comment or write a question on Snap4City forum"}]

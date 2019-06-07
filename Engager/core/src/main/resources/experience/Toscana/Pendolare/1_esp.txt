@@ -1,0 +1,41 @@
+[{
+		"icon": "fas fa-map-marker-alt",
+		"action": "SEARCH",
+		"label": "BUSCAR",
+		"message": "Encuentre un restaurante a su alrededor (Actividad Cultural, Bar/Pizzería, Fitness Center/Garden)"
+},{
+		"icon": "fas fa-code-branch",
+		"action": "GO",
+		"label": "VAYA",
+		"message": "Usa el navegador para moverte hacia tu lugar buscado"
+},{
+		"icon": "fas fa-comments",
+		"action": "COMMENT",
+		"label": "COMENTARIO",
+		"message": "Deja un comentario cada vez que llegues a tu objetivo"
+},{
+		"icon": "fas fa-map-marked-alt",
+		"action": "MY_POI",
+		"label": "MY POI",
+		"message": "Guarda como tu MyPOI un servicio o punto de interés de la ciudad"
+},{
+		"icon": "fas fa-bell",
+		"action": "BE_NOTIFIED",
+		"label": "SE NOTIFICARÁ",
+		"message": "Suscríbase para ser informado cuando la Temperatura está por encima del valor regular (Humedad, Contaminación)"
+},{
+		"icon": "fas fa-star",
+		"action": "RATE",
+		"label": "TARIFA",
+		"message": "Asignar una tasa a esta aplicación en el Play Store"
+},{
+		"icon": "fas fa-share-alt-square",
+		"action": "SOCIAL",
+		"label": "SOCIAL",
+		"message": "Por favor, comparta un PDI o servicio de la ciudad que más aprecie"
+},{
+		"icon": "fas fa-comments",
+		"action": "FORUM",
+		"label": "FORUM",
+		"message": "Deja un comentario o escribe una pregunta en el foro de Snap4City"
+}]

@@ -111,7 +111,7 @@
 		<dependency>
 		    <groupId>com.fasterxml.jackson.core</groupId>
 		    <artifactId>jackson-databind</artifactId>
-		    <version>2.7.9.1</version>
+		    <version>2.8.11.1</version>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
@@ -178,10 +178,15 @@
 		    <artifactId>drools-compiler</artifactId>
 		    <version>7.14.0.Final</version>
 		</dependency>
+		<dependency>
+		    <groupId>org.drools</groupId>
+		    <artifactId>drools-workbench-models-guided-template</artifactId>
+		    <version>7.14.0.Final</version>
+		</dependency>
 		<dependency><!-- my drool dependency -->
       		<groupId>com.disit</groupId>
       		<artifactId>snap4city</artifactId>
-      		<version>1.6.20</version>
+      		<version>1.7.13</version>
     	</dependency>  
 	</dependencies>	
 

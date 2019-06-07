@@ -63,7 +63,7 @@ public class CredentialsServiceImpl implements ICredentialsService {
 	private MessageSource messages;
 
 	@Autowired
-	private RestTemplate restTemplate;
+	RestTemplate restTemplate;// = new RestTemplate();
 
 	@Autowired
 	private IDataManagerService dataService;
@@ -79,8 +79,10 @@ public class CredentialsServiceImpl implements ICredentialsService {
 		Boolean enabled = dataService.getAssistanceEnabled(lang).get(usernameSC);
 
 		// assure the user has accepted to be assistant
-		if (!roles.contains(RoleType.ROOTADMIN.toString()) && ((enabled == null) || (!enabled)))
+		if (!roles.contains(RoleType.ROOTADMIN.toString()) && ((enabled == null) || (!enabled))) {
+			logger.error("user {} not enabled", usernameSC);
 			throw new CredentialsException(messages.getMessage("credentials.ko.notenabled", null, lang));
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -178,9 +180,9 @@ public class CredentialsServiceImpl implements ICredentialsService {
 		params.add("username", username);
 		params.add("password", password);
 
-		logger.debug("cl {}", clientId);
-		logger.debug("un {}", username);
-		logger.debug("pw {}", password);
+		// logger.debug("cl {}", clientId);
+		// logger.debug("un {}", username);
+		// logger.debug("pw {}", password);
 
 		UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(endpoint + "/token").build();
 		logger.debug("Query getRefreshToken {}", uriComponents.toUri());

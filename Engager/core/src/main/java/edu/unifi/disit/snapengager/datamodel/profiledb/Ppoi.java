@@ -12,6 +12,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package edu.unifi.disit.snapengager.datamodel.profiledb;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -39,32 +43,36 @@ public class Ppoi {
 	private String name;
 	private String latitude;
 	private String longitude;
+	private Date acquireddate;
 
 	public Ppoi() {
 	}
 
-	public Ppoi(Long id, Userprofile userprofile, String name, String latitude, String longitude) {
+	public Ppoi(Long id, Userprofile userprofile, String name, String latitude, String longitude, Date acquireddate) {
 		super();
 		this.id = id;
 		this.userprofile = userprofile;
 		this.name = name;
 		this.latitude = latitude;
 		this.longitude = longitude;
+		this.acquireddate = acquireddate;
 	}
 
-	public Ppoi(Userprofile userprofile, String name, String latitude, String longitude) {
+	public Ppoi(Userprofile userprofile, String name, String latitude, String longitude, Date acquireddate) {
 		super();
 		this.userprofile = userprofile;
 		this.name = name;
 		this.latitude = latitude;
 		this.longitude = longitude;
+		this.acquireddate = acquireddate;
 	}
 
-	public Ppoi(String name, String latitude, String longitude) {
+	public Ppoi(String name, String latitude, String longitude, Date acquireddate) {
 		super();
 		this.name = name;
 		this.latitude = latitude;
 		this.longitude = longitude;
+		this.acquireddate = acquireddate;
 	}
 
 	public Long getId() {
@@ -107,9 +115,17 @@ public class Ppoi {
 		this.longitude = longitude;
 	}
 
+	public Date getAcquireddate() {
+		return acquireddate;
+	}
+
+	public void setAcquireddate(Date acquireddate) {
+		this.acquireddate = acquireddate;
+	}
+
 	@Override
 	public String toString() {
-		return "Ppoi [id=" + id + ", userprofile=" + userprofile.getUsername() + ", name=" + name + ", latitude=" + latitude + ", longitude=" + longitude + "]";
+		return "Ppoi [id=" + id + ", userprofile=" + userprofile + ", name=" + name + ", latitude=" + latitude + ", longitude=" + longitude + ", acquireddate=" + acquireddate + "]";
 	}
 
 	@Override
@@ -145,14 +161,32 @@ public class Ppoi {
 	public PPOI toDrools() {
 		PPOI p = new PPOI();
 
-		if (latitude != null)
+		if (latitude != null) {
 			p.setLatitude(Float.valueOf(latitude));
-		if (longitude != null)
+			p.setLatitudeAprox(Float.valueOf(aprox(latitude)));
+		}
+		if (longitude != null) {
 			p.setLongitude(Float.valueOf(longitude));
+			p.setLongitudeAprox(Float.valueOf(aprox(longitude)));
+		}
 		if (name != null)
 			p.setName(name);
 
 		return p;
 	}
 
+	public String getLatitudeAprox() {
+		return aprox(this.latitude);
+	}
+
+	public String getLongitudeAprox() {
+		return aprox(this.longitude);
+	}
+
+	private String aprox(String s) {
+		Double d = Double.parseDouble(s);
+		DecimalFormat df = new DecimalFormat("#.###");
+		df.setRoundingMode(RoundingMode.CEILING);
+		return df.format(d);
+	}
 }

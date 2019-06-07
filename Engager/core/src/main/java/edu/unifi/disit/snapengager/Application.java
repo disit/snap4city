@@ -98,4 +98,5 @@ public class Application extends SpringBootServletInitializer {
 	public RestTemplate restTemplate(ClientHttpRequestFactory factory) {
 		return new RestTemplate();
 	}
+
 }

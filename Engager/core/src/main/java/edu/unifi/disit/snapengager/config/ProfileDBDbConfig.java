@@ -97,6 +97,11 @@ public class ProfileDBDbConfig {
 				.persistenceUnit("LastUpdate")
 				.persistenceUnit("Userprofile")
 				.persistenceUnit("Event")
+				.persistenceUnit("StatsSurvey1ResponseCount")
+				.persistenceUnit("StatsSurvey1Response")
+				.persistenceUnit("StatsSurvey1ResponseText")
+				.persistenceUnit("ActiveTime")
+				.persistenceUnit("StatsSeries")
 
 				.build();
 	}

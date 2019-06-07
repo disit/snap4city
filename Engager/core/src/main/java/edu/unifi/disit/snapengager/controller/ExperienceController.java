@@ -12,7 +12,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package edu.unifi.disit.snapengager.controller;
 
-import java.util.List;
 import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
@@ -21,13 +20,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import edu.unifi.disit.snapengager.datamodel.Experience;
 import edu.unifi.disit.snapengager.service.IExperienceService;
 
 @RestController
@@ -39,9 +38,9 @@ public class ExperienceController {
 	IExperienceService experienceService;
 
 	// -------------------GET Experience ---------------------------------------------
-	@RequestMapping(value = "/api/v1/experiences", method = RequestMethod.GET)
-	public ResponseEntity<Object> getExperiencesV1(
-			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
+	@RequestMapping(value = "/api/v1/experiences", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<String> getExperiencesV1(
+			@RequestParam(value = "lang", required = false, defaultValue = "eng") Locale lang,
 			@RequestParam(value = "org", required = false, defaultValue = "DISIT") String org,
 			@RequestParam(value = "group", required = false, defaultValue = "Developer") String group,
 			HttpServletRequest request) {
@@ -49,11 +48,11 @@ public class ExperienceController {
 		logger.info("Requested getExperiences V1 lang {} org {} group {}", lang, org, group);
 
 		try {
-			List<Experience> ex = experienceService.getRandomize(org, group, lang);
-			return new ResponseEntity<Object>(ex, HttpStatus.OK);
+			String st = experienceService.getRandomize(org, group, lang);
+			return new ResponseEntity<String>(st, HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error("Errore {}", e);
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) e.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((String) e.getMessage());
 		}
 	}
 }

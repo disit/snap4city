@@ -12,10 +12,12 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package edu.unifi.disit.snapengager.task;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 
@@ -43,13 +45,16 @@ import com.disit.snap4city.ENGAGEMENTS;
 import com.disit.snap4city.TIME;
 
 import edu.unifi.disit.snap4city.engager_utils.TimeslotType;
+import edu.unifi.disit.snapengager.datamodel.Poi;
 import edu.unifi.disit.snapengager.datamodel.profiledb.Engagement;
 import edu.unifi.disit.snapengager.datamodel.profiledb.Event;
 import edu.unifi.disit.snapengager.datamodel.profiledb.Ppoi;
 import edu.unifi.disit.snapengager.datamodel.profiledb.Sensor;
 import edu.unifi.disit.snapengager.datamodel.profiledb.SensorDAO;
 import edu.unifi.disit.snapengager.datamodel.profiledb.Userprofile;
+import edu.unifi.disit.snapengager.exception.CredentialsException;
 import edu.unifi.disit.snapengager.exception.UserprofileException;
+import edu.unifi.disit.snapengager.service.IDataManagerService;
 import edu.unifi.disit.snapengager.service.IEngagementService;
 import edu.unifi.disit.snapengager.service.IEventService;
 import edu.unifi.disit.snapengager.service.IUserprofileService;
@@ -78,6 +83,9 @@ public class DroolTask implements SchedulingConfigurer {
 	@Autowired
 	IEventService eventService;
 
+	@Autowired
+	IDataManagerService dataservice;
+
 	@Override
 	public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
 		taskRegistrar.addTriggerTask(new Runnable() {
@@ -101,10 +109,17 @@ public class DroolTask implements SchedulingConfigurer {
 		});
 	}
 
-	private void myTask() throws UserprofileException {
+	private void myTask() throws UserprofileException, CredentialsException, IOException {
 		Locale lang = new Locale("en");
-		for (Userprofile up : upservice.getAll(lang))
-			engaservice.add(convert(getEngagements(up, lang), up), lang);
+		Hashtable<String, Boolean> assistanceEnabled = dataservice.getAssistanceEnabled(lang);
+
+		for (Userprofile up : upservice.getAll(lang)) {
+			// if this user has not specified to be assisted, remove the profile and don't enquire the engagement
+			if ((assistanceEnabled.get(up.getUsername()) == null) || (!assistanceEnabled.get(up.getUsername())))
+				upservice.delete(up, lang);
+			else
+				engaservice.add(convert(getEngagements(up, lang), up), lang);
+		}
 	}
 
 	private List<Engagement> convert(ENGAGEMENTS droolsEngagements, Userprofile up) {
@@ -114,12 +129,10 @@ public class DroolTask implements SchedulingConfigurer {
 		return toreturn;
 	}
 
-	private ENGAGEMENTS getEngagements(Userprofile up, Locale lang) {
-
+	private ENGAGEMENTS getEngagements(Userprofile up, Locale lang) throws CredentialsException, IOException {
+		Ppoi currentPpoi = null;
 		ENGAGEMENTS toreturn = new ENGAGEMENTS();
-
 		KieSession kSession = kContainer.newKieSession("snap4citysession");
-
 		kSession.setGlobal("engagements", toreturn);
 
 		// inseriamo il fatto USER
@@ -127,15 +140,22 @@ public class DroolTask implements SchedulingConfigurer {
 		logger.debug("with groups {}", Arrays.toString(up.getGroupnames().toArray()));
 		kSession.insert(up.toDrools());
 
+		List<Ppoi> ppoiSensorElaborated = new ArrayList<Ppoi>();// ppoi elaborated for processing sensor value
+
 		// inseriamo i ppoi dell'utente
 		for (Ppoi ppoi : up.getPpois()) {
-			logger.debug("Adding ppoi {}", ppoi.getName());
+			logger.debug("Adding ppoi {} {} {}", ppoi, ppoi.toDrools().getLatitudeAprox(), ppoi.toDrools().getLongitudeAprox());
 			kSession.insert(ppoi.toDrools());
+			if (ppoi.getName().equalsIgnoreCase("current-location"))
+				currentPpoi = ppoi;
 
-			for (Sensor sensore : sensorRepo.findByLatitudeAndLongitude(ppoi.getLatitude(), ppoi.getLongitude())) {
-				// inseriamo anche i sensori nei ppoi di questo utente
-				logger.debug("Adding sensor {} {}", sensore.getMapname(), sensore.getValue());
-				kSession.insert(sensore.toDrools());
+			if (!alreadyElaborated(ppoiSensorElaborated, ppoi)) {// check if a ppoi has been already elaborated IN THE SAME cluster gps latitude longitude
+				for (Sensor sensore : sensorRepo.findByLatitudeAndLongitude(ppoi.getLatitudeAprox(), ppoi.getLongitudeAprox())) {
+					// inseriamo anche i sensori nei ppoi di questo utente (aprox)
+					logger.debug("Adding sensor {}", sensore);
+					kSession.insert(sensore.toDrools());
+				}
+				ppoiSensorElaborated.add(ppoi);// adding current ppoi to already elaborated
 			}
 		}
 
@@ -145,14 +165,25 @@ public class DroolTask implements SchedulingConfigurer {
 		kSession.insert(t);
 
 		// inseriamo un evento dell'organizzazione dell'utente
-		Event ev = eventService.getRandomEvent(up.getOrganization(), lang);
-		if (ev != null) {
-			logger.debug("Adding event {}", ev);
-			kSession.insert(ev.toDrools());
+		if (up.getOrganization() != null) {
+			Event ev = eventService.getRandomEvent(up.getOrganization(), lang);
+			if (ev != null) {
+				logger.debug("Adding event {}", ev);
+				kSession.insert(ev.toDrools());
+			}
+		}
+
+		// inseriamo i POI (garden nelle vicinanze, se il current-ppoi e' <10 minuti)
+		Calendar c = Calendar.getInstance();
+		c.add(Calendar.MINUTE, -10);
+		if ((currentPpoi != null) && (currentPpoi.getAcquireddate() != null) && (currentPpoi.getAcquireddate().after(c.getTime()))) {
+			for (Poi poi : dataservice.getPoiData(up.getOrganization(), currentPpoi.getLatitudeAprox(), currentPpoi.getLongitudeAprox(), lang)) {
+				logger.debug("Adding poi {}", poi);
+				kSession.insert(poi.toDrools());
+			}
 		}
 
 		kSession.fireAllRules();
-
 		kSession.dispose();
 
 		if (toreturn != null)
@@ -160,6 +191,14 @@ public class DroolTask implements SchedulingConfigurer {
 				logger.debug("{}", e.getRulename().toString());
 
 		return toreturn;
+	}
+
+	private boolean alreadyElaborated(List<Ppoi> ppoiSensorElaborated, Ppoi ppoi) {
+		for (Ppoi elaborated : ppoiSensorElaborated) {
+			if ((elaborated.getLatitudeAprox().equals(ppoi.getLatitudeAprox())) && (elaborated.getLongitudeAprox().equals(ppoi.getLongitudeAprox())))
+				return true;
+		}
+		return false;
 	}
 
 	private TIME retrieveTime(long when) {
@@ -179,8 +218,19 @@ public class DroolTask implements SchedulingConfigurer {
 		toreturn.setDaySlot(TimeslotType.retrieveDaySlot(hours, minutes).toString());
 
 		// one weekbefore
+		calendar.setTime(new Date());
 		calendar.add(Calendar.DAY_OF_MONTH, -7);
 		toreturn.setWeekbefore(calendar.getTime());
+
+		// two hours before
+		calendar.setTime(new Date());
+		calendar.add(Calendar.HOUR, -2);
+		toreturn.setTwohoursbefore(calendar.getTime());
+
+		// two hours before
+		calendar.setTime(new Date());
+		calendar.add(Calendar.HOUR, -1);
+		toreturn.setOnehourbefore(calendar.getTime());
 
 		return toreturn;
 	}

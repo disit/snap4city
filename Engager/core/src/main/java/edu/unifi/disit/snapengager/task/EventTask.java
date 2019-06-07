@@ -31,6 +31,7 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
 
+import edu.unifi.disit.snap4city.engager_utils.OrganizationType;
 import edu.unifi.disit.snapengager.datamodel.profiledb.Event;
 import edu.unifi.disit.snapengager.datamodel.profiledb.EventDAO;
 import edu.unifi.disit.snapengager.datamodel.profiledb.SensorDAO;
@@ -89,16 +90,11 @@ public class EventTask implements SchedulingConfigurer {
 		eventRepo.deleteAll();
 
 		// popolate event from helsinki
-		List<Event> helsinkiEvents = dataService.getEventData("Helsinki", lang);
-
+		List<Event> helsinkiEvents = dataService.getEventData(OrganizationType.HELSINKI, lang);
 		eventRepo.save(helsinkiEvents);
 
 		// popolate event from DISIT/firenze
-
-		List<Event> firenzeEvents = dataService.getEventData("Firenze", lang);
-
+		List<Event> firenzeEvents = dataService.getEventData(OrganizationType.FIRENZE, lang);
 		eventRepo.save(firenzeEvents);
-
 	}
-
 }

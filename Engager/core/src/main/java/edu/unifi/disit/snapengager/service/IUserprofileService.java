@@ -12,9 +12,11 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package edu.unifi.disit.snapengager.service;
 
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 
+import edu.unifi.disit.snap4city.engager_utils.LanguageType;
 import edu.unifi.disit.snapengager.datamodel.profiledb.Executed;
 import edu.unifi.disit.snapengager.datamodel.profiledb.Ppoi;
 import edu.unifi.disit.snapengager.datamodel.profiledb.Userprofile;
@@ -37,4 +39,6 @@ public interface IUserprofileService {
 	void removeAllSubscriptions(Locale lang);
 
 	void removeAllPpois(Locale lang);
+
+	Hashtable<String, LanguageType> getUserLanguage(Locale lang);
 }
