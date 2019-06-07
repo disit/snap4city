@@ -150,6 +150,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 				if (sensorName != null)
 					logger.debug("sensor's name {}", sensorName);
 
+				// if (!queryType.contains("unsubscribeContext"))
 				checkAuthorization(prefixelementID + ":" + elementId, k1, k2, queryType, sensorName, pksha1, request.getLocale());
 
 				logger.debug("Credentials ARE VALID");
