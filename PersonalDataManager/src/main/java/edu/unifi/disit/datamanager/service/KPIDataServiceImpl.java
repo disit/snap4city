@@ -325,11 +325,19 @@ public class KPIDataServiceImpl implements IKPIDataService {
 				highLevelType, searchKey);
 		return kpiDataRepository.findKPIDataFilteredList(username, highLevelType, searchKey);
 	}
+	
+	@Override
+	public KPIData detachEntity(KPIData toReturn) {
+		entityManager.detach(toReturn);
+		return toReturn;
+	}
 
 	private KPIData anonymize(KPIData toReturn) {
 		entityManager.detach(toReturn);
 		toReturn.setUsername(null);
 		return toReturn;
 	}
+	
+	
 
 }

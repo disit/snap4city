@@ -37,7 +37,7 @@ public class KPIData implements Comparable<KPIData> {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name="id")
+	@Column(name = "id")
 	private Long id;
 	@Column(name = "high_level_type")
 	private String highLevelType;
@@ -63,6 +63,10 @@ public class KPIData implements Comparable<KPIData> {
 	@Column(name = "last_check")
 	@DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
 	private Date lastCheck;
+	@Column(name = "last_longitude")
+	private String lastLongitude;
+	@Column(name = "last_latitude")
+	private String lastLatitude;
 	@Column(name = "metric")
 	private String metric;
 	@Column(name = "saved_direct")
@@ -107,17 +111,18 @@ public class KPIData implements Comparable<KPIData> {
 	private String dbValuesType;
 	@Column(name = "db_values_link")
 	private String dbValuesLink;
-	
+
 	public KPIData() {
 		super();
 	}
 
 	public KPIData(String highLevelType, String nature, String subNature, String kpiName, String lowLevelType,
 			String unit, String instanceUri, String getInstances, Date lastDate, String lastValue, Date lastCheck,
-			String metric, String savedDirect, String kbBased, String smBased, String username, String organizations,
-			String appId, String appName, String widgets, String parameters, String healtiness,
-			String microAppExtServIcon, String ownership, String description, String info, String latitude,
-			String longitude, Date insert_time, Date delete_time, String db_values_type, String db_values_link) {
+			String lastLatitude, String lastLongitude, String metric, String savedDirect, String kbBased,
+			String smBased, String username, String organizations, String appId, String appName, String widgets,
+			String parameters, String healtiness, String microAppExtServIcon, String ownership, String description,
+			String info, String latitude, String longitude, Date insert_time, Date delete_time, String db_values_type,
+			String db_values_link) {
 		super();
 		this.highLevelType = highLevelType;
 		this.nature = nature;
@@ -130,6 +135,8 @@ public class KPIData implements Comparable<KPIData> {
 		this.lastDate = lastDate;
 		this.lastValue = lastValue;
 		this.lastCheck = lastCheck;
+		this.lastLatitude = lastLatitude;
+		this.lastLongitude = lastLongitude;
 		this.metric = metric;
 		this.savedDirect = savedDirect;
 		this.kbBased = kbBased;
@@ -153,16 +160,13 @@ public class KPIData implements Comparable<KPIData> {
 		this.dbValuesLink = db_values_link;
 	}
 
-
-
-
-
 	public KPIData(Long id, String highLevelType, String nature, String subNature, String kpiName, String lowLevelType,
 			String unit, String instanceUri, String getInstances, Date lastDate, String lastValue, Date lastCheck,
-			String metric, String savedDirect, String kbBased, String smBased, String username, String organizations,
-			String appId, String appName, String widgets, String parameters, String healtiness,
-			String microAppExtServIcon, String ownership, String description, String info, String latitude,
-			String longitude, Date insert_time, Date delete_time, String db_values_type, String db_values_link) {
+			String lastLatitude, String lastLongitude, String metric, String savedDirect, String kbBased,
+			String smBased, String username, String organizations, String appId, String appName, String widgets,
+			String parameters, String healtiness, String microAppExtServIcon, String ownership, String description,
+			String info, String latitude, String longitude, Date insert_time, Date delete_time, String db_values_type,
+			String db_values_link) {
 		super();
 		this.id = id;
 		this.highLevelType = highLevelType;
@@ -176,6 +180,8 @@ public class KPIData implements Comparable<KPIData> {
 		this.lastDate = lastDate;
 		this.lastValue = lastValue;
 		this.lastCheck = lastCheck;
+		this.lastLatitude = lastLatitude;
+		this.lastLongitude = lastLongitude;
 		this.metric = metric;
 		this.savedDirect = savedDirect;
 		this.kbBased = kbBased;
@@ -198,8 +204,6 @@ public class KPIData implements Comparable<KPIData> {
 		this.dbValuesType = db_values_type;
 		this.dbValuesLink = db_values_link;
 	}
-
-	
 
 	public Long getId() {
 		return id;
@@ -295,6 +299,22 @@ public class KPIData implements Comparable<KPIData> {
 
 	public void setLastCheck(Date lastCheck) {
 		this.lastCheck = lastCheck;
+	}
+	
+	public String getLastLongitude() {
+		return lastLongitude;
+	}
+
+	public void setLastLongitude(String lastLongitude) {
+		this.lastLongitude = lastLongitude;
+	}
+
+	public String getLastLatitude() {
+		return lastLatitude;
+	}
+
+	public void setLastLatitude(String lastLatitude) {
+		this.lastLatitude = lastLatitude;
 	}
 
 	public String getMetric() {
@@ -464,7 +484,6 @@ public class KPIData implements Comparable<KPIData> {
 	public void setDbValuesLink(String dbValuesLink) {
 		this.dbValuesLink = dbValuesLink;
 	}
-
 
 	@Override
 	public String toString() {

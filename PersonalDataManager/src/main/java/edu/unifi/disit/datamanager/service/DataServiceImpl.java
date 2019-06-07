@@ -27,6 +27,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.stereotype.Service;
 
+import edu.unifi.disit.datamanager.datamodel.ldap.LDAPUserDAO;
 import edu.unifi.disit.datamanager.datamodel.profiledb.Data;
 import edu.unifi.disit.datamanager.datamodel.profiledb.DataDAO;
 import edu.unifi.disit.datamanager.datamodel.profiledb.Ownership;
@@ -42,6 +43,9 @@ public class DataServiceImpl implements IDataService {
 
 	@Autowired
 	private MessageSource messages;
+
+	@Autowired
+	LDAPUserDAO lu;
 
 	@Autowired
 	DataDAO dataRepo;
@@ -157,9 +161,11 @@ public class DataServiceImpl implements IDataService {
 		else if (!data.getUsername().equals(username))
 			throw new DataNotValidException(messages.getMessage("postdata.ko.usernamedifferent", null, lang));
 
-		// check username exist
-		List<Ownership> ownership = ownershipRepo.findByUsername(username);
-		if ((ownership == null) || (ownership.size() == 0))
+		// // check username exist
+
+		// List<Ownership> ownership = ownershipRepo.findByUsername(username);
+		// if ((ownership == null) || (ownership.size() == 0))
+		if (!lu.usernameExist(username))
 			throw new DataNotValidException(messages.getMessage("postdata.ko.usernamenotrecognized", null, lang));
 
 		// override insertTime, deleteTime, elapseTime + appName

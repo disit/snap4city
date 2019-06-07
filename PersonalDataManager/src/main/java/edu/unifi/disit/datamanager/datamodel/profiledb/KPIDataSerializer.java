@@ -96,6 +96,12 @@ public class KPIDataSerializer extends StdSerializer<KPIData> {
 		if (kpiData.getLongitude() != null) {
 			jgen.writeStringField("longitude", kpiData.getLongitude());
 		}
+		if (kpiData.getLastLatitude() != null) {
+			jgen.writeStringField("lastLatitude", kpiData.getLastLatitude());
+		}
+		if (kpiData.getLastLongitude() != null) {
+			jgen.writeStringField("lastLongitude", kpiData.getLastLongitude());
+		}
 		if (kpiData.getValueType() != null) {
 			jgen.writeStringField("valueType", kpiData.getValueType());
 		}
@@ -132,7 +138,7 @@ public class KPIDataSerializer extends StdSerializer<KPIData> {
 		if (kpiData.getUsername() != null) {
 			jgen.writeStringField("username", kpiData.getUsername());
 		}
-		
+
 		if (kpiData.getWidgets() != null) {
 			jgen.writeStringField("widgets", kpiData.getWidgets());
 		}

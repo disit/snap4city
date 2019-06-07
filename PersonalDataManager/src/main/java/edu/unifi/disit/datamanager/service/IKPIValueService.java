@@ -46,5 +46,8 @@ public interface IKPIValueService {
 	List<KPIValue> findByKpiIdNoPagesWithLimit(Long kpiId, Date from, Date to, Integer first, Integer last, Locale lang) throws NoSuchMessageException, DataNotValidException;
 
 	List<Date> getKPIValueDates(Long kpiId) throws NoSuchMessageException, CredentialsException;
+
+	List<Date> getKPIValueDatesCoordinatesOptionallyNull(Long kpiId)
+			throws NoSuchMessageException, CredentialsException;
 	
 }

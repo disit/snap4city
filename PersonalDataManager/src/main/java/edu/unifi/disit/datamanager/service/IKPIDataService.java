@@ -87,6 +87,5 @@ public interface IKPIDataService {
 	boolean updateUsernameDelegatorOnOwnershipChange(String newOwner, Long kpiId, Locale lang)
 			throws DelegationNotValidException, CredentialsException;
 	
-	
-
+	KPIData detachEntity(KPIData toReturn);
 }

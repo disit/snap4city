@@ -42,8 +42,7 @@ public class KPIDataDeserializer extends StdDeserializer<KPIData> {
 		JsonNode jnode = jp.getCodec().readTree(jp);
 		KPIData kpidata = new KPIData();
 
-		
-		if(jnode.get("id") != null) {
+		if (jnode.get("id") != null) {
 			kpidata.setId(jnode.get("id").asLong());
 		}
 		if (jnode.get("appId") != null) {
@@ -82,11 +81,9 @@ public class KPIDataDeserializer extends StdDeserializer<KPIData> {
 		if (jnode.get("valueName") != null) {
 			kpidata.setValueName(jnode.get("valueName").asText());
 		}
-		/*if (jnode.get("lastDate") != null) {
-			Date date = new Date();
-			date.setTime(jnode.get("lastDate").asLong());
-			kpidata.setLastDate(date);
-		}*/
+		/*
+		 * if (jnode.get("lastDate") != null) { Date date = new Date(); date.setTime(jnode.get("lastDate").asLong()); kpidata.setLastDate(date); }
+		 */
 		if (jnode.get("lastDate") != null) {
 			Date date = new Date();
 			if (jnode.get("lastDate").asLong() != 0) {
@@ -94,9 +91,13 @@ public class KPIDataDeserializer extends StdDeserializer<KPIData> {
 				kpidata.setLastDate(date);
 			} else {
 				try {
-					kpidata.setLastDate(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(jnode.get("lastDate").asText()));
+					kpidata.setLastDate(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX").parse(jnode.get("lastDate").asText()));
 				} catch (ParseException e) {
-					e.printStackTrace();
+					try {
+						kpidata.setLastDate(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(jnode.get("lastDate").asText()));
+					} catch (ParseException d) {
+						d.printStackTrace();
+					}
 				}
 			}
 		}
@@ -108,6 +109,12 @@ public class KPIDataDeserializer extends StdDeserializer<KPIData> {
 		}
 		if (jnode.get("longitude") != null) {
 			kpidata.setLongitude(jnode.get("longitude").asText());
+		}
+		if (jnode.get("lastLatitude") != null) {
+			kpidata.setLastLatitude(jnode.get("lastLatitude").asText());
+		}
+		if (jnode.get("lastLongitude") != null) {
+			kpidata.setLastLongitude(jnode.get("lastLongitude").asText());
 		}
 		if (jnode.get("valueType") != null) {
 			kpidata.setValueType(jnode.get("valueType").asText());

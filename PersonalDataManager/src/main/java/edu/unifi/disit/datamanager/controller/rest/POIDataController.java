@@ -263,19 +263,34 @@ public class POIDataController {
 				List<POIData> listPoiData = new ArrayList<POIData>();
 
 				for (KPIData kpiData : listKpiData) {
-					List<KPIValue> kpiValues = kpiValueService.findByKpiIdGeoLocated(kpiData.getId());
+					if (kpiData.getLatitude() == null || kpiData.getLatitude().equals("")
+							|| kpiData.getLongitude() == null || kpiData.getLongitude().equals("")) {
 
-					kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang),
-							sourceRequest, kpiData.getId(), ActivityAccessType.READ, KPIActivityDomainType.POIVALUE);
+						if (kpiData.getLastLatitude() != null && !kpiData.getLastLatitude().equals("")
+								&& kpiData.getLastLongitude() != null && !kpiData.getLastLongitude().equals("")) {
+							kpiData = kpiDataService.detachEntity(kpiData);
+							kpiData.setLatitude(kpiData.getLastLatitude());
+							kpiData.setLongitude(kpiData.getLastLongitude());
+						} else {
 
-					if (!kpiValues.isEmpty()) {
-						kpiData.setLatitude(kpiValues.get(kpiValues.size() - 1).getLatitude());
-						kpiData.setLongitude(kpiValues.get(kpiValues.size() - 1).getLongitude());
+							List<KPIValue> kpiValues = kpiValueService.findByKpiIdGeoLocated(kpiData.getId());
+
+							kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang),
+									sourceRequest, kpiData.getId(), ActivityAccessType.READ,
+									KPIActivityDomainType.POIVALUE);
+
+							if (!kpiValues.isEmpty()) {
+								kpiData = kpiDataService.detachEntity(kpiData);
+								kpiData.setLatitude(kpiValues.get(0).getLatitude());
+								kpiData.setLongitude(kpiValues.get(0).getLongitude());
+							}
+						}
 					}
 					if (kpiData.getLatitude() != null && kpiData.getLatitude() != "" && kpiData.getLongitude() != null
 							&& kpiData.getLongitude() != "") {
 						listPoiData.add(new POIData(kpiData));
 					}
+
 				}
 
 				logger.info("Returning kpidatalist as GeoJson");
@@ -341,19 +356,34 @@ public class POIDataController {
 				List<POIData> listPoiData = new ArrayList<POIData>();
 
 				for (KPIData kpiData : listKpiData) {
-					List<KPIValue> kpiValues = kpiValueService.findByKpiIdGeoLocated(kpiData.getId());
+					if (kpiData.getLatitude() == null || kpiData.getLatitude().equals("")
+							|| kpiData.getLongitude() == null || kpiData.getLongitude().equals("")) {
 
-					kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang),
-							sourceRequest, kpiData.getId(), ActivityAccessType.READ, KPIActivityDomainType.POIVALUE);
+						if (kpiData.getLastLatitude() != null && !kpiData.getLastLatitude().equals("")
+								&& kpiData.getLastLongitude() != null && !kpiData.getLastLongitude().equals("")) {
+							kpiData = kpiDataService.detachEntity(kpiData);
+							kpiData.setLatitude(kpiData.getLastLatitude());
+							kpiData.setLongitude(kpiData.getLastLongitude());
+						} else {
 
-					if (!kpiValues.isEmpty()) {
-						kpiData.setLatitude(kpiValues.get(kpiValues.size() - 1).getLatitude());
-						kpiData.setLongitude(kpiValues.get(kpiValues.size() - 1).getLongitude());
+							List<KPIValue> kpiValues = kpiValueService.findByKpiIdGeoLocated(kpiData.getId());
+
+							kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang),
+									sourceRequest, kpiData.getId(), ActivityAccessType.READ,
+									KPIActivityDomainType.POIVALUE);
+
+							if (!kpiValues.isEmpty()) {
+								kpiData = kpiDataService.detachEntity(kpiData);
+								kpiData.setLatitude(kpiValues.get(0).getLatitude());
+								kpiData.setLongitude(kpiValues.get(0).getLongitude());
+							}
+						}
 					}
 					if (kpiData.getLatitude() != null && kpiData.getLatitude() != "" && kpiData.getLongitude() != null
 							&& kpiData.getLongitude() != "") {
 						listPoiData.add(new POIData(kpiData));
 					}
+
 				}
 
 				logger.info("Returning kpidatalist as GeoJson");
@@ -443,15 +473,24 @@ public class POIDataController {
 					if (kpiData.getLatitude() == null || kpiData.getLatitude().equals("")
 							|| kpiData.getLongitude() == null || kpiData.getLongitude().equals("")) {
 
-						List<KPIValue> kpiValues = kpiValueService.findByKpiIdGeoLocated(kpiData.getId());
+						if (kpiData.getLastLatitude() != null && !kpiData.getLastLatitude().equals("")
+								&& kpiData.getLastLongitude() != null && !kpiData.getLastLongitude().equals("")) {
+							kpiData = kpiDataService.detachEntity(kpiData);
+							kpiData.setLatitude(kpiData.getLastLatitude());
+							kpiData.setLongitude(kpiData.getLastLongitude());
+						} else {
 
-						kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang),
-								sourceRequest, kpiData.getId(), ActivityAccessType.READ,
-								KPIActivityDomainType.POIVALUE);
+							List<KPIValue> kpiValues = kpiValueService.findByKpiIdGeoLocated(kpiData.getId());
 
-						if (!kpiValues.isEmpty()) {
-							kpiData.setLatitude(kpiValues.get(kpiValues.size() - 1).getLatitude());
-							kpiData.setLongitude(kpiValues.get(kpiValues.size() - 1).getLongitude());
+							kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang),
+									sourceRequest, kpiData.getId(), ActivityAccessType.READ,
+									KPIActivityDomainType.POIVALUE);
+
+							if (!kpiValues.isEmpty()) {
+								kpiData = kpiDataService.detachEntity(kpiData);
+								kpiData.setLatitude(kpiValues.get(0).getLatitude());
+								kpiData.setLongitude(kpiValues.get(0).getLongitude());
+							}
 						}
 					}
 					if (kpiData.getLatitude() != null && kpiData.getLatitude() != "" && kpiData.getLongitude() != null

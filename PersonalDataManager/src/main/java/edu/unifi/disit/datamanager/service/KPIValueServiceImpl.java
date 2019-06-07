@@ -126,6 +126,12 @@ public class KPIValueServiceImpl implements IKPIValueService {
 		logger.debug("getKPIValueDates INVOKED on kpiId {}",  kpiId);
 		return kpiValueRepository.findByKpiIdDistinctDateAndDeleteTimeIsNull(kpiId);
 	}
+	
+	@Override
+	public List<Date> getKPIValueDatesCoordinatesOptionallyNull(Long kpiId) throws NoSuchMessageException, CredentialsException {
+		logger.debug("getKPIValueDates INVOKED on kpiId {}",  kpiId);
+		return kpiValueRepository.findByKpiIdDistinctDateAndDeleteTimeIsNullWithCoordinatesOptionallyNull(kpiId);
+	}
 
 	
 	

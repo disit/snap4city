@@ -164,13 +164,19 @@ public class KPIValueController {
 
 			try {
 				if (kpiValue.getDataTime() != null) {
-					List<KPIValue> lastKpiValue = kpiValueService.findByKpiIdNoPagesWithLimit(kpiValue.getKpiId(), null, null, 0, 1,
-							lang);
+					List<KPIValue> lastKpiValue = kpiValueService.findByKpiIdNoPagesWithLimit(kpiValue.getKpiId(), null,
+							null, 0, 1, lang);
 					if (lastKpiValue.isEmpty() || (lastKpiValue.get(0) != null
 							&& lastKpiValue.get(0).getDataTime() != null
 							&& lastKpiValue.get(0).getDataTime().getTime() < kpiValue.getDataTime().getTime())) {
 						kpiData.setLastDate(kpiValue.getDataTime());
 						kpiData.setLastValue(kpiValue.getValue());
+						if (kpiValue.getLatitude() != null && !kpiValue.getLatitude().equals("")) {
+							kpiData.setLastLatitude(kpiValue.getLatitude());
+						}
+						if (kpiValue.getLongitude() != null && !kpiValue.getLongitude().equals("")) {
+							kpiData.setLastLongitude(kpiValue.getLongitude());
+						}
 						kpiDataService.saveKPIData(kpiData);
 					}
 				} else {
@@ -243,6 +249,12 @@ public class KPIValueController {
 							&& lastKpiValue.get(0).getDataTime().getTime() < kpiValue.getDataTime().getTime())) {
 						kpiData.setLastDate(kpiValue.getDataTime());
 						kpiData.setLastValue(kpiValue.getValue());
+						if (kpiValue.getLatitude() != null && !kpiValue.getLatitude().equals("")) {
+							kpiData.setLastLatitude(kpiValue.getLatitude());
+						}
+						if (kpiValue.getLongitude() != null && !kpiValue.getLongitude().equals("")) {
+							kpiData.setLastLongitude(kpiValue.getLongitude());
+						}
 						kpiDataService.saveKPIData(kpiData);
 					}
 				} else {
@@ -284,11 +296,11 @@ public class KPIValueController {
 	// ------------------------------------
 	@PostMapping("/api/v1/kpidata/{kpiId}/values/list")
 	public ResponseEntity<Object> postKPIValueArrayV1(@PathVariable("kpiId") Long kpiId,
-			@RequestBody List<KPIValue> kpiValue, @RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestBody List<KPIValue> kpiValueList, @RequestParam(value = "sourceRequest") String sourceRequest,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) {
 
-		logger.info("Requested postKPIValueArrayV1 id {} sourceRequest {}", null, sourceRequest);
+		logger.info("Requested postKPIValueArrayV1 kpiId {} sourceRequest {}", kpiId, sourceRequest);
 
 		try {
 
@@ -310,11 +322,18 @@ public class KPIValueController {
 			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, kpiId,
 					ActivityAccessType.WRITE, KPIActivityDomainType.VALUE);
 
-			List<KPIValue> listInserterKPIValue = new ArrayList<>();
-			kpiValue.forEach((x) -> listInserterKPIValue
-					.add((KPIValue) postKPIValueV1(kpiId, x, sourceRequest, lang, request).getBody()));
+			List<KPIValue> listInsertedKPIValue = new ArrayList<>();
+			kpiValueList.sort((e1, e2) -> e1.getDataTime().compareTo(e2.getDataTime()));
 
-			return new ResponseEntity<Object>(listInserterKPIValue, HttpStatus.OK);
+			for (int i = 0; i < kpiValueList.size() - 1; i++) {
+				kpiValueList.get(i).setKpiId(kpiId);
+				listInsertedKPIValue.add(kpiValueService.saveKPIValue(kpiValueList.get(i)));
+			}
+
+			listInsertedKPIValue.add((KPIValue) postKPIValueV1(kpiId, kpiValueList.get(kpiValueList.size() - 1),
+					sourceRequest, lang, request).getBody());
+
+			return new ResponseEntity<Object>(listInsertedKPIValue, HttpStatus.OK);
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
 
@@ -376,6 +395,12 @@ public class KPIValueController {
 							&& lastKpiValue.get(0).getDataTime().getTime() < kpiValue.getDataTime().getTime())) {
 						kpiData.setLastDate(kpiValue.getDataTime());
 						kpiData.setLastValue(kpiValue.getValue());
+						if (kpiValue.getLatitude() != null && !kpiValue.getLatitude().equals("")) {
+							kpiData.setLastLatitude(kpiValue.getLatitude());
+						}
+						if (kpiValue.getLongitude() != null && !kpiValue.getLongitude().equals("")) {
+							kpiData.setLastLongitude(kpiValue.getLongitude());
+						}
 						kpiDataService.saveKPIData(kpiData);
 					}
 				} else {
@@ -564,6 +589,8 @@ public class KPIValueController {
 				} else if (!lastKpiValue.isEmpty() && lastKpiValue.size() == 1 && lastKpiValue.get(0).getId() == id) {
 					kpiData.setLastDate(null);
 					kpiData.setLastValue(null);
+					kpiData.setLastLatitude(null);
+					kpiData.setLastLongitude(null);
 					kpiDataService.saveKPIData(kpiData);
 				}
 			} catch (NoSuchMessageException | DataNotValidException e) {
@@ -700,6 +727,7 @@ public class KPIValueController {
 	public ResponseEntity<Object> getDistinctKPIValuesDateV1(@PathVariable("kpiId") Long kpiId,
 			@RequestParam(value = "sourceRequest") String sourceRequest,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
+			@RequestParam(value = "checkCoordinates", required = false, defaultValue = "true") boolean checkCoordinates,
 			HttpServletRequest request) {
 
 		logger.info("Requested getDistinctKPIValuesDateV1 kpiId {}", kpiId);
@@ -718,8 +746,12 @@ public class KPIValueController {
 					&& !accessService.checkAccessFromApp(Long.toString(kpiId), lang).getResult()) {
 				throw new CredentialsException();
 			}
-
-			List<Date> listKpiValueDate = kpiValueService.getKPIValueDates(kpiId);
+			List<Date> listKpiValueDate = null;
+			if (checkCoordinates) {
+				listKpiValueDate = kpiValueService.getKPIValueDates(kpiId);
+			} else {
+				listKpiValueDate = kpiValueService.getKPIValueDatesCoordinatesOptionallyNull(kpiId);
+			}
 
 			if (listKpiValueDate != null) {
 				logger.info("Returning KpiValuesDatesList ");
