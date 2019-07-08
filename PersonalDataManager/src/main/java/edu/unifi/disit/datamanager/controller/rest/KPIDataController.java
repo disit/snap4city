@@ -95,7 +95,7 @@ public class KPIDataController {
 
 				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
 			} else {
-				if (!kpiData.getUsername().equals(credentialService.getLoggedUsername(lang))
+				if (!kpiData.getUsername().toLowerCase().equals(credentialService.getLoggedUsername(lang).toLowerCase())
 						&& !accessService.checkAccessFromApp(Long.toString(kpiData.getId()), lang).getResult()) {
 					throw new CredentialsException();
 				}
@@ -203,7 +203,7 @@ public class KPIDataController {
 					kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang),
 							sourceRequest, newKpiData.getId(), ActivityAccessType.WRITE,
 							KPIActivityDomainType.CHANGEOWNERSHIP);
-					
+
 					kpiDataService.makeKPIDataPrivate(newKpiData.getId(), lang);
 					kpiDataService.makeKPIDataPublic(newKpiData.getUsername(), newKpiData.getId(),
 							newKpiData.getHighLevelType(), lang);
@@ -211,7 +211,7 @@ public class KPIDataController {
 					kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang),
 							sourceRequest, newKpiData.getId(), ActivityAccessType.WRITE,
 							KPIActivityDomainType.CHANGEOWNERSHIP);
-					
+
 					kpiDataService.makeKPIDataPrivate(newKpiData.getId(), lang);
 				}
 			}
@@ -270,7 +270,7 @@ public class KPIDataController {
 
 				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
 			}
-			
+
 			String oldUsername = oldKpiData.getUsername();
 			String oldOwnership = oldKpiData.getOwnership();
 
@@ -312,7 +312,7 @@ public class KPIDataController {
 					kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang),
 							sourceRequest, newKpiData.getId(), ActivityAccessType.WRITE,
 							KPIActivityDomainType.CHANGEOWNERSHIP);
-					
+
 					kpiDataService.makeKPIDataPrivate(newKpiData.getId(), lang);
 				}
 			}
@@ -450,14 +450,14 @@ public class KPIDataController {
 				logger.info("Returning kpiDatapage ");
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						pageKpiData.getContent(), ActivityAccessType.READ, KPIActivityDomainType.DATA);
+						null, ActivityAccessType.READ, KPIActivityDomainType.DATA);
 
 				return new ResponseEntity<Object>(pageKpiData, HttpStatus.OK);
 			} else if (listKpiData != null) {
 				logger.info("Returning kpiDatalist ");
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						listKpiData, ActivityAccessType.READ, KPIActivityDomainType.DATA);
+						null, ActivityAccessType.READ, KPIActivityDomainType.DATA);
 
 				return new ResponseEntity<Object>(listKpiData, HttpStatus.OK);
 			}
@@ -532,14 +532,14 @@ public class KPIDataController {
 				logger.info("Returning kpiDatapage ");
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						pageKpiData.getContent(), ActivityAccessType.READ, KPIActivityDomainType.DATA);
+						null, ActivityAccessType.READ, KPIActivityDomainType.DATA);
 
 				return new ResponseEntity<Object>(pageKpiData, HttpStatus.OK);
 			} else if (listKpiData != null) {
 				logger.info("Returning kpiDatalist ");
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						listKpiData, ActivityAccessType.READ, KPIActivityDomainType.DATA);
+						null, ActivityAccessType.READ, KPIActivityDomainType.DATA);
 
 				return new ResponseEntity<Object>(listKpiData, HttpStatus.OK);
 			}
@@ -663,14 +663,14 @@ public class KPIDataController {
 				logger.info("Returning kpiDatapage ");
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						pageKpiData.getContent(), ActivityAccessType.READ, KPIActivityDomainType.DATA);
+						null, ActivityAccessType.READ, KPIActivityDomainType.DATA);
 
 				return new ResponseEntity<Object>(pageKpiData, HttpStatus.OK);
 			} else if (listKpiData != null) {
 				logger.info("Returning kpiDatalist ");
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						listKpiData, ActivityAccessType.READ, KPIActivityDomainType.DATA);
+						null, ActivityAccessType.READ, KPIActivityDomainType.DATA);
 
 				return new ResponseEntity<Object>(listKpiData, HttpStatus.OK);
 			}

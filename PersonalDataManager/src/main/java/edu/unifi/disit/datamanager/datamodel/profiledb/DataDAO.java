@@ -16,8 +16,10 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 // all with contrains: AndDeleteTimeIsNull
@@ -33,4 +35,9 @@ public interface DataDAO extends JpaRepository<Data, Long>, DataDAOCustom {
 	List<Data> findLastData();
 
 	Data findById(Long dataId);
+
+	@Modifying
+	@Transactional
+	@Query("delete from Data a where a.deleteTime < ?1")
+	void deleteByDeleteTimeBefore(Date time);
 }

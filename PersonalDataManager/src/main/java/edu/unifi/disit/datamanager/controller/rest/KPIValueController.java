@@ -98,7 +98,7 @@ public class KPIValueController {
 						"Wrong KPI Data", null, request.getRemoteAddr());
 
 				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
-			} else if (!kpiData.getUsername().equals(credentialService.getLoggedUsername(lang))
+			} else if (!kpiData.getUsername().toLowerCase().equals(credentialService.getLoggedUsername(lang).toLowerCase())
 					&& !accessService.checkAccessFromApp(Long.toString(kpiId), lang).getResult()) {
 				throw new CredentialsException();
 			}
@@ -157,7 +157,7 @@ public class KPIValueController {
 								+ ((HttpServletRequest) request).getQueryString(),
 						"Wrong KPI Data", null, request.getRemoteAddr());
 				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
-			} else if (!kpiData.getUsername().equals(credentialService.getLoggedUsername(lang))
+			} else if (!kpiData.getUsername().toLowerCase().equals(credentialService.getLoggedUsername(lang).toLowerCase())
 					&& !accessService.checkAccessFromApp(Long.toString(kpiValue.getKpiId()), lang).getResult()) {
 				throw new CredentialsException();
 			}
@@ -235,7 +235,7 @@ public class KPIValueController {
 								+ ((HttpServletRequest) request).getQueryString(),
 						"Wrong KPI Data", null, request.getRemoteAddr());
 				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
-			} else if (!kpiData.getUsername().equals(credentialService.getLoggedUsername(lang))
+			} else if (!kpiData.getUsername().toLowerCase().equals(credentialService.getLoggedUsername(lang).toLowerCase())
 					&& !accessService.checkAccessFromApp(Long.toString(kpiId), lang).getResult()) {
 				throw new CredentialsException();
 			}
@@ -314,7 +314,7 @@ public class KPIValueController {
 								+ ((HttpServletRequest) request).getQueryString(),
 						"Wrong KPI Data", null, request.getRemoteAddr());
 				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
-			} else if (!kpiData.getUsername().equals(credentialService.getLoggedUsername(lang))
+			} else if (!kpiData.getUsername().toLowerCase().equals(credentialService.getLoggedUsername(lang).toLowerCase())
 					&& !accessService.checkAccessFromApp(Long.toString(kpiId), lang).getResult()) {
 				throw new CredentialsException();
 			}
@@ -368,7 +368,7 @@ public class KPIValueController {
 								+ ((HttpServletRequest) request).getQueryString(),
 						"Wrong KPI Data", null, request.getRemoteAddr());
 				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
-			} else if (!kpiData.getUsername().equals(credentialService.getLoggedUsername(lang))
+			} else if (!kpiData.getUsername().toLowerCase().equals(credentialService.getLoggedUsername(lang).toLowerCase())
 					&& !accessService.checkAccessFromApp(Long.toString(kpiId), lang).getResult()) {
 				throw new CredentialsException();
 			}
@@ -459,7 +459,7 @@ public class KPIValueController {
 								+ ((HttpServletRequest) request).getQueryString(),
 						"Wrong KPI Data", null, request.getRemoteAddr());
 				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
-			} else if (!kpiData.getUsername().equals(credentialService.getLoggedUsername(lang))
+			} else if (!kpiData.getUsername().toLowerCase().equals(credentialService.getLoggedUsername(lang).toLowerCase())
 					&& !accessService.checkAccessFromApp(Long.toString(kpiId), lang).getResult()) {
 				throw new CredentialsException();
 			}
@@ -561,7 +561,7 @@ public class KPIValueController {
 								+ ((HttpServletRequest) request).getQueryString(),
 						"Wrong KPI Data", null, request.getRemoteAddr());
 				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
-			} else if (!kpiData.getUsername().equals(credentialService.getLoggedUsername(lang))
+			} else if (!kpiData.getUsername().toLowerCase().equals(credentialService.getLoggedUsername(lang).toLowerCase())
 					&& !accessService.checkAccessFromApp(Long.toString(kpiId), lang).getResult()) {
 				throw new CredentialsException();
 			}
@@ -648,7 +648,7 @@ public class KPIValueController {
 								+ ((HttpServletRequest) request).getQueryString(),
 						"Wrong KPI Data", null, request.getRemoteAddr());
 				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
-			} else if (!kpiData.getUsername().equals(credentialService.getLoggedUsername(lang))
+			} else if (!kpiData.getUsername().toLowerCase().equals(credentialService.getLoggedUsername(lang).toLowerCase())
 					&& !accessService.checkAccessFromApp(Long.toString(kpiId), lang).getResult()) {
 				throw new CredentialsException();
 			}
@@ -742,7 +742,7 @@ public class KPIValueController {
 								+ ((HttpServletRequest) request).getQueryString(),
 						"Wrong KPI Data", null, request.getRemoteAddr());
 				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
-			} else if (!kpiData.getUsername().equals(credentialService.getLoggedUsername(lang))
+			} else if (!kpiData.getUsername().toLowerCase().equals(credentialService.getLoggedUsername(lang).toLowerCase())
 					&& !accessService.checkAccessFromApp(Long.toString(kpiId), lang).getResult()) {
 				throw new CredentialsException();
 			}

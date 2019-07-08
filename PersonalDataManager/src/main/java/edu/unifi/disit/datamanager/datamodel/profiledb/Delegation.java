@@ -26,8 +26,10 @@ import org.hibernate.annotations.Type;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @JsonDeserialize(using = DelegationDeserializer.class)
+@JsonSerialize(using = DelegationSerializer.class)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "delegation")

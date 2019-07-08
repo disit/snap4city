@@ -19,8 +19,10 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public interface KPIDataDAO extends JpaRepository<KPIData, Long>, KPIDataDAOCustom {
@@ -31,52 +33,47 @@ public interface KPIDataDAO extends JpaRepository<KPIData, Long>, KPIDataDAOCust
 
 	Page<KPIData> findByDeleteTimeIsNull(Pageable pageable);
 
-	/*Page<KPIData> findByUsernameAndDeleteTimeIsNull(String username, Pageable pageable);
-
-	Page<KPIData> findByHighLevelTypeContainingOrNatureContainingOrSubNatureContainingOrValueNameContainingOrValueTypeContainingOrDataTypeContainingOrHealthinessContainingOrOwnershipContainingOrUsernameContainingAllIgnoreCaseAndDeleteTimeIsNull(
-			String highLevelType, String nature, String subNature, String valueName, String valueType, String dataType,
-			String healthiness, String ownership, String username, Pageable pageable);
-
-	Page<KPIData> findByUsernameAndHighLevelTypeContainingOrNatureContainingOrSubNatureContainingOrValueNameContainingOrValueTypeContainingOrDataTypeContainingOrHealthinessContainingOrOwnershipContainingAllIgnoreCaseAndDeleteTimeIsNull(
-			String username, String highLevelType, String nature, String subNature, String valueName, String valueType,
-			String dataType, String healthiness, String ownership, Pageable pageable);
-
-	Page<KPIData> findByHighLevelTypeAndDeleteTimeIsNull(String highLevelType, Pageable pageable);
-
-	Page<KPIData> findByUsernameAndHighLevelTypeAndDeleteTimeIsNull(String username, String highLevelType,
-			Pageable pageable);
-
-	Page<KPIData> findByHighLevelTypeAndNatureContainingOrSubNatureContainingOrValueNameContainingOrValueTypeContainingOrDataTypeContainingOrHealthinessContainingOrOwnershipContainingOrUsernameContainingAllIgnoreCaseAndDeleteTimeIsNull(
-			String highLevelType, String nature, String subNature, String valueName, String valueType, String dataType,
-			String healthiness, String ownership, String username, Pageable pageable);
-
-	Page<KPIData> findByUsernameAndHighLevelTypeAndNatureContainingOrSubNatureContainingOrValueNameContainingOrValueTypeContainingOrDataTypeContainingOrHealthinessContainingOrOwnershipContainingAllIgnoreCaseAndDeleteTimeIsNull(
-			String username, String highLevelType, String nature, String subNature, String valueName, String valueType,
-			String dataType, String healthiness, String ownership, Pageable pageable);
-
-	List<KPIData> findByDeleteTimeIsNull();
-
-	List<KPIData> findByUsernameAndDeleteTimeIsNull(String username);
-
-	List<KPIData> findByHighLevelTypeContainingOrNatureContainingOrSubNatureContainingOrValueNameContainingOrValueTypeContainingOrDataTypeContainingOrHealthinessContainingOrOwnershipContainingOrUsernameContainingAllIgnoreCaseAndDeleteTimeIsNull(
-			String highLevelType, String nature, String subNature, String valueName, String valueType, String dataType,
-			String healthiness, String ownership, String username);
-
-	List<KPIData> findByUsernameAndHighLevelTypeContainingOrNatureContainingOrSubNatureContainingOrValueNameContainingOrValueTypeContainingOrDataTypeContainingOrHealthinessContainingOrOwnershipContainingAllIgnoreCaseAndDeleteTimeIsNull(
-			String username, String highLevelType, String nature, String subNature, String valueName, String valueType,
-			String dataType, String healthiness, String ownership);
-
-	List<KPIData> findByHighLevelTypeAndDeleteTimeIsNull(String highLevelType);
-
-	List<KPIData> findByUsernameAndHighLevelTypeAndDeleteTimeIsNull(String username, String highLevelType);
-
-	List<KPIData> findByHighLevelTypeAndNatureContainingOrSubNatureContainingOrValueNameContainingOrValueTypeContainingOrDataTypeContainingOrHealthinessContainingOrOwnershipContainingOrUsernameContainingAllIgnoreCaseAndDeleteTimeIsNull(
-			String highLevelType, String nature, String subNature, String valueName, String valueType, String dataType,
-			String healthiness, String ownership, String username);
-
-	List<KPIData> findByUsernameAndHighLevelTypeOrNatureContainingOrSubNatureContainingOrValueNameContainingOrValueTypeContainingOrDataTypeContainingOrHealthinessContainingOrOwnershipContainingAllIgnoreCaseAndDeleteTimeIsNull(
-			String username, String highLevelType, String nature, String subNature, String valueName, String valueType,
-			String dataType, String healthiness, String ownership);*/
+	/*
+	 * Page<KPIData> findByUsernameAndDeleteTimeIsNull(String username, Pageable pageable);
+	 * 
+	 * Page<KPIData>
+	 * findByHighLevelTypeContainingOrNatureContainingOrSubNatureContainingOrValueNameContainingOrValueTypeContainingOrDataTypeContainingOrHealthinessContainingOrOwnershipContainingOrUsernameContainingAllIgnoreCaseAndDeleteTimeIsNull(
+	 * String highLevelType, String nature, String subNature, String valueName, String valueType, String dataType, String healthiness, String ownership, String username, Pageable pageable);
+	 * 
+	 * Page<KPIData> findByUsernameAndHighLevelTypeContainingOrNatureContainingOrSubNatureContainingOrValueNameContainingOrValueTypeContainingOrDataTypeContainingOrHealthinessContainingOrOwnershipContainingAllIgnoreCaseAndDeleteTimeIsNull(
+	 * String username, String highLevelType, String nature, String subNature, String valueName, String valueType, String dataType, String healthiness, String ownership, Pageable pageable);
+	 * 
+	 * Page<KPIData> findByHighLevelTypeAndDeleteTimeIsNull(String highLevelType, Pageable pageable);
+	 * 
+	 * Page<KPIData> findByUsernameAndHighLevelTypeAndDeleteTimeIsNull(String username, String highLevelType, Pageable pageable);
+	 * 
+	 * Page<KPIData> findByHighLevelTypeAndNatureContainingOrSubNatureContainingOrValueNameContainingOrValueTypeContainingOrDataTypeContainingOrHealthinessContainingOrOwnershipContainingOrUsernameContainingAllIgnoreCaseAndDeleteTimeIsNull(
+	 * String highLevelType, String nature, String subNature, String valueName, String valueType, String dataType, String healthiness, String ownership, String username, Pageable pageable);
+	 * 
+	 * Page<KPIData> findByUsernameAndHighLevelTypeAndNatureContainingOrSubNatureContainingOrValueNameContainingOrValueTypeContainingOrDataTypeContainingOrHealthinessContainingOrOwnershipContainingAllIgnoreCaseAndDeleteTimeIsNull( String
+	 * username, String highLevelType, String nature, String subNature, String valueName, String valueType, String dataType, String healthiness, String ownership, Pageable pageable);
+	 * 
+	 * List<KPIData> findByDeleteTimeIsNull();
+	 * 
+	 * List<KPIData> findByUsernameAndDeleteTimeIsNull(String username);
+	 * 
+	 * List<KPIData>
+	 * findByHighLevelTypeContainingOrNatureContainingOrSubNatureContainingOrValueNameContainingOrValueTypeContainingOrDataTypeContainingOrHealthinessContainingOrOwnershipContainingOrUsernameContainingAllIgnoreCaseAndDeleteTimeIsNull(
+	 * String highLevelType, String nature, String subNature, String valueName, String valueType, String dataType, String healthiness, String ownership, String username);
+	 * 
+	 * List<KPIData> findByUsernameAndHighLevelTypeContainingOrNatureContainingOrSubNatureContainingOrValueNameContainingOrValueTypeContainingOrDataTypeContainingOrHealthinessContainingOrOwnershipContainingAllIgnoreCaseAndDeleteTimeIsNull(
+	 * String username, String highLevelType, String nature, String subNature, String valueName, String valueType, String dataType, String healthiness, String ownership);
+	 * 
+	 * List<KPIData> findByHighLevelTypeAndDeleteTimeIsNull(String highLevelType);
+	 * 
+	 * List<KPIData> findByUsernameAndHighLevelTypeAndDeleteTimeIsNull(String username, String highLevelType);
+	 * 
+	 * List<KPIData> findByHighLevelTypeAndNatureContainingOrSubNatureContainingOrValueNameContainingOrValueTypeContainingOrDataTypeContainingOrHealthinessContainingOrOwnershipContainingOrUsernameContainingAllIgnoreCaseAndDeleteTimeIsNull(
+	 * String highLevelType, String nature, String subNature, String valueName, String valueType, String dataType, String healthiness, String ownership, String username);
+	 * 
+	 * List<KPIData> findByUsernameAndHighLevelTypeOrNatureContainingOrSubNatureContainingOrValueNameContainingOrValueTypeContainingOrDataTypeContainingOrHealthinessContainingOrOwnershipContainingAllIgnoreCaseAndDeleteTimeIsNull( String
+	 * username, String highLevelType, String nature, String subNature, String valueName, String valueType, String dataType, String healthiness, String ownership);
+	 */
 
 	@Query("select k from KPIData as k where k.id in (select elementId from Delegation where elementType like %?2% and usernameDelegated = ?1 and deleteTime = NULL) and k.highLevelType like %?3% and deleteTime = NULL and (k.nature like %?4% or k.subNature like %?4% or k.valueName like %?4% or k.valueType like %?4% or k.dataType like %?4%)")
 	Page<KPIData> findByUsernameDelegatedAndElementTypeContainingAndDeleteTimeIsNull(
@@ -96,4 +93,8 @@ public interface KPIDataDAO extends JpaRepository<KPIData, Long>, KPIDataDAOCust
 
 	List<KPIData> findByDeleteTimeBefore(Date time);
 
+	@Modifying
+	@Transactional
+	@Query("delete from KPIData a where a.deleteTime < ?1")
+	void deleteByDeleteTimeBefore(Date time);
 }

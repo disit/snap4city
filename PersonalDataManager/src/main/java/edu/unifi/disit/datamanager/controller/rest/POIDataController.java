@@ -97,7 +97,7 @@ public class POIDataController {
 
 				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
 			} else {
-				if (!kpiData.getUsername().equals(credentialService.getLoggedUsername(lang))
+				if (!kpiData.getUsername().toLowerCase().equals(credentialService.getLoggedUsername(lang).toLowerCase())
 						&& !accessService.checkAccessFromApp(Long.toString(kpiData.getId()), lang).getResult()) {
 					throw new CredentialsException();
 				}
@@ -296,7 +296,7 @@ public class POIDataController {
 				logger.info("Returning kpidatalist as GeoJson");
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						listKpiData, ActivityAccessType.READ, KPIActivityDomainType.POI);
+						null, ActivityAccessType.READ, KPIActivityDomainType.POI);
 
 				return new ResponseEntity<Object>(listPoiData, HttpStatus.OK);
 			}
@@ -389,7 +389,7 @@ public class POIDataController {
 				logger.info("Returning kpidatalist as GeoJson");
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						listKpiData, ActivityAccessType.READ, KPIActivityDomainType.POI);
+						null, ActivityAccessType.READ, KPIActivityDomainType.POI);
 
 				return new ResponseEntity<Object>(listPoiData, HttpStatus.OK);
 			}
@@ -503,7 +503,7 @@ public class POIDataController {
 				logger.info("Returning kpidatalist as GeoJson");
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						listKpiData, ActivityAccessType.READ, KPIActivityDomainType.POI);
+						null, ActivityAccessType.READ, KPIActivityDomainType.POI);
 
 				return new ResponseEntity<Object>(listPoiData, HttpStatus.OK);
 			}

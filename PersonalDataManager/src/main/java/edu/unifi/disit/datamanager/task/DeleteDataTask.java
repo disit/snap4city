@@ -14,7 +14,6 @@ package edu.unifi.disit.datamanager.task;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,19 +27,12 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
 
-import edu.unifi.disit.datamanager.datamodel.profiledb.Activity;
 import edu.unifi.disit.datamanager.datamodel.profiledb.ActivityDAO;
-import edu.unifi.disit.datamanager.datamodel.profiledb.ActivityViolation;
 import edu.unifi.disit.datamanager.datamodel.profiledb.ActivityViolationDAO;
-import edu.unifi.disit.datamanager.datamodel.profiledb.Data;
 import edu.unifi.disit.datamanager.datamodel.profiledb.DataDAO;
-import edu.unifi.disit.datamanager.datamodel.profiledb.Delegation;
 import edu.unifi.disit.datamanager.datamodel.profiledb.DelegationDAO;
-import edu.unifi.disit.datamanager.datamodel.profiledb.KPIActivity;
 import edu.unifi.disit.datamanager.datamodel.profiledb.KPIActivityDAO;
-import edu.unifi.disit.datamanager.datamodel.profiledb.KPIActivityViolation;
 import edu.unifi.disit.datamanager.datamodel.profiledb.KPIActivityViolationDAO;
-import edu.unifi.disit.datamanager.datamodel.profiledb.KPIData;
 import edu.unifi.disit.datamanager.datamodel.profiledb.KPIDataDAO;
 
 @EnableScheduling
@@ -103,58 +95,59 @@ public class DeleteDataTask implements SchedulingConfigurer {
 
 	private void myTask() {
 
+		logger.debug("Deleting STARTED");
+
 		// removal of the data
 		Calendar c = Calendar.getInstance();
 		c.add(Calendar.MONTH, howmanymonthdata * -1);
 
-		List<Data> datas = dataRepo.findByDeleteTimeBefore(c.getTime());
+		// List<Data> datas = dataRepo.findByDeleteTimeBefore(c.getTime());
+		// if (datas.size() != 0) {
+		logger.debug("Deleting data");
+		dataRepo.deleteByDeleteTimeBefore(c.getTime());
+		// }
 
-		if (datas.size() != 0) {
-			logger.debug("Deleting {} data", datas.size());
-			dataRepo.delete(datas);
-		}
+		// List<Delegation> delegations = delegationRepo.findByDeleteTimeBefore(c.getTime());
+		// if (delegations.size() != 0) {
+		logger.debug("Deleting delegation");
+		delegationRepo.deleteByDeleteTimeBefore(c.getTime());
+		// }
 
-		List<Delegation> delegations = delegationRepo.findByDeleteTimeBefore(c.getTime());
-
-		if (delegations.size() != 0) {
-			logger.debug("Deleting {} data", delegations.size());
-			delegationRepo.delete(delegations);
-		}
-
-		List<KPIData> kpidatas = kpidataRepo.findByDeleteTimeBefore(c.getTime());
-
-		if (kpidatas.size() != 0) {
-			logger.debug("Deleting {} kpidata", kpidatas.size());
-			kpidataRepo.delete(kpidatas);
-		}
+		// List<KPIData> kpidatas = kpidataRepo.findByDeleteTimeBefore(c.getTime());
+		// if (kpidatas.size() != 0) {
+		logger.debug("Deleting kpidata");
+		kpidataRepo.deleteByDeleteTimeBefore(c.getTime());
+		// }
 
 		// removal of the activities
 		c = Calendar.getInstance();
 		c.add(Calendar.MONTH, howmanymonthactivity * -1);
 
-		List<Activity> activities = activitiesRepo.findByTimeBefore(c.getTime());
-		if (activities.size() != 0) {
-			logger.debug("Deleting {} activity", activities.size());
-			activitiesRepo.delete(activities);
-		}
+		// List<Activity> activities = activitiesRepo.findByTimeBefore(c.getTime());
+		// if (activities.size() != 0) {
+		logger.debug("Deleting activity");
+		activitiesRepo.deleteByTimeBefore(c.getTime());
+		// }
 
-		List<ActivityViolation> activitiesViolation = activitiesViolationRepo.findByTimeBefore(c.getTime());
-		if (activitiesViolation.size() != 0) {
-			logger.debug("Deleting {} activity violation", activitiesViolation.size());
-			activitiesViolationRepo.delete(activitiesViolation);
-		}
+		// List<ActivityViolation> activitiesViolation = activitiesViolationRepo.findByTimeBefore(c.getTime());
+		// if (activitiesViolation.size() != 0) {
+		logger.debug("Deleting activity violation");
+		activitiesViolationRepo.deleteByTimeBefore(c.getTime());
+		// }
 
-		List<KPIActivity> kpiactivities = kpiactivitiesRepo.findByInsertTimeBefore(c.getTime());
-		if (kpiactivities.size() != 0) {
-			logger.debug("Deleting {} kpiactivity", kpiactivities.size());
-			kpiactivitiesRepo.delete(kpiactivities);
-		}
+		// List<KPIActivity> kpiactivities = kpiactivitiesRepo.findByInsertTimeBefore(c.getTime());
+		// if (kpiactivities.size() != 0) {
+		logger.debug("Deleting kpiactivity");
+		kpiactivitiesRepo.deleteByInsertTimeBefore(c.getTime());
+		// }
 
-		List<KPIActivityViolation> kpiactivitiesViolation = kpiactivitiesViolationRepo.findByInsertTimeBefore(c.getTime());
-		if (kpiactivitiesViolation.size() != 0) {
-			logger.debug("Deleting {} activity kpiviolation", kpiactivitiesViolation.size());
-			kpiactivitiesViolationRepo.delete(kpiactivitiesViolation);
-		}
+		// List<KPIActivityViolation> kpiactivitiesViolation = kpiactivitiesViolationRepo.findByInsertTimeBefore(c.getTime());
+		// if (kpiactivitiesViolation.size() != 0) {
+		logger.debug("Deleting activity kpiviolation");
+		kpiactivitiesViolationRepo.deleteByInsertTimeBefore(c.getTime());
+		// }
+
+		logger.debug("Deleting TERMINATED");
 
 	}
 }

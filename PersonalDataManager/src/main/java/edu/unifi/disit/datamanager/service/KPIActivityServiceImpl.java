@@ -16,7 +16,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.SQLException;
 import java.util.Date;
-import java.util.List;
 
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialException;
@@ -32,7 +31,6 @@ import edu.unifi.disit.datamanager.datamodel.profiledb.KPIActivity;
 import edu.unifi.disit.datamanager.datamodel.profiledb.KPIActivityDAO;
 import edu.unifi.disit.datamanager.datamodel.profiledb.KPIActivityViolation;
 import edu.unifi.disit.datamanager.datamodel.profiledb.KPIActivityViolationDAO;
-import edu.unifi.disit.datamanager.datamodel.profiledb.KPIData;
 import edu.unifi.disit.datamanager.datamodel.profiledb.OwnershipDAO;
 
 @Service
@@ -63,16 +61,16 @@ public class KPIActivityServiceImpl implements IKPIActivityService {
 
 	}
 
-	@Override
-	public void saveActivityFromUsername(String username, String sourceRequest, List<KPIData> listKpiData,
-			ActivityAccessType accessType, KPIActivityDomainType domain) {
-		
-		for(KPIData kpiData : listKpiData) {
-			saveActivityFromUsername(username, sourceRequest, kpiData.getId(), accessType, domain);
-		}
-		
-	}
-	
+	// @Override
+	// public void saveActivityFromUsername(String username, String sourceRequest, List<KPIData> listKpiData,
+	// ActivityAccessType accessType, KPIActivityDomainType domain) {
+	//
+	// //for(KPIData kpiData : listKpiData) {
+	// saveActivityFromUsername(username, sourceRequest, null, accessType, domain);
+	// //}
+	//
+	// }
+
 	@Override
 	public void saveActivityViolationFromUsername(String username, String sourceRequest, Long kpiId,
 			ActivityAccessType accessType, KPIActivityDomainType domain, String query, String errorMessage,
@@ -97,9 +95,5 @@ public class KPIActivityServiceImpl implements IKPIActivityService {
 		}
 
 	}
-
-
-
-
 
 }

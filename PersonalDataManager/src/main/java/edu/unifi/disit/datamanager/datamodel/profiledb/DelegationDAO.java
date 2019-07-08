@@ -18,14 +18,17 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 // all with contrains: AndDeleteTimeIsNull
 public interface DelegationDAO extends JpaRepository<Delegation, Long>, DelegationDAOCustom {
 
 	List<Delegation> findByElementIdAndDeleteTimeIsNull(String elementId);
-	
+
 	List<Delegation> findByElementIdAndDeleteTimeIsNullAndUsernameDelegatedNotLike(String elementId, String usernameDelegated);
 
 	Delegation findByIdAndDeleteTimeIsNull(Long delegationId);
@@ -33,7 +36,11 @@ public interface DelegationDAO extends JpaRepository<Delegation, Long>, Delegati
 	List<Delegation> findByDeleteTimeBefore(Date date);// used for proper delete
 
 	Page<Delegation> findByElementIdAndDeleteTimeIsNull(String elementId, Pageable pageable);
-	
+
 	Page<Delegation> findByElementIdAndDeleteTimeIsNullAndUsernameDelegatedNotLike(String elementId, String usernameDelegated, Pageable pageable);
 
+	@Modifying
+	@Transactional
+	@Query("delete from Delegation a where a.deleteTime < ?1")
+	void deleteByDeleteTimeBefore(Date time);
 }

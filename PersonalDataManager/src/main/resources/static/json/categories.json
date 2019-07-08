@@ -13,7 +13,8 @@
 ,{"title": "Hotel", "key": "Hotel", "icon": "eng/Accommodation_Hotel.png"}
 ,{"title": "Mountain Shelter", "key": "Mountain_shelter", "icon": "eng/Accommodation_Mountain_shelter.png"}
 ,{"title": "Other Accommodation", "key": "Other_accommodation", "icon": "eng/Accommodation_Other_accommodation.png"}
-,{"title": "Religious Guest House", "key": "Religiuos_guest_house", "icon": "eng/Accommodation_Religious_guest_house.png"}
+,{"title": "Religious Guest House", "key": "Religiuos_guest_house", "icon": "eng/Accommodation_Religiuos_guest_house.png"}
+,{"title": "Residence", "key": "Residence", "icon": "eng/Accommodation_Residence.png"}
 ,{"title": "Rest Home", "key": "Rest_home", "icon": "eng/Accommodation_Rest_home.png"}
 ,{"title": "Summer Camp", "key": "Summer_camp", "icon": "eng/Accommodation_Summer_camp.png"}
 ,{"title": "Summer Residence", "key": "Summer_residence", "icon": "eng/Accommodation_Summer_residence.png"}
@@ -44,9 +45,10 @@
 ,{"title": "Technical Consultants", "key": "Technical_consultants", "icon": "eng/CivilAndEdilEngineering_Technical_consultants.png"}
  ]},
 {"title": "Cultural Activity", "key": "CulturalActivity", "folder": "true", "icon": "eng/CulturalActivity.png", "children": [
-{"title": "Archaeological Site", "key": "Archaeological_site", "icon": "eng/CulturalActivity_Archaeological_site.png"}
+{"title": "Archaeological Site", "key": "Archaelogical_site", "icon": "eng/CulturalActivity_Archaelogical_site.png"}
 ,{"title": "Auditorium", "key": "Auditorium", "icon": "eng/CulturalActivity_Auditorium.png"}
 ,{"title": "Botanical & Zoolog. Gardens", "key": "Botanical_and_zoological_gardens", "icon": "eng/CulturalActivity_Botanical_and_zoological_gardens.png"}
+,{"title": "Castles", "key": "Castle", "icon": "eng/CulturalActivity_Castle.png"}
 ,{"title": "Churches", "key": "Churches", "icon": "eng/CulturalActivity_Churches.png"}
 ,{"title": "Cultural Centre", "key": "Cultural_centre", "icon": "eng/CulturalActivity_Cultural_centre.png"}
 ,{"title": "Cultural Sites", "key": "Cultural_sites", "icon": "eng/CulturalActivity_Cultural_sites.png"}
@@ -65,6 +67,7 @@
 ,{"title": "Publishing Activities", "key": "Publishing_activities", "icon": "eng/CulturalActivity_Publishing_activities.png"}
 ,{"title": "Radio Broadcasting", "key": "Radio_broadcasting", "icon": "eng/CulturalActivity_Radio_broadcasting.png"}
 ,{"title": "Reproduc. Recorded Media", "key": "Reproduction_recorded_media", "icon": "eng/CulturalActivity_Reproduction_recorded_media.png"}
+,{"title": "Roman Bridge", "key": "Roman_bridge", "icon": "eng/CulturalActivity_Roman_bridge.png"}
 ,{"title": "Sound Rec. & Music Publish.", "key": "Sound_recording_and_music_publishing", "icon": "eng/CulturalActivity_Sound_recording_and_music_publishing.png"}
 ,{"title": "Squares", "key": "Squares", "icon": "eng/CulturalActivity_Squares.png"}
 ,{"title": "Television Broadcasting", "key": "Television_broadcasting", "icon": "eng/CulturalActivity_Television_broadcasting.png"}
@@ -118,20 +121,25 @@
 ,{"title": "First Aid", "key": "First_aid", "icon": "eng/Emergency_First_aid.png"}
 ,{"title": "Italian Finance Police", "key": "Italian_finance_police", "icon": "eng/Emergency_Italian_finance_police.png"}
 ,{"title": "Local Police", "key": "Local_police", "icon": "eng/Emergency_Local_police.png"}
+,{"title": "Rescuers", "key": "Rescuers", "icon": "eng/Emergency_Rescuers.png"}
+,{"title": "Shelter Area", "key": "Shelter_area", "icon": "eng/Emergency_Shelter_area.png"}
 ,{"title": "Towing & Roadside Assist.", "key": "Towing_and_roadside_assistance", "icon": "eng/Emergency_Towing_and_roadside_assistance.png"}
 ,{"title": "Traffic Corps", "key": "Traffic_corps", "icon": "eng/Emergency_Traffic_corps.png"}
 ,{"title": "Useful Numbers", "key": "Useful_numbers", "icon": "eng/Emergency_Useful_numbers.png"}
  ]},
 {"title": "Entertainment", "key": "Entertainment", "folder": "true", "icon": "eng/Entertainment.png", "children": [
-{"title": "Amusement & Theme Parks", "key": "Amusement_and_theme_parks", "icon": "eng/Entertainment_Amusement_and_theme_parks.png"}
-,{"title": "Amusement Activities", "key": "Amusement_activities", "icon": "eng/Entertainment_Amusement_activities.png"}
+{"title": "Amusement Activities", "key": "Amusement_activities", "icon": "eng/Entertainment_Amusement_activities.png"}
+,{"title": "Amusement & Theme Parks", "key": "Amusement_and_theme_parks", "icon": "eng/Entertainment_Amusement_and_theme_parks.png"}
 ,{"title": "Aquarium", "key": "Aquarium", "icon": "eng/Entertainment_Aquarium.png"}
+,{"title": "Beach", "key": "Beach", "icon": "eng/Entertainment_Beach.png"}
 ,{"title": "Betting Shops", "key": "Betting_shops", "icon": "eng/Entertainment_Betting_shops.png"}
 ,{"title": "Boxoffice", "key": "Boxoffice", "icon": "eng/Entertainment_Boxoffice.png"}
 ,{"title": "Cinema", "key": "Cinema", "icon": "eng/Entertainment_Cinema.png"}
 ,{"title": "Climbing", "key": "Climbing", "icon": "eng/Entertainment_Climbing.png"}
 ,{"title": "Discotheque", "key": "Discotheque", "icon": "eng/Entertainment_Discotheque.png"}
+,{"title": "Dog Area", "key": "Dog_area", "icon": "eng/Entertainment_Dog_area.png"}
 ,{"title": "Fishing Reserve", "key": "Fishing_reserve", "icon": "eng/Entertainment_Fishing_reserve.png"}
+,{"title": "Forest", "key": "Forest", "icon": "eng/Entertainment_Forest.png"}
 ,{"title": "Gambling And Betting", "key": "Gambling_and_betting", "icon": "eng/Entertainment_Gambling_and_betting.png"}
 ,{"title": "Game Reserve", "key": "Game_reserve", "icon": "eng/Entertainment_Game_reserve.png"}
 ,{"title": "Game Room", "key": "Game_room", "icon": "eng/Entertainment_Game_room.png"}
@@ -140,34 +148,48 @@
 ,{"title": "Green Areas", "key": "Green_areas", "icon": "eng/Entertainment_Green_areas.png"}
 ,{"title": "Gym Fitness", "key": "Gym_fitness", "icon": "eng/Entertainment_Gym_fitness.png"}
 ,{"title": "Hippodrome", "key": "Hippodrome", "icon": "eng/Entertainment_Hippodrome.png"}
+,{"title": "Marina", "key": "Marina", "icon": "eng/Entertainment_Marina.png"}
+,{"title": "National Park", "key": "National_park", "icon": "eng/Entertainment_National_park.png"}
+,{"title": "Natural Reserve", "key": "Natural_reserve", "icon": "eng/Entertainment_Natural_reserve.png"}
 ,{"title": "Operation Of Casinos", "key": "Operation_of_casinos", "icon": "eng/Entertainment_Operation_of_casinos.png"}
 ,{"title": "Pool", "key": "Pool", "icon": "eng/Entertainment_Pool.png"}
 ,{"title": "Rafting Kayak", "key": "Rafting_kayak", "icon": "eng/Entertainment_Rafting_kayak.png"}
 ,{"title": "Recreation Room", "key": "Recreation_room", "icon": "eng/Entertainment_Recreation_room.png"}
 ,{"title": "Riding Stables", "key": "Riding_stables", "icon": "eng/Entertainment_Riding_stables.png"}
 ,{"title": "Skiing Facility", "key": "Skiing_facility", "icon": "eng/Entertainment_Skiing_facility.png"}
+,{"title": "Smart Bench", "key": "Smart_Bench", "icon": "eng/Entertainment_Smart_Bench.png"}
 ,{"title": "Social Centre", "key": "Social_centre", "icon": "eng/Entertainment_Social_centre.png"}
 ,{"title": "Sport Event Promoters", "key": "Sport_event_promoters", "icon": "eng/Entertainment_Sport_event_promoters.png"}
 ,{"title": "Sports Clubs", "key": "Sports_clubs", "icon": "eng/Entertainment_Sports_clubs.png"}
 ,{"title": "Sports Facility", "key": "Sports_facility", "icon": "eng/Entertainment_Sports_facility.png"}
+,{"title": "View Point", "key": "Viewpoint", "icon": "eng/Entertainment_Viewpoint.png"}
  ]},
 {"title": "Environment", "key": "Environment", "folder": "true", "icon": "eng/Environment.png", "children": [
-{"title": "Build. & Indust. Clean. Activ.", "key": "Building_and_industrial_cleaning_activities", "icon": "eng/Environment_Building_and_industrial_cleaning_activities.png"}
+{"title": "Air Quality Monitoring", "key": "Air_quality_monitoring_station", "icon": "eng/Environment_Air_quality_monitoring_station.png"}
+,{"title": "Build. & Indust. Clean. Activ.", "key": "Building_and_industrial_cleaning_activities", "icon": "eng/Environment_Building_and_industrial_cleaning_activities.png"}
 ,{"title": "Cleaning Activities", "key": "Cleaning_activities", "icon": "eng/Environment_Cleaning_activities.png"}
 ,{"title": "Disinfec. & Exterm. Activities", "key": "Disinfecting_and_exterminating_activities", "icon": "eng/Environment_Disinfecting_and_exterminating_activities.png"}
 ,{"title": "Forestry", "key": "Forestry", "icon": "eng/Environment_Forestry.png"}
 ,{"title": "Geologists", "key": "Geologists", "icon": "eng/Environment_Geologists.png"}
 ,{"title": "Landscape Care", "key": "Landscape_care", "icon": "eng/Environment_Landscape_care.png"}
 ,{"title": "Materials Recovery", "key": "Materials_recovery", "icon": "eng/Environment_Materials_recovery.png"}
+,{"title": "Noise Level Sensor", "key": "Noise_level_sensor", "icon": "eng/Environment_Noise_level_sensor.png"}
+,{"title": "People Counter", "key": "People_counter", "icon": "eng/Environment_People_counter.png"}
 ,{"title": "Photovoltaic System", "key": "Photovoltaic_system", "icon": "eng/Environment_Photovoltaic_system.png"}
+,{"title": "Pollen Monitoring", "key": "Pollen_monitoring_station", "icon": "eng/Environment_Pollen_monitoring_station.png"}
 ,{"title": "Sewerage", "key": "Sewerage", "icon": "eng/Environment_Sewerage.png"}
+,{"title": "Smart Irrigator", "key": "Smart_irrigator", "icon": "eng/Environment_Smart_irrigator.png"}
+,{"title": "Smart Waste Container", "key": "Smart_waste_container", "icon": "eng/Environment_Smart_waste_container.png"}
+,{"title": "Street Light", "key": "Street_light", "icon": "eng/Environment_Street_light.png"}
 ,{"title": "Street Sweeping", "key": "Street_sweeping", "icon": "eng/Environment_Street_sweeping.png"}
 ,{"title": "Waste Collec. & Treatment", "key": "Waste_collection_and_treatment", "icon": "eng/Environment_Waste_collection_and_treatment.png"}
+,{"title": "Waste Container", "key": "Waste_container", "icon": "eng/Environment_Waste_container.png"}
+,{"title": "Water Resource", "key": "Water_resource", "icon": "eng/Environment_Water_resource.png"}
 ,{"title": "Weather Sensor", "key": "Weather_sensor", "icon": "eng/Environment_Weather_sensor.png"}
-,{"title": "People Counter", "key": "People_counter", "icon": "eng/Environment_Default.png"}
  ]},
 {"title": "Financial Service", "key": "FinancialService", "folder": "true", "icon": "eng/FinancialService.png", "children": [
 {"title": "Accountants", "key": "Accountants", "icon": "eng/FinancialService_Accountants.png"}
+,{"title": "ATM", "key": "Atm", "icon": "eng/FinancialService_Atm.png"}
 ,{"title": "Auditing Activities", "key": "Auditing_activities", "icon": "eng/FinancialService_Auditing_activities.png"}
 ,{"title": "Bank", "key": "Bank", "icon": "eng/FinancialService_Bank.png"}
 ,{"title": "Financial Institute", "key": "Financial_institute", "icon": "eng/FinancialService_Financial_institute.png"}
@@ -189,6 +211,7 @@
 ,{"title": "Police Headquarters", "key": "Police_headquarters", "icon": "eng/GovernmentOffice_Police_headquarters.png"}
 ,{"title": "Postal Office", "key": "Postal_office", "icon": "eng/GovernmentOffice_Postal_office.png"}
 ,{"title": "Prefecture", "key": "Prefecture", "icon": "eng/GovernmentOffice_Prefecture.png"}
+,{"title": "Public Relations Office", "key": "Public_relations_office", "icon": "eng/GovernmentOffice_Public_relations_office.png"}
 ,{"title": "Social Security Service Office", "key": "Social_security_service_office", "icon": "eng/GovernmentOffice_Social_security_service_office.png"}
 ,{"title": "Train Lost Property Office", "key": "Train_lost_property_office", "icon": "eng/GovernmentOffice_Train_lost_property_office.png"}
 ,{"title": "Welfare Worker Office", "key": "Welfare_worker_office", "icon": "eng/GovernmentOffice_Welfare_worker_office.png"}
@@ -226,44 +249,44 @@
 ,{"title": "Beverage Manufacture", "key": "Beverage_manufacture", "icon": "eng/IndustryAndManufacturing_Beverage_manufacture.png"}
 ,{"title": "Building Materials Manuf.", "key": "Building_materials_manufacture", "icon": "eng/IndustryAndManufacturing_Building_materials_manufacture.png"}
 ,{"title": "Coke & Petroleum Deriv.", "key": "Coke_and_petroleum_derivatives", "icon": "eng/IndustryAndManufacturing_Coke_and_petroleum_derivatives.png"}
-,{"title": "Comp. Program. & Consult.", "key": "Computer_programming_and_consultancy", "icon": "eng/IndustryAndManufacturing_Computer_programming_and_consultancy.png"}
 ,{"title": "Computer Data Processing", "key": "Computer_data_processing", "icon": "eng/IndustryAndManufacturing_Computer_data_processing.png"}
+,{"title": "Comp. Program. & Consult.", "key": "Computer_programming_and_consultancy", "icon": "eng/IndustryAndManufacturing_Computer_programming_and_consultancy.png"}
 ,{"title": "Food Manufacture", "key": "Food_manufacture", "icon": "eng/IndustryAndManufacturing_Food_manufacture.png"}
 ,{"title": "Footwear Manufacture", "key": "Footwear_manufacture", "icon": "eng/IndustryAndManufacturing_Footwear_manufacture.png"}
-,{"title": "ICT Service", "key": "Ict_service", "icon": "eng/IndustryAndManufacturing_ICT_service.png"}
+,{"title": "ICT Service", "key": "ICT_service", "icon": "eng/IndustryAndManufacturing_ICT_service.png"}
 ,{"title": "Instal. Of Indust. Machinery", "key": "Installation_of_industrial_machinery", "icon": "eng/IndustryAndManufacturing_Installation_of_industrial_machinery.png"}
 ,{"title": "Knitted Manufacture", "key": "Knitted_manufacture", "icon": "eng/IndustryAndManufacturing_Knitted_manufacture.png"}
 ,{"title": "Leather Manufacture", "key": "Leather_manufacture", "icon": "eng/IndustryAndManufacturing_Leather_manufacture.png"}
 ,{"title": "Machinery Repair & Instal.", "key": "Machinery_repair_and_installation", "icon": "eng/IndustryAndManufacturing_Machinery_repair_and_installation.png"}
-,{"title": "Man. Of Non Metal. Mineral", "key": "Manufacture_of_non_metallic_mineral_products", "icon": "eng/IndustryAndManufacturing_Manufacture_of_non_metallic_mineral_products.png"}
+,{"title": "Manufacture Of Basic Metals", "key": "Manufacture_of_basic_metals", "icon": "eng/IndustryAndManufacturing_Manufacture_of_basic_metals.png"}
 ,{"title": "Manuf. Of Chemic. Products", "key": "Manufacture_of_chemicals_products", "icon": "eng/IndustryAndManufacturing_Manufacture_of_chemicals_products.png"}
 ,{"title": "Manuf. Of Clay & Ceramic", "key": "Manufacture_of_clay_and_ceramic", "icon": "eng/IndustryAndManufacturing_Manufacture_of_clay_and_ceramic.png"}
 ,{"title": "Manuf. Of Electrical Equip.", "key": "Manufacture_of_electrical_equipment", "icon": "eng/IndustryAndManufacturing_Manufacture_of_electrical_equipment.png"}
+,{"title": "Manuf.Of Electr.Products", "key": "Manufacture_of_electronic_products", "icon": "eng/IndustryAndManufacturing_Manufacture_of_electronic_products.png"}
+,{"title": "Manufacture Of Furniture", "key": "Manufacture_of_furniture", "icon": "eng/IndustryAndManufacturing_Manufacture_of_furniture.png"}
+,{"title": "Manufacture Of Glass", "key": "Manufacture_of_glass", "icon": "eng/IndustryAndManufacturing_Manufacture_of_glass.png"}
 ,{"title": "Manuf. Of Jewel. Bijouterie", "key": "Manufacture_of_jewellery_bijouterie", "icon": "eng/IndustryAndManufacturing_Manufacture_of_jewellery_bijouterie.png"}
 ,{"title": "Manuf. Of Mach. & Equip.", "key": "Manufacture_of_machinery_and_equipment", "icon": "eng/IndustryAndManufacturing_Manufacture_of_machinery_and_equipment.png"}
 ,{"title": "Manuf. Of Motor Vehicles", "key": "Manufacture_of_motor_vehicles", "icon": "eng/IndustryAndManufacturing_Manufacture_of_motor_vehicles.png"}
 ,{"title": "Manuf. Of Musical Instrum.", "key": "Manufacture_of_musical_instruments", "icon": "eng/IndustryAndManufacturing_Manufacture_of_musical_instruments.png"}
+,{"title": "Man. Of Non Metal. Mineral", "key": "Manufacture_of_non_metallic_mineral_products", "icon": "eng/IndustryAndManufacturing_Manufacture_of_non_metallic_mineral_products.png"}
+,{"title": "Manufacture Of Paper", "key": "Manufacture_of_paper", "icon": "eng/IndustryAndManufacturing_Manufacture_of_paper.png"}
 ,{"title": "Manuf. Of Paper Products", "key": "Manufacture_of_paper_products", "icon": "eng/IndustryAndManufacturing_Manufacture_of_paper_products.png"}
 ,{"title": "Manuf. Of Pharmac. Products", "key": "Manufacture_of_pharmaceutical_products", "icon": "eng/IndustryAndManufacturing_Manufacture_of_pharmaceutical_products.png"}
 ,{"title": "Manuf. Of Plastics Products", "key": "Manufacture_of_plastics_products", "icon": "eng/IndustryAndManufacturing_Manufacture_of_plastics_products.png"}
 ,{"title": "Manuf. Of Refin. Petro. Prod.", "key": "Manufacture_of_refined_petroleum_products", "icon": "eng/IndustryAndManufacturing_Manufacture_of_refined_petroleum_products.png"}
+,{"title": "Manuf.Of Refractory Prod.", "key": "Manufacture_of_refractory_products", "icon": "eng/IndustryAndManufacturing_Manufacture_of_refractory_products.png"}
 ,{"title": "Manuf. Of Rub. & Plast. Prod.", "key": "Manufacture_of_rubber_and_plastics_products", "icon": "eng/IndustryAndManufacturing_Manufacture_of_rubber_and_plastics_products.png"}
+,{"title": "Manuf.Of Rubber Products", "key": "Manufacture_of_rubber_products", "icon": "eng/IndustryAndManufacturing_Manufacture_of_rubber_products.png"}
 ,{"title": "Manuf. Of Sports Goods", "key": "Manufacture_of_sports_goods", "icon": "eng/IndustryAndManufacturing_Manufacture_of_sports_goods.png"}
-,{"title": "Man. Of Struct. Metal Prod.", "key": "Manufacture_of_structural_metal_products", "icon": "eng/IndustryAndManufacturing_Manufacture_of_structural_metal_products.png"}
+,{"title": "Manuf. Of Struct. Metal Prod.", "key": "Manufacture_of_structural_metal_products", "icon": "eng/IndustryAndManufacturing_Manufacture_of_structural_metal_products.png"}
+,{"title": "Manufacture Of Textiles", "key": "Manufacture_of_textiles", "icon": "eng/IndustryAndManufacturing_Manufacture_of_textiles.png"}
 ,{"title": "Manuf. Of Toys And Game", "key": "Manufacture_of_toys_and_game", "icon": "eng/IndustryAndManufacturing_Manufacture_of_toys_and_game.png"}
+,{"title": "Manuf.Of Transport Equip.", "key": "Manufacture_of_transport_equipment", "icon": "eng/IndustryAndManufacturing_Manufacture_of_transport_equipment.png"}
 ,{"title": "Manuf. Of Travel Articles", "key": "Manufacture_of_travel_articles", "icon": "eng/IndustryAndManufacturing_Manufacture_of_travel_articles.png"}
 ,{"title": "Manuf. Of Wearing Apparel", "key": "Manufacture_of_wearing_apparel", "icon": "eng/IndustryAndManufacturing_Manufacture_of_wearing_apparel.png"}
-,{"title": "Manuf. Of Wood Products", "key": "Manufacture_of_wood_products", "icon": "eng/IndustryAndManufacturing_Manufacture_of_wood_products.png"}
-,{"title": "Manuf.Of Electr.Products", "key": "Manufacture_of_electronic_products", "icon": "eng/IndustryAndManufacturing_Manufacture_of_electronic_products.png"}
-,{"title": "Manuf.Of Refractory Prod.", "key": "Manufacture_of_refractory_products", "icon": "eng/IndustryAndManufacturing_Manufacture_of_refractory_products.png"}
-,{"title": "Manuf.Of Rubber Products", "key": "Manufacture_of_rubber_products", "icon": "eng/IndustryAndManufacturing_Manufacture_of_rubber_products.png"}
-,{"title": "Manuf.Of Transport Equip.", "key": "Manufacture_of_transport_equipment", "icon": "eng/IndustryAndManufacturing_Manufacture_of_transport_equipment.png"}
-,{"title": "Manufacture Of Basic Metals", "key": "Manufacture_of_basic_metals", "icon": "eng/IndustryAndManufacturing_Manufacture_of_basic_metals.png"}
-,{"title": "Manufacture Of Furniture", "key": "Manufacture_of_furniture", "icon": "eng/IndustryAndManufacturing_Manufacture_of_furniture.png"}
-,{"title": "Manufacture Of Glass", "key": "Manufacture_of_glass", "icon": "eng/IndustryAndManufacturing_Manufacture_of_glass.png"}
-,{"title": "Manufacture Of Paper", "key": "Manufacture_of_paper", "icon": "eng/IndustryAndManufacturing_Manufacture_of_paper.png"}
-,{"title": "Manufacture Of Textiles", "key": "Manufacture_of_textiles", "icon": "eng/IndustryAndManufacturing_Manufacture_of_textiles.png"}
 ,{"title": "Manufacture Of Wood", "key": "Manufacture_of_wood", "icon": "eng/IndustryAndManufacturing_Manufacture_of_wood.png"}
+,{"title": "Manuf. Of Wood Products", "key": "Manufacture_of_wood_products", "icon": "eng/IndustryAndManufacturing_Manufacture_of_wood_products.png"}
 ,{"title": "Mining Support Services", "key": "Mining_support_services", "icon": "eng/IndustryAndManufacturing_Mining_support_services.png"}
 ,{"title": "Other Manufacturing", "key": "Other_manufacturing", "icon": "eng/IndustryAndManufacturing_Other_manufacturing.png"}
 ,{"title": "Quality Control & Certific.", "key": "Quality_control_and_certification", "icon": "eng/IndustryAndManufacturing_Quality_control_and_certification.png"}
@@ -332,8 +355,9 @@
 ,{"title": "Garden And Agriculture", "key": "Garden_and_agriculture", "icon": "eng/ShoppingAndService_Garden_and_agriculture.png"}
 ,{"title": "Gifts And Smoking Articles", "key": "Gifts_and_smoking_articles", "icon": "eng/ShoppingAndService_Gifts_and_smoking_articles.png"}
 ,{"title": "Haberdashery", "key": "Haberdashery", "icon": "eng/ShoppingAndService_Haberdashery.png"}
-,{"title": "Hairdres. & Beauty Treatm.", "key": "Hairdressing_and_beauty_treatment", "icon": "eng/ShoppingAndService_Hairdressing_and_beauty_treatment.png"}
 ,{"title": "Hairdressing", "key": "Hairdressing", "icon": "eng/ShoppingAndService_Hairdressing.png"}
+,{"title": "Hairdres. & Beauty Treatm.", "key": "Hairdressing_and_beauty_treatment", "icon": "eng/ShoppingAndService_Hairdressing_and_beauty_treatment.png"}
+,{"title": "HW. Electr. Plumb. & Heating", "key": "Hardware_electrical_plumbing_and_heating", "icon": "eng/ShoppingAndService_Hardware_electrical_plumbing_and_heating.png"}
 ,{"title": "Hardware Paints And Glass", "key": "Hardware_paints_and_glass", "icon": "eng/ShoppingAndService_Hardware_paints_and_glass.png"}
 ,{"title": "Herbalists Shop", "key": "Herbalists_shop", "icon": "eng/ShoppingAndService_Herbalists_shop.png"}
 ,{"title": "Household Appliances Shop", "key": "Household_appliances_shop", "icon": "eng/ShoppingAndService_Household_appliances_shop.png"}
@@ -342,7 +366,6 @@
 ,{"title": "Household Furniture", "key": "Household_furniture", "icon": "eng/ShoppingAndService_Household_furniture.png"}
 ,{"title": "Household Products", "key": "Household_products", "icon": "eng/ShoppingAndService_Household_products.png"}
 ,{"title": "Household Utensils", "key": "Household_utensils", "icon": "eng/ShoppingAndService_Household_utensils.png"}
-,{"title": "HW. Electr. Plumb. & Heating", "key": "Hardware_electrical_plumbing_and_heating", "icon": "eng/ShoppingAndService_Hardware_electrical_plumbing_and_heating.png"}
 ,{"title": "Hypermarket", "key": "Hypermarket", "icon": "eng/ShoppingAndService_Hypermarket.png"}
 ,{"title": "Industrial Laundries", "key": "Industrial_laundries", "icon": "eng/ShoppingAndService_Industrial_laundries.png"}
 ,{"title": "Jeweller", "key": "Jeweller", "icon": "eng/ShoppingAndService_Jeweller.png"}
@@ -379,7 +402,7 @@
 ,{"title": "Repair Musical Instruments", "key": "Repair_musical_instruments", "icon": "eng/ShoppingAndService_Repair_musical_instruments.png"}
 ,{"title": "Repair Of Commun. Equipm.", "key": "Repair_of_communication_equipment", "icon": "eng/ShoppingAndService_Repair_of_communication_equipment.png"}
 ,{"title": "Repair Of Consumer Electr.", "key": "Repair_of_consumer_electronics", "icon": "eng/ShoppingAndService_Repair_of_consumer_electronics.png"}
-,{"title": "Rep. Of Footw. & Leat. Goo.", "key": "Repair_of_footwear_and_leather_goods", "icon": "eng/ShoppingAndService_Repair_of_footwear_and_leather_goods.png"}
+,{"title": "Repair Of Footw. & Leat. Goo.", "key": "Repair_of_footwear_and_leather_goods", "icon": "eng/ShoppingAndService_Repair_of_footwear_and_leather_goods.png"}
 ,{"title": "Repair Of Garden Equipment", "key": "Repair_of_garden_equipment", "icon": "eng/ShoppingAndService_Repair_of_garden_equipment.png"}
 ,{"title": "Repair Of Home Equipment", "key": "Repair_of_home_equipment", "icon": "eng/ShoppingAndService_Repair_of_home_equipment.png"}
 ,{"title": "Repair Of Househ. Applian.", "key": "Repair_of_household_appliances", "icon": "eng/ShoppingAndService_Repair_of_household_appliances.png"}
@@ -390,8 +413,8 @@
 ,{"title": "Retail Trade", "key": "Retail_trade", "icon": "eng/ShoppingAndService_Retail_trade.png"}
 ,{"title": "Rope Cord And Twine", "key": "Rope_cord_and_twine", "icon": "eng/ShoppingAndService_Rope_cord_and_twine.png"}
 ,{"title": "Sale Motor Vehicles Parts", "key": "Sale_motor_vehicles_parts", "icon": "eng/ShoppingAndService_Sale_motor_vehicles_parts.png"}
-,{"title": "Sale Of Motor Veh. & Motorc.", "key": "Sale_of_motor_vehicles_and_motorcycles", "icon": "eng/ShoppingAndService_Sale_of_motor_vehicles_and_motorcycles.png"}
 ,{"title": "Sale Of Motor Vehicles", "key": "Sale_of_motor_vehicles", "icon": "eng/ShoppingAndService_Sale_of_motor_vehicles.png"}
+,{"title": "Sale Of Motor Veh. & Motorc.", "key": "Sale_of_motor_vehicles_and_motorcycles", "icon": "eng/ShoppingAndService_Sale_of_motor_vehicles_and_motorcycles.png"}
 ,{"title": "Sale Of Motorcycles", "key": "Sale_of_motorcycles", "icon": "eng/ShoppingAndService_Sale_of_motorcycles.png"}
 ,{"title": "Sale Via Mail Or Via Internet", "key": "Sale_via_mail_order_houses_or_via_internet", "icon": "eng/ShoppingAndService_Sale_via_mail_order_houses_or_via_internet.png"}
 ,{"title": "Sanitary Equipment", "key": "Sanitary_equipment", "icon": "eng/ShoppingAndService_Sanitary_equipment.png"}
@@ -404,10 +427,10 @@
 ,{"title": "Small Household Appliances", "key": "Small_household_appliances", "icon": "eng/ShoppingAndService_Small_household_appliances.png"}
 ,{"title": "Souv. Craftw. & Relig. Art.", "key": "Souvenirs_craftwork_and_religious_articles", "icon": "eng/ShoppingAndService_Souvenirs_craftwork_and_religious_articles.png"}
 ,{"title": "Sporting Equipment", "key": "Sporting_equipment", "icon": "eng/ShoppingAndService_Sporting_equipment.png"}
-,{"title": "Stalls & Mark. Cloth. & Foot.", "key": "Stalls_and_markets_of_clothing_and_footwear", "icon": "eng/ShoppingAndService_Stalls_and_markets_of_clothing_and_footwear.png"}
-,{"title": "Stalls & Markets Other Goods", "key": "Stalls_and_markets_other_goods", "icon": "eng/ShoppingAndService_Stalls_and_markets_other_goods.png"}
 ,{"title": "Stalls And Markets", "key": "Stalls_and_markets", "icon": "eng/ShoppingAndService_Stalls_and_markets.png"}
+,{"title": "Stalls & Mark. Cloth. & Foot.", "key": "Stalls_and_markets_of_clothing_and_footwear", "icon": "eng/ShoppingAndService_Stalls_and_markets_of_clothing_and_footwear.png"}
 ,{"title": "Stalls And Markets Of Food", "key": "Stalls_and_markets_of_food", "icon": "eng/ShoppingAndService_Stalls_and_markets_of_food.png"}
+,{"title": "Stalls & Markets Other Goods", "key": "Stalls_and_markets_other_goods", "icon": "eng/ShoppingAndService_Stalls_and_markets_other_goods.png"}
 ,{"title": "Stamps And Coins", "key": "Stamps_and_coins", "icon": "eng/ShoppingAndService_Stamps_and_coins.png"}
 ,{"title": "Supermarket", "key": "Supermarket", "icon": "eng/ShoppingAndService_Supermarket.png"}
 ,{"title": "Tattoo And Piercing", "key": "Tattoo_and_piercing", "icon": "eng/ShoppingAndService_Tattoo_and_piercing.png"}
@@ -448,9 +471,11 @@
 ,{"title": "Airplanes Rental", "key": "Airplanes_rental", "icon": "eng/TransferServiceAndRenting_Airplanes_rental.png"}
 ,{"title": "Bike Rack", "key": "Bike_rack", "icon": "eng/TransferServiceAndRenting_Bike_rack.png"}
 ,{"title": "Bike Rental", "key": "Bike_rental", "icon": "eng/TransferServiceAndRenting_Bike_rental.png"}
+,{"title": "Bike Sharing Rack", "key": "Bike_sharing_rack", "icon": "eng/TransferServiceAndRenting_Bike_sharing_rack.png"}
 ,{"title": "Boats And Ships Rental", "key": "Boats_and_ships_rental", "icon": "eng/TransferServiceAndRenting_Boats_and_ships_rental.png"}
-,{"title": "Bus Stop", "key": "BusStop", "icon": "eng/TransferServiceAndRenting_BusStop.png"}
+,{"title": "Bollard", "key": "Bollard", "icon": "eng/TransferServiceAndRenting_Bollard.png"}
 ,{"title": "Bus Tickets Retail", "key": "Bus_tickets_retail", "icon": "eng/TransferServiceAndRenting_Bus_tickets_retail.png"}
+,{"title": "Bus Stop", "key": "BusStop", "icon": "eng/TransferServiceAndRenting_BusStop.png"}
 ,{"title": "Car Park", "key": "Car_park", "icon": "eng/TransferServiceAndRenting_Car_park.png"}
 ,{"title": "Car Rental With Driver", "key": "Car_rental_with_driver", "icon": "eng/TransferServiceAndRenting_Car_rental_with_driver.png"}
 ,{"title": "Cargo Handling", "key": "Cargo_handling", "icon": "eng/TransferServiceAndRenting_Cargo_handling.png"}
@@ -460,6 +485,7 @@
 ,{"title": "Controlled Parking Zone", "key": "Controlled_parking_zone", "icon": "eng/TransferServiceAndRenting_Controlled_parking_zone.png"}
 ,{"title": "Courier", "key": "Courier", "icon": "eng/TransferServiceAndRenting_Courier.png"}
 ,{"title": "Cycle Paths", "key": "Cycle_paths", "icon": "eng/TransferServiceAndRenting_Cycle_paths.png"}
+,{"title": "Ferry Stop", "key": "Ferry_stop", "icon": "eng/TransferServiceAndRenting_Ferry_stop.png"}
 ,{"title": "Flight Companies", "key": "Flight_companies", "icon": "eng/TransferServiceAndRenting_Flight_companies.png"}
 ,{"title": "Freight Trans. & Furnit. Rem.", "key": "Freight_transport_and_furniture_removal", "icon": "eng/TransferServiceAndRenting_Freight_transport_and_furniture_removal.png"}
 ,{"title": "Fuel Station", "key": "Fuel_station", "icon": "eng/TransferServiceAndRenting_Fuel_station.png"}
@@ -468,16 +494,21 @@
 ,{"title": "Land Transport Rental", "key": "Land_transport_rental", "icon": "eng/TransferServiceAndRenting_Land_transport_rental.png"}
 ,{"title": "Lifting / Handl. Equip. Rental", "key": "Lifting_and_handling_equipment_rental", "icon": "eng/TransferServiceAndRenting_Lifting_and_handling_equipment_rental.png"}
 ,{"title": "Logistics Activities", "key": "Logistics_activities", "icon": "eng/TransferServiceAndRenting_Logistics_activities.png"}
+,{"title": "Monitoring Camera", "key": "Monitoring_camera", "icon": "eng/TransferServiceAndRenting_Monitoring_camera.png"}
 ,{"title": "Passenger Air Transport", "key": "Passenger_air_transport", "icon": "eng/TransferServiceAndRenting_Passenger_air_transport.png"}
+,{"title": "Port", "key": "Port", "icon": "eng/TransferServiceAndRenting_Port.png"}
 ,{"title": "Postal And Courier Activities", "key": "Postal_and_courier_activities", "icon": "eng/TransferServiceAndRenting_Postal_and_courier_activities.png"}
-,{"title": "Rtzgate", "key": "RTZgate", "icon": "eng/TransferServiceAndRenting_RTZgate.png"}
-,{"title": "Sensor Site", "key": "SensorSite", "icon": "eng/TransferServiceAndRenting_SensorSite.png"}
+,{"title": "Postal Office", "key": "RTZgate", "icon": "eng/TransferServiceAndRenting_RTZgate.png"}
+,{"title": "Rtzgate", "key": "SensorSite", "icon": "eng/TransferServiceAndRenting_SensorSite.png"}
+,{"title": "Subway Station", "key": "Subway_station", "icon": "eng/TransferServiceAndRenting_Subway_station.png"}
 ,{"title": "Support Activ. For Transport.", "key": "Support_activities_for_transportation", "icon": "eng/TransferServiceAndRenting_Support_activities_for_transportation.png"}
 ,{"title": "Taxi Company", "key": "Taxi_company", "icon": "eng/TransferServiceAndRenting_Taxi_company.png"}
-,{"title": "Taxi Park", "key": "Taxi_park", "icon": "eng/TransferServiceAndRenting_Taxi_park.png"}
+,{"title": "Taxi", "key": "Taxi_park", "icon": "eng/TransferServiceAndRenting_Taxi_park.png"}
+,{"title": "Traffic Light", "key": "Traffic_light", "icon": "eng/TransferServiceAndRenting_Traffic_light.png"}
 ,{"title": "Train Station", "key": "Train_station", "icon": "eng/TransferServiceAndRenting_Train_station.png"}
 ,{"title": "Tram Stops", "key": "Tram_stops", "icon": "eng/TransferServiceAndRenting_Tram_stops.png"}
 ,{"title": "Tramline", "key": "Tramline", "icon": "eng/TransferServiceAndRenting_Tramline.png"}
+,{"title": "Underpass", "key": "Underpass", "icon": "eng/TransferServiceAndRenting_Underpass.png"}
 ,{"title": "Urban Bus", "key": "Urban_bus", "icon": "eng/TransferServiceAndRenting_Urban_bus.png"}
 ,{"title": "Vehicle Rental", "key": "Vehicle_rental", "icon": "eng/TransferServiceAndRenting_Vehicle_rental.png"}
 ,{"title": "Warehousing And Storage", "key": "Warehousing_and_storage", "icon": "eng/TransferServiceAndRenting_Warehousing_and_storage.png"}
@@ -501,7 +532,7 @@
 ,{"title": "Machinery And Equip. Rental", "key": "Machinery_and_equipment_rental", "icon": "eng/UtilitiesAndSupply_Machinery_and_equipment_rental.png"}
 ,{"title": "Management Consultancy", "key": "Management_consultancy", "icon": "eng/UtilitiesAndSupply_Management_consultancy.png"}
 ,{"title": "Office Admin. & Sup. Activ.", "key": "Office_administrative_and_support_activities", "icon": "eng/UtilitiesAndSupply_Office_administrative_and_support_activities.png"}
-,{"title": "Org. Of Conv., Trade Shows", "key": "Organization_of_conventions_and_trade_shows", "icon": "eng/UtilitiesAndSupply_Organization_of_conventions_and_trade_shows.png"}
+,{"title": "Org. Of Conv. & Trade Shows", "key": "Organization_of_conventions_and_trade_shows", "icon": "eng/UtilitiesAndSupply_Organization_of_conventions_and_trade_shows.png"}
 ,{"title": "Other Telecom. Activities", "key": "Other_telecommunications_activities", "icon": "eng/UtilitiesAndSupply_Other_telecommunications_activities.png"}
 ,{"title": "Packaging Activities", "key": "Packaging_activities", "icon": "eng/UtilitiesAndSupply_Packaging_activities.png"}
 ,{"title": "Pers.& Househ. Goods Rental", "key": "Personal_and_household_goods_rental", "icon": "eng/UtilitiesAndSupply_Personal_and_household_goods_rental.png"}
@@ -519,12 +550,12 @@
 {"title": "Non Specialized Who. Trade", "key": "Non_specialized_wholesale_trade", "icon": "eng/Wholesale_Non_specialized_wholesale_trade.png"}
 ,{"title": "Other Specialized Wholesale", "key": "Other_specialized_wholesale", "icon": "eng/Wholesale_Other_specialized_wholesale.png"}
 ,{"title": "Who. Agr. Raw Mat. Live Ani.", "key": "Wholesale_agricultural_raw_materials_live_animals", "icon": "eng/Wholesale_Wholesale_agricultural_raw_materials_live_animals.png"}
-,{"title": "Whol. Machin. Equipm. Sup.", "key": "Wholesale_machinery_equipmentent_supplies", "icon": "eng/Wholesale_Wholesale_machinery_equipmentent_supplies.png"}
-,{"title": "Wholes. Food Bever. Tobac.", "key": "Wholesale_food_beverages_tobacco", "icon": "eng/Wholesale_Wholesale_food_beverages_tobacco.png"}
-,{"title": "Wholes. Motor Vehic. Parts", "key": "Wholesale_motor_vehicles_parts", "icon": "eng/Wholesale_Wholesale_motor_vehicles_parts.png"}
 ,{"title": "Wholesale Commis.Trade", "key": "Wholesale_commission_trade", "icon": "eng/Wholesale_Wholesale_commission_trade.png"}
+,{"title": "Wholes. Food Bever. Tobacco", "key": "Wholesale_food_beverages_tobacco", "icon": "eng/Wholesale_Wholesale_food_beverages_tobacco.png"}
 ,{"title": "Wholesale Household Goods", "key": "Wholesale_household_goods", "icon": "eng/Wholesale_Wholesale_household_goods.png"}
 ,{"title": "Wholesale Ict Equipment", "key": "Wholesale_ict_equipment", "icon": "eng/Wholesale_Wholesale_ict_equipment.png"}
+,{"title": "Whol. Machin. Equipm. Sup.", "key": "Wholesale_machinery_equipmentent_supplies", "icon": "eng/Wholesale_Wholesale_machinery_equipmentent_supplies.png"}
+,{"title": "Wholes. Motor Vehic. Parts", "key": "Wholesale_motor_vehicles_parts", "icon": "eng/Wholesale_Wholesale_motor_vehicles_parts.png"}
 ,{"title": "Wholesale Trade", "key": "Wholesale_trade", "icon": "eng/Wholesale_Wholesale_trade.png"}
  ]},
 {"title": "Wine And Food", "key": "WineAndFood", "folder": "true", "icon": "eng/WineAndFood.png", "children": [
