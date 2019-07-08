@@ -1,0 +1,533 @@
+/*Smart Cloud Engine Web Interface
+Copyright (C) 2015 DISIT Lab http://www.disit.org - University of Florence
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.*/
+
+/* Default font settings.
+   The font-size percentage is of 16px. (0.75 * 16px = 12px) */
+html { margin-left: 0.4em; margin-right: 0.4em; font-size:100.01%; }
+body {
+    font-size: 70%; //75%
+    color: #222;
+    /*background: #f5fff9;*/
+    background: #e5e5e5;
+    /* background-image: url("../images/texture.png");
+    background-repeat: repeat; */
+    font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+    margin: 0; 
+}
+
+
+/* Headings
+-------------------------------------------------------------- */
+
+h1,h2,h3,h4,h5,h6 { font-weight: normal; color: #111; }
+
+h1 { font-size: 3em; line-height: 1; margin-bottom: 0.5em; }
+h2 { font-size: 2em; margin-bottom: 0.75em; }
+h3 { font-size: 1.5em; line-height: 1; margin-bottom: 1em; }
+h4 { font-size: 1.2em; line-height: 1.25; margin-bottom: 1.25em; }
+h5 { font-size: 1em; font-weight: bold; margin-bottom: 1.5em; }
+h6 { font-size: 1em; font-weight: bold; }
+
+h1 img, h2 img, h3 img,
+h4 img, h5 img, h6 img {
+    margin: 0;
+}
+
+
+/* Text elements
+-------------------------------------------------------------- */
+
+p           { margin: 0 0 1.5em; font-size: 14px}
+p img.left  { float: left; margin: 1.5em 1.5em 1.5em 0; padding: 0; }
+p img.right { float: right; margin: 1.5em 0 1.5em 1.5em; }
+
+a:focus,
+a:hover     { color: #000; }
+a           { color: #009; text-decoration: none; font-size: 16px}
+
+blockquote  { margin: 1.5em; color: #666; font-style: italic; }
+strong      { font-weight: bold; }
+em,dfn      { font-style: italic; }
+dfn         { font-weight: bold; }
+sup, sub    { line-height: 0; }
+
+abbr,
+acronym     { border-bottom: 1px dotted #666; }
+address     { margin: 0 0 1.5em; font-style: italic; }
+del         { color:#666; }
+
+pre         { margin: 1.5em 0; white-space: pre; }
+pre,code,tt { font: 1em 'andale mono', 'lucida console', monospace; line-height: 1.5; }
+
+span        {font-size: 14px;}
+.page-link span  {font-size: 16px;}
+/* Lists
+-------------------------------------------------------------- */
+
+li ul,
+li ol       { margin: 0; }
+ul, ol      { margin: 0 1.5em 1.5em 0; padding-left: 3.333em; }
+
+ul          { list-style-type: disc; }
+ol          { list-style-type: decimal; }
+
+dl          { margin: 0 0 1.5em 0; }
+dl dt       { font-weight: bold; }
+dd          { margin-left: 1.5em;}
+
+
+/* Tables
+-------------------------------------------------------------- */
+
+//table       { margin-bottom: 1.4em; width:100%; }
+table       { margin-bottom: 1.4em; width:100%; table-layout: fixed; }
+th          { font-weight: bold; }
+thead th    { background: #c3d9ff; }
+//th,td,caption { padding: 4px 10px 4px 5px; }
+th,td,caption { padding: 4px 10px 4px 5px; overflow: hidden; width: 160px; height: 40px; word-wrap: break-word; text-overflow: ellipsis; font-size: 14px; text-shadow: 0px 1px 0px rgba(255,255,255,.5); /* 50% white from bottom */ }
+tr.even td  { background: #d3d3d3; } /* #e5ecf9 */
+tr.odd td  { background: #f5fff9; } /* #fffafa #f5fffa */
+tfoot       { font-style: italic; }
+caption     { background: #eee; }
+tr          { word-wrap: break-word }
+td          { height: 50px; font-size: 16px; }
+/* Misc classes
+-------------------------------------------------------------- */
+
+.small      { font-size: .8em; margin-bottom: 1.875em; line-height: 1.875em; }
+.large      { font-size: 1.2em; line-height: 2.5em; margin-bottom: 1.25em; }
+.hide       { display: none; }
+
+.quiet      { color: #666; }
+.loud       { color: #000; }
+.highlight  { background:#ff0; }
+.added      { background:#060; color: #fff; }
+.removed    { background:#900; color: #fff; }
+
+.first      { margin-left:0; padding-left:0; }
+.last       { margin-right:0; padding-right:0; }
+.top        { margin-top:0; padding-top:0; }
+.bottom     { margin-bottom:0; padding-bottom:0; }
+
+textarea.result { width: 164px; resize: vertical; min-height: 60px; max-height: 250px; font-size: 16px; border: 0 none; background-color: transparent; font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;}
+textarea.settings { width: 300px; resize: vertical; min-height: 60px; max-height: 250px; font-size: 16px; border: 0 none; background-color: transparent; font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;}
+
+/* style for Linked Open Graph iframe */
+/* http://css-tricks.com/examples/CSS3Gradient/ */
+#container {
+    width: 100%;
+    overflow: auto;
+    padding-top: 85px;
+    background: #f5fff9;
+}
+#container iframe {
+    width: 100%;
+    min-height: 800px;
+    border: 0;
+}
+
+/* style for header.php */
+.header {
+    /* border:2px solid red; */
+    width: 100%;
+    overflow: hidden;
+    border-bottom: 1px solid gray;
+    position: fixed;
+    left: 0;
+}
+.header .left-image {
+    /* background: url(icons/icaro.png) */
+    /* no-repeat; */
+    float: left;
+    /* border:2px solid green; */
+    padding-left: 10px;
+}
+.header .right-image {
+    /* background: url(icons/disit.jpg) */
+    /* no-repeat; */
+    float: rigth;
+    /* border:2px solid green; */
+}
+.header .text {
+    font: x-large sans-serif;
+    font-weight: bold;
+    text-shadow: 0px 1px 0px #fff;
+    padding: 10px;
+    margin-top: 2px;
+
+}
+.header a {
+    color:black;
+    text-decoration:none;
+}
+.header .image, 
+.header .text {
+    display: inline-block;
+    vertical-align: bottom;
+}
+#gradient { 
+    /* fallback */ 
+    background-color: #f5fff9; /* #A9ACB6 */
+    /* background-image: url(images/linear_bg_1.png); */
+    background-repeat: repeat-y; 
+    /* Safari 4-5, Chrome 1-9 */ background: -webkit-gradient(linear, left top, right top, from(#f5fff9), to(#A9ACB6)); 
+    /* Safari 5.1, Chrome 10+ */ background: -webkit-linear-gradient(left, #A9ACB6, #f5fff9); 
+    /* Firefox 3.6+ */ background: -moz-linear-gradient(left, #A9ACB6, #f5fff9); 
+    /* IE 10 */ background: -ms-linear-gradient(left, #A9ACB6, #f5fff9); 
+    /* Opera 11.10+ */ background: -o-linear-gradient(left, #A9ACB6, #f5fff9);
+}
+img.logo {
+    max-width: 100%;
+    height: 60px;
+    padding: 5px 0px;
+    margin-top: 3px;
+}
+span.subtext {
+    text-shadow: none;
+    font-size: 60%;
+    font-weight: bold;
+    padding: 5px 0px;
+    text-shadow: 0px 1px 0px rgba(255,255,255,.5); /* 50% white from bottom */
+}
+img.info {
+    max-width: 30%;
+    height: 25px;
+    vertical-align: bottom;
+}
+
+/* style for form button */
+/*http://button.csscook.com/*/
+input[type=text] {padding:5px; border:2px solid #ccc; 
+                  -webkit-border-radius: 5px;
+                  border-radius: 5px;
+}
+input.text[type=text] {
+    width:300px;
+}
+input.numeric[type=text] {
+    width:300px;
+}
+input.boolean[type=text] {
+    width:300px;
+}
+input.priority[type=text] {
+    width:100px;
+}
+input[type=text]:focus {border-color:#333; }
+input[type=button] {
+    border : solid 1px #9e9e9e;
+    border-radius : 3px;
+    moz-border-radius : 3px;
+    -webkit-box-shadow : 0px 0px 2px rgba(0,0,0,1.0);
+    -moz-box-shadow : 0px 0px 2px rgba(0,0,0,1.0);
+    box-shadow : 0px 0px 2px rgba(0,0,0,1.0);
+    font-size : 20px;
+    color : #2f4f4f;
+    padding : 1px 17px;
+    background : #ffffff;
+    background : -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(49%,#f1f1f1), color-stop(51%,#e1e1e1), color-stop(100%,#f6f6f6));
+    background : -moz-linear-gradient(top, #ffffff 0%, #f1f1f1 49%, #e1e1e1 51%, #f6f6f6 100%);
+    background : -webkit-linear-gradient(top, #ffffff 0%, #f1f1f1 49%, #e1e1e1 51%, #f6f6f6 100%);
+    background : -o-linear-gradient(top, #ffffff 0%, #f1f1f1 49%, #e1e1e1 51%, #f6f6f6 100%);
+    background : -ms-linear-gradient(top, #ffffff 0%, #f1f1f1 49%, #e1e1e1 51%, #f6f6f6 100%);
+    background : linear-gradient(top, #ffffff 0%, #f1f1f1 49%, #e1e1e1 51%, #f6f6f6 100%);
+    filter : progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#f6f6f6', GradientType=0 );
+    cursor: pointer;
+}
+input[type=button]:hover {
+    border : solid 1px #000000;
+}
+
+/* padding for tables */
+div#resultsTable {
+    /*width: 100%;
+    overflow: auto;*/
+    padding-top: 85px;
+}
+div#resultsTableReload {
+    /*width: 100%;
+    overflow: auto;*/
+    padding-top: 0px;
+}
+/* filters for queries on tables */
+div#filtersTable {
+    /*width: 100%;
+    overflow: auto;*/
+    padding-top: 63px;
+}
+
+/* style for div of newJob.php and newTrigger.php */
+div#postFields {
+    padding-top: 75px;
+}
+
+div#recommendationsTable {
+    margin-top: 120px;
+}
+
+div#recommendationsTable table {
+    table-layout: fixed;
+}
+
+div#recommendationsTable table td {
+    font-size: 14px;
+    height: 85px;
+}
+
+div#recommendationsTable table th {
+    width: 440px;
+}
+
+div#recommendationsTable th.label {
+    width:30px;
+}
+
+/* buttons */
+a.button {
+    border: 1px solid #ccc;
+    padding: 5px;
+    color: #000;
+    text-decoration: none;
+    font-size: 14px;
+    line-height: 30px;
+    background: #A9ACB6;
+    border-radius: 12px;
+    -webkit-border-radius: 12px;
+    -moz-border-radius: 12px;
+    box-shadow: 1px 1px 2px rgba(0,0,0,.5);
+    -webkit-box-shadow: 1px 1px 2px rgba(0,0,0,.5);
+    -moz-box-shadow: 1px 1px 2px rgba(0,0,0,.5);
+    text-shadow: #fff 0px 1px 1px;
+    background: -webkit-gradient(linear, left top, left bottom, from(#eeeeee), to(#cccccc));
+    background: -moz-linear-gradient(top,  #eeeeee,  #cccccc);
+    filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#eeeeee', endColorstr='#cccccc');
+}
+/*a:hover.button {
+    box-shadow: 0px 0px 0px rgba(0,0,0,.5);
+    -webkit-box-shadow: 0px 0px 0px rgba(0,0,0,.5);
+    -moz-box-shadow: 0px 0px 0px rgba(0,0,0,.5);
+    position: relative;
+    top: 1px;
+    left: 1px;
+}*/
+
+/* style for cluster.php */
+div.cluster {
+    width: 400px;
+    outline: 1px solid;
+    float: left;
+    padding-top: 10px;
+    padding-left: 10px;
+    margin-top: 90px;
+    margin-left: 10px;
+    box-shadow: 10px 10px 5px #888888;
+    background: -webkit-gradient(linear, left top, left bottom, from(#eeeeee), to(#cccccc));
+    background: -moz-linear-gradient(top,  #eeeeee,  #cccccc);
+}
+.cluster p { 
+    font-size: 14px;
+    margin: 4px;
+}
+div.clusterTime {
+    margin-bottom: 10px;
+    float: left;
+}
+p.clusterTitle {
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    text-shadow: 0px 1px 0px #fff;
+}
+/*div.clusterContainer {
+    display:block;
+}*/
+div.clusterTotal {
+    width: 95%;
+    outline: 1px solid;
+    padding-top: 40px;
+    padding-left: 10px;
+    margin-top: 100px;
+    margin-bottom: 30px;
+    margin-left: 10px;
+    box-shadow: 10px 10px 5px #888888;
+    float:left;
+}
+
+div.clusterTotal table {
+    table-layout: initial;
+}
+
+.clusterTotal td {
+    text-align: center;
+    font-size: 30px;
+    text-shadow: 0px 1px 0px #fff;
+    overflow: hidden;
+    text-overflow:ellipsis;
+}
+.clusterTotal thead th {
+    text-align: center;
+    font-size: 30px;
+    background: transparent;
+    text-shadow: 0px 1px 0px #fff;
+    overflow: hidden;
+    text-overflow:ellipsis;
+}
+a.acluster {
+    font-size: 14px;
+    margin: 4px;
+    color: inherit;
+}
+
+/*style for scheduler status (used in index.php and status.php)*/
+div.scheduler {
+    width: 20%;
+    height: 100px;
+    outline: 1px solid;
+    padding: 10px;
+    margin: 100px 30px 0px 0px;
+    box-shadow: 10px 10px 5px #888888;
+    background: -webkit-gradient(linear, left top, left bottom, from(#eeeeee), to(#cccccc));
+    background: -moz-linear-gradient(top,  #eeeeee,  #cccccc);
+    display:inline-table;
+}
+
+div#user {
+    font: x-large sans-serif;
+    font-weight: bold;
+    text-shadow: 0px 1px 0px #fff;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    margin-top: 0px;
+    padding-left: 1px;
+    position: fixed;
+    background-color: #e5e5e5;
+    width:38.7%;
+}
+
+div#user p {
+    font: x-small;
+    font-weight: bold;
+    text-shadow: 0px 1px 0px #fff;
+}
+
+div#profile p {
+    font: x-small;
+    font-weight: bold;
+    text-shadow: 0px 1px 0px #fff;
+}
+
+p#group {
+    font-size: 16px;
+    font-weight: bold;
+    text-shadow: 0px 1px 0px #fff;
+}
+
+a#dislike {
+    font-size: 16px;
+    font-weight: bold;
+    color: #8B0000;
+    text-shadow: 0px 1px 0px #fff;
+}
+
+a#requested {
+    font-size: 16px;
+    font-weight: bold;
+    color: #00008B;
+    text-shadow: 0px 1px 0px #fff;
+}
+
+/* custom toast background override toastr.css */
+#toast-container > .customer-info {            
+    background: -webkit-gradient(linear, left top, left bottom, from(#eeeeee), to(#c4c4c4));
+    background: -moz-linear-gradient(top,  #eeeeee,  #c4c4c4);
+    text-shadow: 0px 1px 0px #fff;
+    font-size: 14px;
+    font-weight: bold;
+    color: black;
+}
+
+/* divs */
+#container1 {
+    width: 100%;
+    /*background: #ccc;*/
+    overflow-y:scroll;
+    position:absolute;
+    top: 85px;
+    left:0px;
+    right:0px;
+    bottom:0px;
+}
+
+#recommendations1 {
+    display: inline-block;
+    /*background: blue;*/
+    position: relative;
+    overflow: scroll;
+    /*left: 0;*/
+    /*float: left;*/
+    margin-top: 0px;
+    width: 40%; 
+    height: 100%;
+}
+
+#map {
+    display: inline-block;
+    /*background: red;*/
+    position: relative;
+    margin-top: 0px;
+    /*left: 0;*/
+    float: right;
+    width: 60%;
+    height: 100%;
+}
+
+table.empty {
+    color: #A9A9A9;
+    cursor: zoom-in;
+}
+
+table.result {
+    cursor: zoom-in;
+}
+
+span.timestamp {
+    cursor: pointer;
+} 
+
+span.coordinates {
+    display: none;
+}
+
+div.main {
+    position: absolute;
+}
+div.login {
+    position: relative;
+    left: 10;
+    vertical-align : bottom;
+    font-size: 14px;
+}
+
+div.login input {
+    font-size: 14px
+}
+
+/* header.php span for date_time */
+span#date_time {
+    position: absolute;
+    right: 10px;
+}
