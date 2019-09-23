@@ -296,7 +296,7 @@
                                 <match id="attribute-valueunit.allowed-values" op="or" lev="SEVERE">                                    
                                     <match-value>^(da|h|k|M|G|T|P|E|Z|Y|d|c|m|μ|n|p|f|a|z|y){0,1}(m|kg|s|A|K|mol|cd|rad|sr|Hz|N|Pa|J|W|C|V|F|Ω|S|Wb|T|H|°C|lm|lx|Bq|Gy|Sv|kat|min|h|d|°|′|″|ha|l|L|t|au|AU|Np|B|dB|Å|a|b|bar|mbar|atm|Ba|mmHg|Torr){1}$</match-value>
                                     <match-value>^(&#37;|°C|lux|hPa|ppm|#|km/h|s|car/h|m/s|deg|mm|μm|V|euro|cbar|m|V|A|W|KWh|F|mA|VA){1}$</match-value>
-                                    <match-value>^(#|m|km/h|s|&#37;|ppm|A|C|KW/h|euro|lux|W|hPa|mm|cbar|V|car/h|µm|deg|m/s){1}$</match-value>
+                                    <match-value>^(#|m|km/h|s|&#37;|ppm|A|C|KW/h|euro|lux|W|hPa|mm|cbar|V|car/h|µm|deg|m/s|mS/cm){1}$</match-value>
                                 </match>
                             </pick-validator>
                         </validate>

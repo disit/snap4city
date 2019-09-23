@@ -5,7 +5,7 @@
         <servlet-class>org.disit.iotdeviceapi.Insert</servlet-class>
         <init-param>
             <param-name>cfgFile</param-name>
-            <param-value>/invalid/iot-config/insert-api-cfg.xml</param-value>
+            <param-value>/usr/share/tomcat7/iot-config/insert-api-cfg.xml</param-value>
         </init-param>
     </servlet>
     <servlet>
@@ -13,7 +13,7 @@
         <servlet-class>org.disit.iotdeviceapi.Delete</servlet-class>
         <init-param>
             <param-name>cfgFile</param-name>
-            <param-value>/invalid/iot-config/delete-api-cfg.xml</param-value>
+            <param-value>/usr/share/tomcat7/iot-config/delete-api-cfg.xml</param-value>
         </init-param>
     </servlet>
     <servlet>
@@ -21,7 +21,7 @@
         <servlet-class>org.disit.iotdeviceapi.Disable</servlet-class>
         <init-param>
             <param-name>cfgFile</param-name>
-            <param-value>/invalid/iot-config/disable-api-cfg.xml</param-value>
+            <param-value>/usr/share/tomcat7/iot-config/disable-api-cfg.xml</param-value>
         </init-param>
     </servlet>
     <servlet>
@@ -29,7 +29,7 @@
         <servlet-class>org.disit.iotdeviceapi.Enable</servlet-class>
         <init-param>
             <param-name>cfgFile</param-name>
-            <param-value>/invalid/iot-config/enable-api-cfg.xml</param-value>
+            <param-value>/usr/share/tomcat7/iot-config/enable-api-cfg.xml</param-value>
         </init-param>
     </servlet>
     <servlet>
@@ -37,7 +37,7 @@
         <servlet-class>org.disit.iotdeviceapi.MakePublic</servlet-class>
         <init-param>
             <param-name>cfgFile</param-name>
-            <param-value>/invalid/iot-config/make-public-api-cfg.xml</param-value>
+            <param-value>/usr/share/tomcat7/iot-config/make-public-api-cfg.xml</param-value>
         </init-param>
     </servlet>
     <servlet>
@@ -45,7 +45,7 @@
         <servlet-class>org.disit.iotdeviceapi.MakePrivate</servlet-class>
         <init-param>
             <param-name>cfgFile</param-name>
-            <param-value>/invalid/iot-config/make-private-api-cfg.xml</param-value>
+            <param-value>/usr/share/tomcat7/iot-config/make-private-api-cfg.xml</param-value>
         </init-param>
     </servlet>
     <servlet-mapping>
