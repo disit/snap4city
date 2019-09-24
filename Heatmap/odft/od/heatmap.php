@@ -7,18 +7,8 @@ header("Cache-Control: no-cache, must-revalidate"); //HTTP 1.1
 header("Pragma: no-cache"); //HTTP 1.0
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 
-//include_once "settings_ldap.php";
 session_start();
 $_REQUEST["profile"] = "S4C" . $_REQUEST["org"] . "TrackerLocation";
-// logout
-/*if (isset($_REQUEST["logout"])) {
-unset($_SESSION["role"]);
-session_destroy();
-}
-// check the permission
-if (!isset($_SESSION["role"])) {
-header("location: ssoLogin.php");
-}*/
 
 ?>
 <html>
@@ -27,7 +17,7 @@ header("location: ssoLogin.php");
         <meta http-equiv="refresh" content="10800" >
         <title><?php
 if (isset($_REQUEST["title"])) {
-	echo $_REQUEST["title"];
+	filter_var($_REQUEST["title"], FILTER_SANITIZE_STRING);
 } else {
 	echo "Heatmap";
 }
@@ -43,11 +33,13 @@ if (isset($_REQUEST["title"])) {
 
         <!-- map headers -->
         <!--<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.css" />-->
-        <link rel="stylesheet" href="javascript/leaflet.css" />
+        <!--<link rel="stylesheet" href="javascript/leaflet.css" />-->
         <!--<link rel="stylesheet" href="css/leaflet.css" />-->
         <!--<script src="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.js"></script>-->
-        <script src="javascript/leaflet.js"></script>
+        <!--<script src="javascript/leaflet.js"></script>-->
         <!--<script type="text/javascript" src="javascript/maps/leaflet.js"></script>-->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.1/leaflet.css" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.1/leaflet.js"></script>
 
         <!--leaflet label plugin includes https://github.com/Leaflet/Leaflet.label-->
         <script src = "javascript/maps/leaflet-label-plugin/Label.js" ></script>
@@ -73,9 +65,14 @@ if (isset($_REQUEST["title"])) {
         <script src = "javascript/maps/leaflet-heatmap.js" ></script>
 
         <!-- marker cluster plugin https://github.com/Leaflet/Leaflet.markercluster-->
-        <link rel="stylesheet" href="javascript/maps/markercluster/MarkerCluster.css" />
+        <!--<link rel="stylesheet" href="javascript/maps/markercluster/MarkerCluster.css" />
         <link rel="stylesheet" href="javascript/maps/markercluster/MarkerCluster.Default.css" />
-        <script src="javascript/maps/markercluster/leaflet.markercluster-src.js"></script>
+        <script src="javascript/maps/markercluster/leaflet.markercluster-src.js"></script>-->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/leaflet.markercluster-src.js" integrity="sha256-UxMFwvJ2+HaHDi1Ik5WYCuUcv1yS+hS5QYitB0ev0JQ=" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/leaflet.markercluster.js" integrity="sha256-WL6HHfYfbFEkZOFdsJQeY7lJG/E5airjvqbznghUzRw=" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/MarkerCluster.Default.css" integrity="sha256-LWhzWaQGZRsWFrrJxg+6Zn8TT84k0/trtiHBc6qcGpY=" crossorigin="anonymous" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/MarkerCluster.Default.css" integrity="sha256-LWhzWaQGZRsWFrrJxg+6Zn8TT84k0/trtiHBc6qcGpY=" crossorigin="anonymous" />
+
         <?php
 if ((isset($_REQUEST["showFrame"]) && $_REQUEST['showFrame'] == 'false') || $_SESSION['showFrame'] == 'false') {
 	$_SESSION['showFrame'] = 'false';
@@ -237,6 +234,7 @@ map.on("zoomend", function () {
         // set zoom level in legend
         $("#zoom").text(zoomLevel);console.log(zoomLevel);
         redraw();
+        toggleClusteredTrajectories($("#checkBoxClusteredTrajectories").is(":checked"));
         });
 
                 function redraw() {
@@ -527,7 +525,7 @@ function getClusterSize() {
                     div.innerHTML +=
                             //'<i style="background: ' + color_urls[i] + '"></i> ' +
                             '<br>Clustered trajectories (<span id="numClusteredTrajectories">' + numClusteredTrajectories + '</span>): ' +
-                            '<input id="checkBoxClusteredTrajectories" type="checkbox" name="clusteredTrajectories" value="false" onclick="toggleClusteredTrajectories(this.checked);">' +
+                            '<input id="checkBoxClusteredTrajectories" type="checkbox" name="clusteredTrajectories" value="true" checked onclick="toggleClusteredTrajectories(this.checked);">' +
                             '<br>(' + String.fromCharCode(0x03B5) + ': ' + eps + ', minLns: ' + minLns + ')' +
                             '<br> ' +
                             '<a id="unselect" style="cursor:pointer" onclick="downSlider(\'clusteredTrajectories\',1,1,0);">&#10094;</a>&nbsp;&nbsp;&nbsp;' +
@@ -535,18 +533,19 @@ function getClusterSize() {
                             '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a id="unselect" style="cursor:pointer" onclick="upSlider(\'clusteredTrajectories\',1,1,300);">&#10095;</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' +
                             '<span id="rangeclusteredTrajectories">2</span>';
                     // disable interaction of this div with map
-                    if (!L.Browser.touch) {
-                        L.DomEvent.disableClickPropagation(div);
+                    L.DomEvent.disableClickPropagation(div);
+                    /*if (!L.Browser.touch) {
                         L.DomEvent.on(div, 'mousewheel', L.DomEvent.stopPropagation);
                     } else {
                         L.DomEvent.on(div, 'click', L.DomEvent.stopPropagation);
-                    }
+                    }*/
                     return div;
                 };
                 // add legend to map
                 legend.addTo(map);
                 //map.fitBounds(coordinatesLine.getBounds());
                 //map.setView([57.505, -0.01], 13);
+                toggleClusteredTrajectories($("#checkBoxClusteredTrajectories").is(":checked"));
             </script>
         </div> <!-- div container -->
     </body>

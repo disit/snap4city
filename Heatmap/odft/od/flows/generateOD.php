@@ -13,13 +13,13 @@ ini_set("memory_limit", "-1");
 
 function getHeatmap($org, $hour, $clusterSize) {
 	$nodes = array();
-	$json = json_decode(file_get_contents("./flows/" . $org . "/nodes_" . $hour . ($hour != "" ? "_" : "") . $clusterSize. ".geojson"), true);
+	$json = json_decode(file_get_contents("./flows/" . $org . "/nodes_" . $hour . ($hour != "" ? "_" : "") . $clusterSize . ".geojson"), true);
 	foreach ($json["features"] as $feature) {
 		$nodes[$feature["id"]] = array($feature["properties"]["LAT"], $feature["properties"]["LON"]);
 	}
 	// Open the file for reading
 	$i = 0;
-	if (($h = fopen("./flows/" . $org . "/links_" . $hour . ($hour != "" ? "_" : "") . $clusterSize. ".csv", "r")) !== FALSE) {
+	if (($h = fopen("./flows/" . $org . "/links_" . $hour . ($hour != "" ? "_" : "") . $clusterSize . ".csv", "r")) !== FALSE) {
 		// Convert each line into the local $data variable
 		while (($data = fgetcsv($h, 1000, ",")) !== FALSE) {
 			// Read the data from a single line
@@ -74,9 +74,9 @@ function getPeopleFlows($clusterSize) {
 	}
 
 	// sort the results by user desc, timestamp desc
-	$sql = "SELECT a.id AS idmeasure, b.username AS user, a.latitude, a.longitude, a.data_time AS date, EXTRACT(hour FROM data_time) AS hour, EXTRACT(day FROM data_time) AS day, EXTRACT(month FROM data_time) AS month, EXTRACT(year FROM data_time) AS year FROM profiledb.kpivalues" . ($_REQUEST["test"] == "true" ? "test" : "") . " a LEFT JOIN profiledb.kpidata" . ($_REQUEST["test"] == "true" ? "test" : "") . " b ON a.kpi_id = b.id WHERE b.value_name = 'S4C" . $_REQUEST["org"] . "TrackerLocation' ORDER BY b.username DESC, a.data_time DESC";
-        //$sql = "SELECT idmeasure, device_id AS user, latitude, longitude, date, EXTRACT(hour FROM date) AS hour, EXTRACT(day FROM date) AS day, EXTRACT(month FROM date) AS month, EXTRACT(year FROM date) AS year FROM profiledb.sensors WHERE idmeasure > " . $max_row . " ORDER BY device_id DESC, date DESC";
-        $result = mysqli_query($link, $sql) or die(mysqli_error());
+	$sql = "SELECT a.id AS idmeasure, b.username AS user, a.latitude, a.longitude, a.data_time AS date, EXTRACT(hour FROM data_time) AS hour, EXTRACT(day FROM data_time) AS day, EXTRACT(month FROM data_time) AS month, EXTRACT(year FROM data_time) AS year FROM profiledb.kpivalues" . ($_REQUEST["test"] == "true" ? "test" : "") . " a LEFT JOIN profiledb.kpidata" . ($_REQUEST["test"] == "true" ? "test" : "") . " b ON a.kpi_id = b.id WHERE b.value_name = 'S4C" . $_REQUEST["org"] . "TrackerLocation' AND a.id > " . $max_row . " ORDER BY b.username DESC, a.data_time DESC";
+	//$sql = "SELECT idmeasure, device_id AS user, latitude, longitude, date, EXTRACT(hour FROM date) AS hour, EXTRACT(day FROM date) AS day, EXTRACT(month FROM date) AS month, EXTRACT(year FROM date) AS year FROM profiledb.sensors WHERE idmeasure > " . $max_row . " ORDER BY device_id DESC, date DESC";
+	$result = mysqli_query($link, $sql) or die(mysqli_error());
 	while ($row = mysqli_fetch_assoc($result)) {
 		$max_row = max($max_row, $row["idmeasure"]);
 
@@ -208,7 +208,7 @@ function getTotalPeopleFlows($clusterSize) {
 			continue;
 		}
 		$csv = array_map('str_getcsv', file("./" . $_REQUEST["org"] . "/links_" . $hour . $cluster_suffix . ".csv"));
-                // populate array with id => coordinates
+		// populate array with id => coordinates
 		$geojson = json_decode(file_get_contents("./" . $_REQUEST["org"] . "/nodes_" . $hour . $cluster_suffix . ".geojson"), true);
 		foreach ($geojson["features"] as $feature) {
 			$id_lat_lon[$feature["id"]] = $feature["properties"]["LAT"] . " " . $feature["properties"]["LON"];
@@ -362,9 +362,9 @@ function getTotalPeopleFlows($clusterSize) {
 			//$counter = 0;
 			foreach ($links_hour[$hour] as $k => $v) {
 				// do not include values < 10
-				if ($links_hour[$hour][$k] < 10) {
+				/*if ($links_hour[$hour][$k] < 10) {
 					break;
-				}
+				}*/
 				// populate node.geojson file
 				$target_source = explode("|", $k);
 				$target = explode(",", $target_source[0]);
@@ -588,7 +588,7 @@ function getUsersProfiles() {
 
 // generate people flows for various cluster sizes
 $n = 13;
-$clusterSize = 276;//1104;
+$clusterSize = 276; //1104;
 for ($i = 0; $i < $n; $i++) {
 	getPeopleFlows($clusterSize);
 	getTotalPeopleFlows($clusterSize);

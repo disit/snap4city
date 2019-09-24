@@ -68,7 +68,7 @@ $bind = ldap_bind($ds);
 
 // mettere il gruppo
 if ($ds && $bind) {
-  if (checkLdapMembership($ds, $ldapUsername, "Recommender")) {
+  //if (checkLdapMembership($ds, $ldapUsername, "Recommender")) {
     if (checkLdapRole($ds, $ldapUsername, "RootAdmin")) {
       $ldapRole = "RootAdmin";
       $ldapOk = true;
@@ -84,9 +84,9 @@ if ($ds && $bind) {
     } else {
       $msg = "user $username does not have a valid role";
     }
-  } else {
-    $msg = "user $username cannot access to Recommender";
-  }
+  //} else {
+    //$msg = "user $username cannot access to OD Matrix";
+  //}
 } else {
   $msg = "cannot bind to LDAP server";
 }

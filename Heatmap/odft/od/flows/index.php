@@ -1,12 +1,4 @@
 <?php
-/* include_once "../../settings_ldap.php";
-
-// logout
-if (isset($_REQUEST["logout"])) {
-unset($_SESSION["role"]);
-session_destroy();
-}
- */
 //set headers to NOT cache a page
 header("Cache-Control: no-cache, must-revalidate"); //HTTP 1.1
 header("Pragma: no-cache"); //HTTP 1.0
@@ -15,7 +7,7 @@ header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 session_start();
 // check the permission
 if (!isset($_SESSION["role"])) {
-	header("location: ../../ssoLogin.php?org=".$_REQUEST['org']);
+	header("location: ../../ssoLogin.php?org=" . $_REQUEST['org']);
 }
 ?>
 <html>
@@ -23,6 +15,7 @@ if (!isset($_SESSION["role"])) {
         <!-- refresh page after 3 hours -->
         <meta http-equiv="refresh" content="10800" >
         <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <title><?php
 if (isset($_REQUEST["title"])) {
 	echo $_REQUEST["title"];
@@ -33,14 +26,16 @@ if (isset($_REQUEST["title"])) {
         </title>
         <!-- use leaflet 0.7.5 css with leaflet 1.0 js to make work the leaflet.curve.js plugin and the legend -->
         <!--<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.css" />-->
-        <link rel="stylesheet" type="text/css" href="../css/leaflet.css" />
+        <!--<link rel="stylesheet" type="text/css" href="../css/leaflet.css" />-->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.1/leaflet.css" />
         <!--<link rel="stylesheet" type="text/css" href = "../css/jquery-ui.css"/>-->
         <link rel="stylesheet" type="text/css" href="../css/typography1.css" />
         <!--<script src="http://d3js.org/d3.v3.min.js"></script>-->
         <script src="../javascript/maps/d3.v3.min.js"></script>
         <script type="text/javascript" src="../javascript/jquery-2.1.0.min.js"></script>
         <!--<script src="http://cdn.leafletjs.com/leaflet/v1.0.0-rc.1/leaflet.js"></script>-->
-        <script src="../javascript/maps/leaflet-1.0.js"></script>
+        <!--<script src="../javascript/maps/leaflet-1.0.js"></script>-->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.1/leaflet.js"></script>
         <!-- custom marker with id and icon attributes -->
         <script>
             CustomMarker = L.Marker.extend({
@@ -69,24 +64,24 @@ if (isset($_REQUEST["title"])) {
         <!-- jquery csv plugin https://github.com/evanplaice/jquery-csv/ -->
         <script src="../javascript/jquery.csv.js"></script>
         <!-- include the grids for various cluster sizes -->
-        <script src="../javascript/<?php echo $_REQUEST["org"];?>/grid_276.js"></script>
-        <script src="../javascript/<?php echo $_REQUEST["org"];?>/grid_552.js"></script>
-        <script src="../javascript/<?php echo $_REQUEST["org"];?>/grid_1104.js"></script>
-        <script src="../javascript/<?php echo $_REQUEST["org"];?>/grid_2208.js"></script>
-        <script src="../javascript/<?php echo $_REQUEST["org"];?>/grid_4416.js"></script>
-        <script src="../javascript/<?php echo $_REQUEST["org"];?>/grid_8832.js"></script>
-        <script src="../javascript/<?php echo $_REQUEST["org"];?>/grid_17664.js"></script>
-        <script src="../javascript/<?php echo $_REQUEST["org"];?>/grid_35328.js"></script>
-        <script src="../javascript/<?php echo $_REQUEST["org"];?>/grid_70656.js"></script>
-        <script src="../javascript/<?php echo $_REQUEST["org"];?>/grid_141312.js"></script>
-        <script src="../javascript/<?php echo $_REQUEST["org"];?>/grid_282624.js"></script>
-        <script src="../javascript/<?php echo $_REQUEST["org"];?>/grid_565248.js"></script>
-        <script src="../javascript/<?php echo $_REQUEST["org"];?>/grid_1130496.js"></script>
-        <script src="../javascript/<?php echo $_REQUEST["org"];?>/grid_2260992.js"></script>
-        <script src="../javascript/<?php echo $_REQUEST["org"];?>/grid_4521984.js"></script>
-        <!--<script src="../javascript/<?php echo $_REQUEST["org"];?>/grid_9043968.js"></script>
-        <script src="../javascript/<?php echo $_REQUEST["org"];?>/grid_18087936.js"></script>
-        <script src="../javascript/<?php echo $_REQUEST["org"];?>/grid_36175872.js"></script>-->
+        <script src="../javascript/<?php echo $_REQUEST["org"]; ?>/grid_276.js"></script>
+        <script src="../javascript/<?php echo $_REQUEST["org"]; ?>/grid_552.js"></script>
+        <script src="../javascript/<?php echo $_REQUEST["org"]; ?>/grid_1104.js"></script>
+        <script src="../javascript/<?php echo $_REQUEST["org"]; ?>/grid_2208.js"></script>
+        <script src="../javascript/<?php echo $_REQUEST["org"]; ?>/grid_4416.js"></script>
+        <script src="../javascript/<?php echo $_REQUEST["org"]; ?>/grid_8832.js"></script>
+        <script src="../javascript/<?php echo $_REQUEST["org"]; ?>/grid_17664.js"></script>
+        <script src="../javascript/<?php echo $_REQUEST["org"]; ?>/grid_35328.js"></script>
+        <script src="../javascript/<?php echo $_REQUEST["org"]; ?>/grid_70656.js"></script>
+        <script src="../javascript/<?php echo $_REQUEST["org"]; ?>/grid_141312.js"></script>
+        <script src="../javascript/<?php echo $_REQUEST["org"]; ?>/grid_282624.js"></script>
+        <script src="../javascript/<?php echo $_REQUEST["org"]; ?>/grid_565248.js"></script>
+        <script src="../javascript/<?php echo $_REQUEST["org"]; ?>/grid_1130496.js"></script>
+        <script src="../javascript/<?php echo $_REQUEST["org"]; ?>/grid_2260992.js"></script>
+        <script src="../javascript/<?php echo $_REQUEST["org"]; ?>/grid_4521984.js"></script>
+        <!--<script src="../javascript/<?php echo $_REQUEST["org"]; ?>/grid_9043968.js"></script>
+        <script src="../javascript/<?php echo $_REQUEST["org"]; ?>/grid_18087936.js"></script>
+        <script src="../javascript/<?php echo $_REQUEST["org"]; ?>/grid_36175872.js"></script>-->
 
         <style>
             .curvesettings {
@@ -108,7 +103,8 @@ if (isset($_REQUEST["title"])) {
             }
         </style>
         <?php
-if ($_SERVER["HTTP_REFERER"]){//(isset($_REQUEST["showFrame"]) && $_REQUEST['showFrame'] == 'false') || $_SESSION['showFrame'] == 'false') {
+if ($_SERVER["HTTP_REFERER"]) {
+//(isset($_REQUEST["showFrame"]) && $_REQUEST['showFrame'] == 'false') || $_SESSION['showFrame'] == 'false') {
 	$_SESSION['showFrame'] = 'false';
 	echo "<style>
             body { zoom: 1.0; }
@@ -125,7 +121,7 @@ if ($_SERVER["HTTP_REFERER"]){//(isset($_REQUEST["showFrame"]) && $_REQUEST['sho
     <body>
         <?php
 // https://github.com/elfalem/Leaflet.curve
-if ($_SERVER["HTTP_REFERER"] == ""){// || ((!isset($_REQUEST["showFrame"]) || $_REQUEST['showFrame'] != 'false') && $_SESSION['showFrame'] != 'false')) {
+if ($_SERVER["HTTP_REFERER"] == "") { // || ((!isset($_REQUEST["showFrame"]) || $_REQUEST['showFrame'] != 'false') && $_SESSION['showFrame'] != 'false')) {
 	include_once "../header.php"; //include header
 }
 // get the midpoint of decimal coordinates NOT USED
@@ -232,14 +228,14 @@ function getFeaturesInView() {
   });
   return features;
 }
-<?php // remove flows from the map and reset markers icons to default                          ?>
+<?php // remove flows from the map and reset markers icons to default ?>
             $(function () {
             $("button").click(function (event) {
-<?php // prevent Clean button to propagate on map                          ?>
+<?php // prevent Clean button to propagate on map ?>
             event.preventDefault();
-<?php // remove flows from the map                          ?>
+<?php // remove flows from the map ?>
             removeFlows();
-<?php // reset markers icons to default                          ?>
+<?php // reset markers icons to default ?>
             resetMarkersIcons();
             });
             });</script>
@@ -306,13 +302,11 @@ function getFeaturesInView() {
         </div>
     </form>
     <script>
-<?php //setup map
-?>
+<?php //setup map ?>
         var mbAttr = 'Map data &copy; <a class="leafletAttribution" href="https://openstreetmap.org">OpenStreetMap</a> contributors, ' +
                 '<a class="leafletAttribution" href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
                 'Imagery © <a class="leafletAttribution" href="https://mapbox.com">Mapbox</a>';
-<?php // for satellite map use mapbox.streets-satellite in the url
-?>
+<?php // for satellite map use mapbox.streets-satellite in the url ?>
         var baseLayer = L.tileLayer('https://api.mapbox.com/v4/mapbox.streets/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoicGJlbGxpbmkiLCJhIjoiNTQxZDNmNDY0NGZjYTk3YjlkNTAzNWQwNzc0NzQwYTcifQ.CNfaDbrJLPq14I30N1EqHg', {
         attribution: mbAttr,
                 maxZoom: 22,
@@ -333,47 +327,33 @@ function getFeaturesInView() {
                  zoom: 11,
                  layers: [baseLayer]
          });
-<?php // csv
-?>
+<?php // csv ?>
         var csv;
-<?php // min/max flows
-?>
+<?php // min/max flows ?>
         var flows_min_max;
-<?php // flows csv map (id => (outFlow: x, inFlow: y) or id => (inFlow: x, outFlow: y))
-?>
+<?php // flows csv map (id => (outFlow: x, inFlow: y) or id => (inFlow: x, outFlow: y)) ?>
         var links;
-<?php // flows totals for every node
-?>
+<?php // flows totals for every node ?>
         var flows;
-<?php // links layers
-?>
+<?php // links layers ?>
         var links_layers = [];
-<?php // temp beziers curves layer
-?>
+<?php // temp beziers curves layer ?>
         var beziers_layer_tmp;
-<?php // temp grid layer
-?>
+<?php // temp grid layer ?>
         var grid_layer_tmp;
-<?php // cluster size
-?>
+<?php // cluster size ?>
         var clusterSize = getClusterSize();
-<?php // get coordinates map (id => (lat, lon))
-?>
+<?php // get coordinates map (id => (lat, lon)) ?>
         var coordinates;
-<?php // flow direction (outflow, inflow)
-?>
+<?php // flow direction (outflow, inflow) ?>
         var flow_direction = "outflow";
-<?php // get the hour value
-?>
+<?php // get the hour value ?>
         var hour = $("input:radio[name=hour]:checked").val();
-<?php // set zoom level in legend
-?>
-        $("#zoom").text("13");
-<?php // set OD matrix link in legend
-?>
+<?php // set zoom level in legend ?>
+        $("#zoom").text(map.getZoom());
+<?php // set OD matrix link in legend ?>
 
-<?php // load csv, draw circles and flows
-?>
+<?php // load csv, draw circles and flows ?>
         $.ajax({
         url: "./<?php echo $_REQUEST["org"]; ?>/links_" + (hour != "" ? hour + "_" : "") + clusterSize + ".csv",
                 async: true,
@@ -382,19 +362,15 @@ function getFeaturesInView() {
                 },
                 dataType: "text",
                 complete: function () {
-<?php // get min/max flows
-?>
+<?php // get min/max flows ?>
                 flows_min_max = getMinMaxFlows(csv);
-<?php // get flows totals for every node
-?>
+<?php // get flows totals for every node ?>
                 flows = getFlows(csv);
-<?php // get geoJSON, draw circles on map and populate links layers
-?>
+<?php // get geoJSON, draw circles on map and populate links layers ?>
                 draw(clusterSize);
                 }
         });
-<?php // get bezier curve joining two coordinates (lat, lon)
-?>
+<?php // get bezier curve joining two coordinates (lat, lon) ?>
         function getBezier(lat1, lon1, lat2, lon2, steps, angle, weight) {
         var bezierPath = getBezierPath(lat1, lon1, lat2, lon2, steps, angle);
         var color = flow_direction == "outflow" ? "darkblue" : "darkred";
@@ -432,8 +408,7 @@ function getFeaturesInView() {
         return targetPoints;
         }
 
-<?php // javascript version of https://gist.github.com/Reflejo/f5addfa6408d521a971f
-?>
+<?php // javascript version of https://gist.github.com/Reflejo/f5addfa6408d521a971f ?>
         function fetchThirdPointByLocations(lat1, lon1, lat2, lon2, angle) {
         btpAngle = Math.atan2(Math.abs(lat1 - lat2), Math.abs(lon1 - lon2)) * 180 / Math.PI;
         center = [(lat1 + lat2) / 2.0, (lon1 + lon2) / 2.0];
@@ -446,8 +421,7 @@ function getFeaturesInView() {
         return [center[0] + lat, center[1] + lng];
         }
 
-<?php // calculate the midpoint of coordinates
-?>
+<?php // calculate the midpoint of coordinates ?>
         function midpoint(lat1, lng1, lat2, lng2) {
         lat1 = deg2rad(lat1);
         lng1 = deg2rad(lng1);
@@ -497,8 +471,7 @@ function getFeaturesInView() {
         return [lat_center, lon_center, lat_right, lat_left, lon_top, lon_bottom];
         }
 
-<?php // converts degress to radiants
-?>
+<?php // convert degrees to radiants ?>
         function deg2rad(value) {
         return value * Math.PI / 180;
         }
@@ -509,36 +482,30 @@ function getFeaturesInView() {
 
         //map.on('click', onMapClick);
 
-<?php // if the user zooms, remove every layer, except the map, and redraw clusters
-?>
+<?php // if the user zooms, remove every layer, except the map, and redraw clusters ?>
         map.on("zoomend", function () {
         zoomLevel = map.getZoom();
         // set zoom level in legend
         $("#zoom").text(zoomLevel);
         redraw();
         });
-<?php // remove every layer, except the map, and redraw clusters
-?>
+<?php // remove every layer, except the map, and redraw clusters ?>
         function redraw() {
-<?php // get the hour value
-?>
+<?php // get the hour value ?>
         var hour = $("input:radio[name=hour]:checked").val();
         var grid = false;
-<?php // check if the map has the grid
-?>
+<?php // check if the map has the grid ?>
         if (map.hasLayer(grid_layer_tmp)) {
         grid = true;
         }
-<?php // remove every layer
-?>
+<?php // remove every layer ?>
         map.eachLayer(function (layer) {
         if (layer != baseLayer) {
         map.removeLayer(layer);
         }
         });
         clusterSize = getClusterSize();
-<?php // load csv, draw circles and flows
-?>
+<?php // load csv, draw circles and flows ?>
         $.ajax({
         url: "./<?php echo $_REQUEST["org"]; ?>/links_" + (hour != "" ? hour + "_" : "") + clusterSize + ".csv",
                 async: true,
@@ -547,17 +514,13 @@ function getFeaturesInView() {
                 },
                 dataType: "text",
                 complete: function () {
-<?php // get min/max flows
-?>
+<?php // get min/max flows ?>
                 flows_min_max = getMinMaxFlows(csv);
-<?php // get flows totals for every node
-?>
+<?php // get flows totals for every node ?>
                 flows = getFlows(csv);
-<?php // get geoJSON, draw circles on map and populate links layers
-?>
+<?php // get geoJSON, draw circles on map and populate links layers ?>
                 draw(clusterSize);
-<?php // if the map had the grid, add it to the map
-?>
+<?php // if the map had the grid, add it to the map ?>
                 if (grid) {
                 grid_layer_tmp = getGridLayer(clusterSize);
                 grid_layer_tmp.addTo(map);
@@ -566,16 +529,14 @@ function getFeaturesInView() {
         });
         }
 
-<?php // remove flows from the map
-?>
+<?php // remove flows from the map ?>
         function removeFlows() {
         if (beziers_layer_tmp) {
         map.removeLayer(beziers_layer_tmp);
         }
         }
 
-<?php // reset markers icons to default
-?>
+<?php // reset markers icons to default ?>
         function resetMarkersIcons() {
         $.each(map._layers, function (ml) {
         if (this.options.id) {
@@ -584,11 +545,9 @@ function getFeaturesInView() {
         })
         }
 
-<?php // set cluster size in legend
-?>
+<?php // set cluster size in legend ?>
         function setClusterArea() {
-<?php // get coordinates of first cluster (not important which to choose)
-?>
+<?php // get coordinates of first cluster (not important which to choose) ?>
         var lat_lon;
         for (var key in coordinates) {
         lat_lon = coordinates[key];
@@ -600,36 +559,28 @@ function getFeaturesInView() {
         $("#cluster").text(Math.round(area * 100 / 1000000) / 100);
         }
 
-<?php // get geoJSON, draw circles on map and populate links layers
-?>
+<?php // get geoJSON, draw circles on map and populate links layers ?>
         function draw(clusterSize) {
 lon_max = map.getBounds().getEast();
 lon_min = map.getBounds().getWest();
 lat_max = map.getBounds().getNorth();
 lat_min = map.getBounds().getSouth();
-<?php // get the hour value
-?>
+<?php // get the hour value ?>
         var hour = $("input:radio[name=hour]:checked").val();
-<?php // get the radius value
-?>
+<?php // get the radius value ?>
         var radius = $("input:radio[name=radius]:checked").val();
-<?php // set OD matrix link in legend
-?>
+<?php // set OD matrix link in legend ?>
         var hour_p = hour != "" ? "&hour=" + hour : "";
         var radius_p = radius != 0 ? "&radius=" + radius : "";
         $("#od").attr("href", "./adj/adj.php?org=<?php echo $_REQUEST["org"]; ?>&cluster=" + clusterSize + hour_p + radius_p + "&title=<?php echo urlencode("Origin Destination matrix for People Flows&nbsp;"); ?>");
         $.getJSON("./<?php echo $_REQUEST["org"]; ?>/nodes_" + (hour != "" ? hour + "_" : "") + clusterSize + ".geojson").done(function (data) {
-<?php // reset links_layers
-?>
+<?php // reset links_layers ?>
         links_layers = [];
-<?php // get coordinates map (id => (lat, lon))
-?>
+<?php // get coordinates map (id => (lat, lon)) ?>
         coordinates = getCoordinatesMap(data);
-<?php // get flows csv map (id => (outFlow: x, inFlow: y) or id => (inFlow: x, outFlow: y))
-?>
+<?php // get flows csv map (id => (outFlow: x, inFlow: y) or id => (inFlow: x, outFlow: y)) ?>
         links = getLinksMap(csv);
-<?php // loop links[target][source] array and populate links layers
-?>
+<?php // loop links[target][source] array and populate links layers ?>
 <?php // note that in case flow_direction = "inflow", target and source are swapped (target is the source, and source is the target)
 ?>
         for (var target in links) {
@@ -665,11 +616,9 @@ lat_min = map.getBounds().getSouth();
         }
         }
         }
-<?php // draw geoJSON data
-?>
+<?php // draw geoJSON data ?>
         drawGeoJSON(data);
-<?php // set cluster area in legend
-?>
+<?php // set cluster area in legend ?>
         setClusterArea();
         });
         }
@@ -682,8 +631,7 @@ lat_min = map.getBounds().getSouth();
         layer.bindPopup(popupContent);
         }
 
-<?php // draw geoJSON data
-?>
+<?php // draw geoJSON data ?>
         function drawGeoJSON(geoJSON) {
         lon_max = map.getBounds().getEast();
         lon_min = map.getBounds().getWest();
@@ -702,8 +650,7 @@ lat_min = map.getBounds().getSouth();
                 flow = isNaN(flow) ? 0 : flow;
                 color = getColor(flow, flows_min_max[0], flows_min_max[1]);
                 radius = getRadius(flow, flows_min_max[0], flows_min_max[1]);
-<?php // make the svg icon https://groups.google.com/forum/#!topic/leaflet-js/GSisdUm5rEc
-?>
+<?php // make the svg icon https://groups.google.com/forum/#!topic/leaflet-js/GSisdUm5rEc ?>
                 //var xml = '<\?xml version="1.0" encoding="utf-8"\?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100" height="100">';
                 //var svg = xml + "<circle cx=\"50\" cy=\"50\" r=\"" + radius + "\" opacity=\"0.7\" style=\"fill:" + color + "\"></circle></svg>";
 <?php
@@ -730,23 +677,19 @@ lat_min = map.getBounds().getSouth();
                  opacity: 1,
                  fillOpacity: 0.8
                  }*/
-<?php // marker, on click draws beziers links between this marker and its targets
-?>
+<?php // marker, on click draws beziers links between this marker and its targets ?>
                 return new CustomMarker(latlng, {icon: SVGIcon, defaultIcon: SVGIcon, id: feature["id"], text: flow, color: color, radius: radius}).
                         //bindPopup('Lat: ' + latlng.lat + '<br>Lon: ' + latlng.lng).
                         //bindLabel('Lat: ' + latlng.lat + '<br>Lon: ' + latlng.lng).
-                        on('click', function (e) {
-<?php // remove flows from the map and reset markers icons to default
-?>
+                        on('click', function (e) {console.log(e.target.options.id);
+<?php // remove flows from the map and reset markers icons to default ?>
                         if (beziers_layer_tmp) {
                         map.removeLayer(beziers_layer_tmp);
                         resetMarkersIcons();
                         }
-<?php // set text icon with the flow from this marker
-?>
+<?php // set text icon with the flow from this marker ?>
                         setMarkerHighlightedIcon(e.target.options.id, e.target.options.text);
-<?php // add the flows layers from this marker on the map
-?>
+<?php // add the flows layers from this marker on the map ?>
                         if (links_layers[e.target.options.id]) {
                         beziers_layer_tmp = links_layers[e.target.options.id];
                         beziers_layer_tmp.addTo(map);
@@ -766,21 +709,17 @@ lat_min = map.getBounds().getSouth();
         }).addTo(map);
         }
 
-<?php // set the marker highlighted icon
-?>
+<?php // set the marker highlighted icon ?>
         function setMarkerHighlightedIcon(id, flow) {
-<?php // loop markers
-?>
+<?php // loop markers ?>
         $.each(map._layers, function (ml) {
-<?php // if this marker is the clicked marker (which called this method)
-?>
+<?php // if this marker is the clicked marker (which called this method) ?>
         if (this.options.id == id) {
         var icon = getHighlightedIcon(this, this.options.text, this.options.color, this.options.radius);
         sourceFlow = this.options.text;
         this.setIcon(icon);
         }
-<?php // if this marker is a target marker for this marker
-?>
+<?php // if this marker is a target marker for this marker ?>
         else if (this.options.id && links[this.options.id] && links[this.options.id][id]) {
         var text = links[this.options.id][id] + "/" + (Math.round(parseFloat(links[this.options.id][id]) * 100 / parseFloat(flow))) + "%";
         var icon = getHighlightedIcon(this, text, this.options.color, this.options.radius);
@@ -790,21 +729,18 @@ lat_min = map.getBounds().getSouth();
         );
         }
 
-<?php // get the highlighted icon for a marker
-?>
+<?php // get the highlighted icon for a marker ?>
         function getHighlightedIcon(marker, flow, color, radius) {
         //var xml = '<\?xml version="1.0" encoding="utf-8"\?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100" height="100">';
         //var text = "<text x=\"54%\" y=\"50%\" text-anchor=\"middle\" font-family=\"sans-serif\" font-size=\"22px\" stroke=\"black\" stroke-width=\"1.4\" fill=\"white\" font-weight=\"bold\">" + flow + "</text>";
         var text;
         try {
-<?php // svg of the linked zones
-?>
+<?php // svg of the linked zones ?>
         if ((flow + "").indexOf("/") > - 1) {
         var span = flow.split("/");
         text = "<text x=\"54%\" y=\"50%\" text-anchor=\"middle\" font-family=\"sans-serif\" font-size=\"24px\" stroke=\"black\" stroke-width=\"1.4\" fill=\"white\" font-weight=\"bold\"><tspan x=\"50\">" + span[0] + "</tspan><tspan x=\"60\" dy=\"20\">" + span[1] + "</tspan></text>";
         }
-<?php // svg of the clicked zone
-?>
+<?php // svg of the clicked zone ?>
         else {
         text = "<text x=\"49%\" y=\"54%\" text-anchor=\"middle\" font-family=\"sans-serif\" font-size=\"22px\" stroke=\"black\" stroke-width=\"1.4\" fill=\"white\" font-weight=\"bold\">" + flow + "</text>";
         }
@@ -820,8 +756,7 @@ lat_min = map.getBounds().getSouth();
 ?>
         var svgHighlighted = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\" version=\"1.2\"><g><circle cx=\"50\" cy=\"50\" r=\"" + radius + "\" opacity=\"1.0\" style=\"stroke:black; stroke-width: 2; fill:" + color + "; fill-opacity: 0.7\"></circle>" + text + "</g></svg>";
         var svgURLHighlighted = "data:image/svg+xml;base64," + btoa(svgHighlighted); // btoa = Base64 of svgHighlighted
-<?php // create highlighted icon
-?>
+<?php // create highlighted icon ?>
         return SVGIconHighlighted = L.icon({
         iconUrl: svgURLHighlighted,
                 iconSize: [100, 100],
@@ -832,8 +767,7 @@ lat_min = map.getBounds().getSouth();
         });
         }
 
-<?php // toggle the grid
-?>
+<?php // toggle the grid ?>
         function toggle(action) {
         if (action == 1) {
         if (grid_layer_tmp) {
@@ -847,17 +781,13 @@ lat_min = map.getBounds().getSouth();
         }
         }
 
-<?php // toggle the flow (outflow, inflow)
-?>
+<?php // toggle the flow (outflow, inflow) ?>
         function toggleFlows(action) {
-<?php // remove flows from the map
-?>
+<?php // remove flows from the map ?>
         //removeFlows();
-<?php // reset markers icons to default
-?>
+<?php // reset markers icons to default ?>
         //resetMarkersIcons();
-<?php // outflow
-?>
+<?php // outflow ?>
         if (action == 1) {
         flow_direction = "outflow";
         } else {
@@ -866,20 +796,16 @@ lat_min = map.getBounds().getSouth();
         redraw();
         }
 
-<?php // set the OD matrix link when the radius is set by the radio button in the OD Matrix legend
-?>
+<?php // set the OD matrix link when the radius is set by the radio button in the OD Matrix legend ?>
         function toggleRadius() {
-<?php // get the hour value
-?>
+<?php // get the hour value ?>
         var hour = $("input:radio[name=hour]:checked").val();
-<?php // get the radius value
-?>
+<?php // get the radius value ?>
         var radius = $("input:radio[name=radius]:checked").val();
-<?php // set OD matrix link in legend
-?>
+<?php // set OD matrix link in legend ?>
         var hour_p = hour != "" ? "&hour=" + hour : "";
         var radius_p = radius != 0 ? "&radius=" + radius : "";
-        $("#od").attr("href", "./adj/adj.php?cluster=" + clusterSize + hour_p + radius_p + "&title=<?php echo urlencode("Origin Destination matrix for People Flows&nbsp;"); ?>");
+        $("#od").attr("href", "./adj/adj.php?org=<?php echo $_REQUEST["org"];?>&cluster=" + clusterSize + hour_p + radius_p + "&title=<?php echo urlencode("Origin Destination matrix for People Flows&nbsp;"); ?>");
         }
 
         function getGridLayer(clusterSize) {
@@ -974,24 +900,16 @@ lat_min = map.getBounds().getSouth();
                 return 4521984;
         case 0:
                 return 4521984;
-        /*case 3:
-         return 9043968;
-         case 2:
-         return 18087936;
-         case 1:
-         return 36175872;*/
         default:
                 return 256;
         }
         }
 
-<?php // get min/max flows
-?>
+<?php // get min/max flows ?>
         function getMinMaxFlows(csv) {
         max = 0;
         min = 9999999999;
-<?php // skip header (i = 0)
-?>
+<?php // skip header (i = 0) ?>
         for (i = 1; i < csv.length; i++) {
         if (parseInt(csv[i][2]) > max) {
         max = parseInt(csv[i][2]);
@@ -1003,8 +921,7 @@ lat_min = map.getBounds().getSouth();
         return [min, max];
         }
 
-<?php // get color for node
-?>
+<?php // get color for node ?>
         function getColor(flow, flow_min, flow_max) {
         if (flow == 0) {
         return "yellow";
@@ -1013,16 +930,14 @@ lat_min = map.getBounds().getSouth();
         range = flow_max - flow_min;
         load = diff / range;
         color_range = ["yellow", "#e50000"]; // ["yellow", "red"]
-<?php // instantiate color scale function
-?>
+<?php // instantiate color scale function ?>
         var color = d3.scale.linear()
                 .domain([0, 1])
                 .range(color_range);
         return color(load);
         }
 
-<?php // get radius for node
-?>
+<?php // get radius for node ?>
         function getRadius(flow, flow_min, flow_max) {
         var diff = flow - flow_min;
         var range = flow_max - flow_min;
@@ -1031,15 +946,12 @@ lat_min = map.getBounds().getSouth();
         return Math.min(30, Math.log(radius) / Math.log(1.4));
         }
 
-<?php // get flows csv map (id => (outFlow: x, inFlow: y) or id => (inFlow: x, outFlow: y))
-?>
+<?php // get flows csv map (id => (outFlow: x, inFlow: y) or id => (inFlow: x, outFlow: y)) ?>
         function getLinksMap(csv) {
         var links = [];
-<?php // outflows
-?>
+<?php // outflows ?>
         if (flow_direction == "outflow") {
-<?php // skip header (i = 0)
-?>
+<?php // skip header (i = 0) ?>
         for (i = 1; i < csv.length; i++) {
         if (!links[csv[i][0]]) {
         links[csv[i][0]] = {};
@@ -1047,11 +959,9 @@ lat_min = map.getBounds().getSouth();
         links[csv[i][0]][csv[i][1]] = parseInt(csv[i][2]);
         }
         }
-<?php // inflows
-?>
+<?php // inflows ?>
         else {
-<?php // skip header (i = 0)
-?>
+<?php // skip header (i = 0) ?>
         for (i = 1; i < csv.length; i++) {
         if (!links[csv[i][1]]) {
         links[csv[i][1]] = {};
@@ -1062,15 +972,12 @@ lat_min = map.getBounds().getSouth();
         return links;
         }
 
-<?php // get totals flows for every node
-?>
+<?php // get totals flows for every node ?>
         function getFlows(csv) {
         var flows = [];
-<?php // outflows
-?>
+<?php // outflows ?>
         if (flow_direction == "outflow") {
-<?php // skip header (i = 0)
-?>
+<?php // skip header (i = 0) ?>
         for (i = 1; i < csv.length; i++) {
         if (!flows[csv[i][1]]) {
         flows[csv[i][1]] = parseInt(csv[i][2])
@@ -1079,11 +986,9 @@ lat_min = map.getBounds().getSouth();
         }
         }
         }
-<?php // inflows
-?>
+<?php // inflows ?>
         else {
-<?php // skip header (i = 0)
-?>
+<?php // skip header (i = 0) ?>
         for (i = 1; i < csv.length; i++) {
         if (!flows[csv[i][0]]) {
         flows[csv[i][0]] = parseInt(csv[i][2])
@@ -1095,8 +1000,7 @@ lat_min = map.getBounds().getSouth();
         return flows;
         }
 
-<?php // get coordinates map (id => (lat, lon))
-?>
+<?php // get coordinates map (id => (lat, lon)) ?>
         function getCoordinatesMap(geoJSON) {
         var coordinates = [];
         var features = geoJSON.features;

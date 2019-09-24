@@ -17,13 +17,7 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA. */
 ?>
 <?php
-include_once "../settings_ldap.php";
-
-// logout
-if (isset($_REQUEST["logout"])) {
-    unset($_SESSION["role"]);
-    session_destroy();
-}
+session_start();
 // check the permission
 if (!isset($_SESSION["role"])) {
     header("location: ../ssoLogin.php");

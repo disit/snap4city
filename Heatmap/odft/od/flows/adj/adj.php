@@ -53,7 +53,8 @@ function getFilename() {
         <link rel="stylesheet" type="text/css" href="../../css/adj.css" />
         <!-- use leaflet 0.7.5 css with leaflet 1.0 js to make work the leaflet.curve.js plugin and the legend -->
         <!--<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.css" />-->
-        <link rel="stylesheet" type="text/css" href="../../css/leaflet.css" />
+        <!--<link rel="stylesheet" type="text/css" href="../../css/leaflet.css" />-->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.1/leaflet.css" />
         <style>
 
             @import url(../../css/style1.css?aea6f0a);
@@ -91,7 +92,8 @@ function getFilename() {
         <script type="text/javascript" src="../../javascript/d3.v2.min.js"></script>
         <script type="text/javascript" src="../../javascript/jquery-2.1.0.min.js"></script>
         <script src="../../javascript/jquery.csv.js"></script>
-        <script src="../../javascript/maps/leaflet-1.0.js"></script>
+        <!--<script src="../../javascript/maps/leaflet-1.0.js"></script>-->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.1/leaflet.js"></script>
         <!-- leaflet curve plugin https://github.com/elfalem/Leaflet.curve -->
         <script src="../../javascript/maps/leaflet.curve.js"></script>
 

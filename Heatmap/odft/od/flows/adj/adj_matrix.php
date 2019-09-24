@@ -59,17 +59,21 @@ $index = 0;
 $counter = 0;
 $areas['nodes'] = array();
 
-// if radius in km within Florence is set, then calculate only flows in that range (top 100)
+// get org's coordinates
+$org = $_REQUEST["org"] == "Florence" || $_REQUEST["org"] == "Tuscany" ? "DISIT" : $_REQUEST["org"];
+$j = file_get_contents("https://main.snap4city.org/api/organizations.php?org=" . $org);
+$j = json_decode($j, true);
+$lat_lng = explode(",", trim($j[0]["gpsCentreLatLng"]));
+// if radius in km within org is set, then calculate only flows in that range (top 100)
 if (isset($_REQUEST["radius"])) {
     for ($i = 1; $i < count($csv); $i++) {
-        if ($counter == 100) {
+        /*if ($counter == 100) {
             break;
-        }
+        }*/
         $lat_lon_target = $clusters[$csv[$i][0]];
         $lat_lon_source = $clusters[$csv[$i][1]];
-
-        if (distFrom($lat_lon_target["lat"], $lat_lon_target["lon"], 43.76990127563477, 11.25531959533691) <= $_REQUEST["radius"] ||
-                distFrom($lat_lon_source["lat"], $lat_lon_source["lon"], 43.76990127563477, 11.25531959533691) <= $_REQUEST["radius"]) {
+        if (distFrom($lat_lon_target["lat"], $lat_lon_target["lon"], $lat_lng[0], $lat_lng[1]) <= $_REQUEST["radius"] &&
+                distFrom($lat_lon_source["lat"], $lat_lon_source["lon"], $lat_lng[0], $lat_lng[1]) <= $_REQUEST["radius"]) {
             $nodes['name'] = $csv[$i][0];
             $nodes['group'] = $csv[$i][0];
             if ($nodes['name'] == null || $nodes['group'] == null) {

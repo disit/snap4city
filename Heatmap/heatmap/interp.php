@@ -1,6 +1,7 @@
 <?php
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
+include_once 'settings.php';
 
 require_once __DIR__ . '/Navigator/lib/Treffynnon/Navigator.php';
 use Treffynnon\Navigator as N;
@@ -54,7 +55,7 @@ return $distance;
 $data = array();
 
 function getInterpolatedValue($latitude, $longitude, $threshold) {
-$mapName = "";
+    $mapName = "";
     $metricName = "";
     $date = "";
     $clustered = isset($_REQUEST["clustered"]) ? $_REQUEST["clustered"] : 0;
@@ -71,11 +72,11 @@ $mapName = "";
     $min_lon = $coordinates[0]->getLongitudeInDegrees();
     $max_lat = $coordinates[1]->getLatitudeInDegrees();
     $max_lon = $coordinates[1]->getLongitudeInDegrees();
-    $connection = mysqli_connect("192.168.0.59", "root", "ubuntu", "heatmap");
+    $connection = mysqli_connect($settings["db_host"], $settings["db_username"], $settings["db_password"], $settings["db_schema"]);
     $query = "SELECT map_name, metric_name, latitude, longitude, value, clustered, `date` " .
-             "FROM heatmap.`data` WHERE map_name = '" . $_REQUEST["dataset"] . "' AND `date` = '" . $_REQUEST["date"] . "' AND latitude >= " . $min_lat .
-             " AND latitude <= " . $max_lat . " AND longitude >= " . $min_lon . " AND longitude <= " . $max_lon . " AND clustered = " . $clustered;
-$result = mysqli_query($connection, $query);
+             "FROM heatmap.`data` WHERE map_name = '" . mysqli_real_escape_string($connection, $_REQUEST["dataset"]) . "' AND `date` = '" . mysqli_real_escape_string($connection, $_REQUEST["date"]) . "' AND latitude >= '" . mysqli_real_escape_string($connection, $min_lat) . "' " .
+             " AND latitude <= '" . mysqli_real_escape_string($connection, $max_lat) . "' AND longitude >= '" . mysqli_real_escape_string($connection, $min_lon) . "' AND longitude <= '" . mysqli_real_escape_string($connection, $max_lon) . "' AND clustered = " . $clustered;
+    $result = mysqli_query($connection, $query);
     while ($row = mysqli_fetch_assoc($result)) {
         $mapName = $row["map_name"];
         $metricName = $row["metric_name"];
@@ -103,11 +104,23 @@ $result = mysqli_query($connection, $query);
         $value = NULL;
     }
 }
-mysqli_close($connection);
-return array($value, $metricName);
+    mysqli_close($connection);
+    return array($value, $metricName);
 }
+
+function is_date_old($date, $format = 'Y-m-d H:i:s') {
+    $d = DateTime::createFromFormat($format, $date);
+    return $d && $d->format($format) == $date;
+}
+
+function is_date($date) {
+    $a = date_parse($date);
+    return $a["error_count"] == 0 && $a["warning_count"] == 0 ? 1 : 0;
+}
+
 // calculate interpolation using IDW (Inverse Distance Weighting)
-if (isset($_REQUEST["latitude"]) && isset($_REQUEST["longitude"]) && isset($_REQUEST["dataset"]) && isset($_REQUEST["date"]) && isset($_REQUEST["method"]) && $_REQUEST["method"] == "idw") {
+if (is_numeric($_REQUEST["latitude"]) && is_numeric($_REQUEST["longitude"]) && ctype_alnum(str_replace("_", "", $_REQUEST["dataset"])) &&
+    is_date($_REQUEST["date"]) && isset($_REQUEST["method"]) && $_REQUEST["method"] == "idw") {
     $mapName = "";
     $metricName = "";
     $date = "";
@@ -117,9 +130,9 @@ if (isset($_REQUEST["latitude"]) && isset($_REQUEST["longitude"]) && isset($_REQ
     $distance = False;
     $numerator = 0;
     $denominator = 0;
-    $connection = mysqli_connect("192.168.0.59", "root", "ubuntu", "heatmap");
+    $connection = mysqli_connect($settings["db_host"], $settings["db_username"], $settings["db_password"], $settings["db_schema"]);
     $query = "SELECT map_name, metric_name, latitude, longitude, value, clustered, `date` " .
-             "FROM heatmap.`data` WHERE map_name = '" . $_REQUEST["dataset"] . "' AND `date` = '" . $_REQUEST["date"] . "' AND clustered = " . $clustered;
+             "FROM heatmap.`data` WHERE map_name = '" . mysqli_real_escape_string($connection, $_REQUEST["dataset"]) . "' AND `date` = '" . mysqli_real_escape_string($connection, $_REQUEST["date"]) . "' AND clustered = '" . mysqli_real_escape_string($connection, $clustered) ."'";
     $result = mysqli_query($connection, $query);
     while ($row = mysqli_fetch_assoc($result)) {
         $mapName = $row["map_name"];
@@ -150,10 +163,10 @@ if (isset($_REQUEST["latitude"]) && isset($_REQUEST["longitude"]) && isset($_REQ
     $data = array("mapName" => $mapName, "metricName" => $metricName, "date" => $date, "value" => $value);
     mysqli_close($connection);
 }
-else if (isset($_REQUEST["latitude"]) && isset($_REQUEST["longitude"]) && isset($_REQUEST["dataset"]) && isset($_REQUEST["date"])) {
+else if (is_numeric($_REQUEST["latitude"]) && is_numeric($_REQUEST["longitude"]) && ctype_alnum(str_replace("_", "", $_REQUEST["dataset"])) && is_date($_REQUEST["date"])) {
     $value = "";
     $threshold = 2;
-    for($i = 1; $i <= 10; $i++) {
+    for($i = 1; $i <= 14; $i++) {
      $value_metricName = getInterpolatedValue($_REQUEST["latitude"], $_REQUEST["longitude"], $threshold);
      if($value_metricName[0] != NULL) {
       $value = $value_metricName[0];
@@ -164,7 +177,7 @@ else if (isset($_REQUEST["latitude"]) && isset($_REQUEST["longitude"]) && isset(
     $data = array("mapName" => $_REQUEST["dataset"], "metricName" => $value_metricName[1], "date" => $_REQUEST["date"], "value" => $value);
 }
 
-else if (isset($_REQUEST["lat_lon"]) && isset($_REQUEST["dataset"]) && isset($_REQUEST["date"])) {
+else if (isset($_REQUEST["lat_lon"]) && ctype_alnum(str_replace("_", "", $_REQUEST["dataset"])) && is_date($_REQUEST["date"])) {
     $mapName = "";
     $metricName = "";
     $date = "";
@@ -175,10 +188,10 @@ else if (isset($_REQUEST["lat_lon"]) && isset($_REQUEST["dataset"]) && isset($_R
     $distance = False;
     $numerator = 0;
     $denominator = 0;
-    $connection = mysqli_connect("192.168.0.59", "root", "ubuntu", "heatmap");
+    $connection = mysqli_connect($settings["db_host"], $settings["db_username"], $settings["db_password"], $settings["db_schema"]);
     foreach ($lat_lon_array as $lat_lon) {
      $query = "SELECT map_name, metric_name, latitude, longitude, value, clustered, `date` " .
-              "FROM heatmap.`data` WHERE map_name = '" . $_REQUEST["dataset"] . "' AND `date` = '" . $_REQUEST["date"] . "' AND clustered = " . $clustered;
+              "FROM heatmap.`data` WHERE map_name = '" . mysqli_real_escape_string($connection, $_REQUEST["dataset"]) . "' AND `date` = '" . mysqli_real_escape_string($connection, $_REQUEST["date"]) . "' AND clustered = '" . mysqli_real_escape_string($connection, $clustered) . "'";
      $result = mysqli_query($connection, $query);
      while ($row = mysqli_fetch_assoc($result)) {
          $mapName = $row["map_name"];
