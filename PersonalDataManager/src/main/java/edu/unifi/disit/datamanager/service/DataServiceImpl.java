@@ -244,4 +244,16 @@ public class DataServiceImpl implements IDataService {
 
 		dataRepo.saveAndFlush(todelete);
 	}
+
+	@Override
+	public List<Data> getPublicData(String variableName, String motivation, Date from, Date to, Integer first, Integer last, Locale lang) throws DataNotValidException {
+		logger.debug("getPublicData INVOKED variablename {}, motivation {}, from {}, to {}, first {}, last {}, anonymous {}", variableName, motivation, from, to, first, last);
+
+		// no credentials enforcement needed
+
+		if ((first != 0) && (last != 0))
+			throw new DataNotValidException(messages.getMessage("getdata.ko.firstandlastspecified", null, lang));
+
+		return anonymize(dataRepo.getDataByUsernameDelegated("ANONYMOUS", variableName, motivation, from, to, first, last));
+	}
 }

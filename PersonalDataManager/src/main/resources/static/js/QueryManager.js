@@ -93,4 +93,5 @@ var QueryManager = {
     createGetUsernameOrganizationQuery: function(accessToken){
         return "username/organization/?sourceRequest=" + QueryManager.sourceRequest + "&accessToken=" + accessToken;
     }
+
 }

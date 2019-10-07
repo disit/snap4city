@@ -82,6 +82,10 @@ var KPIDelegationTabler = {
 
         $('#inputFilterKPIDelegation').val(KPIDelegationFilter.currentSearchKey);
         $('#selectSizeKPIDelegation').val(KPIDelegationPager.currentSize);
+
+        if (KPIEditor.withParameters) {
+            $("#backButtonToMyKPIDataList").hide();
+        }
     },
 
     editKPIDelegationModal: function (_kpiId, _id) {
@@ -138,7 +142,7 @@ var KPIDelegationTabler = {
         if ($("#inputIdKPIDelegationEdit").val() != "") {
             kpiDelegation.id = $("#inputIdKPIDelegationEdit").val();
         }
-        if (typeof $("#inputElementTypeKPIDelegationEdit").val() !=  "undefined" && $("#inputElementTypeKPIDelegationEdit").val() != "") {
+        if (typeof $("#inputElementTypeKPIDelegationEdit").val() != "undefined" && $("#inputElementTypeKPIDelegationEdit").val() != "") {
             kpiDelegation.elementType = $("#inputElementTypeKPIDelegationEdit").val();
         } else {
             kpiDelegation.elementType = KPIDelegationTabler.currentHighLevelType;

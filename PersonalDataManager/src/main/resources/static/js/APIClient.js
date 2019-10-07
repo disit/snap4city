@@ -1,9 +1,10 @@
 var APIClient = {
+    suffix: "",
 
     executeGetQuery: function (query, successCallback, errorCallback) {
         $.ajax({
             method: "GET",
-            url: encodeURI(APIClient.url + query),
+            url: encodeURI(APIClient.url + APIClient.suffix + query),
             async: false,
             success: function (_response) {
                 if (successCallback != null) {

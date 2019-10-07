@@ -16,6 +16,7 @@ var KPIDataTabler = {
 
     successQuery: function (_response) {
         KPIDataTabler.currentKPIDataPage = _response;
+        KPIEditor.checkParameters();
         if ($("#kpidatatable").length == 0) {
             $("#indexPage").
             append("<div id=\"kpidatatable\" style=\"margin: 0px 20px\"></div>")
@@ -89,8 +90,10 @@ var KPIDataTabler = {
 
     errorQuery: function (_error) {
         console.log(_error);
-        if (_error.responseText != null) {
+        if (_error.responseText != null && _error.responseText != "") {
             alert(_error.responseText);
+        } else {
+            alert("There was a problem to retrieve the data. Assure you have the right to view this data. The table of your kpi will be shown.")
         }
         $('#genericModal').modal('hide');
     },
@@ -328,6 +331,12 @@ var KPIDataTabler = {
             KPIDataTabler.enableEdit = false;
         } else {
             KPIDataTabler.enableEdit = true;
+        }
+        if (KPIDataTabler.privacy == "public") {
+            APIClient.suffix = KPIDataTabler.privacy + "/";
+            KPIDataTabler.privacy = "";
+        } else {
+            APIClient.suffix = "";
         }
         KPIDataPager.currentPage = 0;
         KPIDataTabler.renderTable();

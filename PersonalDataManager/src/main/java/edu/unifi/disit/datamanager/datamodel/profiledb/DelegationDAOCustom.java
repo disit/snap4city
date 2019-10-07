@@ -25,5 +25,7 @@ public interface DelegationDAOCustom {
 
 	List<Delegation> getDelegationDelegatorFromAppId(String appId, String variableName, String motivation, Boolean deleted, String elementType);
 
+	List<Delegation> getPublicDelegationFromAppId(String appId, String variableName, String motivation, Boolean deleted, String elementType);
+
 	List<Delegation> getSameDelegation(Delegation d, Locale lang);
 }

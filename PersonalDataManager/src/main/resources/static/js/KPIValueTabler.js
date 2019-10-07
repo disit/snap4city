@@ -84,6 +84,10 @@ var KPIValueTabler = {
 
         $('#inputFilterKPIValue').val(KPIValueFilter.currentSearchKey);
         $('#selectSizeKPIValue').val(KPIValuePager.currentSize);
+
+        if (KPIEditor.withParameters) {
+            $("#backButtonToMyKPIDataList").hide();
+        }
     },
 
     editKPIValueModal: function (_kpiId, _id) {
@@ -183,11 +187,11 @@ var KPIValueTabler = {
 
     deleteKPIValue(_kpiId, _id) {
         KPIEditor.keycloak.updateToken(30).success(function () {
-                var query = QueryManager.createDeleteKPIValueQuery(KPIEditor.keycloak.token, _kpiId, _id);
-                APIClient.executeDeleteQuery(query, KPIValueTabler.successSaveKPIValue, KPIValueTabler.errorQuery);
+            var query = QueryManager.createDeleteKPIValueQuery(KPIEditor.keycloak.token, _kpiId, _id);
+            APIClient.executeDeleteQuery(query, KPIValueTabler.successSaveKPIValue, KPIValueTabler.errorQuery);
         }).error(function () {
-                var query = QueryManager.createDeleteKPIValueQuery(Authentication.refreshTokenGetAccessToken(), _kpiId, _id);
-                APIClient.executeDeleteQuery(query, KPIValueTabler.successSaveKPIValue, KPIValueTabler.errorQuery);
+            var query = QueryManager.createDeleteKPIValueQuery(Authentication.refreshTokenGetAccessToken(), _kpiId, _id);
+            APIClient.executeDeleteQuery(query, KPIValueTabler.successSaveKPIValue, KPIValueTabler.errorQuery);
         });
     },
 

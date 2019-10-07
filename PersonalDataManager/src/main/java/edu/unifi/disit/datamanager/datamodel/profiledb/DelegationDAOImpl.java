@@ -149,6 +149,25 @@ public class DelegationDAOImpl implements DelegationDAOCustom {
 		return entityManager.createQuery(criteria).getResultList();
 	}
 
+	@Override
+	public List<Delegation> getPublicDelegationFromAppId(String appId, String variableName, String motivation, Boolean deleted, String elementType) {
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<Delegation> criteria = cb.createQuery(Delegation.class);
+
+		// mainquery
+		Root<Delegation> delegationRoot = criteria.from(Delegation.class);
+		criteria.select(delegationRoot);
+
+		List<Predicate> predicates = getCommonPredicates(cb, delegationRoot, variableName, motivation, deleted, elementType);
+
+		predicates.add(cb.equal(delegationRoot.get("elementId"), appId));// appId
+		predicates.add(cb.equal(delegationRoot.get("usernameDelegated"), "ANONYMOUS"));// specific user
+
+		criteria.where(cb.and(predicates.toArray(new Predicate[predicates.size()])));
+
+		return entityManager.createQuery(criteria).getResultList();
+	}
+
 	private List<Predicate> getCommonPredicates(CriteriaBuilder cb, Root<Delegation> delegationRoot, String variableName, String motivation, Boolean deleted, String elementType) {
 		List<Predicate> predicates = new ArrayList<Predicate>();
 		if (variableName != null)
@@ -161,4 +180,5 @@ public class DelegationDAOImpl implements DelegationDAOCustom {
 			predicates.add(delegationRoot.get("deleteTime").isNull());
 		return predicates;
 	}
+
 }

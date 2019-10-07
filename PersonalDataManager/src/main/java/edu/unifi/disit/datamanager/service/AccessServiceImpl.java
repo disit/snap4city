@@ -128,7 +128,7 @@ public class AccessServiceImpl implements IAccessService {
 				return response;
 			}
 
-			if ((d.getUsernameDelegated() != null) && (d.getUsernameDelegated().equals(username))) {
+			if ((d.getUsernameDelegated() != null) && (d.getUsernameDelegated().equalsIgnoreCase(username))) {
 				response.setResult(true);
 				response.setMessage("DELEGATED");
 				return response;
@@ -144,4 +144,17 @@ public class AccessServiceImpl implements IAccessService {
 		return response;
 	}
 
+	@Override
+	public Response checkPublic(String elementId, String elementType, String variableName, Locale lang) {
+		logger.debug("checkPublic INVOKED on elemntId {} variableName {} ", elementId, variableName);
+
+		Response response = new Response(false, null);
+
+		if (delegationRepo.getPublicDelegationFromAppId(elementId, variableName, null, false, elementType).size() > 0) {
+			response.setMessage("PUBLIC");
+			response.setResult(true);
+		}
+
+		return response;
+	}
 }

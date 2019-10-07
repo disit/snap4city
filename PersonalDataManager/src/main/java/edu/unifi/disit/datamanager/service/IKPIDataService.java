@@ -26,7 +26,7 @@ import edu.unifi.disit.datamanager.exception.DelegationNotValidException;
 
 public interface IKPIDataService {
 
-	KPIData getKPIDataById(long id, Locale lang) throws NoSuchMessageException, CredentialsException;
+	KPIData getKPIDataById(long id, Locale lang, boolean anonymize) throws NoSuchMessageException, CredentialsException;
 
 	Page<KPIData> findAll(Pageable pageable) throws NoSuchMessageException, CredentialsException;
 	

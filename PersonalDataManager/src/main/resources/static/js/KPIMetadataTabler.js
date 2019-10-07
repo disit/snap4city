@@ -76,6 +76,10 @@ var KPIMetadataTabler = {
 
         $('#inputFilterKPIMetadata').val(KPIMetadataFilter.currentSearchKey);
         $('#selectSizeKPIMetadata').val(KPIMetadataPager.currentSize);
+
+        if (KPIEditor.withParameters) {
+            $("#backButtonToMyKPIDataList").hide();
+        }
     },
 
     editKPIMetadataModal: function (_kpiId, _id) {

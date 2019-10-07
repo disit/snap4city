@@ -48,7 +48,48 @@ import edu.unifi.disit.datamanager.datamodel.profiledb.Activity;
 import edu.unifi.disit.datamanager.datamodel.profiledb.Data;
 import edu.unifi.disit.datamanager.datamodel.profiledb.Delegation;
 
-public class roleTest1 {
+public class roleTest {
+
+	// ------headers
+	@Test
+	public void get_dataExist_OKrole_HTTPHEADER() throws ClientProtocolException, IOException {
+
+		// Given
+		HttpUriRequest request = new HttpGet("http://localhost:8080/datamanager/api/v1/apps/nrb404g/data?sourceRequest=test");
+
+		request.addHeader("Authorization", "Bearer " + getAccessTokenADifino());
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		ObjectMapper mapper = new ObjectMapper();
+		List<Data> result = mapper.readValue(EntityUtils.toString(httpResponse.getEntity()), new TypeReference<List<Data>>() {
+		});
+
+		assertThat(
+				httpResponse.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.OK.value()));
+
+		assertEquals(result.size() > 5, true);
+	}
+
+	@Test
+	public void get_dataExist_OKrole_HTTPHEADER_KO() throws ClientProtocolException, IOException {
+
+		// Given
+		HttpUriRequest request = new HttpGet("http://localhost:8080/datamanager/api/v1/apps/nrb404g/data?sourceRequest=test");
+
+		request.addHeader("Authorization", "Bearer asd" + getAccessTokenADifino());
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		assertThat(
+				httpResponse.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.UNAUTHORIZED.value()));
+	}
 
 	// -----------------------------------------------------------------------------activity
 	@Test

@@ -91,7 +91,7 @@ public class KPIDelegationController {
 
 		try {
 
-			KPIData kpiData = kpiDataService.getKPIDataById(kpiId, lang);
+			KPIData kpiData = kpiDataService.getKPIDataById(kpiId, lang, false);
 			if (kpiData == null) {
 				logger.warn("Wrong KPI Data");
 
@@ -151,7 +151,7 @@ public class KPIDelegationController {
 
 		try {
 
-			KPIData kpiData = kpiDataService.getKPIDataById(kpiId, lang);
+			KPIData kpiData = kpiDataService.getKPIDataById(kpiId, lang, false);
 
 			if (kpiData == null) {
 				logger.warn("Wrong KPI Data");
@@ -205,7 +205,7 @@ public class KPIDelegationController {
 
 		try {
 
-			KPIData kpiData = kpiDataService.getKPIDataById(kpiId, lang);
+			KPIData kpiData = kpiDataService.getKPIDataById(kpiId, lang, false);
 
 			if (kpiData == null) {
 				logger.warn("Wrong KPI Data");
@@ -273,7 +273,7 @@ public class KPIDelegationController {
 
 		try {
 
-			KPIData kpiData = kpiDataService.getKPIDataById(kpiId, lang);
+			KPIData kpiData = kpiDataService.getKPIDataById(kpiId, lang, false);
 
 			if (kpiData == null) {
 				logger.warn("Wrong KPI Data");
@@ -354,7 +354,7 @@ public class KPIDelegationController {
 
 		try {
 
-			KPIData kpiData = kpiDataService.getKPIDataById(kpiId, lang);
+			KPIData kpiData = kpiDataService.getKPIDataById(kpiId, lang, false);
 
 			if (kpiData == null) {
 				logger.warn("Wrong KPI Data");
@@ -417,7 +417,7 @@ public class KPIDelegationController {
 				pageNumber, pageSize, sortDirection, sortBy, kpiId);
 
 		try {
-			KPIData kpiData = kpiDataService.getKPIDataById(kpiId, lang);
+			KPIData kpiData = kpiDataService.getKPIDataById(kpiId, lang, false);
 			if (kpiData == null) {
 				logger.warn("Wrong KPI Data");
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),

@@ -21,8 +21,8 @@ These instructions will get you a copy of the project up and running on your loc
 ### Installing
 
 * Create the DB and its tables using the sql script available in src\main\resources\create_db_tables.sql (the name of the DB is by default "profiledb")
-* Create a local folder whenever the logging files will be located (usually /var/log/tomcat8/mylogpath) and note it down the complete path (2)
-* Configure the two enviroment variables for Apache Tomcat (edit setenv.sh in #apachetomcat_home#\bat or pass it via command line): -Dspring.profiles.active=local (as noted in (1)) -DlogFileFolder=/var/log/tomcat8/mylogpath (as noted in (2))
+* Create a local folder whenever the logging files will be located (usually /var/log/tomcat8/datamanager) and note it down the complete path (2). To avoid more configure we suggest to use the inner final destination folder named "datamanager"
+* Configure the two enviroment variables for Apache Tomcat (edit setenv.sh usually in /usr/share/tomcat8 or pass it via command line): -Dspring.profiles.active=local (as noted in (1)) -DlogFileFolder=/var/log/tomcat8/ (as noted in (2) without the inner final "/datamanager")
 * Deploy the war file in Apache Tomcat 
 * Test if the Snap4City MyPersonalData module is up and running tring to acceding via a web browser to the address http://<INSTALLED_URI>:<INSTALLED_PORT>/<TOMCAT_PATH>/api/test (i.e. http://localhost:8080/datamanager-0.0.1/api/test). It should return the label: "alive"
 

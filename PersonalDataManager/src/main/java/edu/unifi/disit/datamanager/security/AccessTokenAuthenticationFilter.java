@@ -79,7 +79,13 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
 		final HttpServletRequest req = (HttpServletRequest) request;
-		String accessToken = req.getParameter("accessToken");
+
+		String accessToken = null;
+
+		if ((req.getHeader("Authorization") != null) && (req.getHeader("Authorization").length() > 8))
+			accessToken = req.getHeader("Authorization").substring(7);
+		else
+			accessToken = req.getParameter("accessToken");
 
 		ActivityAccessType activityType = ActivityAccessType.READ;
 		if (((HttpServletRequest) request).getMethod().equals("POST"))

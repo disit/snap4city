@@ -23,4 +23,5 @@ public interface IAccessService {
 
 	Response checkDelegationsFromUsername(String username, String variableName, String elementID, Locale lang) throws CredentialsException;
 
+	Response checkPublic(String elementID, String elementType, String variableName, Locale lang);
 }

@@ -33,6 +33,12 @@ import edu.unifi.disit.datamanager.datamodel.ldap.LDAPUserDAOImpl;
 @SpringBootApplication
 public class Application extends SpringBootServletInitializer {
 
+	@Value("${spring.ldap.password}")
+	private String ldapPassword;
+
+	@Value("${spring.ldap.managerdn}")
+	private String ldapManagerdn;
+
 	@Value("${spring.ldap.url}")
 	private String ldapUrl;
 
@@ -62,7 +68,9 @@ public class Application extends SpringBootServletInitializer {
 		LdapContextSource ctxSrc = new LdapContextSource();
 		ctxSrc.setUrl(ldapUrl);
 		ctxSrc.setBase(ldapBasicDN);
-		ctxSrc.setAnonymousReadOnly(true);
+		// ctxSrc.setAnonymousReadOnly(true);
+		ctxSrc.setUserDn(ldapManagerdn);
+		ctxSrc.setPassword(ldapPassword);
 		return ctxSrc;
 	}
 

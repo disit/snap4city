@@ -745,6 +745,29 @@ public class delegationTest {
 	}
 
 	@Test
+	public void check_notIgnoreCase() throws ClientProtocolException, IOException {
+
+		// Given
+		HttpUriRequest request = new HttpGet(
+				"http://localhost:8080/datamanager/api/v1/username/ADIFINO/delegation/check?variableName=latitude_longitude&elementID=244a29787d16e7ba720163890c87a76e05dfccfac835cc0fd2700ddf0480f137&accessToken=" + getAccessTokenRoot()
+						+ "&sourceRequest=test");
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		ObjectMapper mapper = new ObjectMapper();
+		Response result = mapper.readValue(EntityUtils.toString(httpResponse.getEntity()), new TypeReference<Response>() {
+		});
+
+		assertThat(
+				httpResponse.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.OK.value()));
+
+		assertEquals(false, result.getResult());
+	}
+
+	@Test
 	public void check_not2_varname() throws ClientProtocolException, IOException {
 
 		// Given

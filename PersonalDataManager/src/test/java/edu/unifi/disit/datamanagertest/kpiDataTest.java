@@ -340,7 +340,7 @@ public class kpiDataTest {
 
 		assertThat(httpResponse.getStatusLine().getStatusCode(), equalTo(HttpStatus.OK.value()));
 
-		assertEquals(175, result.size());
+		assertEquals(176, result.size());
 	}
 
 	@Test
@@ -547,7 +547,7 @@ public class kpiDataTest {
 
 		assertEquals(2, result.size());
 		assertEquals("43", result.get(0).getLastValue());
-		assertEquals("test", result.get(0).getUsername());
+		assertEquals(null, result.get(0).getUsername());
 		assertEquals(Long.valueOf("17055843"), result.get(1).getId());
 		assertEquals(Long.valueOf("17055844"), result.get(0).getId());
 	}

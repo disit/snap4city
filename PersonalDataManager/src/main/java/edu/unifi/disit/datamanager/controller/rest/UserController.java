@@ -332,12 +332,17 @@ public class UserController {
 			@RequestParam(value = "elementID", required = true) String elementID,
 			@RequestParam(value = "variableName", required = false) String variableName,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
-			HttpServletRequest request) {
+			HttpServletRequest request) throws UnsupportedEncodingException {
 
 		logger.info("Requested checkDelegationV1 for {}, elementID {} variableName {} lang {}", username, elementID, variableName, lang);
 
 		if (sourceRequest != null)
 			logger.info("sourceRequest specified {}", sourceRequest);
+
+		if (username.contains("%20")) {
+			username = URLDecoder.decode(username, StandardCharsets.UTF_8.toString());
+			logger.info("username decoded to {}", username);
+		}
 
 		try {
 			Response response = accessService.checkDelegationsFromUsername(username, variableName, elementID, lang);

@@ -38,4 +38,6 @@ public interface IDataService {
 	List<Data> getAllData(Boolean last, Locale lang) throws NoSuchMessageException, CredentialsException;
 
 	void deleteDataFromUser(String username, Long dataId, Locale lang) throws CredentialsException, DataNotValidException;
+
+	List<Data> getPublicData(String variableName, String motivation, Date from, Date to, Integer first, Integer last, Locale lang) throws DataNotValidException;
 }

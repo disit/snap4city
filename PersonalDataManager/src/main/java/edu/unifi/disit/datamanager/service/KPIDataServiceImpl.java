@@ -63,8 +63,11 @@ public class KPIDataServiceImpl implements IKPIDataService {
 	private EntityManager entityManager;
 
 	@Override
-	public KPIData getKPIDataById(long id, Locale lang) throws NoSuchMessageException {
+	public KPIData getKPIDataById(long id, Locale lang, boolean anonymize) throws NoSuchMessageException {
 		logger.debug("getKPIDataById INVOKED on id {}", id);
+		if (anonymize) {
+			return anonymize(kpiDataRepository.findOne(id));
+		}
 		return kpiDataRepository.findOne(id);
 	}
 
@@ -221,6 +224,12 @@ public class KPIDataServiceImpl implements IKPIDataService {
 		logger.debug(
 				"findByUsernameByHighLevelTypeFiltered INVOKED on usernameDelegated {} elementType {} highLevelType {} searchKey {}",
 				usernameDelegated, elementType, highLevelType, searchKey);
+		if (usernameDelegated.equals("ANONYMOUS")) {
+			Page<KPIData> pageKPIData = kpiDataRepository.findByUsernameDelegatedAndElementTypeContainingAndDeleteTimeIsNull(usernameDelegated,
+					elementType, highLevelType, searchKey, pageable);
+			pageKPIData.getContent().forEach((x) -> anonymize(x));
+			return pageKPIData;
+		}
 		return kpiDataRepository.findByUsernameDelegatedAndElementTypeContainingAndDeleteTimeIsNull(usernameDelegated,
 				elementType, highLevelType, searchKey, pageable);
 	}
@@ -232,6 +241,12 @@ public class KPIDataServiceImpl implements IKPIDataService {
 		logger.debug(
 				"findByUsernameByHighLevelTypeFiltered INVOKED on usernameDelegated {} elementType {} highLevelType {} searchKey {}",
 				usernameDelegated, elementType, highLevelType, searchKey);
+		if (usernameDelegated.equals("ANONYMOUS")) {
+			List<KPIData> listKPIData = kpiDataRepository.findByUsernameDelegatedAndElementTypeContainingAndDeleteTimeIsNull(usernameDelegated,
+					elementType, highLevelType, searchKey);
+			listKPIData.forEach((x) -> anonymize(x));
+			return listKPIData;
+		}
 		return kpiDataRepository.findByUsernameDelegatedAndElementTypeContainingAndDeleteTimeIsNull(usernameDelegated,
 				elementType, highLevelType, searchKey);
 	}
