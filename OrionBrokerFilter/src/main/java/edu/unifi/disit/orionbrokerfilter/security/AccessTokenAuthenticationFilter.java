@@ -138,7 +138,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 
 		if ((elementId != null)) {
 
-			logger.debug("Received a request of type {} for {}", elementId, queryType);
+			logger.debug("Received a request of type {} for {}", queryType, elementId);
 			if (k1 != null)
 				logger.debug("K1 {}", k1);
 			if (k2 != null)
@@ -409,6 +409,11 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 			logger.debug("Response from isPublicFromKB {}", response);
 
 			ObjectMapper objectMapper = new ObjectMapper();
+
+			if ((response.getBody() == null)) {
+				logger.debug("no body found, it's private");
+				return false;
+			}
 
 			JsonNode rootNode = objectMapper.readTree(response.getBody().getBytes());
 
