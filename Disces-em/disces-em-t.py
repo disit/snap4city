@@ -1,21 +1,3 @@
-/* Disces-em
-Copyright (C) 2018 DISIT Lab http://www.disit.org - University of 
-Florence
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as
-published by the Free Software Foundation, either version 3 of the
-License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program. If not, see <http://www.gnu.org/licenses/>. */
-
-
 from __future__ import print_function
 from pyVim.connect import SmartConnect, Disconnect
 from pyVim.task import WaitForTask
@@ -30,10 +12,16 @@ import mysql.connector
 from math import floor, ceil
 import time
 import jsonpickle
+import urllib.request
 import requests
 from dateutil.parser import parse
 from datetime import datetime, timezone
 import docker
+import traceback
+import logging
+import json
+import sys
+import os
 
 def print_vm_info(virtual_machine):
     """
@@ -41,30 +29,30 @@ def print_vm_info(virtual_machine):
     folder with depth protection
     """
     summary = virtual_machine.summary
-    print("Name       : ", summary.config.name)
-    print("Template   : ", summary.config.template)
-    print("Path       : ", summary.config.vmPathName)
-    print("Guest      : ", summary.config.guestFullName)
-    print("Instance UUID : ", summary.config.instanceUuid)
-    print("Bios UUID     : ", summary.config.uuid)
+    logMessage("Name       : ", summary.config.name)
+    logMessage("Template   : ", summary.config.template)
+    logMessage("Path       : ", summary.config.vmPathName)
+    logMessage("Guest      : ", summary.config.guestFullName)
+    logMessage("Instance UUID : ", summary.config.instanceUuid)
+    logMessage("Bios UUID     : ", summary.config.uuid)
     annotation = summary.config.annotation
     if annotation:
-        print("Annotation : ", annotation)
-    print("State      : ", summary.runtime.powerState)
+        logMessage("Annotation : ", annotation)
+    logMessage("State      : ", summary.runtime.powerState)
     if summary.guest is not None:
         ip_address = summary.guest.ipAddress
         tools_version = summary.guest.toolsStatus
         if tools_version is not None:
-            print("VMware-tools: ", tools_version)
+            logMessage("VMware-tools: ", tools_version)
         else:
-            print("Vmware-tools: None")
+            logMessage("Vmware-tools: None")
         if ip_address:
-            print("IP         : ", ip_address)
+            logMessage("IP         : ", ip_address)
         else:
-            print("IP         : None")
+            logMessage("IP         : None")
     if summary.runtime.question is not None:
-        print("Question  : ", summary.runtime.question.text)
-    print("")
+        logMessage("Question  : ", summary.runtime.question.text)
+    logMessage("")
 
 def StatCheck(perf_dict, counter_name):
     counter_key = perf_dict[counter_name]
@@ -81,13 +69,13 @@ def BuildQuery(content, vchtime, counterId, instance, vm, interval):
     if perfResults:
         return perfResults
     else:
-        print('vm name: ', vm.vmname)
-        print('ERROR: Performance results empty.  TIP: Check time drift on source and vCenter server')
-        print('Troubleshooting info:')
-        print('vCenter/host date and time: {}'.format(vchtime))
-        print('Start perf counter time   :  {}'.format(startTime))
-        print('End perf counter time     :  {}'.format(endTime))
-        print(query)
+        logMessage('vm name: ', vm.vmname)
+        logMessage('ERROR: Performance results empty.  TIP: Check time drift on source and vCenter server')
+        logMessage('Troubleshooting info:')
+        logMessage('vCenter/host date and time: {}'.format(vchtime))
+        logMessage('Start perf counter time   :  {}'.format(startTime))
+        logMessage('End perf counter time     :  {}'.format(endTime))
+        logMessage(query)
         exit()
         
 def getVM(content, vimtype, name):
@@ -187,13 +175,18 @@ def get_virtual_nic_state(si, vm_obj, nic_number):
                 virtual_nic_device = dev
         if not virtual_nic_device:
             #raise RuntimeError('Virtual {} could not be found.'.format(nic_label))
-            print(virtual_nic_device)
+            logMessage(virtual_nic_device)
             return virtual_nic_device
         
         #connectable = vim.vm.device.VirtualDevice.ConnectInfo()
         result = virtual_nic_device.connectable.connected
-    except:
+    except Exception as e:
+        logException('error get_virtual_nic_state' + str(e) )
+        logMessage('error get_virtual_nic_state' + str(e) )
+        #logException(e)
+        #os._exit(0)
         pass
+    
     finally:
         return result
 
@@ -211,8 +204,11 @@ def insertAppStatus(cnx, app):
         # Make sure data is committed to the database
         cnx.commit()
         
-    except mysql.connector.Error as err:
-        print("Something went wrong: {}".format(err))
+    except mysql.connector.Error as e:
+        logException('error insertAppStatus' + str(e) )
+        logMessage('error insertAppStatus' + str(e) )
+        #logException(e)
+        #os._exit(0)
     
     finally:
         cursor.close()
@@ -220,7 +216,7 @@ def insertAppStatus(cnx, app):
 # insert started app into MySQL
 def insertApp(cnx, app):
     try:
-        print("inserting app "+app_id)
+        logMessage("inserting app "+app_id)
         cursor = cnx.cursor()
         insert_stmt = ("INSERT IGNORE INTO marathon_apps_started (app)"
                       "VALUES (%s, %s) ON DUPLICATE UPDATE date = CURRENT_TIMESTAMP")
@@ -230,8 +226,11 @@ def insertApp(cnx, app):
         # Make sure data is committed to the database
         cnx.commit()
         
-    except mysql.connector.Error as err:
-        print("Something went wrong: {}".format(err))
+    except mysql.connector.Error as e:
+        logException('error insertApp' + str(e) )
+        logMessage('error insertApp' + str(e) )
+        #logException(e)
+        #os._exit(0)
         
     finally:
         cursor.close()
@@ -239,7 +238,7 @@ def insertApp(cnx, app):
 # insert deleted app into MySQL
 def insertDeletedApp(cnx, app):
     try:
-        print("inserting deleted app "+app_id)
+        logMessage("inserting deleted app "+app_id)
         cursor = cnx.cursor()
         insert_stmt = (
             "INSERT IGNORE INTO marathon_apps_deleted (app, json) "
@@ -253,8 +252,11 @@ def insertDeletedApp(cnx, app):
         # Make sure data is committed to the database
         cnx.commit()
         
-    except mysql.connector.Error as err:
-        print("Something went wrong: {}".format(err))
+    except mysql.connector.Error as e:
+        logException('error insertDeletedApp' + str(e) )
+        logMessage('error insertDeletedApp' + str(e) )
+        #logException(e)
+        #os._exit(0)
         
     finally:
         cursor.close()
@@ -262,7 +264,7 @@ def insertDeletedApp(cnx, app):
 # remove deleted app from MySQL
 def removeDeletedApp(cnx, app_id):
     try:
-        print("removing deleted app "+app_id)
+        logMessage("removing deleted app "+app_id)
         cursor = cnx.cursor()
         insert_stmt = ("DELETE FROM marathon_apps_deleted "
                       "WHERE app = %s")
@@ -272,8 +274,11 @@ def removeDeletedApp(cnx, app_id):
         # Make sure data is committed to the database
         cnx.commit()
         
-    except mysql.connector.Error as err:
-        print("Something went wrong: {}".format(err))
+    except mysql.connector.Error as e:
+        logException('error removeDeletedApp' + str(e) )
+        logMessage('error removeDeletedApp' + str(e) )
+        #logException(e)
+        #os._exit(0)
         
     finally:
         cursor.close()
@@ -289,8 +294,11 @@ def getDeletedApps(cnx):
         for (json) in cursor:
             apps.append(jsonpickle.decode(json[0]))
             
-    except mysql.connector.Error as err:
-        print("Something went wrong: {}".format(err))
+    except mysql.connector.Error as e:
+        logException('error getDeletedApps' + str(e) )
+        logMessage('error getDeletedApps' + str(e) )
+        #logException(e)
+        #os._exit(0)
         
     finally:
         cursor.close()
@@ -310,8 +318,11 @@ def getAppsStatus(cnx, seconds):
             if healthy == 0:
                 apps.append(app)
                 
-    except mysql.connector.Error as err:
-        print("Something went wrong: {}".format(err))
+    except mysql.connector.Error as e:
+        logException('error getAppsStatus' + str(e) )
+        logMessage('error getAppsStatus' + str(e) )
+        #logException(e)
+        #os._exit(0)
         
     finally:
         cursor.close()
@@ -329,8 +340,11 @@ def getAppsList(cnx):
         for (app, json, date) in cursor:
             apps[app] = [json, date]
             
-    except mysql.connector.Error as err:
-        print("Something went wrong: {}".format(err))
+    except mysql.connector.Error as e:
+        logException('error getAppsList' + str(e) )
+        logMessage('error getAppsList' + str(e) )
+        #logException(e)
+        #os._exit(0)
         
     finally:
         cursor.close()
@@ -339,14 +353,20 @@ def getAppsList(cnx):
 
 # get the list of unhealthy apps id = that had last success >= seconds ago and
 # the dictionary of vms and their number of healthy and unhealthy apps
-def getUnhealthyApps(marathon_url, seconds):
+def getUnhealthyApps(marathon_url, seconds, request_timeout):
     # list of unhealthy apps
     unhealthy_apps = []
     
     # dictionary of vms and their number of total and unhealthy apps
     vm_healthy_unhealthy = {}
-    
-    json = requests.get(marathon_url+'/v2/tasks', headers = {'accept': 'application/json'})
+    try:
+        json = requests.get(marathon_url+'/v2/tasks', headers = {'accept': 'application/json'}, timeout = request_timeout)
+    except Exception as e:
+        logException('error getUnhealthyApps' + str(e) )
+        logMessage('error getUnhealthyApps' + str(e) )
+        #os._exit(0)
+        #return
+        
     json = json.json()['tasks']
     for j in json:
         if 'healthCheckResults' in j and len(j['healthCheckResults']) > 0 and 'lastSuccess' in j['healthCheckResults'][0]:
@@ -373,9 +393,30 @@ def getUnhealthyApps(marathon_url, seconds):
     
     return unhealthy_apps, vm_healthy_unhealthy
 
+def getMarathonUrl(urls):
+        for url in urls:
+            try:
+                code = urllib.request.urlopen(url, timeout=2).code
+                # logMessage('Code getMarathonUrl' + str(code) )
+                if code == 200:
+                    return url
+            except Exception as e:
+                logException('error getMarathonUrl' + str(e) )
+                logMessage('error getMarathonUrl' + str(e) )
+                #logException(e)
+                #os._exit(0)
+            return urls[0]
+    
 # get the list of deploying and suspended apps
-def getDeployingSuspendedApps(marathon_url):
-    apps = requests.get(marathon_url+'/v2/apps', headers = {'accept': 'application/json'})
+def getDeployingSuspendedApps(marathon_url, request_timeout):
+    try:
+        apps = requests.get(marathon_url+'/v2/apps', headers = {'accept': 'application/json'}, timeout = request_timeout)
+    except Exception as e:
+        logException('error getDeployingSuspendedApps' + str(e) )
+        logMessage('error getDeployingSuspendedApps' + str(e) )
+        #logException(e)
+        #os._exit(0)
+        
     apps = apps.json()
     deployments = []
     suspended = []
@@ -387,8 +428,15 @@ def getDeployingSuspendedApps(marathon_url):
     return deployments, suspended
 
 # get the list of waiting and delayed apps
-def getWaitingDelayedApps(marathon_url):
-    apps = requests.get(marathon_url+'/v2/queue', headers = {'accept': 'application/json'})
+def getWaitingDelayedApps(marathon_url, request_timeout):
+    try:
+        apps = requests.get(marathon_url+'/v2/queue', headers = {'accept': 'application/json'}, timeout = request_timeout)
+    except Exception as e:
+        logException('error getWaitingDelayedApps' + str(e) )
+        logMessage('error getWaitingDelayedApps' + str(e) )
+        #logException(e)
+        #os._exit(0)
+        
     apps = apps.json()
     waiting = []
     delayed = []
@@ -415,8 +463,11 @@ def insertVMMetrics(cnx, vm_metrics):
         # Make sure data is committed to the database
         cnx.commit()
         
-    except mysql.connector.Error as err:
-        print("Something went wrong: {}".format(err))
+    except mysql.connector.Error as e:
+        logException('error insertVMMetrics' + str(e) )
+        logMessage('error insertVMMetrics' + str(e) )
+        #logException(e)
+        #os._exit(0)
         
     finally:
         cursor.close()
@@ -447,8 +498,11 @@ def insertTotalMetrics(cnx, total_metrics):
         # Make sure data is committed to the database
         cnx.commit()
         
-    except mysql.connector.Error as err:
-        print("Something went wrong: {}".format(err))
+    except mysql.connector.Error as e:
+        logException('error insertTotalMetrics' + str(e) )
+        logMessage('error insertTotalMetrics' + str(e) )
+        #logException(e)
+        #os._exit(0)
         
     finally:
         cursor.close()
@@ -467,8 +521,11 @@ def insertAction(cnx, action):
         # Make sure data is committed to the database
         cnx.commit()
         
-    except mysql.connector.Error as err:
-        print("Something went wrong: {}".format(err))
+    except mysql.connector.Error as e:
+        logException('error insertAction' + str(e) )
+        logMessage('error insertAction' + str(e) )
+        #logException(e)
+        #os._exit(0)
         
     finally:
         cursor.close()
@@ -484,13 +541,92 @@ def getLastNicAction(cnx):
         for (date) in cursor:
             result = date[0]
             
-    except mysql.connector.Error as err:
-        print("Something went wrong: {}".format(err))
+    except mysql.connector.Error as e:
+        logException('error getLastNicAction' + str(e) )
+        logMessage('error getLastNicAction' + str(e) )
+        #logException(e)
+        #os._exit(0)
         
     finally:
         cursor.close()
     
     return result
+
+# get apps' cpus, memory, disk totals from MySQL
+def getCpusMemDisk(cnx):
+    cpus = None
+    mem = None
+    disk = None
+    try:
+        cursor = cnx.cursor()
+        query = ("SELECT SUM(JSON_EXTRACT(json, '$.cpus')) AS 'cpus',"
+                 "SUM(JSON_EXTRACT(json, '$.mem')) AS 'mem',"
+                 "SUM(JSON_EXTRACT(json, '$.disk')) AS 'disk' "
+                 "FROM quartz.marathon_apps")
+        cursor.execute(query)
+        for (c, m, d) in cursor:
+            cpus = c
+            mem = m
+            disk = d
+            
+    except mysql.connector.Error as e:
+        logException('error getCpusMemDisk' + str(e) )
+        logMessage('error getCpusMemDisk' + str(e) )
+        #logException(e)
+        #os._exit(0)
+        
+    finally:
+        cursor.close()
+    
+    return cpus, mem, disk
+
+# get apps' stats (cpus, memory, disk) from MySQL
+def getAppsStats(cnx):
+    apps = {}
+    try:
+        cursor = cnx.cursor()
+        query = ("SELECT app, JSON_EXTRACT(json, '$.cpus') AS 'cpus', "
+                 "JSON_EXTRACT(json, '$.mem') AS 'mem', "
+                 "JSON_EXTRACT(json, '$.disk') AS 'disk' "
+                 "FROM quartz.marathon_apps")
+        cursor.execute(query)
+        for (app, cpus, mem, disk) in cursor:
+            apps[app] = {}
+            apps[app]["cpus"] = cpus
+            apps[app]["mem"] = mem
+            apps[app]["disk"] = disk
+            
+    except mysql.connector.Error as e:
+        logException('error getAppsStats' + str(e) )
+        logMessage('error getAppsStats' + str(e) )
+        #logException(e)
+        #os._exit(0)
+        
+    finally:
+        cursor.close()
+    
+    return apps
+
+# get VMs dictionary from MySQL
+def getVMsDict(cnx):
+    vms_dict = {}
+    try:
+        cursor = cnx.cursor()
+        query = ("SELECT vm_id, vm_name, uuid, ip FROM quartz.vms_dict WHERE offline = 0")
+        cursor.execute(query)
+        for (vm_id, vm_name, uuid, ip) in cursor:
+            vms_dict[vm_id] = [vm_name, uuid, ip]
+            
+    except mysql.connector.Error as e:
+        logException('error getVMsDict' + str(e) )
+        logMessage('error getVMsDict' + str(e) )
+        #logException(e)
+        #os._exit(0)
+        
+    finally:
+        cursor.close()
+    
+    return vms_dict
 
 # get the number of apps of an active vm
 def getVMApps(vm_ip, vm_port):
@@ -498,7 +634,7 @@ def getVMApps(vm_ip, vm_port):
     client = docker.DockerClient(base_url=vm_ip+":"+vm_port, timeout=5)
     return len(client.containers.list())
 
-def getVMFromUUID(search_index, uuid):  
+def getVMFromUUID(search_index, uuid):
     return search_index.FindByUuid(None, uuid, True, True)
 
 def getUUIDFomVM(content, vm_name):
@@ -575,99 +711,151 @@ def setVMResources(vm, resources):
     WaitForTask(vm.Reconfigure(cspec))
 
 # get the list of agents connected to the Mesos cluster
-def getMesosCluster(mesos_url):
+def getMesosCluster(mesos_url, request_timeout):
     slaves_list = []
-    json = requests.get(mesos_url+'/slaves', headers = {'accept': 'application/json'})
+    try:
+        json = requests.get(mesos_url+'/slaves', headers = {'accept': 'application/json'}, timeout = request_timeout)
+    except Exception as e:
+        logException('error getMesosCluster' + str(e) )
+        logMessage('error getMesosCluster' + str(e) )
+        #logException(e)
+        #os._exit(0)
+        
     json = json.json()['slaves']
     for slave in json:
         slaves_list.append(slave['hostname'])
     return slaves_list
 
 # check until timeout (s) with the specified interval (s) if an agent is in the Mesos cluster
-def checkClusterAgent(agent, mesos_url, timeout, interval):
+def checkClusterAgent(agent, mesos_url, timeout, interval, request_timeout):
     start = datetime.now(timezone.utc)
     now = start
+    logMessage('Checking agent: '+ str(agent)+ ' in Mesos')
     while now.timestamp() - start.timestamp() <= timeout:
-        agents_list = getMesosCluster(mesos_url)
+        agents_list = getMesosCluster(mesos_url, request_timeout)
+        logMessage('Agents List from Mesos: '+ str(agents_list))
         if agent in agents_list:
             return True
         time.sleep(interval)
         now = datetime.now(timezone.utc)
     return False
 
-# vms dictionary
+# log exception to file
+def logException(e):
+    # get the current date and time
+    now = datetime.now()
+    
+    # get the exception's informations
+    exc_type, exc_obj, exc_tb = sys.exc_info()
+    #fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+    #logMessage(exc_type, fname, exc_tb.tb_lineno)
+    #logging.error(traceback.format_exc())
+    
+    # open the log file in append mode
+    f = open("disces-em-error-t.txt", "a+")
+    
+    # write the exception to file (date | exception | line)
+    f.write(str(now) + " | " + str(e) + " | " + str(exc_tb.tb_lineno) + "\n") 
+    
+    # close the file
+    f.close()
+    
+# log message to file
+def logMessage(msg):
+    # get the current date and time
+    now = datetime.now()
+    
+    # open the log file in append mode
+    f = open("/root/python-vmstats/disces-em-t-log.txt", "a+")
+    
+    # write to file
+    f.write(msg + "\n") 
+    
+    # close the file
+    f.close()
 
-vms_dict = {
-    "...VM id...": ["...VM name on VCenter....", "... VM UUID...", "... VM IP address ..."]
-}
+    
+logMessage('\n-------------- Start script: ' + datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + '------------\n')    
 
 # vms nic state dictionary
 vmnic = {}
 
+# settings
+import settings
+
 # vCenter
-host = ''
-user = ''
-password = ''
-port = ''
+host = settings.config["vCenter_host"]
+user = settings.config["vCenter_user"]
+password = settings.config["vCenter_password"]
+port = settings.config["vCenter_port"]
 
 # config
-interval = 1 # minutes
-cpuLimit = 75 # %
-memLimit = 75 # %
+interval = settings.config["interval"] # minutes
+cpuLimit = settings.config["cpuLimit"] # %
+memLimit = settings.config["memLimit"] # %
 
 # container memory (MB)
-container_mem = 140
+container_mem = settings.config["container_mem"]
 
 # container cpu (MHz)
-container_cpu = 0.085
+container_cpu = settings.config["container_cpu"]
 
 #container number of cpus
-container_ncpus = 6
+container_ncpus = settings.config["container_ncpus"]
 
 # vm memory on Mesos
-vm_memory_mesos = 15.3 - 0.5
+vm_memory_mesos = settings.config["vm_memory_mesos"]
 
 # seconds after which considering an app as unhealthy
-seconds = 30
+seconds = settings.config["seconds"]
+
+# timeout (s) for request calls
+request_timeout = settings.config["request_timeout"]
 
 # nic action period (s)
-nicActionDownPeriod = 180
-nicActionUpPeriod = 120
+nicActionDownPeriod = settings.config["nicActionDownPeriod"]
+nicActionUpPeriod = settings.config["nicActionUpPeriod"]
 
 # grace period (s)
-gracePeriod = 300
-
+gracePeriod = settings.config["gracePeriod"]
+           
 # docker remote api port
-docker_port = '3000'
+docker_port = settings.config["docker_port"]
 
 # Marathon url
-marathon_url = 'http://localhost:8080'
+#marathon_url = 'http://192.168.1.187:8080'
+marathon_url = getMarathonUrl(settings.config["marathon_nodes"])
+logMessage('Marathon Url selected: '+ marathon_url)
 
 # Marathon client
 #marathon_client = MarathonClient(marathon_url)
 
 # Marathon multiple servers
-marathon_client = MarathonClient(['http://localhost:8080'])
+marathon_client = MarathonClient(settings.config["marathon_nodes"])
 
 # Mesos url
-mesos_url = 'http://localhost:5050'
+#mesos_url = 'http://192.168.1.187:5050'
+mesos_url = getMarathonUrl(settings.config["mesos_nodes"])
 
 # setup MySQL connection
-cnx = mysql.connector.connect(user='user', password='password',
-                                  host='localhost',
-                                  database='quartz')
+cnx = mysql.connector.connect(user=settings.config["mysql_user"], password=settings.config["mysql_password"],
+                                  host=settings.config["mysql_host"],
+                                  database=settings.config["mysql_database"])
+
+# get VMs dictionary from MySQL
+vms_dict = getVMsDict(cnx)
 
 # get the apps dictionary from MySQL
 apps_dictionary = getAppsList(cnx)
 
-# get the apps list from Marathongetl
+# get the apps list from Marathon
 apps = marathon_client.list_apps()
 
 # get marathon apps id
 apps_id = {}
 for app in apps:
     apps_id[app.id] = 1
-    
+
 # get missing apps for a time > grace period
 missing_apps = {}
 for app_id in apps_dictionary:
@@ -676,19 +864,21 @@ for app_id in apps_dictionary:
         elapsed = now.timestamp() - apps_dictionary[app_id][1].timestamp()
         if elapsed > gracePeriod:
             missing_apps[app_id] = apps_dictionary[app_id][0]
-            
+
 # get the list of unhealthy apps id = that had last success >= seconds ago and
 # the dictionary of vms and their number of healthy and unhealthy apps
-unhealthy_apps, vm_healthy_unhealthy = getUnhealthyApps(marathon_url, seconds)
+unhealthy_apps, vm_healthy_unhealthy = getUnhealthyApps(marathon_url, seconds, request_timeout)
 
 # queued apps
 queued_apps = marathon_client.list_queue()
 
 # get the lists of deploying and suspended apps
-deploying_apps, suspended_apps = getDeployingSuspendedApps(marathon_url)
+deploying_apps, suspended_apps = getDeployingSuspendedApps(marathon_url, request_timeout)
 
 # get the list of waiting and delayed apps
-waiting_apps, delayed_apps = getWaitingDelayedApps(marathon_url)
+waiting_apps, delayed_apps = getWaitingDelayedApps(marathon_url, request_timeout)
+
+# print('lista delayed apps', delayed_apps)
 
 # ram to be allocated for the queued apps
 ram  =  container_mem * (len(queued_apps) + len(unhealthy_apps)) - (container_mem - 1)
@@ -697,6 +887,8 @@ ram  =  container_mem * (len(queued_apps) + len(unhealthy_apps)) - (container_me
 healthyApps = []
 
 # connect to VMware datacenter
+logMessage("Connecting to VMWare datacenter")
+
 context = ssl._create_unverified_context()
 si = SmartConnect(host=host,
                   user=user,
@@ -715,32 +907,32 @@ for counter in perfList:
     perf_dict[counter_full] = counter.key
 
 # total cpu average utilisation (%)
-total_cpu = 0
+total_cpu = settings.config["total_cpu"]
 
 # total memory average utilisation (%)
-total_memory = 0
+total_memory = settings.config["total_memory"]
 
 # delta cpu total
-delta_cpu_total = 0
+delta_cpu_total = settings.config["delta_cpu_total"]
 
 # vms metrics
 vms_metrics = []
 
 # number of active vms
-active_vms = 0
+active_vms = settings.config["active_vms"]
 
 # maximum cpu usage
-max_cpu = 0
+max_cpu = settings.config["max_cpu"]
 
 # dictionary of vms and number of apps
 vms_apps = {}
 active_vms_apps = {}
 
 # minimum number of apps found in a vm
-num_vm_min = 1000000
+num_vm_min = settings.config["num_vm_min"]
 
 # name of the vm with the minimum number of apps
-vm_min_id = None
+vm_min_id = settings.config["vm_min_id"]
 
 # array of powered off vms, or powered on vms with disconnected nic
 # {vm: n}, n = 0 (powered off), 1 (disconnected nic)
@@ -757,7 +949,7 @@ for key in vms_dict:
         vm = getVMFromUUID(search_index, vms_dict[key][1])
         
         # if this vm is powered off, then continue
-        if(vm.runtime.powerState == vim.VirtualMachinePowerState.poweredOff):
+        if vm.runtime.powerState == vim.VirtualMachinePowerState.poweredOff:
             vms_powered_off_disconnected.append({key: 0})
             pass
         
@@ -784,7 +976,7 @@ for key in vms_dict:
             vm_ip = None
         vm_metrics['ip'] = vm_ip 
         
-        #print(vm.summary.quickStats.overallCpuUsage)
+        #logMessage(vm.summary.quickStats.overallCpuUsage)
         
         # get cpu and memory usage (%)
         cpu, mem = getCpuMem(vm, perf_dict, interval)
@@ -806,16 +998,16 @@ for key in vms_dict:
         vm_metrics['delta_cpu'] = cpu - cpuLimit
         
         # get the number of apps of this vm
-        vm_metrics['total_apps'] = None
-        vm_metrics['healthy_apps'] = None
-        vm_metrics['unhealthy_apps'] = None
+        vm_metrics['total_apps'] = 0
+        vm_metrics['healthy_apps'] = 0
+        vm_metrics['unhealthy_apps'] = 0
         if key in vm_healthy_unhealthy:
             vm_metrics['total_apps'] = vm_healthy_unhealthy[key]['healthy'] + vm_healthy_unhealthy[key]['unhealthy']
             vm_metrics['healthy_apps'] = vm_healthy_unhealthy[key]['healthy']
             vm_metrics['unhealthy_apps'] = vm_healthy_unhealthy[key]['unhealthy']
             
         # if this vm has a number of apps less than the minimum found since now, and its nic is connected
-        if vm_metrics['total_apps'] is not None and vm_metrics['total_apps'] < num_vm_min and vm_metrics['nic'] == 1:
+        if vm_metrics['total_apps'] < num_vm_min and vm_metrics['nic'] == 1:
             num_vm_min = vm_metrics['total_apps']
             vm_min_id = key
             
@@ -852,8 +1044,12 @@ if active_vms > 0:
     total_memory_average = total_memory / active_vms
     # negative if there is available cpu, positive if missing, above the limit
     delta_cpu_average = delta_cpu_total / active_vms
-    over_cpu = (active_vms - 2.2) * cpuLimit - total_cpu 
-    over_mem = (active_vms - 2.2) * memLimit - total_memory 
+    # over 2 VM
+    #over_cpu = (active_vms - 2.2) * cpuLimit - total_cpu 
+    #over_mem = (active_vms - 2.2) * memLimit - total_memory 
+    # over 3 VM
+    over_cpu = (active_vms - 3.2) * cpuLimit - total_cpu 
+    over_mem = (active_vms - 3.2) * memLimit - total_memory    
     #over_cpu_up = active_vms * cpuLimit - total_cpu - 1.0 * cpuLimit
     #over_mem_up = active_vms * memLimit - total_memory - 0.9 * memLimit
     
@@ -861,9 +1057,13 @@ cpu_ratio = None
 mem_ratio = None
 if len(apps_dictionary) > 0:
     # if mem_ratio is >= 1 then memory is sufficient, otherwise is insufficient
+    # TODO: (len(apps_dictionary) * container_mem) dovrebbe essere come somma dei valori dei singoli container allocati
     mem_ratio = active_vms * vm_memory_mesos * 1024 / (len(apps_dictionary) * container_mem)
     # if cpu_ratio is >= 1 then cpu is sufficient, otherwise is insufficient
-    cpu_ratio = active_vms * container_ncpus / (len(apps_dictionary) * (container_cpu+0.005) )
+    # TODO: (len(apps_dictionary) * (container_cpu+0.0055) ) 
+    #       ora container_cpu * 1,0648  che implica aggiungere il 6,48% di overhead per CPU
+    #       dovrebbe essere come somma dei valori dei singoli container allocati
+    cpu_ratio = active_vms * container_ncpus / (len(apps_dictionary) * (container_cpu+0.0055) )
     
 # insert total metrics into MySQL
 total_metrics = {}
@@ -889,84 +1089,123 @@ total_metrics['over_mem'] = str(over_mem) if(over_mem is not None) else None
 
 insertTotalMetrics(cnx, total_metrics)
 
-print('total_cpu_average:', total_cpu_average)
-print('total_cpu:', total_cpu)
-print('total_memory_average:', total_memory_average)
-print('total_memory:', total_memory)
-print('ram:', ram)
-print('delta_cpu_average:', delta_cpu_average)
-print('unhealthy apps:', len(unhealthy_apps))
-print('missing apps:', len(missing_apps))
-print('deploying apps:', len(deploying_apps))
-print('suspended apps:', len(suspended_apps))
-print('mysql apps:', len(apps_dictionary))
-print('marathon apps:', len(apps))
-#print('over cpu_up:', over_cpu_up)
-#print('over mem_up:', over_mem_up)
-print('vms_apps:', vms_apps)
+logMessage('total_cpu_average: ' + str(total_cpu_average))
+logMessage('total_cpu: ' + str(total_cpu))
+logMessage('total_memory_average: ' + str(total_memory_average))
+logMessage('total_memory: ' + str(total_memory))
+logMessage('ram: ' + str(ram))
+logMessage('delta_cpu_average: ' + str(delta_cpu_average))
+logMessage('unhealthy apps: ' + str(len(unhealthy_apps)))
+logMessage('missing apps: ' + str(len(missing_apps)))
+logMessage('deploying apps: ' + str(len(deploying_apps)))
+logMessage('suspended apps: ' + str(len(suspended_apps)))
+logMessage('mysql apps: ' + str(len(apps_dictionary)))
+logMessage('marathon apps: ' + str(len(apps)))
+#logMessage('over cpu_up:', over_cpu_up)
+#logMessage('over mem_up:', over_mem_up)
+logMessage('vms_apps:' + str(vms_apps))
 
 ####################################################################################################################
 
+logMessage('\n-------------- Computing conditions: ' + datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + '------------\n')
+
+#logMessage("apps stats:")
+#logMessage(json.dumps(getAppsStats(cnx)))
+apps_stats = getAppsStats(cnx)
+#logMessage(str(apps_stats))
+cpus, mem, disk = getCpusMemDisk(cnx)
+logMessage("Total requested CPU in %: "+str(cpus))
+logMessage("Total requested mem in MiByte: "+str(mem))
+logMessage("Total requested HD in MiByte: "+str(disk))
+logMessage("Number of Apps on Marathon active: " + str(len(apps_stats)))
 
 # if the last nic action was < nicActionDownPeriod seconds ago, don't do any nic action (enable/disable)
 now = datetime.now(timezone.utc)
 lastNicAction = getLastNicAction(cnx)
-print('lastNicAction: ', lastNicAction)
+logMessage('lastNicAction: ' + str(lastNicAction))
 elapsed = now.timestamp() - lastNicAction.timestamp() if (lastNicAction != None) else -1
 nic_down_allowed = False if elapsed > 0 and elapsed <= nicActionDownPeriod else True
 nic_up_allowed = False if elapsed > 0 and elapsed <= nicActionUpPeriod else True
-
 #minvmdynamic=2
-minvmdynamic = len(apps)/70 + 0.1*active_vms
-maxvmdynamic = len(apps)/70 + 0.20*active_vms
+
+#NEW parameters
+minvmdynamic = mem/(vm_memory_mesos-vm_memory_mesos*0.20)/1000 + 0.1 * active_vms
+maxvmdynamic = minvmdynamic + 0.1 * active_vms
+#minvmdynamic = len(apps) / 70 + 0.1 * active_vms
+#maxvmdynamic = len(apps) / 70 + 0.20 * active_vms
 deltaapps = len(apps) - len(waiting_apps)
-print('max_cpu:', max_cpu)
-print('minvmdynamic:', minvmdynamic)
-print('deltaapps:', deltaapps)
-print('elapsed: ', elapsed)
-print('nicActionDownPeriod: ', nicActionDownPeriod)
+mismatchapps = len(apps) - len(apps_dictionary)
+logMessage('CRITICAL CRITICAL CRITICAL CRITICAL mismatchapps Marathon ha APP che non sono eliminabili:' + str(mismatchapps))
+mem_ratio = len(vms_apps) * (vm_memory_mesos-vm_memory_mesos*0.35)*1000 / (mem)
+logMessage('new_mem_ratio:' + str(mem_ratio))
+over_mem = (vm_memory_mesos-vm_memory_mesos*0.30)*1000*active_vms - mem
+logMessage('new_over_mem:' + str(over_mem))
+over_cpu = (container_ncpus-container_ncpus*0.30)*active_vms - cpus
+logMessage('new_over_cpu:' + str(over_cpu))
 
-print(' ')
-print('Reasons to UP')
-print('nic_up_allowed: ', nic_up_allowed)
-print('waiting apps: ', len(waiting_apps))
-print('delayed apps: ', len(delayed_apps))
-print('active_vms <: ', active_vms)
-print('maxvmdynamic: ', maxvmdynamic)
-print('cpu_ratio<1: ', cpu_ratio)
-print('mem_ratio<1: ', mem_ratio)
-print('max_cpu>95: ', max_cpu)
+logMessage('Elapsed Time since last action: ' + str(elapsed))
 
-print(' ')
-print('Reasons to down:')
-print('nic_down_allowed: ', nic_down_allowed)
-print('over cpu>0:', over_cpu)
-print('over mem>0:', over_mem)
-print('active_vms: ', active_vms, '>2 and >: ')
-print('maxvmdynamic: ', maxvmdynamic)
+logMessage('max_cpu:' + str(max_cpu))
+#logMessage('new_minvmdynamic:' + str(new_minvmdynamic))
+logMessage('minvmdynamic:' + str(minvmdynamic))
+logMessage('maxvmdynamic:' + str(maxvmdynamic))
+logMessage('deltaapps:' + str(deltaapps))
+logMessage('elapsed: ' + str(elapsed))
+logMessage('nicActionDownPeriod: ' + str(nicActionDownPeriod))
+
+avg_container_cpu = cpus / len(apps_stats)
+avg_container_mem = mem / len(apps_stats)
+logMessage("Avg Mem: "+str(avg_container_cpu))
+logMessage("Avg Cpu: "+str(avg_container_mem))
+
+logMessage(' ')
+logMessage('---Reasons to up:---')
+logMessage('nic_up_allowed or waiting apps>70: ' + str(nic_up_allowed) + ' or ' + str(len(delayed_apps)>70) )
+logMessage('waiting apps>0 or delayed apps>0: ' + str(len(waiting_apps)>0) + ' or ' + str(len(delayed_apps)>0))
+logMessage('-- delayed apps>0: ' + str(len(delayed_apps)))
+logMessage('active_vms<maxvmdynamic: ' + str(active_vms) + ' < ' + str(maxvmdynamic))
+logMessage('[\ncpu_ratio= '+ str(cpu_ratio) + ' <1 ) or')
+logMessage('mem_ratio= ' + str(mem_ratio) + ' <1 ) or' )
+logMessage('max_cpu= ' + str(max_cpu) + ' >95\n]')
+
+logMessage(' ')
+logMessage('---Reasons to down:---')
+logMessage('nic_down_allowed: ' + str(nic_down_allowed))
+logMessage('over cpu= ' + str(over_cpu) + ' >0')
+logMessage('over mem= ' + str(over_mem) + ' >0')
+logMessage('active_vms= ' + str(active_vms) + ' > 3 and active_vms=' + str(active_vms) +' >maxvmdynamic=' + str(maxvmdynamic))
+
+logMessage('\n-------------- Taking decisions: ' + datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + '------------\n')
+
+#for vm_powered_off_disconnected in vms_powered_off_disconnected:
+#    for k, v in vm_powered_off_disconnected.items():
+#        agent_state = checkClusterAgent(vms_dict[k][2], mesos_url, 180, 10, request_timeout) #nesi
+#        logMessage("# Agent State"+str(agent_state) )
 
 # enable a vm nic
 #if (nic_up and (ram > 0 or delta_cpu_average > 0) and (mem_ratio < 1 or cpu_ratio < 1)) or (nic_up and max_cpu > 95):
 #if (nic_up and (over_mem_up < 0 or over_cpu_up < 0 or max_cpu > 95) ):
-if (nic_up_allowed or len(waiting_apps) > 70) and (len(waiting_apps) > 0 or len(delayed_apps) > 0) and active_vms<maxvmdynamic and (mem_ratio < 1 or cpu_ratio < 1 or max_cpu > 95):
-    #print('vmsdisc: ', vms_powered_off_disconnected)
-    #print('vmsdict: ', vms_dict)
+if (nic_up_allowed or len(waiting_apps)>70) and (len(waiting_apps) > 0 or len(delayed_apps) > 0) and active_vms < maxvmdynamic and (mem_ratio < 1 or cpu_ratio < 1 or max_cpu > 95):
+    logMessage("# enabling a vm or nic")
+    #logMessage('vmsdisc: ', vms_powered_off_disconnected)
+    #logMessage('vmsdict: ', vms_dict)
     for vm_powered_off_disconnected in vms_powered_off_disconnected:
-        #print('selected: ', list(vm_powered_off_disconnected.keys())[0])
+        #logMessage('selected: ', list(vm_powered_off_disconnected.keys())[0])
         try:
             # flag that indicates that a new vm agent has joined the cluster, and we can exit from this for cycle
             flag = False
             key = list(vm_powered_off_disconnected.keys())[0]
             # get the vm from UUID
-            print('vms_dict[vm_powered_off_disconnected][1]: ', vms_dict[key][1])
+            logMessage('vms_dict[vm_powered_off_disconnected][1]: ' + str(vms_dict[key][1]) )
             vm = getVMFromUUID(search_index, vms_dict[key][1])
-            print ('vm da lanciare: ', vm)
+            logMessage('vm da lanciare: ' + str(vm) )
             # get name and status of this vm (0, powered off, 1 = powered on with disconnected nic)
             for k, v in vm_powered_off_disconnected.items():
                 # if this vm is powered off
                 if(v == 0):
                     # power on the vm and wait for completion
                     WaitForTask(vm.PowerOn())
+                    logMessage('Allocated VM: ' + str(vm))
                     
                     # if the vm has been successfully powered on
                     if(vm.runtime.powerState == vim.VirtualMachinePowerState.poweredOn):
@@ -994,8 +1233,9 @@ if (nic_up_allowed or len(waiting_apps) > 70) and (len(waiting_apps) > 0 or len(
                         insertAction(cnx, action)
             
                 # wait for the agent joining the Mesos cluster
-                agent_state = checkClusterAgent(vms_dict[k][2], mesos_url, 120, 5)
-                    
+                agent_state = checkClusterAgent(vms_dict[k][2], mesos_url, 360, 10, request_timeout)
+                logMessage("# Agent State"+str(agent_state) )
+                
                 # if this agent is connected to the Mesos cluster
                 if agent_state:
                     flag = True
@@ -1003,6 +1243,7 @@ if (nic_up_allowed or len(waiting_apps) > 70) and (len(waiting_apps) > 0 or len(
                     
                 # else if this agent is not connected to the Mesos cluster
                 else:
+                    logMessage("# Else Agent State: reset della VM that was not starting")
                     # reboot guest OS
                     #WaitForTask(vm.RebootGuest())
                     # reset the vm, more drastic but safer
@@ -1012,41 +1253,54 @@ if (nic_up_allowed or len(waiting_apps) > 70) and (len(waiting_apps) > 0 or len(
             if flag:  
                 break
         except Exception as e: 
+            logMessage('Error: '+str(e))
+            logException('Error: '+str(e))
             #print (e)
             pass
+    logMessage("# done enabling a vm nic")
     # sleep 30 seconds
     #time.sleep(30)
     
 # disable the nic of the vm with the fewest number of containers
-elif nic_down_allowed and over_mem > 0 and over_cpu > 0 and active_vms > maxvmdynamic and active_vms > 2:
+elif nic_down_allowed and over_mem > 0 and over_cpu > 0 and active_vms > maxvmdynamic and active_vms > 3:
+    # prima era active_vms > 2 in modo da scendere a 2 VM minime
     vm = getVMFromUUID(search_index, vms_dict[vm_min_id][1])
     
     # disable the nic of this vm
+    logMessage("# disabling vm or nic")
     update_virtual_nic_state(si, vm, 1, 'disconnect')
     nic = get_virtual_nic_state(si, vm, 1)
+    logMessage("# done disabling vm or nic")
     
     # if the nic has been successfully disconnected
     if not nic:
         # insert action into MySQL
+        logMessage("# inserting nic has been successfully disconnected action into MySQL")
         action = {}
         action['vm'] = vm_min_id
         action['action'] = 'disable_nic'
         action['apps_list'] = None
         action['n_apps'] = vms_apps[vm_min_id]
         insertAction(cnx, action)
+        logMessage("# done inserting nic has been successfully disconnected action into MySQL")
         
     # power off the vm
+    logMessage("# powering off the vm")
     WaitForTask(vm.PowerOff())
+    logMessage('Down VM: '+ str(vm))
+    logMessage("# done powering off the vm")
     
     # if the vm has been successfully powered off
     if(vm.runtime.powerState == vim.VirtualMachinePowerState.poweredOff):
         # insert action into MySQL
+        logMessage("# inserting powered off action into MySQL")
         action = {}
         action['vm'] = vm_min_id
         action['action'] = 'poweredOff'
         action['apps_list'] = None
         action['n_apps'] = None
         insertAction(cnx, action)
+        logMessage("# done inserting powered off action into MySQL")
         
 # unallocate unhealthy apps
 #for u in unhealthy_apps:
@@ -1075,30 +1329,56 @@ elif nic_down_allowed and over_mem > 0 and over_cpu > 0 and active_vms > maxvmdy
 #    insertAction(cnx, action)
     
 # unallocate delayed apps
-#for u in delayed_apps:
-    #marathon_client.delete_app(u, force = True)
-# insert action into MySQL
-#if len(delayed_apps) > 0:
-#    action = {}
-#    action['vm'] = None
-#    action['action'] = 'unallocate_delayed'
-#    action['apps_list'] = jsonpickle.encode(delayed_apps)
-#    action['n_apps'] = str(len(delayed_apps))
-#    insertAction(cnx, action)
+# UCCIDERE LE APP DELAYED SOLO SE LO SONO DA 10 MINUTI
+recover = False
+if (recover):
+    logMessage("# kill delayed apps from too long")
+    for u in delayed_apps:
+        try:
+            marathon_client.delete_app(u, force = True)
+        except Exception as e:
+            logMessage('Error from Marathon in killing App:'+str(e))
+            logException('Error from Marathon in killing App:'+str(e))
+            pass #os._exit(0)    
+    # insert action into MySQL
+    if len(delayed_apps) > 0:
+        action = {}
+        action['vm'] = None
+        action['action'] = 'unallocate_delayed'
+        action['apps_list'] = jsonpickle.encode(delayed_apps)
+        action['n_apps'] = str(len(delayed_apps))
+        insertAction(cnx, action)
+    logMessage("# DONE kill delayed apps from too long")
     
 # allocate missing
+logMessage("# allocate missing apps")
 for app_id in missing_apps:
-    requests.post(marathon_url+'/v2/apps', data=missing_apps[app_id], headers = {'Content-type': 'application/json'})
+    try:
+        logMessage("# true allocate missing apps")
+        requests.post(marathon_url+'/v2/apps', 
+                      data=missing_apps[app_id], 
+                      headers = {'Content-type': 'application/json'}, 
+                      timeout = request_timeout)
+    except Exception as e:
+        logMessage('Error from Marathon in getting Up App:'+str(e))
+        logException('Error from Marathon in getting Up App:'+str(e))
+        pass #os._exit(0)
+logMessage("# done allocating missing apps")
+
 # insert action into MySQL
 if len(missing_apps) > 0:
+    logMessage("# inserting action into MySQL")
     action = {}
     action['vm'] = None
     action['action'] = 'allocate_missing'
     action['apps_list'] = jsonpickle.encode(list(missing_apps))
     action['n_apps'] = str(len(missing_apps))
     insertAction(cnx, action)
+    logMessage("# done inserting action into MySQL")
 
-    
-print('--------------------------------')    
+#########################other log################################################################################
+
+
+logMessage('--------------------------------')    
 # close MySQL connection    
 cnx.close()
