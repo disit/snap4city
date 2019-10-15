@@ -1,0 +1,19 @@
+<http://www.disit.org/km4city/resource/iot/orionUNIFI/test_sensor02> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.disit.org/km4city/schema#IoTSensor>
+<http://www.disit.org/km4city/resource/Thermometer> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/sosa/Procedure>
+<http://www.disit.org/km4city/resource/Temperature> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/ssn/Property>
+<http://www.disit.org/km4city/resource/Humidity> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/ssn/Property>
+<http://www.disit.org/km4city/resource/iot/orionUNIFI/test_sensor02#frequency> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/ssn/Frequency>
+<http://www.disit.org/km4city/resource/iot/orionUNIFI/test_sensor02#systemCapability> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/ssn/SystemCapability>
+<http://www.disit.org/km4city/resource/iot/orionUNIFI> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.disit.org/km4city/schema#NGSIBroker>	
+<http://www.disit.org/km4city/resource/iot/orionUNIFI/test_sensor02> <http://schema.org/name> "Humidity and Temperature Sensor - RHT03"^^<http://www.w3.org/2001/XMLSchema#string>
+<http://www.disit.org/km4city/resource/iot/orionUNIFI/test_sensor02> <http://www.w3.org/ns/ssn/implements> <http://www.disit.org/km4city/resource/Thermometer>	
+<http://www.disit.org/km4city/resource/iot/orionUNIFI/test_sensor02> <http://www.w3.org/ns/sosa/observes> <http://www.disit.org/km4city/resource/Temperature>	
+<http://www.disit.org/km4city/resource/iot/orionUNIFI/test_sensor02> <http://www.w3.org/ns/sosa/observes> <http://www.disit.org/km4city/resource/Humidity>
+<http://www.disit.org/km4city/resource/iot/orionUNIFI/test_sensor02#frequency> <http://schema.org/value> "30"^^<http://www.w3.org/2001/XMLSchema#integer>
+<http://www.disit.org/km4city/resource/iot/orionUNIFI/test_sensor02#frequency> <http://schema.org/unitCode> "SEC"^^<http://www.w3.org/2001/XMLSchema#string>
+<http://www.disit.org/km4city/resource/iot/orionUNIFI/test_sensor02#systemCapability> <http://www.w3.org/ns/ssn/hasSystemProperty> <http://www.disit.org/km4city/resource/iot/orionUNIFI/test_sensor02#frequency>	
+<http://www.disit.org/km4city/resource/iot/orionUNIFI/test_sensor02> <http://www.w3.org/ns/ssn/hasSystemCapability> <http://www.disit.org/km4city/resource/iot/orionUNIFI/test_sensor02#systemCapability>
+<http://www.disit.org/km4city/resource/iot/orionUNIFI/test_sensor02> <http://www.w3.org/2003/01/geo/wgs84_pos#lat> "43.8169"^^<http://www.w3.org/2001/XMLSchema#float>
+<http://www.disit.org/km4city/resource/iot/orionUNIFI/test_sensor02> <http://www.w3.org/2003/01/geo/wgs84_pos#long> "11.1994"^^<http://www.w3.org/2001/XMLSchema#float>
+<http://www.disit.org/km4city/resource/iot/orionUNIFI> <http://purl.oclc.org/NET/UNIS/fiware/iot-lite#endpoint> "192.168.1.9:1026"^^<http://www.w3.org/2001/XMLSchema#string>
+<http://www.disit.org/km4city/resource/iot/orionUNIFI/test_sensor02> <http://purl.oclc.org/NET/UNIS/fiware/iot-lite#exposedBy> <http://www.disit.org/km4city/resource/iot/orionUNIFI>

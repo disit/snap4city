@@ -1,0 +1,31 @@
+{
+"id":"test_sensor02",
+"status":"mapped",
+"astatus":"unmapped",
+"macaddress":"",
+"model":"Humidity and Temperature Sensor - RHT03",
+"type":"Thermometer",
+"producer":"",
+"latitude":"43.816859",
+"longitude":"11.199423",
+"kind":"sensor",
+"protocol":"ngsi",
+"format":"json",
+"frequency":"30",
+"created":"2018-02-15 15:01:12",
+"broker":{
+   "name":"orionUNIFI",
+   "type":"ngsi",
+   "ip":"192.168.1.9",
+   "port":"1026",
+   "login":"",
+   "password":"",
+   "latitude":"43.77925",
+   "longitude":"11.24626",
+   "created":"2018-02-07 15:14:39"
+},
+"attributes":[
+   {"name":"temp","type":"float","label":"temperature","order":"1"},
+   {"name":"hum","type":"float","label":"humidity","order":"1"}
+]
+}
