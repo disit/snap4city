@@ -1,0 +1,11 @@
+{
+	"MySQL_hostname": "localhost",
+	"MySQL_username": "user",
+	"MySQL_password": "password",
+	"MySQL_port": "3306",
+	"MySQL_database": "iot",
+	"KeyCloakApiUrl": "http://localhost:8088",
+	"KeyCloakApiUsername": "idpadmin",
+	"KeyCloakApiPassword": "password"
+	"KeyCloakApiGrantType": "password"
+}

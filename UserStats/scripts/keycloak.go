@@ -4,9 +4,11 @@ import (
 	"database/sql"
 	"encoding/base64"
 	"encoding/json"
+	"flag"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/tidwall/gjson"
 	"gopkg.in/resty.v1"
+	"os"
 	"strconv"
 	"time"
 )
@@ -78,15 +80,15 @@ func getBasicAuthForClient(clientId string, clientSecret string) string {
 }
 
 // get KeyCloak's token
-func getKeyCloakToken() string {
+func getKeyCloakToken(conf map[string]string) string {
 	resp, err := resty.R().
 		SetHeader("Content-Type", "application/x-www-form-urlencoded").
-		SetHeader("Authorization", getBasicAuthForClient("admin-cli", "...")).
+		SetHeader("Authorization", getBasicAuthForClient("admin-cli", "r7jKG5Pn")).
 		SetFormData(map[string]string{
-			"grant_type": "password",
-			"username":   "user",
-			"password":   "...",
-		}).Post("http://localhost:8088/auth/realms/master/protocol/openid-connect/token")
+			"grant_type": conf["KeyCloakApiGrantType"],
+			"username":   conf["KeyCloakApiUsername"],
+			"password":   conf["KeyCloakApiPassword"],
+		}).Post(conf["KeyCloakApiUrl"] + "/auth/realms/master/protocol/openid-connect/token")
 	if err != nil {
 		return ""
 	}
@@ -101,11 +103,11 @@ func getKeyCloakToken() string {
 }
 
 // get users' logins
-func getKeyCloakUsersLogins(token, dateFrom, dateTo string, offset int64) []map[string]interface{} {
+func getKeyCloakUsersLogins(token, dateFrom, dateTo string, offset int64, conf map[string]string) []map[string]interface{} {
 	resp, _ := resty.R().
 		SetHeader("Content-Type", "application/json").
 		SetHeader("Authorization", "Bearer "+token).
-		Get("http://localhost:8088/auth/admin/realms/master/events?type=LOGIN&dateFrom=" + dateFrom + "&dateTo=" + dateTo + "&first=" + strconv.FormatInt(offset, 10) + "&max=100")
+		Get(conf["KeyCloakApiUrl"] + "/auth/admin/realms/master/events?type=LOGIN&dateFrom=" + dateFrom + "&dateTo=" + dateTo + "&first=" + strconv.FormatInt(offset, 10) + "&max=100")
 
 	var result []map[string]interface{}
 
@@ -115,13 +117,13 @@ func getKeyCloakUsersLogins(token, dateFrom, dateTo string, offset int64) []map[
 }
 
 // get users' logins map
-func getKeyCloakUsersLoginsMap(dateFrom, dateTo string) map[string]map[string]interface{} {
+func getKeyCloakUsersLoginsMap(dateFrom, dateTo string, conf map[string]string) map[string]map[string]interface{} {
 	m := make(map[string]map[string]interface{})
 	var offset int64 = 0
 
 	for {
-		token := getKeyCloakToken()
-		logins := getKeyCloakUsersLogins(token, dateFrom, dateTo, offset)
+		token := getKeyCloakToken(conf)
+		logins := getKeyCloakUsersLogins(token, dateFrom, dateTo, offset, conf)
 		if len(logins) == 0 {
 			break
 		}
@@ -145,8 +147,8 @@ func getKeyCloakUsersLoginsMap(dateFrom, dateTo string) map[string]map[string]in
 }
 
 // insert KeyCloak user's # logins into MySQL
-func insertKeyCloakUserLogins(username, userId, date string, numLogins int64) {
-	db, err := sql.Open("mysql", "user:passw@tcp(localhost:3306)/iot")
+func insertKeyCloakUserLogins(username, userId, date string, numLogins int64, conf map[string]string) {
+	db, err := sql.Open("mysql", conf["MySQL_username"]+":"+conf["MySQL_password"]+"@tcp("+conf["MySQL_hostname"]+":"+conf["MySQL_port"]+")/"+conf["MySQL_database"])
 
 	// if there is an error opening the connection, handle it
 	if err != nil {
@@ -183,8 +185,8 @@ func insertKeyCloakUserLogins(username, userId, date string, numLogins int64) {
 }
 
 // insert KeyCloak users's # logins into MySQL
-func insertKeyCloakUsersLogins(startDate time.Time, endDate time.Time, usersLogins map[string]map[string]interface{}) {
-	db, err := sql.Open("mysql", "user:passw@tcp(localhost:3306)/iot")
+func insertKeyCloakUsersLogins(startDate time.Time, endDate time.Time, usersLogins map[string]map[string]interface{}, conf map[string]string) {
+	db, err := sql.Open("mysql", conf["MySQL_username"]+":"+conf["MySQL_password"]+"@tcp("+conf["MySQL_hostname"]+":"+conf["MySQL_port"]+")/"+conf["MySQL_database"])
 
 	// if there is an error opening the connection, handle it
 	if err != nil {
@@ -206,21 +208,78 @@ func insertKeyCloakUsersLogins(startDate time.Time, endDate time.Time, usersLogi
 		//dateTo = dateTo.strftime("%Y-%m-%d")
 		//dateFrom = dateFrom.strftime("%Y-%m-%d")
 		// get users' logins map
-		usersLogins := getKeyCloakUsersLoginsMap(dateFrom.Format("2006-01-02"), dateTo.Format("2006-01-02"))
+		usersLogins := getKeyCloakUsersLoginsMap(dateFrom.Format("2006-01-02"), dateTo.Format("2006-01-02"), conf)
 		// for each user
 		for username, loginData := range usersLogins {
-			insertKeyCloakUserLogins(username, loginData["userId"].(string), loginData["date"].(string), loginData["numLogins"].(int64))
+			insertKeyCloakUserLogins(username, loginData["userId"].(string), loginData["date"].(string), loginData["numLogins"].(int64), conf)
 		}
 	}
 }
 
 func main() {
+	// Settings map
+	conf := map[string]string{}
+	// Default settings
+	// MySQL Dashboard
+	conf["MySQL_hostname"] = "localhost"
+	conf["MySQL_username"] = "user"
+	conf["MySQL_password"] = "password"
+	conf["MySQL_port"] = "3306"
+	conf["MySQL_database"] = "iot"
+	conf["KeyCloakApiUrl"] = "http://localhost:8088"
+	conf["KeyCloakApiUsername"] = "idpadmin"
+	conf["KeyCloakApiPassword"] = "password"
+	conf["KeyCloakApiGrantType"] = "password"
+
+	// Custom settings
+	// get conf flag command line parameter
+	c := flag.String("conf", "", "Configuration file path (JSON)")
+	// parse flag
+	//flag.Parse()
+	// don't use lowercase letter in struct members' initial letter, otherwise it does not work
+	// https://stackoverflow.com/questions/24837432/golang-capitals-in-struct-fields
+	type Configuration struct {
+		MySQLHostname        string
+		MySQLUsername        string
+		MySQLPassword        string
+		MySQLPort            string
+		MySQLDatabase        string
+		KeyCloakApiUrl       string
+		KeyCloakApiUsername  string
+		KeyCloakApiPassword  string
+		KeyCloakApiGrantType string
+	}
+	// if a configuration file (JSON) is specified as a command line parameter (-conf), then attempt to read it
+	if *c != "" {
+		configuration := Configuration{}
+		file, err := os.Open(*c)
+		defer file.Close()
+		decoder := json.NewDecoder(file)
+		err = decoder.Decode(&configuration)
+		// if configuration file reading is ok, update the settings map
+		if err == nil {
+			// MySQL
+			conf["MySQL_hostname"] = configuration.MySQLHostname
+			conf["MySQL_username"] = configuration.MySQLUsername
+			conf["MySQL_password"] = configuration.MySQLPassword
+			conf["MySQL_port"] = configuration.MySQLPort
+			conf["MySQL_database"] = configuration.MySQLDatabase
+			conf["KeyCloakApiUrl"] = configuration.KeyCloakApiUrl
+			conf["KeyCloakApiUsername"] = configuration.KeyCloakApiUsername
+			conf["KeyCloakApiPassword"] = configuration.KeyCloakApiPassword
+			conf["KeyCloakApiGrantType"] = configuration.KeyCloakApiGrantType
+		}
+	}
+
+	// parse flag
+	flag.Parse()
+
 	// now
 	now := time.Now()
 	// dateFrom is now - 2 day
 	dateFrom := now.AddDate(0, 0, -2)
 	// dateTo is now -1 1 day
 	dateTo := now.AddDate(0, 0, -1)
-	usersLogins := getKeyCloakUsersLoginsMap(dateTo.Format("2006-01-02"), dateFrom.Format("2006-01-02"))
-	insertKeyCloakUsersLogins(dateFrom, dateTo, usersLogins)
+	usersLogins := getKeyCloakUsersLoginsMap(dateTo.Format("2006-01-02"), dateFrom.Format("2006-01-02"), conf)
+	insertKeyCloakUsersLogins(dateFrom, dateTo, usersLogins, conf)
 }

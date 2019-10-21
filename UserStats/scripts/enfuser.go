@@ -17,7 +17,7 @@ import (
 	"time"
 )
 
-// insert NetCDF map's data into MySQL
+// insert NetCDF map's data and stats into MySQL
 func insertNetCDFMapData(conf map[string]interface{}, fileName string) {
 	fmt.Println("Inserting " + fileName)
 	// Open NetCDF file in read-only mode. The dataset is returned.
@@ -112,7 +112,7 @@ func insertNetCDFMapData(conf map[string]interface{}, fileName string) {
 	// defer the close till after the main function has finished executing
 	defer db.Close()
 
-	// get map's data from GRAL binary file and insert into MySQL
+	// get map's data from NetCDF file and insert into MySQL
 	// prepared statement for data table
 	data_stmt, err := db.Prepare("INSERT IGNORE INTO heatmap.data " +
 		"(map_name, metric_name, latitude, longitude, value, date) " +
@@ -160,6 +160,8 @@ func insertNetCDFMapData(conf map[string]interface{}, fileName string) {
 			_, err = mapsCompleted_stmt.Exec(mapName, metricName, "1", date)
 		}
 	}
+	// insert Enfuser map's stats
+	insertEnfuserMapStats(conf, mapName, metricName)
 }
 
 // get Enfuser map's name and metric
@@ -208,8 +210,8 @@ func checkEnfuserMap(conf map[string]interface{}, mapName, metricName, date stri
 	}
 }
 
-// delete Enfuser map's data older than n days ago
-func deleteEnfuserMapData(conf map[string]interface{}, mapName, days string) {
+// delete map's data older than n days ago
+func deleteMapData(conf map[string]interface{}, mapName, days string) {
 	db, err := sql.Open("mysql", conf["MySQL_username"].(string)+":"+conf["MySQL_password"].(string)+"@tcp("+conf["MySQL_hostname"].(string)+":"+conf["MySQL_port"].(string)+")/"+conf["MySQL_database"].(string))
 
 	// if there is an error opening the connection, handle it
@@ -281,6 +283,35 @@ func checkEnfuserFutureMaps(conf map[string]interface{}, mapName, metricName str
 	}
 }
 
+// insert Enfuser map's stats
+func insertEnfuserMapStats(conf map[string]interface{}, mapName, metricName string) {
+	db, err := sql.Open("mysql", conf["MySQL_username"].(string)+":"+conf["MySQL_password"].(string)+"@tcp("+conf["MySQL_hostname"].(string)+":"+conf["MySQL_port"].(string)+")/"+conf["MySQL_database"].(string))
+
+	// if there is an error opening the connection, handle it
+	if err != nil {
+		panic(err.Error())
+	}
+
+	// defer the close till after the main function has finished executing
+	defer db.Close()
+
+	// get map's stats (using standard MySQL, not GORM)
+	var minDate, maxDate string
+	var num int64
+	results, _ := db.Query("SELECT IFNULL(MIN(date), ''), IFNULL(MAX(date), '') FROM heatmap.`metadata` WHERE map_name = '" + mapName + "'")
+	for results.Next() {
+		results.Scan(&minDate, &maxDate)
+	}
+	results, _ = db.Query("SELECT COUNT(DISTINCT(date)) FROM heatmap.`metadata` WHERE map_name = '" + mapName + "'")
+	for results.Next() {
+		results.Scan(&num)
+	}
+
+	// update map's stats table (using standard MySQL, not GORM)
+	stmt, _ := db.Prepare("INSERT IGNORE INTO stats (map_name, metric_name, num, min_date, max_date) VALUES(?,?,?,?,?) ON DUPLICATE KEY UPDATE num = ?, min_date = ?, max_date = ?")
+	stmt.Exec(mapName, metricName, num, minDate, maxDate, num, minDate, maxDate)
+}
+
 // send an email
 func sendMail(recipients []string, subject, body string) {
 	m := gomail.NewMessage()
@@ -304,13 +335,13 @@ func main() {
 	// MySQL
 	conf["MySQL_hostname"] = "localhost"
 	conf["MySQL_username"] = "user"
-	conf["MySQL_password"] = "passw"
+	conf["MySQL_password"] = "password"
 	conf["MySQL_port"] = "3306"
 	conf["MySQL_database"] = "heatmap"
 	// Enfuser folder
 	conf["Enfuser_folder"] = "/mnt/enfuser/1Last_file"
 	// Mail
-	conf["EmailRecipients"] = []string{"paolo.nesi@unifi.it"}
+	conf["EmailRecipients"] = []string{"me@mail.org"}
 
 	// Custom settings
 	// get c flag command line parameter
@@ -357,16 +388,21 @@ func main() {
 		if err != nil {
 			fmt.Println(err)
 		}
-		// insert NetCDF map's data into MySQL
+		// insert NetCDF map's data and stats into MySQL
 		for _, file := range files {
 			insertNetCDFMapData(conf, file)
 		}
 	}
-	// delete Enfuser old maps and check if there are future maps in the database, otherwise send email
+	// delete old Enfuser maps from MySQL (only data table) and check if there are future maps in the database, otherwise send email
 	for _, metricName := range metrics {
-		deleteEnfuserMapData(conf, "EnfuserHelsinki"+metricName, "3")
+		deleteMapData(conf, "EnfuserHelsinki"+metricName, "3")
 		if !checkEnfuserFutureMaps(conf, "EnfuserHelsinki"+metricName, metricName) {
 			sendMail(conf["EmailRecipients"].([]string), "Enfuser alert", "Future maps missing for: EnfuserHelsinki"+metricName)
 		}
+	}
+	// delete old GRAL maps from MySQL (only data table)
+	GRAL_maps := []string{"GRALheatmapHelsinki3mPM", "GRALheatmapHelsinki6mPM"}
+	for _, GRAL_map := range GRAL_maps {
+		deleteMapData(conf, GRAL_map, "3")
 	}
 }

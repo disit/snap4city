@@ -2,14 +2,16 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"flag"
 	_ "github.com/go-sql-driver/mysql"
+	"os"
 	"time"
 )
 
 // get the total number of users
-func getTotalUsers() int64 {
-	db, err := sql.Open("mysql", "user:passw@tcp(localhost:3306)/profiledb")
+func getTotalUsers(conf map[string]string) int64 {
+	db, err := sql.Open("mysql", conf["MySQL_username"]+":"+conf["MySQL_password"]+"@tcp("+conf["MySQL_hostname"]+":"+conf["MySQL_port"]+")/profiledb")
 
 	// if there is an error opening the connection, handle it
 	if err != nil {
@@ -39,8 +41,8 @@ func getTotalUsers() int64 {
 }
 
 // get the total number of users having metrics for a day
-func getTotalUsersWithMetrics(day string) int64 {
-	db, err := sql.Open("mysql", "user:passw@tcp(localhost:3306)/iot")
+func getTotalUsersWithMetrics(day string, conf map[string]string) int64 {
+	db, err := sql.Open("mysql", conf["MySQL_username"]+":"+conf["MySQL_password"]+"@tcp("+conf["MySQL_hostname"]+":"+conf["MySQL_port"]+")/"+conf["MySQL_database"])
 
 	// if there is an error opening the connection, handle it
 	if err != nil {
@@ -70,8 +72,8 @@ func getTotalUsersWithMetrics(day string) int64 {
 }
 
 // get the total number of users' dashboards for a day
-func getTotalDashboardsWithMetrics(day string) int64 {
-	db, err := sql.Open("mysql", "user:passw@tcp(localhost:3306)/iot")
+func getTotalDashboardsWithMetrics(day string, conf map[string]string) int64 {
+	db, err := sql.Open("mysql", conf["MySQL_username"]+":"+conf["MySQL_password"]+"@tcp("+conf["MySQL_hostname"]+":"+conf["MySQL_port"]+")/"+conf["MySQL_database"])
 
 	// if there is an error opening the connection, handle it
 	if err != nil {
@@ -101,8 +103,8 @@ func getTotalDashboardsWithMetrics(day string) int64 {
 }
 
 // get the total number of IoT apps for a day
-func getTotalIoTAppsWithMetrics(day string) int64 {
-	db, err := sql.Open("mysql", "user:passw@tcp(localhost:3306)/iot")
+func getTotalIoTAppsWithMetrics(day string, conf map[string]string) int64 {
+	db, err := sql.Open("mysql", conf["MySQL_username"]+":"+conf["MySQL_password"]+"@tcp("+conf["MySQL_hostname"]+":"+conf["MySQL_port"]+")/"+conf["MySQL_database"])
 
 	// if there is an error opening the connection, handle it
 	if err != nil {
@@ -132,8 +134,8 @@ func getTotalIoTAppsWithMetrics(day string) int64 {
 }
 
 // get the total number of IoT transmitted kB for a day
-func getTotalIoTTxWithMetrics(day string) float64 {
-	db, err := sql.Open("mysql", "user:passw@tcp(localhost:3306)/iot")
+func getTotalIoTTxWithMetrics(day string, conf map[string]string) float64 {
+	db, err := sql.Open("mysql", conf["MySQL_username"]+":"+conf["MySQL_password"]+"@tcp("+conf["MySQL_hostname"]+":"+conf["MySQL_port"]+")/"+conf["MySQL_database"])
 
 	// if there is an error opening the connection, handle it
 	if err != nil {
@@ -163,8 +165,8 @@ func getTotalIoTTxWithMetrics(day string) float64 {
 }
 
 // get the total number of IoT received kB for a day
-func getTotalIoTRxWithMetrics(day string) float64 {
-	db, err := sql.Open("mysql", "user:passw@tcp(localhost:3306)/iot")
+func getTotalIoTRxWithMetrics(day string, conf map[string]string) float64 {
+	db, err := sql.Open("mysql", conf["MySQL_username"]+":"+conf["MySQL_password"]+"@tcp("+conf["MySQL_hostname"]+":"+conf["MySQL_port"]+")/"+conf["MySQL_database"])
 
 	// if there is an error opening the connection, handle it
 	if err != nil {
@@ -194,8 +196,8 @@ func getTotalIoTRxWithMetrics(day string) float64 {
 }
 
 // get the total number of dashboards' accesses for a day
-func getTotalDashboardsAccessesWithMetrics(day string) int64 {
-	db, err := sql.Open("mysql", "user:passw@tcp(localhost:3306)/iot")
+func getTotalDashboardsAccessesWithMetrics(day string, conf map[string]string) int64 {
+	db, err := sql.Open("mysql", conf["MySQL_username"]+":"+conf["MySQL_password"]+"@tcp("+conf["MySQL_hostname"]+":"+conf["MySQL_port"]+")/"+conf["MySQL_database"])
 
 	// if there is an error opening the connection, handle it
 	if err != nil {
@@ -225,8 +227,8 @@ func getTotalDashboardsAccessesWithMetrics(day string) int64 {
 }
 
 // get the total number of dashboards' minutes for a day
-func getTotalDashboardsMinutesWithMetrics(day string) float64 {
-	db, err := sql.Open("mysql", "user:passw@tcp(localhost:3306)/iot")
+func getTotalDashboardsMinutesWithMetrics(day string, conf map[string]string) float64 {
+	db, err := sql.Open("mysql", conf["MySQL_username"]+":"+conf["MySQL_password"]+"@tcp("+conf["MySQL_hostname"]+":"+conf["MySQL_port"]+")/"+conf["MySQL_database"])
 
 	// if there is an error opening the connection, handle it
 	if err != nil {
@@ -256,8 +258,8 @@ func getTotalDashboardsMinutesWithMetrics(day string) float64 {
 }
 
 // insert general metrics for a day
-func insertMetrics(day string) {
-	db, err := sql.Open("mysql", "user:passw@tcp(localhost:3306)/iot")
+func insertMetrics(day string, conf map[string]string) {
+	db, err := sql.Open("mysql", conf["MySQL_username"]+":"+conf["MySQL_password"]+"@tcp("+conf["MySQL_hostname"]+":"+conf["MySQL_port"]+")/"+conf["MySQL_database"])
 
 	// if there is an error opening the connection, handle it
 	if err != nil {
@@ -269,14 +271,14 @@ func insertMetrics(day string) {
 	defer db.Close()
 
 	// calculate metrics
-	totalUsers := getTotalUsers()
-	totalUsersWithMetrics := getTotalUsersWithMetrics(day)
-	totalDashboardsWithMetrics := getTotalDashboardsWithMetrics(day)
-	totalIoTAppsWithMetrics := getTotalIoTAppsWithMetrics(day)
-	totalIoTTxWithMetrics := getTotalIoTTxWithMetrics(day)
-	totalIoTRxWithMetrics := getTotalIoTRxWithMetrics(day)
-	totalDashboardsAccessesWithMetrics := getTotalDashboardsAccessesWithMetrics(day)
-	totalDashboardsMinutesWithMetrics := getTotalDashboardsMinutesWithMetrics(day)
+	totalUsers := getTotalUsers(conf)
+	totalUsersWithMetrics := getTotalUsersWithMetrics(day, conf)
+	totalDashboardsWithMetrics := getTotalDashboardsWithMetrics(day, conf)
+	totalIoTAppsWithMetrics := getTotalIoTAppsWithMetrics(day, conf)
+	totalIoTTxWithMetrics := getTotalIoTTxWithMetrics(day, conf)
+	totalIoTRxWithMetrics := getTotalIoTRxWithMetrics(day, conf)
+	totalDashboardsAccessesWithMetrics := getTotalDashboardsAccessesWithMetrics(day, conf)
+	totalDashboardsMinutesWithMetrics := getTotalDashboardsMinutesWithMetrics(day, conf)
 
 	stmt, err := db.Prepare(
 		"INSERT IGNORE INTO data_general (totalUsers, totalUsersWithMetrics, totalDashboardsWithMetrics, " +
@@ -369,13 +371,80 @@ func main() {
 	// get n flag command line parameter, default 2
 	n := flag.Int("days", 2, "Number of days in the past to start indexing from")
 
+	// get s flag command line parameter, default ""
+	s := flag.String("startDate", "", "Start date from which perform indexing (excluded), YYYY-mm-dd")
+
+	// get s flag command line parameter, default ""
+	e := flag.String("endDate", "", "End date from which perform indexing (included), YYYY-mm-dd")
+
+	// Settings map
+	conf := map[string]string{}
+	// Default settings
+	// MySQL Dashboard
+	conf["MySQL_hostname"] = "localhost"
+	conf["MySQL_username"] = "user"
+	conf["MySQL_password"] = "password"
+	conf["MySQL_port"] = "3306"
+	conf["MySQL_database"] = "iot"
+
+	// Custom settings
+	// get conf flag command line parameter
+	c := flag.String("conf", "", "Configuration file path (JSON)")
+	// parse flag
+	//flag.Parse()
+	// don't use lowercase letter in struct members' initial letter, otherwise it does not work
+	// https://stackoverflow.com/questions/24837432/golang-capitals-in-struct-fields
+	type Configuration struct {
+		MySQLHostname string
+		MySQLUsername string
+		MySQLPassword string
+		MySQLPort     string
+		MySQLDatabase string
+	}
+	// if a configuration file (JSON) is specified as a command line parameter (-conf), then attempt to read it
+	if *c != "" {
+		configuration := Configuration{}
+		file, err := os.Open(*c)
+		defer file.Close()
+		decoder := json.NewDecoder(file)
+		err = decoder.Decode(&configuration)
+		// if configuration file reading is ok, update the settings map
+		if err == nil {
+			// MySQL
+			conf["MySQL_hostname"] = configuration.MySQLHostname
+			conf["MySQL_username"] = configuration.MySQLUsername
+			conf["MySQL_password"] = configuration.MySQLPassword
+			conf["MySQL_port"] = configuration.MySQLPort
+			conf["MySQL_database"] = configuration.MySQLDatabase
+		}
+	}
+
 	// parse flag
 	flag.Parse()
 
 	// startDate is now - n day
 	startDate := now.AddDate(0, 0, -*n)
+
 	// endDate is now -1 day
 	endDate := now.AddDate(0, 0, -1)
+
+	// if startDate parameter is not empty, use it as the start date
+	if *s != "" {
+		layout := "2006-01-02"
+		sDate, err := time.Parse(layout, *s)
+		if err == nil {
+			startDate = sDate
+		}
+	}
+
+	// if endDate parameter is not empty, use it as the end date
+	if *e != "" {
+		layout := "2006-01-02"
+		eDate, err := time.Parse(layout, *e)
+		if err == nil {
+			endDate = eDate
+		}
+	}
 
 	// for every day in the date range insert data into MySQL
 	for rd := rangeDateRecentToOld(endDate, startDate); ; {
@@ -384,6 +453,6 @@ func main() {
 			break
 		}
 		day := single_date.Format("2006-01-02")
-		insertMetrics(day)
+		insertMetrics(day, conf)
 	}
 }

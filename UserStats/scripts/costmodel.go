@@ -1,42 +1,49 @@
-// https://play.golang.org/p/xbVxASrffo
-// https://gobyexample.com/string-formatting
-// https://golang.org/pkg/net/http/
-// https://github.com/tidwall/gjson
-// https://stackoverflow.com/questions/24822826/cant-i-get-rid-of-fmt-prefix-when-calling-println-in-golang
-
 package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"flag"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/tidwall/gjson"
 	"gopkg.in/resty.v1"
+	"io/ioutil"
+	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
 )
 
 // get index's size
-func getIndexSize() int64 {
-	resp, err := resty.R().
-		Get("http://localhost:8983/solr/syslog/select?q=agent:%22Node-Red%22&wt=json")
+func getIndexSize(url string) int64 {
+	body := strings.NewReader(`{"query": { "match": { "agent": "Node-Red" } } }`)
+	req, err := http.NewRequest("POST", url+"/_search?pretty", body)
 	if err != nil {
-		return 0
+		// handle err
 	}
-	// get JSON result
-	return gjson.Get(string(resp.Body()[:]), "response.numFound").Int()
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		// handle err
+	}
+	defer resp.Body.Close()
+
+	b, _ := ioutil.ReadAll(resp.Body)
+
+	return gjson.Get(string(b), "hits.total").Int()
 }
 
 // get the number of users for a day
-func getDailyUsers(date string) int {
+func getDailyUsers(date string, conf map[string]string) int {
 	d := strings.Split(date, "T")
 	toDate := d[0]
 	toDate = toDate + "T23:59:59.999Z"
 	// get url's result
 	resp, err := resty.R().
-		Get("http://localhost:8983/solr/syslog/select?facet.field=pid_local&facet=on&indent=on&q=date_time:[%22" +
+		Get("http://" + conf["SolrUrl"] + ":8983/solr/syslog/select?facet.field=pid_local&facet=on&indent=on&q=date_time:[%22" +
 			date + "%22%20TO%20%22" +
 			toDate + "%22]%20AND%20agent:%22Node-Red%22&rows=0&sort=date_time%20desc&start=0&wt=json")
 	if err != nil {
@@ -47,74 +54,141 @@ func getDailyUsers(date string) int {
 }
 
 // get the Node-RED traffic (TX/RX) for a day
-func getNodeREDTraffic(startDate, endDate, com_mode string) int64 {
-	// get url's result
-	resp, err := resty.R().
-		Get("http://localhost:8983/solr/syslog/select?indent=on&q=agent:Node-Red%20AND%20date_time:[" +
-			startDate + "%20TO%20" + endDate + "]%20AND%20com_mode:" + com_mode +
-			"&rows=0&stats.field=payload&stats=true&wt=json")
+func getNodeREDTraffic(startDate, endDate, com_mode string, conf map[string]string) float64 {
+	body := strings.NewReader(`{
+  "query":"SELECT SUM(payload) FROM syslog3 WHERE com_mode = '` + com_mode + `' AND date_time >= '` + startDate + `' AND date_time <= '` + endDate + `' LIMIT 1"
+}`)
+
+	req, err := http.NewRequest("POST", "http://"+conf["ElasticSearchIP"]+":9200/_xpack/sql", body)
 	if err != nil {
-		return 0
+		// handle err
 	}
-	// get JSON result
-	return gjson.Get(string(resp.Body()[:]), "stats.stats_fields.payload.sum").Int()
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		// handle err
+	}
+	defer resp.Body.Close()
+
+	b, _ := ioutil.ReadAll(resp.Body)
+
+	n := gjson.Get(string(b), "rows").Value()
+	a := n.([]interface{})
+	return a[0].([]interface{})[0].(float64)
 }
 
 // get the number of Node-RED for a day
-func getNodeREDNumber(startDate, endDate string) int64 {
-	// get url's result
-	resp, err := resty.R().
-		Get("http://localhost:8983/solr/syslog/select?group.field=pid_local&group.ngroups=true&group=true&indent=on&q=agent:Node-Red%20AND%20date_time:[" +
-			startDate + "%20TO%20" + endDate + "]&rows=0&wt=json")
+func getNodeREDNumber(startDate, endDate string, conf map[string]string) int64 {
+	body := strings.NewReader(`{
+  "query":"SELECT pid_local FROM syslog3 WHERE agent = 'Node-Red' AND date_time > '` + startDate + `' AND date_time < '` + endDate + `'"
+}`)
+
+	req, err := http.NewRequest("POST", "http://"+conf["ElasticSearchIP"]+":9200/_xpack/sql", body)
 	if err != nil {
-		return 0
+		// handle err
 	}
-	// get JSON result
-	return gjson.Get(string(resp.Body()[:]), "grouped.pid_local.ngroups").Int()
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		// handle err
+	}
+	defer resp.Body.Close()
+
+	b, _ := ioutil.ReadAll(resp.Body)
+
+	n := gjson.Get(string(b), "rows").Value()
+	a := n.([]interface{})
+	result := []string{}
+	for _, c := range a {
+		if !stringInSlice(c.([]interface{})[0].(string), result) {
+			result = append(result, c.([]interface{})[0].(string))
+		}
+	}
+
+	return (int64)(len(result))
 }
 
 // get the number of ETL processed per day
-func getETLProcessesPerDay(startDate, endDate string) int64 {
-	resp, err := resty.R().
-		Get("http://localhost:8983/solr/syslog/select?fq=date_time:[" +
-			startDate + "%20TO%20" + endDate +
-			"]&q=com_mode:\"RX\"%20AND%20agent:\"ETL\"&wt=json&rows=0")
+func getETLProcessesPerDay(startDate, endDate string, conf map[string]string) int64 {
+	body := strings.NewReader(`{
+  "query":"SELECT COUNT(*) FROM syslog3 WHERE agent = 'ETL' AND com_mode = 'RX' AND date_time > '` + startDate + `' AND date_time < '` + endDate + `'"
+}`)
+
+	req, err := http.NewRequest("POST", "http://"+conf["ElasticSearchIP"]+":9200/_xpack/sql", body)
 	if err != nil {
-		return 0
+		// handle err
 	}
-	// get JSON result
-	return gjson.Get(string(resp.Body()[:]), "response.numFound").Int()
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		// handle err
+	}
+	defer resp.Body.Close()
+
+	b, _ := ioutil.ReadAll(resp.Body)
+
+	//n := gjson.Get(string(b), "rows").Int()
+	n := gjson.Get(string(b), "rows").Value()
+	a := n.([]interface{})
+	return (int64)(a[0].([]interface{})[0].(float64))
 }
 
 // get ETL traffic (TX/RX) per day
-func getETLTrafficPerDay(com_mode, startDate, endDate string) float64 {
-	// get url's result
-	resp, err := resty.R().
-		Get("http://localhost:8983/solr/syslog/select?indent=on&q=agent:ETL%20AND%20date_time:[" +
-			startDate + "%20TO%20" + endDate + "]%20AND%20com_mode:" + com_mode +
-			"&rows=0&stats.field=payload&stats=true&wt=json")
+func getETLTrafficPerDay(com_mode, startDate, endDate string, conf map[string]string) float64 {
+	body := strings.NewReader(`{
+  "query":"SELECT SUM(payload) FROM syslog3 WHERE agent = 'ETL' AND com_mode = '` + com_mode + `' AND date_time > '` + startDate + `' AND date_time < '` + endDate + `'"
+}`)
+
+	req, err := http.NewRequest("POST", "http://"+conf["ElasticSearchIP"]+":9200/_xpack/sql", body)
 	if err != nil {
-		return 0
+		// handle err
 	}
-	// get JSON result
-	return gjson.Get(string(resp.Body()[:]), "stats.stats_fields.payload.sum").Float()
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		// handle err
+	}
+	defer resp.Body.Close()
+
+	b, _ := ioutil.ReadAll(resp.Body)
+
+	//n := gjson.Get(string(b), "rows").Int()
+	n := gjson.Get(string(b), "rows").Value()
+	a := n.([]interface{})
+	return a[0].([]interface{})[0].(float64)
 }
 
 // get the number of R Studio usage per day
-func getRStudioPerDay(startDate, endDate string) int64 {
-	resp, err := resty.R().
-		Get("http://localhost:8983/solr/syslog/select?facet=on&indent=on&q=date_time:[" +
-			startDate + "%20TO%20" + endDate +
-			"]%20AND%20motivation:%22RStatistics%22&rows=0&start=0&wt=json")
+func getRStudioPerDay(startDate, endDate string, conf map[string]string) int64 {
+	body := strings.NewReader(`{
+  "query":"SELECT COUNT(*) FROM syslog3 WHERE motivation = 'RStatistics' AND date_time > '` + startDate + `' AND date_time < '` + endDate + `'"
+}`)
+
+	req, err := http.NewRequest("POST", "http://"+conf["ElasticSearchIP"]+":9200/_xpack/sql", body)
 	if err != nil {
-		return 0
+		// handle err
 	}
-	// get JSON result
-	return gjson.Get(string(resp.Body()[:]), "response.numFound").Int()
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		// handle err
+	}
+	defer resp.Body.Close()
+
+	b, _ := ioutil.ReadAll(resp.Body)
+
+	n := gjson.Get(string(b), "rows").Value()
+	a := n.([]interface{})
+	return (int64)(a[0].([]interface{})[0].(float64))
 }
 
 // get the IoT/ETL writes dictionary per day (username => writes)
-func getIoTETLWritesPerDay(iotid_username map[string]string, day string) (map[string]float64, map[string]float64) {
+func getIoTETLWritesPerDay(iotid_username map[string]string, day string, conf map[string]string) (map[string]float64, map[string]float64) {
 	iot_writes := map[string]float64{}
 	etl_writes := map[string]float64{}
 	serviceUrls_etlwrites := map[string]float64{}
@@ -125,30 +199,37 @@ func getIoTETLWritesPerDay(iotid_username map[string]string, day string) (map[st
 	// end of the day
 	end := day + "T23:59:59.999Z"
 
-	// make query
-	resp, err := resty.R().
-		Get("http://localhost:8983/solr/sensors-ETL-IOTv3/select?facet.field=serviceUri&facet.mincount=1&facet=on&q=date_time:[" +
-			start + "%20TO%20" + end + "]&wt=json&rows=0")
-	if err != nil {
-		return nil, nil
-	}
-	// get JSON result
-	serviceUris := gjson.Get(string(resp.Body()[:]), "facet_counts.facet_fields.serviceUri").Array()
+	body := strings.NewReader(`{
+  "query":"SELECT COUNT(*) AS NUM, serviceUri FROM sensorinew3 WHERE date_time > '` + start + `' AND date_time < '` + end + `' GROUP BY serviceUri"
+}`)
 
-	// build serviceUrls map, serviceUri => ETL writes
-	tmp := ""
-	for _, v := range serviceUris {
-		if v.Type == gjson.Number {
-			serviceUrls_etlwrites[tmp] = v.Float()
-		} else {
-			tmp = v.String()
-		}
+	req, err := http.NewRequest("POST", "http://"+conf["ElasticSearchIP"]+":9200/_xpack/sql", body)
+	if err != nil {
+		// handle err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		// handle err
+	}
+	defer resp.Body.Close()
+
+	b, _ := ioutil.ReadAll(resp.Body)
+
+	n := gjson.Get(string(b), "rows").Value()
+	a := n.([]interface{})
+	for _, v := range a {
+		c := v.([]interface{})[0]
+		s := v.([]interface{})[1]
+		serviceUrls_etlwrites[s.(string)] = c.(float64)
 	}
 
 	// for each serviceUrl in the serviceUrls_etlwrites map
 	for serviceUrl, _ := range serviceUrls_etlwrites {
 		// if this serviceUrl is an IoT
-		if strings.Contains(serviceUrl, "km4city/resource/iot") {
+		//if strings.Contains(serviceUrl, "km4city/resource/iot") {
+		if strings.Contains(serviceUrl, "/resource/iot") {
 			if _, ok := iotid_username[serviceUrl]; ok {
 				if _, ok := iot_writes[iotid_username[serviceUrl]]; ok {
 					iot_writes[iotid_username[serviceUrl]] += serviceUrls_etlwrites[serviceUrl]
@@ -168,10 +249,10 @@ func getIoTETLWritesPerDay(iotid_username map[string]string, day string) (map[st
 }
 
 // get IoT => username dictionary from MySQL
-func getIoTUsername() map[string]string {
+func getIoTUsername(conf map[string]string) map[string]string {
 	result := map[string]string{}
 
-	db, err := sql.Open("mysql", "user:passw@tcp(localhost:3306)/profiledb")
+	db, err := sql.Open("mysql", conf["MySQL_profiledb_username"]+":"+conf["MySQL_profiledb_password"]+"@tcp("+conf["MySQL_profiledb_hostname"]+":"+conf["MySQL_profiledb_port"]+")/"+conf["MySQL_profiledb_database"])
 
 	// if there is an error opening the connection, handle it
 	if err != nil {
@@ -241,24 +322,24 @@ func IfThenElse(condition bool, a interface{}, b interface{}) interface{} {
 }
 
 // get dashboard's daily accesses and minutes (Gianni's API), date = YYYY-mm-dd
-func getDashboardDailyAccessesAndMinutes(idDash string, date string) (string, string) {
+func getDashboardDailyAccessesAndMinutes(idDash string, date string, conf map[string]string) (string, string) {
 	resp, _ := resty.R().
 		SetHeader("Content-Type", "application/x-www-form-urlencoded").
 		SetFormData(map[string]string{
 			"idDash": idDash,
 			"date":   date,
-		}).Post("https://main.snap4city.org/api/dashDailyAccess.php")
+		}).Post(conf["DashboardsDailyAccessesApiUrl"])
 	// get JSON result
 	return val_j("nAccessesPerDay", string(resp.Body()[:])), val_j("nMinutesPerDay", string(resp.Body()[:]))
 }
 
 // get dashboards' accesses and minutes (Gianni's API), date = YYYY-mm-dd
-func getDashboardsDailyAccessesAndMinutes(date string) gjson.Result {
+func getDashboardsDailyAccessesAndMinutes(date string, conf map[string]string) gjson.Result {
 	resp, _ := resty.R().
 		SetHeader("Content-Type", "application/x-www-form-urlencoded").
 		SetFormData(map[string]string{
 			"date": date,
-		}).Post("https://main.snap4city.org/api/dashDailyAccess.php")
+		}).Post(conf["DashboardsDailyAccessesApiUrl"])
 	/*if err != nil {
 		return ""
 	}*/
@@ -266,10 +347,10 @@ func getDashboardsDailyAccessesAndMinutes(date string) gjson.Result {
 }
 
 // get elementId => username dictionary from MySQL
-func getElementIdUsername() map[string]string {
+func getElementIdUsername(conf map[string]string) map[string]string {
 	result := map[string]string{}
 
-	db, err := sql.Open("mysql", "user:passw@tcp(localhost:3306)/profiledb")
+	db, err := sql.Open("mysql", conf["MySQL_profiledb_username"]+":"+conf["MySQL_profiledb_password"]+"@tcp("+conf["MySQL_profiledb_hostname"]+":"+conf["MySQL_profiledb_port"]+")/"+conf["MySQL_profiledb_database"])
 
 	// if there is an error opening the connection, handle it
 	if err != nil {
@@ -343,15 +424,15 @@ func getUsersDashboardsAccessesAndMinutes(elementIdUsername map[string]string, d
 }
 
 // get the access token
-func getAccessToken() string {
+func getAccessToken(conf map[string]string) string {
 	resp, err := resty.R().
 		SetHeader("Content-Type", "application/x-www-form-urlencoded").
 		SetFormData(map[string]string{
-			"grant_type": "password",
-			"client_id":  "metricscollector",
-			"username":   "user",
-			"password":   "passw",
-		}).Post("https://www.snap4city.org/auth/realms/master/protocol/openid-connect/token")
+			"grant_type": conf["AccessTokenGrantType"],
+			"client_id":  conf["AccessTokenClientID"],
+			"username":   conf["AccessTokenUsername"],
+			"password":   conf["AccessTokenPassword"],
+		}).Post(conf["AccessTokenUrl"])
 	if err != nil {
 		return ""
 	}
@@ -360,16 +441,16 @@ func getAccessToken() string {
 }
 
 // get the ownerships (Piero's API)
-func getOwnershipsJSON() gjson.Result {
+func getOwnershipsJSON(conf map[string]string) gjson.Result {
 	// Assign Client Redirect Policy. Create one as per you need
 	resty.SetRedirectPolicy(resty.FlexibleRedirectPolicy(15))
 	resp, _ := resty.R().
 		SetHeader("Content-Type", "application/x-www-form-urlencoded").
 		SetFormData(map[string]string{
-			"grant_type": "password",
-			"username":   "user",
-			"password":   "passw",
-		}).Get("http://localhost/ownership-api/v1/list" + "?accessToken=" + getAccessToken() + "&includeDeleted")
+			"grant_type": conf["OwnershipApiGrantType"],
+			"username":   conf["OwnershipApiUsername"],
+			"password":   conf["OwnershipApiPassword"],
+		}).Get("http://" + conf["OwnershipApiUrl"] + "/ownership-api/v1/list" + "?accessToken=" + getAccessToken(conf) + "&includeDeleted")
 	/*if err != nil {
 		return ""
 	}*/
@@ -378,12 +459,12 @@ func getOwnershipsJSON() gjson.Result {
 }
 
 // get delegations (Angelo's API)
-func getDelegationsJSON() gjson.Result {
+func getDelegationsJSON(conf map[string]string) gjson.Result {
 	resp, _ := resty.R().
-		SetQueryParams(map[string]string{"accessToken": getAccessToken(),
+		SetQueryParams(map[string]string{"accessToken": getAccessToken(conf),
 			"sourceRequest": "metricscollector",
 			"deleted":       "true"}).
-		Get("http://localhost:8080/datamanager/api/v1/username/ANONYMOUS/delegated")
+		Get("http://" + conf["DataManagerApiUrl"] + ":8080/datamanager/api/v1/username/ANONYMOUS/delegated")
 	/*if err != nil {
 		return ""
 	}*/
@@ -392,7 +473,7 @@ func getDelegationsJSON() gjson.Result {
 }
 
 // get the apps/dashboards/devices ownerships and number of apps per username
-func getOwnerships(ownerships gjson.Result, day string) (map[string]string, map[string]int64, map[string]string) {
+func getOwnerships(ownerships gjson.Result, day string, conf map[string]string) (map[string]string, map[string]int64, map[string]string) {
 	// map of appid => owner's username
 	appid_username := map[string]string{}
 
@@ -400,7 +481,7 @@ func getOwnerships(ownerships gjson.Result, day string) (map[string]string, map[
 	username_apps := map[string]int64{}
 
 	// map iotid => owner's username
-	iotid_username := getIoTUsername()
+	iotid_username := getIoTUsername(conf)
 
 	// calculate this day's timestamp
 	start_timestamp := timestamp(day + " 00:00:00")
@@ -411,7 +492,7 @@ func getOwnerships(ownerships gjson.Result, day string) (map[string]string, map[
 		if ok := key_j("elementType", val_s) && key_j("elementId", val_s) && key_j("username", val_s); ok {
 			start_timestamp = timestamp(day + " 00:00:00")
 			// if the app is active at this day and has not been deleted, increment the counter
-			if ok := key_j("created", val_s) && val_j("created", val_s) != "null"; ok {
+			if ok := key_j("created", val_s) && val_j("created", val_s) != "null" && (!key_j("deleted", val_s) || val_j("deleted", val_s) == ""); ok {
 				// consider the creation date at the beginning of the day (00:00:00), since day is YYYY-mm-dd 00:00:00
 				creation_date := strings.Split(val_j("created", val_s), " ")
 				creation_date_v := timestamp(creation_date[0] + " 00:00:00")
@@ -472,7 +553,7 @@ func getElementsPerUser(elementType string, ownerships gjson.Result, day string)
 			if ok := key_j("elementType", val_s) &&
 				val_j("elementType", val_s) == elementType &&
 				(!key_j("deleted", val_s) ||
-					val_j("deleted", val_s) == "null") &&
+					val_j("deleted", val_s) == "") &&
 				start_timestamp >= created_v; ok {
 				if _, ok := result[val_j("username", val_s)]; ok {
 					result[val_j("username", val_s)] = result[val_j("username", val_s)] + 1
@@ -483,7 +564,7 @@ func getElementsPerUser(elementType string, ownerships gjson.Result, day string)
 			} else if ok := key_j("elementType", val_s) &&
 				val_j("elementType", val_s) == elementType &&
 				key_j("usernameDelegator", val_s) &&
-				val_j("deleted", val_s) != "null" &&
+				val_j("deleted", val_s) != "" &&
 				start_timestamp >= created_v &&
 				start_timestamp <= timestamp(val_j("deleted", val_s)); ok {
 				if _, ok := result[val_j("username", val_s)]; ok {
@@ -567,37 +648,71 @@ func getPrivateElementsPerUser(elements, publicElementsPerUser map[string]int64)
 }
 
 // get bytes transmitted/received by agent (ETL, Node-RED) with motivation, start end YYYY-mm-ddT00:00:00Z
-func getPayload(pid_local, agent, motivation, com_mode, start, end string) float64 {
-	resp, err := resty.R().
-		Get("http://localhost:8983/solr/syslog/select?indent=on&q=agent:" +
-			agent + "%20AND%20motivation:" + motivation + "%20AND%20date_time:[" +
-			start + "%20TO%20" + end + "]%20AND%20com_mode:" + com_mode +
-			"%20AND%20pid_local:%22" + pid_local +
-			"%22&rows=0&stats.field=payload&stats=true&wt=json")
+func getPayload(pid_local, agent, motivation, com_mode, start, end string, conf map[string]string) float64 {
+	body := strings.NewReader(`{
+  "query":"SELECT SUM(payload) FROM syslog3 WHERE agent = '` + agent + `' AND com_mode = '` + com_mode + `' AND motivation = '` + motivation + `' AND pid_local = '` + pid_local + `' AND date_time > '` + start + `' AND date_time < '` + end + `'"
+}`)
+
+	req, err := http.NewRequest("POST", "http://"+conf["ElasticSearchIP"]+":9200/_xpack/sql", body)
 	if err != nil {
+		// handle err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		// handle err
+	}
+	defer resp.Body.Close()
+
+	b, _ := ioutil.ReadAll(resp.Body)
+
+	n := gjson.Get(string(b), "rows").Value()
+	a := n.([]interface{})
+	if len(a) > 0 && len(a[0].([]interface{})) > 0 {
+		return a[0].([]interface{})[0].(float64)
+	} else {
 		return 0
 	}
-	payload, _ := strconv.ParseFloat(val_j("stats.stats_fields.payload.sum", string(resp.Body()[:])), 64)
-	return payload
 }
 
 // get the list of pid_local, start end YYYY-mm-ddT00:00:00Z
-func getPidLocalList(agent, start, end string) gjson.Result {
-	resp, _ := resty.R().
-		Get("http://localhost:8983/solr/syslog/select?indent=on&q=date_time:[%22" +
-			start + "%22%20TO%20%22" + end + "%22]%20AND%20agent:%22" + agent +
-			"%22%20AND%20com_mode:%22TX%22&rows=0&start=0&facet.field=pid_local&facet=on&wt=json")
-	/*if err != nil {
-		return nil
-	}*/
-	return gjson.Get(string(resp.Body()[:]), "facet_counts.facet_fields.pid_local")
+func getPidLocalList(agent, start, end string, conf map[string]string) []string {
+	body := strings.NewReader(`{
+  "query":"SELECT COUNT(*) AS num, pid_local FROM syslog3 WHERE agent = '` + agent + `' AND com_mode = 'TX' AND date_time > '` + start + `' AND date_time < '` + end + `' GROUP BY pid_local"
+}`)
+
+	req, err := http.NewRequest("POST", "http://"+conf["ElasticSearchIP"]+":9200/_xpack/sql", body)
+	if err != nil {
+		// handle err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		// handle err
+	}
+	defer resp.Body.Close()
+
+	b, _ := ioutil.ReadAll(resp.Body)
+
+	n := gjson.Get(string(b), "rows").Value()
+	a := n.([]interface{})
+	pid_local_list := []string{}
+	for _, v := range a {
+		c := v.([]interface{})[0]
+		s := v.([]interface{})[1]
+		pid_local_list = append(pid_local_list, s.(string))
+		pid_local_list = append(pid_local_list, fmt.Sprintf("%d", (int64)(c.(float64))))
+	}
+	return pid_local_list
 }
 
 // get the list of dashboards with a broker widget
-func getDashboardBrokerWidgetDictionary() []int64 {
+func getDashboardBrokerWidgetDictionary(conf map[string]string) []int64 {
 	result := []int64{}
 
-	db, err := sql.Open("mysql", "user:passw@tcp(localhost:3306)/Dashboard")
+	db, err := sql.Open("mysql", conf["MySQL_Dashboard_username"]+":"+conf["MySQL_Dashboard_password"]+"@tcp("+conf["MySQL_Dashboard_hostname"]+":"+conf["MySQL_Dashboard_port"]+")/"+conf["MySQL_Dashboard_database"])
 
 	// if there is an error opening the connection, handle it
 	if err != nil {
@@ -633,10 +748,10 @@ func getDashboardBrokerWidgetDictionary() []int64 {
 }
 
 // get the list of dashboards with a Node-RED widget
-func getDashboardNodeREDWidgetDictionary() []int64 {
+func getDashboardNodeREDWidgetDictionary(conf map[string]string) []int64 {
 	result := []int64{}
 
-	db, err := sql.Open("mysql", "user:passw@tcp(localhost:3306)/Dashboard")
+	db, err := sql.Open("mysql", conf["MySQL_Dashboard_username"]+":"+conf["MySQL_Dashboard_password"]+"@tcp("+conf["MySQL_Dashboard_hostname"]+":"+conf["MySQL_Dashboard_port"]+")/"+conf["MySQL_Dashboard_database"])
 
 	// if there is an error opening the connection, handle it
 	if err != nil {
@@ -772,9 +887,10 @@ func insertAppData(username string,
 	rx map[string]float64,
 	iot_apps int64,
 	iot_reads int64,
-	date string) {
+	date string,
+	conf map[string]string) {
 
-	db, err := sql.Open("mysql", "user:passw@tcp(localhost:3306)/iot")
+	db, err := sql.Open("mysql", conf["MySQL_profiledb_username"]+":"+conf["MySQL_profiledb_password"]+"@tcp("+conf["MySQL_profiledb_hostname"]+":"+conf["MySQL_profiledb_port"]+")/iot")
 
 	// if there is an error opening the connection, handle it
 	if err != nil {
@@ -924,9 +1040,9 @@ func insertAppData(username string,
 // insert user's dashboard data for a day into MySQL
 func insertDashboardData(username string, dashboards_public int64, dashboards_private int64,
 	nAccessesPerDay int64, nMinutesPerDay int64, iot_writes float64,
-	etl_writes float64, date string) {
+	etl_writes float64, date string, conf map[string]string) {
 
-	db, err := sql.Open("mysql", "user:passw@tcp(localhost:3306)/iot")
+	db, err := sql.Open("mysql", conf["MySQL_profiledb_username"]+":"+conf["MySQL_profiledb_password"]+"@tcp("+conf["MySQL_profiledb_hostname"]+":"+conf["MySQL_profiledb_port"]+")/iot")
 
 	// if there is an error opening the connection, handle it
 	if err != nil {
@@ -957,8 +1073,8 @@ func insertDashboardData(username string, dashboards_public int64, dashboards_pr
 // insert dashboards' accesses and minutes into MySQL
 func insertDashboardsData(elementId int64, username string, nAccessesPerDay string,
 	nMinutesPerDay string, dashboardBrokerWidgetDictionary []int64,
-	dashboardNodeREDWidgetDictionary []int64, date string) {
-	db, err := sql.Open("mysql", "user:passw@tcp(localhost:3306)/iot")
+	dashboardNodeREDWidgetDictionary []int64, date string, conf map[string]string) {
+	db, err := sql.Open("mysql", conf["MySQL_profiledb_username"]+":"+conf["MySQL_profiledb_password"]+"@tcp("+conf["MySQL_profiledb_hostname"]+":"+conf["MySQL_profiledb_port"]+")/iot")
 
 	// if there is an error opening the connection, handle it
 	if err != nil {
@@ -997,9 +1113,9 @@ func insertDashboardsData(elementId int64, username string, nAccessesPerDay stri
 
 // insert user's device data for a day into MySQL
 func insertDeviceData(username string, devices_public int64, devices_private int64,
-	iot_writes float64, etl_writes float64, date string) {
+	iot_writes float64, etl_writes float64, date string, conf map[string]string) {
 
-	db, err := sql.Open("mysql", "user:passw@tcp(localhost:3306)/iot")
+	db, err := sql.Open("mysql", conf["MySQL_profiledb_username"]+":"+conf["MySQL_profiledb_password"]+"@tcp("+conf["MySQL_profiledb_hostname"]+":"+conf["MySQL_profiledb_port"]+")/iot")
 
 	// if there is an error opening the connection, handle it
 	if err != nil {
@@ -1024,9 +1140,9 @@ func insertDeviceData(username string, devices_public int64, devices_private int
 
 // insert apps data for this user into MySQL
 func insertUsersData(users_total int, users_nodered int, users_dashboards int,
-	username_devices int, date string) {
+	username_devices int, date string, conf map[string]string) {
 
-	db, err := sql.Open("mysql", "user:passw@tcp(localhost:3306)/iot")
+	db, err := sql.Open("mysql", conf["MySQL_profiledb_username"]+":"+conf["MySQL_profiledb_password"]+"@tcp("+conf["MySQL_profiledb_hostname"]+":"+conf["MySQL_profiledb_port"]+")/iot")
 
 	// if there is an error opening the connection, handle it
 	if err != nil {
@@ -1050,7 +1166,7 @@ func insertUsersData(users_total int, users_nodered int, users_dashboards int,
 }
 
 // get and insert ETL processed per day into MySQL
-func indexETL(day string) {
+func indexETL(day string, conf map[string]string) {
 	// start of the day
 	start := day + "T00:00:00.000Z"
 
@@ -1058,13 +1174,13 @@ func indexETL(day string) {
 	end := day + "T23:59:59.999Z"
 
 	// get the number of ETL processes of this day
-	num_etls := getETLProcessesPerDay(start, end)
+	num_etls := getETLProcessesPerDay(start, end, conf)
 
 	// get ETL traffic (TX/RX) per day
-	tx := getETLTrafficPerDay("TX", start, end)
-	rx := getETLTrafficPerDay("RX", start, end)
+	tx := getETLTrafficPerDay("TX", start, end, conf)
+	rx := getETLTrafficPerDay("RX", start, end, conf)
 
-	db, err := sql.Open("mysql", "user:passw@tcp(localhost:3306)/iot")
+	db, err := sql.Open("mysql", conf["MySQL_profiledb_username"]+":"+conf["MySQL_profiledb_password"]+"@tcp("+conf["MySQL_profiledb_hostname"]+":"+conf["MySQL_profiledb_port"]+")/iot")
 
 	// if there is an error opening the connection, handle it
 	if err != nil {
@@ -1089,7 +1205,7 @@ func indexETL(day string) {
 }
 
 // get and insert R usages per day into MySQL
-func indexR(day string) {
+func indexR(day string, conf map[string]string) {
 	// start of the day
 	start := day + "T00:00:00.000Z"
 
@@ -1097,9 +1213,9 @@ func indexR(day string) {
 	end := day + "T23:59:59.999Z"
 
 	// get the number of R usages of this day
-	num_r := getRStudioPerDay(start, end)
+	num_r := getRStudioPerDay(start, end, conf)
 
-	db, err := sql.Open("mysql", "user:passw@tcp(localhost:3306)/iot")
+	db, err := sql.Open("mysql", conf["MySQL_profiledb_username"]+":"+conf["MySQL_profiledb_password"]+"@tcp("+conf["MySQL_profiledb_hostname"]+":"+conf["MySQL_profiledb_port"]+")/iot")
 
 	// if there is an error opening the connection, handle it
 	if err != nil {
@@ -1127,7 +1243,8 @@ func indexUserData(ownerships gjson.Result,
 	iotid_username map[string]string,
 	dashboardBrokerWidgetDictionary []int64,
 	dashboardNodeREDWidgetDictionary []int64,
-	day string) {
+	day string,
+	conf map[string]string) {
 	// start of the day
 	start := day + "T00:00:00.000Z"
 
@@ -1135,10 +1252,10 @@ func indexUserData(ownerships gjson.Result,
 	end := day + "T23:59:59.999Z"
 
 	// get ownerships dictionaries
-	appid_username, username_apps, iotid_username := getOwnerships(ownerships, day)
+	appid_username, username_apps, iotid_username := getOwnerships(ownerships, day, conf)
 
 	// get the IoT/ETL writes dictionary per day (username => writes)
-	iot_writes, etl_writes := getIoTETLWritesPerDay(iotid_username, day)
+	iot_writes, etl_writes := getIoTETLWritesPerDay(iotid_username, day, conf)
 
 	// get the number of active dashboards per user of this day YYYY-mm-dd
 	// and the dictionary of users and their dashboards ids (elementId)
@@ -1161,21 +1278,16 @@ func indexUserData(ownerships gjson.Result,
 	privateDevicesPerUser := getPrivateElementsPerUser(devices, publicDevicesPerUser)
 
 	// get the list of pid_local for the agent Node-Red
-	pid_local_list_gjson := getPidLocalList("Node-Red", start, end)
-	pid_local_list := []string{}
-	pid_local_list_gjson.ForEach(func(key, value gjson.Result) bool {
-		pid_local_list = append(pid_local_list, value.String())
-		return true // keep iterating
-	})
+	pid_local_list := getPidLocalList("Node-Red", start, end, conf)
 
 	// get serviceURI owners' dictionary from MySQL
-	serviceURIsOwners := getServiceURIOwners()
+	serviceURIsOwners := getServiceURIOwners(conf)
 
 	// get IoT reads' dictionary from MySQL (username => count)
-	iot_reads := getIoTReads(day, serviceURIsOwners)
+	iot_reads := getIoTReads(day, serviceURIsOwners, conf)
 
 	// get dashboards' accesses and minutes
-	dashboardsAccessesAndMinutes := getDashboardsDailyAccessesAndMinutes(day)
+	dashboardsAccessesAndMinutes := getDashboardsDailyAccessesAndMinutes(day, conf)
 
 	// get users' dashboard accesses and minutes for a day
 	usersDashboardsAccessesAndMinutes := getUsersDashboardsAccessesAndMinutes(elementIdUsername, dashboardsAccessesAndMinutes)
@@ -1202,23 +1314,21 @@ func indexUserData(ownerships gjson.Result,
 			(strings.LastIndex(pid_local, "nr") != -1 && len(pid_local) == 7)) {
 			// get bytes transmitted/received by Node-RED with motivation
 			for _, motivation := range motivations {
-				tx := getPayload(pid_local, "Node-Red", motivation, "TX", start, end)
-				rx := getPayload(pid_local, "Node-Red", motivation, "RX", start, end)
-				// update Node-Red dictionaries for this motivation
-				username_motivation_tx, username_motivation_rx = updateDictionaries(
-					username_motivation_tx, username_motivation_rx, pid_local,
-					appid_username, motivation, tx, rx)
+				// patch for excluding a bugged pid_local
+				if pid_local != "nrwu2iq" {
+					tx := getPayload(pid_local, "Node-Red", motivation, "TX", start, end, conf)
+					rx := getPayload(pid_local, "Node-Red", motivation, "RX", start, end, conf)
+					// update Node-Red dictionaries for this motivation
+					username_motivation_tx, username_motivation_rx = updateDictionaries(
+						username_motivation_tx, username_motivation_rx, pid_local,
+						appid_username, motivation, tx, rx)
+				}
 			}
 		}
 	}
 
 	// get the list of pid_local for the agent ETL (the user here is assumed to be always 'disit')
-	pid_local_list_gjson = getPidLocalList("ETL", start, end)
-	pid_local_list = []string{}
-	pid_local_list_gjson.ForEach(func(key, value gjson.Result) bool {
-		pid_local_list = append(pid_local_list, value.String())
-		return true // keep iterating
-	})
+	pid_local_list = getPidLocalList("ETL", start, end, conf)
 
 	// motivation => tx dictionary of user 'disit'
 	motivation_tx := map[string]float64{}
@@ -1233,8 +1343,8 @@ func indexUserData(ownerships gjson.Result,
 		if pid_local_list[i+1] != "" {
 			// get bytes transmitted/received by ETL with motivation
 			for _, motivation := range motivations {
-				tx := getPayload(pid_local, "ETL", motivation, "TX", start, end)
-				rx := getPayload(pid_local, "ETL", motivation, "RX", start, end)
+				tx := getPayload(pid_local, "ETL", motivation, "TX", start, end, conf)
+				rx := getPayload(pid_local, "ETL", motivation, "RX", start, end, conf)
 				// update ETL dictionaries for this motivation
 				updateETLDictionaries(motivation_tx, motivation_rx, motivation, tx, rx)
 			}
@@ -1257,11 +1367,11 @@ func indexUserData(ownerships gjson.Result,
 		nMinutesPerDay := val_j("nMinutesPerDay", value.String())
 		if username != nil {
 			elementId_v, err := strconv.ParseInt(elementId, 10, 64)
-			if err != nil {
+			if err == nil {
 				insertDashboardsData(
 					elementId_v, username.(string), nAccessesPerDay,
 					nMinutesPerDay, dashboardBrokerWidgetDictionary,
-					dashboardNodeREDWidgetDictionary, start)
+					dashboardNodeREDWidgetDictionary, start, conf)
 			}
 		}
 		return true // keep iterating
@@ -1298,7 +1408,7 @@ func indexUserData(ownerships gjson.Result,
 
 	// index users for this day
 	insertUsersData(len(users_total), len(users_nodered),
-		len(users_dashboards), len(username_devices), start)
+		len(users_dashboards), len(username_devices), start, conf)
 
 	// index apps (Node-Red) for this day
 	for username := range users_total {
@@ -1313,7 +1423,7 @@ func indexUserData(ownerships gjson.Result,
 		rx := username_motivation_rx[username]
 		// insert apps data for this user into MySQL
 		if username != "" {
-			insertAppData(username, tx, rx, iot_apps, reads, start)
+			insertAppData(username, tx, rx, iot_apps, reads, start, conf)
 		}
 	}
 
@@ -1340,7 +1450,8 @@ func indexUserData(ownerships gjson.Result,
 				usersDashboardsAccessesAndMinutes[username]["nMinutesPerDay"],
 				iot_writes_username,
 				etl_writes_username,
-				start)
+				start,
+				conf)
 		}
 	}
 
@@ -1358,14 +1469,15 @@ func indexUserData(ownerships gjson.Result,
 				privateDevices,
 				iot_writes_username,
 				etl_writes_username,
-				start)
+				start,
+				conf)
 		}
 	}
 }
 
 // get and insert Node-RED data into MySQL
-func indexNodeRed(day string) {
-	db, err := sql.Open("mysql", "user:passw@tcp(localhost:3306)/iot")
+func indexNodeRed(day string, conf map[string]string) {
+	db, err := sql.Open("mysql", conf["MySQL_profiledb_username"]+":"+conf["MySQL_profiledb_password"]+"@tcp("+conf["MySQL_profiledb_hostname"]+":"+conf["MySQL_profiledb_port"]+")/iot")
 
 	// if there is an error opening the connection, handle it
 	if err != nil {
@@ -1383,19 +1495,19 @@ func indexNodeRed(day string) {
 	end := day + "T23:59:59.999Z"
 
 	// get the Node-RED traffic (TX/RX) for a day
-	tx := getNodeREDTraffic(start, end, "TX")
-	rx := getNodeREDTraffic(start, end, "RX")
+	tx := getNodeREDTraffic(start, end, "TX", conf)
+	rx := getNodeREDTraffic(start, end, "RX", conf)
 
 	// get the number of Node-RED for a day
-	num := getNodeREDNumber(start, end)
+	num := getNodeREDNumber(start, end, conf)
 
 	stmt, err := db.Prepare(
 		"INSERT IGNORE INTO nodered (num, tx, rx, date) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE num = ?, tx = ?, rx = ?")
 
-	_, err = stmt.Exec(strconv.FormatInt(num, 10), strconv.FormatInt(tx, 10),
-		strconv.FormatInt(rx, 10), start,
-		strconv.FormatInt(num, 10), strconv.FormatInt(tx, 10),
-		strconv.FormatInt(rx, 10))
+	_, err = stmt.Exec(num, tx,
+		rx, start,
+		num, tx,
+		rx)
 	// if there is an error opening the connection, handle it
 	if err != nil {
 		panic(err.Error())
@@ -1403,9 +1515,9 @@ func indexNodeRed(day string) {
 }
 
 // get IoT reads' dictionary from MySQL
-func getIoTReads(start string, serviceURIsOwners map[string]string) map[string]int64 {
+func getIoTReads(start string, serviceURIsOwners, conf map[string]string) map[string]int64 {
 	// setup MySQL connection
-	db, err := sql.Open("mysql", "user:passw@tcp(localhost:3306)/ServiceMap")
+	db, err := sql.Open("mysql", conf["MySQL_ServiceMap_username"]+":"+conf["MySQL_ServiceMap_password"]+"@tcp("+conf["MySQL_ServiceMap_hostname"]+":"+conf["MySQL_ServiceMap_port"]+")/"+conf["MySQL_ServiceMap_database"])
 
 	// if there is an error opening the connection, handle it
 	if err != nil {
@@ -1442,9 +1554,9 @@ func getIoTReads(start string, serviceURIsOwners map[string]string) map[string]i
 }
 
 // get serviceURI owners' dictionary from MySQL
-func getServiceURIOwners() map[string]string {
+func getServiceURIOwners(conf map[string]string) map[string]string {
 	// setup MySQL connection
-	db, err := sql.Open("mysql", "user:passw@tcp(localhost:3306)/profiledb")
+	db, err := sql.Open("mysql", conf["MySQL_profiledb_username"]+":"+conf["MySQL_profiledb_password"]+"@tcp("+conf["MySQL_profiledb_hostname"]+":"+conf["MySQL_profiledb_port"]+")/"+conf["MySQL_profiledb_database"])
 
 	// if there is an error opening the connection, handle it
 	if err != nil {
@@ -1474,10 +1586,10 @@ func getServiceURIOwners() map[string]string {
 }
 
 // get Dashboards' Ids from MySQL
-func getDashboardsIds() []string {
+func getDashboardsIds(conf map[string]string) []string {
 
 	// setup MySQL connection
-	db, err := sql.Open("mysql", "user:passw@tcp(localhost:3306)/Dashboard")
+	db, err := sql.Open("mysql", conf["MySQL_Dashboard_username"]+":"+conf["MySQL_Dashboard_password"]+"@tcp("+conf["MySQL_Dashboard_hostname"]+":"+conf["MySQL_Dashboard_port"]+")/"+conf["MySQL_Dashboard_database"])
 
 	// if there is an error opening the connection, handle it
 	if err != nil {
@@ -1563,20 +1675,162 @@ func main() {
 	// get s flag command line parameter, default ""
 	e := flag.String("endDate", "", "End date from which perform indexing (included), YYYY-mm-dd")
 
+	// Settings map
+	conf := map[string]string{}
+	// Default settings
+	// MySQL Dashboard
+	conf["MySQL_Dashboard_hostname"] = "localhost"
+	conf["MySQL_Dashboard_username"] = "user""
+	conf["MySQL_Dashboard_password"] = "password"
+	conf["MySQL_Dashboard_port"] = "3306"
+	conf["MySQL_Dashboard_database"] = "Dashboard"
+
+	// MySQL profiledb
+	conf["MySQL_profiledb_hostname"] = "localhost"
+	conf["MySQL_profiledb_username"] = "user"
+	conf["MySQL_profiledb_password"] = "password"
+	conf["MySQL_profiledb_port"] = "3306"
+	conf["MySQL_profiledb_database"] = "profiledb"
+
+	// MySQL ServiceMap
+	conf["MySQL_ServiceMap_hostname"] = "localhost"
+	conf["MySQL_ServiceMap_username"] = "user"
+	conf["MySQL_ServiceMap_password"] = "password"
+	conf["MySQL_ServiceMap_port"] = "3306"
+	conf["MySQL_ServiceMap_database"] = "ServiceMap"
+
+	// ElasticSearch
+	conf["ElasticSearchIP"] = "localhost"
+
+	// DataManager API (Angelo)
+	conf["DataManagerApiUrl"] = "localhost"
+
+	// Daily Accesses API
+	conf["DashboardsDailyAccessesApiUrl"] = "https://loclhost/api/dashDailyAccess.php"
+
+	// Ownership API (Piero)
+	conf["OwnershipApiUrl"] = "localhost"
+	conf["OwnershipApiUsername"] = "admin"
+	conf["OwnershipApiPassword"] = "password"
+	conf["OwnershipApiGrantType"] = "password"
+
+	// Access Token
+	conf["AccessTokenUrl"] = "https://localhost/auth/realms/master/protocol/openid-connect/token"
+	conf["AccessTokenPassword"] = "password"
+	conf["AccessTokenUsername"] = "rootuser"
+	conf["AccessTokenClientID"] = "metricscollector"
+	conf["AccessTokenGrantType"] = "password"
+
+	// Solr Url (not used)
+	conf["SolrUrl"] = "localhost"
+
+	// Custom settings
+	// get conf flag command line parameter
+	c := flag.String("conf", "", "Configuration file path (JSON)")
+	// parse flag
+	//flag.Parse()
+	// don't use lowercase letter in struct members' initial letter, otherwise it does not work
+	// https://stackoverflow.com/questions/24837432/golang-capitals-in-struct-fields
+	type Configuration struct {
+		MySQLDashboardHostname string
+		MySQLDashboardUsername string
+		MySQLDashboardPassword string
+		MySQLDashboardPort     string
+		MySQLDashboardDatabase string
+
+		MySQLProfiledbHostname string
+		MySQLProfiledbUsername string
+		MySQLProfiledbPassword string
+		MySQLProfiledbPort     string
+		MySQLProfiledbDatabase string
+
+		MySQLServiceMapHostname string
+		MySQLServiceMapUsername string
+		MySQLServiceMapPassword string
+		MySQLServiceMapPort     string
+		MySQLServiceMapDatabase string
+
+		ElasticSearchIP string
+
+		DataManagerApiUrl string
+
+		DashboardsDailyAccessesApiUrl string
+
+		OwnershipApiUrl       string
+		OwnershipApiUsername  string
+		OwnershipApiPassword  string
+		OwnershipApiGrantType string
+
+		AccessTokenUrl       string
+		AccessTokenUsername  string
+		AccessTokenPassword  string
+		AccessTokenClientID  string
+		AccessTokenGrantType string
+
+		SolrUrl string
+	}
+	// if a configuration file (JSON) is specified as a command line parameter (-conf), then attempt to read it
+	if *c != "" {
+		configuration := Configuration{}
+		file, err := os.Open(*c)
+		defer file.Close()
+		decoder := json.NewDecoder(file)
+		err = decoder.Decode(&configuration)
+		// if configuration file reading is ok, update the settings map
+		if err == nil {
+			// MySQL
+			conf["MySQL_Dashboard_hostname"] = configuration.MySQLDashboardHostname
+			conf["MySQL_Dashboard_username"] = configuration.MySQLDashboardUsername
+			conf["MySQL_Dashboard_password"] = configuration.MySQLDashboardPassword
+			conf["MySQL_Dashboard_port"] = configuration.MySQLDashboardPort
+			conf["MySQL_Dashboard_database"] = configuration.MySQLDashboardDatabase
+
+			conf["MySQL_profiledb_hostname"] = configuration.MySQLProfiledbHostname
+			conf["MySQL_profiledb_username"] = configuration.MySQLProfiledbUsername
+			conf["MySQL_profiledb_password"] = configuration.MySQLProfiledbPassword
+			conf["MySQL_profiledb_port"] = configuration.MySQLProfiledbPort
+			conf["MySQL_profiledb_database"] = configuration.MySQLProfiledbDatabase
+
+			conf["MySQL_ServiceMap_hostname"] = configuration.MySQLServiceMapHostname
+			conf["MySQL_ServiceMap_username"] = configuration.MySQLServiceMapUsername
+			conf["MySQL_ServiceMap_password"] = configuration.MySQLServiceMapPassword
+			conf["MySQL_ServiceMap_port"] = configuration.MySQLServiceMapPort
+			conf["MySQL_ServiceMap_database"] = configuration.MySQLServiceMapDatabase
+
+			conf["ElasticSearchIP"] = configuration.ElasticSearchIP
+
+			conf["DataManagerApiUrl"] = configuration.DataManagerApiUrl
+
+			conf["DashboardsDailyAccessesApiUrl"] = configuration.DashboardsDailyAccessesApiUrl
+
+			conf["OwnershipApiUrl"] = configuration.OwnershipApiUrl
+			conf["OwnershipApiUsername"] = configuration.OwnershipApiUsername
+			conf["OwnershipApiPassword"] = configuration.OwnershipApiPassword
+
+			conf["AccessTokenUrl"] = configuration.AccessTokenUrl
+			conf["AccessTokenUsername"] = configuration.AccessTokenUsername
+			conf["AccessTokenPassword"] = configuration.AccessTokenPassword
+			conf["AccessTokenClientID"] = configuration.AccessTokenClientID
+			conf["AccessTokenGrantType"] = configuration.AccessTokenGrantType
+
+			conf["SolrUrl"] = configuration.SolrUrl
+		}
+	}
+
 	// parse flag
 	flag.Parse()
 
 	// startDate is now - n day
 	startDate := now.AddDate(0, 0, -*n)
 
-	// endDate is now -1 day
+	// endDate is now - 1 day
 	endDate := now.AddDate(0, 0, -1)
 
 	// if startDate parameter is not empty, use it as the start date
 	if *s != "" {
 		layout := "2006-01-02"
 		sDate, err := time.Parse(layout, *s)
-		if err != nil {
+		if err == nil {
 			startDate = sDate
 		}
 	}
@@ -1585,33 +1839,33 @@ func main() {
 	if *e != "" {
 		layout := "2006-01-02"
 		eDate, err := time.Parse(layout, *e)
-		if err != nil {
+		if err == nil {
 			endDate = eDate
 		}
 	}
 
 	// get the ownerships (Piero's API)
-	ownerships := getOwnershipsJSON()
+	ownerships := getOwnershipsJSON(conf)
 
 	// get the delegations (Angelo's API)
-	delegations := getDelegationsJSON()
+	delegations := getDelegationsJSON(conf)
 
 	// get serviceURI owners' dictionary from MySQL
 	//serviceURIsOwners := getServiceURIOwners()
 
 	// get elementId => username dictionary from MySQL
-	elementIdUsername := getElementIdUsername()
+	elementIdUsername := getElementIdUsername(conf)
 
 	// get dashboard => broker dictionary
 	// list of dashboards with a broker widget
-	dashboardBrokerWidgetDictionary := getDashboardBrokerWidgetDictionary()
+	dashboardBrokerWidgetDictionary := getDashboardBrokerWidgetDictionary(conf)
 
 	// get dashboard => widget Node-RED dictionary
 	// list of dashboards with a Node-RED widget
-	dashboardNodeREDWidgetDictionary := getDashboardNodeREDWidgetDictionary()
+	dashboardNodeREDWidgetDictionary := getDashboardNodeREDWidgetDictionary(conf)
 
 	// dictionary iotid => owner's username
-	iotid_username := getIoTUsername()
+	iotid_username := getIoTUsername(conf)
 
 	// get Dashboards' Ids from MySQL
 	//dashboardsids := getDashboardsIds()
@@ -1626,12 +1880,12 @@ func main() {
 		// index user data
 		indexUserData(ownerships, delegations, elementIdUsername, iotid_username,
 			dashboardBrokerWidgetDictionary,
-			dashboardNodeREDWidgetDictionary, day)
+			dashboardNodeREDWidgetDictionary, day, conf)
 		// index R
-		indexR(day)
+		indexR(day, conf)
 		// index ETL
-		indexETL(day)
+		indexETL(day, conf)
 		// index Node-Red
-		indexNodeRed(day)
+		indexNodeRed(day, conf)
 	}
 }
