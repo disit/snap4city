@@ -1,3 +1,12 @@
+// https://play.golang.org/p/xbVxASrffo
+// https://gobyexample.com/string-formatting
+// https://golang.org/pkg/net/http/
+// https://github.com/tidwall/gjson
+// https://mholt.github.io/curl-to-go <- curl to Go
+// https://mholt.github.io/json-to-go/ <- JSON to Go
+// https://stackoverflow.com/questions/24822826/cant-i-get-rid-of-fmt-prefix-when-calling-println-in-golang
+// compile statically with CGO_ENABLED=0 go build -ldflags "-w -s" -a costmodel.go
+
 package main
 
 import (
@@ -464,7 +473,7 @@ func getDelegationsJSON(conf map[string]string) gjson.Result {
 		SetQueryParams(map[string]string{"accessToken": getAccessToken(conf),
 			"sourceRequest": "metricscollector",
 			"deleted":       "true"}).
-		Get("http://" + conf["DataManagerApiUrl"] + ":8080/datamanager/api/v1/username/ANONYMOUS/delegated")
+		Get(conf["DataManagerApiUrl"] + "/api/v1/username/ANONYMOUS/delegated")
 	/*if err != nil {
 		return ""
 	}*/
@@ -1680,7 +1689,7 @@ func main() {
 	// Default settings
 	// MySQL Dashboard
 	conf["MySQL_Dashboard_hostname"] = "localhost"
-	conf["MySQL_Dashboard_username"] = "user""
+	conf["MySQL_Dashboard_username"] = "user"
 	conf["MySQL_Dashboard_password"] = "password"
 	conf["MySQL_Dashboard_port"] = "3306"
 	conf["MySQL_Dashboard_database"] = "Dashboard"
@@ -1703,10 +1712,10 @@ func main() {
 	conf["ElasticSearchIP"] = "localhost"
 
 	// DataManager API (Angelo)
-	conf["DataManagerApiUrl"] = "localhost"
+	conf["DataManagerApiUrl"] = "http://localhost:8080/datamanager/"
 
 	// Daily Accesses API
-	conf["DashboardsDailyAccessesApiUrl"] = "https://loclhost/api/dashDailyAccess.php"
+	conf["DashboardsDailyAccessesApiUrl"] = "http://localhost/api/dashDailyAccess.php"
 
 	// Ownership API (Piero)
 	conf["OwnershipApiUrl"] = "localhost"
@@ -1715,7 +1724,7 @@ func main() {
 	conf["OwnershipApiGrantType"] = "password"
 
 	// Access Token
-	conf["AccessTokenUrl"] = "https://localhost/auth/realms/master/protocol/openid-connect/token"
+	conf["AccessTokenUrl"] = "http://localhost/auth/realms/master/protocol/openid-connect/token"
 	conf["AccessTokenPassword"] = "password"
 	conf["AccessTokenUsername"] = "rootuser"
 	conf["AccessTokenClientID"] = "metricscollector"
@@ -1727,8 +1736,10 @@ func main() {
 	// Custom settings
 	// get conf flag command line parameter
 	c := flag.String("conf", "", "Configuration file path (JSON)")
-	// parse flag
-	//flag.Parse()
+
+	// parse flags
+	flag.Parse()
+
 	// don't use lowercase letter in struct members' initial letter, otherwise it does not work
 	// https://stackoverflow.com/questions/24837432/golang-capitals-in-struct-fields
 	type Configuration struct {
@@ -1816,9 +1827,6 @@ func main() {
 			conf["SolrUrl"] = configuration.SolrUrl
 		}
 	}
-
-	// parse flag
-	flag.Parse()
 
 	// startDate is now - n day
 	startDate := now.AddDate(0, 0, -*n)

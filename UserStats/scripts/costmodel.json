@@ -15,7 +15,7 @@
 	"MySQLServiceMapPort": "3306",
 	"MySQLServiceMapDatabase": "ServiceMap",
 	"ElasticSearchIP": "localhost",
-	"DataManagerApiUrl": "localhost",
+	"DataManagerApiUrl": "http://localhost:8080/datamanager/",
 	"DashboardsDailyAccessesApiUrl": "http://localhost/api/dashDailyAccess.php",
 	"OwnershipApiUrl": "localhost",
 	"OwnershipApiUsername": "rootuser",
