@@ -55,6 +55,7 @@ return $distance;
 $data = array();
 
 function getInterpolatedValue($latitude, $longitude, $threshold) {
+    global $settings;
     $mapName = "";
     $metricName = "";
     $date = "";
@@ -121,6 +122,7 @@ function is_date($date) {
 // calculate interpolation using IDW (Inverse Distance Weighting)
 if (is_numeric($_REQUEST["latitude"]) && is_numeric($_REQUEST["longitude"]) && ctype_alnum(str_replace("_", "", $_REQUEST["dataset"])) &&
     is_date($_REQUEST["date"]) && isset($_REQUEST["method"]) && $_REQUEST["method"] == "idw") {
+    global $settings;
     $mapName = "";
     $metricName = "";
     $date = "";
@@ -164,6 +166,7 @@ if (is_numeric($_REQUEST["latitude"]) && is_numeric($_REQUEST["longitude"]) && c
     mysqli_close($connection);
 }
 else if (is_numeric($_REQUEST["latitude"]) && is_numeric($_REQUEST["longitude"]) && ctype_alnum(str_replace("_", "", $_REQUEST["dataset"])) && is_date($_REQUEST["date"])) {
+    global $settings;
     $value = "";
     $threshold = 2;
     for($i = 1; $i <= 14; $i++) {
@@ -178,6 +181,7 @@ else if (is_numeric($_REQUEST["latitude"]) && is_numeric($_REQUEST["longitude"])
 }
 
 else if (isset($_REQUEST["lat_lon"]) && ctype_alnum(str_replace("_", "", $_REQUEST["dataset"])) && is_date($_REQUEST["date"])) {
+    global $settings;
     $mapName = "";
     $metricName = "";
     $date = "";
