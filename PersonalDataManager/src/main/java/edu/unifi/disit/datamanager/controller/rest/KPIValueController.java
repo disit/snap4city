@@ -308,7 +308,7 @@ public class KPIValueController {
 							lang);
 					if (lastKpiValue.isEmpty() || (lastKpiValue.get(0) != null
 							&& lastKpiValue.get(0).getDataTime() != null
-							&& lastKpiValue.get(0).getDataTime().getTime() < kpiValue.getDataTime().getTime())) {
+							&& lastKpiValue.get(0).getDataTime().getTime() <= kpiValue.getDataTime().getTime())) {
 						kpiData.setLastDate(kpiValue.getDataTime());
 						kpiData.setLastValue(kpiValue.getValue());
 						if (kpiValue.getLatitude() != null && !kpiValue.getLatitude().equals("")) {
@@ -456,7 +456,7 @@ public class KPIValueController {
 							lang);
 					if (lastKpiValue.isEmpty() || (lastKpiValue.get(0) != null
 							&& lastKpiValue.get(0).getDataTime() != null
-							&& lastKpiValue.get(0).getDataTime().getTime() < kpiValue.getDataTime().getTime())) {
+							&& lastKpiValue.get(0).getDataTime().getTime() <= kpiValue.getDataTime().getTime())) {
 						kpiData.setLastDate(kpiValue.getDataTime());
 						kpiData.setLastValue(kpiValue.getValue());
 						if (kpiValue.getLatitude() != null && !kpiValue.getLatitude().equals("")) {
@@ -546,9 +546,11 @@ public class KPIValueController {
 			// the same
 			fields.remove("id");
 			fields.remove("kpiId");
-			Date date = new Date();
-			date.setTime((Long) fields.get("dataTime"));
-			fields.put("dataTime", date);
+			if (fields.get("dataTime") != null) {
+				Date date = new Date();
+				date.setTime((Long) fields.get("dataTime"));
+				fields.put("dataTime", date);
+			}
 			// Map key is field name, v is value
 			fields.forEach((k, v) -> {
 				// use reflection to get field k on manager and set it to value k
@@ -566,7 +568,7 @@ public class KPIValueController {
 							lang);
 					if (lastKpiValue.isEmpty() || (lastKpiValue.get(0) != null
 							&& lastKpiValue.get(0).getDataTime() != null
-							&& lastKpiValue.get(0).getDataTime().getTime() < oldKpiValue.getDataTime().getTime())) {
+							&& lastKpiValue.get(0).getDataTime().getTime() <= oldKpiValue.getDataTime().getTime())) {
 						kpiData.setLastDate(oldKpiValue.getDataTime());
 						kpiData.setLastValue(oldKpiValue.getValue());
 						kpiDataService.saveKPIData(kpiData);

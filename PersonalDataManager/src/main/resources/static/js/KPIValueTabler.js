@@ -106,11 +106,13 @@ var KPIValueTabler = {
 
     successEditKPIValueModal: function (_response) {
         console.log(_response);
+        var isEdit = false;
         if (_response != null && _response != "") {
             _response.dataTime = Utility.timestampToFormatDate(_response.dataTime);
             _response.elapseTime = Utility.timestampToFormatDate(_response.elapseTime);
             _response.insertTime = Utility.timestampToFormatDate(_response.insertTime);
             _response.deleteTime = Utility.timestampToFormatDate(_response.deleteTime);
+            isEdit = true;
         } else {
             _response = {};
         }
@@ -125,7 +127,7 @@ var KPIValueTabler = {
             _response.validDataType = "text";
         }
         ViewManager.render({
-            "kpivalue": _response
+            "kpivalue": _response, "isEdit": isEdit
         }, "#genericModal", "templates/kpivalue/editkpivalue.mst.html");
         $('#genericModal').modal('show');
         EditModalManager.currentLatitude = _response.latitude;
@@ -168,6 +170,7 @@ var KPIValueTabler = {
         console.log(kpiValue);
         if (typeof kpiValue.id != "undefined") {
             KPIEditor.keycloak.updateToken(30).success(function () {
+                delete kpiValue.dataTime;
                 var query = QueryManager.createPatchKPIValueQuery(KPIEditor.keycloak.token, kpiValue.kpiId, kpiValue.id);
                 APIClient.executePatchQuery(query, kpiValue, KPIValueTabler.successSaveKPIValue, KPIValueTabler.errorQuery);
             }).error(function () {

@@ -99,7 +99,7 @@ public class AppsController {
 		if (appOwner != null)
 			logger.info("appOwner specified {}", appOwner);
 
-		if (appId.startsWith("http%3A%2F%2") || appId.startsWith("https%3A%2F%2")) {
+		if (appId.indexOf("%3A") != -1) {
 			appId = URLDecoder.decode(appId, StandardCharsets.UTF_8.toString());
 			logger.info("appid decoded to {}", appId);
 		}
@@ -148,7 +148,7 @@ public class AppsController {
 		if (sourceRequest != null)
 			logger.info("sourceRequest specified {}", sourceRequest);
 
-		if (appId.startsWith("http%3A%2F%2") || appId.startsWith("https%3A%2F%2")) {
+		if (appId.indexOf("%3A") != -1) {
 			appId = URLDecoder.decode(appId, StandardCharsets.UTF_8.toString());
 			logger.info("appid decoded to {}", appId);
 		}
@@ -225,7 +225,7 @@ public class AppsController {
 		if (sourceRequest != null)
 			logger.info("sourceRequest specified {}", sourceRequest);
 
-		if (appId.startsWith("http%3A%2F%2") || appId.startsWith("https%3A%2F%2")) {
+		if (appId.indexOf("%3A") != -1) {
 			appId = URLDecoder.decode(appId, StandardCharsets.UTF_8.toString());
 			logger.info("appid decoded to {}", appId);
 		}
@@ -308,7 +308,7 @@ public class AppsController {
 			logger.info("sourceRequest specified {}", sourceRequest);
 		if (appOwner != null)
 			logger.info("appOwner specified {}", appOwner);
-		if (appId.startsWith("http%3A%2F%2") || appId.startsWith("https%3A%2F%2")) {
+		if (appId.indexOf("%3A") != -1) {
 			appId = URLDecoder.decode(appId, StandardCharsets.UTF_8.toString());
 			logger.info("appid decoded to {}", appId);
 		}
@@ -367,7 +367,7 @@ public class AppsController {
 		if (sourceRequest != null)
 			logger.info("sourceRequest specified {}", sourceRequest);
 
-		if (appId.startsWith("http%3A%2F%2") || appId.startsWith("https%3A%2F%2")) {
+		if (appId.indexOf("%3A") != -1) {
 			appId = URLDecoder.decode(appId, StandardCharsets.UTF_8.toString());
 			logger.info("appid decoded to {}", appId);
 		}
@@ -402,7 +402,7 @@ public class AppsController {
 		if (sourceRequest != null)
 			logger.info("sourceRequest specified {}", sourceRequest);
 
-		if (appId.startsWith("http%3A%2F%2") || appId.startsWith("https%3A%2F%2")) {
+		if (appId.indexOf("%3A") != -1) {
 			appId = URLDecoder.decode(appId, StandardCharsets.UTF_8.toString());
 			logger.info("appid decoded to {}", appId);
 		}
