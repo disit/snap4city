@@ -727,14 +727,22 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 						continue;
 					}
 
-					JsonNode k1Node = deNode.path("k1");
-					JsonNode k2Node = deNode.path("k2");
+					logger.debug("delegation details are:" + deNode.asText());
+
+					// delegation details are a string that has to be decoded
+					JsonNode deNodeParsed = objectMapper.readTree(deNode.asText());
+
+					JsonNode k1Node = deNodeParsed.path("k1");
+					JsonNode k2Node = deNodeParsed.path("k2");
 
 					if ((k1Node == null) || (k1Node.isNull()) || ((k2Node == null) || (k2Node.isNull())) || (k1Node.isMissingNode()) || (k2Node.isMissingNode())) {
 						logger.error("The retreived data does not contains k1, k2");
 						// throw new CredentialsNotValidException(messages.getMessage("login.ko.configurationerror", null, lang));
 						continue;
 					}
+
+					logger.debug("k1 is:" + k1Node.asText());
+					logger.debug("k2 is:" + k2Node.asText());
 
 					toreturn.add(new Credentials(k1Node.asText(), k2Node.asText(), ud, null));
 				}
