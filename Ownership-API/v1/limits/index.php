@@ -19,9 +19,6 @@ $OPERATION = 'LIMITS';
 include("../../session.php");
 require_once("../../config.php");
 
-$log=fopen("/tmp/owner.log","a");
-fwrite($log, date('c')." limits\n");
-//echo 'register '.$uinfo->username;
 if(!isset($_REQUEST['type']) || strlen(trim($_REQUEST['type']))==0) {
   $_REQUEST['type'] = 'DashboardID;AppID;IOTID;DAAppID';
 }
@@ -61,4 +58,4 @@ foreach($types as $elementType) {
 }
 echo json_encode(array('username'=>$username, 'role'=>$role, 'organization'=>$org, 'limits'=>$o));
 
-ownership_access_log(['op'=>$OPERATION,'user'=>$uinfo->username,'forUser'=>$username,'type'=>$elementType]);
+ownership_access_log(['op'=>$OPERATION,'user'=>$uinfo->username,'forUser'=>$username,'role'=>$role,'organization'=>$org,'type'=>$elementType,'result'=>'SUCCESS']);

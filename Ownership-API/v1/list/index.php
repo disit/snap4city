@@ -100,4 +100,4 @@ if(isset($count)) {
   echo "}";
 }
 
-ownership_access_log(['op'=>$OPERATION,'user'=>$uinfo->username,'type'=>isset($_REQUEST['type']) ? $_REQUEST['type'] : 'any','role'=>$uinfo->mainRole]);
+ownership_access_log(['op'=>$OPERATION,'user'=>$uinfo->username,'type'=>isset($_REQUEST['type']) ? $_REQUEST['type'] : 'any','role'=>$uinfo->mainRole,'result'=>'SUCCESS']);

@@ -24,6 +24,7 @@ $db=mysqli_connect($db_host,$db_user,$db_pwd,$database) or die("DB connection er
 $filter = '';
 if(!isset($_REQUEST['type'])) {
   header("HTTP/1.1 400 BAD REQUEST");  
+  ownership_access_log(['op'=>$OPERATION,'user'=>$uinfo->username,'role'=>$uinfo->mainRole,'result'=>'MISSING TYPE']);
   exit;
 }
 $types = explode(";", $_REQUEST['type']);
@@ -34,6 +35,7 @@ $filter = "AND elementType IN ('".implode("','",$ctypes)."') ";
 
 if(!isset($_REQUEST['elementId'])) {
   header("HTTP/1.1 400 BAD REQUEST");  
+  ownership_access_log(['op'=>$OPERATION,'user'=>$uinfo->username,'role'=>$uinfo->mainRole,'type'=> $_REQUEST['type'],'result'=>'MISSING ID']);
   exit;
 }
 $elIds = explode(";", $_REQUEST['elementId']);
@@ -53,4 +55,4 @@ if($nDeleted==0)
   header("HTTP/1.1 400 BAD REQUEST");
 echo "{ \"deleted\": ".$nDeleted."}\n";
 
-ownership_access_log(['op'=>$OPERATION,'user'=>$uinfo->username,'type'=> $_REQUEST['type'],'id'=> $_REQUEST['elementId']]);
+ownership_access_log(['op'=>$OPERATION,'user'=>$uinfo->username,'role'=>$uinfo->mainRole,'type'=> $_REQUEST['type'],'id'=> $_REQUEST['elementId'],'ndeleted'=>$nDeleted]);

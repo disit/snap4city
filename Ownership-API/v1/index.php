@@ -1,3 +1,3 @@
 <?php
-echo "missing operation: list, register, users, delete";
+echo "missing operation: list, register, users, delete, limits";
 

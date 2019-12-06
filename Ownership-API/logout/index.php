@@ -22,7 +22,7 @@ use Jumbojett\OpenIDConnectClient;
 include "../config.php";
 
 $oidc = new OpenIDConnectClient(
-    'https://www.snap4city.org',
+    $sso_base_url,
     $sso_client_id,
     $sso_client_secret
 );
@@ -30,12 +30,12 @@ $oidc = new OpenIDConnectClient(
 $oidc->setVerifyHost(false);
 $oidc->setVerifyPeer(false);
 
-$oidc->providerConfigParam(array('authorization_endpoint'=>'https://www.snap4city.org/auth/realms/master/protocol/openid-connect/auth'));
-$oidc->providerConfigParam(array('token_endpoint'=>'https://www.snap4city.org/auth/realms/master/protocol/openid-connect/token'));
-$oidc->providerConfigParam(array('userinfo_endpoint'=>'https://www.snap4city.org/auth/realms/master/protocol/openid-connect/userinfo'));
-$oidc->providerConfigParam(array('jwks_uri'=>'https://www.snap4city.org/auth/realms/master/protocol/openid-connect/certs'));
-$oidc->providerConfigParam(array('issuer'=>'https://www.snap4city.org/auth/realms/master'));
-$oidc->providerConfigParam(array('end_session_endpoint'=>'https://www.snap4city.org/auth/realms/master/protocol/openid-connect/logout'));
+$oidc->providerConfigParam(array('authorization_endpoint'=>"$sso_base_url/auth/realms/master/protocol/openid-connect/auth"));
+$oidc->providerConfigParam(array('token_endpoint'=>"$sso_base_url/auth/realms/master/protocol/openid-connect/token"));
+$oidc->providerConfigParam(array('userinfo_endpoint'=>"$sso_base_url/auth/realms/master/protocol/openid-connect/userinfo"));
+$oidc->providerConfigParam(array('jwks_uri'=>"$sso_base_url/auth/realms/master/protocol/openid-connect/certs"));
+$oidc->providerConfigParam(array('issuer'=>"$sso_base_url/auth/realms/master"));
+$oidc->providerConfigParam(array('end_session_endpoint'=>"$sso_base_url/auth/realms/master/protocol/openid-connect/logout"));
 
 if(isset($_SESSION['login'])) {
   //echo $_SESSION['login']."<br/>";

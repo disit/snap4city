@@ -16,7 +16,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
 function ownership_access_log($msg) {
-  $log=fopen('/tmp/ownership-access.log','a');
+  require 'config.php';
+  
+  $log=fopen($log_path.'/ownership-access.log','a');
   fwrite($log, date('c') . ' ' . @get_client_ip_server() . ' ' . join(' ', $msg) . "\n");
   fclose($log);  
 }
@@ -39,7 +41,11 @@ function get_user_organization($username) {
   
   $connection = ldap_connect($ldapServer, $ldapPort);
   ldap_set_option($connection, LDAP_OPT_PROTOCOL_VERSION, 3);
-  ldap_bind($connection);
+  if(isset($ldapAdminDN) && $ldapAdminDN) {
+    ldap_bind($connection, $ldapAdminDN, $ldapAdminPwd);      
+  } else {
+    ldap_bind($connection);
+  }
   
   $ldapUsername = "cn=" . $username . "," . $ldapBaseDN;  
   $result = ldap_search($connection, $ldapBaseDN, '(&(objectClass=organizationalUnit)(l=' . $ldapUsername . '))');
@@ -60,7 +66,11 @@ function get_user_role($username) {
   
   $connection = ldap_connect($ldapServer, $ldapPort);
   ldap_set_option($connection, LDAP_OPT_PROTOCOL_VERSION, 3);
-  ldap_bind($connection);
+  if(isset($ldapAdminDN) && $ldapAdminDN) {
+    ldap_bind($connection, $ldapAdminDN, $ldapAdminPwd);      
+  } else {
+    ldap_bind($connection);
+  }
   
   $ldapUsername = "cn=" . $username . "," . $ldapBaseDN;  
   $roles = array("RootAdmin","ToolAdmin","AreaManager","Manager","Observer");

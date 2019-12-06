@@ -19,29 +19,25 @@ $OPERATION = 'REGISTER';
 include("../../session.php");
 require_once("../../config.php");
 
-$log=fopen("/tmp/owner.log","a");
-fwrite($log, date('c')." register\n");
-//echo 'register '.$uinfo->username;
 $postdata = file_get_contents("php://input");
 if($postdata==NULL) {
   header("HTTP/1.1 400 BAD REQUEST");
   echo "no data via POST";
-  fwrite($log,date('c')." NO POST\n");
+  ownership_access_log(['op'=>$OPERATION,'user'=>$uinfo->username,'role'=>$uinfo->mainRole,'result'=>'NO POST']);
   exit;  
 }
 $o = json_decode($postdata);
 if($o==NULL) {
   header("HTTP/1.1 400 BAD REQUEST");
-  echo "invalid JSON data";
-  fwrite($log,date('c')." invalid JSON data\n");
+  echo "invalid JSON format";
+  ownership_access_log(['op'=>$OPERATION,'user'=>$uinfo->username,'role'=>$uinfo->mainRole,'result'=>'invalid JSON format']);
   exit;  
 }
 
 if(!is_object($o)) {
   header("HTTP/1.1 400 BAD REQUEST");
   echo "no JSON object";
-  fwrite($log,date('c')." NO JSON\n");
-
+  ownership_access_log(['op'=>$OPERATION,'user'=>$uinfo->username,'role'=>$uinfo->mainRole,'result'=>'no JSON object']);
   exit;    
 }
 
@@ -54,15 +50,15 @@ foreach($mandatoryAttrs as $a) {
   if(!isset($o->$a)) {
     header("HTTP/1.1 400 BAD REQUEST");
     echo '{"error":"missing '.$a.' attribute"}';
-    fwrite($log,date('c')." missing '".$a."' attribute\n");
+    ownership_access_log(['op'=>$OPERATION,'user'=>$uinfo->username,'role'=>$uinfo->mainRole,'result'=>'missing '.$a.' attribute']);
     exit;  
   }
 }
-$validTypes = array('AppID',"IOTID","ServiceURI","ServiceGraphID","DashboardID",'DAAppID','BrokerID','ModelID','PortiaID','HeatmapID');
+$validTypes = array('AppID','IOTID','ServiceURI','ServiceGraphID','DashboardID','DAAppID','BrokerID','ModelID','PortiaID','HeatmapID','DeviceGroupID');
 if(!in_array($o->elementType,$validTypes)) {
     header("HTTP/1.1 400 BAD REQUEST");
     echo '{"error":"invalid elementType '.$o->elementType.'"}';
-    fwrite($log,date('c')." invalid elementType '".$o->elementType."'");
+    ownership_access_log(['op'=>$OPERATION,'user'=>$uinfo->username,'role'=>$uinfo->mainRole,'result'=>"invalid elementType '".$o->elementType."'"]);
     exit;    
 }
 $optionalAttrs = array('elementUrl','elementDetails');
@@ -87,9 +83,10 @@ if($r && $c=mysqli_fetch_array($r)) {
   if(isset($o->username) && ($urole = get_user_role($o->username))=='') { 
     header("HTTP/1.1 400 BAD REQUEST");
     echo '{"error":"invalid username '.$o->username.' attribute"}';
-    fwrite($log,date('c')." invalid username '".$o->username."' attribute\n");
+    ownership_access_log(['op'=>$OPERATION,'user'=>$uinfo->username,'role'=>$uinfo->mainRole,'result'=>'invalid username '.$o->username.' attribute']);
     exit;
   }
+  
   //check if changing ownership exceeds the limit for the new user
   if(isset($o->username) && $curUsername!=$o->username) {
     $org = get_user_organization($o->username);
@@ -101,7 +98,7 @@ if($r && $c=mysqli_fetch_array($r)) {
     if($r && ($c=mysqli_fetch_array($r)) && $c[0]>=$limit) {
       header("HTTP/1.1 400 BAD REQUEST");
       echo '{"error":"reached limit of '.$limit.'","limit":'.$limit.',"current":'.$c[0].'}';
-      fwrite($log,date('c')." for $org,".$uinfo->username.",".$uinfo->mainRole.":".$o->elementType." reached limit ".$c[0]."/$limit --".mysqli_error($db)."\n");
+      ownership_access_log(['op'=>$OPERATION,'user'=>$uinfo->username,'role'=>$uinfo->mainRole,'result'=>$o->username."@$org $urole: ".$o->elementType." reached limit ".$c[0]."/$limit"]);
       exit;          
     }
   }
@@ -124,7 +121,7 @@ if($r && $c=mysqli_fetch_array($r)) {
       " AND elementId='".mysqli_escape_string($db, $o->elementId).
       "' AND elementType='".mysqli_escape_string($db, $o->elementType)."' AND deleted IS NULL";
   if(!mysqli_query($db,$update)) {
-    fwrite($log,date('c')." UPDATE ownnership - query error ".  mysqli_error($db));
+    ownership_access_log(['op'=>$OPERATION,'user'=>$uinfo->username,'role'=>$uinfo->mainRole,'result'=>" UPDATE ownnership - query error ".  mysqli_error($db)]);
     exit;
   }
   
@@ -135,7 +132,7 @@ if($r && $c=mysqli_fetch_array($r)) {
             . " AND element_type='".mysqli_escape_string($db, $o->elementType)."'"
             . " AND delete_time IS NULL";
     if(!mysqli_query($db,$update)) {
-      fwrite($log,date('c')." UPDATE delegation - query error ".  mysqli_error($db));
+      ownership_access_log(['op'=>$OPERATION,'user'=>$uinfo->username,'role'=>$uinfo->mainRole,'result'=>" UPDATE delegation - query error ".  mysqli_error($db)]);
       exit;
     }    
   }
@@ -171,7 +168,7 @@ if($r && $c=mysqli_fetch_array($r)) {
     $insert = "INSERT INTO ownership(".join(",", $attrs).") VALUES (".join(",",$values).")";
 
     if(!mysqli_query($db,$insert)) {
-      fwrite($log,date('c')." INSERT ownnership - query error ".  mysqli_error($db));
+      ownership_access_log(['op'=>$OPERATION,'user'=>$uinfo->username,'role'=>$uinfo->mainRole,'result'=>"INSERT ownership - query error ".  mysqli_error($db)]);
       exit;
     }
     $id=mysqli_insert_id($db);
@@ -179,7 +176,7 @@ if($r && $c=mysqli_fetch_array($r)) {
   } else {
     header("HTTP/1.1 400 BAD REQUEST");
     echo '{"error":"reached limit of '.$limit.'","limit":'.$limit.',"current":'.$c[0].'}';
-    fwrite($log,date('c')." for $org,".$uinfo->username.",".$uinfo->mainRole.":".$o->elementType." reached limit ".$c[0]."/$limit --".mysqli_error($db)."\n");
+    ownership_access_log(['op'=>$OPERATION,'user'=>$uinfo->username,'role'=>$uinfo->mainRole,'result'=>" for $org:".$o->elementType." reached limit ".$c[0]."/$limit"]);
     exit;          
   }
 }
@@ -189,4 +186,4 @@ if(isset($o->elementDetails)) {
 }
 echo json_encode($o);
 
-ownership_access_log(['op'=>$OPERATION,'user'=>$uinfo->username,'type'=>$o->elementType,'id'=>$o->elementId]);
+ownership_access_log(['op'=>$OPERATION,'user'=>$uinfo->username,'type'=>$o->elementType,'id'=>$o->elementId,'result'=>'SUCCESS']);

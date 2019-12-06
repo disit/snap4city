@@ -15,25 +15,37 @@
    You should have received a copy of the GNU Affero General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
+// db access
+
 $db_host = "localhost";
 $database = "profiledb";
 $db_user = "user";
 $db_pwd = "password";
 
+// SSO configuration (needed only for debugging)
+$sso_base_url = 'http://localhost:8088';
 $sso_client_id = 'php-ownership-api';
 $sso_client_secret = '...secret...';
 $sso_login_redirect = 'http://localhost/ownership-api/login/';
-$sso_userinfo_endpoint = 'http://localhost:8088/auth/realms/master/protocol/openid-connect/userinfo';
+
+// SSO mandatory configuration
+$sso_userinfo_endpoint = 'https://localhost:8088/auth/realms/master/protocol/openid-connect/userinfo';
 
 $log_path = '/tmp';
 
-$trustedIpAddrs = array('localhost');
+// can be used to bypass authentication, use ONLY if needed
+$trustedIpAddrs = array();
+
+//keycloak admin user used for user search
 
 $keycloack_base_url = 'http://localhost:8088/auth';
 $keycloack_admin = 'admin';
-$keycloack_pwd = '...password...';
+$keycloack_pwd = 'password';
+
+//ldap access, used for organization and role search
 
 $ldapServer = 'localhost';
 $ldapPort = '389';
-$ldapBaseDN = 'dc=test,dc=example,dc=org';
-
+$ldapBaseDN = 'dc=ldap,dc=organization,dc=org';
+$ldapAdminDN = 'cn=admin,dc=ldap,dc=organization,dc=org';
+$ldapAdminPwd = 'password';
