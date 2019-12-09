@@ -16,7 +16,6 @@ package edu.unifi.disit.datamanager.service;
 import java.util.List;
 import java.util.Locale;
 
-import org.springframework.context.NoSuchMessageException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -25,20 +24,20 @@ import edu.unifi.disit.datamanager.exception.CredentialsException;
 
 public interface IKPIMetadataService {
 
-	KPIMetadata getKPIMetadataById(Long id, Locale lang) throws NoSuchMessageException, CredentialsException;
+	KPIMetadata getKPIMetadataById(Long id, Locale lang) throws  CredentialsException;
 
-	Page<KPIMetadata> findAllByKpiId(Long kpiId, Pageable pageable) throws NoSuchMessageException, CredentialsException;
+	Page<KPIMetadata> findAllByKpiId(Long kpiId, Pageable pageable) throws  CredentialsException;
 
-	List<KPIMetadata> findByKpiIdNoPages(Long id) throws NoSuchMessageException, CredentialsException;
+	List<KPIMetadata> findByKpiIdNoPages(Long id) throws  CredentialsException;
 
 	Page<KPIMetadata> findAllFilteredByKpiId(Long kpiId, String searchKey, Pageable pageable)
-			throws NoSuchMessageException, CredentialsException;
+			throws  CredentialsException;
 
 	List<KPIMetadata> findFilteredByKpiIdNoPages(Long kpiId, String searchKey)
-			throws NoSuchMessageException, CredentialsException;
+			throws  CredentialsException;
 
-	KPIMetadata saveKPIMetadata(KPIMetadata kpiMetadata) throws NoSuchMessageException, CredentialsException;
+	KPIMetadata saveKPIMetadata(KPIMetadata kpiMetadata) throws  CredentialsException;
 
-	void deleteKPIMetadata(Long id) throws NoSuchMessageException, CredentialsException;
+	void deleteKPIMetadata(Long id) throws  CredentialsException;
 
 }

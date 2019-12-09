@@ -19,7 +19,6 @@ import java.util.Locale;
 //import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.context.NoSuchMessageException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -45,7 +44,7 @@ public class CredentialsServiceImpl implements ICredentialsService {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void checkAppIdCredentials(String appId, Locale lang) throws NoSuchMessageException, CredentialsException {
+	public void checkAppIdCredentials(String appId, Locale lang) throws  CredentialsException {
 		List<String> roles = (List<String>) SecurityContextHolder.getContext().getAuthentication().getCredentials();
 		String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		// assure the username is included in the list of the ownership of this appid
@@ -54,13 +53,13 @@ public class CredentialsServiceImpl implements ICredentialsService {
 		for (Ownership own : owns)
 			if (own.getUsername().equals(username))
 				found = true;
-		if ((found == false) && (!roles.contains(UserRolesType.RootAdmin.toString())))
+		if ((!found) && (!roles.contains(UserRolesType.RootAdmin.toString())))
 			throw new CredentialsException(messages.getMessage("credentials.ko.appidowner", null, lang));
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void checkUsernameCredentials(String username, Locale lang) throws NoSuchMessageException, CredentialsException {
+	public void checkUsernameCredentials(String username, Locale lang) throws  CredentialsException {
 		List<String> roles = (List<String>) SecurityContextHolder.getContext().getAuthentication().getCredentials();
 		String usernameSC = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		// assure the username is the same than the specified one
@@ -70,7 +69,7 @@ public class CredentialsServiceImpl implements ICredentialsService {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void checkRootCredentials(Locale lang) throws NoSuchMessageException, CredentialsException {
+	public void checkRootCredentials(Locale lang) throws  CredentialsException {
 		List<String> roles = (List<String>) SecurityContextHolder.getContext().getAuthentication().getCredentials();
 		// assure role is RootAdmin
 		if (!roles.contains(UserRolesType.RootAdmin.toString()))

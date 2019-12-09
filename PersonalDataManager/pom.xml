@@ -1,29 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 
-    <groupId>edu.unifi.disit</groupId>
-    <artifactId>datamanager</artifactId>
-    <version>0.0.1</version>
-    <packaging>war</packaging>
+	<groupId>edu.unifi.disit</groupId>
+	<artifactId>datamanager</artifactId>
+	<version>0.0.1</version>
+	<packaging>war</packaging>
 
- 	<dependencies>
- 	<!-- spring boot dependencies-->
+	<dependencies>
+		<!-- spring boot dependencies -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-tomcat</artifactId>
 			<version>1.5.7.RELEASE</version>
- 			<scope>provided</scope><!--since it's always runned in tomcat container!!! -->
+			<scope>provided</scope><!--since it's always runned in tomcat container!!! -->
 		</dependency>
 		<dependency>
-		    <groupId>org.springframework.boot</groupId>
-		    <artifactId>spring-boot-test</artifactId>
-		    <version>1.5.7.RELEASE</version>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-test</artifactId>
+			<version>1.5.7.RELEASE</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -31,26 +32,26 @@
 			<version>1.5.7.RELEASE</version>
 		</dependency>
 		<dependency>
-        	<groupId>org.springframework.boot</groupId>
-        	<artifactId>spring-boot-starter-data-ldap</artifactId>
-        	<version>1.5.7.RELEASE</version>
-    	</dependency>
-		<dependency>
-		    <groupId>org.springframework.security</groupId>
-		    <artifactId>spring-security-test</artifactId>
-		    <version>4.2.3.RELEASE</version>
-		    <scope>test</scope>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-ldap</artifactId>
+			<version>1.5.7.RELEASE</version>
 		</dependency>
 		<dependency>
-		    <groupId>org.springframework.boot</groupId>
-		    <artifactId>spring-boot-starter</artifactId>
-		    <version>1.5.7.RELEASE</version>
-		    <exclusions>
-		        <exclusion>
-		            <groupId>org.springframework.boot</groupId>
-		            <artifactId>spring-boot-starter-logging</artifactId>
-		        </exclusion>
-		    </exclusions>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
+			<version>4.2.3.RELEASE</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter</artifactId>
+			<version>1.5.7.RELEASE</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-logging</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -62,109 +63,110 @@
 			<artifactId>spring-boot-starter-log4j2</artifactId>
 			<version>1.5.7.RELEASE</version>
 		</dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-        	<artifactId>spring-boot-starter-data-jpa</artifactId>
-        	<version>1.5.7.RELEASE</version>
-        </dependency>		
-        <dependency>
-    		<groupId>org.springframework.boot</groupId>
-    		<artifactId>spring-boot-starter-test</artifactId>
-		    <scope>test</scope>
-		    <version>1.5.7.RELEASE</version>
-		</dependency>
-	<!-- spring dependencies -->
 		<dependency>
-    		<groupId>org.springframework</groupId>
-    		<artifactId>spring-context-support</artifactId>
-    		<version>4.3.11.RELEASE</version>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+			<version>1.5.7.RELEASE</version>	
 		</dependency>
 		<dependency>
-    		<groupId>org.springframework</groupId>
-    		<artifactId>spring-tx</artifactId>
-    		<version>4.3.11.RELEASE</version>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+			<version>1.5.7.RELEASE</version>
+		</dependency>
+		<!-- spring dependencies -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context-support</artifactId>
+			<version>4.3.11.RELEASE</version>
 		</dependency>
 		<dependency>
-    		<groupId>org.springframework</groupId>
-    		<artifactId>spring-orm</artifactId>
-    		<version>4.3.11.RELEASE</version>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-tx</artifactId>
+			<version>4.3.11.RELEASE</version>
 		</dependency>
-	   <dependency>
-	        <groupId>org.springframework.restdocs</groupId>
-	        <artifactId>spring-restdocs-mockmvc</artifactId>
-	        <version>1.2.2.RELEASE</version>
-	    </dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-orm</artifactId>
+			<version>4.3.11.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.restdocs</groupId>
+			<artifactId>spring-restdocs-mockmvc</artifactId>
+			<version>1.2.2.RELEASE</version>
+		</dependency>
 	<!-- other dependencies -->        
-	  	<dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.12</version>
- 			<scope>test</scope>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
-		    <groupId>com.fasterxml.jackson.core</groupId>
-		    <artifactId>jackson-databind</artifactId>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
 		    <version>2.9.10.1</version>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 			<version>5.1.38</version>
-		</dependency>	
+		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
-		   	<artifactId>log4j-web</artifactId>
-		   	<version>2.6</version>
-		   	<scope>runtime</scope>
+			<artifactId>log4j-web</artifactId>
+			<version>2.6</version>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-		    <groupId>org.hibernate</groupId>
-		    <artifactId>hibernate-c3p0</artifactId>
-		    <version>5.0.12.Final</version>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-c3p0</artifactId>
+			<version>5.0.12.Final</version>
 		</dependency>
 		<dependency>
-		    <groupId>org.apache.commons</groupId>
-		    <artifactId>commons-lang3</artifactId>
-		    <version>3.5</version>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.5</version>
 		</dependency>
 		<dependency>
-		    <groupId>io.jsonwebtoken</groupId>
-		    <artifactId>jjwt</artifactId>
-		    <version>0.9.0</version>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt</artifactId>
+			<version>0.9.0</version>
 		</dependency>
 		<dependency>
-		    <groupId>commons-io</groupId>
-		    <artifactId>commons-io</artifactId>
-		    <version>2.6</version>
-		</dependency>  
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.6</version>
+		</dependency>
 		<!-- useed for testingt -->
 		<dependency>
-		    <groupId>org.apache.httpcomponents</groupId>
-		    <artifactId>httpclient</artifactId>
-		    <version>4.5.5</version>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.5.5</version>
 		</dependency>
 		<!-- mariadb -->
 		<dependency>
-		    <groupId>org.mariadb.jdbc</groupId>
-		    <artifactId>mariadb-java-client</artifactId>
-		    <version>2.2.3</version>
+			<groupId>org.mariadb.jdbc</groupId>
+			<artifactId>mariadb-java-client</artifactId>
+			<version>2.2.3</version>
 		</dependency>
-		
-	</dependencies>	
 
-    <build>
-        <plugins>
-        	<plugin>
-        		<groupId>org.apache.maven.plugins</groupId>
-        		<artifactId>maven-surefire-plugin</artifactId>
-        		<version>2.9</version>
-<!--         		<configuration> -->
-<!-- 	          		<excludes> -->
-<!-- 	            		<exclude>${mytest.excludes}</exclude> -->
-<!-- 	          		</excludes> -->
-<!--         		</configuration> -->
-      		</plugin>
-            <plugin>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.9</version>
+
+				<!-- <configuration> -->
+				<!-- <excludes> -->
+				<!-- <exclude>${mytest.excludes}</exclude> -->
+				<!-- </excludes> -->
+				<!-- </configuration> -->
+			</plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.5.1</version>
@@ -184,26 +186,26 @@
 			</plugin>
 
 			<plugin>
-                <groupId>org.apache.tomcat.maven</groupId>
-                <artifactId>tomcat7-maven-plugin</artifactId>
-                <version>2.2</version>
-                <configuration>
-					<server>${deploy.name}</server>                    
+				<groupId>org.apache.tomcat.maven</groupId>
+				<artifactId>tomcat7-maven-plugin</artifactId>
+				<version>2.2</version>
+				<configuration>
+					<server>${deploy.name}</server>
 					<url>${deploy.url}</url>
 					<path>${deploy.path}</path>
-<!--                     <update>true</update> -->
-                </configuration>
-            </plugin>
+					<!-- <update>true</update> -->
+				</configuration>
+			</plugin>
 
 
-			<plugin> 
+			<plugin>
 				<groupId>org.asciidoctor</groupId>
 				<artifactId>asciidoctor-maven-plugin</artifactId>
 				<version>1.5.3</version>
 				<executions>
 					<execution>
 						<id>generate-docs</id>
-						<phase>prepare-package</phase> 
+						<phase>prepare-package</phase>
 						<goals>
 							<goal>process-asciidoc</goal>
 						</goals>
@@ -214,14 +216,14 @@
 					</execution>
 				</executions>
 				<dependencies>
-					<dependency> 
+					<dependency>
 						<groupId>org.springframework.restdocs</groupId>
 						<artifactId>spring-restdocs-asciidoctor</artifactId>
 						<version>1.2.2.RELEASE</version>
 					</dependency>
 				</dependencies>
 			</plugin>
-			<plugin> 
+			<plugin>
 				<artifactId>maven-resources-plugin</artifactId>
 				<version>2.7</version>
 				<executions>
@@ -231,7 +233,7 @@
 						<goals>
 							<goal>copy-resources</goal>
 						</goals>
-						<configuration> 
+						<configuration>
 							<outputDirectory>
 								${project.build.outputDirectory}/static/docs
 							</outputDirectory>
@@ -246,24 +248,44 @@
 					</execution>
 				</executions>
 			</plugin>
-        </plugins>	
-    </build>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.5</version>
+				<executions>
+					<execution>
+						<id>default-prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>default-report</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 
-    <repositories>
-        <repository>
-            <id>spring-releases</id>
-            <name>Spring Releases</name>
-            <url>https://repo.spring.io/libs-release</url>
-        </repository>
+	<repositories>
+		<repository>
+			<id>spring-releases</id>
+			<name>Spring Releases</name>
+			<url>https://repo.spring.io/libs-release</url>
+		</repository>
 
-    </repositories>
+	</repositories>
 
-    <pluginRepositories>
-        <pluginRepository>
-            <id>spring-releases</id>
-            <name>Spring Releases</name>
-            <url>https://repo.spring.io/libs-release</url>
-        </pluginRepository>
-    </pluginRepositories>
+	<pluginRepositories>
+		<pluginRepository>
+			<id>spring-releases</id>
+			<name>Spring Releases</name>
+			<url>https://repo.spring.io/libs-release</url>
+		</pluginRepository>
+	</pluginRepositories>
 
 </project>

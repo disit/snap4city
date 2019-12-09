@@ -34,15 +34,18 @@ public class POIDataSerializer extends StdSerializer<POIData> {
 	@Override
 	public void serialize(POIData poiData, JsonGenerator jgen, SerializerProvider provider) throws IOException {
 
-		String linestring = "LINESTRING(";
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append("LINESTRING(");
+		
 		if (!poiData.getListKPIValue().isEmpty()) {
 			for (KPIValue kpiValue : poiData.getListKPIValue()) {
 				if (kpiValue.getLatitude() != null && kpiValue.getLongitude() != null) {
-					linestring = linestring + kpiValue.getLongitude() + " " + kpiValue.getLatitude() + ",";
+					stringBuilder.append(kpiValue.getLongitude() + " " + kpiValue.getLatitude() + ",");
 				}
 			}
 		}
 
+		String linestring = stringBuilder.toString();
 		linestring = linestring.replaceAll("[,]$", "") + ")";
 
 		jgen.writeStartObject();
@@ -51,15 +54,15 @@ public class POIDataSerializer extends StdSerializer<POIData> {
 		jgen.writeObjectFieldStart("geometry");
 		jgen.writeStringField("type", "Point");
 		jgen.writeArrayFieldStart("coordinates");
-		if (poiData.getKpidata().getLongitude() != null && poiData.getKpidata().getLongitude() != "") {
+		if (poiData.getKpidata().getLongitude() != null && !poiData.getKpidata().getLongitude().equals("")) {
 			jgen.writeNumber(poiData.getKpidata().getLongitude());
 		} else if (!linestring.equals("LINESTRING()")){
-			jgen.writeNumber(linestring.substring(linestring.indexOf("(") + 1, linestring.indexOf(" ")));
+			jgen.writeNumber(linestring.substring(linestring.indexOf('(') + 1, linestring.indexOf(' ')));
 		}
-		if (poiData.getKpidata().getLatitude() != null && poiData.getKpidata().getLatitude() != "") {
+		if (poiData.getKpidata().getLatitude() != null && !poiData.getKpidata().getLatitude().equals("")) {
 			jgen.writeNumber(poiData.getKpidata().getLatitude());
 		} else if (!linestring.equals("LINESTRING()")){
-			jgen.writeNumber(linestring.substring(linestring.indexOf(" ") + 1, linestring.indexOf(",")));
+			jgen.writeNumber(linestring.substring(linestring.indexOf(' ') + 1, linestring.indexOf(',')));
 		}
 
 		jgen.writeEndArray();
@@ -160,15 +163,15 @@ public class POIDataSerializer extends StdSerializer<POIData> {
 		if (poiData.getKpidata().getWidgets() != null) {
 			jgen.writeStringField("widgets", poiData.getKpidata().getWidgets());
 		}
-		if (poiData.getKpidata().getLongitude() != null && poiData.getKpidata().getLongitude() != "") {
+		if (poiData.getKpidata().getLongitude() != null && !poiData.getKpidata().getLongitude().equals("")) {
 			jgen.writeNumberField("longitude", Double.parseDouble(poiData.getKpidata().getLongitude()));
 		} else if (!linestring.equals("LINESTRING()")){
-			jgen.writeNumberField("longitude", Double.parseDouble(linestring.substring(linestring.indexOf("(") + 1, linestring.indexOf(" "))));
+			jgen.writeNumberField("longitude", Double.parseDouble(linestring.substring(linestring.indexOf('(') + 1, linestring.indexOf(' '))));
 		}
-		if (poiData.getKpidata().getLatitude() != null && poiData.getKpidata().getLatitude() != "") {
+		if (poiData.getKpidata().getLatitude() != null && !poiData.getKpidata().getLatitude().equals("")) {
 			jgen.writeNumberField("latitude", Double.parseDouble(poiData.getKpidata().getLatitude()));
 		} else if (!linestring.equals("LINESTRING()")){
-			jgen.writeNumberField("latitude",Double.parseDouble(linestring.substring(linestring.indexOf(" ") + 1, linestring.indexOf(","))));
+			jgen.writeNumberField("latitude",Double.parseDouble(linestring.substring(linestring.indexOf(' ') + 1, linestring.indexOf(','))));
 		}
 
 		jgen.writeEndObject();
@@ -214,8 +217,8 @@ public class POIDataSerializer extends StdSerializer<POIData> {
 		if (!poiData.getListKPIValue().isEmpty()) {
 			jgen.writeArrayFieldStart("valuesGeoJSON");
 			for (KPIValue kpiValue : poiData.getListKPIValue()) {
-				if (kpiValue.getLongitude() != null && kpiValue.getLongitude() != "" && kpiValue.getLatitude() != null
-						&& kpiValue.getLatitude() != "") {
+				if (kpiValue.getLongitude() != null && !kpiValue.getLongitude().equals("") && kpiValue.getLatitude() != null
+						&& !kpiValue.getLatitude().equals("")) {
 					jgen.writeStartObject();
 					jgen.writeStringField("type", "Feature");
 					jgen.writeObjectFieldStart("geometry");

@@ -18,9 +18,5 @@ import java.util.List;
 
 public interface KPIValueDAOCustom {
 
-	//List<KPIData> getDataByUsername(String username, String variableName, String motivation, Date from, Date to, Integer first, Integer last);
-
-	//List<KPIData> getDataByUsernameDelegated(String username, String variableName, String motivation, Date from, Date to, Integer first, Integer last);
-
 	List<KPIValue> findByKpiIdNoPagesWithLimit(Long kpiId, Date from, Date to, Integer first, Integer last);
 }

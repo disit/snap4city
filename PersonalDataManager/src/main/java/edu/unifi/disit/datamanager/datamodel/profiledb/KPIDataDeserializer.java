@@ -18,8 +18,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
@@ -27,6 +29,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 public class KPIDataDeserializer extends StdDeserializer<KPIData> {
 
 	private static final long serialVersionUID = 1L;
+	private static final Logger logger = LogManager.getLogger();
 
 	public KPIDataDeserializer() {
 		this(null);
@@ -38,7 +41,7 @@ public class KPIDataDeserializer extends StdDeserializer<KPIData> {
 
 	@Override
 	public KPIData deserialize(JsonParser jp, DeserializationContext ctxt)
-			throws IOException, JsonProcessingException {
+			throws IOException {
 		JsonNode jnode = jp.getCodec().readTree(jp);
 		KPIData kpidata = new KPIData();
 
@@ -81,9 +84,6 @@ public class KPIDataDeserializer extends StdDeserializer<KPIData> {
 		if (jnode.get("valueName") != null) {
 			kpidata.setValueName(jnode.get("valueName").asText());
 		}
-		/*
-		 * if (jnode.get("lastDate") != null) { Date date = new Date(); date.setTime(jnode.get("lastDate").asLong()); kpidata.setLastDate(date); }
-		 */
 		if (jnode.get("lastDate") != null) {
 			Date date = new Date();
 			if (jnode.get("lastDate").asLong() != 0) {
@@ -96,7 +96,7 @@ public class KPIDataDeserializer extends StdDeserializer<KPIData> {
 					try {
 						kpidata.setLastDate(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(jnode.get("lastDate").asText()));
 					} catch (ParseException d) {
-						d.printStackTrace();
+						logger.error("Parsing error {}", d);
 					}
 				}
 			}

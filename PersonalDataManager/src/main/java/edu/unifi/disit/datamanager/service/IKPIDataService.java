@@ -16,7 +16,6 @@ package edu.unifi.disit.datamanager.service;
 import java.util.List;
 import java.util.Locale;
 
-import org.springframework.context.NoSuchMessageException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -26,52 +25,52 @@ import edu.unifi.disit.datamanager.exception.DelegationNotValidException;
 
 public interface IKPIDataService {
 
-	KPIData getKPIDataById(long id, Locale lang, boolean anonymize) throws NoSuchMessageException, CredentialsException;
+	KPIData getKPIDataById(long id, Locale lang, boolean anonymize) throws  CredentialsException;
 
-	Page<KPIData> findAll(Pageable pageable) throws NoSuchMessageException, CredentialsException;
+	Page<KPIData> findAll(Pageable pageable) throws  CredentialsException;
 	
-	Page<KPIData> findByUsername(String username, Pageable pageable) throws NoSuchMessageException, CredentialsException;
+	Page<KPIData> findByUsername(String username, Pageable pageable) throws  CredentialsException;
 	
-	Page<KPIData> findByHighLevelType(String highLevelType, Pageable pageable) throws NoSuchMessageException, CredentialsException;
+	Page<KPIData> findByHighLevelType(String highLevelType, Pageable pageable) throws  CredentialsException;
 	
-	Page<KPIData> findByUsernameByHighLevelType(String username, String highLevelType, Pageable pageable) throws NoSuchMessageException, CredentialsException;
+	Page<KPIData> findByUsernameByHighLevelType(String username, String highLevelType, Pageable pageable) throws  CredentialsException;
 	
-	Page<KPIData> findAllFiltered(String searchKey, Pageable pageable) throws NoSuchMessageException, CredentialsException;
+	Page<KPIData> findAllFiltered(String searchKey, Pageable pageable) throws  CredentialsException;
 	
-	Page<KPIData> findByUsernameFiltered(String username, String searchKey, Pageable pageable) throws NoSuchMessageException, CredentialsException;
+	Page<KPIData> findByUsernameFiltered(String username, String searchKey, Pageable pageable) throws  CredentialsException;
 
-	Page<KPIData> findByHighLevelTypeFiltered(String highLevelType, String searchKey, Pageable pageable) throws NoSuchMessageException, CredentialsException;
+	Page<KPIData> findByHighLevelTypeFiltered(String highLevelType, String searchKey, Pageable pageable) throws  CredentialsException;
 	
-	Page<KPIData> findByUsernameByHighLevelTypeFiltered(String username, String highLevelType, String searchKey, Pageable pageable) throws NoSuchMessageException, CredentialsException;
+	Page<KPIData> findByUsernameByHighLevelTypeFiltered(String username, String highLevelType, String searchKey, Pageable pageable) throws  CredentialsException;
 
-	List<KPIData> findAllNoPages() throws NoSuchMessageException, CredentialsException;
+	List<KPIData> findAllNoPages() throws  CredentialsException;
 	
-	List<KPIData> findByUsernameNoPages(String username) throws NoSuchMessageException, CredentialsException;
+	List<KPIData> findByUsernameNoPages(String username) throws  CredentialsException;
 	
-	List<KPIData> findByHighLevelTypeNoPages(String highLevelType) throws NoSuchMessageException, CredentialsException;
+	List<KPIData> findByHighLevelTypeNoPages(String highLevelType) throws  CredentialsException;
 	
-	List<KPIData> findByUsernameByHighLevelTypeNoPages(String username, String highLevelType) throws NoSuchMessageException, CredentialsException;
+	List<KPIData> findByUsernameByHighLevelTypeNoPages(String username, String highLevelType) throws  CredentialsException;
 	
-	List<KPIData> findAllFilteredNoPages(String searchKey) throws NoSuchMessageException, CredentialsException;
+	List<KPIData> findAllFilteredNoPages(String searchKey) throws  CredentialsException;
 	
-	List<KPIData> findByUsernameFilteredNoPages(String username, String searchKey) throws NoSuchMessageException, CredentialsException;
+	List<KPIData> findByUsernameFilteredNoPages(String username, String searchKey) throws  CredentialsException;
 
-	List<KPIData> findByHighLevelTypeFilteredNoPages(String highLevelType, String searchKey) throws NoSuchMessageException, CredentialsException;
+	List<KPIData> findByHighLevelTypeFilteredNoPages(String highLevelType, String searchKey) throws  CredentialsException;
 	
-	List<KPIData> findByUsernameByHighLevelTypeFilteredNoPages(String username, String highLevelType, String searchKey) throws NoSuchMessageException, CredentialsException;
+	List<KPIData> findByUsernameByHighLevelTypeFilteredNoPages(String username, String highLevelType, String searchKey) throws  CredentialsException;
 
 	
-	Iterable<KPIData> listAllKPIData() throws NoSuchMessageException, CredentialsException;
+	Iterable<KPIData> listAllKPIData() throws  CredentialsException;
 
-	KPIData saveKPIData(KPIData kpidata) throws NoSuchMessageException, CredentialsException;
+	KPIData saveKPIData(KPIData kpidata) throws  CredentialsException;
 
-	void deleteKPIData(Long id) throws NoSuchMessageException, CredentialsException;
+	void deleteKPIData(Long id) throws  CredentialsException;
 
 	Page<KPIData> findByUsernameDelegatedByHighLevelTypeFiltered(String usernameDelegated, String elementType, String highLevelType,
-			String searchKey, Pageable pageable) throws NoSuchMessageException, CredentialsException;
+			String searchKey, Pageable pageable) throws  CredentialsException;
 
 	List<KPIData> findByUsernameDelegatedByHighLevelTypeFilteredNoPages(String string, String highLevelType,
-			String highLevelType2, String searchKey) throws NoSuchMessageException, CredentialsException;
+			String highLevelType2, String searchKey) throws  CredentialsException;
 
 	Page<KPIData> findByUsernameDelegatedByHighLevelTypeByOrganizationFiltered(String string, String elementType,
 			String highLevelType, String searchKey, Pageable pageable);

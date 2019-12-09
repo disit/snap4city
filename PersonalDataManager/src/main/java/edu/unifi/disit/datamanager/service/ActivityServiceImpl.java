@@ -64,7 +64,7 @@ public class ActivityServiceImpl implements IActivityService {
 
 		credentialsService.checkAppIdCredentials(appId, lang);// enforcement credentials
 
-		if (!delegated)
+		if (!Boolean.TRUE.equals(delegated))
 			return activityRepo.findByAppIdAndDelegatedAppIdIsNullAndDeleteTimeIsNull(appId);
 		else
 			return activityRepo.findByDelegatedAppIdAndDeleteTimeIsNull(appId);
@@ -82,7 +82,7 @@ public class ActivityServiceImpl implements IActivityService {
 		Activity owner = new Activity(new Date(), requestAppidOwner, requestUsername, requestAppname, sourceRequest, variableName, motivation, accesstype.toString(), domain.toString(), null);
 		activityRepo.save(owner);// save owner
 
-		Hashtable<String, String> ht = new Hashtable<String, String>();
+		Hashtable<String, String> ht = new Hashtable<>();
 
 		ht.put(requestAppidOwner, requestUsername);// insert owner so it will not be inserted anymore
 
@@ -108,18 +108,20 @@ public class ActivityServiceImpl implements IActivityService {
 		Activity owner = new Activity(new Date(), username, sourceRequest, variableName, motivation, accesstype.toString(), domain.toString(), null);
 		activityRepo.save(owner);// save owner
 
-		Hashtable<String, String> ht = new Hashtable<String, String>();
+		Hashtable<String, String> ht = new Hashtable<>();
 
 		if (delegatedDatas != null)
 			for (Data data : delegatedDatas) {
-				if ((username != data.getUsername()) && (data.getAppId() != null) && (ht.get(data.getAppId()) == null)) {
+				if (data.getUsername() != null && username != null) {
+					if (!data.getUsername().equals(username) && data.getAppId() != null && ht.get(data.getAppId()) == null) {
 
-					List<Ownership> ownsDelega = ownershipRepo.findByElementId(data.getAppId());
+						List<Ownership> ownsDelega = ownershipRepo.findByElementId(data.getAppId());
 
-					Activity delegated = new Activity(new Date(), null, username, username, data.getAppId(), data.getUsername(), getElementNames(ownsDelega), sourceRequest, variableName, motivation, accesstype.toString(), domain.toString(),
+						Activity delegated = new Activity(new Date(), null, username, username, data.getAppId(), data.getUsername(), getElementNames(ownsDelega), sourceRequest, variableName, motivation, accesstype.toString(), domain.toString(),
 							null);
-					activityRepo.save(delegated);// save delegated
-					ht.put(data.getAppId(), data.getUsername());// insert this delegated so it will not be inserted anymore
+						activityRepo.save(delegated);// save delegated
+						ht.put(data.getAppId(), data.getUsername());// insert this delegated so it will not be inserted anymore
+					}
 				}
 			}
 	}
@@ -211,31 +213,31 @@ public class ActivityServiceImpl implements IActivityService {
 
 	private String getUsernames(List<Ownership> ownerships) {
 
-		if (ownerships.size() == 0)
+		if (ownerships.isEmpty())
 			logger.debug("Empty ownership retrieved");
-
-		String usernames = "";
+		
+		StringBuilder bldUsernames = new StringBuilder();
 		for (int i = 0; i < ownerships.size(); i++) {
-			usernames = usernames + ownerships.get(i).getUsername();
+			bldUsernames.append(ownerships.get(i).getUsername());
 			if (i != (ownerships.size() - 1)) {
-				usernames = usernames + ",";
+				bldUsernames.append(',');
 			}
 		}
-		return usernames;
+		return bldUsernames.toString();
 	}
 
 	private String getElementNames(List<Ownership> ownerships) {
 
-		if (ownerships.size() == 0)
+		if (ownerships.isEmpty())
 			logger.debug("Empty ownership retrieved");
 
-		String elementNames = "";
+		StringBuilder bldElementNames = new StringBuilder();
 		for (int i = 0; i < ownerships.size(); i++) {
-			elementNames = elementNames + ownerships.get(i).getElementName();
+			bldElementNames.append(ownerships.get(i).getElementName());
 			if (i != (ownerships.size() - 1)) {
-				elementNames = elementNames + ",";
+				bldElementNames.append(',');
 			}
 		}
-		return elementNames;
+		return bldElementNames.toString();
 	}
 }

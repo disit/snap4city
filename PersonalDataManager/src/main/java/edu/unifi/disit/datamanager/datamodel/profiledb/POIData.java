@@ -32,8 +32,8 @@ public class POIData {
 	public POIData() {
 		super();
 		this.kpidata = new KPIData();
-		this.listKPIMetadata = new ArrayList<KPIMetadata>();
-		this.listKPIValue = new ArrayList<KPIValue>();
+		this.listKPIMetadata = new ArrayList<>();
+		this.listKPIValue = new ArrayList<>();
 	}
 
 	public POIData(KPIData kpidata, List<KPIValue> listKPIValue, List<KPIMetadata> listKPIMetadata) {

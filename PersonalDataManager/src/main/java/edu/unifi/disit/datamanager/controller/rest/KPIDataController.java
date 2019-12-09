@@ -89,14 +89,14 @@ public class KPIDataController {
 
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, id, ActivityAccessType.READ, KPIActivityDomainType.DATA,
-						((HttpServletRequest) request).getRequestURI() + "?"
-								+ ((HttpServletRequest) request).getQueryString(),
+						request.getRequestURI() + "?"
+								+ request.getQueryString(),
 						"No data found", null, request.getRemoteAddr());
 
-				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else {
-				if (!kpiData.getUsername().toLowerCase().equals(credentialService.getLoggedUsername(lang).toLowerCase())
-						&& !accessService.checkAccessFromApp(Long.toString(kpiData.getId()), lang).getResult()) {
+				if (!kpiData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
+						&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiData.getId()), lang).getResult())) {
 					throw new CredentialsException();
 				}
 
@@ -105,15 +105,15 @@ public class KPIDataController {
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
 						kpiData.getId(), ActivityAccessType.READ, KPIActivityDomainType.DATA);
 
-				return new ResponseEntity<Object>(kpiData, HttpStatus.OK);
+				return new ResponseEntity<>(kpiData, HttpStatus.OK);
 			}
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, id, ActivityAccessType.READ, KPIActivityDomainType.DATA,
-					((HttpServletRequest) request).getRequestURI() + "?"
-							+ ((HttpServletRequest) request).getQueryString(),
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
@@ -138,11 +138,11 @@ public class KPIDataController {
 
 				kpiActivityService.saveActivityViolationFromUsername("PUBLIC", sourceRequest, id,
 						ActivityAccessType.READ, KPIActivityDomainType.DATA,
-						((HttpServletRequest) request).getRequestURI() + "?"
-								+ ((HttpServletRequest) request).getQueryString(),
+						request.getRequestURI() + "?"
+								+ request.getQueryString(),
 						"No data found", null, request.getRemoteAddr());
 
-				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else {
 				if (kpiData.getOwnership().equals("private") || !kpiData.getOwnership().equals("public")) {
 					throw new CredentialsException();
@@ -153,15 +153,15 @@ public class KPIDataController {
 				kpiActivityService.saveActivityFromUsername("PUBLIC", sourceRequest, kpiData.getId(),
 						ActivityAccessType.READ, KPIActivityDomainType.DATA);
 
-				return new ResponseEntity<Object>(kpiData, HttpStatus.OK);
+				return new ResponseEntity<>(kpiData, HttpStatus.OK);
 			}
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
 
 			kpiActivityService.saveActivityViolationFromUsername("PUBLIC", sourceRequest, id, ActivityAccessType.READ,
 					KPIActivityDomainType.DATA,
-					((HttpServletRequest) request).getRequestURI() + "?"
-							+ ((HttpServletRequest) request).getQueryString(),
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
@@ -193,14 +193,14 @@ public class KPIDataController {
 						newKpiData.getHighLevelType(), lang);
 			}
 
-			return new ResponseEntity<Object>(newKpiData, HttpStatus.OK);
+			return new ResponseEntity<>(newKpiData, HttpStatus.OK);
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, null, ActivityAccessType.WRITE, KPIActivityDomainType.DATA,
-					((HttpServletRequest) request).getRequestURI() + "?"
-							+ ((HttpServletRequest) request).getQueryString(),
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
@@ -209,8 +209,8 @@ public class KPIDataController {
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, null, ActivityAccessType.WRITE, KPIActivityDomainType.DATA,
-					((HttpServletRequest) request).getRequestURI() + "?"
-							+ ((HttpServletRequest) request).getQueryString(),
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
 					"Problem with public or private ownership", d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
@@ -233,11 +233,11 @@ public class KPIDataController {
 
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, id, ActivityAccessType.WRITE, KPIActivityDomainType.DATA,
-						((HttpServletRequest) request).getRequestURI() + "?"
-								+ ((HttpServletRequest) request).getQueryString(),
+						request.getRequestURI() + "?"
+								+ request.getQueryString(),
 						"No data found", null, request.getRemoteAddr());
 
-				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
 
 			kpiData.setId(oldKpiData.getId());
@@ -271,14 +271,14 @@ public class KPIDataController {
 						lang);
 			}
 
-			return new ResponseEntity<Object>(newKpiData, HttpStatus.OK);
+			return new ResponseEntity<>(newKpiData, HttpStatus.OK);
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, id, ActivityAccessType.WRITE, KPIActivityDomainType.DATA,
-					((HttpServletRequest) request).getRequestURI() + "?"
-							+ ((HttpServletRequest) request).getQueryString(),
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
@@ -287,8 +287,8 @@ public class KPIDataController {
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, null, ActivityAccessType.WRITE, KPIActivityDomainType.DATA,
-					((HttpServletRequest) request).getRequestURI() + "?"
-							+ ((HttpServletRequest) request).getQueryString(),
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
 					"Problem with public or private ownership", d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
@@ -311,11 +311,11 @@ public class KPIDataController {
 
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, id, ActivityAccessType.WRITE, KPIActivityDomainType.DATA,
-						((HttpServletRequest) request).getRequestURI() + "?"
-								+ ((HttpServletRequest) request).getQueryString(),
+						request.getRequestURI() + "?"
+								+ request.getQueryString(),
 						"No data found", null, request.getRemoteAddr());
 
-				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
 
 			String oldUsername = oldKpiData.getUsername();
@@ -371,14 +371,14 @@ public class KPIDataController {
 						lang);
 			}
 
-			return new ResponseEntity<Object>(newKpiData, HttpStatus.OK);
+			return new ResponseEntity<>(newKpiData, HttpStatus.OK);
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, id, ActivityAccessType.WRITE, KPIActivityDomainType.DATA,
-					((HttpServletRequest) request).getRequestURI() + "?"
-							+ ((HttpServletRequest) request).getQueryString(),
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
@@ -387,8 +387,8 @@ public class KPIDataController {
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, null, ActivityAccessType.WRITE, KPIActivityDomainType.DATA,
-					((HttpServletRequest) request).getRequestURI() + "?"
-							+ ((HttpServletRequest) request).getQueryString(),
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
 					"Problem with public or private ownership", d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
@@ -411,11 +411,11 @@ public class KPIDataController {
 
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, id, ActivityAccessType.DELETE, KPIActivityDomainType.DATA,
-						((HttpServletRequest) request).getRequestURI() + "?"
-								+ ((HttpServletRequest) request).getQueryString(),
+						request.getRequestURI() + "?"
+								+ request.getQueryString(),
 						"No data found", null, request.getRemoteAddr());
 
-				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
 
 			kpiDataToDelete.setDeleteTime(new Date());
@@ -426,14 +426,14 @@ public class KPIDataController {
 
 			logger.info("Deleted {}", id);
 
-			return new ResponseEntity<Object>(newKpiData, HttpStatus.OK);
+			return new ResponseEntity<>(newKpiData, HttpStatus.OK);
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, id, ActivityAccessType.DELETE, KPIActivityDomainType.DATA,
-					((HttpServletRequest) request).getRequestURI() + "?"
-							+ ((HttpServletRequest) request).getQueryString(),
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
@@ -442,6 +442,9 @@ public class KPIDataController {
 
 	// -------------------DEPRECATED ------------------------------------
 	// -------------------GET PUBLIC KPI Data Pageable -----------------------------
+	/**
+	    * @deprecated (when, Modificata la semantica del public, refactoring advice...)
+	    */
 	@Deprecated
 	@GetMapping("/api/v1/kpidata/public")
 	public ResponseEntity<Object> getKPIDataPublicV1Pageable(
@@ -489,34 +492,33 @@ public class KPIDataController {
 
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.DATA,
-						((HttpServletRequest) request).getRequestURI() + "?"
-								+ ((HttpServletRequest) request).getQueryString(),
+						request.getRequestURI() + "?"
+								+ request.getQueryString(),
 						"No public data found", null, request.getRemoteAddr());
 
-				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (pageKpiData != null) {
 				logger.info("Returning kpiDatapage ");
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
 						null, ActivityAccessType.READ, KPIActivityDomainType.DATA);
 
-				return new ResponseEntity<Object>(pageKpiData, HttpStatus.OK);
-			} else if (listKpiData != null) {
+				return new ResponseEntity<>(pageKpiData, HttpStatus.OK);
+			} else {
 				logger.info("Returning kpiDatalist ");
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
 						null, ActivityAccessType.READ, KPIActivityDomainType.DATA);
 
-				return new ResponseEntity<Object>(listKpiData, HttpStatus.OK);
+				return new ResponseEntity<>(listKpiData, HttpStatus.OK);
 			}
-			return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.DATA,
-					((HttpServletRequest) request).getRequestURI() + "?"
-							+ ((HttpServletRequest) request).getQueryString(),
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
@@ -525,8 +527,8 @@ public class KPIDataController {
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.DATA,
-					((HttpServletRequest) request).getRequestURI() + "?"
-							+ ((HttpServletRequest) request).getQueryString(),
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
@@ -574,34 +576,33 @@ public class KPIDataController {
 
 				kpiActivityService.saveActivityViolationFromUsername("PUBLIC", sourceRequest, null,
 						ActivityAccessType.READ, KPIActivityDomainType.DATA,
-						((HttpServletRequest) request).getRequestURI() + "?"
-								+ ((HttpServletRequest) request).getQueryString(),
+						request.getRequestURI() + "?"
+								+ request.getQueryString(),
 						"No public data found", null, request.getRemoteAddr());
 
-				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (pageKpiData != null) {
 				logger.info("Returning kpiDatapage ");
 
 				kpiActivityService.saveActivityFromUsername("PUBLIC", sourceRequest, null, ActivityAccessType.READ,
 						KPIActivityDomainType.DATA);
 
-				return new ResponseEntity<Object>(pageKpiData, HttpStatus.OK);
-			} else if (listKpiData != null) {
+				return new ResponseEntity<>(pageKpiData, HttpStatus.OK);
+			} else {
 				logger.info("Returning kpiDatalist ");
 
 				kpiActivityService.saveActivityFromUsername("PUBLIC", sourceRequest, null, ActivityAccessType.READ,
 						KPIActivityDomainType.DATA);
 
-				return new ResponseEntity<Object>(listKpiData, HttpStatus.OK);
+				return new ResponseEntity<>(listKpiData, HttpStatus.OK);
 			}
-			return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
 
 			kpiActivityService.saveActivityViolationFromUsername("PUBLIC", sourceRequest, null, ActivityAccessType.READ,
 					KPIActivityDomainType.DATA,
-					((HttpServletRequest) request).getRequestURI() + "?"
-							+ ((HttpServletRequest) request).getQueryString(),
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
@@ -610,8 +611,8 @@ public class KPIDataController {
 
 			kpiActivityService.saveActivityViolationFromUsername("PUBLIC", sourceRequest, null, ActivityAccessType.READ,
 					KPIActivityDomainType.DATA,
-					((HttpServletRequest) request).getRequestURI() + "?"
-							+ ((HttpServletRequest) request).getQueryString(),
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
@@ -657,34 +658,33 @@ public class KPIDataController {
 
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.DATA,
-						((HttpServletRequest) request).getRequestURI() + "?"
-								+ ((HttpServletRequest) request).getQueryString(),
+						request.getRequestURI() + "?"
+								+ request.getQueryString(),
 						"No organization data found", null, request.getRemoteAddr());
 
-				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (pageKpiData != null) {
 				logger.info("Returning kpiDatapage ");
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
 						null, ActivityAccessType.READ, KPIActivityDomainType.DATA);
 
-				return new ResponseEntity<Object>(pageKpiData, HttpStatus.OK);
-			} else if (listKpiData != null) {
+				return new ResponseEntity<>(pageKpiData, HttpStatus.OK);
+			} else {
 				logger.info("Returning kpiDatalist ");
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
 						null, ActivityAccessType.READ, KPIActivityDomainType.DATA);
 
-				return new ResponseEntity<Object>(listKpiData, HttpStatus.OK);
+				return new ResponseEntity<>(listKpiData, HttpStatus.OK);
 			}
-			return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
 		} catch (IllegalArgumentException d) {
 			logger.warn("Wrong Arguments", d);
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.DATA,
-					((HttpServletRequest) request).getRequestURI() + "?"
-							+ ((HttpServletRequest) request).getQueryString(),
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
@@ -729,34 +729,33 @@ public class KPIDataController {
 
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.DATA,
-						((HttpServletRequest) request).getRequestURI() + "?"
-								+ ((HttpServletRequest) request).getQueryString(),
+						request.getRequestURI() + "?"
+								+ request.getQueryString(),
 						"No delegated data found", null, request.getRemoteAddr());
 
-				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (pageKpiData != null) {
 				logger.info("Returning kpiDatapage ");
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
 						null, ActivityAccessType.READ, KPIActivityDomainType.DATA);
 
-				return new ResponseEntity<Object>(pageKpiData, HttpStatus.OK);
-			} else if (listKpiData != null) {
+				return new ResponseEntity<>(pageKpiData, HttpStatus.OK);
+			} else {
 				logger.info("Returning kpiDatalist ");
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
 						null, ActivityAccessType.READ, KPIActivityDomainType.DATA);
 
-				return new ResponseEntity<Object>(listKpiData, HttpStatus.OK);
+				return new ResponseEntity<>(listKpiData, HttpStatus.OK);
 			}
-			return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.DATA,
-					((HttpServletRequest) request).getRequestURI() + "?"
-							+ ((HttpServletRequest) request).getQueryString(),
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
@@ -765,8 +764,8 @@ public class KPIDataController {
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.DATA,
-					((HttpServletRequest) request).getRequestURI() + "?"
-							+ ((HttpServletRequest) request).getQueryString(),
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
@@ -806,7 +805,7 @@ public class KPIDataController {
 					} else if (highLevelType.equals("")) {
 						pageKpiData = kpiDataService.findAllFiltered(searchKey, new PageRequest(pageNumber, pageSize,
 								new Sort(Direction.fromString(sortDirection), sortBy)));
-					} else if (searchKey.equals("")) {
+					} else {
 						pageKpiData = kpiDataService.findByHighLevelType(highLevelType, new PageRequest(pageNumber,
 								pageSize, new Sort(Direction.fromString(sortDirection), sortBy)));
 					}
@@ -823,7 +822,7 @@ public class KPIDataController {
 						pageKpiData = kpiDataService.findByUsernameFiltered(credentialService.getLoggedUsername(lang),
 								searchKey, new PageRequest(pageNumber, pageSize,
 										new Sort(Direction.fromString(sortDirection), sortBy)));
-					} else if (searchKey.equals("")) {
+					} else {
 						pageKpiData = kpiDataService.findByUsernameByHighLevelType(
 								credentialService.getLoggedUsername(lang), highLevelType, new PageRequest(pageNumber,
 										pageSize, new Sort(Direction.fromString(sortDirection), sortBy)));
@@ -837,7 +836,7 @@ public class KPIDataController {
 						listKpiData = kpiDataService.findByHighLevelTypeFilteredNoPages(highLevelType, searchKey);
 					} else if (highLevelType.equals("")) {
 						listKpiData = kpiDataService.findAllFilteredNoPages(searchKey);
-					} else if (searchKey.equals("")) {
+					} else {
 						listKpiData = kpiDataService.findByHighLevelTypeNoPages(highLevelType);
 					}
 				} else {
@@ -849,7 +848,7 @@ public class KPIDataController {
 					} else if (highLevelType.equals("")) {
 						listKpiData = kpiDataService
 								.findByUsernameFilteredNoPages(credentialService.getLoggedUsername(lang), searchKey);
-					} else if (searchKey.equals("")) {
+					} else {
 						listKpiData = kpiDataService.findByUsernameByHighLevelTypeNoPages(
 								credentialService.getLoggedUsername(lang), highLevelType);
 					}
@@ -860,34 +859,34 @@ public class KPIDataController {
 
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.DATA,
-						((HttpServletRequest) request).getRequestURI() + "?"
-								+ ((HttpServletRequest) request).getQueryString(),
+						request.getRequestURI() + "?"
+								+ request.getQueryString(),
 						"No data found", null, request.getRemoteAddr());
 
-				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (pageKpiData != null) {
 				logger.info("Returning kpiDatapage ");
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
 						null, ActivityAccessType.READ, KPIActivityDomainType.DATA);
 
-				return new ResponseEntity<Object>(pageKpiData, HttpStatus.OK);
+				return new ResponseEntity<>(pageKpiData, HttpStatus.OK);
 			} else if (listKpiData != null) {
 				logger.info("Returning kpiDatalist ");
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
 						null, ActivityAccessType.READ, KPIActivityDomainType.DATA);
 
-				return new ResponseEntity<Object>(listKpiData, HttpStatus.OK);
+				return new ResponseEntity<>(listKpiData, HttpStatus.OK);
 			}
-			return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.DATA,
-					((HttpServletRequest) request).getRequestURI() + "?"
-							+ ((HttpServletRequest) request).getQueryString(),
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
@@ -896,8 +895,8 @@ public class KPIDataController {
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.DATA,
-					((HttpServletRequest) request).getRequestURI() + "?"
-							+ ((HttpServletRequest) request).getQueryString(),
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());

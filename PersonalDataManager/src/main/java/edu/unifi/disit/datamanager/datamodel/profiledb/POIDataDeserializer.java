@@ -18,7 +18,6 @@ import java.util.Date;
 import java.util.Iterator;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
@@ -37,7 +36,7 @@ public class POIDataDeserializer extends StdDeserializer<POIData> {
 
 	@Override
 	public POIData deserialize(JsonParser jp, DeserializationContext ctxt)
-			throws IOException, JsonProcessingException {
+			throws IOException {
 		JsonNode jnode = jp.getCodec().readTree(jp);
 		POIData poidata = new POIData();
 		

@@ -86,7 +86,7 @@ public class KPIActivityViolation {
 	}
 
 	public KPIActivityViolation(String username, String sourceRequest, Long kpiId, String accessType,
-			String delegationId, String domain, Date insertTime, Date elapseTime, Date deleteTime, String query,
+			String domain, Date insertTime, Date elapseTime, Date deleteTime, String query,
 			String errorMessage, Blob stacktrace, String ipAddress) {
 		super();
 		this.username = username;

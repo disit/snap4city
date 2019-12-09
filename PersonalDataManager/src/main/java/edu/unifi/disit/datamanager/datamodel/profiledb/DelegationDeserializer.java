@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.util.Date;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
@@ -35,7 +34,7 @@ public class DelegationDeserializer extends StdDeserializer<Delegation> {
 
 	@Override
 	public Delegation deserialize(JsonParser jp, DeserializationContext ctxt)
-			throws IOException, JsonProcessingException {
+			throws IOException {
 		JsonNode node = jp.getCodec().readTree(jp);
 
 		Long idValue = null;
@@ -73,9 +72,8 @@ public class DelegationDeserializer extends StdDeserializer<Delegation> {
 		if (node.get("groupnameDelegated") != null)
 			groupnameDelegatedValue = node.get("groupnameDelegated").asText();
 
-		Delegation d = new Delegation(idValue, usernameDelegatorValue, usernameDelegatedValue, variableNameValue, motivationValue, elementIdValue, elementTypeValue, insertTimeValue, deleteTimeValue, delegationDetailsValue,
+		return new Delegation(idValue, usernameDelegatorValue, usernameDelegatedValue, variableNameValue, motivationValue, elementIdValue, elementTypeValue, insertTimeValue, deleteTimeValue, delegationDetailsValue,
 				groupnameDelegatedValue);
 
-		return d;
 	}
 }

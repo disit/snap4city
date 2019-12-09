@@ -23,9 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -44,7 +43,7 @@ public class ActivityController {
 	IActivityService activityService;
 
 	// -------------------GET ALL Activity for appId ---------------------------------------------
-	@RequestMapping(value = "/api/v1/apps/{appId}/activity", method = RequestMethod.GET)
+	@GetMapping(value = "/api/v1/apps/{appId}/activity")
 	public ResponseEntity<Object> getActivityV1(@PathVariable("appId") String appId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			@RequestParam(value = "delegated", required = false, defaultValue = "false") Boolean delegated,
@@ -59,18 +58,18 @@ public class ActivityController {
 
 			if ((actvities == null) || (actvities.isEmpty())) {
 				logger.info("No actvities found");
-				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else {
 				logger.info("Returning actvities {}", actvities.size());
 				for (int index = 0; index < actvities.size(); index++)
 					logger.trace("{}- {}", index, actvities.get(index));
-				return new ResponseEntity<Object>(actvities, HttpStatus.OK);
+				return new ResponseEntity<>(actvities, HttpStatus.OK);
 			}
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
 
 			activityService.saveActivityViolation(appId, SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), null, null, null, ActivityAccessType.READ,
-					((HttpServletRequest) request).getRequestURI() + "?" + ((HttpServletRequest) request).getQueryString(), d.getMessage(), d, request.getRemoteAddr());
+					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}

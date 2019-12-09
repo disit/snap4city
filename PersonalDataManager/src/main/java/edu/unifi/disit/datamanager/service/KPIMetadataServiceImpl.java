@@ -22,7 +22,6 @@ import javax.persistence.PersistenceContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.NoSuchMessageException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -36,9 +35,6 @@ import edu.unifi.disit.datamanager.exception.CredentialsException;
 public class KPIMetadataServiceImpl implements IKPIMetadataService {
 
 	private static final Logger logger = LogManager.getLogger();
-
-	//@Autowired
-	//private MessageSource messages;
 
 	@Autowired
 	KPIMetadataDAO kpiMetadataRepository;
@@ -56,27 +52,27 @@ public class KPIMetadataServiceImpl implements IKPIMetadataService {
 	private EntityManager entityManager;
 
 	@Override
-	public KPIMetadata getKPIMetadataById(Long id, Locale lang) throws NoSuchMessageException, CredentialsException {
+	public KPIMetadata getKPIMetadataById(Long id, Locale lang) throws  CredentialsException {
 		logger.debug("getKPIMetadataById INVOKED on id {}", id);
 		return kpiMetadataRepository.findOne(id);
 	}
 
 	@Override
 	public Page<KPIMetadata> findAllByKpiId(Long kpiId, Pageable pageable)
-			throws NoSuchMessageException, CredentialsException {
+			throws  CredentialsException {
 		logger.debug("findAllByKpiId INVOKED on kpiId {}",  kpiId);
 		return kpiMetadataRepository.findByKpiIdAndDeleteTimeIsNull(kpiId, pageable);
 	}
 
 	@Override
-	public List<KPIMetadata> findByKpiIdNoPages(Long kpiId) throws NoSuchMessageException, CredentialsException {
+	public List<KPIMetadata> findByKpiIdNoPages(Long kpiId) throws  CredentialsException {
 		logger.debug("findByKpiIdNoPages INVOKED on kpiId {}",  kpiId);
 		return kpiMetadataRepository.findByKpiIdAndDeleteTimeIsNull(kpiId);
 	}
 
 	@Override
 	public Page<KPIMetadata> findAllFilteredByKpiId(Long kpiId, String searchKey, Pageable pageable)
-			throws NoSuchMessageException, CredentialsException {
+			throws  CredentialsException {
 		logger.debug("findAllFilteredByKpiId INVOKED on searchKey {} kpiId {}",  searchKey, kpiId);
 		return kpiMetadataRepository.findByKpiIdAndValueContainingOrKeyContainingAllIgnoreCaseAndDeleteTimeIsNull(kpiId, searchKey, searchKey, pageable);
 	
@@ -84,20 +80,20 @@ public class KPIMetadataServiceImpl implements IKPIMetadataService {
 	
 	@Override
 	public List<KPIMetadata> findFilteredByKpiIdNoPages(Long kpiId, String searchKey)
-			throws NoSuchMessageException, CredentialsException {
+			throws  CredentialsException {
 		logger.debug("findAllFilteredByKpiId INVOKED on searchKey {} kpiId {}",  searchKey, kpiId);
 		return kpiMetadataRepository.findByKpiIdAndValueContainingOrKeyContainingAllIgnoreCaseAndDeleteTimeIsNull(kpiId, searchKey, searchKey);
 	
 	}
 
 	@Override
-	public KPIMetadata saveKPIMetadata(KPIMetadata kpimetadata) throws NoSuchMessageException, CredentialsException {
+	public KPIMetadata saveKPIMetadata(KPIMetadata kpimetadata) throws  CredentialsException {
 		logger.debug("saveKPIMetadata INVOKED on kpimetadata {}",  kpimetadata.getId());
 		return kpiMetadataRepository.save(kpimetadata);
 	}
 
 	@Override
-	public void deleteKPIMetadata(Long id) throws NoSuchMessageException, CredentialsException {
+	public void deleteKPIMetadata(Long id) throws  CredentialsException {
 		logger.debug("deleteKPIMetadata INVOKED on id {}",  id);
 		kpiMetadataRepository.delete(id);
 		

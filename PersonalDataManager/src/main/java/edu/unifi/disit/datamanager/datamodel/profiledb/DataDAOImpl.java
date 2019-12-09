@@ -89,11 +89,11 @@ public class DataDAOImpl implements DataDAOCustom {
 		subquery.select(delegationRoot.get("elementId")); // field to map with main-query
 		Path<Object> pathGroup = delegationRoot.get("groupnameDelegated"); // field to map with group
 
-		final List<Predicate> predicatesSubquery = new ArrayList<Predicate>();// group
+		final List<Predicate> predicatesSubquery = new ArrayList<>();// group
 		Predicate predicate1 = cb.conjunction();
 		Predicate predicate2 = cb.conjunction();
 		predicate1.getExpressions().add(cb.equal(delegationRoot.get("usernameDelegated"), username));
-		if (groupnames.size() != 0) {
+		if (!groupnames.isEmpty()) {
 			predicate2.getExpressions().add(cb.in(pathGroup).value(groupnames));
 			predicatesSubquery.add(cb.or(predicate1, predicate2));
 		} else {
@@ -130,7 +130,7 @@ public class DataDAOImpl implements DataDAOCustom {
 		// annotations management
 		List<Data> annotations = getDataByUsernameDelegatedAnnotation(username, variableName, motivation, from, to, first, last);
 
-		if (annotations.size() != 0) {
+		if (!annotations.isEmpty()) {
 			toreturn.addAll(annotations);
 
 			if ((first != 0) && (toreturn.size() != first)) {
@@ -157,7 +157,7 @@ public class DataDAOImpl implements DataDAOCustom {
 		Root<Delegation> delegationRoot = subquery.from(Delegation.class);
 		subquery.select(delegationRoot.get("usernameDelegator")); // field to map with main-query
 
-		final List<Predicate> predicatesSubquery = new ArrayList<Predicate>();
+		final List<Predicate> predicatesSubquery = new ArrayList<>();
 
 		predicatesSubquery.add(cb.equal(delegationRoot.get("usernameDelegated"), username));
 
@@ -220,7 +220,7 @@ public class DataDAOImpl implements DataDAOCustom {
 		// annotations management
 		List<Data> annotations = getDataByAppIdAnnotation(appOwner, variableName, motivation, from, to, first, last);
 
-		if (annotations.size() != 0) {
+		if (!annotations.isEmpty()) {
 			toreturn.addAll(annotations);
 
 			if ((first != 0) && (toreturn.size() != first)) {
@@ -268,13 +268,13 @@ public class DataDAOImpl implements DataDAOCustom {
 		if (first != 0) {
 			return entityManager.createQuery(criteria).setMaxResults(first).getResultList();
 		} else if (last != 0) {
-			return entityManager.createQuery(criteria).setMaxResults(last).getResultList();
+				return entityManager.createQuery(criteria).setMaxResults(last).getResultList();
 		} else
-			return entityManager.createQuery(criteria).getResultList();
+				return entityManager.createQuery(criteria).getResultList();
 	}
 
 	private List<Predicate> getCommonPredicates(CriteriaBuilder cb, Root<Data> dataRoot, String variableName, String motivation, Date from, Date to) {
-		List<Predicate> predicates = new ArrayList<Predicate>();
+		List<Predicate> predicates = new ArrayList<>();
 		if (from != null)
 			predicates.add(cb.greaterThan(dataRoot.get("dataTime"), from));
 		if (to != null)

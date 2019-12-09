@@ -18,7 +18,6 @@ import java.util.Locale;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.NoSuchMessageException;
 import org.springframework.stereotype.Service;
 
 import edu.unifi.disit.datamanager.datamodel.Response;
@@ -67,7 +66,7 @@ public class AccessServiceImpl implements IAccessService {
 		// if the AT is from the owner
 		String strippedElementID = elementID;
 		if (elementID.startsWith("http://") || elementID.startsWith("https://")) {// to enable iotdirectory scenario
-			strippedElementID = elementID.substring(elementID.lastIndexOf("/") + 1);
+			strippedElementID = elementID.substring(elementID.lastIndexOf('/') + 1);
 			logger.debug("strippedElementID is: {}", strippedElementID);
 		}
 
@@ -91,7 +90,7 @@ public class AccessServiceImpl implements IAccessService {
 				return response;
 			}
 
-			if ((d.getUsernameDelegated() != null) && (d.getUsernameDelegated().toLowerCase().equals(loggedUserName.toLowerCase()))) {
+			if ((d.getUsernameDelegated() != null) && (d.getUsernameDelegated().equalsIgnoreCase(loggedUserName))) {
 				response.setResult(true);
 				response.setMessage("DELEGATED");
 				return response;
@@ -109,7 +108,7 @@ public class AccessServiceImpl implements IAccessService {
 
 	@Override
 	// the owner of the elementId, specified in the accesstoken, can check if another user has been delegated to access elementId
-	public Response checkDelegationsFromUsername(String username, String variableName, String elementID, Locale lang) throws NoSuchMessageException, CredentialsException {
+	public Response checkDelegationsFromUsername(String username, String variableName, String elementID, Locale lang) throws CredentialsException {
 		logger.debug("checkDelegations INVOKED on username {} variableName {} elementId {} ", username, variableName, elementID);
 
 		credentialsService.checkAppIdCredentials(elementID, lang);
@@ -150,7 +149,7 @@ public class AccessServiceImpl implements IAccessService {
 
 		Response response = new Response(false, null);
 
-		if (delegationRepo.getPublicDelegationFromAppId(elementId, variableName, null, false, elementType).size() > 0) {
+		if (!delegationRepo.getPublicDelegationFromAppId(elementId, variableName, null, false, elementType).isEmpty()) {
 			response.setMessage("PUBLIC");
 			response.setResult(true);
 		}

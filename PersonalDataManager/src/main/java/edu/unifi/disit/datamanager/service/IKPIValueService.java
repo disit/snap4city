@@ -17,7 +17,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import org.springframework.context.NoSuchMessageException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -27,27 +26,27 @@ import edu.unifi.disit.datamanager.exception.DataNotValidException;
 
 public interface IKPIValueService {
 
-	KPIValue getKPIValueById(Long id, Locale lang) throws NoSuchMessageException, CredentialsException;
+	KPIValue getKPIValueById(Long id, Locale lang) throws  CredentialsException;
 
-	Page<KPIValue> findByKpiId(Long kpiId, Pageable pageable) throws NoSuchMessageException, CredentialsException;
+	Page<KPIValue> findByKpiId(Long kpiId, Pageable pageable) throws  CredentialsException;
 	
-	Page<KPIValue> findByKpiIdFiltered(Long kpiId, String searchKey, Pageable pageable) throws NoSuchMessageException, CredentialsException;
+	Page<KPIValue> findByKpiIdFiltered(Long kpiId, String searchKey, Pageable pageable) throws  CredentialsException;
 
-	List<KPIValue> findByKpiIdNoPages(Long kpiId)  throws NoSuchMessageException, CredentialsException;
+	List<KPIValue> findByKpiIdNoPages(Long kpiId)  throws  CredentialsException;
 	
-	List<KPIValue> findByKpiIdGeoLocated(Long kpiId)  throws NoSuchMessageException, CredentialsException;
+	List<KPIValue> findByKpiIdGeoLocated(Long kpiId)  throws  CredentialsException;
 
-	List<KPIValue> findByKpiIdFilteredNoPages(Long kpiId, String searchKey) throws NoSuchMessageException, CredentialsException;
+	List<KPIValue> findByKpiIdFilteredNoPages(Long kpiId, String searchKey) throws  CredentialsException;
 	
-	KPIValue saveKPIValue(KPIValue kpivalue) throws NoSuchMessageException, CredentialsException;
+	KPIValue saveKPIValue(KPIValue kpivalue) throws  CredentialsException;
 
-	void deleteKPIValue(Long id) throws NoSuchMessageException, CredentialsException;
+	void deleteKPIValue(Long id) throws  CredentialsException;
 
-	List<KPIValue> findByKpiIdNoPagesWithLimit(Long kpiId, Date from, Date to, Integer first, Integer last, Locale lang) throws NoSuchMessageException, DataNotValidException;
+	List<KPIValue> findByKpiIdNoPagesWithLimit(Long kpiId, Date from, Date to, Integer first, Integer last, Locale lang) throws  DataNotValidException;
 
-	List<Date> getKPIValueDates(Long kpiId) throws NoSuchMessageException, CredentialsException;
+	List<Date> getKPIValueDates(Long kpiId) throws  CredentialsException;
 
 	List<Date> getKPIValueDatesCoordinatesOptionallyNull(Long kpiId)
-			throws NoSuchMessageException, CredentialsException;
+			throws  CredentialsException;
 	
 }

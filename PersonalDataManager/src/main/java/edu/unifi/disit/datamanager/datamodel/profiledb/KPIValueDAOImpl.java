@@ -63,12 +63,13 @@ public class KPIValueDAOImpl implements KPIValueDAOCustom {
 			return entityManager.createQuery(criteria).setMaxResults(first).getResultList();
 		} else if (last != 0) {
 			return entityManager.createQuery(criteria).setMaxResults(last).getResultList();
-		} else
+		} else {
 			return entityManager.createQuery(criteria).getResultList();
+		}
 	}
 
 	private List<Predicate> getCommonPredicates(CriteriaBuilder cb, Root<KPIValue> dataRoot, Date from, Date to) {
-		List<Predicate> predicates = new ArrayList<Predicate>();
+		List<Predicate> predicates = new ArrayList<>();
 		if (from != null)
 			predicates.add(cb.greaterThan(dataRoot.get("dataTime"), from));
 		if (to != null)

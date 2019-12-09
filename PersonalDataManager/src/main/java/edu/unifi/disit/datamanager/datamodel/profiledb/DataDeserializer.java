@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.util.Date;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
@@ -35,7 +34,7 @@ public class DataDeserializer extends StdDeserializer<Data> {
 
 	@Override
 	public Data deserialize(JsonParser jp, DeserializationContext ctxt)
-			throws IOException, JsonProcessingException {
+			throws IOException {
 		JsonNode node = jp.getCodec().readTree(jp);
 
 		Long idValue = null;
@@ -73,9 +72,8 @@ public class DataDeserializer extends StdDeserializer<Data> {
 		// if (node.get("uidName") != null) // transient
 		// uidNameValue = node.get("uidName").asText();
 
-		Data d = new Data(idValue, usernameValue, dataTimeValue, null, null, null, null, appIdValue, motivationValue, variableNameValue, variableValueValue, variableUnitValue);
+		return new Data(idValue, usernameValue, dataTimeValue, null, null, null, null, appIdValue, motivationValue, variableNameValue, variableValueValue, variableUnitValue);
 		// d.setUidName(uidNameValue); // transient
 
-		return d;
 	}
 }

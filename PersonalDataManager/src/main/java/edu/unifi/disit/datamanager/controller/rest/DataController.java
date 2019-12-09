@@ -23,8 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -47,13 +46,13 @@ public class DataController {
 	IActivityService activityService;
 
 	// -------------------GET alive ---------------------------------------------
-	@RequestMapping(value = "/api/test", method = RequestMethod.GET)
+	@GetMapping(value = "/api/test")
 	public ResponseEntity<String> dataControllerTest() {
-		return new ResponseEntity<String>("alive", HttpStatus.OK);
+		return new ResponseEntity<>("alive", HttpStatus.OK);
 	}
 
 	// -------------------GET ALL Data ---------------------------------------------
-	@RequestMapping(value = "/api/v1/data", method = RequestMethod.GET)
+	@GetMapping(value = "/api/v1/data")
 	public ResponseEntity<Object> getDataV1(
 			@RequestParam("sourceRequest") String sourceRequest,
 			@RequestParam(value = "last", required = false, defaultValue = "false") Boolean last,
@@ -72,18 +71,18 @@ public class DataController {
 
 			if ((datas == null) || (datas.isEmpty())) {
 				logger.info("No data found");
-				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else {
 				logger.info("Returning data {}", datas.size());
 				for (int index = 0; index < datas.size(); index++)
 					logger.trace("{}- {}", index, datas.get(index));
-				return new ResponseEntity<Object>(datas, HttpStatus.OK);
+				return new ResponseEntity<>(datas, HttpStatus.OK);
 			}
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
 
 			activityService.saveActivityViolationFromUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), sourceRequest, null, null, ActivityAccessType.READ,
-					((HttpServletRequest) request).getRequestURI() + "?" + ((HttpServletRequest) request).getQueryString(), d.getMessage(), d, request.getRemoteAddr());
+					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}

@@ -15,7 +15,6 @@ package edu.unifi.disit.datamanager.service;
 import java.util.List;
 import java.util.Locale;
 
-import org.springframework.context.NoSuchMessageException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -32,12 +31,12 @@ public interface IDelegationService {
 	// Response checkDelegationsFromApp(String elementID, Locale lang) throws CredentialsException;
 
 	List<Delegation> getDelegationsDelegatedFromApp(String appId, String variableName, String motivation, Boolean deleted, String appOwner, String groupname, String elementType, Locale lang)
-			throws DelegationNotValidException, CredentialsException, NoSuchMessageException, LDAPException;
+			throws DelegationNotValidException, CredentialsException,  LDAPException;
 
 	List<Delegation> getDelegationsDelegatorFromApp(String appId, String variableName, String motivation, Boolean deleted, String elementType, Locale lang) throws CredentialsException;
 
 	List<Delegation> getDelegationsDelegatedForUsername(String username, String variableName, String motivation, Boolean deleted, String groupname, String elementType, Locale lang)
-			throws CredentialsException, NoSuchMessageException, LDAPException;
+			throws CredentialsException,  LDAPException;
 
 	List<Delegation> getDelegationsDelegatorForUsername(String username, String variableName, String motivation, Boolean deleted, String elementType, Locale lang) throws CredentialsException;
 
@@ -53,16 +52,16 @@ public interface IDelegationService {
 
 	// Aggiunti per KPI
 
-	Delegation getDelegationById(Long id, Locale lang) throws NoSuchMessageException, CredentialsException;
+	Delegation getDelegationById(Long id, Locale lang) throws  CredentialsException;
 
-	Page<Delegation> findByElementId(String elementId, Pageable pageable) throws NoSuchMessageException, CredentialsException;
+	Page<Delegation> findByElementId(String elementId, Pageable pageable) throws  CredentialsException;
 
 	Page<Delegation> findByElementIdWithoutAnonymous(String elementId, Pageable pageable)
-			throws NoSuchMessageException, CredentialsException;
+			throws  CredentialsException;
 
-	List<Delegation> findByElementIdNoPages(String elementId) throws NoSuchMessageException, CredentialsException;
+	List<Delegation> findByElementIdNoPages(String elementId) throws  CredentialsException;
 
 	List<Delegation> findByElementIdNoPagesWithoutAnonymous(String elementId)
-			throws NoSuchMessageException, CredentialsException;
+			throws  CredentialsException;
 
 }

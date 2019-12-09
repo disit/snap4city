@@ -16,7 +16,6 @@ package edu.unifi.disit.datamanager.datamodel.profiledb;
 import java.io.IOException;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
@@ -35,7 +34,7 @@ public class KPIMetadataDeserializer extends StdDeserializer<KPIMetadata> {
 
 	@Override
 	public KPIMetadata deserialize(JsonParser jp, DeserializationContext ctxt)
-			throws IOException, JsonProcessingException {
+			throws IOException {
 		JsonNode jnode = jp.getCodec().readTree(jp);
 		KPIMetadata kpimetadata = new KPIMetadata();
 

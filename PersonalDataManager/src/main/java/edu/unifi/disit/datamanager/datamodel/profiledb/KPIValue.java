@@ -195,12 +195,12 @@ public class KPIValue implements Comparable<KPIValue> {
 			if (other.kpiId != null)
 				return false;
 		} else if (!kpiId.equals(other.kpiId))
-			return false;
+					return false;
 		if (value == null) {
 			if (other.value != null)
 				return false;
 		} else if (!value.equals(other.value))
-			return false;
+					return false;
 		return true;
 	}
 

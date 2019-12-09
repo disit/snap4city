@@ -21,19 +21,16 @@ import java.util.Locale;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attributes;
-//import javax.naming.ldap.LdapName;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.context.NoSuchMessageException;
 import org.springframework.ldap.core.AttributesMapper;
 import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.ldap.core.support.LdapContextSource;
 
 import edu.unifi.disit.datamanager.exception.LDAPException;
-//import org.springframework.ldap.support.LdapNameBuilder;
 
 public class LDAPUserDAOImpl implements LDAPUserDAO {
 
@@ -90,7 +87,7 @@ public class LDAPUserDAOImpl implements LDAPUserDAO {
 						if ((attrs.get("cn") != null) && (attrs.get("ou") != null))
 							return "cn=" + attrs.get("cn").get().toString() + ",ou=" + attrs.get("ou").get().toString() + "," + ((LdapContextSource) ldapTemplate.getContextSource()).getBaseLdapPathAsString();
 						else { // cn is always present since it's in the query!
-							logger.warn("The retreived cn {} hasn't any attached ou", attrs.get("cn").get().toString());
+							logger.warn("The retreived cn {} hasn't any attached ou", attrs.get("cn").get());
 							return "cn=" + attrs.get("cn").get().toString() + "," + ((LdapContextSource) ldapTemplate.getContextSource()).getBaseLdapPathAsString();
 						}
 
@@ -100,7 +97,7 @@ public class LDAPUserDAOImpl implements LDAPUserDAO {
 
 	@Override
 	public boolean usernameExist(String username) {
-		return ldapTemplate
+		return !ldapTemplate
 				.search(query()
 						.attributes("cn")
 						.where("objectClass").is("inetOrgPerson").and("cn").is(username),
@@ -109,7 +106,7 @@ public class LDAPUserDAOImpl implements LDAPUserDAO {
 								return attrs.get("cn").get().toString();
 							}
 						})
-				.size() > 0;
+				.isEmpty();
 	}
 
 	@Override
@@ -128,7 +125,7 @@ public class LDAPUserDAOImpl implements LDAPUserDAO {
 		if (startindexOU == -1)
 			return false;
 
-		int endindexOU = groupname.indexOf(",", startindexOU + 3);
+		int endindexOU = groupname.indexOf(',', startindexOU + 3);
 		if (endindexOU == -1)
 			return false;
 
@@ -138,7 +135,7 @@ public class LDAPUserDAOImpl implements LDAPUserDAO {
 
 		if (startindexCN != -1) {
 			// group scenario
-			int endindexCN = groupname.indexOf(",", startindexCN + 3);
+			int endindexCN = groupname.indexOf(',', startindexCN + 3);
 
 			if (endindexCN == -1) {
 				return false;
@@ -146,7 +143,7 @@ public class LDAPUserDAOImpl implements LDAPUserDAO {
 
 			String cnGroupname = groupname.substring(startindexCN + 3, endindexCN);
 
-			return ldapTemplate
+			return !ldapTemplate
 					.search(query()
 							.attributes("cn")
 							.where("objectClass").is("groupOfNames").and("cn").is(cnGroupname).and("ou").is(ouGroupname),
@@ -155,10 +152,10 @@ public class LDAPUserDAOImpl implements LDAPUserDAO {
 									return attrs.get("cn").get().toString();
 								}
 							})
-					.size() > 0;
+					.isEmpty();
 		} else {
 			// organization scenario
-			return ldapTemplate
+			return !ldapTemplate
 					.search(query()
 							.attributes("ou")
 							.where("objectClass").is("organizationalUnit").and("ou").is(ouGroupname),
@@ -167,7 +164,7 @@ public class LDAPUserDAOImpl implements LDAPUserDAO {
 									return attrs.get("ou").get().toString();
 								}
 							})
-					.size() > 0;
+					.isEmpty();
 
 		}
 	}
@@ -178,14 +175,14 @@ public class LDAPUserDAOImpl implements LDAPUserDAO {
 
 		int startindexCN = groupnamefilter.indexOf("cn=");
 
-		List<List<String>> returno = new ArrayList<List<String>>();
+		List<List<String>> returno;
 
 		// ou has always to exist
 		int startindexOU = groupnamefilter.indexOf("ou=");
 		if (startindexOU == -1) {
 			throw new LDAPException(messages.getMessage("ldap.ko.noouspecified", null, lang));
 		}
-		int endindexOU = groupnamefilter.indexOf(",", startindexOU + 3);
+		int endindexOU = groupnamefilter.indexOf(',', startindexOU + 3);
 		if (endindexOU == -1) {
 			throw new LDAPException(messages.getMessage("ldap.ko.noouspecified", null, lang));
 		}
@@ -195,7 +192,7 @@ public class LDAPUserDAOImpl implements LDAPUserDAO {
 		if (startindexCN != -1) {
 			// group scenario
 
-			int endindexCN = groupnamefilter.indexOf(",", startindexCN + 3);
+			int endindexCN = groupnamefilter.indexOf(',', startindexCN + 3);
 
 			if (endindexCN == -1) {
 				throw new LDAPException(messages.getMessage("ldap.ko.nocnspecified", null, lang));
@@ -232,7 +229,7 @@ public class LDAPUserDAOImpl implements LDAPUserDAO {
 					});
 		}
 
-		if (returno.size() == 0)
+		if (returno.isEmpty())
 			throw new LDAPException(messages.getMessage("ldap.ko.nofound", null, lang));
 		if (returno.size() > 1)
 			throw new LDAPException(messages.getMessage("ldap.ko.toomany", null, lang));
@@ -241,15 +238,15 @@ public class LDAPUserDAOImpl implements LDAPUserDAO {
 
 	}
 
-	List<String> extractUsername(List<String> toremove, Locale lang) throws NoSuchMessageException, LDAPException {
-		List<String> toreturn = new ArrayList<String>();
+	List<String> extractUsername(List<String> toremove, Locale lang) throws LDAPException {
+		List<String> toreturn = new ArrayList<>();
 		for (String s : toremove) {
 			int startindexCN = s.indexOf("cn=");
 			if (startindexCN == -1) {
 				throw new LDAPException(messages.getMessage("ldap.ko.nocnspecified", null, lang));
 			}
 
-			int endindexCN = s.indexOf(",", startindexCN + 3);
+			int endindexCN = s.indexOf(',', startindexCN + 3);
 
 			if (endindexCN == -1) {
 				throw new LDAPException(messages.getMessage("ldap.ko.nocnspecified", null, lang));
@@ -258,30 +255,5 @@ public class LDAPUserDAOImpl implements LDAPUserDAO {
 		}
 		return toreturn;
 	}
-
-	// @Override
-	// public List<LDAPUser> findAll() {
-	// return ldapTemplate.findAll(LDAPUser.class);
-	// }
-	//
-	// @Override
-	// public LDAPUser findByPrimaryKey(String country, String company, String fullname) {
-	// LdapName dn = buildDn(country, company, fullname);
-	// LDAPUser person = ldapTemplate.findByDn(dn, LDAPUser.class);
-	//
-	// return person;
-	// }
-	//
-	// private LdapName buildDn(LDAPUser person) {
-	// return buildDn(person.getCountry(), person.getCompany(), person.getFullName());
-	// }
-	//
-	// private LdapName buildDn(String country, String company, String fullname) {
-	// return LdapNameBuilder.newInstance()
-	// .add("c", country)
-	// .add("ou", company)
-	// .add("cn", fullname)
-	// .build();
-	// }
 
 }

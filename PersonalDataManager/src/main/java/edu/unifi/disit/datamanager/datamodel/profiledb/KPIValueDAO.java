@@ -35,8 +35,6 @@ public interface KPIValueDAO extends JpaRepository<KPIValue, Long>, KPIValueDAOC
 
 	List<KPIValue> findByKpiIdAndDeleteTimeIsNull(Long kpiId);
 	
-	//List<KPIValue> findByKpiIdAndDeleteTimeIsNullAndLatitudeIsNotNullAndLongitudeIsNotNull(Long kpiId);
-
 	List<KPIValue> findByKpiIdAndValueContainingAllIgnoreCaseAndDeleteTimeIsNull(Long kpiId, String searchKey); 
 	
 	@Query("select distinct(date(dataTime)) from KPIValue as v where v.kpiId = ?1 and v.latitude IS NOT NULL and v.longitude IS NOT NULL and v.deleteTime IS NULL")

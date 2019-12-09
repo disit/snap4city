@@ -23,7 +23,6 @@ import javax.persistence.PersistenceContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.NoSuchMessageException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -40,9 +39,6 @@ import edu.unifi.disit.datamanager.exception.DelegationNotValidException;
 public class KPIDataServiceImpl implements IKPIDataService {
 
 	private static final Logger logger = LogManager.getLogger();
-
-	// @Autowired
-	// private MessageSource messages;
 
 	@Autowired
 	KPIDataDAO kpiDataRepository;
@@ -63,7 +59,7 @@ public class KPIDataServiceImpl implements IKPIDataService {
 	private EntityManager entityManager;
 
 	@Override
-	public KPIData getKPIDataById(long id, Locale lang, boolean anonymize) throws NoSuchMessageException {
+	public KPIData getKPIDataById(long id, Locale lang, boolean anonymize) {
 		logger.debug("getKPIDataById INVOKED on id {}", id);
 		if (anonymize) {
 			return anonymize(kpiDataRepository.findOne(id));
@@ -107,7 +103,6 @@ public class KPIDataServiceImpl implements IKPIDataService {
 			logger.debug("makeKPIDataPublic TRUE");
 			return true;
 		}
-		;
 
 		logger.debug("makeKPIDataPublic FALSE");
 		return false;
@@ -121,15 +116,17 @@ public class KPIDataServiceImpl implements IKPIDataService {
 
 		logger.debug("makeKPIDataPrivate");
 
-		listDelegation.removeIf((x) -> !x.getUsernameDelegated().equals("ANONYMOUS"));
+		listDelegation.removeIf(x -> !x.getUsernameDelegated().equals("ANONYMOUS"));
 
 		if (!listDelegation.isEmpty()) {
-			listDelegation.forEach((x) -> {
+			listDelegation.forEach(x -> {
 				x.setDeleteTime(new Date());
 				try {
 					delegationService.putDelegationFromUser(x.getUsernameDelegator(), x, x.getId(), lang);
-				} catch (DelegationNotValidException | CredentialsException e) {
-					e.printStackTrace();
+				} catch (DelegationNotValidException e) {
+					logger.warn("Delegation Not Valid", e);
+				}catch (CredentialsException e) {
+					logger.warn("Rights exception", e);
 				}
 			});
 		}
@@ -142,12 +139,14 @@ public class KPIDataServiceImpl implements IKPIDataService {
 
 		List<Delegation> listDelegation = delegationService.findByElementIdNoPages(Long.toString(kpiId));
 
-		listDelegation.forEach((x) -> {
+		listDelegation.forEach(x -> {
 			x.setUsernameDelegator(newOwner);
 			try {
 				delegationService.putDelegationFromUser(credentialsService.getLoggedUsername(lang), x, x.getId(), lang);
-			} catch (DelegationNotValidException | CredentialsException e) {
-				e.printStackTrace();
+			} catch (DelegationNotValidException e) {
+				logger.warn("Delegation Not Valid", e);
+			}catch (CredentialsException e) {
+				logger.warn("Rights exception", e);
 			}
 		});
 
@@ -168,50 +167,50 @@ public class KPIDataServiceImpl implements IKPIDataService {
 
 	@Override
 	public Page<KPIData> findByUsername(String username, Pageable pageable)
-			throws NoSuchMessageException, CredentialsException {
+			throws  CredentialsException {
 		logger.debug("findByUsername INVOKED on username {}", username);
 		return kpiDataRepository.findKPIDataFilteredPage(username, null, null, pageable);
 	}
 
 	@Override
 	public Page<KPIData> findAllFiltered(String searchKey, Pageable pageable)
-			throws NoSuchMessageException, CredentialsException {
+			throws  CredentialsException {
 		logger.debug("findAllFiltered INVOKED on searchKey {}", searchKey);
 		return kpiDataRepository.findKPIDataFilteredPage(null, null, searchKey, pageable);
 	}
 
 	@Override
 	public Page<KPIData> findByUsernameFiltered(String username, String searchKey, Pageable pageable)
-			throws NoSuchMessageException, CredentialsException {
+			throws  CredentialsException {
 		logger.debug("findByUsernameFiltered INVOKED on username {} searchKey {}", username, searchKey);
 		return kpiDataRepository.findKPIDataFilteredPage(username, null, searchKey, pageable);
 	}
 
 	@Override
 	public Page<KPIData> findByHighLevelType(String highLevelType, Pageable pageable)
-			throws NoSuchMessageException, CredentialsException {
+			throws  CredentialsException {
 		logger.debug("findByHighLevelType INVOKED on highLevelType {}", highLevelType);
 		return kpiDataRepository.findKPIDataFilteredPage(null, highLevelType, null, pageable);
 	}
 
 	@Override
 	public Page<KPIData> findByUsernameByHighLevelType(String username, String highLevelType, Pageable pageable)
-			throws NoSuchMessageException, CredentialsException {
+			throws  CredentialsException {
 		logger.debug("findByUsernameByHighLevelType INVOKED on username {} highLevelType {}", username, highLevelType);
 		return kpiDataRepository.findKPIDataFilteredPage(username, highLevelType, null, pageable);
 	}
 
 	@Override
 	public Page<KPIData> findByHighLevelTypeFiltered(String highLevelType, String searchKey, Pageable pageable)
-			throws NoSuchMessageException, CredentialsException {
+			throws  CredentialsException {
 		logger.debug("findByHighLevelTypeFiltered INVOKED on highLevelType {} searchKey {}", highLevelType, searchKey);
 		return kpiDataRepository.findKPIDataFilteredPage(null, highLevelType, searchKey, pageable);
 	}
 
 	@Override
 	public Page<KPIData> findByUsernameByHighLevelTypeFiltered(String username, String highLevelType, String searchKey,
-			Pageable pageable) throws NoSuchMessageException, CredentialsException {
-		logger.debug("findByUsernameByHighLevelTypeFiltered INVOKED on highLevelType {} searchKey {}", username,
+			Pageable pageable) throws  CredentialsException {
+		logger.debug("findByUsernameByHighLevelTypeFiltered INVOKED on username {} highLevelType {} searchKey {}", username,
 				highLevelType, searchKey);
 		return kpiDataRepository.findKPIDataFilteredPage(username, highLevelType, searchKey, pageable);
 
@@ -220,14 +219,14 @@ public class KPIDataServiceImpl implements IKPIDataService {
 	@Override
 	public Page<KPIData> findByUsernameDelegatedByHighLevelTypeFiltered(String usernameDelegated, String elementType,
 			String highLevelType, String searchKey, Pageable pageable)
-			throws NoSuchMessageException, CredentialsException {
+			throws  CredentialsException {
 		logger.debug(
 				"findByUsernameByHighLevelTypeFiltered INVOKED on usernameDelegated {} elementType {} highLevelType {} searchKey {}",
 				usernameDelegated, elementType, highLevelType, searchKey);
 		if (usernameDelegated.equals("ANONYMOUS")) {
 			Page<KPIData> pageKPIData = kpiDataRepository.findByUsernameDelegatedAndElementTypeContainingAndDeleteTimeIsNull(usernameDelegated,
 					elementType, highLevelType, searchKey, pageable);
-			pageKPIData.getContent().forEach((x) -> anonymize(x));
+			pageKPIData.getContent().forEach(x->anonymize(x));
 			return pageKPIData;
 		}
 		return kpiDataRepository.findByUsernameDelegatedAndElementTypeContainingAndDeleteTimeIsNull(usernameDelegated,
@@ -237,14 +236,14 @@ public class KPIDataServiceImpl implements IKPIDataService {
 	@Override
 	public List<KPIData> findByUsernameDelegatedByHighLevelTypeFilteredNoPages(String usernameDelegated,
 			String elementType, String highLevelType, String searchKey)
-			throws NoSuchMessageException, CredentialsException {
+			throws  CredentialsException {
 		logger.debug(
 				"findByUsernameByHighLevelTypeFiltered INVOKED on usernameDelegated {} elementType {} highLevelType {} searchKey {}",
 				usernameDelegated, elementType, highLevelType, searchKey);
 		if (usernameDelegated.equals("ANONYMOUS")) {
 			List<KPIData> listKPIData = kpiDataRepository.findByUsernameDelegatedAndElementTypeContainingAndDeleteTimeIsNull(usernameDelegated,
 					elementType, highLevelType, searchKey);
-			listKPIData.forEach((x) -> anonymize(x));
+			listKPIData.forEach(x->anonymize(x));
 			return listKPIData;
 		}
 		return kpiDataRepository.findByUsernameDelegatedAndElementTypeContainingAndDeleteTimeIsNull(usernameDelegated,
@@ -264,7 +263,7 @@ public class KPIDataServiceImpl implements IKPIDataService {
 			Page<KPIData> pageKPIData = kpiDataRepository
 					.findByUsernameDelegatedByOrganizationAndElementTypeContainingAndDeleteTimeIsNull(usernameDelegated,
 							elementType, highLevelType, searchKey, organization, pageable);
-			pageKPIData.getContent().forEach((x) -> anonymize(x));
+			pageKPIData.getContent().forEach(x->anonymize(x));
 			return pageKPIData;
 		}
 		return kpiDataRepository.findByUsernameDelegatedByOrganizationAndElementTypeContainingAndDeleteTimeIsNull(
@@ -283,7 +282,7 @@ public class KPIDataServiceImpl implements IKPIDataService {
 			List<KPIData> listKPIData = kpiDataRepository
 					.findByUsernameDelegatedByOrganizationAndElementTypeContainingAndDeleteTimeIsNull(usernameDelegated,
 							elementType, highLevelType, searchKey, organization);
-			listKPIData.forEach((x) -> anonymize(x));
+			listKPIData.forEach(x->anonymize(x));
 			return listKPIData;
 		}
 		return kpiDataRepository.findByUsernameDelegatedByOrganizationAndElementTypeContainingAndDeleteTimeIsNull(
@@ -328,28 +327,30 @@ public class KPIDataServiceImpl implements IKPIDataService {
 
 	@Override
 	public List<KPIData> findByHighLevelTypeFilteredNoPages(String highLevelType, String searchKey)
-			throws NoSuchMessageException, CredentialsException {
+			throws  CredentialsException {
 		logger.debug("findByHighLevelTypeFiltered INVOKED on highLevelType {} searchKey {}", highLevelType, searchKey);
 		return kpiDataRepository.findKPIDataFilteredList(null, highLevelType, searchKey);
 	}
 
 	@Override
 	public List<KPIData> findByUsernameByHighLevelTypeFilteredNoPages(String username, String highLevelType,
-			String searchKey) throws NoSuchMessageException, CredentialsException {
-		logger.debug("findByUsernameByHighLevelTypeFiltered INVOKED on highLevelType {} searchKey {}", username,
+			String searchKey) throws  CredentialsException {
+		logger.debug("findByUsernameByHighLevelTypeFiltered INVOKED on username {} highLevelType {} searchKey {}", username,
 				highLevelType, searchKey);
 		return kpiDataRepository.findKPIDataFilteredList(username, highLevelType, searchKey);
 	}
 	
 	@Override
 	public KPIData detachEntity(KPIData toReturn) {
-		entityManager.detach(toReturn);
+		if(toReturn != null) {
+			entityManager.detach(toReturn);
+		}
 		return toReturn;
 	}
 
 	private KPIData anonymize(KPIData toReturn) {
-		entityManager.detach(toReturn);
-		toReturn.setUsername(null);
+			entityManager.detach(toReturn);
+			toReturn.setUsername(null);
 		return toReturn;
 	}
 	

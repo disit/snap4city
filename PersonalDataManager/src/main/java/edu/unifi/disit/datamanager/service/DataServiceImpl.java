@@ -12,7 +12,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package edu.unifi.disit.datamanager.service;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -24,7 +23,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.context.NoSuchMessageException;
 import org.springframework.stereotype.Service;
 
 import edu.unifi.disit.datamanager.datamodel.ldap.LDAPUserDAO;
@@ -64,7 +62,7 @@ public class DataServiceImpl implements IDataService {
 
 	@Override
 	public List<Data> getDataFromApp(String appId, Boolean delegated, String variableName, String motivation, Date from, Date to, Integer first, Integer last, Boolean anonymous, String appOwner, Locale lang)
-			throws NoSuchMessageException, DelegationNotFoundException, DataNotValidException, CredentialsException {
+			throws  DelegationNotFoundException, DataNotValidException, CredentialsException {
 		logger.debug("getDataFromApp INVOKED on appId {}, delegated {}, variablename {}, motivation {}, from {}, to {}, first {}, last {}, anonymous {}, appOwner {}", appId, delegated, variableName, motivation, from, to, first, last,
 				anonymous, appOwner);
 
@@ -73,13 +71,13 @@ public class DataServiceImpl implements IDataService {
 		if ((first != 0) && (last != 0))
 			throw new DataNotValidException(messages.getMessage("getdata.ko.firstandlastspecified", null, lang));
 
-		List<Data> toreturn = new ArrayList<Data>();
+		List<Data> toreturn;
 
 		if (appOwner == null) {// to enable multi ownership
 			// retrieve ownership of this appId, if appOwner is not specified
 			List<Ownership> owns = ownershipRepo.findByElementId(appId);
 
-			if (owns.size() == 0)
+			if (owns.isEmpty())
 				throw new DataNotValidException(messages.getMessage("getdata.ko.appidnotrecognized", null, lang));
 			else if (owns.size() > 1)
 				throw new DataNotValidException(messages.getMessage("getdata.ko.multipleownershipdetected", null, lang));
@@ -87,12 +85,12 @@ public class DataServiceImpl implements IDataService {
 			appOwner = owns.get(0).getUsername();
 		}
 
-		if (!delegated) {
+		if (!Boolean.TRUE.equals(delegated)) {
 			// returning my data-----------------------------------------------------------------------------------
 			toreturn = dataRepo.getDataByAppId(appId, appOwner, variableName, motivation, from, to, first, last);
 		} else {
 			// returning delegator data----------------------------------------------------------------------------
-			if (anonymous) {
+			if (Boolean.TRUE.equals(anonymous)) {
 				toreturn = anonymize(dataRepo.getDataByUsernameDelegated("ANONYMOUS", variableName, motivation, from, to, first, last));
 			} else {
 				toreturn = dataRepo.getDataByUsernameDelegated(appOwner, variableName, motivation, from, to, first, last);
@@ -104,7 +102,7 @@ public class DataServiceImpl implements IDataService {
 
 	@Override
 	// similar to below
-	public Data postDataFromApp(String appId, Data data, Locale lang) throws DataNotValidException, NoSuchMessageException, CredentialsException {
+	public Data postDataFromApp(String appId, Data data, Locale lang) throws DataNotValidException,  CredentialsException {
 		logger.debug("postData from app {} INVOKED on {}", appId, data);
 
 		credentialsService.checkAppIdCredentials(appId, lang);// enforcement credentials
@@ -122,7 +120,7 @@ public class DataServiceImpl implements IDataService {
 
 		// check appid exist (and popolate appname)
 		List<Ownership> iotapps = ownershipRepo.findByElementId(appId);
-		if (iotapps.size() == 0)
+		if (iotapps.isEmpty())
 			throw new DataNotValidException(messages.getMessage("postdata.ko.appidnotrecognized", null, lang));
 
 		data.setAppName(iotapps.get(0).getElementName());
@@ -178,7 +176,7 @@ public class DataServiceImpl implements IDataService {
 
 	@Override
 	public List<Data> getDataFromUser(String username, Boolean delegated, String variableName, String motivation, Date from, Date to, Integer first, Integer last, Boolean anonymous, Locale lang)
-			throws NoSuchMessageException, DataNotValidException, DelegationNotFoundException, CredentialsException {
+			throws  DataNotValidException, DelegationNotFoundException, CredentialsException {
 		logger.debug("getDataFromUser INVOKED on username {}, delegated {}, variablename {}, motivation {}, from {}, to {}, first {}, last {}, anonymous {}", username, delegated, variableName, motivation, from, to, first, last, anonymous);
 
 		credentialsService.checkUsernameCredentials(username, lang);// enforcement credentials
@@ -186,14 +184,14 @@ public class DataServiceImpl implements IDataService {
 		if ((first != 0) && (last != 0))
 			throw new DataNotValidException(messages.getMessage("getdata.ko.firstandlastspecified", null, lang));
 
-		List<Data> toreturn = new ArrayList<Data>();
+		List<Data> toreturn;
 
-		if (!delegated) {
+		if (!Boolean.TRUE.equals(delegated)) {
 			// returning my data-----------------------------------------------------------------------------------
 			toreturn = dataRepo.getDataByUsername(username, variableName, motivation, from, to, first, last);
 		} else {
 			// returning delegator data----------------------------------------------------------------------------
-			if (anonymous) {
+			if (Boolean.TRUE.equals(anonymous)) {
 				toreturn = anonymize(dataRepo.getDataByUsernameDelegated("ANONYMOUS", variableName, motivation, from, to, first, last));
 			} else {
 				toreturn = dataRepo.getDataByUsernameDelegated(username, variableName, motivation, from, to, first, last);
@@ -204,14 +202,14 @@ public class DataServiceImpl implements IDataService {
 	}
 
 	@Override
-	public List<Data> getAllData(Boolean last, Locale lang) throws NoSuchMessageException, CredentialsException {
+	public List<Data> getAllData(Boolean last, Locale lang) throws  CredentialsException {
 		logger.debug("getAllData INVOKED on last {}", last);
 
 		credentialsService.checkRootCredentials(lang);// enforcement credentials
 
-		List<Data> toreturn = new ArrayList<Data>();
+		List<Data> toreturn;
 
-		if (last)
+		if (Boolean.TRUE.equals(last))
 			toreturn = dataRepo.findLastData();
 		else
 			toreturn = dataRepo.findAllAndDeleteTimeIsNullByOrderByDataTimeAsc();
@@ -247,7 +245,7 @@ public class DataServiceImpl implements IDataService {
 
 	@Override
 	public List<Data> getPublicData(String variableName, String motivation, Date from, Date to, Integer first, Integer last, Locale lang) throws DataNotValidException {
-		logger.debug("getPublicData INVOKED variablename {}, motivation {}, from {}, to {}, first {}, last {}, anonymous {}", variableName, motivation, from, to, first, last);
+		logger.debug("getPublicData INVOKED variablename {}, motivation {}, from {}, to {}, first {}, last {}, anonymous", variableName, motivation, from, to, first, last);
 
 		// no credentials enforcement needed
 

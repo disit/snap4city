@@ -14,17 +14,15 @@ package edu.unifi.disit.datamanager.service;
 
 import java.util.Locale;
 
-import org.springframework.context.NoSuchMessageException;
-
 import edu.unifi.disit.datamanager.exception.CredentialsException;
 
 public interface ICredentialsService {
 
-	public void checkAppIdCredentials(String appId, Locale lang) throws NoSuchMessageException, CredentialsException;
+	public void checkAppIdCredentials(String appId, Locale lang) throws  CredentialsException;
 
-	public void checkUsernameCredentials(String username, Locale lang) throws NoSuchMessageException, CredentialsException;
+	public void checkUsernameCredentials(String username, Locale lang) throws  CredentialsException;
 
-	public void checkRootCredentials(Locale lang) throws NoSuchMessageException, CredentialsException;
+	public void checkRootCredentials(Locale lang) throws  CredentialsException;
 
 	public String getLoggedUsername(Locale lang);
 

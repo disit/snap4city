@@ -91,14 +91,14 @@ public class POIDataController {
 
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, id, ActivityAccessType.READ, KPIActivityDomainType.POI,
-						((HttpServletRequest) request).getRequestURI() + "?"
-								+ ((HttpServletRequest) request).getQueryString(),
+						request.getRequestURI() + "?"
+								+ request.getQueryString(),
 						"No data found", null, request.getRemoteAddr());
 
-				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else {
-				if (!kpiData.getUsername().toLowerCase().equals(credentialService.getLoggedUsername(lang).toLowerCase())
-						&& !accessService.checkAccessFromApp(Long.toString(kpiData.getId()), lang).getResult()) {
+				if (!kpiData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
+						&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiData.getId()), lang).getResult())) {
 					throw new CredentialsException();
 				}
 
@@ -122,7 +122,7 @@ public class POIDataController {
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
 						id, ActivityAccessType.READ, KPIActivityDomainType.POI);
-				return new ResponseEntity<Object>(poiData, HttpStatus.OK);
+				return new ResponseEntity<>(poiData, HttpStatus.OK);
 			}
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
@@ -152,11 +152,11 @@ public class POIDataController {
 
 					kpiActivityService.saveActivityViolationFromUsername("PUBLIC",
 							sourceRequest, id, ActivityAccessType.READ, KPIActivityDomainType.POI,
-							((HttpServletRequest) request).getRequestURI() + "?"
-									+ ((HttpServletRequest) request).getQueryString(),
+							request.getRequestURI() + "?"
+									+ request.getQueryString(),
 							"No data found", null, request.getRemoteAddr());
 
-					return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+					return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 				} else {
 					if (kpiData.getOwnership().equals("private") || !kpiData.getOwnership().equals("public")) {
 						throw new CredentialsException();
@@ -182,7 +182,7 @@ public class POIDataController {
 
 					kpiActivityService.saveActivityFromUsername("PUBLIC", sourceRequest,
 							id, ActivityAccessType.READ, KPIActivityDomainType.POI);
-					return new ResponseEntity<Object>(poiData, HttpStatus.OK);
+					return new ResponseEntity<>(poiData, HttpStatus.OK);
 				}
 			} catch (CredentialsException d) {
 				logger.warn("Rights exception", d);
@@ -195,6 +195,9 @@ public class POIDataController {
 
 	// -------------------DEPRECATED POST New POI Data
 	// ------------------------------------
+		/**
+		    * @deprecated (when, Cambiato l'url di salvataggio, refactoring advice...)
+		    */
 	@Deprecated
 	@PostMapping("/api/v1/poidata/save")
 	public ResponseEntity<Object> savePOIDataV1(@RequestBody POIData poiData,
@@ -219,14 +222,14 @@ public class POIDataController {
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
 						newKpiData.getId(), ActivityAccessType.WRITE, KPIActivityDomainType.METADATA);
 			}
-			return new ResponseEntity<Object>(poiData, HttpStatus.OK);
+			return new ResponseEntity<>(poiData, HttpStatus.OK);
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, null, ActivityAccessType.WRITE, KPIActivityDomainType.DATA,
-					((HttpServletRequest) request).getRequestURI() + "?"
-							+ ((HttpServletRequest) request).getQueryString(),
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
@@ -266,14 +269,14 @@ public class POIDataController {
 						newKpiData.getId(), ActivityAccessType.WRITE, KPIActivityDomainType.METADATA);
 			}
 
-			return new ResponseEntity<Object>(newKpiData, HttpStatus.OK);
+			return new ResponseEntity<>(newKpiData, HttpStatus.OK);
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, null, ActivityAccessType.WRITE, KPIActivityDomainType.DATA,
-					((HttpServletRequest) request).getRequestURI() + "?"
-							+ ((HttpServletRequest) request).getQueryString(),
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
@@ -282,8 +285,8 @@ public class POIDataController {
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, null, ActivityAccessType.WRITE, KPIActivityDomainType.DATA,
-					((HttpServletRequest) request).getRequestURI() + "?"
-							+ ((HttpServletRequest) request).getQueryString(),
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
 					"Problem with public or private ownership", d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
@@ -291,6 +294,9 @@ public class POIDataController {
 	}
 
 	// -------------------GET PUBLIC POI Data Pageable ----------
+	/**
+	    * @deprecated (when, modificato la semantica di public, refactoring advice...)
+	    */
 	@Deprecated
 	@GetMapping("/api/v1/poidata/public")
 	public ResponseEntity<Object> getPublicPOIDataV1Pageable(
@@ -314,14 +320,14 @@ public class POIDataController {
 
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.POI,
-						((HttpServletRequest) request).getRequestURI() + "?"
-								+ ((HttpServletRequest) request).getQueryString(),
+						request.getRequestURI() + "?"
+								+ request.getQueryString(),
 						"No data found", null, request.getRemoteAddr());
 
-				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else {
 
-				List<POIData> listPoiData = new ArrayList<POIData>();
+				List<POIData> listPoiData = new ArrayList<>();
 
 				for (KPIData kpiData : listKpiData) {
 					if (kpiData.getLatitude() == null || kpiData.getLatitude().equals("")
@@ -347,8 +353,8 @@ public class POIDataController {
 							}
 						}
 					}
-					if (kpiData.getLatitude() != null && kpiData.getLatitude() != "" && kpiData.getLongitude() != null
-							&& kpiData.getLongitude() != "") {
+					if (kpiData.getLatitude() != null && !kpiData.getLatitude().equals("") && kpiData.getLongitude() != null
+							&& !kpiData.getLongitude().equals("")) {
 						listPoiData.add(new POIData(kpiData));
 					}
 
@@ -359,15 +365,15 @@ public class POIDataController {
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
 						null, ActivityAccessType.READ, KPIActivityDomainType.POI);
 
-				return new ResponseEntity<Object>(listPoiData, HttpStatus.OK);
+				return new ResponseEntity<>(listPoiData, HttpStatus.OK);
 			}
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.POI,
-					((HttpServletRequest) request).getRequestURI() + "?"
-							+ ((HttpServletRequest) request).getQueryString(),
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
@@ -376,8 +382,8 @@ public class POIDataController {
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.POI,
-					((HttpServletRequest) request).getRequestURI() + "?"
-							+ ((HttpServletRequest) request).getQueryString(),
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
@@ -407,14 +413,14 @@ public class POIDataController {
 
 					kpiActivityService.saveActivityViolationFromUsername("PUBLIC",
 							sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.POI,
-							((HttpServletRequest) request).getRequestURI() + "?"
-									+ ((HttpServletRequest) request).getQueryString(),
+							request.getRequestURI() + "?"
+									+ request.getQueryString(),
 							"No data found", null, request.getRemoteAddr());
 
-					return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+					return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 				} else {
 
-					List<POIData> listPoiData = new ArrayList<POIData>();
+					List<POIData> listPoiData = new ArrayList<>();
 
 					for (KPIData kpiData : listKpiData) {
 						if (kpiData.getLatitude() == null || kpiData.getLatitude().equals("")
@@ -440,8 +446,8 @@ public class POIDataController {
 								}
 							}
 						}
-						if (kpiData.getLatitude() != null && kpiData.getLatitude() != "" && kpiData.getLongitude() != null
-								&& kpiData.getLongitude() != "") {
+						if (kpiData.getLatitude() != null && !kpiData.getLatitude().equals("") && kpiData.getLongitude() != null
+								&& !kpiData.getLongitude().equals("")) {
 							listPoiData.add(new POIData(kpiData));
 						}
 
@@ -452,15 +458,15 @@ public class POIDataController {
 					kpiActivityService.saveActivityFromUsername("PUBLIC", sourceRequest,
 							null, ActivityAccessType.READ, KPIActivityDomainType.POI);
 
-					return new ResponseEntity<Object>(listPoiData, HttpStatus.OK);
+					return new ResponseEntity<>(listPoiData, HttpStatus.OK);
 				}
 			} catch (CredentialsException d) {
 				logger.warn("Rights exception", d);
 
 				kpiActivityService.saveActivityViolationFromUsername("PUBLIC",
 						sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.POI,
-						((HttpServletRequest) request).getRequestURI() + "?"
-								+ ((HttpServletRequest) request).getQueryString(),
+						request.getRequestURI() + "?"
+								+ request.getQueryString(),
 						d.getMessage(), d, request.getRemoteAddr());
 
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
@@ -469,8 +475,8 @@ public class POIDataController {
 
 				kpiActivityService.saveActivityViolationFromUsername("PUBLIC",
 						sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.POI,
-						((HttpServletRequest) request).getRequestURI() + "?"
-								+ ((HttpServletRequest) request).getQueryString(),
+						request.getRequestURI() + "?"
+								+ request.getQueryString(),
 						d.getMessage(), d, request.getRemoteAddr());
 
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
@@ -500,14 +506,14 @@ public class POIDataController {
 
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.POI,
-						((HttpServletRequest) request).getRequestURI() + "?"
-								+ ((HttpServletRequest) request).getQueryString(),
+						request.getRequestURI() + "?"
+								+ request.getQueryString(),
 						"No data found", null, request.getRemoteAddr());
 
-				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else {
 
-				List<POIData> listPoiData = new ArrayList<POIData>();
+				List<POIData> listPoiData = new ArrayList<>();
 
 				for (KPIData kpiData : listKpiData) {
 					if (kpiData.getLatitude() == null || kpiData.getLatitude().equals("")
@@ -533,8 +539,8 @@ public class POIDataController {
 							}
 						}
 					}
-					if (kpiData.getLatitude() != null && kpiData.getLatitude() != "" && kpiData.getLongitude() != null
-							&& kpiData.getLongitude() != "") {
+					if (kpiData.getLatitude() != null && !kpiData.getLatitude().equals("") && kpiData.getLongitude() != null
+							&& !kpiData.getLongitude().equals("")) {
 						listPoiData.add(new POIData(kpiData));
 					}
 
@@ -545,15 +551,15 @@ public class POIDataController {
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
 						null, ActivityAccessType.READ, KPIActivityDomainType.POI);
 
-				return new ResponseEntity<Object>(listPoiData, HttpStatus.OK);
+				return new ResponseEntity<>(listPoiData, HttpStatus.OK);
 			}
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.POI,
-					((HttpServletRequest) request).getRequestURI() + "?"
-							+ ((HttpServletRequest) request).getQueryString(),
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
@@ -562,8 +568,8 @@ public class POIDataController {
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.POI,
-					((HttpServletRequest) request).getRequestURI() + "?"
-							+ ((HttpServletRequest) request).getQueryString(),
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
@@ -614,14 +620,14 @@ public class POIDataController {
 
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.POI,
-						((HttpServletRequest) request).getRequestURI() + "?"
-								+ ((HttpServletRequest) request).getQueryString(),
+						request.getRequestURI() + "?"
+								+ request.getQueryString(),
 						"No data found", null, request.getRemoteAddr());
 
-				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else {
 
-				List<POIData> listPoiData = new ArrayList<POIData>();
+				List<POIData> listPoiData = new ArrayList<>();
 
 				for (KPIData kpiData : listKpiData) {
 					if (kpiData.getLatitude() == null || kpiData.getLatitude().equals("")
@@ -632,23 +638,10 @@ public class POIDataController {
 							kpiData = kpiDataService.detachEntity(kpiData);
 							kpiData.setLatitude(kpiData.getLastLatitude());
 							kpiData.setLongitude(kpiData.getLastLongitude());
-						} /*else {
-
-							List<KPIValue> kpiValues = kpiValueService.findByKpiIdGeoLocated(kpiData.getId());
-
-							kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang),
-									sourceRequest, kpiData.getId(), ActivityAccessType.READ,
-									KPIActivityDomainType.POIVALUE);
-
-							if (!kpiValues.isEmpty()) {
-								kpiData = kpiDataService.detachEntity(kpiData);
-								kpiData.setLatitude(kpiValues.get(0).getLatitude());
-								kpiData.setLongitude(kpiValues.get(0).getLongitude());
-							}
-						}*/
+						}
 					}
-					if (kpiData.getLatitude() != null && kpiData.getLatitude() != "" && kpiData.getLongitude() != null
-							&& kpiData.getLongitude() != "") {
+					if (kpiData.getLatitude() != null && !kpiData.getLatitude().equals("") && kpiData.getLongitude() != null
+							&& kpiData.getLongitude().equals("")) {
 						listPoiData.add(new POIData(kpiData));
 					}
 
@@ -659,15 +652,15 @@ public class POIDataController {
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
 						null, ActivityAccessType.READ, KPIActivityDomainType.POI);
 
-				return new ResponseEntity<Object>(listPoiData, HttpStatus.OK);
+				return new ResponseEntity<>(listPoiData, HttpStatus.OK);
 			}
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.POI,
-					((HttpServletRequest) request).getRequestURI() + "?"
-							+ ((HttpServletRequest) request).getQueryString(),
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
@@ -676,8 +669,8 @@ public class POIDataController {
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.POI,
-					((HttpServletRequest) request).getRequestURI() + "?"
-							+ ((HttpServletRequest) request).getQueryString(),
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());

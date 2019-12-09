@@ -18,8 +18,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
@@ -27,7 +29,8 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 public class KPIValueDeserializer extends StdDeserializer<KPIValue> {
 
 	private static final long serialVersionUID = 1L;
-
+	private static final Logger logger = LogManager.getLogger();
+	
 	public KPIValueDeserializer() {
 		this(null);
 	}
@@ -38,7 +41,7 @@ public class KPIValueDeserializer extends StdDeserializer<KPIValue> {
 
 	@Override
 	public KPIValue deserialize(JsonParser jp, DeserializationContext ctxt)
-			throws IOException, JsonProcessingException {
+			throws IOException {
 		JsonNode jnode = jp.getCodec().readTree(jp);
 		KPIValue kpivalues = new KPIValue();
 
@@ -60,7 +63,7 @@ public class KPIValueDeserializer extends StdDeserializer<KPIValue> {
 					try {
 						kpivalues.setDataTime(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(jnode.get("dataTime").asText()));
 					} catch (ParseException d) {
-						d.printStackTrace();
+						logger.error("Parsing error {}", d);
 					}
 				}
 			}
@@ -77,16 +80,12 @@ public class KPIValueDeserializer extends StdDeserializer<KPIValue> {
 					try {
 						kpivalues.setDataTime(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(jnode.get("dataTime").asText()));
 					} catch (ParseException d) {
-						d.printStackTrace();
+						logger.error("Parsing error {}", d);
 					}
 				}
 			}
 		}
-		/*if (jnode.get("insertTime") != null) {
-			Date date = new Date();
-			date.setTime(jnode.get("insertTime").asLong());
-			kpivalues.setInsertTime(date);
-		}*/
+
 		if (jnode.get("value") != null) {
 			kpivalues.setValue(jnode.get("value").asText());
 		}

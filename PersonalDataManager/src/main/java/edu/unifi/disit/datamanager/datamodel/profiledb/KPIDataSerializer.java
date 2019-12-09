@@ -142,9 +142,6 @@ public class KPIDataSerializer extends StdSerializer<KPIData> {
 		if (kpiData.getWidgets() != null) {
 			jgen.writeStringField("widgets", kpiData.getWidgets());
 		}
-		//
-		// if (value.getUidName() != null) // transient
-		// jgen.writeStringField("uidName", value.getUidName());
 
 		jgen.writeEndObject();
 	}

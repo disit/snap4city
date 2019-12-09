@@ -24,7 +24,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.context.NoSuchMessageException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -59,21 +58,21 @@ public class KPIValueServiceImpl implements IKPIValueService {
 	private EntityManager entityManager;
 
 	@Override
-	public KPIValue getKPIValueById(Long id, Locale lang) throws NoSuchMessageException, CredentialsException {
+	public KPIValue getKPIValueById(Long id, Locale lang) throws  CredentialsException {
 		logger.debug("getKPIValueById INVOKED on id {}", id);
 		return kpiValueRepository.findOne(id);
 	}
 
 	@Override
 	public Page<KPIValue> findByKpiId(Long kpiId, Pageable pageable)
-			throws NoSuchMessageException, CredentialsException {
+			throws  CredentialsException {
 		logger.debug("findAllByKpiId INVOKED on kpiId {}",  kpiId);
 		return kpiValueRepository.findByKpiIdAndDeleteTimeIsNull(kpiId, pageable);
 	}
 
 	@Override
 	public Page<KPIValue> findByKpiIdFiltered(Long kpiId, String searchKey, Pageable pageable)
-			throws NoSuchMessageException, CredentialsException {
+			throws  CredentialsException {
 		logger.debug("findAllFilteredByKpiId INVOKED on searchKey {} kpiId {}",  searchKey, kpiId);
 		return kpiValueRepository.findByKpiIdAndValueContainingAllIgnoreCaseAndDeleteTimeIsNull(kpiId, searchKey, pageable);
 	}
@@ -85,7 +84,7 @@ public class KPIValueServiceImpl implements IKPIValueService {
 	}
 
 	@Override
-	public List<KPIValue> findByKpiIdGeoLocated(Long kpiId) throws NoSuchMessageException, CredentialsException {
+	public List<KPIValue> findByKpiIdGeoLocated(Long kpiId) throws  CredentialsException {
 		logger.debug("findByKpiIdGeoLocated INVOKED on kpiId {}",  kpiId);
 		return kpiValueRepository.findByKpiIdAndDeleteTimeIsNullAndLatitudeIsNotNullAndLongitudeIsNotNullAndLatitudeNotLikeAndLongitudeNotLike(kpiId, "", "");
 	}
@@ -97,7 +96,7 @@ public class KPIValueServiceImpl implements IKPIValueService {
 	}
 
 	@Override
-	public List<KPIValue> findByKpiIdNoPagesWithLimit(Long kpiId, Date from, Date to, Integer first, Integer last, Locale lang) throws NoSuchMessageException, DataNotValidException {
+	public List<KPIValue> findByKpiIdNoPagesWithLimit(Long kpiId, Date from, Date to, Integer first, Integer last, Locale lang) throws  DataNotValidException {
 		logger.debug("findByKpiIdNoPagesWithLimit INVOKED on kpiId {}, from {}, to {}, first {}, last {}", kpiId,from, to, first, last);
 
 		if ((first != 0) && (last != 0)) {
@@ -108,27 +107,27 @@ public class KPIValueServiceImpl implements IKPIValueService {
 	}
 
 	@Override
-	public KPIValue saveKPIValue(KPIValue kpivalue) throws NoSuchMessageException, CredentialsException {
+	public KPIValue saveKPIValue(KPIValue kpivalue) throws  CredentialsException {
 		logger.debug("saveKPIValue INVOKED on kpivalue {}",  kpivalue.getId());
 		kpivalue.setInsertTime(new Date());
 		return kpiValueRepository.save(kpivalue);
 	}
 
 	@Override
-	public void deleteKPIValue(Long id) throws NoSuchMessageException, CredentialsException {
+	public void deleteKPIValue(Long id) throws  CredentialsException {
 		logger.debug("deleteKPIValue INVOKED on id {}",  id);
 		kpiValueRepository.delete(id);
 		
 	}
 
 	@Override
-	public List<Date> getKPIValueDates(Long kpiId) throws NoSuchMessageException, CredentialsException {
+	public List<Date> getKPIValueDates(Long kpiId) throws  CredentialsException {
 		logger.debug("getKPIValueDates INVOKED on kpiId {}",  kpiId);
 		return kpiValueRepository.findByKpiIdDistinctDateAndDeleteTimeIsNull(kpiId);
 	}
 	
 	@Override
-	public List<Date> getKPIValueDatesCoordinatesOptionallyNull(Long kpiId) throws NoSuchMessageException, CredentialsException {
+	public List<Date> getKPIValueDatesCoordinatesOptionallyNull(Long kpiId) throws  CredentialsException {
 		logger.debug("getKPIValueDates INVOKED on kpiId {}",  kpiId);
 		return kpiValueRepository.findByKpiIdDistinctDateAndDeleteTimeIsNullWithCoordinatesOptionallyNull(kpiId);
 	}

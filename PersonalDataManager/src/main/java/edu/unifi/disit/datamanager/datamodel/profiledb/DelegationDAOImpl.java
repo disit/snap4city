@@ -96,7 +96,7 @@ public class DelegationDAOImpl implements DelegationDAOCustom {
 		Predicate predicate1 = cb.conjunction();
 		Predicate predicate2 = cb.conjunction();
 		predicate1.getExpressions().add(cb.equal(delegationRoot.get("usernameDelegated"), username));// username
-		if (groupnames.size() != 0) {
+		if (!groupnames.isEmpty()) {
 			predicate2.getExpressions().add(cb.in(pathDelegatedGroup).value(groupnames));// groupname i belong
 			predicates.add(cb.or(predicate1, predicate2));
 		} else {
@@ -169,14 +169,14 @@ public class DelegationDAOImpl implements DelegationDAOCustom {
 	}
 
 	private List<Predicate> getCommonPredicates(CriteriaBuilder cb, Root<Delegation> delegationRoot, String variableName, String motivation, Boolean deleted, String elementType) {
-		List<Predicate> predicates = new ArrayList<Predicate>();
+		List<Predicate> predicates = new ArrayList<>();
 		if (variableName != null)
 			predicates.add(cb.equal(delegationRoot.get("variableName"), variableName));
 		if (motivation != null)
 			predicates.add(cb.equal(delegationRoot.get("motivation"), motivation));
 		if (elementType != null)
 			predicates.add(cb.equal(delegationRoot.get("elementType"), elementType));
-		if (!deleted)
+		if (!Boolean.TRUE.equals(deleted))
 			predicates.add(delegationRoot.get("deleteTime").isNull());
 		return predicates;
 	}

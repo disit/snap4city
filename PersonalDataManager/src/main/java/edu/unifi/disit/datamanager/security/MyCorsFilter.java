@@ -58,17 +58,18 @@ public class MyCorsFilter implements Filter {
 			response.setHeader("Access-Control-Expose-Headers", "X-Requested-With, Authorization, Origin, Content-Type");
 		//}
 
-		if (request.getMethod() != "OPTIONS") {
+		if (!request.getMethod().equals("OPTIONS")) {
 			chain.doFilter(req, res);
 		}
 	}
 
 	@Override
 	public void destroy() {
-
+		//Add a nested comment explaining why this method is empty, throw an UnsupportedOperationException or complete the implementation.
 	}
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
+		//Add a nested comment explaining why this method is empty, throw an UnsupportedOperationException or complete the implementation.
 	}
 }

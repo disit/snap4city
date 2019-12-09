@@ -16,8 +16,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import org.springframework.context.NoSuchMessageException;
-
 import edu.unifi.disit.datamanager.datamodel.profiledb.Data;
 import edu.unifi.disit.datamanager.exception.DataNotValidException;
 import edu.unifi.disit.datamanager.exception.DelegationNotFoundException;
@@ -26,16 +24,16 @@ import edu.unifi.disit.datamanager.exception.CredentialsException;
 public interface IDataService {
 
 	List<Data> getDataFromApp(String appId, Boolean delegated, String variableName, String motivation, Date from, Date to, Integer first, Integer last, Boolean anonymous, String appOwner, Locale lang)
-			throws NoSuchMessageException, DelegationNotFoundException, DataNotValidException, CredentialsException;
+			throws  DelegationNotFoundException, DataNotValidException, CredentialsException;
 
 	List<Data> getDataFromUser(String username, Boolean delegated, String variableName, String motivation, Date from, Date to, Integer first, Integer last, Boolean anonymous, Locale lang)
-			throws NoSuchMessageException, DataNotValidException, DelegationNotFoundException, CredentialsException;
+			throws  DataNotValidException, DelegationNotFoundException, CredentialsException;
 
-	Data postDataFromApp(String appId, Data data, Locale lang) throws DataNotValidException, NoSuchMessageException, CredentialsException;
+	Data postDataFromApp(String appId, Data data, Locale lang) throws DataNotValidException,  CredentialsException;
 
 	Data postDataFromUser(String username, Data data, Locale lang) throws DataNotValidException, CredentialsException;
 
-	List<Data> getAllData(Boolean last, Locale lang) throws NoSuchMessageException, CredentialsException;
+	List<Data> getAllData(Boolean last, Locale lang) throws  CredentialsException;
 
 	void deleteDataFromUser(String username, Long dataId, Locale lang) throws CredentialsException, DataNotValidException;
 

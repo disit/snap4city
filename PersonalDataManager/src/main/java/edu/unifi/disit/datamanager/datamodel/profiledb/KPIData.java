@@ -121,8 +121,8 @@ public class KPIData implements Comparable<KPIData> {
 			String lastLatitude, String lastLongitude, String metric, String savedDirect, String kbBased,
 			String smBased, String username, String organizations, String appId, String appName, String widgets,
 			String parameters, String healtiness, String microAppExtServIcon, String ownership, String description,
-			String info, String latitude, String longitude, Date insert_time, Date delete_time, String db_values_type,
-			String db_values_link) {
+			String info, String latitude, String longitude, Date insertTime, Date deleteTime, String dbValuesType,
+			String dbValuesLink) {
 		super();
 		this.highLevelType = highLevelType;
 		this.nature = nature;
@@ -154,10 +154,10 @@ public class KPIData implements Comparable<KPIData> {
 		this.info = info;
 		this.latitude = latitude;
 		this.longitude = longitude;
-		this.insertTime = insert_time;
-		this.deleteTime = delete_time;
-		this.dbValuesType = db_values_type;
-		this.dbValuesLink = db_values_link;
+		this.insertTime = insertTime;
+		this.deleteTime = deleteTime;
+		this.dbValuesType = dbValuesType;
+		this.dbValuesLink = dbValuesLink;
 	}
 
 	public KPIData(Long id, String highLevelType, String nature, String subNature, String kpiName, String lowLevelType,
@@ -165,8 +165,8 @@ public class KPIData implements Comparable<KPIData> {
 			String lastLatitude, String lastLongitude, String metric, String savedDirect, String kbBased,
 			String smBased, String username, String organizations, String appId, String appName, String widgets,
 			String parameters, String healtiness, String microAppExtServIcon, String ownership, String description,
-			String info, String latitude, String longitude, Date insert_time, Date delete_time, String db_values_type,
-			String db_values_link) {
+			String info, String latitude, String longitude, Date insertTime, Date deleteTime, String dbValuesType,
+			String dbValuesLink) {
 		super();
 		this.id = id;
 		this.highLevelType = highLevelType;
@@ -199,10 +199,10 @@ public class KPIData implements Comparable<KPIData> {
 		this.info = info;
 		this.latitude = latitude;
 		this.longitude = longitude;
-		this.insertTime = insert_time;
-		this.deleteTime = delete_time;
-		this.dbValuesType = db_values_type;
-		this.dbValuesLink = db_values_link;
+		this.insertTime = insertTime;
+		this.deleteTime = deleteTime;
+		this.dbValuesType = dbValuesType;
+		this.dbValuesLink = dbValuesLink;
 	}
 
 	public Long getId() {
@@ -300,7 +300,7 @@ public class KPIData implements Comparable<KPIData> {
 	public void setLastCheck(Date lastCheck) {
 		this.lastCheck = lastCheck;
 	}
-	
+
 	public String getLastLongitude() {
 		return lastLongitude;
 	}
@@ -521,12 +521,12 @@ public class KPIData implements Comparable<KPIData> {
 			if (other.id != null)
 				return false;
 		} else if (!id.equals(other.id))
-			return false;
+					return false;
 		if (valueName == null) {
 			if (other.valueName != null)
 				return false;
 		} else if (!valueName.equals(other.valueName))
-			return false;
+					return false;
 		return true;
 	}
 

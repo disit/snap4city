@@ -25,8 +25,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -58,7 +57,7 @@ public class PublicController {
 	ICredentialsService credentialService;
 
 	// -------------------GET Check Public Delegation without accesstoken ---------------------------------------------
-	@RequestMapping(value = "/api/v1/public/access/check", method = RequestMethod.GET)
+	@GetMapping(value = "/api/v1/public/access/check")
 	public ResponseEntity<Object> checkAccessPublicV1(
 			@RequestParam("sourceRequest") String sourceRequest,
 			@RequestParam(value = "elementID", required = true) String elementID,
@@ -78,11 +77,11 @@ public class PublicController {
 
 		logger.info("Response {}", response);
 
-		return new ResponseEntity<Object>(response, HttpStatus.OK);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
 	// -------------------GET Data Public without accesstoken ---------------------------------------------
-	@RequestMapping(value = "/api/v1/public/data", method = RequestMethod.GET)
+	@GetMapping(value = "/api/v1/public/data")
 	public ResponseEntity<Object> getDataPublicV1(
 			@RequestParam("sourceRequest") String sourceRequest,
 			@RequestParam(value = "variableName", required = false) String variableName,
@@ -94,7 +93,7 @@ public class PublicController {
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) {
 
-		logger.info("Requested getDataPublicV1 first {}, last {}, anonymous {}, lang {}", first, last, lang);
+		logger.info("Requested getDataPublicV1 first {}, last {}, anonymous, lang {}", first, last, lang);
 
 		if (variableName != null)
 			logger.info("VariableName specified {}", variableName);
@@ -115,19 +114,19 @@ public class PublicController {
 
 			if ((datas == null) || (datas.isEmpty())) {
 				logger.info("No data found");
-				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else {
 				logger.info("Returning data {}", datas.size());
 				for (int index = 0; index < datas.size(); index++)
 					logger.trace("{}- {}", index, datas.get(index));
-				return new ResponseEntity<Object>(datas, HttpStatus.OK);
+				return new ResponseEntity<>(datas, HttpStatus.OK);
 			}
 
 		} catch (DataNotValidException d) {
 			logger.error("Delegation not found {}", d);
 
 			activityService.saveActivityViolationFromUsername("PUBLIC", sourceRequest, variableName, motivation, ActivityAccessType.READ,
-					((HttpServletRequest) request).getContextPath() + "?" + ((HttpServletRequest) request).getQueryString(), d.getMessage(), d, request.getRemoteAddr());
+					request.getContextPath() + "?" + request.getQueryString(), d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 
@@ -135,7 +134,7 @@ public class PublicController {
 			logger.error("Parsing error {}", e);
 
 			activityService.saveActivityViolationFromUsername("PUBLIC", sourceRequest, variableName, motivation, ActivityAccessType.READ,
-					((HttpServletRequest) request).getContextPath() + "?" + ((HttpServletRequest) request).getQueryString(), e.getMessage(), e, request.getRemoteAddr());
+					request.getContextPath() + "?" + request.getQueryString(), e.getMessage(), e, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) e.getMessage());
 		}
@@ -154,6 +153,7 @@ public class PublicController {
 			try {
 				text = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse(text_string);
 			} catch (ParseException e1) {
+				logger.error("Parsing error {}", e1);
 				throw e1;
 			}
 		}

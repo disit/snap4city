@@ -61,16 +61,6 @@ public class KPIActivityServiceImpl implements IKPIActivityService {
 
 	}
 
-	// @Override
-	// public void saveActivityFromUsername(String username, String sourceRequest, List<KPIData> listKpiData,
-	// ActivityAccessType accessType, KPIActivityDomainType domain) {
-	//
-	// //for(KPIData kpiData : listKpiData) {
-	// saveActivityFromUsername(username, sourceRequest, null, accessType, domain);
-	// //}
-	//
-	// }
-
 	@Override
 	public void saveActivityViolationFromUsername(String username, String sourceRequest, Long kpiId,
 			ActivityAccessType accessType, KPIActivityDomainType domain, String query, String errorMessage,
@@ -85,7 +75,7 @@ public class KPIActivityServiceImpl implements IKPIActivityService {
 
 		try {
 			KPIActivityViolation kpiActivityViolation = new KPIActivityViolation(username, sourceRequest, kpiId,
-					accessType.toString(), null, domain.toString(), new Date(), null, null, query, errorMessage,
+					accessType.toString(), domain.toString(), new Date(), null, null, query, errorMessage,
 					new SerialBlob(sw.toString().getBytes()), ipAddress);
 			kpiActivityViolationRepo.save(kpiActivityViolation);
 		} catch (SerialException e) {

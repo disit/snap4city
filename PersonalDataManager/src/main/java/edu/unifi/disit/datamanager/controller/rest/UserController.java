@@ -30,10 +30,12 @@ import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -74,7 +76,7 @@ public class UserController {
 	ICredentialsService credentialService;
 
 	// -------------------GET Data for app ---------------------------------------------
-	@RequestMapping(value = "/api/v1/username/{username}/data", method = RequestMethod.GET)
+	@GetMapping(value = "/api/v1/username/{username}/data")
 	public ResponseEntity<Object> getDataV1(@PathVariable("username") String username,
 			@RequestParam("sourceRequest") String sourceRequest,
 			@RequestParam(value = "variableName", required = false) String variableName,
@@ -109,39 +111,39 @@ public class UserController {
 
 			if ((datas == null) || (datas.isEmpty())) {
 				logger.info("No data found");
-				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else {
 				logger.info("Returning data {}", datas.size());
 				for (int index = 0; index < datas.size(); index++)
 					logger.trace("{}- {}", index, datas.get(index));
-				return new ResponseEntity<Object>(datas, HttpStatus.OK);
+				return new ResponseEntity<>(datas, HttpStatus.OK);
 			}
 		} catch (DelegationNotFoundException | NoSuchMessageException | DataNotValidException d) {
 			logger.error("Delegation not found {}", d);
 
 			activityService.saveActivityViolationFromUsername(username, sourceRequest, variableName, motivation, ActivityAccessType.READ,
-					((HttpServletRequest) request).getContextPath() + "?" + ((HttpServletRequest) request).getQueryString(), d.getMessage(), d, request.getRemoteAddr());
+					request.getContextPath() + "?" + request.getQueryString(), d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
 
 			activityService.saveActivityViolationFromUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), null, null, null, ActivityAccessType.READ,
-					((HttpServletRequest) request).getRequestURI() + "?" + ((HttpServletRequest) request).getQueryString(), d.getMessage(), d, request.getRemoteAddr());
+					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (ParseException e) {
 			logger.error("Parsing error {}", e);
 
 			activityService.saveActivityViolationFromUsername(username, sourceRequest, variableName, motivation, ActivityAccessType.READ,
-					((HttpServletRequest) request).getContextPath() + "?" + ((HttpServletRequest) request).getQueryString(), e.getMessage(), e, request.getRemoteAddr());
+					request.getContextPath() + "?" + request.getQueryString(), e.getMessage(), e, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) e.getMessage());
 		}
 	}
 
 	// -------------------POST Data for username ---------------------------------------------
-	@RequestMapping(value = "/api/v1/username/{username}/data", method = RequestMethod.POST)
+	@PostMapping(value = "/api/v1/username/{username}/data")
 	public ResponseEntity<Object> postDataV1(@PathVariable("username") String username,
 			@RequestBody Data data,
 			@RequestParam("sourceRequest") String sourceRequest,
@@ -160,11 +162,11 @@ public class UserController {
 
 			logger.info("Returning new Data {}", newData);
 
-			return new ResponseEntity<Object>(newData, HttpStatus.OK);
+			return new ResponseEntity<>(newData, HttpStatus.OK);
 		} catch (DataNotValidException d) {
 			logger.error("Data not valid {}", d);
 
-			activityService.saveActivityViolationFromUsername(username, sourceRequest, null, null, ActivityAccessType.READ, ((HttpServletRequest) request).getContextPath() + "?" + ((HttpServletRequest) request).getQueryString(),
+			activityService.saveActivityViolationFromUsername(username, sourceRequest, null, null, ActivityAccessType.READ, request.getContextPath() + "?" + request.getQueryString(),
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
@@ -172,7 +174,7 @@ public class UserController {
 			logger.warn("Rights exception", d);
 
 			activityService.saveActivityViolationFromUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), null, null, null, ActivityAccessType.WRITE,
-					((HttpServletRequest) request).getRequestURI() + "?" + ((HttpServletRequest) request).getQueryString(), d.getMessage(), d, request.getRemoteAddr());
+					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
@@ -181,7 +183,7 @@ public class UserController {
 	// -------------------GET Delegation for username (delegator)---------------------------------------------
 	// V1 does not return Delegation with UsernameDelegated==null
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/api/v1/username/{username}/delegator", method = RequestMethod.GET)
+	@GetMapping(value = "/api/v1/username/{username}/delegator")
 	public ResponseEntity<Object> getDelegatorV1(@PathVariable("username") String username,
 			@RequestParam("sourceRequest") String sourceRequest,
 			@RequestParam(value = "variableName", required = false) String variableName,
@@ -196,14 +198,14 @@ public class UserController {
 		ResponseEntity<Object> toreturn = getDelegatorV2(username, sourceRequest, variableName, motivation, deleted, elementType, lang, request);
 
 		if (toreturn.getStatusCode().compareTo(HttpStatus.OK) == 0) {
-			toreturn = new ResponseEntity<Object>(delegationService.stripUsernameDelegatedNull((List<Delegation>) toreturn.getBody()), HttpStatus.OK);
+			toreturn = new ResponseEntity<>(delegationService.stripUsernameDelegatedNull((List<Delegation>) toreturn.getBody()), HttpStatus.OK);
 		}
 
 		return toreturn;
 	}
 
 	// V2 return also Delegation with UsernameDelegated==null
-	@RequestMapping(value = "/api/v2/username/{username}/delegator", method = RequestMethod.GET)
+	@GetMapping(value = "/api/v2/username/{username}/delegator")
 	public ResponseEntity<Object> getDelegatorV2(@PathVariable("username") String username,
 			@RequestParam("sourceRequest") String sourceRequest,
 			@RequestParam(value = "variableName", required = false) String variableName,
@@ -229,18 +231,18 @@ public class UserController {
 
 			if ((delegations == null) || (delegations.isEmpty())) {
 				logger.info("No data found");
-				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else {
 				logger.info("Returning delegations {}", delegations.size());
 				for (int index = 0; index < delegations.size(); index++)
 					logger.trace("{}- {}", index, delegations.get(index));
-				return new ResponseEntity<Object>(delegations, HttpStatus.OK);
+				return new ResponseEntity<>(delegations, HttpStatus.OK);
 			}
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
 
 			activityService.saveActivityViolationFromUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), null, null, null, ActivityAccessType.READ,
-					((HttpServletRequest) request).getRequestURI() + "?" + ((HttpServletRequest) request).getQueryString(), d.getMessage(), d, request.getRemoteAddr());
+					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
@@ -249,7 +251,7 @@ public class UserController {
 	// -------------------GET Delegation fom username (delegated)---------------------------------------------
 	// V1 does not return Delegation with UsernameDelegated==null
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/api/v1/username/{username}/delegated", method = RequestMethod.GET)
+	@GetMapping(value = "/api/v1/username/{username}/delegated")
 	public ResponseEntity<Object> getDelegatedV1(@PathVariable("username") String username,
 			@RequestParam("sourceRequest") String sourceRequest,
 			@RequestParam(value = "variableName", required = false) String variableName,
@@ -265,14 +267,14 @@ public class UserController {
 		ResponseEntity<Object> toreturn = getDelegatedV2(username, sourceRequest, variableName, motivation, deleted, groupname, elementType, lang, request);
 
 		if (toreturn.getStatusCode().compareTo(HttpStatus.OK) == 0) {
-			toreturn = new ResponseEntity<Object>(delegationService.stripUsernameDelegatedNull((List<Delegation>) toreturn.getBody()), HttpStatus.OK);
+			toreturn = new ResponseEntity<>(delegationService.stripUsernameDelegatedNull((List<Delegation>) toreturn.getBody()), HttpStatus.OK);
 		}
 
 		return toreturn;
 	}
 
 	// V2 return also Delegation with UsernameDelegated==null
-	@RequestMapping(value = "/api/v2/username/{username}/delegated", method = RequestMethod.GET)
+	@GetMapping(value = "/api/v2/username/{username}/delegated")
 	public ResponseEntity<Object> getDelegatedV2(@PathVariable("username") String username,
 			@RequestParam("sourceRequest") String sourceRequest,
 			@RequestParam(value = "variableName", required = false) String variableName,
@@ -304,12 +306,12 @@ public class UserController {
 
 			if ((delegations == null) || (delegations.isEmpty())) {
 				logger.info("No data found");
-				return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else {
 				logger.info("Returning delegations {}", delegations.size());
 				for (int index = 0; index < delegations.size(); index++)
 					logger.trace("{}- {}", index, delegations.get(index));
-				return new ResponseEntity<Object>(delegations, HttpStatus.OK);
+				return new ResponseEntity<>(delegations, HttpStatus.OK);
 			}
 		} catch (LDAPException le) {
 			logger.error("LDAP not valid {}", le);
@@ -319,14 +321,14 @@ public class UserController {
 			logger.warn("Rights exception", d);
 
 			activityService.saveActivityViolationFromUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), null, null, null, ActivityAccessType.READ,
-					((HttpServletRequest) request).getRequestURI() + "?" + ((HttpServletRequest) request).getQueryString(), d.getMessage(), d, request.getRemoteAddr());
+					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
 	}
 
 	// -------------------GET Check Delegation fom username ---------------------------------------------
-	@RequestMapping(value = "/api/v1/username/{username}/delegation/check", method = RequestMethod.GET)
+	@GetMapping(value = "/api/v1/username/{username}/delegation/check")
 	public ResponseEntity<Object> checkDelegationV1(@PathVariable("username") String username,
 			@RequestParam("sourceRequest") String sourceRequest,
 			@RequestParam(value = "elementID", required = true) String elementID,
@@ -351,19 +353,19 @@ public class UserController {
 
 			logger.info("Response {}", response);
 
-			return new ResponseEntity<Object>(response, HttpStatus.OK);
+			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
 
 			activityService.saveActivityViolationFromUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), null, null, null, ActivityAccessType.READ,
-					((HttpServletRequest) request).getRequestURI() + "?" + ((HttpServletRequest) request).getQueryString(), d.getMessage(), d, request.getRemoteAddr());
+					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
 	}
 
 	// -------------------POST Delegation for username ---------------------------------------------
-	@RequestMapping(value = "/api/v1/username/{username}/delegation", method = RequestMethod.POST)
+	@PostMapping(value = "/api/v1/username/{username}/delegation")
 	public ResponseEntity<Object> postDelegationV1(@PathVariable("username") String username,
 			@RequestBody Delegation delegation,
 			@RequestParam("sourceRequest") String sourceRequest,
@@ -382,26 +384,26 @@ public class UserController {
 
 			logger.info("Returning new Delegation {}", newDelegation);
 
-			return new ResponseEntity<Object>(newDelegation, HttpStatus.OK);
+			return new ResponseEntity<>(newDelegation, HttpStatus.OK);
 		} catch (DelegationNotValidException de) {
 			logger.error("Delegation not valid {}", de);
 
 			activityService.saveActivityViolationFromUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), null, null, null, ActivityAccessType.WRITE,
-					((HttpServletRequest) request).getRequestURI() + "?" + ((HttpServletRequest) request).getQueryString(), de.getMessage(), de, request.getRemoteAddr());
+					request.getRequestURI() + "?" + request.getQueryString(), de.getMessage(), de, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) de.getMessage());
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
 
 			activityService.saveActivityViolationFromUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), null, null, null, ActivityAccessType.WRITE,
-					((HttpServletRequest) request).getRequestURI() + "?" + ((HttpServletRequest) request).getQueryString(), d.getMessage(), d, request.getRemoteAddr());
+					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
 	}
 
 	// -------------------PUT Delegation for username ---------------------------------------------
-	@RequestMapping(value = "/api/v1/username/{username}/delegation/{delegationid}", method = RequestMethod.PUT)
+	@PutMapping(value = "/api/v1/username/{username}/delegation/{delegationid}")
 	public ResponseEntity<Object> putDelegationV1(@PathVariable("username") String username,
 			@PathVariable("delegationid") Long delegationId,
 			@RequestBody Delegation delegation,
@@ -421,26 +423,26 @@ public class UserController {
 
 			logger.info("Returning new Delegation {}", newDelegation);
 
-			return new ResponseEntity<Object>(newDelegation, HttpStatus.OK);
+			return new ResponseEntity<>(newDelegation, HttpStatus.OK);
 		} catch (DelegationNotValidException de) {
 			logger.error("Delegation not valid {}", de);
 
 			activityService.saveActivityViolationFromUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), null, null, null, ActivityAccessType.WRITE,
-					((HttpServletRequest) request).getRequestURI() + "?" + ((HttpServletRequest) request).getQueryString(), de.getMessage(), de, request.getRemoteAddr());
+					request.getRequestURI() + "?" + request.getQueryString(), de.getMessage(), de, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) de.getMessage());
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
 
 			activityService.saveActivityViolationFromUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), null, null, null, ActivityAccessType.WRITE,
-					((HttpServletRequest) request).getRequestURI() + "?" + ((HttpServletRequest) request).getQueryString(), d.getMessage(), d, request.getRemoteAddr());
+					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
 	}
 
 	// -------------------DELETE Delegation for username ---------------------------------------------
-	@RequestMapping(value = "/api/v1/username/{username}/delegation/{delegationid}", method = RequestMethod.DELETE)
+	@DeleteMapping(value = "/api/v1/username/{username}/delegation/{delegationid}")
 	public ResponseEntity<Object> deleteDelegationV1(@PathVariable("username") String username,
 			@PathVariable("delegationid") Long delegationId,
 			@RequestParam("sourceRequest") String sourceRequest,
@@ -459,19 +461,19 @@ public class UserController {
 
 			logger.info("Deleted {}", delegationId);
 
-			return new ResponseEntity<Object>(HttpStatus.OK);
+			return new ResponseEntity<>(HttpStatus.OK);
 		} catch (DelegationNotValidException de) {
 			logger.error("Delegation not valid {}", de);
 
 			activityService.saveActivityViolationFromUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), null, null, null, ActivityAccessType.DELETE,
-					((HttpServletRequest) request).getRequestURI() + "?" + ((HttpServletRequest) request).getQueryString(), de.getMessage(), de, request.getRemoteAddr());
+					request.getRequestURI() + "?" + request.getQueryString(), de.getMessage(), de, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) de.getMessage());
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
 
 			activityService.saveActivityViolationFromUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), null, null, null, ActivityAccessType.DELETE,
-					((HttpServletRequest) request).getRequestURI() + "?" + ((HttpServletRequest) request).getQueryString(), d.getMessage(), d, request.getRemoteAddr());
+					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
@@ -496,7 +498,7 @@ public class UserController {
 	}
 
 	// -------------------GET Data for app ---------------------------------------------
-	@RequestMapping(value = "/api/v1/username/organization", method = RequestMethod.GET)
+	@GetMapping(value = "/api/v1/username/organization")
 	public ResponseEntity<Object> getOrganizationV1(
 			@RequestParam("sourceRequest") String sourceRequest,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
@@ -505,7 +507,7 @@ public class UserController {
 		logger.info("Requested getOrganizationV1");
 
 		try {
-			return new ResponseEntity<Object>(credentialService.getOrganization(lang), HttpStatus.OK);
+			return new ResponseEntity<>(credentialService.getOrganization(lang), HttpStatus.OK);
 		} catch (NoSuchMessageException d) {
 			logger.error("Delegation not found {}", d);
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
@@ -513,7 +515,7 @@ public class UserController {
 	}
 
 	// -------------------DELETE Data for username ---------------------------------------------
-	@RequestMapping(value = "/api/v1/username/{username}/data/{dataid}", method = RequestMethod.DELETE)
+	@DeleteMapping(value = "/api/v1/username/{username}/data/{dataid}")
 	public ResponseEntity<Object> deleteDataV1(@PathVariable("username") String username,
 			@PathVariable("dataid") Long dataId,
 			@RequestParam("sourceRequest") String sourceRequest,
@@ -532,11 +534,11 @@ public class UserController {
 
 			logger.info("Deleted {}", dataId);
 
-			return new ResponseEntity<Object>(HttpStatus.OK);
+			return new ResponseEntity<>(HttpStatus.OK);
 		} catch (DataNotValidException d) {
 			logger.error("Data not valid {}", d);
 
-			activityService.saveActivityViolationFromUsername(username, sourceRequest, null, null, ActivityAccessType.DELETE, ((HttpServletRequest) request).getContextPath() + "?" + ((HttpServletRequest) request).getQueryString(),
+			activityService.saveActivityViolationFromUsername(username, sourceRequest, null, null, ActivityAccessType.DELETE, request.getContextPath() + "?" + request.getQueryString(),
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
@@ -544,7 +546,7 @@ public class UserController {
 			logger.warn("Rights exception", d);
 
 			activityService.saveActivityViolationFromUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), null, null, null, ActivityAccessType.DELETE,
-					((HttpServletRequest) request).getRequestURI() + "?" + ((HttpServletRequest) request).getQueryString(), d.getMessage(), d, request.getRemoteAddr());
+					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}

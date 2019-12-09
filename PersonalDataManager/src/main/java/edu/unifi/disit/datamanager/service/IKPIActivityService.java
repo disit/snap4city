@@ -8,9 +8,6 @@ public interface IKPIActivityService {
 	void saveActivityFromUsername(String username, String sourceRequest, Long kpiId, ActivityAccessType accessType,
 			KPIActivityDomainType domain);
 
-	// void saveActivityFromUsername(String username, String sourceRequest, List<KPIData> listKpiData,
-	// ActivityAccessType accessType, KPIActivityDomainType domain);
-
 	void saveActivityViolationFromUsername(String username, String sourceRequest, Long kpiId,
 			ActivityAccessType accessType, KPIActivityDomainType domain, String query, String errorMessage, Throwable stacktrace, String ipAddress);
 

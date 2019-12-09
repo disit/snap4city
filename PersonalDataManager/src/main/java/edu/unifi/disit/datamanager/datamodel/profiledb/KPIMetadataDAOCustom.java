@@ -15,9 +15,4 @@ package edu.unifi.disit.datamanager.datamodel.profiledb;
 
 public interface KPIMetadataDAOCustom {
 
-	//List<KPIData> getDataByUsername(String username, String variableName, String motivation, Date from, Date to, Integer first, Integer last);
-
-	//List<KPIData> getDataByUsernameDelegated(String username, String variableName, String motivation, Date from, Date to, Integer first, Integer last);
-
-	//List<KPIData> getDataByAppId(String appId, String appOwner, String variableName, String motivation, Date from, Date to, Integer first, Integer last);
 }
