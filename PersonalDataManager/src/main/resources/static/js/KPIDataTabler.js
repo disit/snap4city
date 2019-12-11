@@ -165,7 +165,7 @@ var KPIDataTabler = {
             _response = {};
             _response.highLevelType = KPIDataTabler.currentHighLevelType;
         }
-        if (KPIDataTabler.currentHighLevelType != "changeownership") {
+        if (KPIDataTabler.currentHighLevelType != "changeownership" && _response != null && _response != "" && _response.highLevelType != null) {
             ViewManager.render({
                 "kpidata": _response
             }, "#genericModal", "templates/kpidata/edit" + _response.highLevelType.toLowerCase() + ".mst.html");

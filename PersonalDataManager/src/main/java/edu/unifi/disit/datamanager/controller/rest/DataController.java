@@ -45,12 +45,6 @@ public class DataController {
 	@Autowired
 	IActivityService activityService;
 
-	// -------------------GET alive ---------------------------------------------
-	@GetMapping(value = "/api/test")
-	public ResponseEntity<String> dataControllerTest() {
-		return new ResponseEntity<>("alive", HttpStatus.OK);
-	}
-
 	// -------------------GET ALL Data ---------------------------------------------
 	@GetMapping(value = "/api/v1/data")
 	public ResponseEntity<Object> getDataV1(

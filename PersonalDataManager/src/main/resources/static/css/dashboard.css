@@ -295,7 +295,7 @@ body
 {
    width: 100%;
    min-height: 100%;
-   font-family: 'Montserrat', 'Verdana', sans-serif;
+   font-family: 'Montserrat', sans-serif;', 'Verdana', sans-serif;
    font-weight: 400;
 }
 
@@ -536,13 +536,7 @@ label[for='alrThrFlagM'], label[for='alrAxisSelM'], label[for='alrRangeMinM'], l
 }
 
 .ui-autocomplete-input {
-  border: none; 
   font-size: 14px;
-  /*width: 300px;
-  height: 24px;
-  margin-bottom: 5px;
-  padding-top: 2px;
-  padding-top: 0px !important;*/
   border: 1px solid #DDD !important; 
   z-index: 1511;
   position: relative;
@@ -992,7 +986,6 @@ ul.alert-dropdown {
 .footerLogo, .footerLogo:link, .footerLogo:visited, .footerLogo:active
 {
     color: black;
-    display: block;
     height: 100%;
     float: left;
     text-decoration: none;
@@ -1005,7 +998,6 @@ ul.alert-dropdown {
 {
     background-color: #eeeeee;
     text-decoration: none;
-    display: block;
     height: 100%;
     float: left;
     display: flex;
@@ -1622,7 +1614,7 @@ div.mainMenuItemContainer:hover
 
 #newTabLinkOpenImpossibile
 {
-    font-family: Verdana;
+    font-family: Verdana, sans-serif;
 }
 
 #newTabLinkOpenImpossibile div.modal-header h4
@@ -1864,7 +1856,7 @@ body.guiPageBody
     height: 100vh;
     overflow-x: hidden;
     overflow-y: hidden;
-    font-family: 'Montserrat';
+    font-family: 'Montserrat', sans-serif;
 }
 
 #loginBody, #accountEnableBody
@@ -1879,7 +1871,7 @@ body.dashboardViewBodyAuth
    height: 100vh;
    overflow-x: hidden;
    overflow-y: hidden;
-   font-family: 'Montserrat';
+   font-family: 'Montserrat', sans-serif;
    background: url("../img/loginPageBackground.jpg") no-repeat center center;
    background-size: cover;
 }
@@ -1895,14 +1887,14 @@ body.dashboardViewBodyAuth
 
 #logoutViewModal
 {
-    font-family: 'Montserrat';
+    font-family: 'Montserrat', sans-serif;
 }
 
 /*PARTE NUOVA*/
 
 #modalEditDashboard, #modal-duplicate-dashboard, #embedDashboardModal
 {
-    font-family: 'Montserrat';
+    font-family: 'Montserrat', sans-serif;
 }
 
 #embedDashboardModalBody, #embedDashboardModalFooter
@@ -2186,7 +2178,7 @@ div.pageSingleDataLabel
 
 div.dashEditMenuItemCnt
 {
-    font-family: 'Montserrat';
+    font-family: 'Montserrat', sans-serif;
     color: #eeeeee;
     font-size: 1em;
     font-weight: 400;
@@ -2364,7 +2356,7 @@ a.moduleLink:hover
     background-color: rgb(69, 183, 175);/*#5cb85c;*/
     border: none;
     color: white;
-    font-family: 'Montserrat';
+    font-family: 'Montserrat', sans-serif;
     font-weight: bold;
     text-transform: uppercase;
     cursor: pointer;
@@ -2376,7 +2368,7 @@ a.moduleLink:hover
     background-color: rgb(183, 69, 84);/*#5cb85c;*/
     border: none;
     color: white;
-    font-family: 'Montserrat';
+    font-family: 'Montserrat', sans-serif;
     font-weight: bold;
     text-transform: uppercase;
     cursor: pointer;
@@ -2406,7 +2398,7 @@ a.moduleLink:hover
     background-color: rgba(0, 162, 211, 1);
     border: none;
     color: white;
-    font-family: 'Montserrat';
+    font-family: 'Montserrat', sans-serif;
     font-weight: bold;
     text-transform: uppercase;
     cursor: pointer;
@@ -2427,7 +2419,7 @@ a.moduleLink:hover
     background-color: transparent;
     border: none;
     color: rgba(0, 162, 211, 1);
-    font-family: 'Montserrat';
+    font-family: 'Montserrat', sans-serif;
     font-weight: bold;
     text-transform: uppercase;
 }
@@ -2752,7 +2744,7 @@ input[type="text"]:disabled
 
 #cloneDashboardModal
 {
-    font-family: 'Montserrat';
+    font-family: 'Montserrat', sans-serif;
 }
 
 #cloningDashboardFormRow, #duplicateDashboardLoadingRow, #duplicateDashboardOkRow, #duplicateDashboardKoRow, #cloneDashboardModalFooter, #duplicateDashboardLoadingTitlesKoRow, #duplicateDashboardWarningRow
@@ -2800,7 +2792,7 @@ input[type="text"]:disabled
     width: 225px;
     height: 110px;
     background: #ff6666;
-    font-family: 'Montserrat';
+    font-family: 'Montserrat', sans-serif;
     z-index: 999999;
 }
 

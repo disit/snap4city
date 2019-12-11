@@ -67,7 +67,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 	@Value("${spring.openidconnect.userinfo_endpoint}")
 	private String userinfo_endpoint;
 
-	@Value("${spring.openidconnect.userinfo_endpoint_test}")
+	@Value("${spring.openidconnect.userinfo_endpoint_test:#{null}}")
 	private String userinfo_endpoint_test;
 
 	@Autowired
@@ -154,11 +154,15 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
 
 		try {
-			checkValidationOnKeycloakServer(UriComponentsBuilder.fromHttpUrl(userinfo_endpoint).build(), restTemplate, entity, lang);// check validation on www.snap4city.org/auth keycloak server
+			checkValidationOnKeycloakServer(UriComponentsBuilder.fromHttpUrl(userinfo_endpoint + "realms/master/protocol/openid-connect/userinfo").build(), restTemplate, entity, lang);// check validation on www.snap4city.org/auth keycloak
+																																														// server
 		} catch (HttpClientErrorException e) {
 			loggerA.warn("AccessToken WAS NOT VALIDATED HttpClientErrorException {}", e);
 			try {
-				checkValidationOnKeycloakServer(UriComponentsBuilder.fromHttpUrl(userinfo_endpoint_test).build(), restTemplate, entity, lang);// check validation on www.snap4city.org/auth keycloak server
+				if (userinfo_endpoint_test != null)
+					checkValidationOnKeycloakServer(UriComponentsBuilder.fromHttpUrl(userinfo_endpoint_test + "realms/master/protocol/openid-connect/userinfo").build(), restTemplate, entity, lang);// check validation on
+																																																		// www.snap4city.org/auth
+																																																		// keycloak server
 			} catch (HttpClientErrorException e2) {
 				loggerA.error("AccessToken WAS NOT VALIDATED even on keycloak TEST HttpClientErrorException {}", e2);
 				throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));

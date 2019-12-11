@@ -58,46 +58,47 @@
 
 </div>
 <table class="table table-striped table-bordered" style="background-color: white">
+    <caption></caption>
     <thead>
     <tr style="background: rgb(0, 162, 211); color: rgb(255, 255, 255); font-size: 1em;">
-        <th onclick="KPIDataSorter.setSortOnField('id');KPIDataTabler.renderTable();" style="cursor: pointer;">No.
+        <th scope="col" onclick="KPIDataSorter.setSortOnField('id');KPIDataTabler.renderTable();" style="cursor: pointer;">No.
             {{#sortidASC}}&darr;{{/sortidASC}}
             {{#sortidDESC}}&uarr;{{/sortidDESC}}</th>
-        <th onclick="KPIDataSorter.setSortOnField('highLevelType');KPIDataTabler.renderTable();" style="cursor: pointer;">High
+        <th scope="col" onclick="KPIDataSorter.setSortOnField('highLevelType');KPIDataTabler.renderTable();" style="cursor: pointer;">High
             Level Type
             {{#sorthighLevelTypeASC}}&darr;{{/sorthighLevelTypeASC}}
             {{#sorthighLevelTypeDESC}}&uarr;{{/sorthighLevelTypeDESC}}</th>
-        <th onclick="KPIDataSorter.setSortOnField('nature');KPIDataTabler.renderTable();" style="cursor: pointer;">Nature
+        <th scope="col" onclick="KPIDataSorter.setSortOnField('nature');KPIDataTabler.renderTable();" style="cursor: pointer;">Nature
             {{#sortnatureASC}}&darr;{{/sortnatureASC}}
             {{#sortnatureDESC}}&uarr;{{/sortnatureDESC}}</th>
-        <th onclick="KPIDataSorter.setSortOnField('subNature');KPIDataTabler.renderTable();" style="cursor: pointer;">Sub
+        <th scope="col" onclick="KPIDataSorter.setSortOnField('subNature');KPIDataTabler.renderTable();" style="cursor: pointer;">Sub
             Nature
             {{#sortsubNatureASC}}&darr;{{/sortsubNatureASC}} {{#sortsubNatureDESC}}&uarr;{{/sortsubNatureDESC}}</th>
-        <th onclick="KPIDataSorter.setSortOnField('valueName');KPIDataTabler.renderTable();" style="cursor: pointer;">Value
+        <th scope="col" onclick="KPIDataSorter.setSortOnField('valueName');KPIDataTabler.renderTable();" style="cursor: pointer;">Value
             Name
             {{#sortvalueNameASC}}&darr;{{/sortvalueNameASC}} {{#sortvalueNameDESC}}&uarr;{{/sortvalueNameDESC}}</th>
-        <th onclick="KPIDataSorter.setSortOnField('valueType');KPIDataTabler.renderTable();" style="cursor: pointer;">Value
+        <th scope="col" onclick="KPIDataSorter.setSortOnField('valueType');KPIDataTabler.renderTable();" style="cursor: pointer;">Value
             Type
             {{#sortvalueTypeASC}}&darr;{{/sortvalueTypeASC}} {{#sortvalueTypeDESC}}&uarr;{{/sortvalueTypeDESC}}</th>
-        <th onclick="KPIDataSorter.setSortOnField('dataType');KPIDataTabler.renderTable();" style="cursor: pointer;">Data
+        <th scope="col" onclick="KPIDataSorter.setSortOnField('dataType');KPIDataTabler.renderTable();" style="cursor: pointer;">Data
             Type
             {{#sortdataTypeASC}}&darr;{{/sortdataTypeASC}}
             {{#sortdataTypeDESC}}&uarr;{{/sortdataTypeDESC}}</th>
-        <th onclick="KPIDataSorter.setSortOnField('lastDate');KPIDataTabler.renderTable();" style="cursor: pointer;">Last
+        <th scope="col" onclick="KPIDataSorter.setSortOnField('lastDate');KPIDataTabler.renderTable();" style="cursor: pointer;">Last
             Date
             {{#sortlastDateASC}}&darr;{{/sortlastDateASC}}
             {{#sortlastDateDESC}}&uarr;{{/sortlastDateDESC}}</th>
-        <th onclick="KPIDataSorter.setSortOnField('lastValue');KPIDataTabler.renderTable();" style="cursor: pointer;">Last
+        <th scope="col" onclick="KPIDataSorter.setSortOnField('lastValue');KPIDataTabler.renderTable();" style="cursor: pointer;">Last
             Value
             {{#sortlastValueASC}}&darr;{{/sortlastValueASC}} {{#sortlastValueDESC}}&uarr;{{/sortlastValueDESC}}</th>
-        <th onclick="KPIDataSorter.setSortOnField('ownership');KPIDataTabler.renderTable();" style="cursor: pointer;">Ownership
+        <th scope="col" onclick="KPIDataSorter.setSortOnField('ownership');KPIDataTabler.renderTable();" style="cursor: pointer;">Ownership
             {{#sortownershipASC}}&darr;{{/sortownershipASC}} {{#sortownershipDESC}}&uarr;{{/sortownershipDESC}}</th>
-        <th onclick="KPIDataSorter.setSortOnField('username');KPIDataTabler.renderTable();" style="cursor: pointer;">Username
+        <th scope="col" onclick="KPIDataSorter.setSortOnField('username');KPIDataTabler.renderTable();" style="cursor: pointer;">Username
             {{#sortusernameASC}}&darr;{{/sortusernameASC}} {{#sortusernameDESC}}&uarr;{{/sortusernameDESC}}</th>
-        <th>Controls</th>
-        <th>Data</th>
+        <th scope="col" >Controls</th>
+        <th scope="col" >Data</th>
          <!-- {{#enableEdit}} -->
-        <th>Visibility</th>
+        <th scope="col" >Visibility</th>
          <!-- {{/enableEdit}} -->
     </tr>
     </thead>

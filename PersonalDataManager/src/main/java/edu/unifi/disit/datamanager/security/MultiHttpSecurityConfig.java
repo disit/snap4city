@@ -44,7 +44,9 @@ public class MultiHttpSecurityConfig {
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
 			http
-					.antMatcher("/api/test").antMatcher("/api/v1/public/**")
+					.antMatcher("/api/configuration/**")
+					.antMatcher("/api/test")
+					.antMatcher("/api/v1/public/**")
 					.authorizeRequests()
 					/**/.anyRequest().permitAll();
 		}

@@ -10,9 +10,9 @@
 <div class="row" style="padding: 15px;">
     <div class="col-sm-8 offset-sm-2">
         <div class="alert alert-light">
-            <b style="margin-right: 30px">Values of KPIData:</b> <b style="margin-right: 10px">No.</b> {{id}} <b style="margin-right: 10px; margin-left: 10px;">Nature</b>
-            {{nature}} | <b style="margin-right: 10px;margin-left: 10px;">Sub Nature</b> {{subNature}} | <b style="margin-right: 10px; margin-left: 10px;">Value
-                Name</b> {{valueName}}
+            <strong style="margin-right: 30px">Values of KPIData:</strong> <strong style="margin-right: 10px">No.</strong> {{id}} <strong style="margin-right: 10px; margin-left: 10px;">Nature</strong>
+            {{nature}} | <strong style="margin-right: 10px;margin-left: 10px;">Sub Nature</strong> {{subNature}} | <strong style="margin-right: 10px; margin-left: 10px;">Value
+                Name</strong> {{valueName}}
         </div>
     </div>
 
@@ -55,19 +55,20 @@
 
 </div>
 <table class="table table-striped table-bordered" style="background-color: white">
+    <caption></caption>
     <thead>
         <tr style="background: rgb(0, 162, 211); color: rgb(255, 255, 255); font-size: 1em;">
-            <th onclick="KPIMetadataSorter.setSortOnField('id');KPIMetadataTabler.renderTable({{kpiId}});" style="cursor: pointer;">No.
+            <th scope="col" onclick="KPIMetadataSorter.setSortOnField('id');KPIMetadataTabler.renderTable({{kpiId}});" style="cursor: pointer;">No.
                 {{#sortidASC}}&darr;{{/sortidASC}}
                 {{#sortidDESC}}&uarr;{{/sortidDESC}}</th>
-            <th onclick="KPIMetadataSorter.setSortOnField('key');KPIMetadataTabler.renderTable({{kpiId}});" style="cursor: pointer;">Key
+            <th scope="col" onclick="KPIMetadataSorter.setSortOnField('key');KPIMetadataTabler.renderTable({{kpiId}});" style="cursor: pointer;">Key
                 {{#sortkeyASC}}&darr;{{/sortkeyASC}}
                 {{#sortkeyDESC}}&uarr;{{/sortkeyDESC}}</th>
-            <th onclick="KPIMetadataSorter.setSortOnField('value');KPIMetadataTabler.renderTable({kpiId});" style="cursor: pointer;">Value
+            <th scope="col" onclick="KPIMetadataSorter.setSortOnField('value');KPIMetadataTabler.renderTable({kpiId});" style="cursor: pointer;">Value
                 {{#sortvalueASC}}&darr;{{/sortvalueASC}}
                 {{#sortvalueDESC}}&uarr;{{/sortvalueDESC}}</th>
             <!-- {{#enableEdit}} -->
-            <th>Controls</th>
+            <th scope="col" >Controls</th>
             <!-- {{/enableEdit}} -->
         </tr>
     </thead>

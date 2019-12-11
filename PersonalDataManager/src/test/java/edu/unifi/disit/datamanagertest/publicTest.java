@@ -17,6 +17,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
@@ -348,6 +349,48 @@ public class publicTest {
 		assertEquals(1525186380000l, result.get(0).getDataTime().getTime());
 		// assertEquals("adifino", result.get(1).getUsername());
 		assertEquals(1525186352000l, result.get(1).getDataTime().getTime());
+	}
+
+	@Test
+	public void config_ok() throws ClientProtocolException, IOException {
+		// Given
+		HttpUriRequest request = new HttpGet(
+				"http://localhost:8080/datamanager/api/configuration/v1?sourceRequest=test");
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		ObjectMapper mapper = new ObjectMapper();
+		HashMap<String, String> result = mapper.readValue(EntityUtils.toString(httpResponse.getEntity()), new TypeReference<HashMap<String, String>>() {
+		});
+
+		HashMap<String, String> totest = new HashMap<String, String>();
+		totest.put("Authentication.url", "https://www.disit.org/auth/");
+		totest.put("grp.Authentication.clientId", "js-grp-client-test");
+		totest.put("kpi.Authentication.clientId", "js-kpi-client-test");
+
+		assertThat(
+				httpResponse.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.OK.value()));
+
+		assertEquals(totest, result);
+	}
+
+	@Test
+	public void config_ko() throws ClientProtocolException, IOException {
+		// Given
+		HttpUriRequest request = new HttpGet(
+				"http://localhost:8080/datamanager/api/configuration/v2?sourceRequest=test");
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		assertThat(
+				httpResponse.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.NO_CONTENT.value()));
+
 	}
 
 	// private HttpEntity createEntity(Delegation delegation) throws JsonGenerationException, JsonMappingException, IOException {
