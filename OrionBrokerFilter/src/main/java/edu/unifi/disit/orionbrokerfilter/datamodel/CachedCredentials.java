@@ -18,7 +18,7 @@ import java.util.List;
 
 public class CachedCredentials {
 
-	Boolean isPublic;
+	Boolean isPublic = false;// default is private
 	Credentials ownerCredentials;
 	List<Credentials> delegatedCredentials;
 	Date elapsingDate;

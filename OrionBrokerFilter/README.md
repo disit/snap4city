@@ -16,16 +16,16 @@ These instructions will get you a copy of the project up and running on your loc
 
 ## Configure
 - Create keyclock client id for orionbrokerfilter
->client ID: orionbrokerfilter
->TODO --> use also the secret: <orionbrokerfilter-secret>
+>client ID: orionbrokerfilter  
+>TODO --> use also the secret: <orionbrokerfilter-secret>  
 - Create in LDAP a user "rootfilter" with _RootAdmin_ rule
->-CN=rootfilter
->-objectClass=inetOrgPerson, posixAccount, top 
+>-CN=rootfilter  
+>-objectClass=inetOrgPerson, posixAccount, top  
 -configure rewrite rule for tomcat
->-add in conf/context.xml
->Valve className="org.apache.catalina.valves.rewrite.RewriteValve" />
->-add in /usr/tomcat8/webapps/ROOT/WEB-INF/rewrite.config
->RewriteRule /v1/(.*) /orionbrokerfilter/v1/$1
+>-add in conf/context.xml  
+>Valve className="org.apache.catalina.valves.rewrite.RewriteValve" />  
+>-add in /usr/tomcat8/webapps/ROOT/WEB-INF/rewrite.config  
+>RewriteRule /v1/(.*) /orionbrokerfilter/v1/$1  
 
 ## Deployment
 
@@ -58,26 +58,28 @@ These instructions will get you a copy of the project up and running on your loc
 - using root user, install docker compose like https://docs.docker.com/compose/install/ (prerequisite docker like https://docs.docker.com/install/linux/docker-ce/debian/)
 
 - create docker-compose yaml file
->root@debian:/home/debian# mkdir fiware
->root@debian:/home/debian# cd fiware
->root@debian:/home/debian/fiware# mkdir db
->root@debian:/home/debian/fiware# docker volume create --name=mongodb_data_volume
->root@debian:/home/debian/fiware# vi docker-compose
->    version: "3.7"
->    services:
->       orion:
->          image: fiware/orion
->          depends_on:
->            - mongo
->          ports:
->            - "1026:1026"
->          command: -dbhost mongo
->          restart: always
->       mongo:
->          image: mongo:3.6
->          restart: always
->          volumes:
->            - /home/debian/fiware/db:/data/db
+>root@debian:/home/debian# mkdir fiware  
+>root@debian:/home/debian# cd fiware  
+>root@debian:/home/debian/fiware# mkdir db  
+>(maybe not needed?)root@debian:/home/debian/fiware# docker volume create --name=mongodb_data_volume  
+>root@debian:/home/debian/fiware# vi docker-compose  
+>    version: "3.7"  
+>    services:  
+>       orion:  
+>          image: fiware/orion  
+>          depends_on:  
+>            - mongo  
+>          ports:  
+>            - "1026:1026"  
+>          command: -dbhost mongo  
+>          restart: always  
+>       mongo:  
+>          image: mongo:3.6  
+>          restart: always  
+>          volumes:  
+>            - /home/debian/fiware/db:/data/db  
+- run docker-compose
+>root@debian:/home/debian/fiware# docker-compose up
 -Test if everything works well accessing http://iotobsf:1026/version
 
 ## Authors

@@ -14,7 +14,7 @@ package edu.unifi.disit.orionbrokerfilter.datamodel;
 
 public class Credentials {
 
-	String username;
+	String username; // if ownership -> means owner username, if delegation -> means delegated username
 	String pksha1;
 	String k1;
 	String k2;
@@ -72,12 +72,12 @@ public class Credentials {
 		return ((k1 != null) && (k2 != null) && (this.k1 != null) && (this.k2 != null) && (this.k1.equals(k1) && (this.k2.equals(k2))));
 	}
 
-	// check validity of pksha1 (and eventually k1,k2 if pksha1 is not configured)
+	// check validity of pksha1 (if set) otherwise check validity of k1, k2
 	public boolean isValid(String k1, String k2, String pksha1) {
 		if (this.pksha1 != null)
-			return (this.pksha1.equals(pksha1) || isValid(k1, k2));// TODO permits k1 and k2 even if the sha is supported??
-
-		return isValid(k1, k2);
+			return (this.pksha1.equals(pksha1));
+		else
+			return isValid(k1, k2);
 	}
 
 	@Override

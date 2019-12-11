@@ -36,7 +36,7 @@ public class MyCorsFilter implements Filter {
 
 	// private static final Logger logger = LogManager.getLogger();
 
-	@Value("${cors.origins.accepted}") // ACCEPTING just this domain, since i'm not able to understand where this call came from!!! (in case of swagger calls)
+	@Value("${cors.origins.accepted:#{null}}") // ACCEPTING just this domain, since i'm not able to understand where this call came from!!! (in case of swagger calls)
 	private String originsAccepted;
 
 	public MyCorsFilter() {
@@ -48,30 +48,22 @@ public class MyCorsFilter implements Filter {
 		final HttpServletResponse response = (HttpServletResponse) res;
 		final HttpServletRequest request = (HttpServletRequest) req;
 
-		// String uri = request.getHeader("Origin");
-
-		// if (originsAccepted.contains(uri)) {
-
-		response.setHeader("Access-Control-Allow-Origin", originsAccepted);
-
-		// without this header jquery.ajax calls returns 401 even after successful login and SSESSIONID being succesfully stored.
-		response.setHeader("Access-Control-Allow-Credentials", "true");
-
-		response.setHeader("Access-Control-Allow-Methods", "POST, PUT, GET, OPTIONS, DELETE");
-		response.setHeader("Access-Control-Max-Age", "3600");
-		response.setHeader("Access-Control-Allow-Headers", "X-Requested-With, Authorization, Origin, Content-Type, Version");
-		response.setHeader("Access-Control-Expose-Headers", "X-Requested-With, Authorization, Origin, Content-Type");
-		// }
+		if (originsAccepted != null) {
+			response.setHeader("Access-Control-Allow-Origin", originsAccepted);
+			response.setHeader("Access-Control-Allow-Credentials", "true"); // without this header jquery.ajax calls returns 401 even after successful login and SSESSIONID being succesfully stored.
+			response.setHeader("Access-Control-Allow-Methods", "POST, PUT, GET, OPTIONS, DELETE");
+			response.setHeader("Access-Control-Max-Age", "3600");
+			response.setHeader("Access-Control-Allow-Headers", "X-Requested-With, Authorization, Origin, Content-Type, Version");
+			response.setHeader("Access-Control-Expose-Headers", "X-Requested-With, Authorization, Origin, Content-Type");
+		}
 
 		if (request.getMethod() != "OPTIONS") {
 			chain.doFilter(req, res);
 		}
-
 	}
 
 	@Override
 	public void destroy() {
-
 	}
 
 	@Override

@@ -90,7 +90,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 	@Value("${spring.delegation_endpoint}")
 	private String delegation_endpoint;
 
-	@Value("${spring.servicemapkb_endpoint}")
+	@Value("${spring.servicemapkb_endpoint:#{null}}")
 	private String servicemapkb_endpoint;
 
 	@Value("${spring.prefixelementID}")
@@ -267,7 +267,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		} else {
 			if (isWriteQuery(queryType)) {
 				logger.debug("The operation is WRITE on private");
-				if (cc.getOwnerCredentials().isValid(k1, k2, pksha1)) {// TODO bugfix improve the management of security-level
+				if (cc.getOwnerCredentials().isValid(k1, k2, pksha1)) {
 					logger.debug("The owner credentials are valid");
 					return;
 				} else {
@@ -282,17 +282,16 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 				} else {
 					// TODO if the elementID is private, the invoked query is a READ, and it's not the owner, first we need to check if the sensorID is PUBLIC (from cached and via packet inspection) and if not we need to validate the
 					// delegation as below
-					logger.debug("The owner credentials are not valid");
+					logger.debug("The owner credentials are not valid, check if there are any delegation");
 					for (Credentials c : cc.getDelegatedCredentials()) {
-						// if (cc.getOwnerCredentials().getPksha1() == null) {// if the elementID is not protected with certificate, use k1, k2 enforcement
-						if (pksha1 == null) {// TODO bugfix improve the management of security-level
+						if (cc.getOwnerCredentials().getPksha1() == null) {// if the elementID is not protected with certificate, use k1, k2 enforcement
 							if (c.isValid(k1, k2)) {
-								logger.debug("One of the delegated credentials are valid, certificate not envolved");
+								logger.debug("One of the delegated credentials are valid, certificate not involved");
 								return;
 							}
-						} else {// if the elementID is protected with certificate, use username of public key enforcement
-							if (c.isValid(getUsername(pksha1, lang))) {
-								logger.debug("One of the delegated credentials are valid, certificate envolved");
+						} else {// if the elementID is protected with certificate: (1) check if there is a pksha1 and (2) check the username delegated is the same of the username included in the certicate
+							if ((pksha1 != null) && (c.isValid(getUsername(pksha1, lang)))) {
+								logger.debug("One of the delegated credentials are valid, certificate involved");
 								return;
 							}
 						}
@@ -302,7 +301,6 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 				}
 			}
 		}
-
 	}
 
 	private String getUsername(String pksha1, Locale lang) throws CredentialsNotValidException {
@@ -366,7 +364,8 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 			logger.debug("retrieving credentials");
 
 			cc = new CachedCredentials(minutesElapsingCache);
-			cc.setIsPublic(isPublicFromKB(o.getElementUrl(), lang));
+			if (servicemapkb_endpoint != null)// if the servicemap endpoint is set, enable the check on public/private
+				cc.setIsPublic(isPublicFromKB(o.getElementUrl(), lang));
 
 			cc.setOwnerCredentials(o);
 
@@ -648,7 +647,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 
 		try {
 			ResponseEntity<String> response = restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, entity, String.class);
-			logger.debug("Response from  getOwnerCredentials {}", response);
+			logger.debug("Response from getOwnerCredentials {}", response);
 
 			ObjectMapper objectMapper = new ObjectMapper();
 
