@@ -108,11 +108,11 @@ var EditModalManager = {
     checkOrganizationAndCreateMap: function (editType) {
         EditModalManager.editType = editType;
         KPIEditor.keycloak.updateToken(30).success(function () {
-            var query = QueryManager.createGetUsernameOrganizationQuery(KPIEditor.keycloak.token);
-            APIClient.executeGetQuery(query, EditModalManager.successCheckOrganization, EditModalManager.errorCheckOrganization);
+            var query = QueryManager.createGetUsernameOrganizationQuery();
+            APIClient.executeGetQuery(query, KPIEditor.keycloak.token, EditModalManager.successCheckOrganization, EditModalManager.errorCheckOrganization);
         }).error(function () {
-            var query = QueryManager.createGetUsernameOrganizationQuery(Authentication.refreshTokenGetAccessToken());
-            APIClient.executeGetQuery(query, EditModalManager.successCheckOrganization, EditModalManager.errorCheckOrganization);
+            var query = QueryManager.createGetUsernameOrganizationQuery();
+            APIClient.executeGetQuery(query, Authentication.refreshTokenGetAccessToken(), EditModalManager.successCheckOrganization, EditModalManager.errorCheckOrganization);
 
         });
     },

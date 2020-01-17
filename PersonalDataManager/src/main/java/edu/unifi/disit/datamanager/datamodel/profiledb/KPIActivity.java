@@ -39,6 +39,8 @@ public class KPIActivity {
 	private Long kpiId;
 	@Column(name = "source_request")
 	private String sourceRequest;
+	@Column(name = "source_id")
+	private String sourceId;
 	@Column(name = "access_type")
 	private String accessType;
 	@Column(name = "domain")
@@ -58,13 +60,14 @@ public class KPIActivity {
 		super();
 	}
 
-	public KPIActivity(Long id, String username, String sourceRequest, Long kpiId, String accessType, String domain,
+	public KPIActivity(Long id, String username, String sourceRequest, String sourceId, Long kpiId, String accessType, String domain,
 			Date insertTime, Date elapseTime, Date deleteTime) {
 		super();
 		this.id = id;
 		this.username = username;
 		this.kpiId = kpiId;
 		this.sourceRequest = sourceRequest;
+		this.sourceId = sourceId;
 		this.accessType = accessType;
 		this.domain = domain;
 		this.insertTime = insertTime;
@@ -72,12 +75,13 @@ public class KPIActivity {
 		this.deleteTime = deleteTime;
 	}
 
-	public KPIActivity(String username, String sourceRequest, Long kpiId, String accessType, String domain,
+	public KPIActivity(String username, String sourceRequest, String sourceId, Long kpiId, String accessType, String domain,
 			Date insertTime, Date elapseTime, Date deleteTime) {
 		super();
 		this.username = username;
 		this.kpiId = kpiId;
 		this.sourceRequest = sourceRequest;
+		this.sourceId = sourceId;
 		this.accessType = accessType;
 		this.domain = domain;
 		this.insertTime = insertTime;
@@ -115,6 +119,14 @@ public class KPIActivity {
 
 	public void setSourceRequest(String sourceRequest) {
 		this.sourceRequest = sourceRequest;
+	}
+
+	public String getSourceId() {
+		return sourceId;
+	}
+
+	public void setSourceId(String sourceId) {
+		this.sourceId = sourceId;
 	}
 
 	public String getAccessType() {

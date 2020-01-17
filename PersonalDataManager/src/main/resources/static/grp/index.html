@@ -1,0 +1,99 @@
+﻿<!DOCTYPE html>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+<html>
+
+<head>
+
+  <meta name="format-detection" content="telephone=no">
+  <meta name="msapplication-tap-highlight" content="no">
+  <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+
+  <script type="text/javascript" src="js/lib/jquery-3.3.1.js"></script>
+  <script type="text/javascript" src="js/lib/bootstrap.min.js"></script>
+  <script type="text/javascript" src="js/lib/jquery.dataTables.min.js"></script>
+  <script type="text/javascript" src="js/lib/dataTables.responsive.min.js"></script>
+  <script type="text/javascript" src="js/lib/dataTables.bootstrap4.min.js"></script>
+  <script type="text/javascript" src="js/lib/Mustache.js"></script>
+  <script type="text/javascript" src="js/lib/keycloak.js"></script>
+  <script type="text/javascript" src="js/lib/leaflet.js"></script>
+  <script type="text/javascript" src="js/lib/leaflet.draw.js"></script>
+
+  <script type="text/javascript" src="js/kpi/APIClient.js"></script>
+  <script type="text/javascript" src="js/kpi/Authentication.js"></script>
+  <script type="text/javascript" src="js/kpi/EditModalManager.js"></script>
+  <script type="text/javascript" src="js/kpi/MustacheFunctions.js"></script>
+  <script type="text/javascript" src="js/kpi/Utility.js"></script>
+  <script type="text/javascript" src="js/kpi/ViewManager.js"></script>
+  
+  <!-- Group-specific js -->
+  <script type="text/javascript" src="js/GrpQueryManager.js"></script>
+  <script type="text/javascript" src="js/GrpConfiguration.js"></script>
+  <script type="text/javascript" src="js/GrpEditor.js"></script>
+  <script type="text/javascript" src="js/DeviceGrpTabler.js"></script>
+  <script type="text/javascript" src="js/DeviceGrpFilter.js"></script>
+  <script type="text/javascript" src="js/DeviceGrpPager.js"></script>
+  <script type="text/javascript" src="js/DeviceGrpSorter.js"></script>
+  <script type="text/javascript" src="js/GrpDelegationFilter.js"></script>
+  <script type="text/javascript" src="js/GrpDelegationPager.js"></script>
+  <script type="text/javascript" src="js/GrpDelegationSorter.js"></script>
+  <script type="text/javascript" src="js/GrpDelegationTabler.js"></script>
+  <script type="text/javascript" src="js/GrpElementFilter.js"></script>
+  <script type="text/javascript" src="js/GrpElementPager.js"></script>
+  <script type="text/javascript" src="js/GrpElementSorter.js"></script>
+  <script type="text/javascript" src="js/GrpElementTabler.js"></script>
+  <!-- -->
+
+  <link rel="stylesheet" href="../css/bootstrap.css">
+  <link rel="stylesheet" href="../css/dataTables.bootstrap4.min.css">
+  <link rel="stylesheet" href="../css/responsive.dataTables.min.css">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
+  <link rel="stylesheet" href="../css/leaflet.css">
+  <link rel="stylesheet" href="../css/leaflet.draw.css">
+
+</head>
+
+<body id="mainContentCnt">
+  <script type="text/javascript">
+    GrpConfiguration.checkHostname();
+    GrpEditor.initialize();
+  </script>
+  <div id="indexPage">
+    <div id="loginForm" style="display:none">
+      <div class="card" id="cardLoginContainer">
+        <div class="card-body">
+          <div class="form-group">
+            <label for="inputUsername">Username</label>
+            <input type="text" class="form-control" required id="inputUsername" aria-describedby="emailHelp"
+              placeholder="Enter username">
+          </div>
+          <div class="form-group">
+            <label for="inputPassword">Password</label>
+            <input type="password" class="form-control" required id="inputPassword" placeholder="Enter Password">
+          </div>
+          <button type="button" class="btn btn-primary btn-lg" onclick="GrpEditor.checkLogin();">Enter</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal" tabindex="-1" role="dialog" id="genericModal"></div>
+  </div>
+</body>
+
+</html>

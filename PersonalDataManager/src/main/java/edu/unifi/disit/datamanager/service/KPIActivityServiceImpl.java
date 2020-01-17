@@ -16,6 +16,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialException;
@@ -23,6 +25,9 @@ import javax.sql.rowset.serial.SerialException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import edu.unifi.disit.datamanager.datamodel.ActivityAccessType;
@@ -32,6 +37,8 @@ import edu.unifi.disit.datamanager.datamodel.profiledb.KPIActivityDAO;
 import edu.unifi.disit.datamanager.datamodel.profiledb.KPIActivityViolation;
 import edu.unifi.disit.datamanager.datamodel.profiledb.KPIActivityViolationDAO;
 import edu.unifi.disit.datamanager.datamodel.profiledb.OwnershipDAO;
+import edu.unifi.disit.datamanager.exception.CredentialsException;
+import edu.unifi.disit.datamanager.exception.DataNotValidException;
 
 @Service
 public class KPIActivityServiceImpl implements IKPIActivityService {
@@ -42,6 +49,9 @@ public class KPIActivityServiceImpl implements IKPIActivityService {
 	KPIActivityDAO kpiActivityRepo;
 
 	@Autowired
+	private MessageSource messages;
+	
+	@Autowired
 	KPIActivityViolationDAO kpiActivityViolationRepo;
 
 	@Autowired
@@ -51,11 +61,11 @@ public class KPIActivityServiceImpl implements IKPIActivityService {
 	ICredentialsService credentialsService;
 
 	@Override
-	public void saveActivityFromUsername(String username, String sourceRequest, Long kpiId,
+	public void saveActivityFromUsername(String username, String sourceRequest, String sourceId, Long kpiId,
 			ActivityAccessType accessType, KPIActivityDomainType domain) {
-		logger.debug("saveKPIActivityFromUsername INVOKED on username {} sourceRequest {} kpiId {} accessType {} domain {}", username, sourceRequest, kpiId, accessType, domain);
+		logger.debug("saveKPIActivityFromUsername INVOKED on username {} sourceRequest {} sourceId {} kpiId {} accessType {} domain {}", username, sourceRequest, sourceId, kpiId, accessType, domain);
 
-		KPIActivity kpiActivity = new KPIActivity(username, sourceRequest, kpiId, accessType.toString(),
+		KPIActivity kpiActivity = new KPIActivity(username, sourceRequest, sourceId, kpiId, accessType.toString(),
 				domain.toString(), new Date(), null, null);
 		kpiActivityRepo.save(kpiActivity);
 
@@ -85,5 +95,125 @@ public class KPIActivityServiceImpl implements IKPIActivityService {
 		}
 
 	}
+	
+	@Override
+	public KPIActivity getKPIActivityById(Long id, Locale lang) throws  CredentialsException {
+		logger.debug("getKPIActivityById INVOKED on id {}", id);
+		return kpiActivityRepo.findOne(id);
+	}
 
+	@Override
+	public Page<KPIActivity> findByKpiId(Long kpiId, Pageable pageable)
+			throws  CredentialsException {
+		logger.debug("findByKpiId INVOKED on kpiId {}",  kpiId);
+		return kpiActivityRepo.findByKpiIdAndDeleteTimeIsNullAndSourceIdIsNotNull(kpiId, pageable);
+	}
+
+	@Override
+	public Page<KPIActivity> findByKpiIdByAccessTypeBySourceRequest(Long kpiId, String accessType, String sourceRequestFilter, Pageable pageable)
+			throws  CredentialsException {
+		logger.debug("findByKpiIdByAccessTypeBySourceRequest INVOKED on kpiId {} accesstype {} sourceRequestFilter {}", kpiId, accessType, sourceRequestFilter);
+		return kpiActivityRepo.findByKpiIdAndAccessTypeAndSourceRequestAndDeleteTimeIsNullAndSourceIdIsNotNull(kpiId, accessType, sourceRequestFilter, pageable);
+	}
+	@Override
+	public Page<KPIActivity> findByKpiIdBySourceRequest(Long kpiId, String sourceRequestFilter, Pageable pageable)
+			throws  CredentialsException {
+		logger.debug("findByKpiIdBySourceRequest INVOKED on sourceRequestFilter {} kpiId {}",  sourceRequestFilter, kpiId);
+		return kpiActivityRepo.findByKpiIdAndSourceRequestAndDeleteTimeIsNullAndSourceIdIsNotNull(kpiId, sourceRequestFilter, pageable);
+	}
+	@Override
+	public Page<KPIActivity> findByKpiIdByAccessType(Long kpiId, String accessType, Pageable pageable)
+			throws  CredentialsException {
+		logger.debug("findByKpiIdByAccessType INVOKED on accessType {} kpiId {}",  accessType, kpiId);
+		return kpiActivityRepo.findByKpiIdAndAccessTypeAndDeleteTimeIsNullAndSourceIdIsNotNull(kpiId, accessType, pageable);
+	}
+
+	@Override
+	public List<KPIActivity> findByKpiIdNoPages(Long kpiId) {
+		logger.debug("findByKpiIdNoPages INVOKED on kpiId {}",  kpiId);
+		return kpiActivityRepo.findByKpiIdAndDeleteTimeIsNullAndSourceIdIsNotNull(kpiId);
+	}
+	
+	@Override
+	public List<KPIActivity> findByKpiIdByAccessTypeBySourceRequestNoPagesWithLimit(Long kpiId, Date from, Date to, Integer first, Integer last, Locale lang,String accessType, String sourceRequest) throws  DataNotValidException {
+		logger.debug("findByKpiIdNoPagesWithLimit INVOKED on kpiId {}, from {}, to {}, first {}, last {}", kpiId,from, to, first, last);
+
+		if ((first != 0) && (last != 0)) {
+			throw new DataNotValidException(messages.getMessage("getdata.ko.firstandlastspecified", null, lang));
+		}
+
+		return kpiActivityRepo.findByKpiIdByAccessTypeBySourceRequestNoPagesWithLimit(kpiId, from, to, first, last, accessType, sourceRequest);
+	}
+
+	@Override
+	public List<KPIActivity> findByKpiIdByAccessTypeBySourceRequestNoPages(Long kpiId, String accessType, String sourceRequestFilter)
+			throws  CredentialsException {
+		logger.debug("findByKpiIdByAccessTypeBySourceRequestNoPages INVOKED on kpiId {} accesstype {} sourceRequestFilter {}", kpiId, accessType, sourceRequestFilter);
+		return kpiActivityRepo.findByKpiIdAndAccessTypeAndSourceRequestAndDeleteTimeIsNullAndSourceIdIsNotNull(kpiId, accessType, sourceRequestFilter);
+	}
+	@Override
+	public List<KPIActivity> findByKpiIdBySourceRequestNoPages(Long kpiId, String sourceRequestFilter)
+			throws  CredentialsException {
+		logger.debug("findByKpiIdBySourceRequestNoPages INVOKED on sourceRequestFilter {} kpiId {}",  sourceRequestFilter, kpiId);
+		return kpiActivityRepo.findByKpiIdAndSourceRequestAndDeleteTimeIsNullAndSourceIdIsNotNull(kpiId, sourceRequestFilter);
+	}
+	@Override
+	public List<KPIActivity> findByKpiIdByAccessTypeNoPages(Long kpiId, String accessType)
+			throws  CredentialsException {
+		logger.debug("findByKpiIdByAccessTypeNoPages INVOKED on accessType {} kpiId {}",  accessType, kpiId);
+		return kpiActivityRepo.findByKpiIdAndAccessTypeAndDeleteTimeIsNullAndSourceIdIsNotNull(kpiId, accessType);
+	}
+	
+	
+	
+	@Override
+	public Page<KPIActivity> findByUsernameByKpiId(String username, Long kpiId, Pageable pageable)
+			throws  CredentialsException {
+		logger.debug("findByUsernameByKpiId INVOKED on username {} kpiId {}", username, kpiId);
+		return kpiActivityRepo.findByUsernameAndKpiIdAndDeleteTimeIsNullAndSourceIdIsNotNull(username, kpiId, pageable);
+	}
+
+	@Override
+	public Page<KPIActivity> findByUsernameByKpiIdByAccessTypeBySourceRequest(String username, Long kpiId, String accessType, String sourceRequestFilter, Pageable pageable)
+			throws  CredentialsException {
+		logger.debug("findByUsernameByKpiIdByAccessTypeBySourceRequest INVOKED on username {} kpiId {} accesstype {} sourceRequestFilter {}", username, kpiId, accessType, sourceRequestFilter);
+		return kpiActivityRepo.findByUsernameAndKpiIdAndAccessTypeAndSourceRequestAndDeleteTimeIsNullAndSourceIdIsNotNull(username, kpiId, accessType, sourceRequestFilter, pageable);
+	}
+	@Override
+	public Page<KPIActivity> findByUsernameByKpiIdBySourceRequest(String username, Long kpiId, String sourceRequestFilter, Pageable pageable)
+			throws  CredentialsException {
+		logger.debug("findByUsernameByKpiIdBySourceRequest INVOKED on username {} sourceRequestFilter {} kpiId {}", username, sourceRequestFilter, kpiId);
+		return kpiActivityRepo.findByUsernameAndKpiIdAndSourceRequestAndDeleteTimeIsNullAndSourceIdIsNotNull(username, kpiId, sourceRequestFilter, pageable);
+	}
+	@Override
+	public Page<KPIActivity> findByUsernameByKpiIdByAccessType(String username, Long kpiId, String accessType, Pageable pageable)
+			throws  CredentialsException {
+		logger.debug("findByUsernameByKpiIdByAccessType INVOKED on username {} accessType {} kpiId {}", username, accessType, kpiId);
+		return kpiActivityRepo.findByUsernameAndKpiIdAndAccessTypeAndDeleteTimeIsNullAndSourceIdIsNotNull(username, kpiId, accessType, pageable);
+	}
+
+	@Override
+	public List<KPIActivity> findByUsernameByKpiIdNoPages(String username, Long kpiId) {
+		logger.debug("findByUsernameByKpiIdNoPages INVOKED on username {} kpiId {}", username, kpiId);
+		return kpiActivityRepo.findByUsernameAndKpiIdAndDeleteTimeIsNullAndSourceIdIsNotNull(username, kpiId);
+	}
+
+	@Override
+	public List<KPIActivity> findByUsernameByKpiIdByAccessTypeBySourceRequestNoPages(String username, Long kpiId, String accessType, String sourceRequestFilter)
+			throws  CredentialsException {
+		logger.debug("findByUsernameByKpiIdByAccessTypeBySourceRequestNoPages INVOKED on username {} kpiId {} accesstype {} sourceRequestFilter {}", username, kpiId, accessType, sourceRequestFilter);
+		return kpiActivityRepo.findByUsernameAndKpiIdAndAccessTypeAndSourceRequestAndDeleteTimeIsNullAndSourceIdIsNotNull(username, kpiId, accessType, sourceRequestFilter);
+	}
+	@Override
+	public List<KPIActivity> findByUsernameByKpiIdBySourceRequestNoPages(String username, Long kpiId, String sourceRequestFilter)
+			throws  CredentialsException {
+		logger.debug("findByUsernameByKpiIdBySourceRequestNoPages INVOKED on username {} sourceRequestFilter {} kpiId {}", username, sourceRequestFilter, kpiId);
+		return kpiActivityRepo.findByUsernameAndKpiIdAndSourceRequestAndDeleteTimeIsNullAndSourceIdIsNotNull(username, kpiId, sourceRequestFilter);
+	}
+	@Override
+	public List<KPIActivity> findByUsernameByKpiIdByAccessTypeNoPages(String username, Long kpiId, String accessType)
+			throws  CredentialsException {
+		logger.debug("findByUsernameByKpiIdByAccessTypeNoPages INVOKED on username {} accessType {} kpiId {}", username, accessType, kpiId);
+		return kpiActivityRepo.findByUsernameAndKpiIdAndAccessTypeAndDeleteTimeIsNullAndSourceIdIsNotNull(username, kpiId, accessType);
+	}
 }

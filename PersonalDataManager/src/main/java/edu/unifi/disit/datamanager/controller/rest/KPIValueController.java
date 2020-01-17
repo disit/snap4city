@@ -80,6 +80,7 @@ public class KPIValueController {
 	@GetMapping("/api/v1/kpidata/{kpiId}/values/{id}")
 	public ResponseEntity<Object> getKPIValueV1ById(@PathVariable("kpiId") Long kpiId, @PathVariable("id") Long id,
 			@RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) {
 
@@ -120,7 +121,7 @@ public class KPIValueController {
 				logger.info("Returning kpivalue {}", kpiValue.getId());
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						kpiData.getId(), ActivityAccessType.READ, KPIActivityDomainType.VALUE);
+						sourceId, kpiData.getId(), ActivityAccessType.READ, KPIActivityDomainType.VALUE);
 				return new ResponseEntity<>(kpiValue, HttpStatus.OK);
 			}
 		} catch (CredentialsException d) {
@@ -141,6 +142,7 @@ public class KPIValueController {
 	@GetMapping("/api/v1/public/kpidata/{kpiId}/values/{id}")
 	public ResponseEntity<Object> getPublicKPIValueV1ById(@PathVariable("kpiId") Long kpiId,
 			@PathVariable("id") Long id, @RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) {
 
@@ -179,7 +181,7 @@ public class KPIValueController {
 				logger.info("Returning kpivalue {}", kpiValue.getId());
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						kpiData.getId(), ActivityAccessType.READ, KPIActivityDomainType.VALUE);
+						sourceId, kpiData.getId(), ActivityAccessType.READ, KPIActivityDomainType.VALUE);
 				return new ResponseEntity<>(kpiValue, HttpStatus.OK);
 			}
 		} catch (CredentialsException d) {
@@ -259,7 +261,7 @@ public class KPIValueController {
 			}
 
 			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-					kpiValue.getKpiId(), ActivityAccessType.WRITE, KPIActivityDomainType.VALUE);
+					null, kpiValue.getKpiId(), ActivityAccessType.WRITE, KPIActivityDomainType.VALUE);
 
 			kpiValueService.saveKPIValue(kpiValue);
 			logger.info("Posted kpivalue {}", kpiValue.getId());
@@ -282,6 +284,7 @@ public class KPIValueController {
 	@PostMapping("/api/v1/kpidata/{kpiId}/values")
 	public ResponseEntity<Object> postKPIValueV1(@PathVariable("kpiId") Long kpiId, @RequestBody KPIValue kpiValue,
 			@RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) {
 
@@ -337,7 +340,7 @@ public class KPIValueController {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 			}
 
-			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, kpiId,
+			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, sourceId, kpiId,
 					ActivityAccessType.WRITE, KPIActivityDomainType.VALUE);
 			kpiValue.setKpiId(kpiId);
 			kpiValueService.saveKPIValue(kpiValue);
@@ -362,6 +365,7 @@ public class KPIValueController {
 	@PostMapping("/api/v1/kpidata/{kpiId}/values/list")
 	public ResponseEntity<Object> postKPIValueArrayV1(@PathVariable("kpiId") Long kpiId,
 			@RequestBody List<KPIValue> kpiValueList, @RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) {
 
@@ -385,7 +389,7 @@ public class KPIValueController {
 				throw new CredentialsException();
 			}
 
-			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, kpiId,
+			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, sourceId, kpiId,
 					ActivityAccessType.WRITE, KPIActivityDomainType.VALUE);
 
 			List<KPIValue> listInsertedKPIValue = new ArrayList<>();
@@ -397,7 +401,7 @@ public class KPIValueController {
 			}
 
 			listInsertedKPIValue.add((KPIValue) postKPIValueV1(kpiId, kpiValueList.get(kpiValueList.size() - 1),
-					sourceRequest, lang, request).getBody());
+					sourceRequest, sourceId, lang, request).getBody());
 
 			return new ResponseEntity<>(listInsertedKPIValue, HttpStatus.OK);
 		} catch (CredentialsException d) {
@@ -417,6 +421,7 @@ public class KPIValueController {
 	@PutMapping("/api/v1/kpidata/{kpiId}/values/{id}")
 	public ResponseEntity<Object> putKPIValueV1(@PathVariable("kpiId") Long kpiId, @PathVariable("id") Long id,
 			@RequestBody KPIValue kpiValue, @RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) {
 
@@ -488,7 +493,7 @@ public class KPIValueController {
 			kpiValue.setId(oldKpiValue.getId());
 			KPIValue newKpiValue = kpiValueService.saveKPIValue(kpiValue);
 
-			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, kpiId,
+			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, sourceId, kpiId,
 					ActivityAccessType.WRITE, KPIActivityDomainType.VALUE);
 			logger.info("Putted kpivalue {}", kpiValue.getId());
 			return new ResponseEntity<>(newKpiValue, HttpStatus.OK);
@@ -509,6 +514,7 @@ public class KPIValueController {
 	@PatchMapping("/api/v1/kpidata/{kpiId}/values/{id}")
 	public ResponseEntity<Object> patchKPIValueV1(@PathVariable("kpiId") Long kpiId, @PathVariable("id") Long id,
 			@RequestBody Map<String, Object> fields, @RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) {
 
@@ -593,7 +599,7 @@ public class KPIValueController {
 
 			KPIValue newKpiValue = kpiValueService.saveKPIValue(oldKpiValue);
 			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-					newKpiValue.getKpiId(), ActivityAccessType.WRITE, KPIActivityDomainType.VALUE);
+					sourceId, newKpiValue.getKpiId(), ActivityAccessType.WRITE, KPIActivityDomainType.VALUE);
 
 			logger.info("Patched kpivalue {}", newKpiValue.getId());
 			return new ResponseEntity<>(newKpiValue, HttpStatus.OK);
@@ -614,6 +620,7 @@ public class KPIValueController {
 	@DeleteMapping("/api/v1/kpidata/{kpiId}/values/{id}")
 	public ResponseEntity<Object> deleteKPIValueV1(@PathVariable("kpiId") Long kpiId, @PathVariable("id") Long id,
 			@RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) {
 
@@ -671,7 +678,7 @@ public class KPIValueController {
 			kpiValueToDelete.setDeleteTime(new Date());
 			KPIValue newKpiValue = kpiValueService.saveKPIValue(kpiValueToDelete);
 
-			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, kpiId,
+			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, sourceId, kpiId,
 					ActivityAccessType.DELETE, KPIActivityDomainType.VALUE);
 			logger.info("Deleted kpivalue {}", id);
 			return new ResponseEntity<>(newKpiValue, HttpStatus.OK);
@@ -693,6 +700,7 @@ public class KPIValueController {
 	@GetMapping("/api/v1/kpidata/{kpiId}/values")
 	public ResponseEntity<Object> getAllKPIValueV1Pageable(@PathVariable("kpiId") Long kpiId,
 			@RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			@RequestParam(value = "pageNumber", required = false, defaultValue = "-1") int pageNumber,
 			@RequestParam(value = "pageSize", required = false, defaultValue = "10") int pageSize,
@@ -760,14 +768,14 @@ public class KPIValueController {
 				logger.info("Returning KpiValuepage ");
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						kpiId, ActivityAccessType.READ, KPIActivityDomainType.VALUE);
+						sourceId, kpiId, ActivityAccessType.READ, KPIActivityDomainType.VALUE);
 
 				return new ResponseEntity<>(pageKpiValue, HttpStatus.OK);
 			} else {
 				logger.info("Returning KpiValuelist ");
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						kpiId, ActivityAccessType.READ, KPIActivityDomainType.VALUE);
+						sourceId, kpiId, ActivityAccessType.READ, KPIActivityDomainType.VALUE);
 
 				return new ResponseEntity<>(listKpiValue, HttpStatus.OK);
 			}
@@ -799,6 +807,7 @@ public class KPIValueController {
 	@GetMapping("/api/v1/public/kpidata/{kpiId}/values")
 	public ResponseEntity<Object> getAllKPIValueOfPublicKPIV1Pageable(@PathVariable("kpiId") Long kpiId,
 			@RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			@RequestParam(value = "pageNumber", required = false, defaultValue = "-1") int pageNumber,
 			@RequestParam(value = "pageSize", required = false, defaultValue = "10") int pageSize,
@@ -863,14 +872,14 @@ public class KPIValueController {
 			} else if (pageKpiValue != null) {
 				logger.info("Returning KpiValuepage ");
 
-				kpiActivityService.saveActivityFromUsername("PUBLIC", sourceRequest, kpiId, ActivityAccessType.READ,
+				kpiActivityService.saveActivityFromUsername("PUBLIC", sourceRequest, sourceId, kpiId, ActivityAccessType.READ,
 						KPIActivityDomainType.VALUE);
 
 				return new ResponseEntity<>(pageKpiValue, HttpStatus.OK);
 			} else {
 				logger.info("Returning KpiValuelist ");
 
-				kpiActivityService.saveActivityFromUsername("PUBLIC", sourceRequest, kpiId, ActivityAccessType.READ,
+				kpiActivityService.saveActivityFromUsername("PUBLIC", sourceRequest, sourceId, kpiId, ActivityAccessType.READ,
 						KPIActivityDomainType.VALUE);
 
 				return new ResponseEntity<>(listKpiValue, HttpStatus.OK);
@@ -904,6 +913,7 @@ public class KPIValueController {
 	@GetMapping("/api/v1/public/kpidata/{kpiId}/values/dates")
 	public ResponseEntity<Object> getDistinctKPIValuesDateOfPublicKPIV1(@PathVariable("kpiId") Long kpiId,
 			@RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			@RequestParam(value = "checkCoordinates", required = false, defaultValue = "true") boolean checkCoordinates,
 			HttpServletRequest request) {
@@ -933,7 +943,7 @@ public class KPIValueController {
 			if (listKpiValueDate != null) {
 				logger.info("Returning KpiValuesDatesList ");
 
-				kpiActivityService.saveActivityFromUsername("PUBLIC", sourceRequest, kpiId, ActivityAccessType.READ,
+				kpiActivityService.saveActivityFromUsername("PUBLIC", sourceRequest, sourceId, kpiId, ActivityAccessType.READ,
 						KPIActivityDomainType.VALUEDATES);
 
 				return new ResponseEntity<>(listKpiValueDate, HttpStatus.OK);
@@ -967,6 +977,7 @@ public class KPIValueController {
 	@GetMapping("/api/v1/kpidata/{kpiId}/values/dates")
 	public ResponseEntity<Object> getDistinctKPIValuesDateV1(@PathVariable("kpiId") Long kpiId,
 			@RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			@RequestParam(value = "checkCoordinates", required = false, defaultValue = "true") boolean checkCoordinates,
 			HttpServletRequest request) {
@@ -999,7 +1010,7 @@ public class KPIValueController {
 				logger.info("Returning KpiValuesDatesList ");
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						kpiId, ActivityAccessType.READ, KPIActivityDomainType.VALUEDATES);
+						sourceId, kpiId, ActivityAccessType.READ, KPIActivityDomainType.VALUEDATES);
 
 				return new ResponseEntity<>(listKpiValueDate, HttpStatus.OK);
 			}

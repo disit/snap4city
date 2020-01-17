@@ -7,11 +7,11 @@ var KPIDelegationTabler = {
         KPIDelegationTabler.currentKpiId = kpiId;
         KPIDelegationTabler.currentHighLevelType = highLevelType;
         KPIEditor.keycloak.updateToken(30).success(function () {
-            var query = QueryManager.createGetKPIDelegationTableQuery(KPIDelegationTabler.currentKpiId, KPIDelegationPager.currentPage, KPIDelegationPager.currentSize, KPIDelegationSorter.currentSortDirection, KPIDelegationSorter.currentSortBy, KPIDelegationFilter.currentSearchKey, KPIEditor.keycloak.token);
-            APIClient.executeGetQuery(query, KPIDelegationTabler.successQuery, KPIDelegationTabler.errorQuery);
+            var query = QueryManager.createGetKPIDelegationTableQuery(KPIDelegationTabler.currentKpiId, KPIDelegationPager.currentPage, KPIDelegationPager.currentSize, KPIDelegationSorter.currentSortDirection, KPIDelegationSorter.currentSortBy, KPIDelegationFilter.currentSearchKey);
+            APIClient.executeGetQuery(query, KPIEditor.keycloak.token, KPIDelegationTabler.successQuery, KPIDelegationTabler.errorQuery);
         }).error(function () {
-            var query = QueryManager.createGetKPIDelegationTableQuery(KPIDelegationTabler.currentKpiId, KPIDelegationPager.currentPage, KPIDelegationPager.currentSize, KPIDelegationSorter.currentSortDirection, KPIDelegationSorter.currentSortBy, KPIDelegationFilter.currentSearchKey, Authentication.refreshTokenGetAccessToken());
-            APIClient.executeGetQuery(query, KPIDelegationTabler.successQuery, KPIDelegationTabler.errorQuery);
+            var query = QueryManager.createGetKPIDelegationTableQuery(KPIDelegationTabler.currentKpiId, KPIDelegationPager.currentPage, KPIDelegationPager.currentSize, KPIDelegationSorter.currentSortDirection, KPIDelegationSorter.currentSortBy, KPIDelegationFilter.currentSearchKey);
+            APIClient.executeGetQuery(query, Authentication.refreshTokenGetAccessToken(), KPIDelegationTabler.successQuery, KPIDelegationTabler.errorQuery);
         });
     },
 
@@ -91,11 +91,11 @@ var KPIDelegationTabler = {
     editKPIDelegationModal: function (_kpiId, _id) {
         if (_id != null && _id != "") {
             KPIEditor.keycloak.updateToken(30).success(function () {
-                var query = QueryManager.createGetKPIDelegationByIdQuery(KPIEditor.keycloak.token, _kpiId, _id);
-                APIClient.executeGetQuery(query, KPIDelegationTabler.successEditKPIDelegationModal, KPIDelegationTabler.errorQuery);
+                var query = QueryManager.createGetKPIDelegationByIdQuery( _kpiId, _id);
+                APIClient.executeGetQuery(query, KPIEditor.keycloak.token, KPIDelegationTabler.successEditKPIDelegationModal, KPIDelegationTabler.errorQuery);
             }).error(function () {
-                var query = QueryManager.createGetKPIDelegationByIdQuery(Authentication.refreshTokenGetAccessToken(), _kpiId, _id);
-                APIClient.executeGetQuery(query, KPIDelegationTabler.successEditKPIDelegationModal, KPIDelegationTabler.errorQuery);
+                var query = QueryManager.createGetKPIDelegationByIdQuery(_kpiId, _id);
+                APIClient.executeGetQuery(query, Authentication.refreshTokenGetAccessToken(), KPIDelegationTabler.successEditKPIDelegationModal, KPIDelegationTabler.errorQuery);
             });
         } else {
             KPIDelegationTabler.successEditKPIDelegationModal(null);
@@ -151,47 +151,47 @@ var KPIDelegationTabler = {
         console.log(kpiDelegation);
         if (typeof kpiDelegation.id != "undefined") {
             KPIEditor.keycloak.updateToken(30).success(function () {
-                var query = QueryManager.createPatchKPIDelegationQuery(KPIEditor.keycloak.token, kpiDelegation.elementId, kpiDelegation.id);
-                APIClient.executePatchQuery(query, kpiDelegation, KPIDelegationTabler.successSaveKPIDelegation, KPIDelegationTabler.errorQuery);
+                var query = QueryManager.createPatchKPIDelegationQuery(kpiDelegation.elementId, kpiDelegation.id);
+                APIClient.executePatchQuery(query, kpiDelegation, KPIEditor.keycloak.token,  KPIDelegationTabler.successSaveKPIDelegation, KPIDelegationTabler.errorQuery);
             }).error(function () {
-                var query = QueryManager.createPatchKPIDelegationQuery(Authentication.refreshTokenGetAccessToken(), kpiDelegation.elementId, kpiDelegation.id);
-                APIClient.executePatchQuery(query, kpiDelegation, KPIDelegationTabler.successSaveKPIDelegation, KPIDelegationTabler.errorQuery);
+                var query = QueryManager.createPatchKPIDelegationQuery(kpiDelegation.elementId, kpiDelegation.id);
+                APIClient.executePatchQuery(query, kpiDelegation, Authentication.refreshTokenGetAccessToken(),  KPIDelegationTabler.successSaveKPIDelegation, KPIDelegationTabler.errorQuery);
             });
         } else {
             KPIEditor.keycloak.updateToken(30).success(function () {
-                var query = QueryManager.createPostKPIDelegationQuery(KPIEditor.keycloak.token, kpiDelegation.elementId);
-                APIClient.executePostQuery(query, kpiDelegation, KPIDelegationTabler.successSaveKPIDelegation, KPIDelegationTabler.errorQuery);
+                var query = QueryManager.createPostKPIDelegationQuery(kpiDelegation.elementId);
+                APIClient.executePostQuery(query, kpiDelegation, KPIEditor.keycloak.token,  KPIDelegationTabler.successSaveKPIDelegation, KPIDelegationTabler.errorQuery);
             }).error(function () {
-                var query = QueryManager.createPostKPIDelegationQuery(Authentication.refreshTokenGetAccessToken(), kpiDelegation.elementId);
-                APIClient.executePostQuery(query, kpiDelegation, KPIDelegationTabler.successSaveKPIDelegation, KPIDelegationTabler.errorQuery);
+                var query = QueryManager.createPostKPIDelegationQuery(kpiDelegation.elementId);
+                APIClient.executePostQuery(query, kpiDelegation, Authentication.refreshTokenGetAccessToken(),  KPIDelegationTabler.successSaveKPIDelegation, KPIDelegationTabler.errorQuery);
             });
         }
     },
 
     getDelegations: function (_kpiId, successCallBack, errorCallBack) {
         KPIEditor.keycloak.updateToken(30).success(function () {
-            var query = QueryManager.createGetKPIDelegationTableQuery(_kpiId, null, null, null, null, null, KPIEditor.keycloak.token);
-            APIClient.executeGetQuery(query, successCallBack, errorCallBack);
+            var query = QueryManager.createGetKPIDelegationTableQuery(_kpiId, null, null, null, null, null);
+            APIClient.executeGetQuery(query, KPIEditor.keycloak.token, successCallBack, errorCallBack);
         }).error(function () {
-            var query = QueryManager.createGetKPIDelegationTableQuery(_kpiId, null, null, null, null, null, Authentication.refreshTokenGetAccessToken());
-            APIClient.executeGetQuery(query, successCallBack, errorCallBack);
+            var query = QueryManager.createGetKPIDelegationTableQuery(_kpiId, null, null, null, null, null);
+            APIClient.executeGetQuery(query, Authentication.refreshTokenGetAccessToken(), successCallBack, errorCallBack);
         });
     },
 
     deleteKPIDelegation(_kpiId, _id, successCallBack, errorCallBack) {
         KPIEditor.keycloak.updateToken(30).success(function () {
-            var query = QueryManager.createDeleteKPIDelegationQuery(KPIEditor.keycloak.token, _kpiId, _id);
+            var query = QueryManager.createDeleteKPIDelegationQuery(_kpiId, _id);
             if (successCallBack != null && errorCallBack != null) {
-                APIClient.executeDeleteQuery(query, successCallBack, errorCallBack);
+                APIClient.executeDeleteQuery(query, KPIEditor.keycloak.token, successCallBack, errorCallBack);
             } else {
-                APIClient.executeDeleteQuery(query, KPIDelegationTabler.successSaveKPIDelegation, KPIDelegationTabler.errorQuery);
+                APIClient.executeDeleteQuery(query, KPIEditor.keycloak.token, KPIDelegationTabler.successSaveKPIDelegation, KPIDelegationTabler.errorQuery);
             }
         }).error(function () {
-            var query = QueryManager.createDeleteKPIDelegationQuery(Authentication.refreshTokenGetAccessToken(), _kpiId, _id);
+            var query = QueryManager.createDeleteKPIDelegationQuery(_kpiId, _id);
             if (successCallBack != null && errorCallBack != null) {
-                APIClient.executeDeleteQuery(query, successCallBack, errorCallBack);
+                APIClient.executeDeleteQuery(query, Authentication.refreshTokenGetAccessToken(), successCallBack, errorCallBack);
             } else {
-                APIClient.executeDeleteQuery(query, KPIDelegationTabler.successSaveKPIDelegation, KPIDelegationTabler.errorQuery);
+                APIClient.executeDeleteQuery(query, Authentication.refreshTokenGetAccessToken(), KPIDelegationTabler.successSaveKPIDelegation, KPIDelegationTabler.errorQuery);
             }
         });
     },

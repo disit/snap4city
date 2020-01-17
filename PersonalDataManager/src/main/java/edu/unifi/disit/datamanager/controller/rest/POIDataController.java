@@ -76,6 +76,7 @@ public class POIDataController {
 	@GetMapping("/api/v1/poidata/{id}")
 	public ResponseEntity<Object> getPOIDataV1ById(@PathVariable("id") Long id,
 			@RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "from", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") Date from,
 			@RequestParam(value = "to", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") Date to,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
@@ -110,18 +111,18 @@ public class POIDataController {
 				}
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						id, ActivityAccessType.READ, KPIActivityDomainType.POIVALUE);
+						sourceId, id, ActivityAccessType.READ, KPIActivityDomainType.POIVALUE);
 
 				List<KPIMetadata> listKPIMetadata = kpiMetadataService.findByKpiIdNoPages(id);
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						id, ActivityAccessType.READ, KPIActivityDomainType.POIMETADATA);
+						sourceId, id, ActivityAccessType.READ, KPIActivityDomainType.POIMETADATA);
 
 				logger.info("Returning kpiData as POIData {}", kpiData.getId());
 				POIData poiData = new POIData(kpiData, listKPIValue, listKPIMetadata);
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						id, ActivityAccessType.READ, KPIActivityDomainType.POI);
+						sourceId, id, ActivityAccessType.READ, KPIActivityDomainType.POI);
 				return new ResponseEntity<>(poiData, HttpStatus.OK);
 			}
 		} catch (CredentialsException d) {
@@ -137,6 +138,7 @@ public class POIDataController {
 		@GetMapping("/api/v1/public/poidata/{id}")
 		public ResponseEntity<Object> getPublicPOIDataV1ById(@PathVariable("id") Long id,
 				@RequestParam(value = "sourceRequest") String sourceRequest,
+				@RequestParam(value = "sourceId", required = false) String sourceId,
 				@RequestParam(value = "from", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") Date from,
 				@RequestParam(value = "to", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") Date to,
 				@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
@@ -170,18 +172,18 @@ public class POIDataController {
 					}
 
 					kpiActivityService.saveActivityFromUsername("PUBLIC", sourceRequest,
-							id, ActivityAccessType.READ, KPIActivityDomainType.POIVALUE);
+							sourceId, id, ActivityAccessType.READ, KPIActivityDomainType.POIVALUE);
 
 					List<KPIMetadata> listKPIMetadata = kpiMetadataService.findByKpiIdNoPages(id);
 
 					kpiActivityService.saveActivityFromUsername("PUBLIC", sourceRequest,
-							id, ActivityAccessType.READ, KPIActivityDomainType.POIMETADATA);
+							sourceId, id, ActivityAccessType.READ, KPIActivityDomainType.POIMETADATA);
 
 					logger.info("Returning kpiData as POIData {}", kpiData.getId());
 					POIData poiData = new POIData(kpiData, listKPIValue, listKPIMetadata);
 
 					kpiActivityService.saveActivityFromUsername("PUBLIC", sourceRequest,
-							id, ActivityAccessType.READ, KPIActivityDomainType.POI);
+							sourceId, id, ActivityAccessType.READ, KPIActivityDomainType.POI);
 					return new ResponseEntity<>(poiData, HttpStatus.OK);
 				}
 			} catch (CredentialsException d) {
@@ -211,7 +213,7 @@ public class POIDataController {
 			KPIData newKpiData = kpiDataService.saveKPIData(poiData.getKpidata());
 
 			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-					newKpiData.getId(), ActivityAccessType.WRITE, KPIActivityDomainType.DATA);
+					null,newKpiData.getId(), ActivityAccessType.WRITE, KPIActivityDomainType.DATA);
 
 			logger.info("Posted kpiData {}", newKpiData.getId());
 
@@ -220,7 +222,7 @@ public class POIDataController {
 				kpiMetadataService.saveKPIMetadata(kpiMetadata);
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						newKpiData.getId(), ActivityAccessType.WRITE, KPIActivityDomainType.METADATA);
+						null,newKpiData.getId(), ActivityAccessType.WRITE, KPIActivityDomainType.METADATA);
 			}
 			return new ResponseEntity<>(poiData, HttpStatus.OK);
 		} catch (CredentialsException d) {
@@ -240,6 +242,7 @@ public class POIDataController {
 	@PostMapping("/api/v1/poidata")
 	public ResponseEntity<Object> postPOIDataV1(@RequestBody POIData poiData,
 			@RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) {
 
@@ -249,13 +252,13 @@ public class POIDataController {
 			KPIData newKpiData = kpiDataService.saveKPIData(poiData.getKpidata());
 
 			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-					newKpiData.getId(), ActivityAccessType.WRITE, KPIActivityDomainType.DATA);
+					sourceId, newKpiData.getId(), ActivityAccessType.WRITE, KPIActivityDomainType.DATA);
 
 			logger.info("Posted kpiData {}", newKpiData.getId());
 
 			if (newKpiData.getOwnership().equals("public")) {
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						newKpiData.getId(), ActivityAccessType.READ, KPIActivityDomainType.CHANGEOWNERSHIP);
+						sourceId, newKpiData.getId(), ActivityAccessType.READ, KPIActivityDomainType.CHANGEOWNERSHIP);
 
 				kpiDataService.makeKPIDataPublic(newKpiData.getUsername(), newKpiData.getId(),
 						newKpiData.getHighLevelType(), lang);
@@ -266,7 +269,7 @@ public class POIDataController {
 				kpiMetadataService.saveKPIMetadata(kpiMetadata);
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						newKpiData.getId(), ActivityAccessType.WRITE, KPIActivityDomainType.METADATA);
+						sourceId, newKpiData.getId(), ActivityAccessType.WRITE, KPIActivityDomainType.METADATA);
 			}
 
 			return new ResponseEntity<>(newKpiData, HttpStatus.OK);
@@ -343,7 +346,7 @@ public class POIDataController {
 							List<KPIValue> kpiValues = kpiValueService.findByKpiIdGeoLocated(kpiData.getId());
 
 							kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang),
-									sourceRequest, kpiData.getId(), ActivityAccessType.READ,
+									sourceRequest, null, kpiData.getId(), ActivityAccessType.READ,
 									KPIActivityDomainType.POIVALUE);
 
 							if (!kpiValues.isEmpty()) {
@@ -363,7 +366,7 @@ public class POIDataController {
 				logger.info("Returning kpidatalist as GeoJson");
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						null, ActivityAccessType.READ, KPIActivityDomainType.POI);
+						null, null, ActivityAccessType.READ, KPIActivityDomainType.POI);
 
 				return new ResponseEntity<>(listPoiData, HttpStatus.OK);
 			}
@@ -394,6 +397,7 @@ public class POIDataController {
 		@GetMapping("/api/v1/public/poidata")
 		public ResponseEntity<Object> getPOIDataPublicV1Pageable(
 				@RequestParam(value = "sourceRequest") String sourceRequest,
+				@RequestParam(value = "sourceId", required = false) String sourceId,
 				@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 				@RequestParam(value = "searchKey", required = false, defaultValue = "") String searchKey,
 				@RequestParam(value = "highLevelType", required = false, defaultValue = "") String highLevelType,
@@ -436,7 +440,7 @@ public class POIDataController {
 								List<KPIValue> kpiValues = kpiValueService.findByKpiIdGeoLocated(kpiData.getId());
 
 								kpiActivityService.saveActivityFromUsername("PUBLIC",
-										sourceRequest, kpiData.getId(), ActivityAccessType.READ,
+										sourceRequest, sourceId, kpiData.getId(), ActivityAccessType.READ,
 										KPIActivityDomainType.POIVALUE);
 
 								if (!kpiValues.isEmpty()) {
@@ -456,7 +460,7 @@ public class POIDataController {
 					logger.info("Returning kpidatalist as GeoJson");
 
 					kpiActivityService.saveActivityFromUsername("PUBLIC", sourceRequest,
-							null, ActivityAccessType.READ, KPIActivityDomainType.POI);
+							sourceId, null, ActivityAccessType.READ, KPIActivityDomainType.POI);
 
 					return new ResponseEntity<>(listPoiData, HttpStatus.OK);
 				}
@@ -487,6 +491,7 @@ public class POIDataController {
 	@GetMapping("/api/v1/poidata/delegated")
 	public ResponseEntity<Object> getDelegatedPOIDataV1Pageable(
 			@RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			@RequestParam(value = "searchKey", required = false, defaultValue = "") String searchKey,
 			@RequestParam(value = "highLevelType", required = false, defaultValue = "") String highLevelType,
@@ -529,7 +534,7 @@ public class POIDataController {
 							List<KPIValue> kpiValues = kpiValueService.findByKpiIdGeoLocated(kpiData.getId());
 
 							kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang),
-									sourceRequest, kpiData.getId(), ActivityAccessType.READ,
+									sourceRequest, sourceId, kpiData.getId(), ActivityAccessType.READ,
 									KPIActivityDomainType.POIVALUE);
 
 							if (!kpiValues.isEmpty()) {
@@ -549,7 +554,7 @@ public class POIDataController {
 				logger.info("Returning kpidatalist as GeoJson");
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						null, ActivityAccessType.READ, KPIActivityDomainType.POI);
+						sourceId, null, ActivityAccessType.READ, KPIActivityDomainType.POI);
 
 				return new ResponseEntity<>(listPoiData, HttpStatus.OK);
 			}
@@ -579,6 +584,7 @@ public class POIDataController {
 	// -------------------GET Own POI Data Pageable ----------
 	@GetMapping("/api/v1/poidata")
 	public ResponseEntity<Object> getOwnPOIDataV1(@RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			@RequestParam(value = "searchKey", required = false, defaultValue = "") String searchKey,
 			@RequestParam(value = "highLevelType", required = false, defaultValue = "") String highLevelType,
@@ -641,7 +647,7 @@ public class POIDataController {
 						}
 					}
 					if (kpiData.getLatitude() != null && !kpiData.getLatitude().equals("") && kpiData.getLongitude() != null
-							&& kpiData.getLongitude().equals("")) {
+							&& !kpiData.getLongitude().equals("")) {
 						listPoiData.add(new POIData(kpiData));
 					}
 
@@ -650,7 +656,7 @@ public class POIDataController {
 				logger.info("Returning kpidatalist as GeoJson");
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						null, ActivityAccessType.READ, KPIActivityDomainType.POI);
+						sourceId, null, ActivityAccessType.READ, KPIActivityDomainType.POI);
 
 				return new ResponseEntity<>(listPoiData, HttpStatus.OK);
 			}

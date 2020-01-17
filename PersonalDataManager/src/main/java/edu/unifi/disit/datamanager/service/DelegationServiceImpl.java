@@ -33,6 +33,7 @@ import edu.unifi.disit.datamanager.datamodel.profiledb.OwnershipDAO;
 import edu.unifi.disit.datamanager.exception.CredentialsException;
 import edu.unifi.disit.datamanager.exception.DelegationNotValidException;
 import edu.unifi.disit.datamanager.exception.LDAPException;
+import org.springframework.data.domain.PageRequest;
 
 @Service
 public class DelegationServiceImpl implements IDelegationService {
@@ -242,5 +243,17 @@ public class DelegationServiceImpl implements IDelegationService {
 		}
 		return toreturn;
 	}
+
+    @Override
+    public Page<Delegation> findByElementIdWithoutAnonymousFiltered(String elementId, String searchKey, PageRequest pageable) {
+        logger.debug("findByElementId INVOKED on elementId {} usernameDelegated {} searchKey {}", elementId, "ANONYMOUS", "%"+searchKey+"%");
+	return delegationRepo.findByElementIdAndDeleteTimeIsNullAndUsernameDelegatedNotLikeAndUsernameDelegatedLike(elementId, "ANONYMOUS", "%"+searchKey+"%", pageable);
+    }
+
+    @Override
+    public List<Delegation> findByElementIdNoPagesWithoutAnonymousFiltered(String elementId, String searchKey) {
+        logger.debug("findByElementId INVOKED on elementId {} usernameDelegated {} searchKey {}", elementId, "ANONYMOUS", "%"+searchKey+"%");
+        return delegationRepo.findByElementIdAndDeleteTimeIsNullAndUsernameDelegatedNotLikeAndUsernameDelegatedLike(elementId, "ANONYMOUS", "%"+searchKey+"%");
+    }
 
 }

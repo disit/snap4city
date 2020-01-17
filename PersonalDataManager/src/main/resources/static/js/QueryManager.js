@@ -2,96 +2,96 @@ var QueryManager = {
 
     sourceRequest: "kpieditor",
 
-    createGetKPIDataTableQuery: function (privacy, pageNumber, pageSize, sortDirection, sortBy, searchKey, accessToken) {
-        return "kpidata/" + privacy + "/?sourceRequest=" + QueryManager.sourceRequest + "&accessToken=" + accessToken + (pageNumber || pageNumber == 0 ? "&pageNumber=" + pageNumber : "") + (pageSize ? "&pageSize=" + pageSize : "") + (sortDirection ? "&sortDirection=" + sortDirection : "") + (sortBy ? "&sortBy=" + sortBy : "") + (searchKey ? "&searchKey=" + searchKey : "");
+    createGetKPIDataTableQuery: function (privacy, pageNumber, pageSize, sortDirection, sortBy, searchKey) {
+        return "kpidata/" + privacy + "/?sourceRequest=" + QueryManager.sourceRequest  + (pageNumber || pageNumber == 0 ? "&pageNumber=" + pageNumber : "") + (pageSize ? "&pageSize=" + pageSize : "") + (sortDirection ? "&sortDirection=" + sortDirection : "") + (sortBy ? "&sortBy=" + sortBy : "") + (searchKey ? "&searchKey=" + searchKey : "");
     },
 
-    createGetKPIDataByIdQuery: function (id, accessToken) {
-        return "kpidata/" + id + "?sourceRequest=" + QueryManager.sourceRequest + "&accessToken=" + accessToken;
+    createGetKPIDataByIdQuery: function (id) {
+        return "kpidata/" + id + "?sourceRequest=" + QueryManager.sourceRequest ;
     },
 
-    createPostKPIDataQuery: function (accessToken) {
-        return "kpidata/?sourceRequest=" + QueryManager.sourceRequest + "&accessToken=" + accessToken;
+    createPostKPIDataQuery: function () {
+        return "kpidata/?sourceRequest=" + QueryManager.sourceRequest ;
     },
 
-    createPatchKPIDataQuery: function (accessToken, id) {
-        return "kpidata/"+ id + "/?sourceRequest=" + QueryManager.sourceRequest + "&accessToken=" + accessToken;
+    createPatchKPIDataQuery: function (id) {
+        return "kpidata/"+ id + "/?sourceRequest=" + QueryManager.sourceRequest ;
     },
 
-    createDeleteKPIDataQuery: function (accessToken, id) {
-        return "kpidata/"+ id + "/?sourceRequest=" + QueryManager.sourceRequest + "&accessToken=" + accessToken;
+    createDeleteKPIDataQuery: function (id) {
+        return "kpidata/"+ id + "/?sourceRequest=" + QueryManager.sourceRequest ;
     },
 
-    createGetKPIValueTableQuery: function (kpiId, pageNumber, pageSize, sortDirection, sortBy, searchKey, accessToken) {
-        return "kpidata/" + kpiId + "/values/?sourceRequest=" + QueryManager.sourceRequest + "&accessToken=" + accessToken + (pageNumber || pageNumber == 0? "&pageNumber=" + pageNumber : "") + (pageSize ? "&pageSize=" + pageSize : "") + (sortDirection ? "&sortDirection=" + sortDirection : "") + (sortBy ? "&sortBy=" + sortBy : "") + (searchKey ? "&searchKey=" + searchKey : "");
+    createGetKPIValueTableQuery: function (kpiId, pageNumber, pageSize, sortDirection, sortBy, searchKey) {
+        return "kpidata/" + kpiId + "/values/?sourceRequest=" + QueryManager.sourceRequest  + (pageNumber || pageNumber == 0? "&pageNumber=" + pageNumber : "") + (pageSize ? "&pageSize=" + pageSize : "") + (sortDirection ? "&sortDirection=" + sortDirection : "") + (sortBy ? "&sortBy=" + sortBy : "") + (searchKey ? "&searchKey=" + searchKey : "");
     },
 
-    createGetKPIValueByIdQuery: function (accessToken, kpiId, id) {
-        return "kpidata/" + kpiId + "/values/" + id + "/?sourceRequest=" + QueryManager.sourceRequest + "&accessToken=" + accessToken;
+    createGetKPIValueByIdQuery: function (kpiId, id) {
+        return "kpidata/" + kpiId + "/values/" + id + "/?sourceRequest=" + QueryManager.sourceRequest ;
     },
 
-    createPostKPIValueQuery: function (accessToken, kpiId) {
-        return "kpidata/" + kpiId + "/values/?sourceRequest=" + QueryManager.sourceRequest + "&accessToken=" + accessToken;
+    createPostKPIValueQuery: function (kpiId) {
+        return "kpidata/" + kpiId + "/values/?sourceRequest=" + QueryManager.sourceRequest ;
     },
 
-    createPatchKPIValueQuery: function (accessToken, kpiId, id) {
-        return "kpidata/" + kpiId + "/values/" + id + "/?sourceRequest=" + QueryManager.sourceRequest + "&accessToken=" + accessToken;
+    createPatchKPIValueQuery: function (kpiId, id) {
+        return "kpidata/" + kpiId + "/values/" + id + "/?sourceRequest=" + QueryManager.sourceRequest ;
     },
 
-    createDeleteKPIValueQuery: function (accessToken, kpiId, id) {
-        return "kpidata/" + kpiId + "/values/" + id + "/?sourceRequest=" + QueryManager.sourceRequest + "&accessToken=" + accessToken;
+    createDeleteKPIValueQuery: function (kpiId, id) {
+        return "kpidata/" + kpiId + "/values/" + id + "/?sourceRequest=" + QueryManager.sourceRequest ;
     },
 
-    createGetKPIMetadataTableQuery: function (kpiId, pageNumber, pageSize, sortDirection, sortBy, searchKey, accessToken) {
-        return "kpidata/" + kpiId + "/metadata/?sourceRequest=" + QueryManager.sourceRequest + "&accessToken=" + accessToken + (pageNumber || pageNumber == 0? "&pageNumber=" + pageNumber : "") + (pageSize ? "&pageSize=" + pageSize : "") + (sortDirection ? "&sortDirection=" + sortDirection : "") + (sortBy ? "&sortBy=" + sortBy : "") + (searchKey ? "&searchKey=" + searchKey : "");
+    createGetKPIMetadataTableQuery: function (kpiId, pageNumber, pageSize, sortDirection, sortBy, searchKey) {
+        return "kpidata/" + kpiId + "/metadata/?sourceRequest=" + QueryManager.sourceRequest  + (pageNumber || pageNumber == 0? "&pageNumber=" + pageNumber : "") + (pageSize ? "&pageSize=" + pageSize : "") + (sortDirection ? "&sortDirection=" + sortDirection : "") + (sortBy ? "&sortBy=" + sortBy : "") + (searchKey ? "&searchKey=" + searchKey : "");
     },
 
-    createGetKPIMetadataByIdQuery: function (accessToken, kpiId, id) {
-        return "kpidata/" + kpiId + "/metadata/" + id + "/?sourceRequest=" + QueryManager.sourceRequest + "&accessToken=" + accessToken;
+    createGetKPIMetadataByIdQuery: function (kpiId, id) {
+        return "kpidata/" + kpiId + "/metadata/" + id + "/?sourceRequest=" + QueryManager.sourceRequest ;
     },
 
-    createPostKPIMetadataQuery: function (accessToken, kpiId) {
-        return "kpidata/" + kpiId + "/metadata/?sourceRequest=" + QueryManager.sourceRequest + "&accessToken=" + accessToken;
+    createPostKPIMetadataQuery: function (kpiId) {
+        return "kpidata/" + kpiId + "/metadata/?sourceRequest=" + QueryManager.sourceRequest ;
     },
 
-    createPatchKPIMetadataQuery: function (accessToken, kpiId, id) {
-        return "kpidata/" + kpiId + "/metadata/" + id + "/?sourceRequest=" + QueryManager.sourceRequest + "&accessToken=" + accessToken;
+    createPatchKPIMetadataQuery: function (kpiId, id) {
+        return "kpidata/" + kpiId + "/metadata/" + id + "/?sourceRequest=" + QueryManager.sourceRequest ;
     },
 
-    createDeleteKPIMetadataQuery: function (accessToken, kpiId, id) {
-        return "kpidata/" + kpiId + "/metadata/" + id + "/?sourceRequest=" + QueryManager.sourceRequest + "&accessToken=" + accessToken;
+    createDeleteKPIMetadataQuery: function (kpiId, id) {
+        return "kpidata/" + kpiId + "/metadata/" + id + "/?sourceRequest=" + QueryManager.sourceRequest ;
     },
 
-    createGetKPIDelegationTableQuery: function (kpiId, pageNumber, pageSize, sortDirection, sortBy, searchKey, accessToken) {
-        return "kpidata/" + kpiId + "/delegations/?sourceRequest=" + QueryManager.sourceRequest + "&accessToken=" + accessToken + (pageNumber || pageNumber == 0? "&pageNumber=" + pageNumber : "") + (pageSize ? "&pageSize=" + pageSize : "") + (sortDirection ? "&sortDirection=" + sortDirection : "") + (sortBy ? "&sortBy=" + sortBy : "") + (searchKey ? "&searchKey=" + searchKey : "");
+    createGetKPIDelegationTableQuery: function (kpiId, pageNumber, pageSize, sortDirection, sortBy, searchKey) {
+        return "kpidata/" + kpiId + "/delegations/?sourceRequest=" + QueryManager.sourceRequest  + (pageNumber || pageNumber == 0? "&pageNumber=" + pageNumber : "") + (pageSize ? "&pageSize=" + pageSize : "") + (sortDirection ? "&sortDirection=" + sortDirection : "") + (sortBy ? "&sortBy=" + sortBy : "") + (searchKey ? "&searchKey=" + searchKey : "");
     },
 
-    createGetKPIDelegationByIdQuery: function (accessToken, kpiId, id) {
-        return "kpidata/" + kpiId + "/delegations/" + id + "?sourceRequest=" + QueryManager.sourceRequest + "&accessToken=" + accessToken;
+    createGetKPIDelegationByIdQuery: function (kpiId, id) {
+        return "kpidata/" + kpiId + "/delegations/" + id + "?sourceRequest=" + QueryManager.sourceRequest ;
     },
 
-    createPostKPIDelegationQuery: function (accessToken, kpiId) {
-        return "kpidata/" + kpiId + "/delegations/?sourceRequest=" + QueryManager.sourceRequest + "&accessToken=" + accessToken;
+    createPostKPIDelegationQuery: function (kpiId) {
+        return "kpidata/" + kpiId + "/delegations/?sourceRequest=" + QueryManager.sourceRequest ;
     },
 
-    createPatchKPIDelegationQuery: function (accessToken, kpiId, id) {
-        return "kpidata/" + kpiId + "/delegations/" + id + "/?sourceRequest=" + QueryManager.sourceRequest + "&accessToken=" + accessToken;
+    createPatchKPIDelegationQuery: function (kpiId, id) {
+        return "kpidata/" + kpiId + "/delegations/" + id + "/?sourceRequest=" + QueryManager.sourceRequest ;
     },
 
-    createDeleteKPIDelegationQuery: function (accessToken, kpiId, id) {
-        return "kpidata/" + kpiId + "/delegations/" + id + "/?sourceRequest=" + QueryManager.sourceRequest + "&accessToken=" + accessToken;
+    createDeleteKPIDelegationQuery: function (kpiId, id) {
+        return "kpidata/" + kpiId + "/delegations/" + id + "/?sourceRequest=" + QueryManager.sourceRequest ;
     },
 
-    createAddMyPOIQuery: function(accessToken, highLevelType, lang, searchKey){
-        return "poidata?sourceRequest=" + QueryManager.sourceRequest + (highLevelType ? "&highLevelType=" + highLevelType : "") + "&accessToken=" + accessToken;
+    createAddMyPOIQuery: function(highLevelType, lang, searchKey){
+        return "poidata?sourceRequest=" + QueryManager.sourceRequest + (highLevelType ? "&highLevelType=" + highLevelType : "") ;
     },
 
-    createGetMyPOIQuery: function(idPOI, accessToken, fromDate, toDate){
-        return "poidata/"+ idPOI + "/?sourceRequest=" + QueryManager.sourceRequest + "&accessToken=" + accessToken + (fromDate ? "&from=" + fromDate : "") + (toDate ? "&to=" + toDate : "");
+    createGetMyPOIQuery: function(idPOI, fromDate, toDate){
+        return "poidata/"+ idPOI + "/?sourceRequest=" + QueryManager.sourceRequest  + (fromDate ? "&from=" + fromDate : "") + (toDate ? "&to=" + toDate : "");
     },
 
-    createGetUsernameOrganizationQuery: function(accessToken){
-        return "username/organization/?sourceRequest=" + QueryManager.sourceRequest + "&accessToken=" + accessToken;
+    createGetUsernameOrganizationQuery: function(){
+        return "username/organization/?sourceRequest=" + QueryManager.sourceRequest ;
     }
 
 }

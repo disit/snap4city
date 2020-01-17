@@ -96,6 +96,9 @@ public class POIDataDeserializer extends StdDeserializer<POIData> {
 		if (jnode.get("valueType") != null) {
 			poidata.getKpidata().setValueType(jnode.get("valueType").asText());
 		}
+		if (jnode.get("valueUnit") != null) {
+			poidata.getKpidata().setValueUnit(jnode.get("valueUnit").asText());
+		}
 		if (jnode.get("metric") != null) {
 			poidata.getKpidata().setMetric(jnode.get("metric").asText());
 		}

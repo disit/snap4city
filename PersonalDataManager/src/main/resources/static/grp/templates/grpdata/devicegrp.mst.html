@@ -1,0 +1,204 @@
+<!-- {{#response}} -->
+<div class="row" style="padding: 15px;">
+    <div class="col-md-1">
+        <select id="selectSizeKPIData" class="custom-select custom-select" onchange="DeviceGrpPager.setCurrentSize($('#selectSizeKPIData').val());DeviceGrpTabler.renderTable();">
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="200">200</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <div class="alert alert-light" style="padding: 0.375rem 0.75rem;margin-top: 0.5rem;">
+            <div class="form-check form-check-inline" onclick="DeviceGrpTabler.setPrivacy();">
+                <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value=""
+                    checked>
+                <label class="form-check-label" for="inlineRadio1">My</label>
+            </div>
+            <div class="form-check form-check-inline"  onclick="DeviceGrpTabler.setPrivacy();">
+                <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="organization">
+                <label class="form-check-label" for="inlineRadio2">Public in Org.</label>
+            </div>
+            <div class="form-check form-check-inline"  onclick="DeviceGrpTabler.setPrivacy();">
+                <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio3" value="delegated">
+                <label class="form-check-label" for="inlineRadio3">Delegated</label>
+            </div>
+            <div class="form-check form-check-inline"  onclick="DeviceGrpTabler.setPrivacy();">
+                <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio4" value="public">
+                <label class="form-check-label" for="inlineRadio4">Public</label>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="input-group">
+            <input type="text" id="inputFilterKPIData" class="form-control" placeholder="Filter Table" aria-label="Filter Table"
+                aria-describedby="button-addon2" max="{{totalPages}}" min="1" \>
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="button" onclick="$('#inputFilterKPIData').val('');DeviceGrpFilter.setCurrentSearchKey(''); DeviceGrpTabler.renderTable();"
+                    id="button-addon2" style="background-color: #eee;">&times;</button>
+            </div>
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="button" onclick="DeviceGrpFilter.setCurrentSearchKey($('#inputFilterKPIData').val()); DeviceGrpTabler.renderTable();"
+                    id="button-addon2" style="background-color: #eee;">Search</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-5" style="text-align: right; margin-bottom: 1rem;">
+        <button class="btn btn-warning" style="color: white; padding: 0.5rem;" type="button" onclick="DeviceGrpTabler.editDeviceGrpModal('','MyGroup');">New Group</button>
+    </div>
+    
+</div>
+<table class="table table-striped table-bordered" style="background-color: white">
+    <thead>
+    <tr style="background: rgb(0, 162, 211); color: rgb(255, 255, 255); font-size: 1em;">
+        <th onclick="DeviceGrpSorter.setSortOnField('id');DeviceGrpTabler.renderTable();" style="cursor: pointer;">No.
+            {{#sortidASC}}&darr;{{/sortidASC}}
+            {{#sortidDESC}}&uarr;{{/sortidDESC}}</th>
+        <th onclick="DeviceGrpSorter.setSortOnField('highLevelType');DeviceGrpTabler.renderTable();" style="cursor: pointer;">High
+            Level Type
+            {{#sorthighLevelTypeASC}}&darr;{{/sorthighLevelTypeASC}}
+            {{#sorthighLevelTypeDESC}}&uarr;{{/sorthighLevelTypeDESC}}</th>
+
+        <th onclick="DeviceGrpSorter.setSortOnField('name');DeviceGrpTabler.renderTable();" style="cursor: pointer;">
+            Name
+            {{#sortnameASC}}&darr;{{/sortnameASC}} {{#sortnameDESC}}&uarr;{{/sortnameDESC}}</th>
+        <th onclick="DeviceGrpSorter.setSortOnField('description');DeviceGrpTabler.renderTable();" style="cursor: pointer;">Description
+            {{#sortdescriptionASC}}&darr;{{/sortdescriptionASC}} {{#sortdescriptionDESC}}&uarr;{{/sortdescriptionDESC}}</th>
+        <th>Content</th>
+        
+        <th onclick="DeviceGrpSorter.setSortOnField('updateTime');DeviceGrpTabler.renderTable();" style="cursor: pointer;">Last
+            Change
+            {{#sortupdateTimeASC}}&darr;{{/sortupdateTimeASC}}
+            {{#sortupdateTimeDESC}}&uarr;{{/sortupdateTimeDESC}}</th>
+        <th onclick="DeviceGrpSorter.setSortOnField('username');DeviceGrpTabler.renderTable();" style="cursor: pointer;">Owner Username
+            {{#sortusernameASC}}&darr;{{/sortusernameASC}} {{#sortusernameDESC}}&uarr;{{/sortusernameDESC}}</th>
+        <th onclick="DeviceGrpSorter.setSortOnField('ownership');DeviceGrpTabler.renderTable();" style="cursor: pointer;">Ownership
+            {{#sortownershipASC}}&darr;{{/sortownershipASC}} {{#sortownershipDESC}}&uarr;{{/sortownershipDESC}}</th>
+
+         <!-- {{#enableEdit}} -->
+        <th>Visibility</th>
+         <!-- {{/enableEdit}} -->        
+        <th>Group Controls</th>
+
+    </tr>
+    </thead>
+    <tbody>
+    <!-- {{#content}} -->
+    <tr>
+        <td>{{id}}</td>
+        <td>{{highLevelType}}</td>
+        <td>{{name}}</td>
+        <td>{{description}}</td>
+        <td>
+            {{size}}&nbsp;
+            <!-- {{#viewEnabled}} --><button type="button" onclick="GrpElementFilter.setCurrentSearchKey(''); GrpElementTabler.renderTable({{id}},true);" class="btn viewDashBtn">View</button><!-- {{/viewEnabled}} -->
+            <!-- {{#enableEdit}} --><button type="button" onclick="GrpElementFilter.setCurrentSearchKey(''); GrpElementTabler.renderTable({{id}});" class="btn viewDashBtn">Edit</button><!-- {{/enableEdit}} -->            
+        </td>
+        <td>{{#timestampToDate}}{{updateTime}}{{/timestampToDate}}</td>
+        <td>{{username}}</td>
+        <td>{{ownership}}
+        <!-- {{#enableEdit}} -->
+        <!-- {{^isPublic}} -->
+        <button type="button" onclick="DeviceGrpTabler.makePublic({{id}});" class="btn editDashBtn">Make Public
+        </button>
+        <!-- {{/isPublic}} -->
+        <!-- {{#isPublic}} -->
+        <button type="button" onclick="DeviceGrpTabler.makePrivate({{id}});" class="btn editDashBtn">Make Private
+        </button>
+        <!-- {{/isPublic}} -->
+        <!-- {{/enableEdit}} -->
+            </td>
+        
+        
+        <!-- {{#enableEdit}} -->
+        <td>
+            
+            <button type="button" onclick="GrpDelegationFilter.setCurrentSearchKey(''); GrpDelegationTabler.renderTable({{id}}, '{{highLevelType}}');" class="btn editDashBtn">Delegate
+                Users</button>
+                <button type="button" onclick="DeviceGrpTabler.editDeviceGrpModal({{id}}, 'changeownership');" class="btn editDashBtn">Change
+                    Ownership</button>
+            <!--  <button type="button" onclick="KPIDelegationTabler.renderTable({{id}}, '{{highLevelType}}');" class="btn editDashBtn">Delegate
+                Groups</button> -->
+        </td>
+         <!-- {{/enableEdit}} -->
+         
+        <td><button type="button" onclick="DeviceGrpTabler.showGrpDataModal({{id}});" class="btn viewDashBtn">View</button>
+            <!-- {{#enableEdit}} -->
+            <button type="button" onclick="DeviceGrpTabler.editDeviceGrpModal({{id}}, '{{highLevelType}}');" class=" btn editDashBtn">Edit</button>
+            <button type="button" onclick="DeviceGrpTabler.clearDeviceGrpModal({{id}}, '{{highLevelType}}', '{{escapedName}}');" class=" btn deleteDashBtn" {{ifClearDisabled}}>Clear</button>             
+            <button type="button" onclick="DeviceGrpTabler.deleteDeviceGroupModal({{id}}, '{{highLevelType}}', '{{escapedName}}');"
+                class="btn deleteDashBtn">Delete</button>
+            <!-- {{/enableEdit}} -->
+        </td>
+
+    </tr>
+    <!-- {{/content}} -->
+    </tbody>
+</table>
+</div>
+
+
+<div class="row">
+    <div class="col-sm-3">
+        <div class="pagination" style="background-color: #eee; text-align: center">
+            <p>Showing <span class="badge">{{showingFrom}}</span> to
+                <span class="badge"> {{showingTo}}</span>
+                of
+                <span class="badge">{{totalElements}}</span>
+               Device Groups</p>
+        </div>
+    </div>
+
+    <div class="col-sm-6">
+        <!-- Pagination Bar -->
+        <div th:fragment='paginationbar'>
+            <div class="text-center">
+                <ul class='pagination pagination-centered'>
+                    <li class="page-item {{#first}} disabled {{/first}}">
+                        <span class="page-link" style="color: #337ab7" onclick="DeviceGrpPager.setCurrentPage(0); DeviceGrpTabler.renderTable();">First</span>
+                    </li>
+                    <li class="page-item {{#first}} disabled {{/first}}">
+                        <span class="page-link" style="color: #337ab7" onclick="DeviceGrpPager.setCurrentPage({{number}} - 1); DeviceGrpTabler.renderTable();">&lt;</span>
+                    </li>
+                    <li class="page-item {{#disableTwoPreviousNumber}} disabled {{/disableTwoPreviousNumber}}">
+                        <span class="page-link" style="color: #337ab7" onclick="DeviceGrpPager.setCurrentPage({{number}} - 2); DeviceGrpTabler.renderTable();">{{twoPreviousNumber}}</span>
+                    </li>
+                    <li class="page-item {{#disablePreviousNumber}} disabled {{/disablePreviousNumber}}">
+                        <span class="page-link" style="color: #337ab7" onclick="DeviceGrpPager.setCurrentPage({{number}} - 1); DeviceGrpTabler.renderTable();">{{previousNumber}}</span>
+                    </li>
+                    <li class="page-item">
+                        <span class="page-link" style="background-color: #337ab7;border-color: #337ab7;color: white">
+                            {{labelNumber}}</span>
+                    </li>
+                    <li class="page-item {{#disableNextNumber}} disabled {{/disableNextNumber}}">
+                        <span class="page-link" style="color: #337ab7" onclick="DeviceGrpPager.setCurrentPage({{number}} + 1); DeviceGrpTabler.renderTable();">{{nextNumber}}</span>
+                    </li>
+                    <li class="page-item {{#disableTwoNextNumber}} disabled {{/disableTwoNextNumber}}">
+                        <span class="page-link" style="color: #337ab7" onclick="DeviceGrpPager.setCurrentPage({{number}} + 2); DeviceGrpTabler.renderTable();">{{twoNextNumber}}</span>
+                    </li>
+                    <li class="page-item {{#last}} disabled {{/last}}">
+                        <span class="page-link" style="color: #337ab7" onclick="DeviceGrpPager.setCurrentPage({{number}} + 1); DeviceGrpTabler.renderTable();">&gt;</span>
+                    </li>
+                    <li class="page-item {{#last}} disabled {{/last}}">
+                        <span class="page-link" style="color: #337ab7" onclick="DeviceGrpPager.setCurrentPage({{totalPages}} - 1); DeviceGrpTabler.renderTable();">Last</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-3">
+        <div class="input-group">
+            <input type="number" id="inputGoToPageKPIData" class="form-control" placeholder="Page Number" aria-label="Page Number"
+                aria-describedby="button-addon2" max="{{totalPages}}" min="1" \>
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="button" onclick="DeviceGrpPager.setCurrentPage($('#inputGoToPageKPIData').val() - 1); DeviceGrpTabler.renderTable();"
+                    id="button-addon2" style="background-color: #eee;">Go</button>
+            </div>
+        </div>
+    </div>
+    <!-- {{/response}} -->

@@ -43,4 +43,8 @@ public interface DelegationDAO extends JpaRepository<Delegation, Long>, Delegati
 	@Transactional
 	@Query("delete from Delegation a where a.deleteTime < ?1")
 	void deleteByDeleteTimeBefore(Date time);
+
+        Page<Delegation> findByElementIdAndDeleteTimeIsNullAndUsernameDelegatedNotLikeAndUsernameDelegatedLike(String elementId, String usernameDelegated, String searchKey, Pageable pageable);
+
+        List<Delegation> findByElementIdAndDeleteTimeIsNullAndUsernameDelegatedNotLikeAndUsernameDelegatedLike(String elementId, String usernameDelegated, String searchKey);
 }

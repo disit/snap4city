@@ -7,7 +7,7 @@
 openapi: '3.0.0'
 info:
   title: My KPI API
-  version: 1.0.0
+  version: 1.1.0
 servers:
   - url: 'https://www.snap4city.org/mypersonaldata/api/v1'
 paths:
@@ -16,9 +16,11 @@ paths:
       tags: [KPI Data]
       summary: Retrieve all KPI Data 
       description: Retrieve own KPI Data that belong to the user associated at the Access Token passed on the call or all KPI Data if the user is an admin
+      security:
+        - accessToken: [] 
       parameters:
-        - $ref: '#/components/parameters/accessToken'
         - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
         - $ref: '#/components/parameters/lang'
         - $ref: '#/components/parameters/pageNumber'
         - $ref: '#/components/parameters/pageSize'
@@ -39,9 +41,11 @@ paths:
       tags: [KPI Data]
       summary: Save the passed KPI Data 
       description: Save the KPI Data passed on the body of the call
+      security:
+        - accessToken: [] 
       parameters:
-        - $ref: '#/components/parameters/accessToken'
         - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
         - $ref: '#/components/parameters/lang'
       requestBody:
         required: true
@@ -62,10 +66,12 @@ paths:
     get:
       tags: [KPI Data]
       summary: Retrieve delegated KPI Data 
-      description: Retriete all KPI Data that delegated to the user associated at the Access Token passed on the call
+      description: Retrieve all KPI Data that delegated to the user associated at the Access Token passed on the call
+      security:
+        - accessToken: [] 
       parameters:
-        - $ref: '#/components/parameters/accessToken'
         - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
         - $ref: '#/components/parameters/lang'
         - $ref: '#/components/parameters/pageNumber'
         - $ref: '#/components/parameters/pageSize'
@@ -82,14 +88,16 @@ paths:
           description: Right Exceptions
         400:
           description: Wrong Arguments
-  /kpidata/public:
+  /kpidata/organization:
     get:
       tags: [KPI Data]
-      summary: Retrieve public KPI Data 
-      description: Retriete all KPI Data that are public
+      summary: Retrieve organization public KPI Data 
+      description: Retrieve all KPI Data that are public in your organization
+      security:
+        - accessToken: [] 
       parameters:
-        - $ref: '#/components/parameters/accessToken'
         - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
         - $ref: '#/components/parameters/lang'
         - $ref: '#/components/parameters/pageNumber'
         - $ref: '#/components/parameters/pageSize'
@@ -111,11 +119,13 @@ paths:
       tags: [KPI Data]
       summary: Retrieve the specific KPI data 
       description: Retrieve the specific KPI Data with the ID passed in the URL 
+      security:
+        - accessToken: [] 
       parameters:
-        - $ref: '#/components/parameters/accessToken'
-        - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/lang'
         - $ref: '#/components/parameters/kpiId'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
       responses:
         200:
           description: The KPI Data requested
@@ -126,13 +136,14 @@ paths:
     put:
       tags: [KPI Data]
       summary: Overwrite a KPI Data
-      description: Overwrite the KPI Data passed on the body of the call
-        over the KPI Data with the same ID present on the database
+      description: Overwrite the KPI Data passed on the body of the call over the KPI Data with the same ID present on the database
+      security:
+        - accessToken: [] 
       parameters:
-        - $ref: '#/components/parameters/accessToken'
-        - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/lang'
         - $ref: '#/components/parameters/kpiId'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
       requestBody:
         required: true
         content:
@@ -151,13 +162,14 @@ paths:
     patch:
       tags: [KPI Data]
       summary: Change a KPI Data
-      description: Save the KPI Data passed on the body of the call
-        changing the KPI Data fields of the KPI Data with the same ID present on the database
+      description: Save the KPI Data passed on the body of the call changing the KPI Data fields of the KPI Data with the same ID present on the database
+      security:
+        - accessToken: [] 
       parameters:
-        - $ref: '#/components/parameters/accessToken'
-        - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/lang'
         - $ref: '#/components/parameters/kpiId'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
       requestBody:
         required: true
         content:
@@ -177,11 +189,13 @@ paths:
       tags: [KPI Data]
       summary: Delete specific KPI Data
       description: Delete the KPI Data with the id passed on call
+      security:
+        - accessToken: [] 
       parameters:
-        - $ref: '#/components/parameters/accessToken'
-        - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/lang'
         - $ref: '#/components/parameters/kpiId'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
       responses:
         200:
           description: The KPI Data deleted
@@ -191,43 +205,86 @@ paths:
           description: Right Exceptions
         400:
           description: Problem with public or private ownership
-  /kpivalue/save:
-    post:
-      deprecated: true
-      tags: [KPI Data Values]
-      summary: Save a KPI Data Value
-      description: Save the KPI Data passed on the body of the call
-        on the database
+  /public/kpidata/:
+    get:
+      tags: [KPI Data]
+      summary: Retrieve public KPI Data 
+      description: Retrieve all KPI Data that are public  
       parameters:
-        - $ref: '#/components/parameters/accessToken'
         - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
         - $ref: '#/components/parameters/lang'
-        - $ref: '#/components/parameters/kpiId'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/KPIValue'
+        - $ref: '#/components/parameters/pageNumber'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sortDirection'
+        - $ref: '#/components/parameters/sortBy'
+        - $ref: '#/components/parameters/searchKey'
+        - $ref: '#/components/parameters/highLevelType'
       responses:
         200:
-          description: The KPI Data saved
+          description: A page or a list of KPI Data
         204:
           description: No Data Found
         401:
           description: Right Exceptions
         400:
-          description: Problem with public or private ownership
+          description: Wrong Arguments
+  /public/kpidata/{kpiId}:
+    get:
+      tags: [KPI Data]
+      summary: Retrieve the specific public KPI data 
+      description: Retrieve the specific public KPI Data with the ID passed in the URL 
+      parameters:
+        - $ref: '#/components/parameters/kpiId'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
+      responses:
+        200:
+          description: The KPI Data requested
+        204:
+          description: No Data Found
+        401:
+          description: Right Exceptions
+  /kpidata/public:
+    get:
+      deprecated: true
+      tags: [KPI Data]
+      summary: Retrieve public KPI Data 
+      description: Retrieve all KPI Data that are public (Replaced by two APIs that allows you to take public kpidata in your organization and public kpidata without passing the accessToken) 
+      security:
+        - accessToken: [] 
+      parameters:
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
+        - $ref: '#/components/parameters/pageNumber'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sortDirection'
+        - $ref: '#/components/parameters/sortBy'
+        - $ref: '#/components/parameters/searchKey'
+        - $ref: '#/components/parameters/highLevelType'
+      responses:
+        200:
+          description: A page or a list of KPI Data
+        204:
+          description: No Data Found
+        401:
+          description: Right Exceptions
+        400:
+          description: Wrong Arguments
   /kpidata/{kpiId}/values:
     get:
       tags: [KPI Data Values]
       summary: Retrieve all values of a KPI Data 
       description: Retrieve all values of a KPI Data that belong to the user associated at the Access Token passed on the call
+      security:
+        - accessToken: [] 
       parameters:
-        - $ref: '#/components/parameters/accessToken'
-        - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/lang'
         - $ref: '#/components/parameters/kpiId'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
         - $ref: '#/components/parameters/pageNumber'
         - $ref: '#/components/parameters/pageSize'
         - $ref: '#/components/parameters/sortDirection'
@@ -249,13 +306,14 @@ paths:
     post:
       tags: [KPI Data Values]
       summary: Save a KPI Data Value
-      description: Save the KPI Data passed on the body of the call
-        on the database
+      description: Save the KPI Data passed on the body of the call on the database
+      security:
+        - accessToken: [] 
       parameters:
-        - $ref: '#/components/parameters/accessToken'
-        - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/lang'
         - $ref: '#/components/parameters/kpiId'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
       requestBody:
         required: true
         content:
@@ -276,12 +334,14 @@ paths:
       tags: [KPI Data Values]
       summary: Retrieve the specific KPI data value
       description: Retrieve the specific KPI Data value with the valueId passed in the URL 
+      security:
+        - accessToken: [] 
       parameters:
-        - $ref: '#/components/parameters/accessToken'
-        - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/lang'
         - $ref: '#/components/parameters/kpiId'
         - $ref: '#/components/parameters/valueId'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
       responses:
         200:
           description: The KPI Data Value requested
@@ -292,14 +352,15 @@ paths:
     put:
       tags: [KPI Data Values]
       summary: Overwrite a KPI Data Value
-      description: Overwrite the KPI Data Value passed on the body of the call
-        over the KPI Data Value with the same ValueId present on the database
+      description: Overwrite the KPI Data Value passed on the body of the call over the KPI Data Value with the same ValueId present on the database
+      security:
+        - accessToken: [] 
       parameters:
-        - $ref: '#/components/parameters/accessToken'
-        - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/lang'
         - $ref: '#/components/parameters/kpiId'
         - $ref: '#/components/parameters/valueId'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
       requestBody:
         required: true
         content:
@@ -318,14 +379,15 @@ paths:
     patch:
       tags: [KPI Data Values]
       summary: Change a KPI Data Value
-      description: Save the KPI Data Value passed on the body of the call
-        changing the KPI Data Value fields of the KPI Data Value with the same ValueId present on the database
+      description: Save the KPI Data Value passed on the body of the call changing the KPI Data Value fields of the KPI Data Value with the same ValueId present on the database
+      security:
+        - accessToken: [] 
       parameters:
-        - $ref: '#/components/parameters/accessToken'
-        - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/lang'
         - $ref: '#/components/parameters/kpiId'
         - $ref: '#/components/parameters/valueId'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
       requestBody:
         required: true
         content:
@@ -345,12 +407,14 @@ paths:
       tags: [KPI Data Values]
       summary: Delete specific KPI Data Value
       description: Delete the KPI Data Value with the valueId passed on call
+      security:
+        - accessToken: [] 
       parameters:
-        - $ref: '#/components/parameters/accessToken'
-        - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/lang'
         - $ref: '#/components/parameters/kpiId'
         - $ref: '#/components/parameters/valueId'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
       responses:
         200:
           description: The KPI Data Value deleted
@@ -365,11 +429,14 @@ paths:
       tags: [KPI Data Values]
       summary: Retrieve all values dates of a KPI Data 
       description: Retrieve all values dates of a KPI Data that belong to the user associated at the Access Token passed on the call
+      security:
+        - accessToken: [] 
       parameters:
-        - $ref: '#/components/parameters/accessToken'
-        - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/lang'
         - $ref: '#/components/parameters/kpiId'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/checkCoordinates'
+        - $ref: '#/components/parameters/lang'
       responses:
         200:
           description: A page or a list of KPI Data Values Dates
@@ -379,16 +446,112 @@ paths:
           description: Right Exceptions
         400:
           description: Wrong Arguments
+  /public/kpidata/{kpiId}/values/{valueId}:
+    get:
+      tags: [KPI Data Values]
+      summary: Retrieve the specific public KPI data value
+      description: Retrieve the specific public KPI Data value with the valueId passed in the URL 
+      parameters:
+        - $ref: '#/components/parameters/kpiId'
+        - $ref: '#/components/parameters/valueId'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
+      responses:
+        200:
+          description: The KPI Data Value requested
+        204:
+          description: No Data Found
+        401:
+          description: Right Exceptions
+  /public/kpidata/{kpiId}/values:
+    get:
+      tags: [KPI Data Values]
+      summary: Retrieve all values of a public KPI Data 
+      description: Retrieve all values of a public KPI Data
+      parameters:
+        - $ref: '#/components/parameters/kpiId'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
+        - $ref: '#/components/parameters/pageNumber'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sortDirection'
+        - $ref: '#/components/parameters/sortBy'
+        - $ref: '#/components/parameters/searchKey'
+        - $ref: '#/components/parameters/from'
+        - $ref: '#/components/parameters/to'
+        - $ref: '#/components/parameters/first'
+        - $ref: '#/components/parameters/last'
+      responses:
+        200:
+          description: A page or a list of KPI Data Value of a specific KPI Data
+        204:
+          description: No Data Found
+        401:
+          description: Right Exceptions
+        400:
+          description: Wrong Arguments
+  /public/kpidata/{kpiId}/values/dates:
+    get:
+      tags: [KPI Data Values]
+      summary: Retrieve all values dates of a public KPI Data 
+      description: Retrieve all values dates of a public KPI Data
+      parameters:
+        - $ref: '#/components/parameters/kpiId'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/checkCoordinates'
+        - $ref: '#/components/parameters/lang'
+      responses:
+        200:
+          description: A page or a list of KPI Data Values Dates
+        204:
+          description: No Data Found
+        401:
+          description: Right Exceptions
+        400:
+          description: Wrong Arguments
+  /kpivalue/save:
+    post:
+      deprecated: true
+      tags: [KPI Data Values]
+      summary: Save a KPI Data Value
+      description: Save the KPI Data passed on the body of the call on the database
+      security:
+        - accessToken: [] 
+      parameters:
+        - $ref: '#/components/parameters/kpiId'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KPIValue'
+      responses:
+        200:
+          description: The KPI Data saved
+        204:
+          description: No Data Found
+        401:
+          description: Right Exceptions
+        400:
+          description: Problem with public or private ownership
   /kpidata/{kpiId}/metadata:
     get:
       tags: [KPI Data Metadata]
       summary: Retrieve all metadata of a KPI Data 
       description: Retrieve all metadata of a KPI Data that belong to the user associated at the Access Token passed on the call
+      security:
+        - accessToken: [] 
       parameters:
-        - $ref: '#/components/parameters/accessToken'
-        - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/lang'
         - $ref: '#/components/parameters/kpiId'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
         - $ref: '#/components/parameters/pageNumber'
         - $ref: '#/components/parameters/pageSize'
         - $ref: '#/components/parameters/sortDirection'
@@ -406,13 +569,14 @@ paths:
     post:
       tags: [KPI Data Metadata]
       summary: Save a KPI Data Metadata
-      description: Save the KPI Data Metadata passed on the body of the call
-         on the database
+      description: Save the KPI Data Metadata passed on the body of the call on the database
+      security:
+        - accessToken: [] 
       parameters:
-        - $ref: '#/components/parameters/accessToken'
-        - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/lang'
         - $ref: '#/components/parameters/kpiId'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
       requestBody:
         required: true
         content:
@@ -433,12 +597,14 @@ paths:
       tags: [KPI Data Metadata]
       summary: Retrieve the specific KPI Data Metadata
       description: Retrieve the specific KPI Data Metadata with the metadataId passed in the URL 
+      security:
+        - accessToken: [] 
       parameters:
-        - $ref: '#/components/parameters/accessToken'
-        - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/lang'
         - $ref: '#/components/parameters/kpiId'
         - $ref: '#/components/parameters/metadataId'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
       responses:
         200:
           description: The KPI Data Metadata requested
@@ -449,14 +615,15 @@ paths:
     put:
       tags: [KPI Data Metadata]
       summary: Overwrite a KPI Data Metadata
-      description: Overwrite the KPI Data Metadata passed on the body of the call
-        over the KPI Data Metadata with the same metadataId present on the database
+      description: Overwrite the KPI Data Metadata passed on the body of the call over the KPI Data Metadata with the same metadataId present on the database
+      security:
+        - accessToken: [] 
       parameters:
-        - $ref: '#/components/parameters/accessToken'
-        - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/lang'
         - $ref: '#/components/parameters/kpiId'
         - $ref: '#/components/parameters/metadataId'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
       requestBody:
         required: true
         content:
@@ -475,14 +642,15 @@ paths:
     patch:
       tags: [KPI Data Metadata]
       summary: Change a KPI Data Metadata
-      description: Save the KPI Data Metadata passed on the body of the call
-        changing the KPI Data Metadata fields of the KPI Data Metadata with the same metadataId present on the database
+      description: Save the KPI Data Metadata passed on the body of the call changing the KPI Data Metadata fields of the KPI Data Metadata with the same metadataId present on the database
+      security:
+        - accessToken: [] 
       parameters:
-        - $ref: '#/components/parameters/accessToken'
-        - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/lang'
         - $ref: '#/components/parameters/kpiId'
         - $ref: '#/components/parameters/metadataId'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
       requestBody:
         required: true
         content:
@@ -502,12 +670,14 @@ paths:
       tags: [KPI Data Metadata]
       summary: Delete specific KPI Data Metadata
       description: Delete the KPI Data Metadata with the metadataId passed on call
+      security:
+        - accessToken: [] 
       parameters:
-        - $ref: '#/components/parameters/accessToken'
-        - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/lang'
         - $ref: '#/components/parameters/kpiId'
         - $ref: '#/components/parameters/metadataId'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
       responses:
         200:
           description: The KPI Data Metadata deleted
@@ -517,16 +687,60 @@ paths:
           description: Right Exceptions
         400:
           description: Problem with public or private ownership
+  /public/kpidata/{kpiId}/metadata/{metadataId}:
+    get:
+      tags: [KPI Data Metadata]
+      summary: Retrieve the specific public KPI Data Metadata
+      description: Retrieve the specific public KPI Data Metadata with the metadataId passed in the URL 
+      parameters:
+        - $ref: '#/components/parameters/kpiId'
+        - $ref: '#/components/parameters/metadataId'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
+      responses:
+        200:
+          description: The KPI Data Metadata requested
+        204:
+          description: No Data Found
+        401:
+          description: Right Exceptions
+  /public/kpidata/{kpiId}/metadata:
+    get:
+      tags: [KPI Data Metadata]
+      summary: Retrieve all metadata of a public KPI Data 
+      description: Retrieve all metadata of a public KPI Data
+      parameters:
+        - $ref: '#/components/parameters/kpiId'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
+        - $ref: '#/components/parameters/pageNumber'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sortDirection'
+        - $ref: '#/components/parameters/sortBy'
+        - $ref: '#/components/parameters/searchKey'
+      responses:
+        200:
+          description: A page or a list of KPI Data Metadata of a specific KPI Data
+        204:
+          description: No Data Found
+        401:
+          description: Right Exceptions
+        400:
+          description: Wrong Arguments
   /kpidata/{kpiId}/delegations:
     get:
       tags: [KPI Data Delegations]
       summary: Retrieve all delegations of a KPI Data 
       description: Retrieve all delegations of a KPI Data that belong to the user associated at the Access Token passed on the call
+      security:
+        - accessToken: [] 
       parameters:
-        - $ref: '#/components/parameters/accessToken'
-        - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/lang'
         - $ref: '#/components/parameters/kpiId'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
         - $ref: '#/components/parameters/pageNumber'
         - $ref: '#/components/parameters/pageSize'
         - $ref: '#/components/parameters/sortDirection'
@@ -546,11 +760,13 @@ paths:
       summary: Overwrite a KPI Data Delegation
       description: Overwrite the KPI Data Delegation passed on the body of the call
         on the database
+      security:
+        - accessToken: [] 
       parameters:
-        - $ref: '#/components/parameters/accessToken'
-        - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/lang'
         - $ref: '#/components/parameters/kpiId'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
       responses:
         200:
           description: The KPI Data Delegation saved
@@ -564,13 +780,15 @@ paths:
     get:
       tags: [KPI Data Delegations]
       summary: Retrieve the specific KPI Data Delegation
-      description: Retrieve the specific KPI Data Delegation with the delegationId passed in the URL 
+      description: Retrieve the specific KPI Data Delegation with the delegationId passed in the URL
+      security:
+        - accessToken: [] 
       parameters:
-        - $ref: '#/components/parameters/accessToken'
-        - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/lang'
         - $ref: '#/components/parameters/kpiId'
         - $ref: '#/components/parameters/delegationId'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
       responses:
         200:
           description: The KPI Data Delegation requested
@@ -581,14 +799,15 @@ paths:
     put:
       tags: [KPI Data Delegations]
       summary: Overwrite a KPI Data Delegation
-      description: Overwrite the KPI Data Delegation passed on the body of the call
-        over the KPI Data Delegation with the same delegationId present on the database
+      description: Overwrite the KPI Data Delegation passed on the body of the call over the KPI Data Delegation with the same delegationId present on the database
+      security:
+        - accessToken: [] 
       parameters:
-        - $ref: '#/components/parameters/accessToken'
-        - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/lang'
         - $ref: '#/components/parameters/kpiId'
         - $ref: '#/components/parameters/delegationId'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
       requestBody:
         required: true
         content:
@@ -607,14 +826,15 @@ paths:
     patch:
       tags: [KPI Data Delegations]
       summary: Change a KPI Data Delegation
-      description: Save the KPI Data Delegation passed on the body of the call
-        changing the KPI Data Delegation fields of the KPI Data Delegatin with the same delegationId present on the database
+      description: Save the KPI Data Delegation passed on the body of the call changing the KPI Data Delegation fields of the KPI Data Delegatin with the same delegationId present on the database
+      security:
+        - accessToken: [] 
       parameters:
-        - $ref: '#/components/parameters/accessToken'
-        - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/lang'
         - $ref: '#/components/parameters/kpiId'
         - $ref: '#/components/parameters/delegationId'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
       requestBody:
         required: true
         content:
@@ -634,12 +854,14 @@ paths:
       tags: [KPI Data Delegations]
       summary: Delete specific KPI Data Delegation
       description: Delete the KPI Data Delegation with the delegationId passed on call
+      security:
+        - accessToken: [] 
       parameters:
-        - $ref: '#/components/parameters/accessToken'
-        - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/lang'
         - $ref: '#/components/parameters/kpiId'
         - $ref: '#/components/parameters/delegationId'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
       responses:
         200:
           description: The KPI Data saved
@@ -649,20 +871,60 @@ paths:
           description: Right Exceptions
         400:
           description: Problem with public or private ownership
-          
-  /poidata:
+  /public/kpidata/{kpiId}/delegations/{delegationId}:
     get:
-      tags: [POI Data]
-      summary: Retrieve all KPI Data as GeoJSON
-      description: Retriete all KPI Data as GeoJSON that belong to the user associated at the Access Token passed on the call
+      tags: [KPI Data Delegations]
+      summary: Retrieve the specific public KPI Data Delegation
+      description: Retrieve the specific public KPI Data Delegation with the delegationId passed in the URL
       parameters:
-        - $ref: '#/components/parameters/accessToken'
+        - $ref: '#/components/parameters/kpiId'
+        - $ref: '#/components/parameters/delegationId'
         - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
+      responses:
+        200:
+          description: The KPI Data Delegation requested
+        204:
+          description: No Data Found
+        401:
+          description: Right Exceptions
+  /public/kpidata/{kpiId}/delegations:
+    get:
+      tags: [KPI Data Delegations]
+      summary: Retrieve all delegations of a public KPI Data 
+      description: Retrieve all delegations of a public KPI Data 
+      parameters:
+        - $ref: '#/components/parameters/kpiId'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
         - $ref: '#/components/parameters/lang'
         - $ref: '#/components/parameters/pageNumber'
         - $ref: '#/components/parameters/pageSize'
         - $ref: '#/components/parameters/sortDirection'
         - $ref: '#/components/parameters/sortBy'
+        - $ref: '#/components/parameters/searchKey'
+      responses:
+        200:
+          description: A page or a list of KPI Data Delegations
+        204:
+          description: No Data Found
+        401:
+          description: Right Exceptions
+        400:
+          description: Wrong Arguments
+          
+  /poidata:
+    get:
+      tags: [POI Data]
+      summary: Retrieve all KPI Data as GeoJSON
+      description: Retrieve all KPI Data as GeoJSON that belong to the user associated at the Access Token passed on the call
+      security:
+        - accessToken: [] 
+      parameters:
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
         - $ref: '#/components/parameters/searchKey'
         - $ref: '#/components/parameters/highLevelType'
       responses:
@@ -678,39 +940,13 @@ paths:
     get:
       tags: [POI Data]
       summary: Retrieve delegated KPI Data as GeoJSON
-      description: Retriete all KPI Data as GeoJSON that delegated to the user associated at the Access Token passed on the call
+      description: Retrieve all KPI Data as GeoJSON that delegated to the user associated at the Access Token passed on the call
+      security:
+        - accessToken: [] 
       parameters:
-        - $ref: '#/components/parameters/accessToken'
         - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
         - $ref: '#/components/parameters/lang'
-        - $ref: '#/components/parameters/pageNumber'
-        - $ref: '#/components/parameters/pageSize'
-        - $ref: '#/components/parameters/sortDirection'
-        - $ref: '#/components/parameters/sortBy'
-        - $ref: '#/components/parameters/searchKey'
-        - $ref: '#/components/parameters/highLevelType'
-      responses:
-        200:
-          description: A list of KPI Data as GeoJSON
-        204:
-          description: No Data Found
-        401:
-          description: Right Exceptions
-        400:
-          description: Wrong Arguments
-  /poidata/public:
-    get:
-      tags: [POI Data]
-      summary: Retrieve public KPI Data as GeoJSON
-      description: Retriete all KPI Data as GeoJSON that are public
-      parameters:
-        - $ref: '#/components/parameters/accessToken'
-        - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/lang'
-        - $ref: '#/components/parameters/pageNumber'
-        - $ref: '#/components/parameters/pageSize'
-        - $ref: '#/components/parameters/sortDirection'
-        - $ref: '#/components/parameters/sortBy'
         - $ref: '#/components/parameters/searchKey'
         - $ref: '#/components/parameters/highLevelType'
       responses:
@@ -727,19 +963,188 @@ paths:
       tags: [POI Data]
       summary: Retrieve the specific KPI Data as GeoJSON
       description: Retrieve the specific KPI Data as GeoJSON with the ID passed in the URL 
+      security:
+        - accessToken: [] 
       parameters:
-        - $ref: '#/components/parameters/accessToken'
-        - $ref: '#/components/parameters/sourceRequest'
-        - $ref: '#/components/parameters/lang'
         - $ref: '#/components/parameters/kpiId'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/from'
+        - $ref: '#/components/parameters/to'
+        - $ref: '#/components/parameters/lang'
       responses:
         200:
-          description: The KPI Data  requested as GeoJSON
+          description: The KPI Data requested as GeoJSON
         204:
           description: No Data Found
         401:
           description: Right Exceptions
+  /public/poidata/{kpiId}:
+    get:
+      tags: [POI Data]
+      summary: Retrieve the specific public KPI Data as GeoJSON
+      description: Retrieve the specific public KPI Data as GeoJSON with the ID passed in the URL 
+      security:
+        - accessToken: [] 
+      parameters:
+        - $ref: '#/components/parameters/kpiId'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/from'
+        - $ref: '#/components/parameters/to'
+        - $ref: '#/components/parameters/lang'
+      responses:
+        200:
+          description: The KPI Data requested as GeoJSON
+        204:
+          description: No Data Found
+        401:
+          description: Right Exceptions
+  /public/poidata/:
+    get:
+      tags: [POI Data]
+      summary: Retrieve public KPI Data as GeoJSON
+      description: Retrieve all KPI Data as GeoJSON that are public
+      security:
+        - accessToken: [] 
+      parameters:
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
+        - $ref: '#/components/parameters/searchKey'
+        - $ref: '#/components/parameters/highLevelType'
+      responses:
+        200:
+          description: A list of KPI Data as GeoJSON
+        204:
+          description: No Data Found
+        401:
+          description: Right Exceptions
+        400:
+          description: Wrong Arguments
+  /poidata/public:
+    get:
+      deprecated: true
+      tags: [POI Data]
+      summary: Retrieve public KPI Data as GeoJSON
+      description: Retrieve all KPI Data as GeoJSON that are public
+      security:
+        - accessToken: [] 
+      parameters:
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
+        - $ref: '#/components/parameters/pageNumber'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sortDirection'
+        - $ref: '#/components/parameters/sortBy'
+        - $ref: '#/components/parameters/searchKey'
+        - $ref: '#/components/parameters/highLevelType'
+      responses:
+        200:
+          description: A list of KPI Data as GeoJSON
+        204:
+          description: No Data Found
+        401:
+          description: Right Exceptions
+        400:
+          description: Wrong Arguments
+  /kpidata/{kpiId}/activities:
+    get:
+      tags: [KPI Data Activities]
+      summary: Retrieve all activities of a KPI Data
+      description: Retrieve all activities of a KPI Data
+      security:
+        - accessToken: [] 
+      parameters:
+        - $ref: '#/components/parameters/kpiId'
+        - $ref: '#/components/parameters/sourceRequestFilter'
+        - $ref: '#/components/parameters/accessTypeFilter'
+        - $ref: '#/components/parameters/pageNumber'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sortDirection'
+        - $ref: '#/components/parameters/sortBy'
+        - $ref: '#/components/parameters/from'
+        - $ref: '#/components/parameters/to'
+        - $ref: '#/components/parameters/first'
+        - $ref: '#/components/parameters/last'
+        - $ref: '#/components/parameters/lang'
+      responses:
+        200:
+          description: A page or a list of KPI Data Activities
+        204:
+          description: No Data Found
+        401:
+          description: Right Exceptions
+        400:
+          description: Wrong Arguments
+  /kpidata/{kpiId}/activities/{activityId}:
+    get:
+      tags: [KPI Data Activities]
+      summary: Retrieve the specific KPI Data Activity
+      description: Retrieve the specific KPI Data Activity with the activityId passed in the URL
+      security:
+        - accessToken: [] 
+      parameters:
+        - $ref: '#/components/parameters/kpiId'
+        - $ref: '#/components/parameters/activityId'
+        - $ref: '#/components/parameters/lang'
+      responses:
+        200:
+          description: The KPI Data Activity requested
+        204:
+          description: No Data Found
+        401:
+          description: Right Exceptions
+  /public/kpidata/{kpiId}/activities/{activityId}:
+    get:
+      tags: [KPI Data Activities]
+      summary: Retrieve the specific public KPI Data Activity
+      description: Retrieve the specific public KPI Data Activity with the activityId passed in the URL
+      parameters:
+        - $ref: '#/components/parameters/kpiId'
+        - $ref: '#/components/parameters/activityId'
+        - $ref: '#/components/parameters/lang'
+      responses:
+        200:
+          description: The KPI Data Activity requested
+        204:
+          description: No Data Found
+        401:
+          description: Right Exceptions
+  /public/kpidata/{kpiId}/activities:
+    get:
+      tags: [KPI Data Activities]
+      summary: Retrieve all activities of a public KPI Data
+      description: Retrieve all activities of a public KPI Data
+      parameters:
+        - $ref: '#/components/parameters/kpiId'
+        - $ref: '#/components/parameters/sourceRequestFilter'
+        - $ref: '#/components/parameters/accessTypeFilter'
+        - $ref: '#/components/parameters/pageNumber'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sortDirection'
+        - $ref: '#/components/parameters/sortBy'
+        - $ref: '#/components/parameters/from'
+        - $ref: '#/components/parameters/to'
+        - $ref: '#/components/parameters/first'
+        - $ref: '#/components/parameters/last'
+        - $ref: '#/components/parameters/lang'
+      responses:
+        200:
+          description: A page or a list of KPI Data Activities
+        204:
+          description: No Data Found
+        401:
+          description: Right Exceptions
+        400:
+          description: Wrong Arguments
 components:
+  securitySchemes:
+    accessToken:            # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     KPIData: 
       type: "object"
@@ -819,13 +1224,13 @@ components:
         usernameDelegated: 
           type: string
   parameters:
-    accessToken:
+    sourceId:
       in: query
-      name: accessToken
+      name: sourceId
       schema:
-        type: string
-      required: true
-      description: accessToken reletad to the user who calls the API
+       type: string
+      required: false
+      description: A string that allows you to identify the source among others having the same sourceRequest (which component of the platform calls the API). If 'iotapp' as sourceRequest is passed as sourceId, the unique id of that iotapp can be passed.
     sourceRequest:
       in: query
       name: sourceRequest
@@ -868,6 +1273,13 @@ components:
         type: integer
       required: true
       description: The identifier of the KPI Data Metadata
+    activityId:
+      in: path
+      name: activityId
+      schema:
+        type: integer
+      required: true
+      description: The identifier of the KPI Data Activity
     pageNumber:
       in: query
       name: pageNumber
@@ -940,4 +1352,25 @@ components:
         type: integer
       required: false
       description: Return the last elements in the time interval
-      
+    checkCoordinates:
+      in: query
+      name: checkCoordinates
+      schema:
+        type: boolean
+      required: false
+      description: Indicates whether the coordinate check must be strict or there may be some value that does not have coordinates
+    sourceRequestFilter:
+      in: query
+      name: sourceRequestFilter
+      schema:
+        type: string
+      required: false
+      description: Filters activities based on the sourceRequestFilter value on the sourceRequest property of the saved activities
+    accessTypeFilter:
+      in: query
+      name: accessTypeFilter
+      schema:
+        type: string
+        enum: ["READ", "WRITE", "DELETE"]
+      required: false
+      description: Filters activities based on the accessTypeFilter value on the accessTyped property of saved activities

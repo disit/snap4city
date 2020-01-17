@@ -1,0 +1,26 @@
+<div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Remove this element from the group?</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+            <div class="modal-body" style="padding: 0px;">
+                    <!-- {{#groupelement}} -->
+                    <ul class="list-group" style="border: none;">
+                        <li class="list-group-item"><b>No.</b> <span style="float: right;">{{no}}</span></li>
+                        <li class="list-group-item"><b>Group ID</b> <span style="float: right;">{{grpId}}</span></li>
+                        <li class="list-group-item"><b>Element ID</b> <span style="float: right;">{{elementId}}</span></li>
+                        <li class="list-group-item"><b>Element Type</b> <span style="float: right;">{{elementType}}</span></li>
+                        <li class="list-group-item"><b>Element Name</b> <span style="float: right;">{{elementName}}</span></li>
+                        <li class="list-group-item"><b>Insert Time</b> <span style="float: right;">{{insertTime}}</span></li>
+                    </ul>
+                    <!-- {{/groupelement}} -->
+                </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn deleteDashBtn" onclick="GrpElementTabler.deleteElement({{#groupelement}}{{grpId}},{{no}}{{/groupelement}});">Delete</button>
+        </div>
+    </div>
+</div>

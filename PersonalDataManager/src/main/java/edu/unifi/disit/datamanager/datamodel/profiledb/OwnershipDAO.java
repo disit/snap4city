@@ -21,6 +21,22 @@ import org.springframework.stereotype.Repository;
 public interface OwnershipDAO extends JpaRepository<Ownership, Long> {
 
 	List<Ownership> findByUsername(String username);
+        
+        List<Ownership> findByUsernameAndDeletedIsNull(String username);
+        
+        List<Ownership> findByDeletedIsNull();
 
 	List<Ownership> findByElementId(String containerId);
+        
+        List<Ownership> findByUsernameAndElementType(String username, String elementType);
+        
+        List<Ownership> findByUsernameAndElementTypeAndDeletedIsNull(String username, String elementType);
+        
+        List<Ownership> findByElementType(String elementType);
+        
+        List<Ownership> findByElementTypeAndDeletedIsNull(String elementType);
+        
+        List<Ownership> findByElmtTypeLbl4GrpsAndDeletedIsNull(String elementType);
+        
+        List<Ownership> findByUsernameAndElmtTypeLbl4GrpsAndDeletedIsNull(String username, String elementType);
 }

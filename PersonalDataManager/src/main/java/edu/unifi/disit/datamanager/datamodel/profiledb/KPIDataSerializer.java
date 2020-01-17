@@ -105,6 +105,9 @@ public class KPIDataSerializer extends StdSerializer<KPIData> {
 		if (kpiData.getValueType() != null) {
 			jgen.writeStringField("valueType", kpiData.getValueType());
 		}
+		if (kpiData.getValueUnit() != null) {
+			jgen.writeStringField("valueUnit", kpiData.getValueUnit());
+		}
 		if (kpiData.getMetric() != null) {
 			jgen.writeStringField("metric", kpiData.getMetric());
 		}

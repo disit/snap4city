@@ -22,6 +22,9 @@ import javax.persistence.Table;
 import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.util.Date;
+import org.hibernate.annotations.Formula;
+import org.springframework.format.annotation.DateTimeFormat;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
@@ -41,9 +44,14 @@ public class Ownership {
 	private String elementName;
 	@Column(name = "elementUrl")
 	private String elementUrl;
+        @Column(name = "deleted")
+        @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+        private Date deleted;
 	@Column(name = "elementDetails")
 	@Type(type = "text")
 	private String elementDetails;
+        @Formula("(select case when elementType = 'IOTID' then 'IOT Device' when elementType = 'AppID' then 'IOT App' when elementType = 'DAAppID' then 'Data Analytics' when elementType = 'BrokerID' then 'IOT Broker' when elementType = 'PortiaID' then 'Web Scraping' when elementType = 'ModelID' then 'IOT Device Model' when elementType = 'HeatmapID' then 'Heatmap' when elementType = 'ServiceGraphID' then 'Service Graph' when elementType = 'DashboardID' then 'Dashboard' when elementType = 'ServiceURI' then 'Service URI' else elementType end )")
+        private String elmtTypeLbl4Grps;
 
 	public Ownership() {
 		super();
@@ -126,8 +134,25 @@ public class Ownership {
 		this.elementDetails = elementDetails;
 	}
 
+        public Date getDeleted() {
+            return deleted;
+        }
+
+        public void setDeleted(Date deleted) {
+            this.deleted = deleted;
+        }
+
 	@Override
 	public String toString() {
 		return "Ownership [id=" + id + ", username=" + username + ", elementId=" + elementId + ", elementType=" + elementType + ", elementName=" + elementName + ", elementUrl=" + elementUrl + ", elementDetails=" + elementDetails + "]";
 	}
+
+        public String getElmtTypeLbl4Grps() {
+            return elmtTypeLbl4Grps;
+        }
+
+        public void setElmtTypeLbl4Grps(String elmtTypeLbl4Grps) {
+            this.elmtTypeLbl4Grps = elmtTypeLbl4Grps;
+        }
+          
 }

@@ -49,6 +49,8 @@ public class KPIData implements Comparable<KPIData> {
 	private String valueName;
 	@Column(name = "value_type")
 	private String valueType;
+	@Column(name = "value_unit")
+	private String valueUnit;
 	@Column(name = "data_type")
 	private String dataType;
 	@Column(name = "instance_uri")
@@ -116,20 +118,21 @@ public class KPIData implements Comparable<KPIData> {
 		super();
 	}
 
-	public KPIData(String highLevelType, String nature, String subNature, String kpiName, String lowLevelType,
-			String unit, String instanceUri, String getInstances, Date lastDate, String lastValue, Date lastCheck,
-			String lastLatitude, String lastLongitude, String metric, String savedDirect, String kbBased,
-			String smBased, String username, String organizations, String appId, String appName, String widgets,
-			String parameters, String healtiness, String microAppExtServIcon, String ownership, String description,
-			String info, String latitude, String longitude, Date insertTime, Date deleteTime, String dbValuesType,
-			String dbValuesLink) {
+	public KPIData(String highLevelType, String nature, String subNature, String valueName, String valueType,
+			String valueUnit, String dataType, String instanceUri, String getInstances, Date lastDate, String lastValue,
+			Date lastCheck, String lastLatitude, String lastLongitude, String metric, String savedDirect,
+			String kbBased, String smBased, String username, String organizations, String appId, String appName,
+			String widgets, String parameters, String healtiness, String microAppExtServIcon, String ownership,
+			String description, String info, String latitude, String longitude, Date insertTime, Date deleteTime,
+			String dbValuesType, String dbValuesLink) {
 		super();
 		this.highLevelType = highLevelType;
 		this.nature = nature;
 		this.subNature = subNature;
-		this.valueName = kpiName;
-		this.valueType = lowLevelType;
-		this.dataType = unit;
+		this.valueName = valueName;
+		this.valueType = valueType;
+		this.valueUnit = valueUnit;
+		this.dataType = dataType;
 		this.instanceUri = instanceUri;
 		this.getInstances = getInstances;
 		this.lastDate = lastDate;
@@ -160,21 +163,22 @@ public class KPIData implements Comparable<KPIData> {
 		this.dbValuesLink = dbValuesLink;
 	}
 
-	public KPIData(Long id, String highLevelType, String nature, String subNature, String kpiName, String lowLevelType,
-			String unit, String instanceUri, String getInstances, Date lastDate, String lastValue, Date lastCheck,
-			String lastLatitude, String lastLongitude, String metric, String savedDirect, String kbBased,
-			String smBased, String username, String organizations, String appId, String appName, String widgets,
-			String parameters, String healtiness, String microAppExtServIcon, String ownership, String description,
-			String info, String latitude, String longitude, Date insertTime, Date deleteTime, String dbValuesType,
-			String dbValuesLink) {
+	public KPIData(Long id, String highLevelType, String nature, String subNature, String valueName, String valueType,
+			String valueUnit, String dataType, String instanceUri, String getInstances, Date lastDate, String lastValue,
+			Date lastCheck, String lastLatitude, String lastLongitude, String metric, String savedDirect,
+			String kbBased, String smBased, String username, String organizations, String appId, String appName,
+			String widgets, String parameters, String healtiness, String microAppExtServIcon, String ownership,
+			String description, String info, String latitude, String longitude, Date insertTime, Date deleteTime,
+			String dbValuesType, String dbValuesLink) {
 		super();
 		this.id = id;
 		this.highLevelType = highLevelType;
 		this.nature = nature;
 		this.subNature = subNature;
-		this.valueName = kpiName;
-		this.valueType = lowLevelType;
-		this.dataType = unit;
+		this.valueName = valueName;
+		this.valueType = valueType;
+		this.valueUnit = valueUnit;
+		this.dataType = dataType;
 		this.instanceUri = instanceUri;
 		this.getInstances = getInstances;
 		this.lastDate = lastDate;
@@ -251,6 +255,14 @@ public class KPIData implements Comparable<KPIData> {
 
 	public void setValueType(String valueType) {
 		this.valueType = valueType;
+	}
+
+	public String getValueUnit() {
+		return valueUnit;
+	}
+
+	public void setValueUnit(String valueUnit) {
+		this.valueUnit = valueUnit;
 	}
 
 	public String getDataType() {
@@ -521,12 +533,12 @@ public class KPIData implements Comparable<KPIData> {
 			if (other.id != null)
 				return false;
 		} else if (!id.equals(other.id))
-					return false;
+			return false;
 		if (valueName == null) {
 			if (other.valueName != null)
 				return false;
 		} else if (!valueName.equals(other.valueName))
-					return false;
+			return false;
 		return true;
 	}
 

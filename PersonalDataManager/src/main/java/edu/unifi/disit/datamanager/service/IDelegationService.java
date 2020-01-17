@@ -23,6 +23,7 @@ import edu.unifi.disit.datamanager.datamodel.profiledb.Delegation;
 import edu.unifi.disit.datamanager.exception.CredentialsException;
 import edu.unifi.disit.datamanager.exception.DelegationNotValidException;
 import edu.unifi.disit.datamanager.exception.LDAPException;
+import org.springframework.data.domain.PageRequest;
 
 public interface IDelegationService {
 
@@ -64,4 +65,8 @@ public interface IDelegationService {
 	List<Delegation> findByElementIdNoPagesWithoutAnonymous(String elementId)
 			throws  CredentialsException;
 
+        Page<Delegation> findByElementIdWithoutAnonymousFiltered(String elementId, String searchKey, PageRequest pageRequest);
+
+        List<Delegation> findByElementIdNoPagesWithoutAnonymousFiltered(String elementId, String searchKey);
+        
 }

@@ -127,6 +127,9 @@ public class POIDataSerializer extends StdSerializer<POIData> {
 		if (poiData.getKpidata().getValueType() != null) {
 			jgen.writeStringField("valueType", poiData.getKpidata().getValueType());
 		}
+		if (poiData.getKpidata().getValueUnit() != null) {
+			jgen.writeStringField("valueUnit", poiData.getKpidata().getValueUnit());
+		}
 		if (poiData.getKpidata().getMetric() != null) {
 			jgen.writeStringField("metric", poiData.getKpidata().getMetric());
 		}

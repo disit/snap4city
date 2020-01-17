@@ -1,0 +1,35 @@
+<div class="modal-dialog" role="document">
+    <form onsubmit="GrpElementTabler.submitAddElmts(); return false;">
+        <input type="hidden" name="elementType" value="{{elementType}}">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add {{elementType}}s to this group</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" style="padding: 0px;">                
+                <ul class="list-group" style="border: none;">
+                    <li class="list-group-item">
+                        <div class="row">
+                            <div class="col-sm-8"><input onkeyup="GrpElementTabler.searchInNewElmts();" type="text" id="searchNewElmtTxtbox" style="width:15em; padding:0.1rem; float:left;" placeholder="Search..."><span style="padding-top:0.5em; display:block;"><input style="margin-left:1em;" type="checkbox" name="selvisible" id="selvisible" onchange="GrpElementTabler.selAll();">&nbsp;All</span></div>
+                        </div>
+                    </li>
+                    <!-- {{#availItems}} -->
+                    <li class="list-group-item newel">
+                        <div class="row">
+                            <!-- {{#isHeatmap}} --><div class="col-sm-8"><input class="newelchkbox" onchange="GrpElementTabler.updAddNewElmtBtnLbl();" type="checkbox" id="add{{username}}{{elementType}}{{elementId}}{{valueName}}" name="add{{username}}{{elementType}}{{elementId}}{{valueName}}" data-username="{{username}}" data-elementType="{{elementType}}" data-elementId="{{elementId}}" data-surrogateKey="{{id}}" style="margin-right:0.5rem;">{{elementId}} ({{username}})</div><!-- {{/isHeatmap}} -->
+                            <!-- {{#isNotHeatmap}} --><div class="col-sm-8"><input class="newelchkbox" onchange="GrpElementTabler.updAddNewElmtBtnLbl();" type="checkbox" id="add{{username}}{{elementType}}{{elementId}}{{valueName}}" name="add{{username}}{{elementType}}{{elementId}}{{valueName}}" data-username="{{username}}" data-elementType="{{elementType}}" data-elementId="{{elementId}}" data-surrogateKey="{{id}}" style="margin-right:0.5rem;">{{elementName}}{{valueName}} ({{username}})</div><!-- {{/isNotHeatmap}} -->
+                        </div>
+                    </li>
+                    <!-- {{/availItems}} -->
+                </ul>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn editDashBtn addNewElmtBtn">Add</button>
+            </div>
+        </div>
+    </form>
+</div>

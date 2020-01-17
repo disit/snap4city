@@ -5,11 +5,11 @@ var KPIMetadataTabler = {
     renderTable: function (kpiId) {
         KPIMetadataTabler.currentKpiId = kpiId;
         KPIEditor.keycloak.updateToken(30).success(function () {
-            var query = QueryManager.createGetKPIMetadataTableQuery(kpiId, KPIMetadataPager.currentPage, KPIMetadataPager.currentSize, KPIMetadataSorter.currentSortDirection, KPIMetadataSorter.currentSortBy, KPIMetadataFilter.currentSearchKey, KPIEditor.keycloak.token);
-            APIClient.executeGetQuery(query, KPIMetadataTabler.successQuery, KPIMetadataTabler.errorQuery);
+            var query = QueryManager.createGetKPIMetadataTableQuery(kpiId, KPIMetadataPager.currentPage, KPIMetadataPager.currentSize, KPIMetadataSorter.currentSortDirection, KPIMetadataSorter.currentSortBy, KPIMetadataFilter.currentSearchKey);
+            APIClient.executeGetQuery(query, KPIEditor.keycloak.token, KPIMetadataTabler.successQuery, KPIMetadataTabler.errorQuery);
         }).error(function () {
-            var query = QueryManager.createGetKPIMetadataTableQuery(kpiId, KPIMetadataPager.currentPage, KPIMetadataPager.currentSize, KPIMetadataSorter.currentSortDirection, KPIMetadataSorter.currentSortBy, KPIMetadataFilter.currentSearchKey, Authentication.refreshTokenGetAccessToken());
-            APIClient.executeGetQuery(query, KPIMetadataTabler.successQuery, KPIMetadataTabler.errorQuery);
+            var query = QueryManager.createGetKPIMetadataTableQuery(kpiId, KPIMetadataPager.currentPage, KPIMetadataPager.currentSize, KPIMetadataSorter.currentSortDirection, KPIMetadataSorter.currentSortBy, KPIMetadataFilter.currentSearchKey);
+            APIClient.executeGetQuery(query, Authentication.refreshTokenGetAccessToken(), KPIMetadataTabler.successQuery, KPIMetadataTabler.errorQuery);
         });
     },
 
@@ -85,11 +85,11 @@ var KPIMetadataTabler = {
     editKPIMetadataModal: function (_kpiId, _id) {
         if (_id != null && _id != "") {
             KPIEditor.keycloak.updateToken(30).success(function () {
-                var query = QueryManager.createGetKPIMetadataByIdQuery(KPIEditor.keycloak.token, _kpiId, _id);
-                APIClient.executeGetQuery(query, KPIMetadataTabler.successEditKPIMetadataModal, KPIMetadataTabler.errorQuery);
+                var query = QueryManager.createGetKPIMetadataByIdQuery(_kpiId, _id);
+                APIClient.executeGetQuery(query, KPIEditor.keycloak.token, KPIMetadataTabler.successEditKPIMetadataModal, KPIMetadataTabler.errorQuery);
             }).error(function () {
-                var query = QueryManager.createGetKPIMetadataByIdQuery(Authentication.refreshTokenGetAccessToken(), _kpiId, _id);
-                APIClient.executeGetQuery(query, KPIMetadataTabler.successEditKPIMetadataModal, KPIMetadataTabler.errorQuery);
+                var query = QueryManager.createGetKPIMetadataByIdQuery(_kpiId, _id);
+                APIClient.executeGetQuery(query, Authentication.refreshTokenGetAccessToken(), KPIMetadataTabler.successEditKPIMetadataModal, KPIMetadataTabler.errorQuery);
             });
         } else {
             KPIMetadataTabler.successEditKPIMetadataModal(null);
@@ -141,30 +141,30 @@ var KPIMetadataTabler = {
         console.log(kpiMetadata);
         if (typeof kpiMetadata.id != "undefined") {
             KPIEditor.keycloak.updateToken(30).success(function () {
-                var query = QueryManager.createPatchKPIMetadataQuery(KPIEditor.keycloak.token, kpiMetadata.kpiId, kpiMetadata.id);
-                APIClient.executePatchQuery(query, kpiMetadata, KPIMetadataTabler.successSaveKPIMetadata, KPIMetadataTabler.errorQuery);
+                var query = QueryManager.createPatchKPIMetadataQuery(kpiMetadata.kpiId, kpiMetadata.id);
+                APIClient.executePatchQuery(query, kpiMetadata, KPIEditor.keycloak.token,  KPIMetadataTabler.successSaveKPIMetadata, KPIMetadataTabler.errorQuery);
             }).error(function () {
-                var query = QueryManager.createPatchKPIMetadataQuery(Authentication.refreshTokenGetAccessToken(), kpiMetadata.kpiId, kpiMetadata.id);
-                APIClient.executePatchQuery(query, kpiMetadata, KPIMetadataTabler.successSaveKPIMetadata, KPIMetadataTabler.errorQuery);
+                var query = QueryManager.createPatchKPIMetadataQuery(kpiMetadata.kpiId, kpiMetadata.id);
+                APIClient.executePatchQuery(query, kpiMetadata, Authentication.refreshTokenGetAccessToken(),  KPIMetadataTabler.successSaveKPIMetadata, KPIMetadataTabler.errorQuery);
             });
         } else {
             KPIEditor.keycloak.updateToken(30).success(function () {
-                var query = QueryManager.createPostKPIMetadataQuery(KPIEditor.keycloak.token, kpiMetadata.kpiId);
-                APIClient.executePostQuery(query, kpiMetadata, KPIMetadataTabler.successSaveKPIMetadata, KPIMetadataTabler.errorQuery);
+                var query = QueryManager.createPostKPIMetadataQuery(kpiMetadata.kpiId);
+                APIClient.executePostQuery(query, kpiMetadata, KPIEditor.keycloak.token,  KPIMetadataTabler.successSaveKPIMetadata, KPIMetadataTabler.errorQuery);
             }).error(function () {
-                var query = QueryManager.createPostKPIMetadataQuery(Authentication.refreshTokenGetAccessToken(), kpiMetadata.kpiId);
-                APIClient.executePostQuery(query, kpiMetadata, KPIMetadataTabler.successSaveKPIMetadata, KPIMetadataTabler.errorQuery);
+                var query = QueryManager.createPostKPIMetadataQuery(kpiMetadata.kpiId);
+                APIClient.executePostQuery(query, kpiMetadata, Authentication.refreshTokenGetAccessToken(),  KPIMetadataTabler.successSaveKPIMetadata, KPIMetadataTabler.errorQuery);
             });
         }
     },
 
     deleteKPIMetadata(_kpiId, _id) {
         KPIEditor.keycloak.updateToken(30).success(function () {
-            var query = QueryManager.createDeleteKPIMetadataQuery(KPIEditor.keycloak.token, _kpiId, _id);
-            APIClient.executeDeleteQuery(query, KPIMetadataTabler.successSaveKPIMetadata, KPIMetadataTabler.errorQuery);
+            var query = QueryManager.createDeleteKPIMetadataQuery(_kpiId, _id);
+            APIClient.executeDeleteQuery(query, KPIEditor.keycloak.token, KPIMetadataTabler.successSaveKPIMetadata, KPIMetadataTabler.errorQuery);
         }).error(function () {
-            var query = QueryManager.createDeleteKPIMetadataQuery(Authentication.refreshTokenGetAccessToken(), _kpiId, _id);
-            APIClient.executeDeleteQuery(query, KPIMetadataTabler.successSaveKPIMetadata, KPIMetadataTabler.errorQuery);
+            var query = QueryManager.createDeleteKPIMetadataQuery(_kpiId, _id);
+            APIClient.executeDeleteQuery(query, Authentication.refreshTokenGetAccessToken(), KPIMetadataTabler.successSaveKPIMetadata, KPIMetadataTabler.errorQuery);
         });
     },
 

@@ -76,6 +76,7 @@ public class KPIDataController {
 	@GetMapping("/api/v1/kpidata/{id}")
 	public ResponseEntity<Object> getKPIDataV1ById(@PathVariable("id") Long id,
 			@RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) {
 
@@ -103,7 +104,7 @@ public class KPIDataController {
 				logger.info("Returning kpiData {}", kpiData.getId());
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						kpiData.getId(), ActivityAccessType.READ, KPIActivityDomainType.DATA);
+						sourceId, kpiData.getId(), ActivityAccessType.READ, KPIActivityDomainType.DATA);
 
 				return new ResponseEntity<>(kpiData, HttpStatus.OK);
 			}
@@ -125,6 +126,7 @@ public class KPIDataController {
 	@GetMapping("/api/v1/public/kpidata/{id}")
 	public ResponseEntity<Object> getPublicKPIDataV1ById(@PathVariable("id") Long id,
 			@RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) {
 
@@ -150,7 +152,7 @@ public class KPIDataController {
 
 				logger.info("Returning kpiData {}", kpiData.getId());
 
-				kpiActivityService.saveActivityFromUsername("PUBLIC", sourceRequest, kpiData.getId(),
+				kpiActivityService.saveActivityFromUsername("PUBLIC", sourceRequest, sourceId, kpiData.getId(),
 						ActivityAccessType.READ, KPIActivityDomainType.DATA);
 
 				return new ResponseEntity<>(kpiData, HttpStatus.OK);
@@ -172,6 +174,7 @@ public class KPIDataController {
 	@PostMapping("/api/v1/kpidata")
 	public ResponseEntity<Object> postKPIDataV1(@RequestBody KPIData kpiData,
 			@RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) {
 
@@ -181,13 +184,13 @@ public class KPIDataController {
 			KPIData newKpiData = kpiDataService.saveKPIData(kpiData);
 
 			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-					newKpiData.getId(), ActivityAccessType.WRITE, KPIActivityDomainType.DATA);
+					sourceId, newKpiData.getId(), ActivityAccessType.WRITE, KPIActivityDomainType.DATA);
 
 			logger.info("Posted kpiData {}", newKpiData.getId());
 
 			if (newKpiData.getOwnership().equals("public")) {
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						newKpiData.getId(), ActivityAccessType.READ, KPIActivityDomainType.CHANGEOWNERSHIP);
+						sourceId, newKpiData.getId(), ActivityAccessType.READ, KPIActivityDomainType.CHANGEOWNERSHIP);
 
 				kpiDataService.makeKPIDataPublic(newKpiData.getUsername(), newKpiData.getId(),
 						newKpiData.getHighLevelType(), lang);
@@ -221,6 +224,7 @@ public class KPIDataController {
 	@PutMapping("/api/v1/kpidata/{id}")
 	public ResponseEntity<Object> putKPIDataV1ById(@PathVariable("id") Long id, @RequestBody KPIData kpiData,
 			@RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) {
 
@@ -243,13 +247,13 @@ public class KPIDataController {
 			kpiData.setId(oldKpiData.getId());
 			KPIData newKpiData = kpiDataService.saveKPIData(kpiData);
 			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-					newKpiData.getId(), ActivityAccessType.WRITE, KPIActivityDomainType.DATA);
+					sourceId, newKpiData.getId(), ActivityAccessType.WRITE, KPIActivityDomainType.DATA);
 			logger.info("Putted kpiData {}", kpiData.getId());
 
 			if (!newKpiData.getOwnership().equals(oldKpiData.getOwnership())) {
 				if (newKpiData.getOwnership().equals("public")) {
 					kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang),
-							sourceRequest, newKpiData.getId(), ActivityAccessType.WRITE,
+							sourceRequest, sourceId, newKpiData.getId(), ActivityAccessType.WRITE,
 							KPIActivityDomainType.CHANGEOWNERSHIP);
 
 					kpiDataService.makeKPIDataPrivate(newKpiData.getId(), lang);
@@ -257,7 +261,7 @@ public class KPIDataController {
 							newKpiData.getHighLevelType(), lang);
 				} else {
 					kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang),
-							sourceRequest, newKpiData.getId(), ActivityAccessType.WRITE,
+							sourceRequest, sourceId, newKpiData.getId(), ActivityAccessType.WRITE,
 							KPIActivityDomainType.CHANGEOWNERSHIP);
 
 					kpiDataService.makeKPIDataPrivate(newKpiData.getId(), lang);
@@ -266,7 +270,7 @@ public class KPIDataController {
 
 			if (!newKpiData.getUsername().equals(oldKpiData.getUsername())) {
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						newKpiData.getId(), ActivityAccessType.WRITE, KPIActivityDomainType.CHANGEOWNER);
+						sourceId, newKpiData.getId(), ActivityAccessType.WRITE, KPIActivityDomainType.CHANGEOWNER);
 				kpiDataService.updateUsernameDelegatorOnOwnershipChange(newKpiData.getUsername(), newKpiData.getId(),
 						lang);
 			}
@@ -299,6 +303,7 @@ public class KPIDataController {
 	@PatchMapping("/api/v1/kpidata/{id}")
 	public ResponseEntity<Object> patchKPIDataV1ById(@PathVariable("id") Long id,
 			@RequestBody Map<String, Object> fields, @RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) {
 
@@ -343,13 +348,13 @@ public class KPIDataController {
 
 			KPIData newKpiData = kpiDataService.saveKPIData(oldKpiData);
 			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-					newKpiData.getId(), ActivityAccessType.WRITE, KPIActivityDomainType.DATA);
+					sourceId, newKpiData.getId(), ActivityAccessType.WRITE, KPIActivityDomainType.DATA);
 			logger.info("Patched kpivalue {}", newKpiData.getId());
 
 			if (!newKpiData.getOwnership().equals(oldOwnership)) {
 				if (newKpiData.getOwnership().equals("public")) {
 					kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang),
-							sourceRequest, newKpiData.getId(), ActivityAccessType.WRITE,
+							sourceRequest, sourceId, newKpiData.getId(), ActivityAccessType.WRITE,
 							KPIActivityDomainType.CHANGEOWNERSHIP);
 
 					kpiDataService.makeKPIDataPrivate(newKpiData.getId(), lang);
@@ -357,7 +362,7 @@ public class KPIDataController {
 							newKpiData.getHighLevelType(), lang);
 				} else {
 					kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang),
-							sourceRequest, newKpiData.getId(), ActivityAccessType.WRITE,
+							sourceRequest, sourceId, newKpiData.getId(), ActivityAccessType.WRITE,
 							KPIActivityDomainType.CHANGEOWNERSHIP);
 
 					kpiDataService.makeKPIDataPrivate(newKpiData.getId(), lang);
@@ -366,7 +371,7 @@ public class KPIDataController {
 
 			if (!newKpiData.getUsername().equals(oldUsername)) {
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						newKpiData.getId(), ActivityAccessType.WRITE, KPIActivityDomainType.CHANGEOWNER);
+						sourceId, newKpiData.getId(), ActivityAccessType.WRITE, KPIActivityDomainType.CHANGEOWNER);
 				kpiDataService.updateUsernameDelegatorOnOwnershipChange(newKpiData.getUsername(), newKpiData.getId(),
 						lang);
 			}
@@ -399,6 +404,7 @@ public class KPIDataController {
 	@DeleteMapping("/api/v1/kpidata/{id}")
 	public ResponseEntity<Object> deleteKPIDataV1ById(@PathVariable("id") Long id,
 			@RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) {
 
@@ -421,7 +427,7 @@ public class KPIDataController {
 			kpiDataToDelete.setDeleteTime(new Date());
 
 			KPIData newKpiData = kpiDataService.saveKPIData(kpiDataToDelete);
-			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, id,
+			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, sourceId, id,
 					ActivityAccessType.DELETE, KPIActivityDomainType.DATA);
 
 			logger.info("Deleted {}", id);
@@ -501,14 +507,14 @@ public class KPIDataController {
 				logger.info("Returning kpiDatapage ");
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						null, ActivityAccessType.READ, KPIActivityDomainType.DATA);
+						null, null, ActivityAccessType.READ, KPIActivityDomainType.DATA);
 
 				return new ResponseEntity<>(pageKpiData, HttpStatus.OK);
 			} else {
 				logger.info("Returning kpiDatalist ");
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						null, ActivityAccessType.READ, KPIActivityDomainType.DATA);
+						null, null, ActivityAccessType.READ, KPIActivityDomainType.DATA);
 
 				return new ResponseEntity<>(listKpiData, HttpStatus.OK);
 			}
@@ -540,6 +546,7 @@ public class KPIDataController {
 	@GetMapping("/api/v1/public/kpidata")
 	public ResponseEntity<Object> getPublicKPIDataV1Pageable(
 			@RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			@RequestParam(value = "pageNumber", required = false, defaultValue = "-1") int pageNumber,
 			@RequestParam(value = "pageSize", required = false, defaultValue = "10") int pageSize,
@@ -584,14 +591,14 @@ public class KPIDataController {
 			} else if (pageKpiData != null) {
 				logger.info("Returning kpiDatapage ");
 
-				kpiActivityService.saveActivityFromUsername("PUBLIC", sourceRequest, null, ActivityAccessType.READ,
+				kpiActivityService.saveActivityFromUsername("PUBLIC", sourceRequest, sourceId, null, ActivityAccessType.READ,
 						KPIActivityDomainType.DATA);
 
 				return new ResponseEntity<>(pageKpiData, HttpStatus.OK);
 			} else {
 				logger.info("Returning kpiDatalist ");
 
-				kpiActivityService.saveActivityFromUsername("PUBLIC", sourceRequest, null, ActivityAccessType.READ,
+				kpiActivityService.saveActivityFromUsername("PUBLIC", sourceRequest, sourceId, null, ActivityAccessType.READ,
 						KPIActivityDomainType.DATA);
 
 				return new ResponseEntity<>(listKpiData, HttpStatus.OK);
@@ -625,6 +632,7 @@ public class KPIDataController {
 	@GetMapping("/api/v1/kpidata/organization")
 	public ResponseEntity<Object> getOrganizationKPIDataV1Pageable(
 			@RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			@RequestParam(value = "pageNumber", required = false, defaultValue = "-1") int pageNumber,
 			@RequestParam(value = "pageSize", required = false, defaultValue = "10") int pageSize,
@@ -667,14 +675,14 @@ public class KPIDataController {
 				logger.info("Returning kpiDatapage ");
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						null, ActivityAccessType.READ, KPIActivityDomainType.DATA);
+						sourceId, null, ActivityAccessType.READ, KPIActivityDomainType.DATA);
 
 				return new ResponseEntity<>(pageKpiData, HttpStatus.OK);
 			} else {
 				logger.info("Returning kpiDatalist ");
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						null, ActivityAccessType.READ, KPIActivityDomainType.DATA);
+						sourceId, null, ActivityAccessType.READ, KPIActivityDomainType.DATA);
 
 				return new ResponseEntity<>(listKpiData, HttpStatus.OK);
 			}
@@ -697,6 +705,7 @@ public class KPIDataController {
 	@GetMapping("/api/v1/kpidata/delegated")
 	public ResponseEntity<Object> getDelegatedKPIDataV1Pageable(
 			@RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			@RequestParam(value = "pageNumber", required = false, defaultValue = "-1") int pageNumber,
 			@RequestParam(value = "pageSize", required = false, defaultValue = "10") int pageSize,
@@ -738,14 +747,14 @@ public class KPIDataController {
 				logger.info("Returning kpiDatapage ");
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						null, ActivityAccessType.READ, KPIActivityDomainType.DATA);
+						sourceId, null, ActivityAccessType.READ, KPIActivityDomainType.DATA);
 
 				return new ResponseEntity<>(pageKpiData, HttpStatus.OK);
 			} else {
 				logger.info("Returning kpiDatalist ");
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						null, ActivityAccessType.READ, KPIActivityDomainType.DATA);
+						sourceId, null, ActivityAccessType.READ, KPIActivityDomainType.DATA);
 
 				return new ResponseEntity<>(listKpiData, HttpStatus.OK);
 			}
@@ -776,6 +785,7 @@ public class KPIDataController {
 	// -------------------GET ALL KPI Data Pageable -----------------------------
 	@GetMapping("/api/v1/kpidata")
 	public ResponseEntity<Object> getOwnKPIDataV1Pageable(@RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			@RequestParam(value = "pageNumber", required = false, defaultValue = "-1") int pageNumber,
 			@RequestParam(value = "pageSize", required = false, defaultValue = "10") int pageSize,
@@ -868,14 +878,14 @@ public class KPIDataController {
 				logger.info("Returning kpiDatapage ");
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						null, ActivityAccessType.READ, KPIActivityDomainType.DATA);
+						sourceId, null, ActivityAccessType.READ, KPIActivityDomainType.DATA);
 
 				return new ResponseEntity<>(pageKpiData, HttpStatus.OK);
 			} else if (listKpiData != null) {
 				logger.info("Returning kpiDatalist ");
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						null, ActivityAccessType.READ, KPIActivityDomainType.DATA);
+						sourceId, null, ActivityAccessType.READ, KPIActivityDomainType.DATA);
 
 				return new ResponseEntity<>(listKpiData, HttpStatus.OK);
 			}

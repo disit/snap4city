@@ -29,9 +29,11 @@ public interface KPIDataDAO extends JpaRepository<KPIData, Long>, KPIDataDAOCust
 
 	KPIData findOne(long id);
 
-	Page<KPIData> findAll(Pageable pageable);
+        Page<KPIData> findAll(Pageable pageable);
 
 	Page<KPIData> findByDeleteTimeIsNull(Pageable pageable);
+        
+        List<KPIData> findByDeleteTimeIsNull();
 
 	@Query("select k from KPIData as k where k.id in (select elementId from Delegation where elementType like %?2% and usernameDelegated = ?1 and deleteTime = NULL) and k.highLevelType like %?3% and deleteTime = NULL and (k.nature like %?4% or k.subNature like %?4% or k.valueName like %?4% or k.valueType like %?4% or k.dataType like %?4%)")
 	Page<KPIData> findByUsernameDelegatedAndElementTypeContainingAndDeleteTimeIsNull(
@@ -55,4 +57,13 @@ public interface KPIDataDAO extends JpaRepository<KPIData, Long>, KPIDataDAOCust
 	@Transactional
 	@Query("delete from KPIData a where a.deleteTime < ?1")
 	void deleteByDeleteTimeBefore(Date time);
+        
+        List<KPIData> findByUsername(String username);
+        
+        List<KPIData> findByUsernameAndDeleteTimeIsNull(String username);
+        
+        List<KPIData> findByHighLevelTypeAndDeleteTimeIsNull(String elmtType);
+        
+        List<KPIData> findByUsernameAndHighLevelTypeAndDeleteTimeIsNull(String username, String elmtType);
+        
 }

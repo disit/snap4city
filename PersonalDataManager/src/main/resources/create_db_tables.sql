@@ -73,12 +73,15 @@ CREATE TABLE `profiledb`.`kpidata` (
   `sub_nature` varchar(128) DEFAULT NULL,
   `value_name` varchar(128) DEFAULT NULL,
   `value_type` varchar(128) DEFAULT NULL,
+  `value_unit` varchar(128) DEFAULT NULL,
   `data_type` varchar(128) DEFAULT NULL,
   `instance_uri` varchar(256) DEFAULT NULL,
   `get_instances` varchar(128) DEFAULT NULL,
   `last_date` datetime DEFAULT NULL,
   `last_value` varchar(128) DEFAULT NULL,
   `last_check` datetime DEFAULT NULL,
+  `last_latitude` varchar(45) DEFAULT NULL,
+  `last_longitude` varchar(45) DEFAULT NULL,
   `metric` varchar(128) DEFAULT NULL,
   `saved_direct` varchar(128) DEFAULT NULL,
   `kb_based` varchar(128) DEFAULT NULL,
@@ -146,6 +149,7 @@ CREATE TABLE `kpiactivity` (
   `username` varchar(128) DEFAULT NULL,
   `kpi_id` bigint(20) DEFAULT NULL,
   `source_request` varchar(255) DEFAULT NULL,
+  `source_id` varchar(255) DEFAULT NULL,
   `access_type` varchar(255) DEFAULT NULL,
   `domain` varchar(255) DEFAULT NULL,
   `insert_time` datetime DEFAULT NULL,
@@ -153,3 +157,27 @@ CREATE TABLE `kpiactivity` (
   `elapse_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;
+
+CREATE TABLE `devicegroup` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `ownership` varchar(64) DEFAULT NULL,
+  `name` varchar(128) DEFAULT NULL,
+  `description` varchar(250) DEFAULT NULL,
+  `insert_time` datetime DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
+  `delete_time` datetime DEFAULT NULL,
+  `username` varchar(128) DEFAULT NULL,
+  `high_level_type` varchar(128) DEFAULT NULL,
+  `organizations` text,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE `devicegroupelement` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `device_group_id` bigint(20) NOT NULL,
+  `elementId` varchar(255) NOT NULL,
+  `elementType` varchar(64) NOT NULL,
+  `insert_time` datetime DEFAULT NULL,
+  `delete_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;

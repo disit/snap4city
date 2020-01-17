@@ -78,6 +78,7 @@ public class KPIMetadataController {
 	@GetMapping("/api/v1/kpidata/{kpiId}/metadata/{id}")
 	public ResponseEntity<Object> getKPIMetadataV1ById(@PathVariable("kpiId") Long kpiId, @PathVariable("id") Long id,
 			@RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) {
 
@@ -116,7 +117,7 @@ public class KPIMetadataController {
 				logger.info("Returning kpimetadata {}", kpimetadata.getId());
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						kpiData.getId(), ActivityAccessType.READ, KPIActivityDomainType.METADATA);
+						sourceId, kpiData.getId(), ActivityAccessType.READ, KPIActivityDomainType.METADATA);
 
 				return new ResponseEntity<>(kpimetadata, HttpStatus.OK);
 			}
@@ -137,6 +138,7 @@ public class KPIMetadataController {
 	@GetMapping("/api/v1/public/kpidata/{kpiId}/metadata/{id}")
 	public ResponseEntity<Object> getPublicKPIMetadataV1ById(@PathVariable("kpiId") Long kpiId,
 			@PathVariable("id") Long id, @RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) {
 
@@ -172,7 +174,7 @@ public class KPIMetadataController {
 			} else {
 				logger.info("Returning kpimetadata {}", kpimetadata.getId());
 
-				kpiActivityService.saveActivityFromUsername("PUBLIC", sourceRequest, kpiData.getId(),
+				kpiActivityService.saveActivityFromUsername("PUBLIC", sourceRequest, sourceId, kpiData.getId(),
 						ActivityAccessType.READ, KPIActivityDomainType.METADATA);
 
 				return new ResponseEntity<>(kpimetadata, HttpStatus.OK);
@@ -193,6 +195,7 @@ public class KPIMetadataController {
 	@PostMapping("/api/v1/kpidata/{kpiId}/metadata")
 	public ResponseEntity<Object> postKPIMetadataV1(@PathVariable("kpiId") Long kpiId,
 			@RequestBody KPIMetadata kpiMetadata, @RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) {
 
@@ -216,7 +219,7 @@ public class KPIMetadataController {
 				throw new CredentialsException();
 			}
 
-			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, kpiId,
+			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, sourceId, kpiId,
 					ActivityAccessType.WRITE, KPIActivityDomainType.METADATA);
 
 			kpiMetadata.setKpiId(kpiId);
@@ -241,6 +244,7 @@ public class KPIMetadataController {
 	@PutMapping("/api/v1/kpidata/{kpiId}/metadata/{id}")
 	public ResponseEntity<Object> putKPIMetadataV1(@PathVariable("kpiId") Long kpiId, @PathVariable("id") Long id,
 			@RequestBody KPIMetadata kpiMetadata, @RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) {
 
@@ -280,7 +284,7 @@ public class KPIMetadataController {
 			kpiMetadata.setId(oldKpiMetadata.getId());
 			KPIMetadata newKpiMetadata = kpiMetadataService.saveKPIMetadata(oldKpiMetadata);
 
-			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, kpiId,
+			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, sourceId, kpiId,
 					ActivityAccessType.WRITE, KPIActivityDomainType.METADATA);
 			logger.info("Putted kpimetadata {}", kpiMetadata.getId());
 			return new ResponseEntity<>(newKpiMetadata, HttpStatus.OK);
@@ -302,6 +306,7 @@ public class KPIMetadataController {
 	@PatchMapping("/api/v1/kpidata/{kpiId}/metadata/{id}")
 	public ResponseEntity<Object> patchKPIMetadataV1(@PathVariable("kpiId") Long kpiId, @PathVariable("id") Long id,
 			@RequestBody Map<String, Object> fields, @RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) {
 
@@ -354,7 +359,7 @@ public class KPIMetadataController {
 			});
 
 			KPIMetadata newKpiMetadata = kpiMetadataService.saveKPIMetadata(oldKpiMetadata);
-			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, kpiId,
+			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, sourceId, kpiId,
 					ActivityAccessType.WRITE, KPIActivityDomainType.METADATA);
 
 			logger.info("Patched kpimetadata {}", newKpiMetadata.getId());
@@ -377,6 +382,7 @@ public class KPIMetadataController {
 	@DeleteMapping("/api/v1/kpidata/{kpiId}/metadata/{id}")
 	public ResponseEntity<Object> deleteKPIMetadataV1(@PathVariable("kpiId") Long kpiId, @PathVariable("id") Long id,
 			@RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) {
 
@@ -416,7 +422,7 @@ public class KPIMetadataController {
 			kpiMetadataToDelete.setDeleteTime(new Date());
 			KPIMetadata newKpiMetadata = kpiMetadataService.saveKPIMetadata(kpiMetadataToDelete);
 
-			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, kpiId,
+			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, sourceId, kpiId,
 					ActivityAccessType.DELETE, KPIActivityDomainType.METADATA);
 			logger.info("Deleted kpivalue {}", id);
 			return new ResponseEntity<>(newKpiMetadata, HttpStatus.OK);
@@ -438,6 +444,7 @@ public class KPIMetadataController {
 	@GetMapping("/api/v1/kpidata/{kpiId}/metadata")
 	public ResponseEntity<Object> getAllKPIMetadataV1Pageable(@PathVariable("kpiId") Long kpiId,
 			@RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			@RequestParam(value = "pageNumber", required = false, defaultValue = "-1") int pageNumber,
 			@RequestParam(value = "pageSize", required = false, defaultValue = "10") int pageSize,
@@ -497,14 +504,14 @@ public class KPIMetadataController {
 				logger.info("Returning KpiVMetadataPage ");
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						kpiId, ActivityAccessType.READ, KPIActivityDomainType.METADATA);
+						sourceId, kpiId, ActivityAccessType.READ, KPIActivityDomainType.METADATA);
 
 				return new ResponseEntity<>(pageKpiMetadata, HttpStatus.OK);
 			} else {
 				logger.info("Returning KpiMetadataList ");
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						kpiId, ActivityAccessType.READ, KPIActivityDomainType.METADATA);
+						sourceId, kpiId, ActivityAccessType.READ, KPIActivityDomainType.METADATA);
 
 				return new ResponseEntity<>(listKpiMetadata, HttpStatus.OK);
 			}
@@ -536,6 +543,7 @@ public class KPIMetadataController {
 	@GetMapping("/api/v1/public/kpidata/{kpiId}/metadata")
 	public ResponseEntity<Object> getAllKPIMetadataOfPublicKPIV1Pageable(@PathVariable("kpiId") Long kpiId,
 			@RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			@RequestParam(value = "pageNumber", required = false, defaultValue = "-1") int pageNumber,
 			@RequestParam(value = "pageSize", required = false, defaultValue = "10") int pageSize,
@@ -592,14 +600,14 @@ public class KPIMetadataController {
 			} else if (pageKpiMetadata != null) {
 				logger.info("Returning KpiVMetadataPage ");
 
-				kpiActivityService.saveActivityFromUsername("PUBLIC", sourceRequest, kpiId, ActivityAccessType.READ,
+				kpiActivityService.saveActivityFromUsername("PUBLIC", sourceRequest, sourceId, kpiId, ActivityAccessType.READ,
 						KPIActivityDomainType.METADATA);
 
 				return new ResponseEntity<>(pageKpiMetadata, HttpStatus.OK);
 			} else {
 				logger.info("Returning KpiMetadataList ");
 
-				kpiActivityService.saveActivityFromUsername("PUBLIC", sourceRequest, kpiId, ActivityAccessType.READ,
+				kpiActivityService.saveActivityFromUsername("PUBLIC", sourceRequest, sourceId, kpiId, ActivityAccessType.READ,
 						KPIActivityDomainType.METADATA);
 
 				return new ResponseEntity<>(listKpiMetadata, HttpStatus.OK);

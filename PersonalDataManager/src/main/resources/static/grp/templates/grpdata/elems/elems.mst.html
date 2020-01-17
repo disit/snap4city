@@ -1,0 +1,179 @@
+<!-- {{#response}} -->
+<div class="row" style="padding: 15px;">
+    <div class="col-sm-2">
+        <button id="backButtonToMyKPIDataList" class="btn btn-secondary" style="color: white;padding: 0.5rem;" type="button" onclick="DeviceGrpTabler.renderTable();">Return
+            to My Device Groups List</button>
+    </div>
+
+</div>
+<!-- {{#currentGrpData}} -->
+<div class="row" style="padding: 15px;">
+    <div class="col-sm-8 offset-sm-2">
+        <div class="alert alert-light">
+            <b style="margin-right: 30px">Device Group</b> <b style="margin-right: 10px">ID</b> {{id}} <b style="margin-right: 10px; margin-left: 10px;">Name</b>
+            {{name}} <b style="margin-right: 10px;margin-left: 10px;">Description</b> {{description}} 
+        </div>
+    </div>
+
+</div>
+<!-- {{/currentGrpData}} -->
+<div class="row" style="padding: 15px;">
+    <div class="col-md-2">
+        <select id="selectSizeKPIDelegation" class="custom-select custom-select" onchange="GrpElementPager.setCurrentSize($('#selectSizeKPIDelegation').val());GrpElementTabler.renderTable('{{grpId}}',GrpElementTabler.forceReadonly);">
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="200">200</option>
+        </select>
+    </div>
+    
+    <!-- {{#enableEdit}} -->
+    <div id="addnewelement" class="col-md-7 offset-md-3" style="text-align: center; margin: 0.5rem;">
+        
+        <!-- qui, per prendere poi spunto, veniva chiamata la editKPIDelegationModal('') -->
+
+        <!--
+        <button class="btn btn-warning" style="color: white;padding: 0.5rem;" type="button" onclick="GrpElementTabler.addElement('');">Add
+            Device</button>
+        <button class="btn btn-warning" style="color: white;padding: 0.5rem;" type="button" onclick="GrpElementTabler.addMyKPIElement('');">Add
+            MyKPI</button>
+        <button class="btn btn-warning" style="color: white;padding: 0.5rem;" type="button" onclick="GrpElementTabler.addDashboardElement('');">Add
+            Dashboard</button>
+        -->
+        
+    </div>
+    <!-- {{/enableEdit}} -->
+    
+    <div class="col-nd-2 offset-nd-3">
+        <div class="input-group">
+            <input type="text" id="inputFilterKPIDelegation" class="form-control" placeholder="Filter Table" aria-label="Filter Table"
+                aria-describedby="button-addon2" max="{{totalPages}}" min="1" \>
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="button" onclick="$('#inputFilterKPIDelegation').val('');GrpElementFilter.setCurrentSearchKey(''); GrpElementTabler.renderTable('{{grpId}}',GrpElementTabler.forceReadonly);"
+                    id="button-addon2" style="background-color: #eee;">&times;</button>
+            </div>
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="button" onclick="GrpElementFilter.setCurrentSearchKey($('#inputFilterKPIDelegation').val()); GrpElementTabler.renderTable('{{grpId}}',GrpElementTabler.forceReadonly);"
+                    id="button-addon2" style="background-color: #eee;">Search</button>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+<table class="table table-striped table-bordered" style="background-color: white">
+    <thead>
+        <tr style="background: rgb(0, 162, 211); color: rgb(255, 255, 255); font-size: 1em;">
+            <th onclick="GrpElementSorter.setSortOnField('id');GrpElementTabler.renderTable('{{grpId}}',GrpElementTabler.forceReadonly);" style="cursor: pointer;">No.
+                {{#sortidASC}}&darr;{{/sortidASC}}
+                {{#sortidDESC}}&uarr;{{/sortidDESC}}</th>
+            <th onclick="GrpElementSorter.setSortOnField('username');GrpElementTabler.renderTable('{{grpId}}',GrpElementTabler.forceReadonly);"
+                style="cursor: pointer;">Username
+                {{#sortusernameASC}}&darr;{{/sortusernameASC}}
+                {{#sortusernameDESC}}&uarr;{{/sortusernameDESC}}</th>
+            <th onclick="GrpElementSorter.setSortOnField('elementId');GrpElementTabler.renderTable('{{grpId}}',GrpElementTabler.forceReadonly);"
+                style="cursor: pointer;">Element ID
+                {{#sortelementIdASC}}&darr;{{/sortelementIdASC}}
+                {{#sortelementIdDESC}}&uarr;{{/sortelementIdDESC}}</th>            
+            <th onclick="GrpElementSorter.setSortOnField('elementType');GrpElementTabler.renderTable('{{grpId}}',GrpElementTabler.forceReadonly);"
+                style="cursor: pointer;">Element Type
+                {{#sortelementTypeASC}}&darr;{{/sortelementTypeASC}}
+                {{#sortelementTypeDESC}}&uarr;{{/sortelementTypeDESC}}</th>
+            <th onclick="GrpElementSorter.setSortOnField('elementName');GrpElementTabler.renderTable('{{grpId}}',GrpElementTabler.forceReadonly);"
+                style="cursor: pointer;">Element Name
+                {{#sortelementNameASC}}&darr;{{/sortelementNameASC}}
+                {{#sortelementNameDESC}}&uarr;{{/sortelementNameDESC}}</th>
+            <th onclick="GrpElementSorter.setSortOnField('insertTime');GrpElementTabler.renderTable('{{grpId}}',GrpElementTabler.forceReadonly);"
+                style="cursor: pointer;">Added
+                {{#sortinsertTimeASC}}&darr;{{/sortinsertTimeASC}} {{#sortinsertTimeDESC}}&uarr;{{/sortinsertTimeDESC}}</th>
+            <!-- <th>View</th> -->
+            <!-- {{#enableEdit}} -->
+            <th>Controls</th>
+            <!-- {{/enableEdit}} -->
+        </tr>
+    </thead>
+    <tbody>
+        <!-- {{#content}} -->
+        <tr>
+            <td>{{id}}</td>
+            <td>{{username}}</td>
+            <td>{{elementId}}</td>
+            <td>{{elmtTypeLbl}}</td>            
+            <td>{{elementName}}</td>            
+            <td>{{#timestampToDate}}{{insertTime}}{{/timestampToDate}}</td>
+            <!-- {{#enableEdit}} -->
+            <!-- qui prima era deleteKPIDelegationModal per poi riprendere spunto -->
+            <td>
+                <button type="button" onclick="GrpElementTabler.deleteElementModal({{id}}, {{grpId}}, '{{username}}', '{{elementId}}', '{{elementType}}', '{{escapedElementName}}', {{insertTime}});"
+                    class="btn deleteDashBtn">Delete</button></td>
+            <!-- {{/enableEdit}} -->
+        </tr>
+        <!-- {{/content}} -->
+    </tbody>
+</table>
+</div>
+
+
+<div class="row">
+    <div class="col-sm-3">
+        <div class="pagination" style="background-color: #eee; text-align: center">
+            <p>Showing <span class="badge">{{showingFrom}}</span> to
+                <span class="badge"> {{showingTo}}</span>
+                of
+                <span class="badge">{{totalElements}}</span>
+               My Device Group Elements</p>
+        </div>
+    </div>
+
+    <div class="col-sm-6">
+        <!-- Pagination Bar -->
+        <div th:fragment='paginationbar'>
+            <div class="text-center">
+                <ul class='pagination pagination-centered'>
+                    <li class="page-item {{#first}} disabled {{/first}}">
+                        <span class="page-link" style="color: #337ab7" onclick="GrpElementPager.setCurrentPage(0); GrpElementTabler.renderTable('{{grpId}}', GrpElementTabler.forceReadonly);">First</span>
+                    </li>
+                    <li class="page-item {{#first}} disabled {{/first}}">
+                        <span class="page-link" style="color: #337ab7" onclick="GrpElementPager.setCurrentPage({{number}} - 1); GrpElementTabler.renderTable('{{grpId}}', GrpElementTabler.forceReadonly);">&lt;</span>
+                    </li>
+                    <li class="page-item {{#disableTwoPreviousNumber}} disabled {{/disableTwoPreviousNumber}}">
+                        <span class="page-link" style="color: #337ab7" onclick="GrpElementPager.setCurrentPage({{number}} - 2); GrpElementTabler.renderTable('{{grpId}}', GrpElementTabler.forceReadonly);">{{twoPreviousNumber}}</span>
+                    </li>
+                    <li class="page-item {{#disablePreviousNumber}} disabled {{/disablePreviousNumber}}">
+                        <span class="page-link" style="color: #337ab7" onclick="GrpElementPager.setCurrentPage({{number}} - 1); GrpElementTabler.renderTable('{{grpId}}', GrpElementTabler.forceReadonly);">{{previousNumber}}</span>
+                    </li>
+                    <li class="page-item">
+                        <span class="page-link" style="background-color: #337ab7;border-color: #337ab7;color: white">
+                            {{labelNumber}}</span>
+                    </li>
+                    <li class="page-item {{#disableNextNumber}} disabled {{/disableNextNumber}}">
+                        <span class="page-link" style="color: #337ab7" onclick="GrpElementPager.setCurrentPage({{number}} + 1); GrpElementTabler.renderTable('{{grpId}}', GrpElementTabler.forceReadonly);">{{nextNumber}}</span>
+                    </li>
+                    <li class="page-item {{#disableTwoNextNumber}} disabled {{/disableTwoNextNumber}}">
+                        <span class="page-link" style="color: #337ab7" onclick="GrpElementPager.setCurrentPage({{number}} + 2); GrpElementTabler.renderTable('{{grpId}}', GrpElementTabler.forceReadonly);">{{twoNextNumber}}</span>
+                    </li>
+                    <li class="page-item {{#last}} disabled {{/last}}">
+                        <span class="page-link" style="color: #337ab7" onclick="GrpElementPager.setCurrentPage({{number}} + 1); GrpElementTabler.renderTable('{{grpId}}', GrpElementTabler.forceReadonly);">&gt;</span>
+                    </li>
+                    <li class="page-item {{#last}} disabled {{/last}}">
+                        <span class="page-link" style="color: #337ab7" onclick="GrpElementPager.setCurrentPage({{totalPages}} - 1); GrpElementTabler.renderTable('{{grpId}}', GrpElementTabler.forceReadonly);">Last</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-3">
+        <div class="input-group">
+            <input type="number" id="inputGoToPageKPIDelegation" class="form-control" placeholder="Page Number"
+                aria-label="Page Number" aria-describedby="button-addon2" max="{{totalPages}}" min="1" \>
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="button" onclick="GrpElementPager.setCurrentPage($('#inputGoToPageKPIDelegation').val() - 1); GrpElementTabler.renderTable('{{grpId}}', GrpElementTabler.forceReadonly);"
+                    id="button-addon2" style="background-color: #eee;">Go</button>
+            </div>
+        </div>
+    </div>
+    <!-- {{/response}} -->

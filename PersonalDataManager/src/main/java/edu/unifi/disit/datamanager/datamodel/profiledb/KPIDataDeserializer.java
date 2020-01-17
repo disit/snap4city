@@ -119,6 +119,9 @@ public class KPIDataDeserializer extends StdDeserializer<KPIData> {
 		if (jnode.get("valueType") != null) {
 			kpidata.setValueType(jnode.get("valueType").asText());
 		}
+		if (jnode.get("valueUnit") != null) {
+			kpidata.setValueType(jnode.get("valueUnit").asText());
+		}
 		if (jnode.get("metric") != null) {
 			kpidata.setMetric(jnode.get("metric").asText());
 		}

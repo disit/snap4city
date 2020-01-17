@@ -1,0 +1,153 @@
+<!-- {{#response}} -->
+<div class="row" style="padding: 15px;">
+    <div class="col-sm-2">
+        <button id="backButtonToMyKPIDataList" class="btn btn-secondary" style="color: white;padding: 0.5rem;" type="button" onclick="DeviceGrpTabler.renderTable();">Return
+            to My Device Groups List</button>
+    </div>
+
+</div>
+<!-- {{#currentKPIData}} -->
+<div class="row" style="padding: 15px;">
+    <div class="col-sm-8 offset-sm-2">
+        <div class="alert alert-light">
+            <b style="margin-right: 30px">Device Group:</b> <b style="margin-right: 10px">No.</b> {{id}} <b style="margin-right: 10px; margin-left: 10px;">Name</b>
+            {{name}} | <b style="margin-right: 10px;margin-left: 10px;">Description</b> {{description}} 
+        </div>
+    </div>
+
+</div>
+<!-- {{/currentKPIData}} -->
+<div class="row" style="padding: 15px;">
+    <div class="col-md-2">
+        <select id="selectSizeKPIDelegation" class="custom-select custom-select" onchange="GrpDelegationPager.setCurrentSize($('#selectSizeKPIDelegation').val());GrpDelegationTabler.renderTable('{{kpiId}}');">
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="200">200</option>
+        </select>
+    </div>
+    <div class="col-md-2 offset-md-3" style="text-align: center; margin: 0.5rem;">
+        <!-- {{#enableEdit}} -->
+        <button class="btn btn-warning" style="color: white;padding: 0.5rem;" type="button" onclick="GrpDelegationTabler.editKPIDelegationModal('');">Add
+            New My Device Group Delegation</button>
+        <!-- {{/enableEdit}} -->
+
+    </div>
+    <div class="col-nd-2 offset-nd-3">
+        <div class="input-group">
+            <input type="text" id="inputFilterKPIDelegation" class="form-control" placeholder="Filter Table" aria-label="Filter Table"
+                aria-describedby="button-addon2" max="{{totalPages}}" min="1" \>
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="button" onclick="$('#inputFilterKPIDelegation').val('');GrpDelegationFilter.setCurrentSearchKey(''); GrpDelegationTabler.renderTable('{{kpiId}}');"
+                    id="button-addon2" style="background-color: #eee;">&times;</button>
+            </div>
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="button" onclick="GrpDelegationFilter.setCurrentSearchKey($('#inputFilterKPIDelegation').val()); GrpDelegationTabler.renderTable('{{kpiId}}');"
+                    id="button-addon2" style="background-color: #eee;">Search</button>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+<table class="table table-striped table-bordered" style="background-color: white">
+    <thead>
+        <tr style="background: rgb(0, 162, 211); color: rgb(255, 255, 255); font-size: 1em;">
+            <th onclick="GrpDelegationSorter.setSortOnField('id');GrpDelegationTabler.renderTable('{{kpiId}}');" style="cursor: pointer;">No.
+                {{#sortidASC}}&darr;{{/sortidASC}}
+                {{#sortidDESC}}&uarr;{{/sortidDESC}}</th>
+            <th onclick="GrpDelegationSorter.setSortOnField('usernameDelegated');GrpDelegationTabler.renderTable({kpiId});"
+                style="cursor: pointer;">Username Delegated
+                {{#sortusernameDelegatedASC}}&darr;{{/sortusernameDelegatedASC}}
+                {{#sortusernameDelegatedDESC}}&uarr;{{/sortusernameDelegatedDESC}}</th>
+            <th onclick="GrpDelegationSorter.setSortOnField('insertTime');GrpDelegationTabler.renderTable('{{kpiId}}');"
+                style="cursor: pointer;">Insert
+                Time
+                {{#sortinsertTimeASC}}&darr;{{/sortinsertTimeASC}} {{#sortinsertTimeDESC}}&uarr;{{/sortinsertTimeDESC}}</th>
+            <!-- <th>View</th> -->
+            <!-- {{#enableEdit}} -->
+            <th>Controls</th>
+            <!-- {{/enableEdit}} -->
+        </tr>
+    </thead>
+    <tbody>
+        <!-- {{#content}} -->
+        <tr>
+            <td>{{id}}</td>
+            <td>{{usernameDelegated}}</td>
+            <td>{{#timestampToDate}}{{insertTime}}{{/timestampToDate}}</td>
+            <!-- {{#enableEdit}} -->
+            <td><!--<button type="button" onclick="GrpDelegationTabler.editKPIDelegationModal({{kpiId}},{{id}});" class=" btn editDashBtn">Edit</button>-->
+                <button type="button" onclick="GrpDelegationTabler.deleteKPIDelegationModal({{id}}, {{kpiId}}, '{{usernameDelegated}}', '{{insertTime}}');"
+                    class="btn deleteDashBtn">Delete</button></td>
+            <!-- {{/enableEdit}} -->
+        </tr>
+        <!-- {{/content}} -->
+    </tbody>
+</table>
+</div>
+
+
+<div class="row">
+    <div class="col-sm-3">
+        <div class="pagination" style="background-color: #eee; text-align: center">
+            <p>Showing <span class="badge">{{showingFrom}}</span> to
+                <span class="badge"> {{showingTo}}</span>
+                of
+                <span class="badge">{{totalElements}}</span>
+               My Device Group Delegation</p>
+        </div>
+    </div>
+
+    <div class="col-sm-6">
+        <!-- Pagination Bar -->
+        <div th:fragment='paginationbar'>
+            <div class="text-center">
+                <ul class='pagination pagination-centered'>
+                    <li class="page-item {{#first}} disabled {{/first}}">
+                        <span class="page-link" style="color: #337ab7" onclick="GrpDelegationPager.setCurrentPage(0); GrpDelegationTabler.renderTable('{{kpiId}}');">First</span>
+                    </li>
+                    <li class="page-item {{#first}} disabled {{/first}}">
+                        <span class="page-link" style="color: #337ab7" onclick="GrpDelegationPager.setCurrentPage({{number}} - 1); GrpDelegationTabler.renderTable('{{kpiId}}');">&lt;</span>
+                    </li>
+                    <li class="page-item {{#disableTwoPreviousNumber}} disabled {{/disableTwoPreviousNumber}}">
+                        <span class="page-link" style="color: #337ab7" onclick="GrpDelegationPager.setCurrentPage({{number}} - 2); GrpDelegationTabler.renderTable('{{kpiId}}');">{{twoPreviousNumber}}</span>
+                    </li>
+                    <li class="page-item {{#disablePreviousNumber}} disabled {{/disablePreviousNumber}}">
+                        <span class="page-link" style="color: #337ab7" onclick="GrpDelegationPager.setCurrentPage({{number}} - 1); GrpDelegationTabler.renderTable('{{kpiId}}');">{{previousNumber}}</span>
+                    </li>
+                    <li class="page-item">
+                        <span class="page-link" style="background-color: #337ab7;border-color: #337ab7;color: white">
+                            {{labelNumber}}</span>
+                    </li>
+                    <li class="page-item {{#disableNextNumber}} disabled {{/disableNextNumber}}">
+                        <span class="page-link" style="color: #337ab7" onclick="GrpDelegationPager.setCurrentPage({{number}} + 1); GrpDelegationTabler.renderTable('{{kpiId}}');">{{nextNumber}}</span>
+                    </li>
+                    <li class="page-item {{#disableTwoNextNumber}} disabled {{/disableTwoNextNumber}}">
+                        <span class="page-link" style="color: #337ab7" onclick="GrpDelegationPager.setCurrentPage({{number}} + 2); GrpDelegationTabler.renderTable('{{kpiId}}');">{{twoNextNumber}}</span>
+                    </li>
+                    <li class="page-item {{#last}} disabled {{/last}}">
+                        <span class="page-link" style="color: #337ab7" onclick="GrpDelegationPager.setCurrentPage({{number}} + 1); GrpDelegationTabler.renderTable('{{kpiId}}');">&gt;</span>
+                    </li>
+                    <li class="page-item {{#last}} disabled {{/last}}">
+                        <span class="page-link" style="color: #337ab7" onclick="GrpDelegationPager.setCurrentPage({{totalPages}} - 1); GrpDelegationTabler.renderTable('{{kpiId}}');">Last</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-3">
+        <div class="input-group">
+            <input type="number" id="inputGoToPageKPIDelegation" class="form-control" placeholder="Page Number"
+                aria-label="Page Number" aria-describedby="button-addon2" max="{{totalPages}}" min="1" \>
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="button" onclick="GrpDelegationPager.setCurrentPage($('#inputGoToPageKPIDelegation').val() - 1); GrpDelegationTabler.renderTable('{{kpiId}}');"
+                    id="button-addon2" style="background-color: #eee;">Go</button>
+            </div>
+        </div>
+    </div>
+    <!-- {{/response}} -->

@@ -84,6 +84,7 @@ public class KPIDelegationController {
 	@GetMapping("/api/v1/kpidata/{kpiId}/delegations/{id}")
 	public ResponseEntity<Object> getKPIDelegationV1ById(@PathVariable("kpiId") Long kpiId, @PathVariable("id") Long id,
 			@RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) {
 
@@ -123,7 +124,7 @@ public class KPIDelegationController {
 				logger.info("Returning delegation {}", delegation.getId());
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						kpiData.getId(), ActivityAccessType.READ, KPIActivityDomainType.DELEGATION);
+						sourceId, kpiData.getId(), ActivityAccessType.READ, KPIActivityDomainType.DELEGATION);
 
 				return new ResponseEntity<>(delegation, HttpStatus.OK);
 			}
@@ -144,6 +145,7 @@ public class KPIDelegationController {
 	@PostMapping("/api/v1/kpidata/{kpiId}/delegations")
 	public ResponseEntity<Object> postKPIDelegationV1(@PathVariable("kpiId") Long kpiId,
 			@RequestBody Delegation kpiDelegation, @RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) {
 
@@ -168,12 +170,12 @@ public class KPIDelegationController {
 			
 			if(kpiDelegation.getUsernameDelegated().equals("ANONYMOUS")) {
 				kpiData.setOwnership("public");
-				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, kpiId,
+				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, sourceId, kpiId,
 						ActivityAccessType.WRITE, KPIActivityDomainType.CHANGEOWNERSHIP);
 				kpiDataService.saveKPIData(kpiData);
 			}
 
-			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, kpiId,
+			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, sourceId, kpiId,
 					ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION);
 
 			logger.info("Posted kpiDelegation {}", kpiDelegation.getId());
@@ -198,6 +200,7 @@ public class KPIDelegationController {
 	@PutMapping("/api/v1/kpidata/{kpiId}/delegations/{id}")
 	public ResponseEntity<Object> putKPIDelegationV1(@PathVariable("kpiId") Long kpiId, @PathVariable("id") Long id,
 			@RequestBody Delegation kpiDelegation, @RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) {
 
@@ -234,13 +237,13 @@ public class KPIDelegationController {
 			}
 
 			kpiDelegation.setId(oldKpiDelegation.getId());
-			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, kpiId,
+			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, sourceId, kpiId,
 					ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION);
 			
 
 			if(kpiDelegation.getUsernameDelegated().equals("ANONYMOUS")) {
 				kpiData.setOwnership("public");
-				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, kpiId,
+				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, sourceId, kpiId,
 						ActivityAccessType.WRITE, KPIActivityDomainType.CHANGEOWNERSHIP);
 				kpiDataService.saveKPIData(kpiData);
 			}
@@ -266,6 +269,7 @@ public class KPIDelegationController {
 	@PatchMapping("/api/v1/kpidata/{kpiId}/delegations/{id}")
 	public ResponseEntity<Object> patchKPIDelegationV1(@PathVariable("kpiId") Long kpiId, @PathVariable("id") Long id,
 			@RequestBody Map<String, Object> fields, @RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) {
 
@@ -317,12 +321,12 @@ public class KPIDelegationController {
 			});
 			
 
-			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, kpiId,
+			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, sourceId, kpiId,
 					ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION);
 			
 			if(oldKpiDelegation.getUsernameDelegated().equals("ANONYMOUS")) {
 				kpiData.setOwnership("public");
-				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, kpiId,
+				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, sourceId, kpiId,
 						ActivityAccessType.WRITE, KPIActivityDomainType.CHANGEOWNERSHIP);
 				kpiDataService.saveKPIData(kpiData);
 			}
@@ -347,6 +351,7 @@ public class KPIDelegationController {
 	@DeleteMapping("/api/v1/kpidata/{kpiId}/delegations/{id}")
 	public ResponseEntity<Object> deleteKPIDelegationV1(@PathVariable("kpiId") Long kpiId, @PathVariable("id") Long id,
 			@RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) {
 
@@ -383,7 +388,7 @@ public class KPIDelegationController {
 			}
 
 			kpiDelegationToDelete.setDeleteTime(new Date());
-			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, kpiId,
+			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, sourceId, kpiId,
 					ActivityAccessType.DELETE, KPIActivityDomainType.DELEGATION);
 			logger.info("Deleted kpiDelegation {}", kpiDelegationToDelete.getId());
 			return userController.putDelegationV1(credentialService.getLoggedUsername(lang),
@@ -405,6 +410,7 @@ public class KPIDelegationController {
 	@GetMapping("/api/v1/kpidata/{kpiId}/delegations")
 	public ResponseEntity<Object> getAllDelegationV1Pageable(@PathVariable("kpiId") Long kpiId,
 			@RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			@RequestParam(value = "pageNumber", required = false, defaultValue = "-1") int pageNumber,
 			@RequestParam(value = "pageSize", required = false, defaultValue = "10") int pageSize,
@@ -453,14 +459,14 @@ public class KPIDelegationController {
 				logger.info("Returning KpiDelegationPage ");
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						kpiId, ActivityAccessType.READ, KPIActivityDomainType.DELEGATION);
+						sourceId, kpiId, ActivityAccessType.READ, KPIActivityDomainType.DELEGATION);
 
 				return new ResponseEntity<>(pageKpiDelegation, HttpStatus.OK);
 			} else {
 				logger.info("Returning KpiDelegationList ");
 
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
-						kpiId, ActivityAccessType.READ, KPIActivityDomainType.DELEGATION);
+						sourceId, kpiId, ActivityAccessType.READ, KPIActivityDomainType.DELEGATION);
 
 				return new ResponseEntity<>(listKpiDelegation, HttpStatus.OK);
 			}

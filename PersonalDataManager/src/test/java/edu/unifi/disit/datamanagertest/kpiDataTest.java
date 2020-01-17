@@ -34,6 +34,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.unifi.disit.datamanager.datamodel.profiledb.Delegation;
+import edu.unifi.disit.datamanager.datamodel.profiledb.KPIActivity;
 import edu.unifi.disit.datamanager.datamodel.profiledb.KPIData;
 import edu.unifi.disit.datamanager.datamodel.profiledb.KPIMetadata;
 import edu.unifi.disit.datamanager.datamodel.profiledb.KPIValue;
@@ -44,9 +45,8 @@ public class kpiDataTest {
 	public void get_kpiDataNotExist() throws ClientProtocolException, IOException {
 
 		// Given
-		HttpUriRequest request = new HttpGet("http://localhost:8080/datamanager/api/v1/kpidata/154312/?accessToken="
-				+ getAccessTokenRoot() + "&sourceRequest=junittest");
-
+		HttpUriRequest request = new HttpGet("http://localhost:8080/datamanager/api/v1/kpidata/154312/?sourceRequest=junittest");
+		request.addHeader("Authorization", "Bearer " + getAccessTokenRoot());
 		// When
 		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
 
@@ -59,8 +59,8 @@ public class kpiDataTest {
 
 		// Given
 		HttpUriRequest request = new HttpGet(
-				"http://localhost:8080/datamanager/api/v1/kpidata/17055844/values/9999/?accessToken="
-						+ getAccessTokenRoot() + "&sourceRequest=junittest");
+				"http://localhost:8080/datamanager/api/v1/kpidata/17055844/values/9999/?sourceRequest=junittest");
+		request.addHeader("Authorization", "Bearer " + getAccessTokenRoot());
 
 		// When
 		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
@@ -74,8 +74,8 @@ public class kpiDataTest {
 
 		// Given
 		HttpUriRequest request = new HttpGet(
-				"http://localhost:8080/datamanager/api/v1/kpidata/17055844/metadata/9999/?accessToken="
-						+ getAccessTokenRoot() + "&sourceRequest=junittest");
+				"http://localhost:8080/datamanager/api/v1/kpidata/17055844/metadata/9999/?sourceRequest=junittest");
+		request.addHeader("Authorization", "Bearer " + getAccessTokenRoot());
 
 		// When
 		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
@@ -89,8 +89,22 @@ public class kpiDataTest {
 
 		// Given
 		HttpUriRequest request = new HttpGet(
-				"http://localhost:8080/datamanager/api/v1/kpidata/17055844/delegations/9999/?accessToken="
-						+ getAccessTokenRoot() + "&sourceRequest=junittest");
+				"http://localhost:8080/datamanager/api/v1/kpidata/17055844/delegations/9999/?sourceRequest=junittest");
+		request.addHeader("Authorization", "Bearer " + getAccessTokenRoot());
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		assertThat(httpResponse.getStatusLine().getStatusCode(), equalTo(HttpStatus.NO_CONTENT.value()));
+	}
+	
+	@Test
+	public void get_kpiActivityNotExist() throws ClientProtocolException, IOException {
+
+		// Given
+		HttpUriRequest request = new HttpGet("http://localhost:8080/datamanager/api/v1/kpidata/17055838/activities/154312/?sourceRequest=junittest");
+		request.addHeader("Authorization", "Bearer " + getAccessTokenRoot());
 
 		// When
 		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
@@ -103,9 +117,9 @@ public class kpiDataTest {
 	public void get_kpiDataWithID() throws ClientProtocolException, IOException {
 
 		// Given
-		HttpUriRequest request = new HttpGet("http://localhost:8080/datamanager/api/v1/kpidata/17055844/?accessToken="
-				+ getAccessTokenRoot() + "&sourceRequest=junittest");
-
+		HttpUriRequest request = new HttpGet("http://localhost:8080/datamanager/api/v1/kpidata/17055844/?sourceRequest=junittest");
+		request.addHeader("Authorization", "Bearer " + getAccessTokenRoot());
+		
 		// When
 		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
 
@@ -130,9 +144,10 @@ public class kpiDataTest {
 
 		// Given
 		HttpUriRequest request = new HttpGet(
-				"http://localhost:8080/datamanager/api/v1/kpidata/17055844/values/73/?accessToken="
-						+ getAccessTokenRoot() + "&sourceRequest=junittest");
-
+				"http://localhost:8080/datamanager/api/v1/kpidata/17055844/values/73/?sourceRequest=junittest");
+						request.addHeader("Authorization", "Bearer " + getAccessTokenRoot());
+		request.addHeader("Authorization", "Bearer " + getAccessTokenRoot());
+		
 		// When
 		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
 
@@ -155,8 +170,8 @@ public class kpiDataTest {
 
 		// Given
 		HttpUriRequest request = new HttpGet(
-				"http://localhost:8080/datamanager/api/v1/kpidata/17055844/metadata/34/?accessToken="
-						+ getAccessTokenRoot() + "&sourceRequest=junittest");
+				"http://localhost:8080/datamanager/api/v1/kpidata/17055844/metadata/34/?sourceRequest=junittest");
+		request.addHeader("Authorization", "Bearer " + getAccessTokenRoot());
 
 		// When
 		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
@@ -178,8 +193,8 @@ public class kpiDataTest {
 
 		// Given
 		HttpUriRequest request = new HttpGet(
-				"http://localhost:8080/datamanager/api/v1/kpidata/17055844/delegations/970/?accessToken="
-						+ getAccessTokenRoot() + "&sourceRequest=junittest");
+				"http://localhost:8080/datamanager/api/v1/kpidata/17055844/delegations/970/?sourceRequest=junittest");
+		request.addHeader("Authorization", "Bearer " + getAccessTokenRoot());
 
 		// When
 		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
@@ -200,12 +215,38 @@ public class kpiDataTest {
 	}
 	
 	@Test
+	public void get_kpiActivityWithID() throws ClientProtocolException, IOException {
+
+		// Given
+		HttpUriRequest request = new HttpGet(
+				"http://localhost:8080/datamanager/api/v1/kpidata/17055838/activities/7260/?sourceRequest=junittest");
+		request.addHeader("Authorization", "Bearer " + getAccessTokenRoot());
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		ObjectMapper mapper = new ObjectMapper();
+		KPIActivity result = mapper.readValue(EntityUtils.toString(httpResponse.getEntity()),
+				new TypeReference<KPIActivity>() {
+				});
+
+		assertThat(httpResponse.getStatusLine().getStatusCode(), equalTo(HttpStatus.OK.value()));
+
+		assertEquals("WRITE", result.getAccessType());
+		assertEquals("VALUE", result.getDomain());
+		assertEquals("iotapp", result.getSourceRequest());
+		assertEquals("da5698be17b9b46962335799779fbeca8ce5d491c0d26243bafef9ea1837a9d8", result.getSourceId());
+		assertEquals("badii", result.getUsername());
+	}
+	
+	@Test
 	public void get_kpiDataExist_values() throws ClientProtocolException, IOException {
 
 		// Given
 		HttpUriRequest request = new HttpGet(
-				"http://localhost:8080/datamanager/api/v1/kpidata/17055844/values/?&accessToken="
-						+ getAccessTokenRoot() + "&sourceRequest=junittest");
+				"http://localhost:8080/datamanager/api/v1/kpidata/17055844/values/?sourceRequest=junittest");
+		request.addHeader("Authorization", "Bearer " + getAccessTokenRoot());
 
 		// When
 		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
@@ -226,8 +267,8 @@ public class kpiDataTest {
 
 		// Given
 		HttpUriRequest request = new HttpGet(
-				"http://localhost:8080/datamanager/api/v1/kpidata/17055844/metadata/?&accessToken="
-						+ getAccessTokenRoot() + "&sourceRequest=junittest");
+				"http://localhost:8080/datamanager/api/v1/kpidata/17055844/metadata/?sourceRequest=junittest");
+		request.addHeader("Authorization", "Bearer " + getAccessTokenRoot());
 
 		// When
 		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
@@ -248,8 +289,8 @@ public class kpiDataTest {
 
 		// Given
 		HttpUriRequest request = new HttpGet(
-				"http://localhost:8080/datamanager/api/v1/kpidata/17055844/delegations/?&accessToken="
-						+ getAccessTokenRoot() + "&sourceRequest=junittest");
+				"http://localhost:8080/datamanager/api/v1/kpidata/17055844/delegations/?sourceRequest=junittest");
+		request.addHeader("Authorization", "Bearer " + getAccessTokenRoot());
 
 		// When
 		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
@@ -264,6 +305,122 @@ public class kpiDataTest {
 
 		//The Anonymous Delegations are not returned
 		assertEquals(1, result.size());
+	}
+	
+	@Test
+	public void get_kpiDataExist_activities() throws ClientProtocolException, IOException {
+
+		// Given
+		HttpUriRequest request = new HttpGet(
+				"http://localhost:8080/datamanager/api/v1/kpidata/17055838/activities/?sourceRequest=junittest");
+		request.addHeader("Authorization", "Bearer " + getAccessTokenRoot());
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		ObjectMapper mapper = new ObjectMapper();
+		List<KPIActivity> result = mapper.readValue(EntityUtils.toString(httpResponse.getEntity()),
+				new TypeReference<List<KPIActivity>>() {
+				});
+
+		assertThat(httpResponse.getStatusLine().getStatusCode(), equalTo(HttpStatus.OK.value()));
+
+		assertEquals(2, result.size());
+	}
+	
+	@Test
+	public void get_kpiDataExist_activities_filteredOnAccessType() throws ClientProtocolException, IOException {
+
+		// Given
+		HttpUriRequest request = new HttpGet(
+				"http://localhost:8080/datamanager/api/v1/kpidata/17055838/activities/?accessTypeFilter=WRITE");
+		request.addHeader("Authorization", "Bearer " + getAccessTokenRoot());
+		
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		ObjectMapper mapper = new ObjectMapper();
+		List<KPIActivity> result = mapper.readValue(EntityUtils.toString(httpResponse.getEntity()),
+				new TypeReference<List<KPIActivity>>() {
+				});
+
+		assertThat(httpResponse.getStatusLine().getStatusCode(), equalTo(HttpStatus.OK.value()));
+
+		assertEquals(1, result.size());
+		assertEquals("da5698be17b9b46962335799779fbeca8ce5d491c0d26243bafef9ea1837a9d8", result.get(0).getSourceId());
+		assertEquals(7260L, result.get(0).getId().longValue());
+	}
+	
+	@Test
+	public void get_kpiDataExist_activities_filteredOnSourceRequest() throws ClientProtocolException, IOException {
+
+		// Given
+		HttpUriRequest request = new HttpGet(
+				"http://localhost:8080/datamanager/api/v1/kpidata/17055838/activities/?sourceRequestFilter=fakeForTest");
+		request.addHeader("Authorization", "Bearer " + getAccessTokenRoot());
+		
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		ObjectMapper mapper = new ObjectMapper();
+		List<KPIActivity> result = mapper.readValue(EntityUtils.toString(httpResponse.getEntity()),
+				new TypeReference<List<KPIActivity>>() {
+				});
+
+		assertThat(httpResponse.getStatusLine().getStatusCode(), equalTo(HttpStatus.OK.value()));
+
+		assertEquals(1, result.size());
+		assertEquals("fakeSourceId", result.get(0).getSourceId());
+		assertEquals(7253L, result.get(0).getId().longValue());
+	}
+	
+	@Test
+	public void get_kpiDataExist_activities_filteredOnSourceRequestAndAccessType() throws ClientProtocolException, IOException {
+
+		// Given
+		HttpUriRequest request = new HttpGet(
+				"http://localhost:8080/datamanager/api/v1/kpidata/17055838/activities/?sourceRequestFilter=fakeForTest&accessTypeFilter=WRITE");
+		request.addHeader("Authorization", "Bearer " + getAccessTokenRoot());
+		
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		ObjectMapper mapper = new ObjectMapper();
+		List<KPIActivity> result = mapper.readValue(EntityUtils.toString(httpResponse.getEntity()),
+				new TypeReference<List<KPIActivity>>() {
+				});
+
+		assertThat(httpResponse.getStatusLine().getStatusCode(), equalTo(HttpStatus.OK.value()));
+
+		assertEquals(0, result.size());
+	}
+	
+	@Test
+	public void get_kpiDataExist_activities_filteredOnSourceRequestAndAccessTypeBis() throws ClientProtocolException, IOException {
+
+		// Given
+		HttpUriRequest request = new HttpGet(
+				"http://localhost:8080/datamanager/api/v1/kpidata/17055838/activities/?sourceRequestFilter=iotapp&accessTypeFilter=WRITE");
+		request.addHeader("Authorization", "Bearer " + getAccessTokenRoot());
+		
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		ObjectMapper mapper = new ObjectMapper();
+		List<KPIActivity> result = mapper.readValue(EntityUtils.toString(httpResponse.getEntity()),
+				new TypeReference<List<KPIActivity>>() {
+				});
+
+		assertThat(httpResponse.getStatusLine().getStatusCode(), equalTo(HttpStatus.OK.value()));
+
+		assertEquals(1, result.size());
+		assertEquals("da5698be17b9b46962335799779fbeca8ce5d491c0d26243bafef9ea1837a9d8", result.get(0).getSourceId());
+		assertEquals(7260L, result.get(0).getId().longValue());
 	}
 
 	@Test
@@ -321,13 +478,41 @@ public class kpiDataTest {
 		// Then
 		assertThat(httpResponse.getStatusLine().getStatusCode(), equalTo(HttpStatus.FORBIDDEN.value()));
 	}
+	
+	@Test
+	public void get_kpiData_activities_NotAuthorized() throws ClientProtocolException, IOException {
+
+		// Given
+		HttpUriRequest request = new HttpGet(
+				"http://localhost:8080/datamanager/api/v1/kpidata/17055838/activities/?sourceRequest=junittest");
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		assertThat(httpResponse.getStatusLine().getStatusCode(), equalTo(HttpStatus.FORBIDDEN.value()));
+	}
+	
+	@Test
+	public void get_kpiData_activityWihtID_NotAuthorized() throws ClientProtocolException, IOException {
+
+		// Given
+		HttpUriRequest request = new HttpGet(
+				"http://localhost:8080/datamanager/api/v1/kpidata/17055838/activities/7260/?sourceRequest=junittest");
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		assertThat(httpResponse.getStatusLine().getStatusCode(), equalTo(HttpStatus.FORBIDDEN.value()));
+	}
 
 	@Test
 	public void get_kpiDataRootList() throws ClientProtocolException, IOException {
 
 		// Given
-		HttpUriRequest request = new HttpGet("http://localhost:8080/datamanager/api/v1/kpidata/?accessToken="
-				+ getAccessTokenRoot() + "&sourceRequest=junittest");
+		HttpUriRequest request = new HttpGet("http://localhost:8080/datamanager/api/v1/kpidata/?sourceRequest=junittest");
+				request.addHeader("Authorization", "Bearer " + getAccessTokenRoot());
 
 		// When
 		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
@@ -348,8 +533,8 @@ public class kpiDataTest {
 
 		// Given
 		HttpUriRequest request = new HttpGet(
-				"http://localhost:8080/datamanager/api/v1/kpidata/17055844/values?last=1&accessToken="
-						+ getAccessTokenRoot() + "&sourceRequest=junittest");
+				"http://localhost:8080/datamanager/api/v1/kpidata/17055844/values?last=1&sourceRequest=junittest");
+						request.addHeader("Authorization", "Bearer " + getAccessTokenRoot());
 
 		// When
 		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
@@ -373,8 +558,8 @@ public class kpiDataTest {
 
 		// Given
 		HttpUriRequest request = new HttpGet(
-				"http://localhost:8080/datamanager/api/v1/kpidata/17055844/values?last=3&accessToken="
-						+ getAccessTokenRoot() + "&sourceRequest=junittest");
+				"http://localhost:8080/datamanager/api/v1/kpidata/17055844/values?last=3&sourceRequest=junittest");
+						request.addHeader("Authorization", "Bearer " + getAccessTokenRoot());
 
 		// When
 		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
@@ -397,8 +582,8 @@ public class kpiDataTest {
 
 		// Given
 		HttpUriRequest request = new HttpGet(
-				"http://localhost:8080/datamanager/api/v1/kpidata/17055844/values?first=1&accessToken="
-						+ getAccessTokenRoot() + "&sourceRequest=junittest");
+				"http://localhost:8080/datamanager/api/v1/kpidata/17055844/values?first=1&sourceRequest=junittest");
+						request.addHeader("Authorization", "Bearer " + getAccessTokenRoot());
 
 		// When
 		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
@@ -420,8 +605,8 @@ public class kpiDataTest {
 
 		// Given
 		HttpUriRequest request = new HttpGet(
-				"http://localhost:8080/datamanager/api/v1/kpidata/17055844/values?from=2019-02-02T00:00&accessToken="
-						+ getAccessTokenRoot() + "&sourceRequest=junittest");
+				"http://localhost:8080/datamanager/api/v1/kpidata/17055844/values?from=2019-02-02T00:00&sourceRequest=junittest");
+						request.addHeader("Authorization", "Bearer " + getAccessTokenRoot());
 
 		// When
 		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
@@ -442,8 +627,8 @@ public class kpiDataTest {
 
 		// Given
 		HttpUriRequest request = new HttpGet(
-				"http://localhost:8080/datamanager/api/v1/kpidata/17055844/values?to=2019-02-02T00:00&accessToken="
-						+ getAccessTokenRoot() + "&sourceRequest=junittest");
+				"http://localhost:8080/datamanager/api/v1/kpidata/17055844/values?to=2019-02-02T00:00&sourceRequest=junittest");
+						request.addHeader("Authorization", "Bearer " + getAccessTokenRoot());
 
 		// When
 		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
@@ -464,8 +649,8 @@ public class kpiDataTest {
 
 		// Given
 		HttpUriRequest request = new HttpGet(
-				"http://localhost:8080/datamanager/api/v1/kpidata/17055844/values?from=2019-02-01T00:00&to=2019-02-04T00:00&accessToken="
-						+ getAccessTokenRoot() + "&sourceRequest=junittest");
+				"http://localhost:8080/datamanager/api/v1/kpidata/17055844/values?from=2019-02-01T00:00&to=2019-02-04T00:00&sourceRequest=junittest");
+						request.addHeader("Authorization", "Bearer " + getAccessTokenRoot());
 
 		// When
 		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
@@ -486,8 +671,8 @@ public class kpiDataTest {
 
 		// Given
 		HttpUriRequest request = new HttpGet(
-				"http://localhost:8080/datamanager/api/v1/kpidata/17055844/values?from=2019-02-01T00:00&to=2019-02-04T00:00&last=1&accessToken="
-						+ getAccessTokenRoot() + "&sourceRequest=junittest");
+				"http://localhost:8080/datamanager/api/v1/kpidata/17055844/values?from=2019-02-01T00:00&to=2019-02-04T00:00&last=1&sourceRequest=junittest");
+						request.addHeader("Authorization", "Bearer " + getAccessTokenRoot());
 
 		// When
 		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
@@ -508,8 +693,8 @@ public class kpiDataTest {
 	public void get_kpiDataDelegation_OK_general_result() throws ClientProtocolException, IOException {
 
 		// Given
-		HttpUriRequest request = new HttpGet("http://localhost:8080/datamanager/api/v1/kpidata/delegated/?accessToken="
-				+ getAccessTokenRoot() + "&sourceRequest=junittest");
+		HttpUriRequest request = new HttpGet("http://localhost:8080/datamanager/api/v1/kpidata/delegated/?sourceRequest=junittest");
+				request.addHeader("Authorization", "Bearer " + getAccessTokenRoot());
 
 		// When
 		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
@@ -531,8 +716,8 @@ public class kpiDataTest {
 	public void get_kpiDataPublic_OK_general_result() throws ClientProtocolException, IOException {
 
 		// Given
-		HttpUriRequest request = new HttpGet("http://localhost:8080/datamanager/api/v1/kpidata/public/?accessToken="
-				+ getAccessTokenRoot() + "&sourceRequest=junittest");
+		HttpUriRequest request = new HttpGet("http://localhost:8080/datamanager/api/v1/kpidata/public/?sourceRequest=junittest");
+				request.addHeader("Authorization", "Bearer " + getAccessTokenRoot());
 
 		// When
 		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
@@ -551,6 +736,31 @@ public class kpiDataTest {
 		assertEquals(Long.valueOf("17055843"), result.get(1).getId());
 		assertEquals(Long.valueOf("17055844"), result.get(0).getId());
 	}
+	
+	@Test
+	public void get_kpiDataPublic_Activities() throws ClientProtocolException, IOException {
+
+		// Given
+		HttpUriRequest request = new HttpGet("http://localhost:8080/datamanager/api/v1/public/kpidata/17055844/activities/"
+				+ "?sourceRequest=junittest");
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		ObjectMapper mapper = new ObjectMapper();
+		List<KPIActivity> result = mapper.readValue(EntityUtils.toString(httpResponse.getEntity()),
+				new TypeReference<List<KPIActivity>>() {
+				});
+
+		assertThat(httpResponse.getStatusLine().getStatusCode(), equalTo(HttpStatus.OK.value()));
+
+		assertEquals(1, result.size());
+		assertEquals("da5698be17b9b46962335799779fbeca8ce5d491c0d26243bafef9ea1837a9d8", result.get(0).getSourceId());
+		assertEquals(7257L, result.get(0).getId().longValue());
+	}
+	
+	
 
 	private String getAccessTokenRoot() throws IOException {
 		return get("accesstoken.rootuser=");
