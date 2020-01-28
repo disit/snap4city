@@ -598,8 +598,16 @@
 			<query>s</query>                        
 		</data>
                 
+                <data id="air-quality-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#Air_quality_monitoring_station</data>
+                <data id="airQualityDocet" type="uri" builder="switch" loader="volatile"> 
+                    <switch ref="value_type_mapping_array">
+            		<case><if ref="air-quality-uri" /><then ref="air-quality-uri" /> </case>
+                    </switch>
+                </data>  
+                
                 <data id="readytouse_value_type_mapping_array" type="uri" builder="alternative" loader="volatile">
-			<alternative ref="value_type_mapping_array"/>
+			<alternative ref="airQualityDocet"/>
+                        <alternative ref="value_type_mapping_array"/>
                         <alternative ref="device-type-old"/>
 		</data>                                         	                 
                        
