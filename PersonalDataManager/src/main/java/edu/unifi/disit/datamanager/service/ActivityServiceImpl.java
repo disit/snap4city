@@ -59,10 +59,10 @@ public class ActivityServiceImpl implements IActivityService {
 	// if delegated == true, return the delegated
 	// if delegated == false, return the delegator (check appid and delegated==null)
 	@Override
-	public List<Activity> getActivities(String appId, Boolean delegated, Locale lang) throws CredentialsException {
-		logger.debug("getActivities INVOKED on appid {}, delegated {}", appId, delegated);
+	public List<Activity> getActivities(String appId, String elementType, Boolean delegated, Locale lang) throws CredentialsException {
+		logger.debug("getActivities INVOKED on appid {}, elementType {}, delegated {}", appId, elementType, delegated);
 
-		credentialsService.checkAppIdCredentials(appId, lang);// enforcement credentials
+		credentialsService.checkAppIdCredentials(appId, elementType, lang);// enforcement credentials
 
 		if (!Boolean.TRUE.equals(delegated))
 			return activityRepo.findByAppIdAndDelegatedAppIdIsNullAndDeleteTimeIsNull(appId);
@@ -117,8 +117,8 @@ public class ActivityServiceImpl implements IActivityService {
 
 						List<Ownership> ownsDelega = ownershipRepo.findByElementId(data.getAppId());
 
-						Activity delegated = new Activity(new Date(), null, username, username, data.getAppId(), data.getUsername(), getElementNames(ownsDelega), sourceRequest, variableName, motivation, accesstype.toString(), domain.toString(),
-							null);
+						Activity delegated = new Activity(new Date(), null, username, username, data.getAppId(), data.getUsername(), getElementNames(ownsDelega), sourceRequest, variableName, motivation, accesstype.toString(),
+								domain.toString(), null);
 						activityRepo.save(delegated);// save delegated
 						ht.put(data.getAppId(), data.getUsername());// insert this delegated so it will not be inserted anymore
 					}
@@ -215,7 +215,7 @@ public class ActivityServiceImpl implements IActivityService {
 
 		if (ownerships.isEmpty())
 			logger.debug("Empty ownership retrieved");
-		
+
 		StringBuilder bldUsernames = new StringBuilder();
 		for (int i = 0; i < ownerships.size(); i++) {
 			bldUsernames.append(ownerships.get(i).getUsername());

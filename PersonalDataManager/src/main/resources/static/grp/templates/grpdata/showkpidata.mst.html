@@ -1,27 +1,53 @@
 <div class="modal-dialog" role="document">
     <div class="modal-content">
+        <!-- {{#kpidata}} -->
         <div class="modal-header">
-            <h5 class="modal-title">Device Group Details</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <h5 class="modal-title">{{name}}</h5>
+            <button type="button" class="close" data-dismiss="modal" onclick="if(window.location.href.indexOf('?id=') > -1) window.location.href='index.html';" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>
         </div>
         <div class="modal-body" style="padding: 0px;">
-            <!-- {{#kpidata}} -->
+            
             <ul class="list-group" style="border: none;">
                 <li class="list-group-item"><b>High Level Type</b> <span style="float: right;">{{highLevelType}}</span></li>                
-                <li class="list-group-item"><b>Name</b> <span style="float: right;">{{name}}</span></li>
-                <li class="list-group-item"><b>Description</b> <span style="float: right;">{{description}}</span></li>                
+                <li class="list-group-item"><b>Name</b> <span style="float: right;">{{name}}<!-- {{#enableEdit}} -->
+            <button type="button" onclick="DeviceGrpTabler.editDeviceGrpModal({{id}}, '{{highLevelType}}');" class=" btn editDashBtn">Edit</button><!-- {{/enableEdit}} --></span></li>
+                <li class="list-group-item"><b>Description</b> <span style="float: right;">{{description}}<!-- {{#enableEdit}} -->
+            <button type="button" onclick="DeviceGrpTabler.editDeviceGrpModal({{id}}, '{{highLevelType}}');" class=" btn editDashBtn">Edit</button><!-- {{/enableEdit}} --></span></li>                
                 <li class="list-group-item"><b>Created</b> <span style="float: right;">{{insertTime}}</span></li>
                 <li class="list-group-item"><b>Last Change</b> <span style="float: right;">{{updateTime}}</span></li>                
-                <li class="list-group-item"><b>Owner Username</b> <span style="float: right;">{{username}}</span></li>                            
-                <li class="list-group-item"><b>Ownership</b> <span style="float: right;">{{ownership}}</span></li>
+                <li class="list-group-item"><b>Owner Username</b> <span style="float: right;">{{username}} <!-- {{#enableEdit}} --><button type="button" onclick="DeviceGrpTabler.editDeviceGrpModal({{id}}, 'changeownership');" class="btn editDashBtn">Change
+                    </button><!-- {{/enableEdit}} --></span></li>                            
+                <li class="list-group-item"><b>Public/Private</b> <span style="float: right;">{{ownership}}<!-- {{#enableEdit}} -->
+        <!-- {{^isPublic}} -->
+        <button type="button" onclick="DeviceGrpTabler.makePublic({{id}});" class="btn editDashBtn">Toggle
+        </button>
+        <!-- {{/isPublic}} -->
+        <!-- {{#isPublic}} -->
+        <button type="button" onclick="DeviceGrpTabler.makePrivate({{id}});" class="btn editDashBtn">Toggle
+        </button>
+        <!-- {{/isPublic}} -->
+        <!-- {{/enableEdit}} --></span></li>
                 <li class="list-group-item"><b>Organizations</b> <span style="float: right;">{{organizations}}</span></li>    
-            </ul>
-            <!-- {{/kpidata}} -->
+                <li class="list-group-item" id="modalgrpcontent"><b>Content</b> <span style="float: right;">{{size}}&nbsp;
+            <!-- {{#viewEnabled}} --><button type="button" onclick="GrpElementFilter.setCurrentSearchKey(''); GrpElementTabler.renderTable({{id}},true);" class="btn viewDashBtn">View</button><!-- {{/viewEnabled}} -->
+            <!-- {{#enableEdit}} --><button type="button" class="btn editDashBtn" onclick=" GrpElementFilter.setCurrentSearchKey(''); GrpElementTabler.renderTable({{id}}); ">Edit</button><!-- {{/enableEdit}} -->            </span></li>   
+                <!-- {{#enableEdit}} --><li class="list-group-item" id="modalgrpvisib"><b>Visibility</b> <span style="float: right;"><button type="button" onclick="GrpDelegationFilter.setCurrentSearchKey(''); GrpDelegationTabler.renderTable({{id}}, '{{highLevelType}}');" class="btn editDashBtn">Delegate
+                </button>
+                
+            </span></li>   <!-- {{/enableEdit}} -->
+            </ul>            
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="if(window.location.href.indexOf('?id=') > -1) window.location.href='index.html';">Close</button><button id="simplyclose" style="display:none;" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>            
         </div>
+        <!-- {{/kpidata}} -->
     </div>
 </div>
+<script>
+if(!GrpEditor.withParameters) {
+    $("#modalgrpcontent").hide();
+    $("#modalgrpvisib").hide();
+}
+</script>

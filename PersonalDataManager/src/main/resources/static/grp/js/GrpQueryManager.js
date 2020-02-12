@@ -7,7 +7,12 @@ var GrpQueryManager = {
     },
     
     createGetDeviceGrpTableQuery: function (privacy, pageNumber, pageSize, sortDirection, sortBy, searchKey, accessToken) {
-        return "devicegroup/" + privacy + "/?sourceRequest=" + GrpQueryManager.sourceRequest + "&accessToken=" + accessToken + (pageNumber || pageNumber == 0 ? "&pageNumber=" + pageNumber : "") + (pageSize ? "&pageSize=" + pageSize : "") + (sortDirection ? "&sortDirection=" + sortDirection : "") + (sortBy ? "&sortBy=" + sortBy : "") + (searchKey ? "&searchKey=" + searchKey : "");
+        if(privacy != "public") {
+            return "devicegroup/" + privacy + "/?sourceRequest=" + GrpQueryManager.sourceRequest + "&accessToken=" + accessToken + (pageNumber || pageNumber == 0 ? "&pageNumber=" + pageNumber : "") + (pageSize ? "&pageSize=" + pageSize : "") + (sortDirection ? "&sortDirection=" + sortDirection : "") + (sortBy ? "&sortBy=" + sortBy : "") + (searchKey ? "&searchKey=" + searchKey : "");
+        }
+        else {
+            return "public/devicegroup/?sourceRequest=" + GrpQueryManager.sourceRequest + "&accessToken=" + accessToken + (pageNumber || pageNumber == 0 ? "&pageNumber=" + pageNumber : "") + (pageSize ? "&pageSize=" + pageSize : "") + (sortDirection ? "&sortDirection=" + sortDirection : "") + (sortBy ? "&sortBy=" + sortBy : "") + (searchKey ? "&searchKey=" + searchKey : "");
+        }
     },
     
     createPatchDeviceGrpQuery: function (accessToken, id) {
@@ -64,4 +69,8 @@ var GrpQueryManager = {
     createDeleteElmtFromGroupQuery: function (accessToken, grpId, id) {
         return "devicegroup/" + grpId + "/elements/" + id + "/?sourceRequest=" + GrpQueryManager.sourceRequest + "&accessToken=" + accessToken;
     },
+    
+    createGetSensorsAPIQuery: function(accessToken, pageSize = 10, pageNum = 1, search = "") {
+        return "sensors/?accessToken="+encodeURIComponent(accessToken)+"&pageSize="+encodeURIComponent(pageSize)+"&pageNum="+encodeURIComponent(pageNum)+"&search="+encodeURIComponent(search);
+    }
 }

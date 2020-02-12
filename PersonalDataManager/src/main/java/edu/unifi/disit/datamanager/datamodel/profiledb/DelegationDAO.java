@@ -29,6 +29,8 @@ public interface DelegationDAO extends JpaRepository<Delegation, Long>, Delegati
 
 	List<Delegation> findByElementIdAndDeleteTimeIsNull(String elementId);
 
+	List<Delegation> findByElementIdAndElementTypeAndDeleteTimeIsNull(String elementId, String elementType);
+
 	List<Delegation> findByElementIdAndDeleteTimeIsNullAndUsernameDelegatedNotLike(String elementId, String usernameDelegated);
 
 	Delegation findByIdAndDeleteTimeIsNull(Long delegationId);
@@ -44,7 +46,7 @@ public interface DelegationDAO extends JpaRepository<Delegation, Long>, Delegati
 	@Query("delete from Delegation a where a.deleteTime < ?1")
 	void deleteByDeleteTimeBefore(Date time);
 
-        Page<Delegation> findByElementIdAndDeleteTimeIsNullAndUsernameDelegatedNotLikeAndUsernameDelegatedLike(String elementId, String usernameDelegated, String searchKey, Pageable pageable);
+	Page<Delegation> findByElementIdAndDeleteTimeIsNullAndUsernameDelegatedNotLikeAndUsernameDelegatedLike(String elementId, String usernameDelegated, String searchKey, Pageable pageable);
 
-        List<Delegation> findByElementIdAndDeleteTimeIsNullAndUsernameDelegatedNotLikeAndUsernameDelegatedLike(String elementId, String usernameDelegated, String searchKey);
+	List<Delegation> findByElementIdAndDeleteTimeIsNullAndUsernameDelegatedNotLikeAndUsernameDelegatedLike(String elementId, String usernameDelegated, String searchKey);
 }

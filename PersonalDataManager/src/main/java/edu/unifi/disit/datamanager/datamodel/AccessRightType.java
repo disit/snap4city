@@ -10,23 +10,25 @@
    GNU Affero General Public License for more details.
    You should have received a copy of the GNU Affero General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
-package edu.unifi.disit.datamanager.service;
+package edu.unifi.disit.datamanager.datamodel;
 
-import java.util.Locale;
+public enum AccessRightType {
+	ROOTADMIN("ROOTADMIN"), OWNER("OWNER"), PUBLIC("PUBLIC"), DELEGATED("DELEGATED"), GROUP_DELEGATED("GROUP-DELEGATED"), MYGROUP_PUBLIC("MYGROUP-PUBLIC"), MYGROUP_DELEGATED("MYGROUP-DELEGATED");
 
-import edu.unifi.disit.datamanager.exception.CredentialsException;
+	// GROUP-DELEGATED means elementId delegated to the organization the user belongs
 
-public interface ICredentialsService {
+	// MYGROUP_PUBLIC means elementId belonging to a group public
+	// MYGROUP_DELEGATED means elementId belonging to a group delegated to the user
+	// MYGROUP_GROUP_DELEGATED means elementId belonging to a group delegated to the organization the user belongs (TODO)
 
-	public void checkAppIdCredentials(String appId, String elementType, Locale lang) throws CredentialsException;
+	private final String text;
 
-	public void checkUsernameCredentials(String username, Locale lang) throws CredentialsException;
+	private AccessRightType(final String text) {
+		this.text = text;
+	}
 
-	public void checkRootCredentials(Locale lang) throws CredentialsException;
-
-	public String getLoggedUsername(Locale lang);
-
-	public boolean isRoot(Locale lang);
-
-	public String getOrganization(Locale lang);
+	@Override
+	public String toString() {
+		return text;
+	}
 }

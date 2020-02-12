@@ -104,7 +104,7 @@ public class delegationTest {
 				httpResponse.getStatusLine().getStatusCode(),
 				equalTo(HttpStatus.OK.value()));
 
-		assertEquals(5, result.size());
+		assertEquals(7, result.size());
 	}
 
 	@Test
@@ -1097,6 +1097,36 @@ public class delegationTest {
 	}
 
 	@Test
+	public void delete_delegation_fromapp_ko_v1() throws ClientProtocolException, IOException {
+
+		// Given
+		HttpDelete request = new HttpDelete("http://localhost:8080/datamanager/api/v1/apps/prova/delegations?accessToken=" + getAccessTokenRoot() + "&sourceRequest=test");
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		assertThat(
+				httpResponse.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.OK.value()));
+	}
+
+	@Test
+	public void delete_delegation_fromapp_ko_v3() throws ClientProtocolException, IOException {
+
+		// Given
+		HttpDelete request = new HttpDelete("http://localhost:8080/datamanager/api/v3/apps/prova/delegations?elementType=IOTID&accessToken=" + getAccessTokenRoot() + "&sourceRequest=test");
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		assertThat(
+				httpResponse.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.OK.value()));
+	}
+
+	@Test
 	public void delete_delegationNotValid_notrecognized() throws ClientProtocolException, IOException {
 
 		// Given
@@ -1544,6 +1574,124 @@ public class delegationTest {
 
 		assertEquals(true, result.getResult());
 		assertEquals("ROOTADMIN", result.getMessage());
+	}
+
+	@Test
+	public void check_not_v3() throws ClientProtocolException, IOException {
+
+		// Given
+		HttpUriRequest request = new HttpGet(
+				"http://localhost:8080/datamanager/api/v3/username/adifino/delegation/check?elementID=17055860&elementType=MyKPI&accessToken=" + getAccessTokenRoot()
+						+ "&sourceRequest=test");
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		ObjectMapper mapper = new ObjectMapper();
+		Response result = mapper.readValue(EntityUtils.toString(httpResponse.getEntity()), new TypeReference<Response>() {
+		});
+
+		assertThat(
+				httpResponse.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.OK.value()));
+
+		assertEquals(false, result.getResult());
+	}
+
+	@Test
+	public void check_notIgnoreCase_V3() throws ClientProtocolException, IOException {
+
+		// Given
+		HttpUriRequest request = new HttpGet(
+				"http://localhost:8080/datamanager/api/v3/username/ADIFINO/delegation/check?elementID=17055860&elementType=MyKPI&accessToken=" + getAccessTokenRoot()
+						+ "&sourceRequest=test");
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		ObjectMapper mapper = new ObjectMapper();
+		Response result = mapper.readValue(EntityUtils.toString(httpResponse.getEntity()), new TypeReference<Response>() {
+		});
+
+		assertThat(
+				httpResponse.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.OK.value()));
+
+		assertEquals(false, result.getResult());
+	}
+
+	@Test
+	public void check_owner_v3() throws ClientProtocolException, IOException {
+
+		// Given
+		HttpUriRequest request = new HttpGet(
+				"http://localhost:8080/datamanager/api/v3/username/adifino/delegation/check?elementID=6ff3a0ea0a5d92f345fa13c95d0b35ff77204413b9c98e3a71b1d269a26af11e&elementType=AppID&accessToken=" + getAccessTokenRoot()
+						+ "&sourceRequest=test");
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		ObjectMapper mapper = new ObjectMapper();
+		Response result = mapper.readValue(EntityUtils.toString(httpResponse.getEntity()), new TypeReference<Response>() {
+		});
+
+		assertThat(
+				httpResponse.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.OK.value()));
+
+		assertEquals(true, result.getResult());
+		assertEquals("PUBLIC", result.getMessage());
+	}
+
+	@Test
+	public void check_public_v3() throws ClientProtocolException, IOException {
+
+		// Given
+		HttpUriRequest request = new HttpGet(
+				"http://localhost:8080/datamanager/api/v3/username/pb1/delegation/check?elementID=17055859&elementType=MyKPI&accessToken=" + getAccessTokenRoot()
+						+ "&sourceRequest=test");
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		ObjectMapper mapper = new ObjectMapper();
+		Response result = mapper.readValue(EntityUtils.toString(httpResponse.getEntity()), new TypeReference<Response>() {
+		});
+
+		assertThat(
+				httpResponse.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.OK.value()));
+
+		assertEquals(true, result.getResult());
+		assertEquals("PUBLIC", result.getMessage());
+	}
+
+	@Test
+	public void check_delegation_v3() throws ClientProtocolException, IOException {
+
+		// Given
+		HttpUriRequest request = new HttpGet(
+				"http://localhost:8080/datamanager/api/v3/username/angelokpi/delegation/check?elementType=IOTID&elementID=Firenze%3Abroker%3Adevice1&accessToken=" + getAccessTokenRoot()
+						+ "&sourceRequest=test");
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		ObjectMapper mapper = new ObjectMapper();
+		Response result = mapper.readValue(EntityUtils.toString(httpResponse.getEntity()), new TypeReference<Response>() {
+		});
+
+		assertThat(
+				httpResponse.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.OK.value()));
+
+		assertEquals(true, result.getResult());
+		assertEquals("MYGROUP-DELEGATED", result.getMessage());
 	}
 
 	private HttpEntity createEntity(Delegation delegation) throws JsonGenerationException, JsonMappingException, IOException {

@@ -62,12 +62,13 @@ var DeviceGrpTabler = {
         if (grpDataToSave == null) {
             grpData = {
                 "highLevelType": $("#inputHighLevelTypeGrpDataEdit").val(),
-                "name": $("#inputNameGrpDataEdit").val()
+                "name": $("#inputNameGrpDataEdit").val(),
+                "description": $("#inputDescriptionGrpDataEdit").val()
             }
 
-            if ($("#inputDescriptionGrpDataEdit").val() != "") {
+            /*if ($("#inputDescriptionGrpDataEdit").val() != "") {
                 grpData.description = $("#inputDescriptionGrpDataEdit").val();
-            }
+            }*/
             
             if ($("#inputIdGrpDataEdit").val() != "") {
                 grpData.id = $("#inputIdGrpDataEdit").val();
@@ -121,7 +122,7 @@ var DeviceGrpTabler = {
         if (_error.responseText != null && _error.responseText != "") {
             alert(_error.responseText);
         } else {
-            alert("There was a problem to retrieve the data. Assure you have the right to view this data. The table of your kpi will be shown.")
+            alert("There was a problem to retrieve the data. Assure you have the right to view this data. The table of your groups will be shown.")
         }
         $('#genericModal').modal('hide');
     },
@@ -198,22 +199,48 @@ var DeviceGrpTabler = {
             "response": _response
         }, "#kpidatatable", "templates/grpdata/devicegrp.mst.html");
 
-        $('table').DataTable({
-            "searching": false,
-            "paging": false,
-            "ordering": false,
-            "info": false,
-            responsive: true
-        });
-
+        if(_response.enableEdit) {
+            $('table').DataTable({
+                "searching": false,
+                "paging": false,
+                "ordering": false,
+                "info": false,
+                responsive: true
+            });
+        } 
+        else {
+            $('table').DataTable({
+                "searching": false,
+                "paging": false,
+                "ordering": false,
+                "info": false,
+                responsive: true,
+                columnDefs: [
+                    {
+                        "targets": [ 8 ],
+                        "visible": false
+                    }                    
+                ]
+            });            
+        }
+    
         $('table').css("width", "");
         
-        
-    
         $("input[name=inlineRadioOptions][value='" + DeviceGrpTabler.privacy + "']").prop("checked", true);
-        if(DeviceGrpTabler.privacy != "organization" && DeviceGrpTabler.privacy != "delegated" && isPublic) $("input[name=inlineRadioOptions][value='public']").prop("checked", true);
+        if(DeviceGrpTabler.privacy != "organization" && DeviceGrpTabler.privacy != "delegated" && isPublic) {             
+            $("input[name=inlineRadioOptions][value='public']").prop("checked", true);            
+        }        
         $('#inputFilterKPIData').val(DeviceGrpFilter.currentSearchKey);
         $('#selectSizeKPIData').val(DeviceGrpPager.currentSize);
+        APIClient.suffix = "";        
+        var query = GrpQueryManager.createGetDeviceGrpTableQuery("", DeviceGrpPager.currentPage, DeviceGrpPager.currentSize, DeviceGrpSorter.currentSortDirection, DeviceGrpSorter.currentSortBy, DeviceGrpFilter.currentSearchKey, GrpEditor.keycloak.token);
+        APIClient.executeAsyncGetQuery(query, DeviceGrpTabler.chkIfUserHasGroups, function(){});
+        var query2 = GrpQueryManager.createGetDeviceGrpTableQuery("organization", DeviceGrpPager.currentPage, DeviceGrpPager.currentSize, DeviceGrpSorter.currentSortDirection, DeviceGrpSorter.currentSortBy, DeviceGrpFilter.currentSearchKey, GrpEditor.keycloak.token);
+        APIClient.executeAsyncGetQuery(query2, DeviceGrpTabler.chkIfUserHasPublInOrgGroups, function(){});
+        var query3 = GrpQueryManager.createGetDeviceGrpTableQuery("delegated", DeviceGrpPager.currentPage, DeviceGrpPager.currentSize, DeviceGrpSorter.currentSortDirection, DeviceGrpSorter.currentSortBy, DeviceGrpFilter.currentSearchKey, GrpEditor.keycloak.token);
+        APIClient.executeAsyncGetQuery(query3, DeviceGrpTabler.chkIfUserHasDelegatedGroups, function(){});
+        var query4 = GrpQueryManager.createGetDeviceGrpTableQuery("public", DeviceGrpPager.currentPage, DeviceGrpPager.currentSize, DeviceGrpSorter.currentSortDirection, DeviceGrpSorter.currentSortBy, DeviceGrpFilter.currentSearchKey, GrpEditor.keycloak.token);
+        APIClient.executeAsyncGetQuery(query4, DeviceGrpTabler.chkIfUserHasPublicGroups, function(){}); 
     },
     
     getCurrentKPIData: function (_kpiId) {
@@ -241,6 +268,35 @@ var DeviceGrpTabler = {
         }
         DeviceGrpPager.currentPage = 0;
         DeviceGrpTabler.renderTable();        
+    },
+    
+    chkIfUserHasGroups: function(_response) {
+        if(_response.content.length == 0) {
+            $("input[name=inlineRadioOptions][value='']").prop("disabled",true);
+            $("input[name=inlineRadioOptions][value='']").siblings().css("color","lightgray");
+        }
+    },
+    
+    chkIfUserHasPublInOrgGroups: function(_response) {
+        if(_response.content.length == 0) {
+            $("input[name=inlineRadioOptions][value='organization']").prop("disabled",true);
+            $("input[name=inlineRadioOptions][value='organization']").siblings().css("color","lightgray");
+        }
+    },
+    
+    chkIfUserHasDelegatedGroups: function(_response) {
+        console.log(_response);
+        if(_response.content.length == 0) {
+            $("input[name=inlineRadioOptions][value='delegated']").prop("disabled",true);
+            $("input[name=inlineRadioOptions][value='delegated']").siblings().css("color","lightgray");
+        }
+    },
+    
+    chkIfUserHasPublicGroups: function(_response) {
+        if(_response.content.length == 0) {
+            $("input[name=inlineRadioOptions][value='public']").prop("disabled",true);
+            $("input[name=inlineRadioOptions][value='public']").siblings().css("color","lightgray");
+        }
     },
     
     makePublic: function (_kpiId) {
@@ -274,7 +330,31 @@ var DeviceGrpTabler = {
         _response.insertTime = Utility.timestampToFormatDate(_response.insertTime);
         _response.updateTime = Utility.timestampToFormatDate(_response.updateTime);
         ViewManager.render({
-            "kpidata": _response
+            "kpidata": _response,
+            "isPublic": (_response.ownership == "public")
+        }, "#genericModal", "templates/grpdata/showkpidata.mst.html");
+        $('#genericModal').modal('show');       
+        $("#genericModal").draggable();
+    },
+    
+    showReadonlyGrpDataModal: function (_id) {
+        GrpEditor.keycloak.updateToken(30).success(function () {
+            var query = GrpQueryManager.createGetDeviceGrpByIdQuery(_id, GrpEditor.keycloak.token);
+            APIClient.executeGetQuery(query, DeviceGrpTabler.successReadonlyShowGrpDataModal, DeviceGrpTabler.errorQuery);
+        }).error(function () {
+            var query = GrpQueryManager.createGetDeviceGrpByIdQuery(_id, Authentication.refreshTokenGetAccessToken());
+            APIClient.executeGetQuery(query, DeviceGrpTabler.successReadonlyShowGrpDataModal, DeviceGrpTabler.errorQuery);
+        });
+    },
+    
+    successReadonlyShowGrpDataModal: function (_response) {
+        console.log(_response);
+        _response.insertTime = Utility.timestampToFormatDate(_response.insertTime);
+        _response.updateTime = Utility.timestampToFormatDate(_response.updateTime);
+        _response.enableEdit = false;
+        ViewManager.render({
+            "kpidata": _response,
+            "isPublic": (_response.ownership == "public")
         }, "#genericModal", "templates/grpdata/showkpidata.mst.html");
         $('#genericModal').modal('show');
     },

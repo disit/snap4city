@@ -383,7 +383,7 @@ public class roleTest {
 				httpResponse.getStatusLine().getStatusCode(),
 				equalTo(HttpStatus.OK.value()));
 
-		assertEquals(1, result.size());
+		assertEquals(2, result.size());
 	}
 
 	@Test
@@ -425,7 +425,7 @@ public class roleTest {
 				httpResponse.getStatusLine().getStatusCode(),
 				equalTo(HttpStatus.OK.value()));
 
-		assertEquals(3, result.size());
+		assertEquals(4, result.size());
 	}
 
 	@Test
@@ -667,7 +667,7 @@ public class roleTest {
 				httpResponse.getStatusLine().getStatusCode(),
 				equalTo(HttpStatus.OK.value()));
 
-		assertEquals(5, result.size());
+		assertEquals(7, result.size());
 	}
 
 	@Test
@@ -772,6 +772,106 @@ public class roleTest {
 
 		assertEquals(true, result.getResult());
 		assertEquals("GROUP-DELEGATED", result.getMessage());
+	}
+
+	@Test
+	public void check_username_notowner_v3() throws ClientProtocolException, IOException {
+		// Given
+		HttpUriRequest request = new HttpGet("http://localhost:8080/datamanager/api/v3/apps/17055861/access/check?accessToken=" + getAccessTokenADifino() + "&elementType=MyKPI&sourceRequest=test");
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		ObjectMapper mapper = new ObjectMapper();
+		Response result = mapper.readValue(EntityUtils.toString(httpResponse.getEntity()), new TypeReference<Response>() {
+		});
+
+		assertThat(
+				httpResponse.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.OK.value()));
+
+		assertEquals(false, result.getResult());
+	}
+
+	@Test
+	public void check_username_public_v3() throws ClientProtocolException, IOException {
+		// Given
+		HttpUriRequest request = new HttpGet("http://localhost:8080/datamanager/api/v3/apps/17055859/access/check?accessToken=" + getAccessTokenADifino() + "&elementType=MyKPI&sourceRequest=test");
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		ObjectMapper mapper = new ObjectMapper();
+		Response result = mapper.readValue(EntityUtils.toString(httpResponse.getEntity()), new TypeReference<Response>() {
+		});
+
+		assertThat(
+				httpResponse.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.OK.value()));
+
+		assertEquals(true, result.getResult());
+		assertEquals("PUBLIC", result.getMessage());
+	}
+
+	@Test
+	public void check_username_delegated_v3() throws ClientProtocolException, IOException {
+		// Given
+		HttpUriRequest request = new HttpGet("http://localhost:8080/datamanager/api/v3/apps/17055860/access/check?accessToken=" + getAccessTokenADifino() + "&elementType=MyKPI&sourceRequest=test");
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		ObjectMapper mapper = new ObjectMapper();
+		Response result = mapper.readValue(EntityUtils.toString(httpResponse.getEntity()), new TypeReference<Response>() {
+		});
+
+		assertThat(
+				httpResponse.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.OK.value()));
+
+		assertEquals(true, result.getResult());
+		assertEquals("MYGROUP-DELEGATED", result.getMessage());
+	}
+
+	public void check_username_delegated_ko1_v3() throws ClientProtocolException, IOException {
+		// Given
+		HttpUriRequest request = new HttpGet("http://localhost:8080/datamanager/api/v3/apps/Firenze%3Abroker%3Adevice1/access/check?accessToken=" + getAccessTokenADifino() + "&elementType=IOTID&sourceRequest=test");
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		ObjectMapper mapper = new ObjectMapper();
+		Response result = mapper.readValue(EntityUtils.toString(httpResponse.getEntity()), new TypeReference<Response>() {
+		});
+
+		assertThat(
+				httpResponse.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.OK.value()));
+
+		assertEquals(false, result.getResult());
+	}
+
+	public void check_username_delegated_ko2_v3() throws ClientProtocolException, IOException {
+		// Given
+		HttpUriRequest request = new HttpGet("http://localhost:8080/datamanager/api/v3/apps/17055860/access/check?accessToken=" + getAccessTokenADifino() + "&elementType=IOTID&sourceRequest=test");
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		ObjectMapper mapper = new ObjectMapper();
+		Response result = mapper.readValue(EntityUtils.toString(httpResponse.getEntity()), new TypeReference<Response>() {
+		});
+
+		assertThat(
+				httpResponse.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.OK.value()));
+
+		assertEquals(false, result.getResult());
 	}
 
 	// --------------------------------------------------------------------------------------------------------------------

@@ -22,18 +22,21 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import edu.unifi.disit.datamanager.datamodel.ElementType;
 import edu.unifi.disit.datamanager.datamodel.ldap.LDAPUserDAO;
 import edu.unifi.disit.datamanager.datamodel.profiledb.Delegation;
 import edu.unifi.disit.datamanager.datamodel.profiledb.DelegationDAO;
+import edu.unifi.disit.datamanager.datamodel.profiledb.DeviceGroupElement;
+import edu.unifi.disit.datamanager.datamodel.profiledb.DeviceGroupElementDAO;
 import edu.unifi.disit.datamanager.datamodel.profiledb.Ownership;
 import edu.unifi.disit.datamanager.datamodel.profiledb.OwnershipDAO;
 import edu.unifi.disit.datamanager.exception.CredentialsException;
 import edu.unifi.disit.datamanager.exception.DelegationNotValidException;
 import edu.unifi.disit.datamanager.exception.LDAPException;
-import org.springframework.data.domain.PageRequest;
 
 @Service
 public class DelegationServiceImpl implements IDelegationService {
@@ -55,36 +58,39 @@ public class DelegationServiceImpl implements IDelegationService {
 	@Autowired
 	ICredentialsService credentialsService;
 
+	@Autowired
+	DeviceGroupElementDAO dgeRepo;
+
 	@Override
-	public Delegation getDelegationById(Long id, Locale lang) throws  CredentialsException {
+	public Delegation getDelegationById(Long id, Locale lang) throws CredentialsException {
 		logger.debug("getDelegationById INVOKED on id {}", id);
 		return delegationRepo.findOne(id);
 	}
 
 	@Override
 	public Page<Delegation> findByElementId(String elementId, Pageable pageable)
-			throws  CredentialsException {
+			throws CredentialsException {
 		logger.debug("findByElementId INVOKED on elementId {}", elementId);
 		return delegationRepo.findByElementIdAndDeleteTimeIsNull(elementId, pageable);
 	}
 
 	@Override
 	public Page<Delegation> findByElementIdWithoutAnonymous(String elementId, Pageable pageable)
-			throws  CredentialsException {
+			throws CredentialsException {
 		logger.debug("findByElementId INVOKED on elementId {} usernameDelegated {}", elementId, "ANONYMOUS");
 		return delegationRepo.findByElementIdAndDeleteTimeIsNullAndUsernameDelegatedNotLike(elementId, "ANONYMOUS", pageable);
 	}
 
 	@Override
 	public List<Delegation> findByElementIdNoPages(String elementId)
-			throws  CredentialsException {
+			throws CredentialsException {
 		logger.debug("findByElementIdNoPages INVOKED on elementId {}", elementId);
 		return delegationRepo.findByElementIdAndDeleteTimeIsNull(elementId);
 	}
 
 	@Override
 	public List<Delegation> findByElementIdNoPagesWithoutAnonymous(String elementId)
-			throws  CredentialsException {
+			throws CredentialsException {
 		logger.debug("findByElementId INVOKED on elementId {} usernameDelegated {}", elementId, "ANONYMOUS");
 		return delegationRepo.findByElementIdAndDeleteTimeIsNullAndUsernameDelegatedNotLike(elementId, "ANONYMOUS");
 	}
@@ -92,18 +98,19 @@ public class DelegationServiceImpl implements IDelegationService {
 	@Override
 	// same as below
 	public List<Delegation> getDelegationsDelegatedForUsername(String username, String variableName, String motivation, Boolean deleted, String groupname, String elementType, Locale lang)
-			throws  CredentialsException, LDAPException {
+			throws CredentialsException, LDAPException, CloneNotSupportedException {
 		logger.debug("getDelegationsDelegatedForUsername INVOKED on username {} variableName {} motivation {} deleted {} groupname {}", username, variableName, motivation, deleted, groupname);
 
 		if (!username.equals("ANONYMOUS"))// avoid check credentials for PUBLIC elements
 			credentialsService.checkUsernameCredentials(username, lang);
 
-		return delegationRepo.getDelegationDelegatedByUsername(username, variableName, motivation, deleted, groupname, elementType, lang);
+		// explode delegations containing MyGroups
+		return explodeDelegationAboutMyGroup(delegationRepo.getDelegationDelegatedByUsername(username, variableName, motivation, deleted, groupname, elementType, lang));
 	}
 
 	@Override
 	// same as above
-	public List<Delegation> getDelegationsDelegatorForUsername(String username, String variableName, String motivation, Boolean deleted, String elementType, Locale lang) throws  CredentialsException {
+	public List<Delegation> getDelegationsDelegatorForUsername(String username, String variableName, String motivation, Boolean deleted, String elementType, Locale lang) throws CredentialsException {
 		logger.debug("getDelegationsDelegatorForUsername INVOKED on username {} variableName {} motivation {} deleted {}", username, variableName, motivation, deleted);
 
 		credentialsService.checkUsernameCredentials(username, lang);
@@ -113,10 +120,10 @@ public class DelegationServiceImpl implements IDelegationService {
 
 	@Override
 	// same as above
-	public List<Delegation> getDelegationsDelegatorFromApp(String appId, String variableName, String motivation, Boolean deleted, String elementType, Locale lang) throws  CredentialsException {
+	public List<Delegation> getDelegationsDelegatorFromApp(String appId, String variableName, String motivation, Boolean deleted, String elementType, Locale lang) throws CredentialsException {
 		logger.debug("getDelegationsDelegatorFromApp INVOKED on appid {} variableName {} motivation {} deleted {}", appId, variableName, motivation, deleted);
 
-		credentialsService.checkAppIdCredentials(appId, lang);
+		credentialsService.checkAppIdCredentials(appId, elementType, lang);
 
 		return delegationRepo.getDelegationDelegatorFromAppId(appId, variableName, motivation, deleted, elementType);
 
@@ -124,10 +131,10 @@ public class DelegationServiceImpl implements IDelegationService {
 
 	@Override
 	public List<Delegation> getDelegationsDelegatedFromApp(String appId, String variableName, String motivation, Boolean deleted, String appOwner, String groupname, String elementType, Locale lang)
-			throws DelegationNotValidException,  CredentialsException, LDAPException {
+			throws DelegationNotValidException, CredentialsException, LDAPException {
 		logger.debug("getDelegationsDelegatedFromApp INVOKED on appid {} variableName {} motivation {} appOwner {} deleted {}", appId, variableName, motivation, appOwner, deleted);
 
-		credentialsService.checkAppIdCredentials(appId, lang);
+		credentialsService.checkAppIdCredentials(appId, elementType, lang);
 
 		// retrieve the user belonging this appId
 		if (appOwner == null) {
@@ -143,7 +150,7 @@ public class DelegationServiceImpl implements IDelegationService {
 	}
 
 	@Override
-	public Delegation postDelegationFromUser(String username, Delegation delegation, Locale lang) throws DelegationNotValidException,  CredentialsException {
+	public Delegation postDelegationFromUser(String username, Delegation delegation, Locale lang) throws DelegationNotValidException, CredentialsException {
 		logger.debug("postDelegationFromUser INVOKED on username {} delegation {}", username, delegation);
 
 		credentialsService.checkUsernameCredentials(username, lang);
@@ -177,7 +184,7 @@ public class DelegationServiceImpl implements IDelegationService {
 	}
 
 	@Override
-	public void deleteDelegationFromUser(String username, Long delegationId, Locale lang) throws DelegationNotValidException,  CredentialsException {
+	public void deleteDelegationFromUser(String username, Long delegationId, Locale lang) throws DelegationNotValidException, CredentialsException {
 		logger.debug("deleteDelegationFromUser INVOKED on username {} delegationId {}", username, delegationId);
 
 		credentialsService.checkUsernameCredentials(username, lang);
@@ -201,13 +208,18 @@ public class DelegationServiceImpl implements IDelegationService {
 		delegationRepo.save(todelete);
 	}
 
+	// return OK even if nothing is found
 	@Override
-	public void deleteAllDelegationFromApp(String appId, Locale lang) throws  CredentialsException {
+	public void deleteAllDelegationFromApp(String appId, String elementType, Locale lang) throws CredentialsException {
 		logger.debug("deleteAllDelegationFromApp INVOKED on appid {} ", appId);
 
-		credentialsService.checkAppIdCredentials(appId, lang);
+		credentialsService.checkAppIdCredentials(appId, elementType, lang);
 
-		List<Delegation> delegations = delegationRepo.findByElementIdAndDeleteTimeIsNull(appId);
+		List<Delegation> delegations = null;
+		if (elementType == null)// elementType can be null for backword compatibility
+			delegations = delegationRepo.findByElementIdAndDeleteTimeIsNull(appId);
+		else
+			delegations = delegationRepo.findByElementIdAndElementTypeAndDeleteTimeIsNull(appId, elementType);
 
 		for (Delegation d : delegations) {
 			d.setDeleteTime(new Date());
@@ -216,7 +228,7 @@ public class DelegationServiceImpl implements IDelegationService {
 	}
 
 	@Override
-	public Delegation putDelegationFromUser(String username, Delegation delegation, Long delegationId, Locale lang) throws DelegationNotValidException,  CredentialsException {
+	public Delegation putDelegationFromUser(String username, Delegation delegation, Long delegationId, Locale lang) throws DelegationNotValidException, CredentialsException {
 		logger.debug("putDelegationFromUser INVOKED on username {} delegation {} delegationId {}", username, delegation, delegationId);
 
 		credentialsService.checkUsernameCredentials(username, lang);
@@ -244,16 +256,37 @@ public class DelegationServiceImpl implements IDelegationService {
 		return toreturn;
 	}
 
-    @Override
-    public Page<Delegation> findByElementIdWithoutAnonymousFiltered(String elementId, String searchKey, PageRequest pageable) {
-        logger.debug("findByElementId INVOKED on elementId {} usernameDelegated {} searchKey {}", elementId, "ANONYMOUS", "%"+searchKey+"%");
-	return delegationRepo.findByElementIdAndDeleteTimeIsNullAndUsernameDelegatedNotLikeAndUsernameDelegatedLike(elementId, "ANONYMOUS", "%"+searchKey+"%", pageable);
-    }
+	@Override
+	public Page<Delegation> findByElementIdWithoutAnonymousFiltered(String elementId, String searchKey, PageRequest pageable) {
+		logger.debug("findByElementId INVOKED on elementId {} usernameDelegated {} searchKey {}", elementId, "ANONYMOUS", "%" + searchKey + "%");
+		return delegationRepo.findByElementIdAndDeleteTimeIsNullAndUsernameDelegatedNotLikeAndUsernameDelegatedLike(elementId, "ANONYMOUS", "%" + searchKey + "%", pageable);
+	}
 
-    @Override
-    public List<Delegation> findByElementIdNoPagesWithoutAnonymousFiltered(String elementId, String searchKey) {
-        logger.debug("findByElementId INVOKED on elementId {} usernameDelegated {} searchKey {}", elementId, "ANONYMOUS", "%"+searchKey+"%");
-        return delegationRepo.findByElementIdAndDeleteTimeIsNullAndUsernameDelegatedNotLikeAndUsernameDelegatedLike(elementId, "ANONYMOUS", "%"+searchKey+"%");
-    }
+	@Override
+	public List<Delegation> findByElementIdNoPagesWithoutAnonymousFiltered(String elementId, String searchKey) {
+		logger.debug("findByElementId INVOKED on elementId {} usernameDelegated {} searchKey {}", elementId, "ANONYMOUS", "%" + searchKey + "%");
+		return delegationRepo.findByElementIdAndDeleteTimeIsNullAndUsernameDelegatedNotLikeAndUsernameDelegatedLike(elementId, "ANONYMOUS", "%" + searchKey + "%");
+	}
+
+	private List<Delegation> explodeDelegationAboutMyGroup(List<Delegation> delegations) throws CloneNotSupportedException {
+		List<Delegation> toreturn = new ArrayList<Delegation>();
+
+		for (Delegation d : delegations) {
+			if ((d.getElementType() != null) && (d.getElementType().equals(ElementType.MYGROUP.toString()))) {
+				// retrieve elementId belonging this groups
+				List<DeviceGroupElement> dges = dgeRepo.findByDeviceGroupIdAndDeleteTimeIsNull(Long.parseLong(d.getElementId()));
+				for (DeviceGroupElement dge : dges) {
+					Delegation newDelegation = d.clone();// the new delegation delegator respect the owner of the group and not the owner of the element
+					newDelegation.setElementId(dge.getElementId());
+					newDelegation.setElementType(dge.getElementType());
+					toreturn.add(newDelegation);
+				}
+			} else {
+				toreturn.add(d);
+			}
+		}
+
+		return toreturn;
+	}
 
 }

@@ -33,7 +33,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "delegation")
-public class Delegation {
+public class Delegation implements Cloneable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -191,5 +191,9 @@ public class Delegation {
 	public String toString() {
 		return "Delegation [id=" + id + ", usernameDelegator=" + usernameDelegator + ", usernameDelegated=" + usernameDelegated + ", variableName=" + variableName + ", motivation=" + motivation + ", elementId=" + elementId
 				+ ", elementType=" + elementType + ", insertTime=" + insertTime + ", deleteTime=" + deleteTime + ", delegationDetails=" + delegationDetails + ", groupnameDelegated=" + groupnameDelegated + "]";
+	}
+
+	public Delegation clone() throws CloneNotSupportedException {
+		return (Delegation) super.clone();
 	}
 }

@@ -79,9 +79,9 @@
         <th onclick="DeviceGrpSorter.setSortOnField('ownership');DeviceGrpTabler.renderTable();" style="cursor: pointer;">Ownership
             {{#sortownershipASC}}&darr;{{/sortownershipASC}} {{#sortownershipDESC}}&uarr;{{/sortownershipDESC}}</th>
 
-         <!-- {{#enableEdit}} -->
+
         <th>Visibility</th>
-         <!-- {{/enableEdit}} -->        
+     
         <th>Group Controls</th>
 
     </tr>
@@ -114,7 +114,6 @@
             </td>
         
         
-        <!-- {{#enableEdit}} -->
         <td>
             
             <button type="button" onclick="GrpDelegationFilter.setCurrentSearchKey(''); GrpDelegationTabler.renderTable({{id}}, '{{highLevelType}}');" class="btn editDashBtn">Delegate
@@ -124,12 +123,13 @@
             <!--  <button type="button" onclick="KPIDelegationTabler.renderTable({{id}}, '{{highLevelType}}');" class="btn editDashBtn">Delegate
                 Groups</button> -->
         </td>
-         <!-- {{/enableEdit}} -->
+
+        
          
-        <td><button type="button" onclick="DeviceGrpTabler.showGrpDataModal({{id}});" class="btn viewDashBtn">View</button>
+        <td><button type="button" onclick="DeviceGrpTabler.showReadonlyGrpDataModal({{id}});" class="btn viewDashBtn">View</button>
             <!-- {{#enableEdit}} -->
             <button type="button" onclick="DeviceGrpTabler.editDeviceGrpModal({{id}}, '{{highLevelType}}');" class=" btn editDashBtn">Edit</button>
-            <button type="button" onclick="DeviceGrpTabler.clearDeviceGrpModal({{id}}, '{{highLevelType}}', '{{escapedName}}');" class=" btn deleteDashBtn" {{ifClearDisabled}}>Clear</button>             
+            <button type="button" onclick="DeviceGrpTabler.clearDeviceGrpModal({{id}}, '{{highLevelType}}', '{{escapedName}}');" class=" btn deleteDashBtn" {{ifClearDisabled}}>EMPTY</button>             
             <button type="button" onclick="DeviceGrpTabler.deleteDeviceGroupModal({{id}}, '{{highLevelType}}', '{{escapedName}}');"
                 class="btn deleteDashBtn">Delete</button>
             <!-- {{/enableEdit}} -->

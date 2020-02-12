@@ -32,12 +32,12 @@ public interface IDelegationService {
 	// Response checkDelegationsFromApp(String elementID, Locale lang) throws CredentialsException;
 
 	List<Delegation> getDelegationsDelegatedFromApp(String appId, String variableName, String motivation, Boolean deleted, String appOwner, String groupname, String elementType, Locale lang)
-			throws DelegationNotValidException, CredentialsException,  LDAPException;
+			throws DelegationNotValidException, CredentialsException, LDAPException;
 
 	List<Delegation> getDelegationsDelegatorFromApp(String appId, String variableName, String motivation, Boolean deleted, String elementType, Locale lang) throws CredentialsException;
 
 	List<Delegation> getDelegationsDelegatedForUsername(String username, String variableName, String motivation, Boolean deleted, String groupname, String elementType, Locale lang)
-			throws CredentialsException,  LDAPException;
+			throws CredentialsException, LDAPException, CloneNotSupportedException;
 
 	List<Delegation> getDelegationsDelegatorForUsername(String username, String variableName, String motivation, Boolean deleted, String elementType, Locale lang) throws CredentialsException;
 
@@ -45,7 +45,7 @@ public interface IDelegationService {
 
 	void deleteDelegationFromUser(String username, Long delegationId, Locale lang) throws DelegationNotValidException, CredentialsException;
 
-	void deleteAllDelegationFromApp(String appId, Locale lang) throws CredentialsException;
+	void deleteAllDelegationFromApp(String appId, String elementType, Locale lang) throws CredentialsException;
 
 	Delegation putDelegationFromUser(String username, Delegation delegation, Long delegationId, Locale lang) throws DelegationNotValidException, CredentialsException;
 
@@ -53,20 +53,20 @@ public interface IDelegationService {
 
 	// Aggiunti per KPI
 
-	Delegation getDelegationById(Long id, Locale lang) throws  CredentialsException;
+	Delegation getDelegationById(Long id, Locale lang) throws CredentialsException;
 
-	Page<Delegation> findByElementId(String elementId, Pageable pageable) throws  CredentialsException;
+	Page<Delegation> findByElementId(String elementId, Pageable pageable) throws CredentialsException;
 
 	Page<Delegation> findByElementIdWithoutAnonymous(String elementId, Pageable pageable)
-			throws  CredentialsException;
+			throws CredentialsException;
 
-	List<Delegation> findByElementIdNoPages(String elementId) throws  CredentialsException;
+	List<Delegation> findByElementIdNoPages(String elementId) throws CredentialsException;
 
 	List<Delegation> findByElementIdNoPagesWithoutAnonymous(String elementId)
-			throws  CredentialsException;
+			throws CredentialsException;
 
-        Page<Delegation> findByElementIdWithoutAnonymousFiltered(String elementId, String searchKey, PageRequest pageRequest);
+	Page<Delegation> findByElementIdWithoutAnonymousFiltered(String elementId, String searchKey, PageRequest pageRequest);
 
-        List<Delegation> findByElementIdNoPagesWithoutAnonymousFiltered(String elementId, String searchKey);
-        
+	List<Delegation> findByElementIdNoPagesWithoutAnonymousFiltered(String elementId, String searchKey);
+
 }

@@ -59,7 +59,7 @@ import edu.unifi.disit.datamanager.service.IActivityService;
 @Component
 public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 
-	private static final Logger loggerA = LogManager.getLogger();
+	private static final Logger logger = LogManager.getLogger();
 
 	@Autowired
 	IActivityService activityService;
@@ -96,11 +96,11 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 			try {
 
 				validation(accessToken, request.getLocale());
-				loggerA.info("Access token IS VALID");
+				logger.info("Access token IS VALID");
 
 			} catch (AccessTokenNotValidException e) {
 
-				loggerA.info("Access token NOT VALID");
+				logger.info("Access token NOT VALID");
 
 				activityService.saveActivityViolationFromUsername(null, req.getParameter("sourceRequest"), req.getParameter("variableName"), req.getParameter("motivation"), activityType,
 						((HttpServletRequest) request).getContextPath() + "?" + ((HttpServletRequest) request).getQueryString(),
@@ -118,7 +118,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 
 		} else {
 
-			loggerA.warn("Access token NOT PRESENT");
+			logger.warn("Access token NOT PRESENT");
 
 			activityService.saveActivityViolationFromUsername(null, req.getParameter("sourceRequest"), req.getParameter("variableName"), req.getParameter("motivation"), activityType,
 					((HttpServletRequest) request).getContextPath() + "?" + ((HttpServletRequest) request).getQueryString(),
@@ -157,27 +157,32 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 			checkValidationOnKeycloakServer(UriComponentsBuilder.fromHttpUrl(userinfo_endpoint + "realms/master/protocol/openid-connect/userinfo").build(), restTemplate, entity, lang);// check validation on www.snap4city.org/auth keycloak
 																																														// server
 		} catch (HttpClientErrorException e) {
-			loggerA.warn("AccessToken WAS NOT VALIDATED HttpClientErrorException {}", e);
+			logger.warn("AccessToken WAS NOT VALIDATED HttpClientErrorException {}", e);
 			try {
 				if (userinfo_endpoint_test != null)
 					checkValidationOnKeycloakServer(UriComponentsBuilder.fromHttpUrl(userinfo_endpoint_test + "realms/master/protocol/openid-connect/userinfo").build(), restTemplate, entity, lang);// check validation on
 																																																		// www.snap4city.org/auth
 																																																		// keycloak server
+				else {
+					logger.error("AccessToken WAS NOT VALIDATED even on keycloak HttpClientErrorException {}", e);
+					throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
+				}
+
 			} catch (HttpClientErrorException e2) {
-				loggerA.error("AccessToken WAS NOT VALIDATED even on keycloak TEST HttpClientErrorException {}", e2);
+				logger.error("AccessToken WAS NOT VALIDATED even on keycloak TEST HttpClientErrorException {}", e2);
 				throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
 			} catch (JsonProcessingException e2) {
-				loggerA.warn("AccessToken WAS NOT VALIDATED even on keycloak TEST  JsonProcessingException {}", e2);
+				logger.warn("AccessToken WAS NOT VALIDATED even on keycloak TEST  JsonProcessingException {}", e2);
 				throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
 			} catch (IOException e2) {
-				loggerA.warn("AccessToken WAS NOT VALIDATED even on keycloak TEST  IOException {}", e2);
+				logger.warn("AccessToken WAS NOT VALIDATED even on keycloak TEST  IOException {}", e2);
 				throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
 			}
 		} catch (JsonProcessingException e) {
-			loggerA.warn("AccessToken WAS NOT VALIDATED JsonProcessingException {}", e);
+			logger.warn("AccessToken WAS NOT VALIDATED JsonProcessingException {}", e);
 			throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
 		} catch (IOException e) {
-			loggerA.warn("AccessToken WAS NOT VALIDATED IOException {}", e);
+			logger.warn("AccessToken WAS NOT VALIDATED IOException {}", e);
 			throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
 		}
 	}
@@ -185,13 +190,13 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 	private void checkValidationOnKeycloakServer(UriComponents uriComponents, RestTemplate restTemplate, HttpEntity<String> entity, Locale lang)
 			throws IOException, AccessTokenNotValidException {
 
-		loggerA.info("AccessToken check on {}", uriComponents.toUri());
+		logger.info("AccessToken check on {}", uriComponents.toUri());
 
 		ResponseEntity<String> re = restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, entity, String.class);
 
 		String response = re.getBody();
 
-		loggerA.debug("got response:{}", response);
+		logger.debug("got response:{}", response);
 
 		JsonNode jsonNode = objectMapper.readTree(response);
 
@@ -208,7 +213,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 			username = jn.asText();
 
 		if (username == null) {
-			loggerA.error("username not found");
+			logger.error("username not found");
 			throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
 		}
 
@@ -229,14 +234,14 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		}
 
 		if (iroles == null) {
-			loggerA.error("roles not found");
+			logger.error("roles not found");
 			throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
 		}
 
 		while (iroles.hasNext())
 			roles.add(iroles.next().asText());
 
-		loggerA.info("AccessToken username {} + Roles {}", username, roles.toArray());
+		logger.info("AccessToken username {} + Roles {}", username, roles.toArray());
 
 		authUser(username, roles);
 	}

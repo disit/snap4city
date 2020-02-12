@@ -80,7 +80,7 @@ public class DelegationDAOImpl implements DelegationDAOCustom {
 	@Override
 	public List<Delegation> getDelegationDelegatedByUsername(String username, String variableName, String motivation, Boolean deleted, String groupnamefilter, String elementType, Locale lang) throws LDAPException {
 
-		List<String> groupnames = lu.getGroupAndOUnames(username);
+		List<String> groupnames = lu.getGroupAndOUnames(username);// organization the user belongs
 
 		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Delegation> criteria = cb.createQuery(Delegation.class);
@@ -174,7 +174,7 @@ public class DelegationDAOImpl implements DelegationDAOCustom {
 			predicates.add(cb.equal(delegationRoot.get("variableName"), variableName));
 		if (motivation != null)
 			predicates.add(cb.equal(delegationRoot.get("motivation"), motivation));
-		if (elementType != null)
+		if (elementType != null)// elementType can be null for backword compatibility
 			predicates.add(cb.equal(delegationRoot.get("elementType"), elementType));
 		if (!Boolean.TRUE.equals(deleted))
 			predicates.add(delegationRoot.get("deleteTime").isNull());

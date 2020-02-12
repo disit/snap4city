@@ -56,6 +56,9 @@ public class DeviceGroupElement {
     @Column(name = "device_group_id")
     private Long deviceGroupId;
     
+    @Formula("( select g.username from devicegroup g where g.id = device_group_id ) ")
+    private String deviceGroupContact;
+    
     @Formula("( select o.username from devicegroup g, ownership o where g.id = device_group_id and o.elementId = elementId and o.elementType = elementType union select o.username from devicegroup g, kpidata o where g.id = device_group_id and o.id = elementId and 'MyKPI' = elementType )")
     private String username;
     
@@ -149,6 +152,14 @@ public class DeviceGroupElement {
 
     public void setElmtTypeLbl(String elmtTypeLbl) {
         this.elmtTypeLbl = elmtTypeLbl;
+    }
+
+    public String getDeviceGroupContact() {
+        return deviceGroupContact;
+    }
+
+    public void setDeviceGroupContact(String deviceGroupContact) {
+        this.deviceGroupContact = deviceGroupContact;
     }
     
     @Override

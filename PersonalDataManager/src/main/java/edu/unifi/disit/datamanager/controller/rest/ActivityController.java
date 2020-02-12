@@ -43,6 +43,8 @@ public class ActivityController {
 	IActivityService activityService;
 
 	// -------------------GET ALL Activity for appId ---------------------------------------------
+	// V1 does not require elementType (set to NULL)
+	@Deprecated
 	@GetMapping(value = "/api/v1/apps/{appId}/activity")
 	public ResponseEntity<Object> getActivityV1(@PathVariable("appId") String appId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
@@ -51,8 +53,21 @@ public class ActivityController {
 
 		logger.info("Requested getActivityV1 for {}, delegated {} lang {}", appId, delegated, lang);
 
+		return getActivityV3(appId, null, lang, delegated, request);
+	}
+
+	// V3 requires elementType
+	@GetMapping(value = "/api/v3/apps/{appId}/activity")
+	public ResponseEntity<Object> getActivityV3(@PathVariable("appId") String appId,
+			@RequestParam(value = "elementType") String elementType,
+			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
+			@RequestParam(value = "delegated", required = false, defaultValue = "false") Boolean delegated,
+			HttpServletRequest request) {
+
+		logger.info("Requested getActivityV3 for {}, elementType {}, delegated {} lang {}", appId, elementType, delegated, lang);
+
 		try {
-			List<Activity> actvities = activityService.getActivities(appId, delegated, lang);
+			List<Activity> actvities = activityService.getActivities(appId, elementType, delegated, lang);
 
 			activityService.saveActivityDelegationFromAppId(appId, null, null, null, null, ActivityAccessType.READ, ActivityDomainType.ACTIVITY);
 

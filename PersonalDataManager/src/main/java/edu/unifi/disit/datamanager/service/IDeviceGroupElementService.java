@@ -21,12 +21,14 @@ import org.springframework.data.domain.PageRequest;
 
 import edu.unifi.disit.datamanager.datamodel.profiledb.DeviceGroupElement;
 import edu.unifi.disit.datamanager.exception.CredentialsException;
+import java.io.IOException;
+import java.net.MalformedURLException;
 
 public interface IDeviceGroupElementService {
     
-    Page<DeviceGroupElement> findByDeviceGroupId(Long grpId, PageRequest pageRequest) throws CredentialsException;
+    Page<DeviceGroupElement> findByDeviceGroupId(Long grpId, PageRequest pageRequest) throws CredentialsException, MalformedURLException, IOException;
     
-    List<DeviceGroupElement> findByDeviceGroupIdNoPages(Long grpId) throws CredentialsException;
+    List<DeviceGroupElement> findByDeviceGroupIdNoPages(Long grpId) throws CredentialsException, MalformedURLException, IOException;
     
     Set<String> getAvailElmtTypesToAdd(String username);
     
@@ -34,14 +36,16 @@ public interface IDeviceGroupElementService {
     
     List<DeviceGroupElement> addElmtsToGrp(Long grpId, List<DeviceGroupElement> elements);
 
-    Page<DeviceGroupElement> findByDeviceGroupIdFiltered(Long grpId, String searchKey, PageRequest pageRequest);
+    Page<DeviceGroupElement> findByDeviceGroupIdFiltered(Long grpId, String searchKey, PageRequest pageRequest) throws MalformedURLException, IOException;
 
-    List<DeviceGroupElement> findByDeviceGroupIdNoPagesFiltered(Long grpId, String searchKey);
+    List<DeviceGroupElement> findByDeviceGroupIdNoPagesFiltered(Long grpId, String searchKey) throws MalformedURLException, IOException;
     
-    DeviceGroupElement getDeviceGroupElementById(Long id) throws  CredentialsException;
+    DeviceGroupElement getDeviceGroupElementById(Long id) throws  CredentialsException, MalformedURLException, IOException;
 
     public Set<String> getAllElmtTypes();
 
     public Set<Object> getAllItems(String elmtType);
+    
+    List<DeviceGroupElement> getByUserAndElmtIdAndElmtType(String username, String elementId, String elementType);
     
 }

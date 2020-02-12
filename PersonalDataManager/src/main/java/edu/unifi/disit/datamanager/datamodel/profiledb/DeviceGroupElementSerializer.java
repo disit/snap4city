@@ -18,10 +18,24 @@ import java.io.IOException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import edu.unifi.disit.datamanager.service.ICredentialsService;
+import java.util.Locale;
+import javax.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 public class DeviceGroupElementSerializer extends StdSerializer<DeviceGroupElement> {
 
 	private static final long serialVersionUID = 1L;
+        
+        @Autowired
+	ICredentialsService credentialService;
+        
+        @Autowired
+        private HttpServletRequest request;
+        
+        @Value("${grp.url}")
+	private String grpUrl;
 
 	public DeviceGroupElementSerializer() {
 		this(null);
@@ -37,10 +51,12 @@ public class DeviceGroupElementSerializer extends StdSerializer<DeviceGroupEleme
 		jgen.writeStartObject();
 
 		if (grp.getId() != null) {
-			jgen.writeNumberField("id", grp.getId());
+			jgen.writeNumberField("id", grp.getId());                        
 		}
 		if (grp.getDeviceGroupId() != null) {
 			jgen.writeNumberField("deviceGroupId", grp.getDeviceGroupId());
+                        if(request != null) jgen.writeStringField("deviceGroupUrl", String.format(grpUrl,grp.getDeviceGroupId()));
+                        jgen.writeStringField("deviceGroupContact", grp.getDeviceGroupContact());
 		}
 		if (grp.getDeleteTime() != null) {
 			jgen.writeNumberField("deleteTime", grp.getDeleteTime().getTime());
@@ -57,9 +73,22 @@ public class DeviceGroupElementSerializer extends StdSerializer<DeviceGroupEleme
                 if (grp.getElmtTypeLbl() != null) {
 			jgen.writeStringField("elmtTypeLbl", grp.getElmtTypeLbl());
 		}
-                if (grp.getUsername() != null) {
-			jgen.writeStringField("username", grp.getUsername());
-		}
+                
+                try {
+                    if (grp.getUsername() != null) {
+                        jgen.writeStringField("username", grp.getUsername());
+                    }
+                    else if("Sensor".equals(grp.getElementType()) && credentialService.isRoot(Locale.getDefault())) {
+                        jgen.writeStringField("username", "-- Public --");
+                    }
+                    else if("Sensor".equals(grp.getElementType()) && !credentialService.isRoot(Locale.getDefault())) {
+                        jgen.writeStringField("username", "-- Unknown --");
+                    }
+                }
+                catch(Exception e) {
+                    jgen.writeStringField("username", "-- Unknown --");
+                }
+                
                 if (grp.getElementName() != null && !grp.getElementName().isEmpty()) {
                     jgen.writeStringField("elementName", grp.getElementName());
 		}

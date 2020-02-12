@@ -50,11 +50,11 @@ import edu.unifi.disit.datamanager.datamodel.profiledb.DeviceGroupElement;
 
 public class deviceGroupTest {
 
-        @Test
+	@Test
 	public void get_grpNotExist() throws ClientProtocolException, IOException {
 
 		// Given
-		HttpUriRequest request = new HttpGet("http://localhost:8080/devicegrpmanager/api/v1/devicegroup/1000/?accessToken="
+		HttpUriRequest request = new HttpGet("http://localhost:8080/datamanager/api/v1/devicegroup/1000/?accessToken="
 				+ getAccessTokenRoot() + "&sourceRequest=junittest");
 
 		// When
@@ -63,12 +63,12 @@ public class deviceGroupTest {
 		// Then
 		assertThat(httpResponse.getStatusLine().getStatusCode(), equalTo(HttpStatus.NO_CONTENT.value()));
 	}
-        
+
 	@Test
 	public void get_grpWithID() throws ClientProtocolException, IOException, java.text.ParseException {
 
 		// Given
-		HttpUriRequest request = new HttpGet("http://localhost:8080/devicegrpmanager/api/v1/devicegroup/6/?accessToken="
+		HttpUriRequest request = new HttpGet("http://localhost:8080/datamanager/api/v1/devicegroup/6/?accessToken="
 				+ getAccessTokenRoot() + "&sourceRequest=junittest");
 
 		// When
@@ -88,7 +88,7 @@ public class deviceGroupTest {
 		assertEquals(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2019-12-11 17:00:40"), result.getInsertTime());
 		assertEquals("Sesto gruppo", result.getName());
 		assertEquals("[ou=Firenze,dc=foo,dc=example,dc=org]", result.getOrganizations());
-                assertEquals("private", result.getOwnership());
+		assertEquals("private", result.getOwnership());
 		assertEquals(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2019-12-11 17:00:40"), result.getUpdateTime());
 		assertEquals("mirco-rootadmin", result.getUsername());
 
@@ -99,7 +99,7 @@ public class deviceGroupTest {
 
 		// Given
 		HttpUriRequest request = new HttpGet(
-				"http://localhost:8080/devicegrpmanager/api/v1/devicegroup/6/elements/?&accessToken="
+				"http://localhost:8080/datamanager/api/v1/devicegroup/40/elements/?&accessToken="
 						+ getAccessTokenRoot() + "&sourceRequest=junittest");
 
 		// When
@@ -113,15 +113,15 @@ public class deviceGroupTest {
 
 		assertThat(httpResponse.getStatusLine().getStatusCode(), equalTo(HttpStatus.OK.value()));
 
-		assertEquals(3, result.size());
+		assertEquals(2, result.size());
 	}
-	
+
 	@Test
 	public void get_grpExist_delegations() throws ClientProtocolException, IOException {
 
 		// Given
 		HttpUriRequest request = new HttpGet(
-				"http://localhost:8080/devicegrpmanager/api/v1/devicegroup/4/delegations/?&accessToken="
+				"http://localhost:8080/datamanager/api/v1/devicegroup/40/delegations/?&accessToken="
 						+ getAccessTokenRoot() + "&sourceRequest=junittest");
 
 		// When
@@ -135,7 +135,7 @@ public class deviceGroupTest {
 
 		assertThat(httpResponse.getStatusLine().getStatusCode(), equalTo(HttpStatus.OK.value()));
 
-		//The Anonymous Delegations are not returned
+		// The Anonymous Delegations are not returned
 		assertEquals(1, result.size());
 	}
 
@@ -144,7 +144,7 @@ public class deviceGroupTest {
 
 		// Given
 		HttpUriRequest request = new HttpGet(
-				"http://localhost:8080/devicegrpmanager/api/v1/devicegroup/5/?sourceRequest=junittest");
+				"http://localhost:8080/datamanager/api/v1/devicegroup/5/?sourceRequest=junittest");
 
 		// When
 		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
@@ -153,11 +153,11 @@ public class deviceGroupTest {
 		assertThat(httpResponse.getStatusLine().getStatusCode(), equalTo(HttpStatus.FORBIDDEN.value()));
 	}
 
-        @Test
+	@Test
 	public void get_grpRootList() throws ClientProtocolException, IOException {
 
 		// Given
-		HttpUriRequest request = new HttpGet("http://localhost:8080/devicegrpmanager/api/v1/devicegroup/?accessToken="
+		HttpUriRequest request = new HttpGet("http://localhost:8080/datamanager/api/v1/devicegroup/?accessToken="
 				+ getAccessTokenRoot() + "&sourceRequest=junittest");
 
 		// When
@@ -171,15 +171,15 @@ public class deviceGroupTest {
 
 		assertThat(httpResponse.getStatusLine().getStatusCode(), equalTo(HttpStatus.OK.value()));
 
-		assertThat("cardinality",result.size(),greaterThan(0));
+		assertThat("cardinality", result.size(), greaterThan(0));
 
 	}
 
-        @Test
+	@Test
 	public void get_grpDelegation_OK_general_result() throws ClientProtocolException, IOException {
 
 		// Given
-		HttpUriRequest request = new HttpGet("http://localhost:8080/devicegrpmanager/api/v1/devicegroup/delegated/?accessToken="
+		HttpUriRequest request = new HttpGet("http://localhost:8080/datamanager/api/v1/devicegroup/delegated/?accessToken="
 				+ getAccessTokenRoot() + "&sourceRequest=junittest");
 
 		// When
@@ -194,15 +194,15 @@ public class deviceGroupTest {
 		assertThat(httpResponse.getStatusLine().getStatusCode(), equalTo(HttpStatus.OK.value()));
 
 		assertEquals(2, result.size());
-		assertEquals("Ottavo gruppo", result.get(0).getName());
-		assertEquals("mirco-rootadmin", result.get(0).getUsername());
+		assertEquals("E se ne faccio un altro ah ok", result.get(0).getName());
+		assertEquals("mirco-tooladmin", result.get(0).getUsername());
 	}
 
 	@Test
 	public void get_grpPublic_OK_general_result() throws ClientProtocolException, IOException {
 
 		// Given
-		HttpUriRequest request = new HttpGet("http://localhost:8080/devicegrpmanager/api/v1/devicegroup/public/?accessToken="
+		HttpUriRequest request = new HttpGet("http://localhost:8080/datamanager/api/v1/devicegroup/public/?accessToken="
 				+ getAccessTokenRoot() + "&sourceRequest=junittest");
 
 		// When
@@ -216,101 +216,101 @@ public class deviceGroupTest {
 
 		assertThat(httpResponse.getStatusLine().getStatusCode(), equalTo(HttpStatus.OK.value()));
 
-		assertEquals(2, result.size());
+		assertEquals(3, result.size());
 		assertEquals("Quinto gruppo", result.get(0).getName());
 		assertEquals(null, result.get(0).getUsername());
 		assertEquals(Long.valueOf("10"), result.get(1).getId());
 		assertEquals(Long.valueOf("5"), result.get(0).getId());
 	}
-        
-        @Test
+
+	@Test
 	public void post_createGrp() throws ClientProtocolException, IOException {
 
-		// Add group 
-                
-		HttpPost request = new HttpPost("http://localhost:8080/devicegrpmanager/api/v1/devicegroup?accessToken="
+		// Add group
+
+		HttpPost request = new HttpPost("http://localhost:8080/datamanager/api/v1/devicegroup?accessToken="
 				+ getAccessTokenRoot() + "&sourceRequest=junittest");
 
 		DeviceGroup grp = new DeviceGroup();
-                grp.setDescription("Description of JUnit test group");
-                grp.setHighLevelType("MyGroup");
-                grp.setName("JUnit test group");
+		grp.setDescription("Description of JUnit test group");
+		grp.setHighLevelType("MyGroup");
+		grp.setName("JUnit test group");
 		request.setEntity(createGrpEntity(grp));
 		request.addHeader("Content-Type", "application/json; charset=utf8");
 
 		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
-                
-		assertThat(
-                    httpResponse.getStatusLine().getStatusCode(),
-                    equalTo(HttpStatus.OK.value()));
-                
-                ObjectMapper mapper = new ObjectMapper();
-                DeviceGroup result = mapper.readValue(EntityUtils.toString(httpResponse.getEntity()),
-                    new TypeReference<DeviceGroup>() {
-                });
 
-                Long grpId = result.getId();
-                
-                // Add Element
-                
-		HttpPost request2 = new HttpPost("http://localhost:8080/devicegrpmanager/api/v1/devicegroup/"+String.valueOf(grpId)+"/elements?accessToken="
+		assertThat(
+				httpResponse.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.OK.value()));
+
+		ObjectMapper mapper = new ObjectMapper();
+		DeviceGroup result = mapper.readValue(EntityUtils.toString(httpResponse.getEntity()),
+				new TypeReference<DeviceGroup>() {
+				});
+
+		Long grpId = result.getId();
+
+		// Add Element
+
+		HttpPost request2 = new HttpPost("http://localhost:8080/datamanager/api/v1/devicegroup/" + String.valueOf(grpId) + "/elements?accessToken="
 				+ getAccessTokenRoot() + "&sourceRequest=junittest");
 
 		ArrayList<DeviceGroupElement> grpel = new ArrayList<DeviceGroupElement>();
-                DeviceGroupElement grpe = new DeviceGroupElement();
-                grpe.setDeviceGroupId(grpId);
-                grpe.setElementId("Firenze:broker:device1");
-                grpe.setElementType("IOTID");
-                grpe.setInsertTime(new Date());
-                grpel.add(grpe);                        
+		DeviceGroupElement grpe = new DeviceGroupElement();
+		grpe.setDeviceGroupId(grpId);
+		grpe.setElementId("17055860");
+		grpe.setElementType("MyKPI");
+		grpe.setInsertTime(new Date());
+		grpel.add(grpe);
 		request2.setEntity(createGrpElmtEntity(grpel));
 		request2.addHeader("Content-Type", "application/json; charset=utf8");
-		HttpResponse httpResponse2 = HttpClientBuilder.create().build().execute(request2);                
-                assertThat(
-                    httpResponse2.getStatusLine().getStatusCode(),
-                    equalTo(HttpStatus.CREATED.value()));
-                
-                                ObjectMapper mapper2 = new ObjectMapper();
-                ArrayList<DeviceGroupElement> result2 = mapper2.readValue(EntityUtils.toString(httpResponse2.getEntity()),
-                    new TypeReference<ArrayList<DeviceGroupElement>>() {
-                });
+		HttpResponse httpResponse2 = HttpClientBuilder.create().build().execute(request2);
+		assertThat(
+				httpResponse2.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.CREATED.value()));
 
-                Long elmtId = result2.get(0).getId();
-                
-                // Delete Element
-                
-                HttpDelete request3 = new HttpDelete("http://localhost:8080/devicegrpmanager/api/v1/devicegroup/"+String.valueOf(grpId)+"/elements/"+String.valueOf(elmtId)+"?accessToken="
-                + getAccessTokenRoot() + "&sourceRequest=junittest");
-		HttpResponse httpResponse3 = HttpClientBuilder.create().build().execute(request3);                
-                assertThat(
-                    httpResponse3.getStatusLine().getStatusCode(),
-                    equalTo(HttpStatus.OK.value()));
-                
-                // Delete group
-                
-                HttpDelete request4 = new HttpDelete("http://localhost:8080/devicegrpmanager/api/v1/devicegroup/"+String.valueOf(grpId)+"?accessToken="
-                + getAccessTokenRoot() + "&sourceRequest=junittest");
-		HttpResponse httpResponse4 = HttpClientBuilder.create().build().execute(request4);                
-                assertThat(
-                    httpResponse4.getStatusLine().getStatusCode(),
-                    equalTo(HttpStatus.OK.value()));
+		ObjectMapper mapper2 = new ObjectMapper();
+		ArrayList<DeviceGroupElement> result2 = mapper2.readValue(EntityUtils.toString(httpResponse2.getEntity()),
+				new TypeReference<ArrayList<DeviceGroupElement>>() {
+				});
+
+		Long elmtId = result2.get(0).getId();
+
+		// Delete Element
+
+		HttpDelete request3 = new HttpDelete("http://localhost:8080/datamanager/api/v1/devicegroup/" + String.valueOf(grpId) + "/elements/" + String.valueOf(elmtId) + "?accessToken="
+				+ getAccessTokenRoot() + "&sourceRequest=junittest");
+		HttpResponse httpResponse3 = HttpClientBuilder.create().build().execute(request3);
+		assertThat(
+				httpResponse3.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.OK.value()));
+
+		// Delete group
+
+		HttpDelete request4 = new HttpDelete("http://localhost:8080/datamanager/api/v1/devicegroup/" + String.valueOf(grpId) + "?accessToken="
+				+ getAccessTokenRoot() + "&sourceRequest=junittest");
+		HttpResponse httpResponse4 = HttpClientBuilder.create().build().execute(request4);
+		assertThat(
+				httpResponse4.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.OK.value()));
 	}
-        
+
 	private HttpEntity createGrpEntity(DeviceGroup data) throws JsonGenerationException, JsonMappingException, IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		mapper.writeValue(baos, data);
 		return new ByteArrayEntity(baos.toByteArray());
 	}
-        
-        private HttpEntity createGrpElmtEntity(ArrayList<DeviceGroupElement> data) throws JsonGenerationException, JsonMappingException, IOException {
+
+	private HttpEntity createGrpElmtEntity(ArrayList<DeviceGroupElement> data) throws JsonGenerationException, JsonMappingException, IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		mapper.writeValue(baos, data);
 		return new ByteArrayEntity(baos.toByteArray());
 	}
-                
-        private String getAccessTokenRoot() throws IOException {
+
+	private String getAccessTokenRoot() throws IOException {
 		return get("accesstoken.mircorootadmin=");
 	}
 
@@ -327,7 +327,4 @@ public class deviceGroupTest {
 		throw new IOException(tosearch + " not found");
 	}
 
-
-        
-        
 }

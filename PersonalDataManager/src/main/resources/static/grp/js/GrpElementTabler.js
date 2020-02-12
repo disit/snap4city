@@ -132,10 +132,10 @@ var GrpElementTabler = {
         console.log("selecting and disabling the following:");
         _response.forEach(function(element){
             console.log(element);
-            console.log("#add"+$.escapeSelector((element.username?element.username:"")+(element.elementType?element.elementType:"")+(element.elementType == "MyKPI" ? element.elementName : element.elementId)));
+            console.log("#add"+$.escapeSelector((element.username && element.elementType != "Sensor"?element.username:"")+(element.elementType?element.elementType:"")+(element.elementType == "MyKPI" ? element.elementName : element.elementId)));
             console.log("occurrences: "+$("#add"+$.escapeSelector((element.username?element.username:"")+(element.elementType?element.elementType:"")+(element.elementType == "MyKPI" ? element.elementName : element.elementId))).length);
-            $("#add"+$.escapeSelector((element.username?element.username:"")+(element.elementType?element.elementType:"")+(element.elementType == "MyKPI" ? element.elementName : element.elementId))).prop('checked',true);
-            $("#add"+$.escapeSelector((element.username?element.username:"")+(element.elementType?element.elementType:"")+(element.elementType == "MyKPI" ? element.elementName : element.elementId))).prop('disabled',true);
+            $("#add"+$.escapeSelector((element.username && element.elementType != "Sensor"?element.username:"")+(element.elementType?element.elementType:"")+(element.elementType == "MyKPI" ? element.elementName : element.elementId))).prop('checked',true);
+            $("#add"+$.escapeSelector((element.username && element.elementType != "Sensor"?element.username:"")+(element.elementType?element.elementType:"")+(element.elementType == "MyKPI" ? element.elementName : element.elementId))).prop('disabled',true);
         });
     },
     renderTable: function (grpId, forceReadonly = false) {        
@@ -197,6 +197,10 @@ var GrpElementTabler = {
 
         _response.grpId = GrpElementTabler.currentGrpId;
         _response.currentGrpData = DeviceGrpTabler.getCurrentKPIData(GrpElementTabler.currentGrpId);
+        if(_response.currentGrpData == null) {
+            var query = GrpQueryManager.createGetDeviceGrpByIdQuery(_response.grpId, GrpEditor.keycloak.token);
+            APIClient.executeGetQuery(query, function(_iresponse){ _response.currentGrpData = _iresponse; }, function(){} );
+        }
 
         _response.timestampToDate = MustacheFunctions.timestampToDate;
 
@@ -224,14 +228,20 @@ var GrpElementTabler = {
 
         $('#inputFilterKPIDelegation').val(GrpElementFilter.currentSearchKey);
         $('#selectSizeKPIDelegation').val(GrpElementPager.currentSize);
- 
-        if (GrpEditor.withParameters) {
-            $("#backButtonToMyKPIDataList").hide();
-        }
        
         var query = GrpQueryManager.createGetNewGrpElmtBtnsQuery(GrpEditor.keycloak.token,GrpElementTabler.currentGrpId);
         APIClient.executeGetQuery(query, GrpElementTabler.newGrpElmtBtnsSuccess, function(){ console.log("GetNewGrpElmtBtnsQuery error"); });
+        var sensorsQuery = GrpQueryManager.createGetSensorsAPIQuery(GrpEditor.keycloak.token);
+        APIClient.executeGetQuery(sensorsQuery, GrpElementTabler.addSensorBtn, function(){ console.log("createGetSensorsAPIQuery error"); });
         
+        $('#simplyclose').click();
+        
+    },
+    
+    addSensorBtn: function(_response) {
+        if(_response["payload"] !== undefined && _response["payload"].length > 0) {
+            $("#addnewelement").append($('<button class="btn btn-warning" style="color: white;padding: 0.5rem; margin-bottom:0.5rem; margin-left:0.5rem; margin-right:0.5rem;" type="button" onclick="GrpElementTabler.addNewSensorToGrp();">Add Sensor</button>"'));            
+        }
     },
     
     newGrpElmtBtnsSuccess: function(_response) {
@@ -356,7 +366,6 @@ var GrpElementTabler = {
     },
 
     successSaveKPIDelegation: function (_response) {
-        console.log(_response);
         $('#genericModal').modal('hide');
         GrpDelegationTabler.renderTable(_response.elementId, _response.elementType);
     },
@@ -367,6 +376,51 @@ var GrpElementTabler = {
             alert(_error.responseText);
         }
         $('#genericModal').modal('hide');
+    },
+    
+    addNewSensorToGrp: function(pagesize=10, pagenum=1, search="") {
+        ViewManager.render({}, "#genericModal", "templates/grpdata/elems/wait.mst.html"); $('#genericModal').modal('show');
+        GrpEditor.keycloak.updateToken(30).success(function () {
+            var query = GrpQueryManager.createGetSensorsAPIQuery(GrpEditor.keycloak.token,pagesize,pagenum,search);
+            APIClient.executeGetQuery(query, GrpElementTabler.getAvailSensorsSuccess, function(){ console.log("createGetAvailItemsQuery error"); }); 
+        }).error(function () {
+            var query = GrpQueryManager.createGetSensorsAPIQuery(Authentication.refreshTokenGetAccessToken(),pagesize,pagenum,search);
+            APIClient.executeGetQuery(query, GrpElementTabler.getAvailSensorsSuccess, function(){ console.log("createGetAvailItemsQuery error"); }); 
+        });
+    },
+    
+    getAvailSensorsSuccess: function(_response) {
+        setTimeout(function(){            
+            $('#genericModal').modal('hide');      
+            for(var i = 0; i < _response["payload"].length; i++) {
+                _response["payload"][i]["deviceType"] = _response["payload"][i]["deviceType"]
+                        .split("_").join(" ")
+                        .replace("IoTSensor","IoT Sensor")
+                        .replace("SensorSite","Sensor Site");
+                _response["payload"][i]["deviceName"] = _response["payload"][i]["deviceName"]
+                        .split("_").join(" ");
+            }
+            ViewManager.render({
+                "availItems": _response["payload"],
+                "pageNum": _response["heading"]["pageNum"],
+                "pageSize": _response["heading"]["pageSize"],
+                "prevDisabled": (_response["heading"]["pageNum"] == 1 ? "disabled" : ""),
+                "prevPointer": (_response["heading"]["pageNum"] == 1 ? "" : "cursor:pointer;"),
+                "prev": _response["heading"]["pageNum"]-1,
+                "nextDisabled": (_response["heading"]["pageSize"] != _response["payload"].length ? "disabled" : ""),
+                "nextPointer": (_response["heading"]["pageSize"] != _response["payload"].length ? "" : "cursor:pointer;"),
+                "next": _response["heading"]["pageNum"]+1,                
+            }, "#genericModal", "templates/grpdata/elems/sensors/add.mst.html");
+            $('#genericModal').modal('show');
+            GrpElementTabler.updAddNewElmtBtnLbl();
+            GrpEditor.keycloak.updateToken(30).success(function () {
+                var query = GrpQueryManager.createGetGrpElemsTableQuery(GrpElementTabler.currentGrpId, -1, false, false, false, false, GrpEditor.keycloak.token);
+                APIClient.executeGetQuery(query, GrpElementTabler.preselectMembers, function(){ console.log("createGetGrpElemsTableQuery error"); });     
+            }).error(function () {
+                var query = GrpQueryManager.createGetGrpElemsTableQuery(GrpElementTabler.currentGrpId, -1, false, false, false, false, Authentication.refreshTokenGetAccessToken());
+                APIClient.executeGetQuery(query, GrpElementTabler.preselectMembers, function(){ console.log("createGetGrpElemsTableQuery error"); });     
+            });
+        },1000);
     }
 
 }

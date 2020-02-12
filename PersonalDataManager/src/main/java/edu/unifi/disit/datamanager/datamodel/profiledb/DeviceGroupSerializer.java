@@ -18,10 +18,16 @@ import java.io.IOException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import edu.unifi.disit.datamanager.service.ICredentialsService;
+import java.util.Locale;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class DeviceGroupSerializer extends StdSerializer<DeviceGroup> {
 
 	private static final long serialVersionUID = 1L;
+        
+        @Autowired
+	ICredentialsService credentialService;
 
 	public DeviceGroupSerializer() {
 		this(null);
@@ -68,12 +74,23 @@ public class DeviceGroupSerializer extends StdSerializer<DeviceGroup> {
 		}
                 if (grp.getSize() > 0) {
                     jgen.writeBooleanField("viewEnabled", true);
-                    jgen.writeStringField("size", String.valueOf(grp.getSize())+" items");
+                    jgen.writeStringField("size", String.valueOf(grp.getSize())+(grp.getSize() > 1 ? " items" : " item"));
 		}
                 else {
                     jgen.writeBooleanField("viewEnabled", false);
                     jgen.writeStringField("ifClearDisabled", "style=cursor:not-allowed; disabled");
                     jgen.writeStringField("size", "Empty");                    
+                }
+                try {
+                    if(credentialService.isRoot(Locale.getDefault()) || credentialService.getLoggedUsername(Locale.getDefault()).equals(grp.getUsername())) {
+                        jgen.writeBooleanField("enableEdit", true);
+                    }
+                    else {
+                        jgen.writeBooleanField("enableEdit", false);
+                    }
+                }
+                catch(Exception e) {
+                    jgen.writeBooleanField("enableEdit", false);
                 }
 
 		jgen.writeEndObject();

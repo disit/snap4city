@@ -42,60 +42,35 @@ var GrpEditor = {
     },
 
     checkParameters: function () {
-        var kpiId = "";
-        var operation = "";
-        var dataType = "";
-        var highLevelType = "";
-
-
+        var id = null;
+        var op = null;
         var decodedParameters = window.location.search;
         while (decodedParameters.indexOf("%") != -1) {
             decodedParameters = decodeURIComponent(decodedParameters);
         };
         GrpEditor.parametersArray = decodedParameters.substring(1).split("&");
-
         if (GrpEditor.parametersArray.length != 0 && GrpEditor.parametersArray[0] != "") {
-
             GrpEditor.withParameters = true;
-
             for (var i = 0; i < GrpEditor.parametersArray.length; i++) {
-                if (GrpEditor.parametersArray[i].indexOf("kpiId") != -1) {
-                    kpiId = GrpEditor.parametersArray[i].substring(GrpEditor.parametersArray[i].indexOf("=") + 1).split(";");
+                if (GrpEditor.parametersArray[i].indexOf("id") != -1) {
+                    id = GrpEditor.parametersArray[i].substring(GrpEditor.parametersArray[i].indexOf("=") + 1).split(";");
                 }
-                if (GrpEditor.parametersArray[i].indexOf("operation") != -1) {
-                    operation = GrpEditor.parametersArray[i].substring(GrpEditor.parametersArray[i].indexOf("=") + 1).split(";");
-                }
-                if (GrpEditor.parametersArray[i].indexOf("dataType") != -1) {
-                    dataType = GrpEditor.parametersArray[i].substring(GrpEditor.parametersArray[i].indexOf("=") + 1).split(";");
-                }
-                if (GrpEditor.parametersArray[i].indexOf("highLevelType") != -1) {
-                    highLevelType = GrpEditor.parametersArray[i].substring(GrpEditor.parametersArray[i].indexOf("=") + 1).split(";");
+                if (GrpEditor.parametersArray[i].indexOf("op") != -1) {
+                    op = GrpEditor.parametersArray[i].substring(GrpEditor.parametersArray[i].indexOf("=") + 1).split(";");
                 }
             }
-
-            if (kpiId == "") {
-                alert("kpiId parameter is null and is mandatory");
-            } else if (operation == "") {
-                alert("operation parameter is null and is mandatory");
-            } else {
-                if (operation == "show") {
-                    KPIDataTabler.showKPIDataModal(kpiId);
-                } else if (operation == "values") {
-                    if (dataType == "") {
-                        alert("dataType parameter is null and is mandatory for 'values' operation");
-                    } else {
-                        KPIValueTabler.renderTable(kpiId, dataType);
-                    }
-                } else if (operation == "metadata") {
-                    KPIDelegationTabler.renderTable(kpiId);
-                } else if (operation == "delegations") {
-                    if (highLevelType == "") {
-                        alert("highLevelType parameter is null and is mandatory for 'delegations' operation");
-                    } else {
-                        KPIDelegationTabler.renderTable(kpiId, highLevelType);
-                    }
-                }
+            if(id != null) {
+                if (op == null) {
+                    DeviceGrpTabler.showGrpDataModal(id);
+                } else if (op == "content") {
+                    GrpElementTabler.renderTable(id);
+                } else if (op == "visib") {
+                    GrpDelegationTabler.renderTable(id);                    
+                }                
             }
+        }
+        else {
+            GrpEditor.withParameters = false;
         }
     }
 }

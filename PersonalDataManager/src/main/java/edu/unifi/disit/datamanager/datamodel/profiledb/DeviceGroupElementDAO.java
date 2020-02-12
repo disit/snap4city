@@ -22,8 +22,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface DeviceGroupElementDAO extends JpaRepository<DeviceGroupElement, Long>, DeviceGroupElementDAOCustom {
 
-    Page<DeviceGroupElement> findByDeviceGroupIdAndDeleteTimeIsNull(Long grpId, Pageable pageable);
+	Page<DeviceGroupElement> findByDeviceGroupIdAndDeleteTimeIsNull(Long grpId, Pageable pageable);
     
-    List<DeviceGroupElement> findByDeviceGroupIdAndDeleteTimeIsNull(Long grpId);
+        List<DeviceGroupElement> findByUsernameAndElementIdAndElementTypeAndDeleteTimeIsNull(String username, String elementId, String elementType);
 
+	List<DeviceGroupElement> findByDeviceGroupIdAndDeleteTimeIsNull(Long grpId);
+
+	List<DeviceGroupElement> findByElementIdAndElementTypeAndDeleteTimeIsNull(String elementId, String elementType);
 }

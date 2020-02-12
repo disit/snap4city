@@ -20,10 +20,14 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import edu.unifi.disit.datamanager.datamodel.AccessRightType;
+import edu.unifi.disit.datamanager.datamodel.ElementType;
 import edu.unifi.disit.datamanager.datamodel.Response;
 import edu.unifi.disit.datamanager.datamodel.ldap.LDAPUserDAO;
 import edu.unifi.disit.datamanager.datamodel.profiledb.Delegation;
 import edu.unifi.disit.datamanager.datamodel.profiledb.DelegationDAO;
+import edu.unifi.disit.datamanager.datamodel.profiledb.DeviceGroupElement;
+import edu.unifi.disit.datamanager.datamodel.profiledb.DeviceGroupElementDAO;
 import edu.unifi.disit.datamanager.datamodel.profiledb.Ownership;
 import edu.unifi.disit.datamanager.datamodel.profiledb.OwnershipDAO;
 import edu.unifi.disit.datamanager.exception.CredentialsException;
@@ -48,110 +52,132 @@ public class AccessServiceImpl implements IAccessService {
 	@Autowired
 	IDelegationService delegationService;
 
+	@Autowired
+	DeviceGroupElementDAO dgeRepo;
+
+	@Autowired
+	ICredentialsService credentialService;
+
 	@Override
-	public Response checkAccessFromApp(String elementID, Locale lang) throws CredentialsException {
-		logger.debug("checkDelegations INVOKED on elementId {} ", elementID);
+	// check if loggedUser can access to elementID. Firstly check if there are any delegation, if not found, check if the loggedUser is ROOTADMIN or is the OWNER
+	public Response checkAccessFromApp(String elementID, String elementType, Locale lang) throws CredentialsException {
+		Response response = checkDelegationAccess(elementID, elementType, null, credentialsService.getLoggedUsername(lang), lang);
 
-		Response response = new Response(false, null);
-
-		// if the AT is from a RootAdmin
-		if (credentialsService.isRoot(lang)) {
-			response.setResult(true);
-			response.setMessage("ROOTADMIN");
-			return response;
-		}
-
-		String loggedUserName = credentialsService.getLoggedUsername(lang);
-
-		// if the AT is from the owner
-		String strippedElementID = elementID;
-		if (elementID.startsWith("http://") || elementID.startsWith("https://")) {// to enable iotdirectory scenario
-			strippedElementID = elementID.substring(elementID.lastIndexOf('/') + 1);
-			logger.debug("strippedElementID is: {}", strippedElementID);
-		}
-
-		List<Ownership> owns = ownershipRepo.findByElementId(strippedElementID);
-		for (Ownership own : owns)
-			if (own.getUsername().equals(loggedUserName)) {
+		// if no delegation has been found, investigate more on the ROOTADMIN role and OWNERSHIP
+		if (!response.getResult()) {
+			// if the AT is from a RootAdmin
+			if (credentialsService.isRoot(lang)) {
 				response.setResult(true);
-				response.setMessage("OWNER");
+				response.setMessage(AccessRightType.ROOTADMIN.toString());
 				return response;
 			}
 
-		List<String> groupnames = lu.getGroupAndOUnames(loggedUserName);
-
-		// check delegation
-		List<Delegation> mydelegations = delegationRepo.getDelegationDelegatorFromAppId(elementID, null, null, false, null);
-
-		for (Delegation d : mydelegations) {
-			if ((d.getUsernameDelegated() != null) && (d.getUsernameDelegated().equals("ANONYMOUS"))) {
-				response.setResult(true);
-				response.setMessage("PUBLIC");
-				return response;
+			// if the AT is from the owner
+			String strippedElementID = elementID;
+			if (elementID.startsWith("http://") || elementID.startsWith("https://")) {// to enable iotdirectory scenario
+				strippedElementID = elementID.substring(elementID.lastIndexOf('/') + 1);
+				logger.debug("strippedElementID is: {}", strippedElementID);
 			}
-
-			if ((d.getUsernameDelegated() != null) && (d.getUsernameDelegated().equalsIgnoreCase(loggedUserName))) {
-				response.setResult(true);
-				response.setMessage("DELEGATED");
-				return response;
-			}
-
-			if ((d.getGroupnameDelegated() != null) && (groupnames.contains(d.getGroupnameDelegated()))) {
-				response.setResult(true);
-				response.setMessage("GROUP-DELEGATED");
-				return response;
-			}
+			List<Ownership> owns = ownershipRepo.findByElementId(strippedElementID);
+			for (Ownership own : owns)
+				if (own.getUsername().equals(credentialsService.getLoggedUsername(lang))) {
+					response.setResult(true);
+					response.setMessage(AccessRightType.OWNER.toString());
+					return response;
+				}
 		}
 
 		return response;
 	}
 
 	@Override
-	// the owner of the elementId, specified in the accesstoken, can check if another user has been delegated to access elementId
-	public Response checkDelegationsFromUsername(String username, String variableName, String elementID, Locale lang) throws CredentialsException {
-		logger.debug("checkDelegations INVOKED on username {} variableName {} elementId {} ", username, variableName, elementID);
+	// backword compatibility
+	// the owner of the elementID, specified in the accesstoken, can check if another user has been delegated to access elementId
+	public Response checkDelegationsFromUsername(String elementID, String elementType, String variableName, String username, Locale lang) throws CredentialsException {
 
-		credentialsService.checkAppIdCredentials(elementID, lang);
+		credentialService.checkAppIdCredentials(elementID, elementType, lang);
+
+		return checkDelegationAccess(elementID, elementType, variableName, username, lang);
+	}
+
+	public Response checkDelegationAccess(String elementID, String elementType, String variableName, String username, Locale lang) throws CredentialsException {
+		logger.debug("checkDelegations INVOKED on elementId {} elementType {} variableName {} username {} ", elementID, elementType, variableName, username);
 
 		Response response = new Response(false, null);
 
-		List<String> groupnames = lu.getGroupAndOUnames(username);
-
-		// check delegation
-		List<Delegation> mydelegations = delegationService.getDelegationsDelegatorFromApp(elementID, variableName, null, false, null, lang);
+		// if there are any delegation to elementID
+		List<Delegation> mydelegations = delegationRepo.getDelegationDelegatorFromAppId(elementID, variableName, null, false, elementType);
 
 		for (Delegation d : mydelegations) {
 			if ((d.getUsernameDelegated() != null) && (d.getUsernameDelegated().equals("ANONYMOUS"))) {
 				response.setResult(true);
-				response.setMessage("PUBLIC");
+				response.setMessage(AccessRightType.PUBLIC.toString());
 				return response;
 			}
 
 			if ((d.getUsernameDelegated() != null) && (d.getUsernameDelegated().equalsIgnoreCase(username))) {
 				response.setResult(true);
-				response.setMessage("DELEGATED");
+				response.setMessage(AccessRightType.DELEGATED.toString());
 				return response;
 			}
 
-			if (groupnames.contains(d.getGroupnameDelegated())) {
+			List<String> groupnames = lu.getGroupAndOUnames(username);
+			if ((d.getGroupnameDelegated() != null) && (groupnames.contains(d.getGroupnameDelegated()))) {
 				response.setResult(true);
-				response.setMessage("GROUP-DELEGATED");
+				response.setMessage(AccessRightType.GROUP_DELEGATED.toString());// delegation to the organization the user belong
 				return response;
 			}
 		}
 
+		// if the elementId belong to any groups that got some delegation
+		List<DeviceGroupElement> dges = dgeRepo.findByElementIdAndElementTypeAndDeleteTimeIsNull(elementID, elementType);
+
+		for (DeviceGroupElement dge : dges) {
+			if (!delegationRepo.getPublicDelegationFromAppId(dge.getDeviceGroupId().toString(), variableName, null, false, ElementType.MYGROUP.toString()).isEmpty()) {
+				response.setMessage(AccessRightType.MYGROUP_PUBLIC.toString());
+				response.setResult(true);
+				return response;
+			}
+
+			List<Delegation> mygroupdelegations = delegationRepo.getDelegationDelegatorFromAppId(dge.getDeviceGroupId().toString(), null, null, false, ElementType.MYGROUP.toString());
+			for (Delegation d : mygroupdelegations) {
+				if ((d.getUsernameDelegated() != null) && (d.getUsernameDelegated().equalsIgnoreCase(username))) {
+					response.setResult(true);
+					response.setMessage(AccessRightType.MYGROUP_DELEGATED.toString());
+					return response;
+				}
+				//
+				// if ((d.getGroupnameDelegated() != null) && (groupnames.contains(d.getGroupnameDelegated()))) {
+				// response.setResult(true);
+				// response.setMessage(AccessRightType.GROUP_DELEGATED.toString());// mygroup delegation to the organization the user belong
+				// return response;
+				// }
+			}
+		}
 		return response;
 	}
 
 	@Override
 	public Response checkPublic(String elementId, String elementType, String variableName, Locale lang) {
-		logger.debug("checkPublic INVOKED on elemntId {} variableName {} ", elementId, variableName);
+		logger.debug("checkPublic INVOKED on elemntId {} elementType {} variableName {} ", elementId, elementType, variableName);
 
 		Response response = new Response(false, null);
 
+		// check if this elementId has a PUBLIC delegation
 		if (!delegationRepo.getPublicDelegationFromAppId(elementId, variableName, null, false, elementType).isEmpty()) {
-			response.setMessage("PUBLIC");
+			response.setMessage(AccessRightType.PUBLIC.toString());
 			response.setResult(true);
+			return response;
+		}
+
+		// check if the groups belonging the elementId has a PUBLIC delegation
+		List<DeviceGroupElement> dges = dgeRepo.findByElementIdAndElementTypeAndDeleteTimeIsNull(elementId, elementType);
+		for (DeviceGroupElement dge : dges) {
+			if (!delegationRepo.getPublicDelegationFromAppId(dge.getDeviceGroupId().toString(), variableName, null, false, "MyGroup").isEmpty()) {
+				response.setMessage(AccessRightType.PUBLIC.toString());
+				response.setResult(true);
+				return response;
+			}
 		}
 
 		return response;

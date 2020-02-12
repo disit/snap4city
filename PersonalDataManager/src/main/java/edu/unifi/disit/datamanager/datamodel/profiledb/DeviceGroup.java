@@ -24,10 +24,7 @@ import javax.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import edu.unifi.disit.datamanager.service.DeviceGroupElementServiceImpl;
-import edu.unifi.disit.datamanager.service.IDeviceGroupElementService;
 import org.hibernate.annotations.Formula;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 
 @JsonSerialize(using = DeviceGroupSerializer.class)
@@ -71,8 +68,11 @@ public class DeviceGroup {
     @Column(name = "organizations")
     private String organizations;
     
-    @Formula("(select count(*) from devicegroupelement e left join kpidata kpi on e.elementId = kpi.id and e.elementType = 'MyKPI' left join ownership o on e.elementId = o.elementId and e.elementType <> 'MyKPI' where e.device_group_id = id and e.delete_time is null and kpi.delete_time is null and o.deleted is null)")
+    @Formula("(select count(*) from devicegroupelement e left join kpidata kpi on e.elementId = kpi.id and e.elementType = 'MyKPI' left join ownership o on e.elementId = o.elementId and e.elementType <> 'MyKPI' where e.elementType <> 'Sensor' and e.device_group_id = id and e.delete_time is null and kpi.delete_time is null and o.deleted is null)")
     private int size;
+    
+    @Formula("(select group_concat(e.elementId) from devicegroupelement e where e.device_group_id = id and e.delete_time is null and e.elementType = 'Sensor' group by null)")
+    private String sensors;
 
     // default with nothing
     public DeviceGroup() {
@@ -179,6 +179,14 @@ public class DeviceGroup {
 
     public void setSize(int size) {
         this.size = size;
+    }
+
+    public String getSensors() {
+        return sensors;
+    }
+
+    public void setSensors(String sensors) {
+        this.sensors = sensors;
     }
     
     @Override

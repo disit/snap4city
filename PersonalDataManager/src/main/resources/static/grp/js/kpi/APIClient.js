@@ -18,6 +18,24 @@ var APIClient = {
             }
         });
     },
+    
+    executeAsyncGetQuery: function (query, successCallback, errorCallback) {        
+        $.ajax({
+            method: "GET",
+            url: encodeURI(APIClient.url + APIClient.suffix + query),
+            async: true,
+            success: function (_response) {
+                if (successCallback != null) {
+                    successCallback(_response);
+                }
+            },
+            error: function (_error) {
+                if (errorCallback != null) {
+                    errorCallback(_error);
+                }
+            }
+        });
+    },
 
     executePostQuery: function (_query, _jsonData, successCallback, errorCallback) {
         $.ajax({

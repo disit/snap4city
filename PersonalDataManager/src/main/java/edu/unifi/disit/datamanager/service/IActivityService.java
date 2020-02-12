@@ -23,7 +23,7 @@ import edu.unifi.disit.datamanager.exception.CredentialsException;
 
 public interface IActivityService {
 
-	List<Activity> getActivities(String appId, Boolean delegated, Locale lang) throws CredentialsException;
+	List<Activity> getActivities(String appId, String elementType, Boolean delegated, Locale lang) throws CredentialsException;
 
 	void saveActivityFromApp(String requestOwner, List<Data> datas, String sourceRequest, String variableName, String motivation, ActivityAccessType accessType, ActivityDomainType domain);
 

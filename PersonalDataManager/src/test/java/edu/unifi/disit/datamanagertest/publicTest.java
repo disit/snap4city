@@ -393,6 +393,69 @@ public class publicTest {
 
 	}
 
+	@Test
+	public void public_mygroups_ok1() throws ClientProtocolException, IOException {
+		// Given
+		HttpUriRequest request = new HttpGet(
+				"http://localhost:8080/datamanager/api/v1/public/access/check?elementID=17055859&elementType=MyKPI&sourceRequest=test");
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		ObjectMapper mapper = new ObjectMapper();
+		Response result = mapper.readValue(EntityUtils.toString(httpResponse.getEntity()), new TypeReference<Response>() {
+		});
+
+		assertThat(
+				httpResponse.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.OK.value()));
+
+		assertEquals(true, result.getResult());
+	}
+
+	@Test
+	public void public_mygroups_ko1() throws ClientProtocolException, IOException {
+		// Given
+		HttpUriRequest request = new HttpGet(
+				"http://localhost:8080/datamanager/api/v1/public/access/check?elementID=17055860&elementType=MyKPI&sourceRequest=test");
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		ObjectMapper mapper = new ObjectMapper();
+		Response result = mapper.readValue(EntityUtils.toString(httpResponse.getEntity()), new TypeReference<Response>() {
+		});
+
+		assertThat(
+				httpResponse.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.OK.value()));
+
+		assertEquals(false, result.getResult());
+	}
+
+	@Test
+	public void public_mygroups_ko2() throws ClientProtocolException, IOException {
+		// Given
+		HttpUriRequest request = new HttpGet(
+				"http://localhost:8080/datamanager/api/v1/public/access/check?elementID=Firenze%3Abroker%3Adevice1&elementType=IOTID&sourceRequest=test");
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		ObjectMapper mapper = new ObjectMapper();
+		Response result = mapper.readValue(EntityUtils.toString(httpResponse.getEntity()), new TypeReference<Response>() {
+		});
+
+		assertThat(
+				httpResponse.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.OK.value()));
+
+		assertEquals(false, result.getResult());
+	}
+
 	// private HttpEntity createEntity(Delegation delegation) throws JsonGenerationException, JsonMappingException, IOException {
 	// ObjectMapper mapper = new ObjectMapper();
 	// ByteArrayOutputStream baos = new ByteArrayOutputStream();

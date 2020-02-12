@@ -41,7 +41,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import edu.unifi.disit.datamanager.datamodel.ActivityAccessType;
+import edu.unifi.disit.datamanager.datamodel.ElementType;
 import edu.unifi.disit.datamanager.datamodel.KPIActivityDomainType;
+import edu.unifi.disit.datamanager.datamodel.ldap.LDAPUserDAO;
 import edu.unifi.disit.datamanager.datamodel.profiledb.DeviceGroup;
 import edu.unifi.disit.datamanager.exception.CredentialsException;
 import edu.unifi.disit.datamanager.exception.DelegationNotValidException;
@@ -50,6 +52,7 @@ import edu.unifi.disit.datamanager.service.ICredentialsService;
 import edu.unifi.disit.datamanager.service.IDelegationService;
 import edu.unifi.disit.datamanager.service.IDeviceGroupService;
 import edu.unifi.disit.datamanager.service.IKPIActivityService;
+import java.io.IOException;
 
 @RestController
 public class DeviceGroupController {
@@ -70,6 +73,9 @@ public class DeviceGroupController {
 
 	@Autowired
 	IAccessService accessService;
+        
+        @Autowired
+        LDAPUserDAO lu;
 
 	// -------------------POST New KPI Data ------------------------------------
 	@PostMapping("/api/v1/devicegroup")
@@ -120,8 +126,8 @@ public class DeviceGroupController {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		}
 	}
-        
-        // -------------------GET ALL KPI Data Pageable -----------------------------
+
+	// -------------------GET ALL KPI Data Pageable -----------------------------
 	@GetMapping("/api/v1/devicegroup")
 	public ResponseEntity<Object> getOwnDeviceGroupsV1Pageable(@RequestParam(value = "sourceRequest") String sourceRequest,
 			@RequestParam(value = "sourceId", required = false) String sourceId,
@@ -249,15 +255,25 @@ public class DeviceGroupController {
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
+		} catch (IOException d) {
+			logger.warn("Probable connection error to sensors API of dashboardSmartCity", d);
+
+			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
+					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.GROUP,
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
+					d.getMessage(), d, request.getRemoteAddr());
+
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((Object) d.getMessage());
 		}
 
 	}
-        
-        // -------------------DEPRECATED ------------------------------------
+
+	// -------------------DEPRECATED ------------------------------------
 	// -------------------GET PUBLIC KPI Data Pageable -----------------------------
 	/**
-	    * @deprecated (when, Modificata la semantica del public, refactoring advice...)
-	    */
+	 * @deprecated (when, Modificata la semantica del public, refactoring advice...)
+	 */
 	@Deprecated
 	@GetMapping("/api/v1/devicegroup/public")
 	public ResponseEntity<Object> getDeviceGroupsPublicV1Pageable(
@@ -345,6 +361,16 @@ public class DeviceGroupController {
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
+		} catch (IOException d) {
+			logger.warn("Probable connection error to sensors API of dashboardSmartCity", d);
+
+			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
+					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.GROUP,
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
+					d.getMessage(), d, request.getRemoteAddr());
+
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((Object) d.getMessage());
 		}
 
 	}
@@ -430,6 +456,16 @@ public class DeviceGroupController {
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
+		} catch (IOException d) {
+			logger.warn("Probable connection error to sensors API of dashboardSmartCity", d);
+
+			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
+					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.GROUP,
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
+					d.getMessage(), d, request.getRemoteAddr());
+
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((Object) d.getMessage());
 		}
 
 	}
@@ -503,7 +539,27 @@ public class DeviceGroupController {
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
-		}
+		} catch (IOException d) {
+			logger.warn("Probable connection error to sensors API of dashboardSmartCity", d);
+
+			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
+					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.GROUP,
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
+					d.getMessage(), d, request.getRemoteAddr());
+
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((Object) d.getMessage());
+		} catch (CredentialsException d) {
+			logger.warn("Rights exception", d);
+
+			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
+					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.GROUP,
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
+					d.getMessage(), d, request.getRemoteAddr());
+
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage()); 
+                }
 
 	}
 
@@ -585,11 +641,21 @@ public class DeviceGroupController {
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
+		} catch (IOException d) {
+			logger.warn("Probable connection error to sensors API of dashboardSmartCity", d);
+
+			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
+					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.GROUP,
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
+					d.getMessage(), d, request.getRemoteAddr());
+
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((Object) d.getMessage());
 		}
 
 	}
-        
-        // -------------------PATCH KPI Data From ID --------------------------------
+
+	// -------------------PATCH KPI Data From ID --------------------------------
 	@PatchMapping("/api/v1/devicegroup/{id}")
 	public ResponseEntity<Object> patchDeviceGroupV1ById(@PathVariable("id") Long id,
 			@RequestBody Map<String, Object> fields, @RequestParam(value = "sourceRequest") String sourceRequest,
@@ -600,7 +666,12 @@ public class DeviceGroupController {
 		logger.info("Requested patchDeviceGroupV1ById id {} sourceRequest {}", id, sourceRequest);
 
 		try {
-			DeviceGroup oldGrpData = deviceGroupService.getDeviceGroupById(id, lang, false);
+                    
+                        if(fields.containsKey("username") && !lu.usernameExist(fields.get("username").toString())) {
+                            throw new DelegationNotValidException(fields.get("username").toString()+" is NOT a valid username!");
+                        }
+                                            
+                        DeviceGroup oldGrpData = deviceGroupService.getDeviceGroupById(id, lang, false);
 			if (oldGrpData == null) {
 				logger.info("No data found");
 
@@ -621,9 +692,9 @@ public class DeviceGroupController {
 			fields.remove("id");
 			// Map key is field name, v is value
 
-                        Date date = new Date();				
-                        fields.put("updateTime", date);
-			
+			Date date = new Date();
+			fields.put("updateTime", date);
+
 			fields.forEach((k, v) -> {
 				// use reflection to get field k on manager and set it to value k
 				Field field = ReflectionUtils.findField(DeviceGroup.class, k);
@@ -686,10 +757,20 @@ public class DeviceGroupController {
 					"Problem with public or private ownership", d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
+		} catch (IOException d) {
+			logger.warn("Probable connection error to sensors API of dashboardSmartCity", d);
+
+			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
+					sourceRequest, null, ActivityAccessType.WRITE, KPIActivityDomainType.GROUP,
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
+					d.getMessage(), d, request.getRemoteAddr());
+
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((Object) d.getMessage());
 		}
 	}
 
-        // -------------------GET KPI Data From ID ------------------------------------
+	// -------------------GET KPI Data From ID ------------------------------------
 	@GetMapping("/api/v1/devicegroup/{id}")
 	public ResponseEntity<Object> getGrpDataV1ById(@PathVariable("id") Long id,
 			@RequestParam(value = "sourceRequest") String sourceRequest,
@@ -714,7 +795,7 @@ public class DeviceGroupController {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else {
 				if (!kpiData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
-						&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiData.getId()), lang).getResult())) {
+						&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiData.getId()), ElementType.MYGROUP.toString(), lang).getResult())) {
 					throw new CredentialsException();
 				}
 
@@ -735,10 +816,20 @@ public class DeviceGroupController {
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
+		} catch (IOException d) {
+			logger.warn("Probable connection error to sensors API of dashboardSmartCity", d);
+
+			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
+					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.GROUP,
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
+					d.getMessage(), d, request.getRemoteAddr());
+
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((Object) d.getMessage());
 		}
 	}
-        
-        // -------------------DELETE KPI Data From ID --------------------------------
+
+	// -------------------DELETE KPI Data From ID --------------------------------
 	@DeleteMapping("/api/v1/devicegroup/{id}")
 	public ResponseEntity<Object> deleteDeviceGroupV1ById(@PathVariable("id") Long id,
 			@RequestParam(value = "sourceRequest") String sourceRequest,
@@ -781,10 +872,20 @@ public class DeviceGroupController {
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
+		} catch (IOException d) {
+			logger.warn("Probable connection error to sensors API of dashboardSmartCity", d);
+
+			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
+					sourceRequest, null, ActivityAccessType.DELETE, KPIActivityDomainType.GROUP,
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
+					d.getMessage(), d, request.getRemoteAddr());
+
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((Object) d.getMessage());
 		}
 	}
-        
-        @GetMapping("/api/v1/public/devicegroup/{id}")
+
+	@GetMapping("/api/v1/public/devicegroup/{id}")
 	public ResponseEntity<Object> getPublicDeviceGroupV1ById(@PathVariable("id") Long id,
 			@RequestParam(value = "sourceRequest") String sourceRequest,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
@@ -827,7 +928,17 @@ public class DeviceGroupController {
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
+		} catch (IOException d) {
+			logger.warn("Probable connection error to sensors API of dashboardSmartCity", d);
+
+			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
+					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.GROUP,
+					request.getRequestURI() + "?"
+							+ request.getQueryString(),
+					d.getMessage(), d, request.getRemoteAddr());
+
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((Object) d.getMessage());
 		}
 	}
-           
+
 }

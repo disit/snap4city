@@ -75,7 +75,7 @@ public class KPIActivityController {
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
-					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), lang).getResult())) {
+					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), kpiData.getHighLevelType(), lang).getResult())) {
 				throw new CredentialsException();
 			}
 
@@ -151,7 +151,7 @@ public class KPIActivityController {
 			@RequestParam(value = "last", required = false, defaultValue = "0") Integer last,
 			@RequestParam(value = "sourceRequestFilter", required = false, defaultValue = "") String sourceRequestFilter,
 			@RequestParam(value = "accessTypeFilter", required = false, defaultValue = "") String accessType, // READ, WRITE,
-																										// DELETE
+			// DELETE
 			HttpServletRequest request) {
 
 		logger.info(
@@ -164,7 +164,7 @@ public class KPIActivityController {
 				logger.warn("Wrong KPI Data");
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
-					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), lang).getResult())) {
+					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), kpiData.getHighLevelType(), lang).getResult())) {
 				throw new CredentialsException();
 			}
 

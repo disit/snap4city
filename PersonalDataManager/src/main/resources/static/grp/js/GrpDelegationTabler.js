@@ -82,10 +82,9 @@ var GrpDelegationTabler = {
 
         $('#inputFilterKPIDelegation').val(GrpDelegationFilter.currentSearchKey);
         $('#selectSizeKPIDelegation').val(GrpDelegationPager.currentSize);
-
-        if (GrpEditor.withParameters) {
-            $("#backButtonToMyKPIDataList").hide();
-        }
+        
+        $('#simplyclose').click();
+        
     },
 
     editKPIDelegationModal: function (_kpiId, _id) {

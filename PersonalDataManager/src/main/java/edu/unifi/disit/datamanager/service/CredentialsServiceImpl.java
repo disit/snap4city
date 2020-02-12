@@ -38,17 +38,21 @@ public class CredentialsServiceImpl implements ICredentialsService {
 
 	@Autowired
 	OwnershipDAO ownershipRepo;
-	
+
 	@Autowired
 	LDAPUserDAO ldapRepository;
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void checkAppIdCredentials(String appId, Locale lang) throws  CredentialsException {
+	public void checkAppIdCredentials(String appId, String elementType, Locale lang) throws CredentialsException {
 		List<String> roles = (List<String>) SecurityContextHolder.getContext().getAuthentication().getCredentials();
 		String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		// assure the username is included in the list of the ownership of this appid
-		List<Ownership> owns = ownershipRepo.findByElementId(appId);
+		List<Ownership> owns = null;
+		if (elementType == null)// elementType can be null for backword compatibility
+			owns = ownershipRepo.findByElementId(appId);
+		else
+			owns = ownershipRepo.findByElementIdAndElementType(appId, elementType);
 		boolean found = false;
 		for (Ownership own : owns)
 			if (own.getUsername().equals(username))
@@ -59,7 +63,7 @@ public class CredentialsServiceImpl implements ICredentialsService {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void checkUsernameCredentials(String username, Locale lang) throws  CredentialsException {
+	public void checkUsernameCredentials(String username, Locale lang) throws CredentialsException {
 		List<String> roles = (List<String>) SecurityContextHolder.getContext().getAuthentication().getCredentials();
 		String usernameSC = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		// assure the username is the same than the specified one
@@ -69,7 +73,7 @@ public class CredentialsServiceImpl implements ICredentialsService {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void checkRootCredentials(Locale lang) throws  CredentialsException {
+	public void checkRootCredentials(Locale lang) throws CredentialsException {
 		List<String> roles = (List<String>) SecurityContextHolder.getContext().getAuthentication().getCredentials();
 		// assure role is RootAdmin
 		if (!roles.contains(UserRolesType.RootAdmin.toString()))
@@ -88,7 +92,7 @@ public class CredentialsServiceImpl implements ICredentialsService {
 
 		return (roles.contains(UserRolesType.RootAdmin.toString()));
 	}
-	
+
 	@Override
 	public String getOrganization(Locale lang) {
 		return ldapRepository.getOUnames(getLoggedUsername(new Locale("en"))).toString();

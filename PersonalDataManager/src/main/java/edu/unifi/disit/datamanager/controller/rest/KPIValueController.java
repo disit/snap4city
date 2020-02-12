@@ -101,7 +101,7 @@ public class KPIValueController {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername()
 					.equalsIgnoreCase(credentialService.getLoggedUsername(lang))
-					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), lang).getResult())) {
+					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), kpiData.getHighLevelType(), lang).getResult())) {
 				throw new CredentialsException();
 			}
 
@@ -199,8 +199,8 @@ public class KPIValueController {
 
 	// -------------------DEPRECATED ------------------------------------
 	/**
-	    * @deprecated (when, Cambiato il formato dell'url, refactoring advice...)
-	    */
+	 * @deprecated (when, Cambiato il formato dell'url, refactoring advice...)
+	 */
 	@Deprecated
 	@PostMapping("/api/v1/kpivalue/save")
 	public ResponseEntity<Object> saveKPIValueV1(@RequestBody KPIValue kpiValue,
@@ -224,7 +224,7 @@ public class KPIValueController {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername()
 					.equalsIgnoreCase(credentialService.getLoggedUsername(lang))
-					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiValue.getKpiId()), lang).getResult())) {
+					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiValue.getKpiId()), kpiData.getHighLevelType(), lang).getResult())) {
 				throw new CredentialsException();
 			}
 
@@ -304,7 +304,7 @@ public class KPIValueController {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername()
 					.equalsIgnoreCase(credentialService.getLoggedUsername(lang))
-					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), lang).getResult())) {
+					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), kpiData.getHighLevelType(), lang).getResult())) {
 				throw new CredentialsException();
 			}
 
@@ -385,7 +385,7 @@ public class KPIValueController {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername()
 					.equalsIgnoreCase(credentialService.getLoggedUsername(lang))
-					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), lang).getResult())) {
+					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), kpiData.getHighLevelType(), lang).getResult())) {
 				throw new CredentialsException();
 			}
 
@@ -441,7 +441,7 @@ public class KPIValueController {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername()
 					.equalsIgnoreCase(credentialService.getLoggedUsername(lang))
-					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), lang).getResult())) {
+					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), kpiData.getHighLevelType(), lang).getResult())) {
 				throw new CredentialsException();
 			}
 
@@ -534,7 +534,7 @@ public class KPIValueController {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername()
 					.equalsIgnoreCase(credentialService.getLoggedUsername(lang))
-					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), lang).getResult())) {
+					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), kpiData.getHighLevelType(), lang).getResult())) {
 				throw new CredentialsException();
 			}
 
@@ -640,7 +640,7 @@ public class KPIValueController {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername()
 					.equalsIgnoreCase(credentialService.getLoggedUsername(lang))
-					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), lang).getResult())) {
+					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), kpiData.getHighLevelType(), lang).getResult())) {
 				throw new CredentialsException();
 			}
 
@@ -729,7 +729,7 @@ public class KPIValueController {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername()
 					.equalsIgnoreCase(credentialService.getLoggedUsername(lang))
-					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), lang).getResult())) {
+					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), kpiData.getHighLevelType(), lang).getResult())) {
 				throw new CredentialsException();
 			}
 
@@ -996,7 +996,7 @@ public class KPIValueController {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername()
 					.equalsIgnoreCase(credentialService.getLoggedUsername(lang))
-					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), lang).getResult())) {
+					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), kpiData.getHighLevelType(), lang).getResult())) {
 				throw new CredentialsException();
 			}
 			List<Date> listKpiValueDate = null;

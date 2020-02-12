@@ -23,17 +23,17 @@ import edu.unifi.disit.datamanager.exception.CredentialsException;
 
 public interface IDataService {
 
-	List<Data> getDataFromApp(String appId, Boolean delegated, String variableName, String motivation, Date from, Date to, Integer first, Integer last, Boolean anonymous, String appOwner, Locale lang)
-			throws  DelegationNotFoundException, DataNotValidException, CredentialsException;
+	List<Data> getDataFromApp(String appId, String elementType, Boolean delegated, String variableName, String motivation, Date from, Date to, Integer first, Integer last, Boolean anonymous, String appOwner, Locale lang)
+			throws DelegationNotFoundException, DataNotValidException, CredentialsException;
 
 	List<Data> getDataFromUser(String username, Boolean delegated, String variableName, String motivation, Date from, Date to, Integer first, Integer last, Boolean anonymous, Locale lang)
-			throws  DataNotValidException, DelegationNotFoundException, CredentialsException;
+			throws DataNotValidException, DelegationNotFoundException, CredentialsException;
 
-	Data postDataFromApp(String appId, Data data, Locale lang) throws DataNotValidException,  CredentialsException;
+	Data postDataFromApp(String appId, String elementType, Data data, Locale lang) throws DataNotValidException, CredentialsException;
 
 	Data postDataFromUser(String username, Data data, Locale lang) throws DataNotValidException, CredentialsException;
 
-	List<Data> getAllData(Boolean last, Locale lang) throws  CredentialsException;
+	List<Data> getAllData(Boolean last, Locale lang) throws CredentialsException;
 
 	void deleteDataFromUser(String username, Long dataId, Locale lang) throws CredentialsException, DataNotValidException;
 

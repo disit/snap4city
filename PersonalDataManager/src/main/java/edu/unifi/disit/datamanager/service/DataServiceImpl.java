@@ -61,12 +61,12 @@ public class DataServiceImpl implements IDataService {
 	private EntityManager entityManager;
 
 	@Override
-	public List<Data> getDataFromApp(String appId, Boolean delegated, String variableName, String motivation, Date from, Date to, Integer first, Integer last, Boolean anonymous, String appOwner, Locale lang)
-			throws  DelegationNotFoundException, DataNotValidException, CredentialsException {
+	public List<Data> getDataFromApp(String appId, String elementType, Boolean delegated, String variableName, String motivation, Date from, Date to, Integer first, Integer last, Boolean anonymous, String appOwner, Locale lang)
+			throws DelegationNotFoundException, DataNotValidException, CredentialsException {
 		logger.debug("getDataFromApp INVOKED on appId {}, delegated {}, variablename {}, motivation {}, from {}, to {}, first {}, last {}, anonymous {}, appOwner {}", appId, delegated, variableName, motivation, from, to, first, last,
 				anonymous, appOwner);
 
-		credentialsService.checkAppIdCredentials(appId, lang);// enforcement credentials
+		credentialsService.checkAppIdCredentials(appId, elementType, lang);// enforcement credentials
 
 		if ((first != 0) && (last != 0))
 			throw new DataNotValidException(messages.getMessage("getdata.ko.firstandlastspecified", null, lang));
@@ -102,10 +102,10 @@ public class DataServiceImpl implements IDataService {
 
 	@Override
 	// similar to below
-	public Data postDataFromApp(String appId, Data data, Locale lang) throws DataNotValidException,  CredentialsException {
+	public Data postDataFromApp(String appId, String elementType, Data data, Locale lang) throws DataNotValidException, CredentialsException {
 		logger.debug("postData from app {} INVOKED on {}", appId, data);
 
-		credentialsService.checkAppIdCredentials(appId, lang);// enforcement credentials
+		credentialsService.checkAppIdCredentials(appId, elementType, lang);// enforcement credentials
 
 		// check if id is specified
 		if (data.getId() != null)
@@ -176,7 +176,7 @@ public class DataServiceImpl implements IDataService {
 
 	@Override
 	public List<Data> getDataFromUser(String username, Boolean delegated, String variableName, String motivation, Date from, Date to, Integer first, Integer last, Boolean anonymous, Locale lang)
-			throws  DataNotValidException, DelegationNotFoundException, CredentialsException {
+			throws DataNotValidException, DelegationNotFoundException, CredentialsException {
 		logger.debug("getDataFromUser INVOKED on username {}, delegated {}, variablename {}, motivation {}, from {}, to {}, first {}, last {}, anonymous {}", username, delegated, variableName, motivation, from, to, first, last, anonymous);
 
 		credentialsService.checkUsernameCredentials(username, lang);// enforcement credentials
@@ -202,7 +202,7 @@ public class DataServiceImpl implements IDataService {
 	}
 
 	@Override
-	public List<Data> getAllData(Boolean last, Locale lang) throws  CredentialsException {
+	public List<Data> getAllData(Boolean last, Locale lang) throws CredentialsException {
 		logger.debug("getAllData INVOKED on last {}", last);
 
 		credentialsService.checkRootCredentials(lang);// enforcement credentials

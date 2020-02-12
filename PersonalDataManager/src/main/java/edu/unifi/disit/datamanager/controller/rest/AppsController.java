@@ -39,6 +39,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import edu.unifi.disit.datamanager.datamodel.ActivityAccessType;
 import edu.unifi.disit.datamanager.datamodel.ActivityDomainType;
+import edu.unifi.disit.datamanager.datamodel.ElementType;
 import edu.unifi.disit.datamanager.datamodel.Response;
 import edu.unifi.disit.datamanager.datamodel.profiledb.Data;
 import edu.unifi.disit.datamanager.datamodel.profiledb.Delegation;
@@ -106,7 +107,7 @@ public class AppsController {
 		}
 
 		try {
-			List<Data> datas = dataService.getDataFromApp(appId, delegated, variableName, motivation, from, to, first, last, anonymous, appOwner, lang);
+			List<Data> datas = dataService.getDataFromApp(appId, ElementType.APPID.toString(), delegated, variableName, motivation, from, to, first, last, anonymous, appOwner, lang);
 
 			activityService.saveActivityFromApp(appId, datas, sourceRequest, variableName, motivation, ActivityAccessType.READ, ActivityDomainType.DATA);
 
@@ -155,7 +156,7 @@ public class AppsController {
 		}
 
 		try {
-			Data newData = dataService.postDataFromApp(appId, data, lang);
+			Data newData = dataService.postDataFromApp(appId, ElementType.APPID.toString(), data, lang);
 
 			activityService.saveActivityFromApp(appId, null, sourceRequest, data.getVariableName(), data.getMotivation(), ActivityAccessType.WRITE, ActivityDomainType.DATA);
 
@@ -180,7 +181,8 @@ public class AppsController {
 	}
 
 	// -------------------GET Delegation for app (delegator)---------------------------------------------
-	// V1 does not return Delegation with UsernameDelegated==null
+	// V1 does not return Delegation with UsernameDelegated==null, elementType is not required
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	@GetMapping(value = "/api/v1/apps/{appId}/delegator")
 	public ResponseEntity<Object> getDelegatorV1(@PathVariable("appId") String appId,
@@ -206,7 +208,8 @@ public class AppsController {
 		return toreturn;
 	}
 
-	// V2 return also Delegation with UsernameDelegated==null
+	// V2 return also Delegation with UsernameDelegated==null, elementType is not required
+	@Deprecated
 	@GetMapping(value = "/api/v2/apps/{appId}/delegator")
 	public ResponseEntity<Object> getDelegatorV2(@PathVariable("appId") String appId,
 			@RequestParam(value = "variableName", required = false) String variableName,
@@ -219,6 +222,22 @@ public class AppsController {
 
 		logger.info("Requested getDelegatorV2 for appid {} deleted {} lang {}", appId, deleted, lang);
 
+		return getDelegatorV3(appId, variableName, motivation, sourceRequest, elementType, deleted, lang, request);
+	}
+
+	// V3 return also Delegation with UsernameDelegated==null, elementType is required
+	@GetMapping(value = "/api/v3/apps/{appId}/delegator")
+	public ResponseEntity<Object> getDelegatorV3(@PathVariable("appId") String appId,
+			@RequestParam(value = "variableName", required = false) String variableName,
+			@RequestParam(value = "motivation", required = false) String motivation,
+			@RequestParam("sourceRequest") String sourceRequest,
+			@RequestParam(value = "elementType") String elementType,
+			@RequestParam(value = "deleted", required = false, defaultValue = "false") Boolean deleted,
+			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
+			HttpServletRequest request) throws UnsupportedEncodingException {
+
+		logger.info("Requested getDelegatorV3 for appid {} elementType {} deleted {} lang {}", appId, elementType, deleted, lang);
+
 		if (variableName != null)
 			logger.info("VariableName specified {}", variableName);
 		if (motivation != null)
@@ -230,8 +249,6 @@ public class AppsController {
 			appId = URLDecoder.decode(appId, StandardCharsets.UTF_8.toString());
 			logger.info("appid decoded to {}", appId);
 		}
-		if (elementType != null)
-			logger.info("elementType specified {}", elementType);
 
 		try {
 			List<Delegation> delegations = delegationService.getDelegationsDelegatorFromApp(appId, variableName, motivation, deleted, elementType, lang);
@@ -258,7 +275,8 @@ public class AppsController {
 	}
 
 	// -------------------GET Delegation for app (delegated)---------------------------------------------
-	// V1 does not return Delegation with UsernameDelegated==null
+	// V1 does not return Delegation with UsernameDelegated==null, elementType is not required
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	@GetMapping(value = "/api/v1/apps/{appId}/delegated")
 	public ResponseEntity<Object> getDelegatedV1(@PathVariable("appId") String appId,
@@ -286,7 +304,8 @@ public class AppsController {
 		return toreturn;
 	}
 
-	// V2 return also Delegation with UsernameDelegated==null
+	// V2 return also Delegation with UsernameDelegated==null, elementType is not required
+	@Deprecated
 	@GetMapping(value = "/api/v2/apps/{appId}/delegated")
 	public ResponseEntity<Object> getDelegatedV2(@PathVariable("appId") String appId,
 			@RequestParam(value = "variableName", required = false) String variableName,
@@ -300,6 +319,24 @@ public class AppsController {
 			HttpServletRequest request) throws UnsupportedEncodingException {
 
 		logger.info("Requested getDelegatedV2 for appid {} deleted {} lang {}", appId, deleted, lang);
+
+		return getDelegatedV3(appId, variableName, motivation, sourceRequest, elementType, deleted, lang, appOwner, groupname, request);
+	}
+
+	// V3 return also Delegation with UsernameDelegated==null, elementType is required
+	@GetMapping(value = "/api/v3/apps/{appId}/delegated")
+	public ResponseEntity<Object> getDelegatedV3(@PathVariable("appId") String appId,
+			@RequestParam(value = "variableName", required = false) String variableName,
+			@RequestParam(value = "motivation", required = false) String motivation,
+			@RequestParam("sourceRequest") String sourceRequest,
+			@RequestParam(value = "elementType") String elementType,
+			@RequestParam(value = "deleted", required = false, defaultValue = "false") Boolean deleted,
+			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
+			@RequestParam(value = "appOwner", required = false) String appOwner,
+			@RequestParam(value = "groupname", required = false) String groupname,
+			HttpServletRequest request) throws UnsupportedEncodingException {
+
+		logger.info("Requested getDelegatedV3 for appid {} elementType {} deleted {} lang {} ", appId, elementType, deleted, lang);
 
 		if (variableName != null)
 			logger.info("VariableName specified {}", variableName);
@@ -318,8 +355,6 @@ public class AppsController {
 			groupname = URLDecoder.decode(groupname, StandardCharsets.UTF_8.toString());
 			logger.info("groupname decoded to {}", groupname);
 		}
-		if (elementType != null)
-			logger.info("elementType specified {}", elementType);
 
 		try {
 			List<Delegation> delegations = delegationService.getDelegationsDelegatedFromApp(appId, variableName, motivation, deleted, appOwner, groupname, elementType, lang);
@@ -357,6 +392,8 @@ public class AppsController {
 	}
 
 	// -------------------DELETE Delegation for appid ---------------------------------------------
+	// V1 does not require elementType (set to NULL)
+	@Deprecated
 	@DeleteMapping(value = "/api/v1/apps/{appId}/delegations")
 	public ResponseEntity<Object> deleteDelegationV1(@PathVariable("appId") String appId,
 			@RequestParam("sourceRequest") String sourceRequest,
@@ -364,6 +401,19 @@ public class AppsController {
 			HttpServletRequest request) throws UnsupportedEncodingException {
 
 		logger.info("Requested deleteDelegationV1 for {}, lang {}", appId, lang);
+
+		return deleteDelegationV3(appId, sourceRequest, null, lang, request);
+	}
+
+	// V3 requires elementType
+	@DeleteMapping(value = "/api/v3/apps/{appId}/delegations")
+	public ResponseEntity<Object> deleteDelegationV3(@PathVariable("appId") String appId,
+			@RequestParam("sourceRequest") String sourceRequest,
+			@RequestParam("elementType") String elementType,
+			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
+			HttpServletRequest request) throws UnsupportedEncodingException {
+
+		logger.info("Requested deleteDelegationV3 for {}, elementType {}, lang {}", appId, elementType, lang);
 
 		if (sourceRequest != null)
 			logger.info("sourceRequest specified {}", sourceRequest);
@@ -374,7 +424,7 @@ public class AppsController {
 		}
 
 		try {
-			delegationService.deleteAllDelegationFromApp(appId, lang);
+			delegationService.deleteAllDelegationFromApp(appId, elementType, lang);
 
 			activityService.saveActivityDelegationFromAppId(appId, null, sourceRequest, null, null, ActivityAccessType.DELETE, ActivityDomainType.DELEGATION);
 
@@ -391,7 +441,9 @@ public class AppsController {
 		}
 	}
 
-	// -------------------GET Check Access fom username (from AT)---------------------------------------------
+	// -------------------GET Check Access fom Appid (from AT)---------------------------------------------
+	// V1 does not require elementType (set to NULL)
+	@Deprecated
 	@GetMapping(value = "/api/v1/apps/{appId}/access/check")
 	public ResponseEntity<Object> checkAccessV1(@PathVariable("appId") String appId,
 			@RequestParam("sourceRequest") String sourceRequest,
@@ -399,6 +451,19 @@ public class AppsController {
 			HttpServletRequest request) throws UnsupportedEncodingException {
 
 		logger.info("Requested checkDelegationV1 for {}, lang {}", appId, lang);
+
+		return checkAccessV3(appId, sourceRequest, null, lang, request);
+	}
+
+	// V3 requires elementType
+	@GetMapping(value = "/api/v3/apps/{appId}/access/check")
+	public ResponseEntity<Object> checkAccessV3(@PathVariable("appId") String appId,
+			@RequestParam("sourceRequest") String sourceRequest,
+			@RequestParam("elementType") String elementType,
+			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
+			HttpServletRequest request) throws UnsupportedEncodingException {
+
+		logger.info("Requested checkDelegationV3 for {}, lang {}", appId, lang);
 
 		if (sourceRequest != null)
 			logger.info("sourceRequest specified {}", sourceRequest);
@@ -409,7 +474,7 @@ public class AppsController {
 		}
 
 		try {
-			Response response = accessService.checkAccessFromApp(appId, lang);
+			Response response = accessService.checkAccessFromApp(appId, elementType, lang);
 
 			activityService.saveActivityDelegationFromAppId(appId, null, sourceRequest, null, null, ActivityAccessType.READ, ActivityDomainType.DELEGATION);
 

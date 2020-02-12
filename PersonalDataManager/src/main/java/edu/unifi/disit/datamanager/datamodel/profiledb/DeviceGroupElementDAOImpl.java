@@ -93,7 +93,7 @@ public class DeviceGroupElementDAOImpl implements DeviceGroupElementDAOCustom {
 			filterPredicates.add(cb.like(dataRoot.<String>get("elementId"), "%" + searchKey + "%"));
 			filterPredicates.add(cb.like(dataRoot.<String>get("elementType"), "%" + searchKey + "%"));
                         filterPredicates.add(cb.like(dataRoot.<String>get("elementName"), "%" + searchKey + "%"));
-                        filterPredicates.add(cb.like(dataRoot.<String>get("kpiName"), "%" + searchKey + "%"));
+                        filterPredicates.add(cb.like(dataRoot.<String>get("username"), "%" + searchKey + "%"));
 			commonPredicates.add(cb.or(filterPredicates.toArray(new Predicate[filterPredicates.size()])));
 		}
 

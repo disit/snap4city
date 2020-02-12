@@ -13,6 +13,7 @@
    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA. */
 package edu.unifi.disit.datamanager.controller.rest;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.List;
@@ -104,7 +105,7 @@ public class KPIDelegationController {
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
-					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), lang).getResult())) {
+					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), kpiData.getHighLevelType(), lang).getResult())) {
 				throw new CredentialsException();
 			}
 
@@ -147,7 +148,7 @@ public class KPIDelegationController {
 			@RequestBody Delegation kpiDelegation, @RequestParam(value = "sourceRequest") String sourceRequest,
 			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
-			HttpServletRequest request) {
+			HttpServletRequest request) throws UnsupportedEncodingException {
 
 		logger.info("Requested postKPIDelegationV1 id {} sourceRequest {}", kpiDelegation.getId(), sourceRequest);
 
@@ -164,11 +165,11 @@ public class KPIDelegationController {
 						"Wrong KPI Data", null, request.getRemoteAddr());
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
-					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), lang).getResult())) {
+					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), kpiData.getHighLevelType(), lang).getResult())) {
 				throw new CredentialsException();
 			}
-			
-			if(kpiDelegation.getUsernameDelegated().equals("ANONYMOUS")) {
+
+			if (kpiDelegation.getUsernameDelegated().equals("ANONYMOUS")) {
 				kpiData.setOwnership("public");
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, sourceId, kpiId,
 						ActivityAccessType.WRITE, KPIActivityDomainType.CHANGEOWNERSHIP);
@@ -202,7 +203,7 @@ public class KPIDelegationController {
 			@RequestBody Delegation kpiDelegation, @RequestParam(value = "sourceRequest") String sourceRequest,
 			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
-			HttpServletRequest request) {
+			HttpServletRequest request) throws UnsupportedEncodingException {
 
 		logger.info("Requested putKPIDelegationV1 id {} sourceRequest {}", id, sourceRequest);
 
@@ -219,7 +220,7 @@ public class KPIDelegationController {
 						"Wrong KPI Data", null, request.getRemoteAddr());
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
-					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), lang).getResult())) {
+					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), kpiData.getHighLevelType(), lang).getResult())) {
 				throw new CredentialsException();
 			}
 
@@ -239,15 +240,14 @@ public class KPIDelegationController {
 			kpiDelegation.setId(oldKpiDelegation.getId());
 			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, sourceId, kpiId,
 					ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION);
-			
 
-			if(kpiDelegation.getUsernameDelegated().equals("ANONYMOUS")) {
+			if (kpiDelegation.getUsernameDelegated().equals("ANONYMOUS")) {
 				kpiData.setOwnership("public");
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, sourceId, kpiId,
 						ActivityAccessType.WRITE, KPIActivityDomainType.CHANGEOWNERSHIP);
 				kpiDataService.saveKPIData(kpiData);
 			}
-			
+
 			logger.info("Putted kpiDelegation {}", kpiDelegation.getId());
 			return userController.putDelegationV1(credentialService.getLoggedUsername(lang), kpiDelegation.getId(),
 					kpiDelegation, sourceRequest, lang, request);
@@ -271,7 +271,7 @@ public class KPIDelegationController {
 			@RequestBody Map<String, Object> fields, @RequestParam(value = "sourceRequest") String sourceRequest,
 			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
-			HttpServletRequest request) {
+			HttpServletRequest request) throws UnsupportedEncodingException {
 
 		logger.info("Requested patchKPIDelegationV1 id {} sourceRequest {}", id, sourceRequest);
 
@@ -288,7 +288,7 @@ public class KPIDelegationController {
 						"Wrong KPI Data", null, request.getRemoteAddr());
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
-					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), lang).getResult())) {
+					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), kpiData.getHighLevelType(), lang).getResult())) {
 				throw new CredentialsException();
 			}
 
@@ -304,7 +304,6 @@ public class KPIDelegationController {
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
-			
 
 			// Problem with cast of int to long, but the id is also present and it must be
 			// the same
@@ -319,18 +318,17 @@ public class KPIDelegationController {
 					ReflectionUtils.setField(field, oldKpiDelegation, (field.getType()).cast(v));
 				}
 			});
-			
 
 			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, sourceId, kpiId,
 					ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION);
-			
-			if(oldKpiDelegation.getUsernameDelegated().equals("ANONYMOUS")) {
+
+			if (oldKpiDelegation.getUsernameDelegated().equals("ANONYMOUS")) {
 				kpiData.setOwnership("public");
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, sourceId, kpiId,
 						ActivityAccessType.WRITE, KPIActivityDomainType.CHANGEOWNERSHIP);
 				kpiDataService.saveKPIData(kpiData);
 			}
-			
+
 			logger.info("Patched kpiDelegation {}", oldKpiDelegation.getId());
 			return userController.putDelegationV1(credentialService.getLoggedUsername(lang), oldKpiDelegation.getId(),
 					oldKpiDelegation, sourceRequest, lang, request);
@@ -353,7 +351,7 @@ public class KPIDelegationController {
 			@RequestParam(value = "sourceRequest") String sourceRequest,
 			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
-			HttpServletRequest request) {
+			HttpServletRequest request) throws UnsupportedEncodingException {
 
 		logger.info("Requested deleteKPIDelegationV1 id {} sourceRequest {}", id, sourceRequest);
 
@@ -370,7 +368,7 @@ public class KPIDelegationController {
 						"Wrong KPI Data", null, request.getRemoteAddr());
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
-					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), lang).getResult())) {
+					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), kpiData.getHighLevelType(), lang).getResult())) {
 				throw new CredentialsException();
 			}
 
@@ -433,7 +431,7 @@ public class KPIDelegationController {
 						"Wrong KPI Data", null, request.getRemoteAddr());
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
-					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), lang).getResult())) {
+					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), kpiData.getHighLevelType(), lang).getResult())) {
 				throw new CredentialsException();
 			}
 

@@ -88,7 +88,9 @@ public class UserController {
 			@RequestParam(value = "delegated", required = false, defaultValue = "false") Boolean delegated,
 			@RequestParam(value = "anonymous", required = false, defaultValue = "false") Boolean anonymous,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
-			HttpServletRequest request) {
+			HttpServletRequest request) throws UnsupportedEncodingException {
+
+		username = URLDecoder.decode(username, StandardCharsets.UTF_8.toString());
 
 		logger.info("Requested getDataV1 for {}, delegated {}, first {}, last {}, anonymous {}, lang {}", username, delegated, first, last, anonymous, lang);
 
@@ -148,7 +150,9 @@ public class UserController {
 			@RequestBody Data data,
 			@RequestParam("sourceRequest") String sourceRequest,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
-			HttpServletRequest request) {
+			HttpServletRequest request) throws UnsupportedEncodingException {
+
+		username = URLDecoder.decode(username, StandardCharsets.UTF_8.toString());
 
 		logger.info("Requested postDataV1 {} for {}, lang {}", data, username, lang);
 
@@ -182,6 +186,7 @@ public class UserController {
 
 	// -------------------GET Delegation for username (delegator)---------------------------------------------
 	// V1 does not return Delegation with UsernameDelegated==null
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	@GetMapping(value = "/api/v1/username/{username}/delegator")
 	public ResponseEntity<Object> getDelegatorV1(@PathVariable("username") String username,
@@ -191,7 +196,9 @@ public class UserController {
 			@RequestParam(value = "deleted", required = false, defaultValue = "false") Boolean deleted,
 			@RequestParam(value = "elementType", required = false) String elementType,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
-			HttpServletRequest request) {
+			HttpServletRequest request) throws UnsupportedEncodingException {
+
+		username = URLDecoder.decode(username, StandardCharsets.UTF_8.toString());
 
 		logger.info("Requested getDelegatorV1 for {} lang {}", username, lang);
 
@@ -204,7 +211,7 @@ public class UserController {
 		return toreturn;
 	}
 
-	// V2 return also Delegation with UsernameDelegated==null
+	// V2 return also Delegation with UsernameDelegated==nul
 	@GetMapping(value = "/api/v2/username/{username}/delegator")
 	public ResponseEntity<Object> getDelegatorV2(@PathVariable("username") String username,
 			@RequestParam("sourceRequest") String sourceRequest,
@@ -213,7 +220,9 @@ public class UserController {
 			@RequestParam(value = "deleted", required = false, defaultValue = "false") Boolean deleted,
 			@RequestParam(value = "elementType", required = false) String elementType,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
-			HttpServletRequest request) {
+			HttpServletRequest request) throws UnsupportedEncodingException {
+
+		username = URLDecoder.decode(username, StandardCharsets.UTF_8.toString());
 
 		logger.info("Requested getDelegatorV2 for {} lang {}", username, lang);
 
@@ -223,8 +232,13 @@ public class UserController {
 			logger.info("Motivation specified {}", motivation);
 		if (sourceRequest != null)
 			logger.info("sourceRequest specified {}", sourceRequest);
+		if (elementType != null) {
+			logger.info("elementType specified {}", elementType);
+		}
 
-		try {
+		try
+
+		{
 			List<Delegation> delegations = delegationService.getDelegationsDelegatorForUsername(username, variableName, motivation, deleted, elementType, lang);
 
 			activityService.saveActivityDelegationFromUsername(username, null, sourceRequest, variableName, motivation, ActivityAccessType.READ, ActivityDomainType.DELEGATION);
@@ -250,6 +264,7 @@ public class UserController {
 
 	// -------------------GET Delegation fom username (delegated)---------------------------------------------
 	// V1 does not return Delegation with UsernameDelegated==null
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	@GetMapping(value = "/api/v1/username/{username}/delegated")
 	public ResponseEntity<Object> getDelegatedV1(@PathVariable("username") String username,
@@ -260,7 +275,9 @@ public class UserController {
 			@RequestParam(value = "groupname", required = false) String groupname,
 			@RequestParam(value = "elementType", required = false) String elementType,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
-			HttpServletRequest request) throws UnsupportedEncodingException {
+			HttpServletRequest request) throws UnsupportedEncodingException, CloneNotSupportedException {
+
+		username = URLDecoder.decode(username, StandardCharsets.UTF_8.toString());
 
 		logger.info("Requested getDelegatedV1 for {} lang {}", username, lang);
 
@@ -283,7 +300,9 @@ public class UserController {
 			@RequestParam(value = "groupname", required = false) String groupname,
 			@RequestParam(value = "elementType", required = false) String elementType,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
-			HttpServletRequest request) throws UnsupportedEncodingException {
+			HttpServletRequest request) throws UnsupportedEncodingException, CloneNotSupportedException {
+
+		username = URLDecoder.decode(username, StandardCharsets.UTF_8.toString());
 
 		logger.info("Requested getDelegatedV2 for {} deleted {} lang {}", username, deleted, lang);
 
@@ -297,6 +316,9 @@ public class UserController {
 			logger.info("groupname specified {}", groupname);
 			groupname = URLDecoder.decode(groupname, StandardCharsets.UTF_8.toString());
 			logger.info("groupname decoded to {}", groupname);
+		}
+		if (elementType != null) {
+			logger.info("elementType specified {}", elementType);
 		}
 
 		try {
@@ -328,6 +350,8 @@ public class UserController {
 	}
 
 	// -------------------GET Check Delegation fom username ---------------------------------------------
+	// V1 does not require elementType (set to NULL)
+	@Deprecated
 	@GetMapping(value = "/api/v1/username/{username}/delegation/check")
 	public ResponseEntity<Object> checkDelegationV1(@PathVariable("username") String username,
 			@RequestParam("sourceRequest") String sourceRequest,
@@ -336,7 +360,26 @@ public class UserController {
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) throws UnsupportedEncodingException {
 
+		username = URLDecoder.decode(username, StandardCharsets.UTF_8.toString());
+
 		logger.info("Requested checkDelegationV1 for {}, elementID {} variableName {} lang {}", username, elementID, variableName, lang);
+
+		return checkDelegationV3(username, sourceRequest, elementID, null, variableName, lang, request);
+	}
+
+	// V3 requires elementType
+	@GetMapping(value = "/api/v3/username/{username}/delegation/check")
+	public ResponseEntity<Object> checkDelegationV3(@PathVariable("username") String username,
+			@RequestParam("sourceRequest") String sourceRequest,
+			@RequestParam("elementID") String elementID,
+			@RequestParam("elementType") String elementType,
+			@RequestParam(value = "variableName", required = false) String variableName,
+			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
+			HttpServletRequest request) throws UnsupportedEncodingException {
+
+		username = URLDecoder.decode(username, StandardCharsets.UTF_8.toString());
+
+		logger.info("Requested checkDelegationV3 for {}, elementID {}, elementType {}, variableName {} lang {}", username, elementID, elementType, variableName, lang);
 
 		if (sourceRequest != null)
 			logger.info("sourceRequest specified {}", sourceRequest);
@@ -347,7 +390,8 @@ public class UserController {
 		}
 
 		try {
-			Response response = accessService.checkDelegationsFromUsername(username, variableName, elementID, lang);
+
+			Response response = accessService.checkDelegationsFromUsername(elementID, elementType, variableName, username, lang);
 
 			activityService.saveActivityDelegationFromUsername(username, null, sourceRequest, null, null, ActivityAccessType.READ, ActivityDomainType.DELEGATION);
 
@@ -370,7 +414,9 @@ public class UserController {
 			@RequestBody Delegation delegation,
 			@RequestParam("sourceRequest") String sourceRequest,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
-			HttpServletRequest request) {
+			HttpServletRequest request) throws UnsupportedEncodingException {
+
+		username = URLDecoder.decode(username, StandardCharsets.UTF_8.toString());
 
 		logger.info("Requested postDelegationV1 {} for {}, lang {}", delegation, username, lang);
 
@@ -409,7 +455,9 @@ public class UserController {
 			@RequestBody Delegation delegation,
 			@RequestParam("sourceRequest") String sourceRequest,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
-			HttpServletRequest request) {
+			HttpServletRequest request) throws UnsupportedEncodingException {
+
+		username = URLDecoder.decode(username, StandardCharsets.UTF_8.toString());
 
 		logger.info("Requested putDelegationV1 {} for {}, lang {}, delegationId {}", delegation, username, lang, delegationId);
 
@@ -447,7 +495,9 @@ public class UserController {
 			@PathVariable("delegationid") Long delegationId,
 			@RequestParam("sourceRequest") String sourceRequest,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
-			HttpServletRequest request) {
+			HttpServletRequest request) throws UnsupportedEncodingException {
+
+		username = URLDecoder.decode(username, StandardCharsets.UTF_8.toString());
 
 		logger.info("Requested deleteDelegationV1 {} for {}, lang {}", delegationId, username, lang);
 
@@ -497,7 +547,7 @@ public class UserController {
 		return text;
 	}
 
-	// -------------------GET Data for app ---------------------------------------------
+	// -------------------GET Organization of an user ---------------------------------------------
 	@GetMapping(value = "/api/v1/username/organization")
 	public ResponseEntity<Object> getOrganizationV1(
 			@RequestParam("sourceRequest") String sourceRequest,
@@ -520,7 +570,9 @@ public class UserController {
 			@PathVariable("dataid") Long dataId,
 			@RequestParam("sourceRequest") String sourceRequest,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
-			HttpServletRequest request) {
+			HttpServletRequest request) throws UnsupportedEncodingException {
+
+		username = URLDecoder.decode(username, StandardCharsets.UTF_8.toString());
 
 		logger.info("Requested deleteDataV1 {} for {}, lang {}", dataId, username, lang);
 

@@ -97,7 +97,7 @@ public class KPIDataController {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else {
 				if (!kpiData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
-						&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiData.getId()), lang).getResult())) {
+						&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiData.getId()), kpiData.getHighLevelType(), lang).getResult())) {
 					throw new CredentialsException();
 				}
 
@@ -449,8 +449,8 @@ public class KPIDataController {
 	// -------------------DEPRECATED ------------------------------------
 	// -------------------GET PUBLIC KPI Data Pageable -----------------------------
 	/**
-	    * @deprecated (when, Modificata la semantica del public, refactoring advice...)
-	    */
+	 * @deprecated (when, Modificata la semantica del public, refactoring advice...)
+	 */
 	@Deprecated
 	@GetMapping("/api/v1/kpidata/public")
 	public ResponseEntity<Object> getKPIDataPublicV1Pageable(

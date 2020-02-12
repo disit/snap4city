@@ -66,4 +66,10 @@ public interface KPIDataDAO extends JpaRepository<KPIData, Long>, KPIDataDAOCust
         
         List<KPIData> findByUsernameAndHighLevelTypeAndDeleteTimeIsNull(String username, String elmtType);
         
+        List<KPIData> findByUsernameAndHighLevelTypeIsNotNullAndDeleteTimeIsNull(String username);
+				        
+        Page<KPIData> findByHighLevelTypeIsNotNullAndDeleteTimeIsNull(Pageable pageable);
+		
+	List<KPIData> findByHighLevelTypeIsNotNullAndDeleteTimeIsNull();
+        
 }
