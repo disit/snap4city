@@ -1,0 +1,40 @@
+{  
+   "id":"BibliotecaMarioLuzi",
+   "type":"MonitorCamera",
+   "dateObserved":{  
+      "type":"datetime",
+      "value":"0",
+      "metadata":{  
+
+      }
+   },
+   "latitude":{  
+      "type":"float",
+      "value":"43.776000",
+      "metadata":{  
+
+      }
+   },
+   "longitude":{  
+      "type":"float",
+      "value":"11.290201",
+      "metadata":{  
+
+      }
+   },
+   "model":{  
+      "type":"string",
+      "value":"MonitorFirenze",
+      "metadata":{  
+
+      }
+   },
+   "status":{  
+      "type":"boolean",
+      "value":"0",
+      "metadata":{  
+
+      }
+   },
+   "date_time":"2019-10-22T13:24:43.660Z"
+}

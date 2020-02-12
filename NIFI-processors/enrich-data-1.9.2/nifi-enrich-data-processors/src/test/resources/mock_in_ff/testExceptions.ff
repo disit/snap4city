@@ -1,0 +1,63 @@
+{  
+   "id":"123456789",
+   "type":"AirQualityObserved",
+   "PM10":{  
+      "type":"Number",
+      "value":18.4,
+      "metadata":{  
+
+      }
+   },
+   "PM2.5":{  
+      "type":"Number",
+      "value":6,
+      "metadata":{  
+
+      }
+   },
+   "address":{  
+      "type":"StructuredValue",
+      "value":{  
+         "addressCountry":"",
+         "addressLocality":"",
+         "streetAddress":""
+      },
+      "metadata":{  
+
+      }
+   },
+   "dateObserved":{  
+      "type":"Text",
+      "value":"2019-06-06T15:46:54.930000+00:00",
+      "metadata":{  
+
+      }
+   },
+   "location":{  
+      "type":"StructuredValue",
+      "value":{  
+         "type":"Point",
+         "coordinates":[  
+            24.912011,
+            60.157338000
+         ]
+      },
+      "metadata":{  
+
+      }
+   },
+   "reliability":{  
+      "type":"Number",
+      "value":0.5,
+      "metadata":{  
+
+      }
+   },
+   "source":{  
+      "type":"Text",
+      "value":"https://source.com/source",
+      "metadata":{  
+
+      }
+   }
+}

@@ -1,0 +1,114 @@
+{
+    "Service": {
+        "features": [
+            {
+                "geometry": {
+                    "coordinates": [
+                        24.911846,
+                        60.168095
+                    ],
+                    "type": "Point"
+                },
+                "properties": {
+                    "avgStars": 0,
+                    "brokerEndpoint": "0.0.0.0:1026",
+                    "brokerName": "aBroker",
+                    "comments": [],
+                    "format": "json",
+                    "linkDBpedia": [],
+                    "macaddress": "3D:F2:C9:A6:B3:4F",
+                    "model": "custom",
+                    "name": "TA-12345",
+                    "organization": "MyOrg",
+                    "ownership": "public",
+                    "photoOrigs": [],
+                    "photoThumbs": [],
+                    "photos": [],
+                    "producer": "null",
+                    "protocol": "ngsi",
+                    "realtimeAttributes": {
+                        "LAeq": {
+                            "attr_type": "DeviceAttribute",
+                            "data_type": "float",
+                            "different_values": "0",
+                            "value_bounds": "unspecified",
+                            "value_refresh_rate": "300",
+                            "value_type": "sound_lv",
+                            "value_unit": "#"
+                        },
+                        "LAmax": {
+                            "attr_type": "DeviceAttribute",
+                            "data_type": "float",
+                            "different_values": "0",
+                            "value_bounds": "unspecified",
+                            "value_refresh_rate": "300",
+                            "value_type": "sound_lv",
+                            "value_unit": "#"
+                        },
+                        "dateObserved": {
+                            "attr_type": "DeviceAttribute",
+                            "data_type": "time",
+                            "different_values": "0",
+                            "value_bounds": "unspecified",
+                            "value_refresh_rate": "300",
+                            "value_type": "timestamp",
+                            "value_unit": "s"
+                        },
+                        "dateObservedFrom": {
+                            "attr_type": "DeviceAttribute",
+                            "data_type": "time",
+                            "different_values": "0",
+                            "value_bounds": "unspecified",
+                            "value_refresh_rate": "300",
+                            "value_type": "timestamp",
+                            "value_unit": "s"
+                        },
+                        "dateObservedTo": {
+                            "attr_type": "DeviceAttribute",
+                            "data_type": "time",
+                            "different_values": "0",
+                            "value_bounds": "unspecified",
+                            "value_refresh_rate": "300",
+                            "value_type": "timestamp",
+                            "value_unit": "s"
+                        },
+                        "location": {
+                            "attr_type": "DeviceAttribute",
+                            "data_type": "float",
+                            "different_values": "0",
+                            "value_bounds": "unspecified",
+                            "value_refresh_rate": "300",
+                            "value_type": "latitude_longitude",
+                            "value_unit": "#"
+                        },
+                        "measurand": {
+                            "attr_type": "DeviceAttribute",
+                            "data_type": "float",
+                            "different_values": "0",
+                            "value_bounds": "unspecified",
+                            "value_refresh_rate": "300",
+                            "value_type": "latitude_longitude",
+                            "value_unit": "#"
+                        },
+                        "sonometerClass": {
+                            "attr_type": "DeviceAttribute",
+                            "data_type": "string",
+                            "different_values": "0",
+                            "value_bounds": "unspecified",
+                            "value_refresh_rate": "300",
+                            "value_type": "audio",
+                            "value_unit": "#"
+                        }
+                    },
+                    "serviceType": "Environment_Noise_level_sensor",
+                    "serviceUri": "http://www.disit.org/km4city/resource/iot/orionFinland/Helsinki/TA-12345",
+                    "starsCount": 0,
+                    "typeLabel": "Noise level sensor",
+                    "wktGeometry": ""
+                },
+                "type": "Feature"
+            }
+        ],
+        "type": "FeatureCollection"
+    }
+}

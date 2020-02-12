@@ -1,0 +1,46 @@
+{
+	"id":"TA-12345",
+	"type":"NoiseLevelObserved",
+	"LAeq":{ 
+		"type":"Number",
+		"value":63.7,
+		"metadata":{}
+	},
+	"LAmax":{
+		"type":"Number",
+		"value":65.7,
+		"metadata":{}
+	},
+	"dateObserved":{
+		"type":"Text",
+		"value":"2019-08-30T13:19:26.000000Z",
+		"metadata":{}
+	},
+	"dateObservedFrom":{
+		"type":"Text",
+		"value":"2019-08-30T13:18:26.000000Z",
+		"metadata":{}
+	},
+	"dateObservedTo":{
+		"type":"Text",
+		"value":"2019-08-30T13:19:26.000000Z","metadata":{}
+	},
+	"location":{
+		"type":"StructuredValue",
+		"value":{
+			"type":"Point","coordinates":[24.911846,60.168094000]
+		},
+		"metadata":{}
+	},
+	"measurand":{
+		"type":"StructuredValue",
+		"value":["LAeq | 63.7 | A-weighted, equivalent, sound level"],
+		"metadata":{}
+	},
+	"sonometerClass":{
+		"type":"Text",
+		"value":"1",
+		"metadata":{}
+	},
+	"date_time":"2019-08-30T13:19:41.264Z"
+}

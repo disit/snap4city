@@ -1,0 +1,272 @@
+FF-Attributes:
+{
+	path : target
+	filename : 228227711371.mockFlowFile
+	timestampSource : dateObservedTo
+	uuid : 239b6996-6639-471c-acd5-ceb53a9a80e0
+	deviceId : TA-12345
+}
+
+FF-Content:
+{
+  "value": 63.7,
+  "value_type": "sound_lv",
+  "data_type": "float",
+  "value_refresh_rate": "300",
+  "value_unit": "#",
+  "sensorId": "TA-12345",
+  "src": "IOT",
+  "kind": "sensor",
+  "latlon": "60.168095,24.911846",
+  "serviceUri": "http://serviceuriprefix.org/TA-12345",
+  "uuid": "f9c0c91f-6c93-46a4-ba18-7956dd02d3bd",
+  "value_name": "LAeq",
+  "organization": "MyOrg",
+  "deviceName": "TA-12345",
+  "date_time": "2019-08-30T13:19:26.000Z",
+  "date_time10min": "2019-08-30T13:20:00.000Z",
+  "date_time10sec": "2019-08-30T13:19:30.000Z",
+  "date_time1d": "2019-08-30T00:00:00.000Z",
+  "date_time1h": "2019-08-30T13:00:00.000Z",
+  "date_time1min": "2019-08-30T13:19:00.000Z",
+  "date_time1sec": "2019-08-30T13:19:26.000Z"
+}
+FF-Attributes:
+{
+	path : target
+	filename : 228227711371.mockFlowFile
+	timestampSource : dateObservedTo
+	uuid : ad9b7df0-939a-4fd4-8bc0-f6d97fa47ac1
+	deviceId : TA-12345
+}
+
+FF-Content:
+{
+  "value": 65.7,
+  "value_type": "sound_lv",
+  "data_type": "float",
+  "value_refresh_rate": "300",
+  "value_unit": "#",
+  "sensorId": "TA-12345",
+  "src": "IOT",
+  "kind": "sensor",
+  "latlon": "60.168095,24.911846",
+  "serviceUri": "http://serviceuriprefix.org/TA-12345",
+  "uuid": "f9c0c91f-6c93-46a4-ba18-7956dd02d3bd",
+  "value_name": "LAmax",
+  "organization": "MyOrg",
+  "deviceName": "TA-12345",
+  "date_time": "2019-08-30T13:19:26.000Z",
+  "date_time10min": "2019-08-30T13:20:00.000Z",
+  "date_time10sec": "2019-08-30T13:19:30.000Z",
+  "date_time1d": "2019-08-30T00:00:00.000Z",
+  "date_time1h": "2019-08-30T13:00:00.000Z",
+  "date_time1min": "2019-08-30T13:19:00.000Z",
+  "date_time1sec": "2019-08-30T13:19:26.000Z"
+}
+FF-Attributes:
+{
+	path : target
+	filename : 228227711371.mockFlowFile
+	timestampSource : dateObservedTo
+	uuid : 254cb0d0-cb01-4920-ba9c-dde1134fba44
+	deviceId : TA-12345
+}
+
+FF-Content:
+{
+  "value_type": "timestamp",
+  "data_type": "time",
+  "value_refresh_rate": "300",
+  "value_unit": "s",
+  "value_str": "2019-08-30T13:19:26.000000Z",
+  "sensorId": "TA-12345",
+  "src": "IOT",
+  "kind": "sensor",
+  "latlon": "60.168095,24.911846",
+  "serviceUri": "http://serviceuriprefix.org/TA-12345",
+  "uuid": "f9c0c91f-6c93-46a4-ba18-7956dd02d3bd",
+  "value_name": "dateObserved",
+  "organization": "MyOrg",
+  "deviceName": "TA-12345",
+  "date_time": "2019-08-30T13:19:26.000Z",
+  "date_time10min": "2019-08-30T13:20:00.000Z",
+  "date_time10sec": "2019-08-30T13:19:30.000Z",
+  "date_time1d": "2019-08-30T00:00:00.000Z",
+  "date_time1h": "2019-08-30T13:00:00.000Z",
+  "date_time1min": "2019-08-30T13:19:00.000Z",
+  "date_time1sec": "2019-08-30T13:19:26.000Z"
+}
+FF-Attributes:
+{
+	path : target
+	filename : 228227711371.mockFlowFile
+	timestampSource : dateObservedTo
+	uuid : cd359480-37e5-4bbf-b23a-9f185e6b4295
+	deviceId : TA-12345
+}
+
+FF-Content:
+{
+  "value_type": "timestamp",
+  "data_type": "time",
+  "value_refresh_rate": "300",
+  "value_unit": "s",
+  "value_str": "2019-08-30T13:18:26.000000Z",
+  "sensorId": "TA-12345",
+  "src": "IOT",
+  "kind": "sensor",
+  "latlon": "60.168095,24.911846",
+  "serviceUri": "http://serviceuriprefix.org/TA-12345",
+  "uuid": "f9c0c91f-6c93-46a4-ba18-7956dd02d3bd",
+  "value_name": "dateObservedFrom",
+  "organization": "MyOrg",
+  "deviceName": "TA-12345",
+  "date_time": "2019-08-30T13:19:26.000Z",
+  "date_time10min": "2019-08-30T13:20:00.000Z",
+  "date_time10sec": "2019-08-30T13:19:30.000Z",
+  "date_time1d": "2019-08-30T00:00:00.000Z",
+  "date_time1h": "2019-08-30T13:00:00.000Z",
+  "date_time1min": "2019-08-30T13:19:00.000Z",
+  "date_time1sec": "2019-08-30T13:19:26.000Z"
+}
+FF-Attributes:
+{
+	path : target
+	filename : 228227711371.mockFlowFile
+	timestampSource : dateObservedTo
+	uuid : 9357845a-e192-4887-a26a-db1d9d2bb168
+	deviceId : TA-12345
+}
+
+FF-Content:
+{
+  "value_type": "timestamp",
+  "data_type": "time",
+  "value_refresh_rate": "300",
+  "value_unit": "s",
+  "value_str": "2019-08-30T13:19:26.000000Z",
+  "sensorId": "TA-12345",
+  "src": "IOT",
+  "kind": "sensor",
+  "latlon": "60.168095,24.911846",
+  "serviceUri": "http://serviceuriprefix.org/TA-12345",
+  "uuid": "f9c0c91f-6c93-46a4-ba18-7956dd02d3bd",
+  "value_name": "dateObservedTo",
+  "organization": "MyOrg",
+  "deviceName": "TA-12345",
+  "date_time": "2019-08-30T13:19:26.000Z",
+  "date_time10min": "2019-08-30T13:20:00.000Z",
+  "date_time10sec": "2019-08-30T13:19:30.000Z",
+  "date_time1d": "2019-08-30T00:00:00.000Z",
+  "date_time1h": "2019-08-30T13:00:00.000Z",
+  "date_time1min": "2019-08-30T13:19:00.000Z",
+  "date_time1sec": "2019-08-30T13:19:26.000Z"
+}
+FF-Attributes:
+{
+	path : target
+	filename : 228227711371.mockFlowFile
+	timestampSource : dateObservedTo
+	uuid : 0861f8d1-bde6-4e91-853f-b5a6e73b40d7
+	deviceId : TA-12345
+}
+
+FF-Content:
+{
+  "value_type": "latitude_longitude",
+  "data_type": "float",
+  "value_refresh_rate": "300",
+  "value_unit": "#",
+  "value_obj": {
+    "type": "Point",
+    "coordinates": [
+      24.911846,
+      60.168094000
+    ]
+  },
+  "sensorId": "TA-12345",
+  "src": "IOT",
+  "kind": "sensor",
+  "latlon": "60.168095,24.911846",
+  "serviceUri": "http://serviceuriprefix.org/TA-12345",
+  "uuid": "f9c0c91f-6c93-46a4-ba18-7956dd02d3bd",
+  "value_name": "location",
+  "organization": "MyOrg",
+  "deviceName": "TA-12345",
+  "date_time": "2019-08-30T13:19:26.000Z",
+  "date_time10min": "2019-08-30T13:20:00.000Z",
+  "date_time10sec": "2019-08-30T13:19:30.000Z",
+  "date_time1d": "2019-08-30T00:00:00.000Z",
+  "date_time1h": "2019-08-30T13:00:00.000Z",
+  "date_time1min": "2019-08-30T13:19:00.000Z",
+  "date_time1sec": "2019-08-30T13:19:26.000Z"
+}
+FF-Attributes:
+{
+	path : target
+	filename : 228227711371.mockFlowFile
+	timestampSource : dateObservedTo
+	uuid : d50a6511-0d64-46d7-b113-b7814b3b7713
+	deviceId : TA-12345
+}
+
+FF-Content:
+{
+  "value_type": "latitude_longitude",
+  "data_type": "float",
+  "value_refresh_rate": "300",
+  "value_unit": "#",
+  "value_arr": [
+    "LAeq | 63.7 | A-weighted, equivalent, sound level"
+  ],
+  "sensorId": "TA-12345",
+  "src": "IOT",
+  "kind": "sensor",
+  "latlon": "60.168095,24.911846",
+  "serviceUri": "http://serviceuriprefix.org/TA-12345",
+  "uuid": "f9c0c91f-6c93-46a4-ba18-7956dd02d3bd",
+  "value_name": "measurand",
+  "organization": "MyOrg",
+  "deviceName": "TA-12345",
+  "date_time": "2019-08-30T13:19:26.000Z",
+  "date_time10min": "2019-08-30T13:20:00.000Z",
+  "date_time10sec": "2019-08-30T13:19:30.000Z",
+  "date_time1d": "2019-08-30T00:00:00.000Z",
+  "date_time1h": "2019-08-30T13:00:00.000Z",
+  "date_time1min": "2019-08-30T13:19:00.000Z",
+  "date_time1sec": "2019-08-30T13:19:26.000Z"
+}
+FF-Attributes:
+{
+	path : target
+	filename : 228227711371.mockFlowFile
+	timestampSource : dateObservedTo
+	uuid : 15e19bf8-ac36-438e-9318-fb54fdfea612
+	deviceId : TA-12345
+}
+
+FF-Content:
+{
+  "value_type": "audio",
+  "data_type": "string",
+  "value_refresh_rate": "300",
+  "value_unit": "#",
+  "value_str": "1",
+  "sensorId": "TA-12345",
+  "src": "IOT",
+  "kind": "sensor",
+  "latlon": "60.168095,24.911846",
+  "serviceUri": "http://serviceuriprefix.org/TA-12345",
+  "uuid": "f9c0c91f-6c93-46a4-ba18-7956dd02d3bd",
+  "value_name": "sonometerClass",
+  "organization": "MyOrg",
+  "deviceName": "TA-12345",
+  "date_time": "2019-08-30T13:19:26.000Z",
+  "date_time10min": "2019-08-30T13:20:00.000Z",
+  "date_time10sec": "2019-08-30T13:19:30.000Z",
+  "date_time1d": "2019-08-30T00:00:00.000Z",
+  "date_time1h": "2019-08-30T13:00:00.000Z",
+  "date_time1min": "2019-08-30T13:19:00.000Z",
+  "date_time1sec": "2019-08-30T13:19:26.000Z"
+}
