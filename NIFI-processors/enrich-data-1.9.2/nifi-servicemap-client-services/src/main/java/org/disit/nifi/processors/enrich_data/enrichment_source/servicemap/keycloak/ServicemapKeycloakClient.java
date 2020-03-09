@@ -135,13 +135,13 @@ public class ServicemapKeycloakClient extends ServicemapClient{
 	}
 	
 	// Methods to cache and manage access tokens
-	public void refreshTokenCache() throws IOException, InterruptedException, ExecutionException {
-		if( tokenCache.isEmpty() ) { // Get a fresh access token
+	public void refreshTokenCache() throws IOException, InterruptedException, ExecutionException { 
+		if( !tokenCache.isValid() && !tokenCache.isRefreshValid() ) {
+			// Get a new token
 			OAuth2AccessToken token = service.getAccessTokenPasswordGrant( kc.username , kc.password );
-			
-			// TODO: Check expiration?
 			tokenCache.cacheToken( token );
-		} else { // Try to refresh with refresh token
+		} else {
+			// Use refresh token
 			OAuth2AccessToken freshToken = service.refreshAccessToken( tokenCache.getToken().getRefreshToken() );
 			tokenCache.cacheToken( freshToken );
 		}
@@ -164,7 +164,7 @@ public class ServicemapKeycloakClient extends ServicemapClient{
 		private long cacheThreshold;
 		
 		private OAuth2AccessToken token;
-		private JsonObject payloadObj;
+		// private JsonObject payloadObj;
 		private long exp; //in milliseconds
 		
 		
@@ -172,7 +172,7 @@ public class ServicemapKeycloakClient extends ServicemapClient{
 			this.cacheThreshold = cacheThresholdMs;
 			
 			token = null;
-			payloadObj = null;
+//			payloadObj = null;
 			exp = 0;
 		}
 		
@@ -180,15 +180,29 @@ public class ServicemapKeycloakClient extends ServicemapClient{
 			this( 1000 );
 		}
 		
+		public JsonObject decodeTokenPayload( String tokenStr ) {
+			String[] tokenParts = tokenStr.split( "\\." );
+			String payload = new String( Base64.getDecoder().decode( tokenParts[1] ) );
+			JsonObject payloadObj = ServicemapKeycloakClient.this.parser
+									.parse( payload )
+									.getAsJsonObject();
+			return payloadObj;
+		}
+		
+		public JsonObject decodeTokenPayload( OAuth2AccessToken token ) {
+			return decodeTokenPayload( token.getAccessToken() );
+		}
+		
 		public void cacheToken( OAuth2AccessToken token ) {
 			this.token = token;
 			
-			String[] tokenParts = token.getAccessToken().split( "\\." );
-			String payload = new String( Base64.getDecoder().decode( tokenParts[1] ) );
-			payloadObj = ServicemapKeycloakClient.this.parser
-							.parse( payload )
-							.getAsJsonObject();
-			exp = payloadObj.get( "exp" ).getAsLong();
+//			String[] tokenParts = token.getAccessToken().split( "\\." );
+//			String payload = new String( Base64.getDecoder().decode( tokenParts[1] ) );
+//			payloadObj = ServicemapKeycloakClient.this.parser
+//							.parse( payload )
+//							.getAsJsonObject();
+			JsonObject payloadObj = decodeTokenPayload( token );
+			exp = payloadObj.get("exp").getAsLong();
 		}
 		
 		public OAuth2AccessToken getToken() {
@@ -205,6 +219,24 @@ public class ServicemapKeycloakClient extends ServicemapClient{
 			else
 				return ( exp * 1000 - System.currentTimeMillis() ) >= cacheThreshold;
 		}
+		
+		public boolean isRefreshValid() {
+			if( isEmpty() )
+				return false;
+			else
+				return this.isValid( token.getRefreshToken() );
+		}
+		
+		public boolean isValid( OAuth2AccessToken token ) {
+			return isValid( token.getAccessToken() );
+		}
+		
+		public boolean isValid( String tokenStr ) {
+			JsonObject payloadObj = decodeTokenPayload( tokenStr );
+			long exp = payloadObj.get("exp").getAsLong();
+			return ( exp * 1000 - System.currentTimeMillis() ) >= cacheThreshold;
+		}
 	}
 	
 }
+
