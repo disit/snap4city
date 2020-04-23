@@ -9,6 +9,14 @@
         </init-param>
     </servlet>
     <servlet>
+        <servlet-name>ListStaticAttr</servlet-name>
+        <servlet-class>org.disit.iotdeviceapi.ListStaticAttr</servlet-class>
+        <init-param>
+            <param-name>cfgFile</param-name>
+            <param-value>/usr/share/tomcat7/iot-config/list-static-attr-api-cfg.xml</param-value>
+        </init-param>
+    </servlet>
+    <servlet>
         <servlet-name>Delete</servlet-name>
         <servlet-class>org.disit.iotdeviceapi.Delete</servlet-class>
         <init-param>
@@ -51,6 +59,10 @@
     <servlet-mapping>
         <servlet-name>Insert</servlet-name>
         <url-pattern>/insert</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ListStaticAttr</servlet-name>
+        <url-pattern>/list-static-attr</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>Delete</servlet-name>

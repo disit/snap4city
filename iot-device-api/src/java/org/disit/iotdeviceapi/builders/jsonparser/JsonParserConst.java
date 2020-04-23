@@ -28,5 +28,6 @@ public final class JsonParserConst {
     
     public static final String CFG_EL_DEFAULT = "default";
     public static final String CFG_AT_DEFAULT_REF = "ref";
+    public static final String CFG_AT_QUERY_ONMISSING = "onMissing";
 
 }

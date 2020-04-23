@@ -48,8 +48,8 @@ import org.json.simple.JSONValue;
  * 
  * @author Mirco Soderi @ DISIT DINFO UNIFI (mirco.soderi at unifi dot it)
  */
-@WebServlet(name = "Disable", urlPatterns = {"/disable"})
-public class Disable extends HttpServlet {
+@WebServlet(name = "ListStaticAttr", urlPatterns = {"/ListStaticAttr"})
+public class ListStaticAttr extends HttpServlet {
 
     HashMap<String, Loader> mLoaders; 
     int status;
@@ -68,10 +68,26 @@ public class Disable extends HttpServlet {
             throws ServletException, IOException {
         
         response.setHeader("Access-Control-Allow-Origin", "*");
-        response.setHeader("Warning", "Should send your requests via HTTP POST.");
+        response.setHeader("Warning", "Should send your requests via HTTP GET.");
            
     }
     
+    /**
+     * Handles the HTTP <code>POST</code> method.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        processRequest(request, response);
+        
+    }
+
     /**
      * Handles the HTTP <code>GET</code> method.
      *
@@ -84,22 +100,6 @@ public class Disable extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-        processRequest(request, response);
-        
-    }
-
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
         XLogger xlogger = null;
         Parser cfgParser;
         setStatus(Const.OK);
@@ -119,7 +119,7 @@ public class Disable extends HttpServlet {
                 throw new Exception("Error while retrieving Xlog configuration. No Xlog available for this request. See preceeding errors for further details.");
             }
             
-            xlogger = new XLogger(Disable.class.getName(),cfgParser.getLoggingFolder());
+            xlogger = new XLogger(ListStaticAttr.class.getName(),cfgParser.getLoggingFolder());
             if(Const.ERROR == xlogger.getStatus()) {
                 throw new IotDeviceApiException("Error while initializing Xlog. No Xlog available for this request. See preceeding errors for further details.");
             }
@@ -147,7 +147,7 @@ public class Disable extends HttpServlet {
             HashMap<String, ArrayList<Validator>> validations = cfgParser.getValidations();
             this.mLoaders = loaders; 
             
-            xlogger.log(Disable.class.getName(), Level.INFO, "request", repos.get(ParserConst.REQUEST).getParameter(ParserConst.REQUEST_RAW));
+            xlogger.log(ListStaticAttr.class.getName(), Level.INFO, "request", repos.get(ParserConst.REQUEST).getParameter(ParserConst.REQUEST_RAW));
             if(Const.ERROR == xlogger.getStatus()) {
                 throw new IotDeviceApiException("Error while logging request payload.");
             }
@@ -164,6 +164,12 @@ public class Disable extends HttpServlet {
                 Constructor builderConstructor = builders.get(builderID);
                 Builder builder = (Builder)builderConstructor.newInstance(cfgNode, repos, datatypes, providers, data, xlogger);
                 Data builtData = builder.build();
+                
+                if(builtData.getId().equals("device-validity-query")) {
+                    String ciao = "ciao";
+                    
+                }
+                
                 if(Const.ERROR == builder.getStatus()) {
                     throw new IotDeviceApiException(MessageFormat.format("Error while building data: {0}.",new Object[]{cfgNode.getAttribute(ParserConst.CFG_AT_DATA_ID)}));
                 }
@@ -182,13 +188,13 @@ public class Disable extends HttpServlet {
                 
                 data.put(builtData.getId(), builtData);
                 
-                xlogger.log(Disable.class.getName(), Level.FINE, "successfull data built", MessageFormat.format("Successfull build of data: {0}.",new Object[]{builtData.getId()}));
+                xlogger.log(ListStaticAttr.class.getName(), Level.FINE, "successfull data built", MessageFormat.format("Successfull build of data: {0}.",new Object[]{builtData.getId()}));
                 
                 if(cfgNode.hasAttribute(ParserConst.CFG_AT_DATA_TRIGGER)) {
                     if (null == data.get(cfgNode.getAttribute(ParserConst.CFG_AT_DATA_TRIGGER)).getValue() || 
                             0 == data.get(cfgNode.getAttribute(ParserConst.CFG_AT_DATA_TRIGGER)).getValue().length) {
                         builtData.setTriggered(false);
-                        xlogger.log(Disable.class.getName(), Level.FINE, "untriggered data", MessageFormat.format("Data found to be untriggered: {0}. It is expected not to be produced in output, nor to be persisted by loaders. It could be employed for cleaning purposes in full updates.",new Object[]{builtData.getId()}));
+                        xlogger.log(ListStaticAttr.class.getName(), Level.FINE, "untriggered data", MessageFormat.format("Data found to be untriggered: {0}. It is expected not to be produced in output, nor to be persisted by loaders. It could be employed for cleaning purposes in full updates.",new Object[]{builtData.getId()}));
                     }
                 }
                                 
@@ -205,7 +211,7 @@ public class Disable extends HttpServlet {
                         outputCfg.put(ParserConst.CFG_AT_OUTPUT_TRAIL, "");
                         outputCfg.put(ParserConst.CFG_AT_OUTPUT_TAIL, "");
                         builtData.setOutput(outputCfg);
-                        xlogger.log(Disable.class.getName(), Level.WARNING, "Unable to load output configuration. Default configuration will be used.",outputException);
+                        xlogger.log(ListStaticAttr.class.getName(), Level.WARNING, "Unable to load output configuration. Default configuration will be used.",outputException);
                     }                    
                 }
                 
@@ -215,7 +221,7 @@ public class Disable extends HttpServlet {
                         throw new IotDeviceApiException(MessageFormat.format("Error while loading data: {0}.",new Object[]{builtData.getId()}));
                     }
                     else {
-                        xlogger.log(Disable.class.getName(), Level.FINE, "successfull data load", MessageFormat.format("Data loaded successfully: {0}", new Object[]{builtData.getId()}));
+                        xlogger.log(ListStaticAttr.class.getName(), Level.FINE, "successfull data load", MessageFormat.format("Data loaded successfully: {0}", new Object[]{builtData.getId()}));
                     }
                 }
                 
@@ -231,7 +237,7 @@ public class Disable extends HttpServlet {
                     throw new IotDeviceApiException(MessageFormat.format("Error while disconnecting loader: {0}.", new Object[]{loaderID}));
                 }
                 else {
-                    xlogger.log(Disable.class.getName(), Level.FINE, "loader disconnected", MessageFormat.format("Loader {0} disconnected.", new Object[]{loaderID}));
+                    xlogger.log(ListStaticAttr.class.getName(), Level.FINE, "loader disconnected", MessageFormat.format("Loader {0} disconnected.", new Object[]{loaderID}));
                 }
             }
             
@@ -286,7 +292,7 @@ public class Disable extends HttpServlet {
                     }
                 }
                 out.print(responseString);
-                xlogger.log(Disable.class.getName(), Level.INFO, "response", responseString);
+                xlogger.log(ListStaticAttr.class.getName(), Level.INFO, "response", responseString);
             }
             catch(Exception e) {
                 setStatus(Const.ERROR);
@@ -309,8 +315,8 @@ public class Disable extends HttpServlet {
                 });
             }
             
-            if(xlogger!=null) xlogger.log(Disable.class.getName(), Level.SEVERE, "insert error", e);
-            
+            if(xlogger!=null) xlogger.log(ListStaticAttr.class.getName(), Level.SEVERE, "insert error", e);
+
             response.setHeader("Access-Control-Allow-Origin", "*");
             response.setHeader("Warning", e.getMessage());
             

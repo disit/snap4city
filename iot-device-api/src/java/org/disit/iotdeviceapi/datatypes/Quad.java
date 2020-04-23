@@ -61,4 +61,25 @@ public class Quad extends DataType {
         this.filler = filler;
     }
 
+    @Override
+    public String toString() { 
+        String graph = "[ ";
+        for(Object g: getGraph().getValue()) graph+="\""+g.toString().replaceAll("\"", "\\\"")+"\""+", ";
+        graph = graph.substring(0,graph.length()-2);
+        graph+=" ]";
+        String subject = "[ ";
+        for(Object g: getSubject().getValue()) subject+="\""+g.toString().replaceAll("\"", "\\\"")+"\""+", ";
+        subject = subject.substring(0,subject.length()-2);
+        subject+=" ]";        
+        String property = "[ ";
+        for(Object g: getProperty().getValue()) property+="\""+g.toString().replaceAll("\"", "\\\"")+"\""+", ";
+        property = property.substring(0,property.length()-2);
+        property+=" ]";  
+        String filler = "[ ";
+        for(Object g: getFiller().getValue()) filler+="\""+g.toString().replaceAll("\"", "\\\"")+"\""+", ";
+        filler = filler.substring(0,filler.length()-2);
+        filler+=" ]";        
+        return "QUAD(\n\tGRAPH: "+graph+",\n\tSUBJECT: "+subject+",\n\tPROPERTY: "+property+",\n\tFILLER: "+filler+"\n)"; 
+    } 
+    
 }

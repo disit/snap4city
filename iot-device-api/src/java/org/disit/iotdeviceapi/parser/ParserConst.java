@@ -81,5 +81,9 @@ public final class ParserConst {
     public static final String REQUEST = "{request}";
     public static final String VOLATILE_LOADER = "volatile";
     public static final String VOLATILE_REPOS = "volatile";
+    public static final String CFG_AT_OUTPUT_TYPE = "contentType";
+    public static final String CFG_AT_OUTPUT_GLUE = "glue";
+    public static final String CFG_AT_OUTPUT_TRAIL = "trail";
+    public static final String CFG_AT_OUTPUT_TAIL = "tail";
     
 }

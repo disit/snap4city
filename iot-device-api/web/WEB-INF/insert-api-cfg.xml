@@ -609,13 +609,30 @@
             		<case><if ref="air-quality-uri" /><then ref="air-quality-uri" /> </case>
                     </switch>
                 </data>                
+                                
+                <data id="subnature-uri" type="uri" builder="jsonp" loader="volatile">
+			<source ref="request-body"/>
+			<query>subnature</query>
+		</data>
+                                                
+                <data id="subnature-name" type="string" builder="jsonp" loader="volatile">
+			<source ref="request-body"/>
+			<query>subnature</query>
+		</data>
+                
+                <data id="built-subnature-uri" type="uri" builder="template" loader="volatile">
+                        <template>http://www.disit.org/km4city/schema#{0}</template>
+			<param index="0" value="subnature-name"/>
+		</data>
                 
                 <data id="readytouse_value_type_mapping_array" type="uri" builder="alternative" loader="volatile">
-			<alternative ref="airQualityDocet"/>
+			<alternative ref="subnature-uri"/>
+                        <alternative ref="built-subnature-uri"/>
+                        <alternative ref="airQualityDocet"/>
                         <alternative ref="value_type_mapping_array"/>
                         <alternative ref="device-type-old"/>
-		</data>                                         	                 
-                       
+		</data>                                         	                                                            
+                               
                 <data id="graph-uri.service-uri.is-a.value_type_mapping_array" type="quad" builder="bean" loader="virtuoso">
 			<member name="graph" ref="graph-uri"/> 
 			<member name="subject" ref="service-uri"/> 
@@ -1208,6 +1225,52 @@
                         <member name="filler" ref="device-ownership"/>
 		</data>
                 -->
+                
+                <!-- Static attributes -->
+                
+                <data id="static-attributes-query" type="string" builder="template" loader="volatile">                    
+                    <template>
+                        select distinct ?uri ?label '{'
+                            '{' select ?uri ?label '{' ?uri &lt;http://www.w3.org/2000/01/rdf-schema#domain&gt; &lt;{0}&gt; ; &lt;http://www.w3.org/2000/01/rdf-schema#label&gt; ?label . filter(lang(?label) = ''en'') '}' '}' 
+                            union
+                            '{' select ?uri ?label '{' bind( &lt;http://schema.org/addressLocality&gt; as ?uri ) . bind( "Locality" as ?label ) . &lt;{0}&gt; a owl:Class '}' '}'
+                            union
+                            '{' select ?uri ?label '{' bind( &lt;http://schema.org/addressRegion&gt; as ?uri ) . bind( "Region" as ?label ) . &lt;{0}&gt; a owl:Class '}' '}'        
+                            union
+                            '{' select ?uri ?label '{' bind( &lt;http://schema.org/streetAddress&gt; as ?uri ) . bind( "Street address" as ?label ) . &lt;{0}&gt; a owl:Class '}' '}'   
+                            union
+                            '{' select ?uri ?label '{' bind( &lt;http://www.disit.org/km4city/schema#houseNumber&gt; as ?uri ) . &lt;http://www.disit.org/km4city/schema#houseNumber&gt; &lt;http://www.w3.org/2000/01/rdf-schema#label&gt; ?label . filter(lang(?label) = ''en'') . &lt;{0}&gt; a owl:Class '}' '}'
+                            union
+                            '{' select ?uri ?label '{' bind( &lt;http://www.disit.org/km4city/schema#isInRoad&gt; as ?uri ) . &lt;http://www.disit.org/km4city/schema#isInRoad&gt; &lt;http://www.w3.org/2000/01/rdf-schema#label&gt; ?label . filter(lang(?label) = ''en'') . &lt;{0}&gt; a owl:Class '}' '}'
+                        '}'
+                    </template>
+                    <param index="0" value="readytouse_value_type_mapping_array"/>
+                </data>             
+                
+                <data id="static-attributes-result" type="string" builder="lookup" loader="volatile">
+			<lookup>
+				<priority>1</priority>
+				<provider>virtuoso-provider</provider>
+				<query ref="static-attributes-query" />
+			</lookup>
+		</data>
+                
+                <data id="static-attributes-uris" type="uri" builder="jsonp" loader="volatile">
+			<source ref="static-attributes-result"/>
+			<query>uri</query>                        
+		</data>
+                
+                <data id="static-attributes-values" type="string" builder="jsonp" loader="volatile">
+			<source ref="request-body"/>
+			<query ref="static-attributes-uris" onMissing="clean"/>
+		</data>
+ 
+                <data id="graph-uri.service-uri.static-attributes-uris.static-attributes-values" type="quad" builder="bean" loader="virtuoso">
+			<member name="graph" ref="graph-uri"/> 
+			<member name="subject" ref="service-uri"/> 
+			<member name="property" ref="static-attributes-uris"/>
+			<member name="filler" ref="static-attributes-values"/> 
+		</data>
 
 	</process>
 

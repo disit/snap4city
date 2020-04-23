@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+   IOTDEVICEAPI
+   Copyright (C) 2017 DISIT Lab http://www.disit.org - University of Florence
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as
+   published by the Free Software Foundation, either version 3 of the
+   License, or (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Affero General Public License for more details.
+
+   You should have received a copy of the GNU Affero General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+   
+<api-cfg xmlns="http://www.disit.org/ServiceMap/api/v1/iot">
+
+	<admin>
+		<xlogs destination="/iot-log2/list-static-attr">
+			<xlog-level class="org.disit.iotdeviceapi.ListStaticAttr" level="INFO"/>
+			<xlog-level class="org.disit.iotdeviceapi.config.ConfigParser" level="INFO"/>
+			<xlog-level class="org.disit.iotdeviceapi.providers.request.RequestProvider" level="SEVERE"/>
+			<xlog-level class="org.disit.iotdeviceapi.builders.constb.ConstBuilder" level="SEVERE"/>
+			<xlog-level class="org.disit.iotdeviceapi.builders.template.TemplateBuilder" level="SEVERE"/>
+			<xlog-level class="org.disit.iotdeviceapi.builders.switchb.SwitchBuilder" level="SEVERE"/>
+			<xlog-level class="org.disit.iotdeviceapi.builders.lookup.LookupBuilder" level="SEVERE"/>
+			<xlog-level class="org.disit.iotdeviceapi.builders.bean.BeanBuilder" level="SEVERE"/>
+			<xlog-level class="org.disit.iotdeviceapi.loaders.virtuoso.VirtuosoLoader" level="INFO"/>
+			<xlog-level class="org.disit.iotdeviceapi.dataquality.basic.BasicValidator" level="INFO"/>
+                        <xlog-level class="org.disit.iotdeviceapi.providers.virtuoso.VirtuosoProvider" level="INFO"/>
+		</xlogs>
+	</admin>
+
+	<repos>
+		<repo id="virtuoso">
+			<param key="virtuosoEndpoint" value="localhost:1111"/>
+			<param key="virtuosoUser" value="dba"/>
+			<param key="virtuosoPwd" value="dba"/>
+			<param key="virtuosoTimeout" value="600"/>
+			<param key="virtuosoDeleteInsert" value="subject"/>
+		</repo>
+	</repos>
+        
+	<providers>
+		<provider id="request" class="org.disit.iotdeviceapi.providers.request.RequestProvider" repo="{request}" />
+                <provider id="virtuoso-provider" class="org.disit.iotdeviceapi.providers.virtuoso.VirtuosoProvider" repo="virtuoso" />
+	</providers>
+	
+	<builders>
+		<builder id="const" class="org.disit.iotdeviceapi.builders.constb.ConstBuilder"/>
+		<builder id="template" class="org.disit.iotdeviceapi.builders.template.TemplateBuilder"/>
+		<builder id="switch" class="org.disit.iotdeviceapi.builders.switchb.SwitchBuilder"/>
+		<builder id="lookup" class="org.disit.iotdeviceapi.builders.lookup.LookupBuilder"/>
+		<builder id="jsonp" class="org.disit.iotdeviceapi.builders.jsonparser.JsonParser"/>
+		<builder id="alternative" class="org.disit.iotdeviceapi.builders.alternative.AlternativeBuilder"/>
+	</builders>
+
+	<datatypes>
+		<datatype id="string" class="org.disit.iotdeviceapi.datatypes.StringWrapper"/>
+		<datatype id="uri" class="org.disit.iotdeviceapi.datatypes.UrlWrapper"/>
+	</datatypes>
+
+	<loaders/>
+	
+	<process>
+		
+                <data id="request-body" type="string" builder="lookup" loader="volatile">
+			<lookup>
+				<priority>1</priority>
+				<provider>request</provider>
+				<query>{raw}</query>
+			</lookup>
+		</data>
+		
+                <data id="kind" type="string" builder="jsonp" loader="volatile">
+			<source ref="request-body"/>
+			<query>kind</query>
+		</data>
+                
+                <data id="attribute-valuetype" type="string" builder="jsonp" loader="volatile">
+			<source ref="request-body"/>
+			<query>attributes.value_type</query>
+		</data>
+
+                <data id="measure-uri" type="uri" builder="template" loader="volatile">
+                    <template>http://www.disit.org/km4city/resource/value_type/{0}</template>
+                    <param index="0" value="attribute-valuetype"/>
+                </data>                
+            
+                <data id="value_type_mapping" type="string" builder="template" loader="volatile">                    
+                    <template>select distinct ?s '{' graph &lt;urn:test:value_types_mapping&gt; '{' &lt;{0}&gt; &lt;http://purl.org/dc/terms/source&gt; ?s '}' . filter("{1}" = "sensor") '}'</template>
+                    <param index="0" value="measure-uri"/>
+                    <param index="1" value="kind"/>
+                </data>
+                
+                <data id="value_type_mapping_result" type="string" builder="lookup" loader="volatile">
+			<lookup>
+				<priority>1</priority>
+				<provider>virtuoso-provider</provider>
+				<query ref="value_type_mapping" />
+			</lookup>
+		</data>
+                
+                <data id="value_type_mapping_array" type="string" builder="jsonp" loader="volatile">
+			<source ref="value_type_mapping_result"/>
+			<query>s</query>                        
+		</data>
+                
+                <data id="air-quality-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#Air_quality_monitoring_station</data>
+                
+                <data id="airQualityDocet" type="uri" builder="switch" loader="volatile"> 
+                    <switch ref="value_type_mapping_array">
+            		<case><if ref="air-quality-uri" /><then ref="air-quality-uri" /> </case>
+                    </switch>
+                </data>                
+                       
+                <data id="subnature-uri" type="uri" builder="jsonp" loader="volatile">
+			<source ref="request-body"/>
+			<query>subnature</query>
+		</data>
+                                                
+                <data id="subnature-name" type="string" builder="jsonp" loader="volatile">
+			<source ref="request-body"/>
+			<query>subnature</query>
+		</data>
+                
+                <data id="built-subnature-uri" type="uri" builder="template" loader="volatile">
+                        <template>http://www.disit.org/km4city/schema#{0}</template>
+			<param index="0" value="subnature-name"/>
+		</data>        
+                
+                <data id="subnature-uri-param" type="uri" builder="lookup" loader="volatile">
+			<lookup>
+				<priority>1</priority>
+				<provider>request</provider>
+				<query>subnature</query>
+			</lookup>
+		</data>     
+                
+                <data id="subnature-name-param" type="string" builder="lookup" loader="volatile">
+			<lookup>
+				<priority>1</priority>
+				<provider>request</provider>
+				<query>subnature</query>
+			</lookup>
+		</data>      
+                
+                <data id="built-subnature-uri-param" type="uri" builder="template" loader="volatile">
+                        <template>http://www.disit.org/km4city/schema#{0}</template>
+			<param index="0" value="subnature-name-param"/>
+		</data>  
+                
+                <data id="iot-sensor-uri-old" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#IoTSensor</data>
+                
+                <data id="iot-actuator-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#IoTActuator</data>
+                
+                <data id="device-type-old" type="uri" builder="switch" loader="volatile">
+			<switch ref="kind">
+				<case><if>sensor</if><then ref="iot-sensor-uri-old"/></case>
+				<case><if>actuator</if><then ref="iot-actuator-uri"/></case>
+			</switch>
+		</data>
+                
+                <data id="class-uri" type="uri" builder="alternative" loader="volatile">
+			<alternative ref="subnature-uri-param"/>
+                        <alternative ref="built-subnature-uri-param"/>
+                        <alternative ref="subnature-uri"/>
+                        <alternative ref="built-subnature-uri"/>
+                        <alternative ref="airQualityDocet"/>
+                        <alternative ref="value_type_mapping_array"/>
+                        <alternative ref="device-type-old"/>
+		</data>
+                
+                <data id="attributes-query" type="string" builder="template" loader="volatile">                    
+                    <template>
+                        select distinct ?uri ?label ?type '{'
+                            '{' select ?uri ?label ?type '{' ?uri &lt;http://www.w3.org/2000/01/rdf-schema#domain&gt; &lt;{0}&gt; ; &lt;http://www.w3.org/2000/01/rdf-schema#label&gt; ?label . optional '{' ?uri &lt;http://www.w3.org/2000/01/rdf-schema#range&gt; ?type '}' . filter(lang(?label) = ''en'') '}' '}' 
+                            union
+                            '{' select ?uri ?label ?type '{' bind( &lt;http://schema.org/addressLocality&gt; as ?uri ) . bind( "Locality" as ?label ) . bind( &lt;http://www.w3.org/2001/XMLSchema#string&gt; as ?type ) . &lt;{0}&gt; a owl:Class '}' '}'
+                            union
+                            '{' select ?uri ?label ?type '{' bind( &lt;http://schema.org/addressRegion&gt; as ?uri ) . bind( "Region" as ?label ) . bind( &lt;http://www.w3.org/2001/XMLSchema#string&gt; as ?type ) . &lt;{0}&gt; a owl:Class '}' '}'        
+                            union
+                            '{' select ?uri ?label ?type '{' bind( &lt;http://schema.org/streetAddress&gt; as ?uri ) . bind( "Street address" as ?label ) . bind( &lt;http://www.w3.org/2001/XMLSchema#string&gt; as ?type ) . &lt;{0}&gt; a owl:Class '}' '}'   
+                            union
+                            '{' select ?uri ?label ?type '{' bind( &lt;http://www.disit.org/km4city/schema#houseNumber&gt; as ?uri ) . &lt;http://www.disit.org/km4city/schema#houseNumber&gt; &lt;http://www.w3.org/2000/01/rdf-schema#label&gt; ?label ; &lt;http://www.w3.org/2000/01/rdf-schema#range&gt; ?type . filter(lang(?label) = ''en'') . &lt;{0}&gt; a owl:Class '}' '}'
+                            union
+                            '{' select ?uri ?label ?type '{' bind( &lt;http://www.disit.org/km4city/schema#isInRoad&gt; as ?uri ) . &lt;http://www.disit.org/km4city/schema#isInRoad&gt; &lt;http://www.w3.org/2000/01/rdf-schema#label&gt; ?label ; &lt;http://www.w3.org/2000/01/rdf-schema#range&gt; ?type . filter(lang(?label) = ''en'') . &lt;{0}&gt; a owl:Class '}' '}'
+                        '}'
+                    </template>
+                    <param index="0" value="class-uri"/>
+                </data>             
+                
+                <data id="outputCfg" type="string" builder="const" loader="volatile">
+                    { "contentType": "application/json;charset=UTF-8", "glue":",", "trail": "[", "tail": "]" }                    
+                </data>
+                
+                <data id="attributes-result" type="string" builder="lookup" loader="volatile">
+			<lookup>
+				<priority>1</priority>
+				<provider>virtuoso-provider</provider>
+				<query ref="attributes-query" />
+			</lookup>
+		</data>
+                
+                <data id="emptyResponse" type="string" builder="const" loader="volatile"></data>
+                
+                <data id="response" type="string" builder="alternative" loader="volatile" output="outputCfg">
+                    <alternative ref="attributes-result"/>
+                    <alternative ref="emptyResponse"/>
+                </data>
+
+	</process>
+        
+</api-cfg>

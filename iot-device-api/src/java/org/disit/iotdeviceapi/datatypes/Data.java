@@ -15,6 +15,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package org.disit.iotdeviceapi.datatypes;
 
+import org.json.simple.JSONObject;
+
 /**
  * 
  * @author Mirco Soderi @ DISIT DINFO UNIFI (mirco.soderi at unifi dot it)
@@ -24,7 +26,7 @@ public class Data {
     String id;
     private String type;
     private Object[] value;
-    private boolean output;
+    private JSONObject output;
     private boolean triggered;
 
     public Data(String id, String type, Object[] value) {
@@ -32,6 +34,7 @@ public class Data {
         this.type = type;
         this.value = value;
         this.triggered = true;
+        this.output = null;
     }
     
     public String getType() {
@@ -50,11 +53,11 @@ public class Data {
         this.value = value;
     }
 
-    public boolean isOutput() {
+    public JSONObject getOutput() {
         return output;
     }
 
-    public void setOutput(boolean output) {
+    public void setOutput(JSONObject output) {
         this.output = output;
     }
 

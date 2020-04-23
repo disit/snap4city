@@ -27,7 +27,7 @@ import org.disit.iotdeviceapi.repos.Repos;
 import org.disit.iotdeviceapi.datatypes.DataType;
 import org.disit.iotdeviceapi.providers.Provider;
 import org.disit.iotdeviceapi.utils.Const;
-import org.disit.iotdeviceapi.utils.IotDeviceApiException;
+// import org.disit.iotdeviceapi.utils.IotDeviceApiException;
 import org.disit.iotdeviceapi.logging.XLogger;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -109,10 +109,16 @@ public class LookupBuilder extends Builder {
                     Constructor<?> typeConstructor = typeClass.getConstructor();
                     DataType typeInst = (DataType)typeConstructor.newInstance();
                     typeInst = typeInst.fromString(oneValue.toString());
-                    if(typeInst == null) {
-                        throw new IotDeviceApiException(MessageFormat.format("Unable to produce \"{0}\" from \"{1}\".", new Object[]{type, oneValue.toString()}));
+                    // if(typeInst == null) {
+                    //     throw new IotDeviceApiException(MessageFormat.format("Unable to produce \"{0}\" from \"{1}\".", new Object[]{type, oneValue.toString()}));
+                    // }
+                    // tValue.add(typeInst);
+                    if(typeInst != null) {
+                        tValue.add(typeInst);
                     }
-                    tValue.add(typeInst);
+                    else {
+                        getXlogger().log(LookupBuilder.class.getName(), Level.WARNING, MessageFormat.format("Unable to produce \"{0}\" from \"{1}\".", new Object[]{type, oneValue.toString()}), oneValue);
+                    }
                 }
             }
             

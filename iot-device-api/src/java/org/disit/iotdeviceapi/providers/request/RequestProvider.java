@@ -33,9 +33,10 @@ public class RequestProvider extends Provider {
     public Object[] get(Object[] queries) {
         ArrayList<Object> pars = new ArrayList<>();
         for(Object query:queries) {
-            pars.add(getDatasource().getParameter(query.toString()));
+            if(getDatasource().getParameter(query.toString()) != null) pars.add(getDatasource().getParameter(query.toString()));
         }
-        return pars.toArray();
+        if(!pars.isEmpty()) return pars.toArray();
+        else return null;
     }
 
 }

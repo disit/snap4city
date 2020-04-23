@@ -28,7 +28,7 @@ import org.disit.iotdeviceapi.repos.Repos;
 import org.disit.iotdeviceapi.datatypes.DataType;
 import org.disit.iotdeviceapi.providers.Provider;
 import org.disit.iotdeviceapi.utils.Const;
-import org.disit.iotdeviceapi.utils.IotDeviceApiException;
+// import org.disit.iotdeviceapi.utils.IotDeviceApiException;
 import org.disit.iotdeviceapi.logging.XLogger;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -88,7 +88,7 @@ public class SwitchBuilder extends Builder {
 
             String type = getCfg().getAttribute(ParserConst.CFG_AT_DATA_TYPE);
             String dataId = getCfg().getAttribute(ParserConst.CFG_AT_DATA_ID);
-            if(output.isEmpty()) output.addAll(Arrays.asList(ref.getValue()));
+            if(output.isEmpty() && ref.getValue() != null) output.addAll(Arrays.asList(ref.getValue()));
             
             ArrayList<DataType> tOutput = new ArrayList<>();
             for(Object oneOutput: output) {
@@ -96,10 +96,16 @@ public class SwitchBuilder extends Builder {
                 Constructor<?> typeConstructor = typeClass.getConstructor();
                 DataType typeInst = (DataType)typeConstructor.newInstance();
                 typeInst = typeInst.fromString(oneOutput.toString());
-                if(typeInst == null) {
-                    throw new IotDeviceApiException(MessageFormat.format("Unable to produce \"{0}\" from \"{1}\".", new Object[]{type, oneOutput.toString()}));
+                // if(typeInst == null) {
+                //    throw new IotDeviceApiException(MessageFormat.format("Unable to produce \"{0}\" from \"{1}\".", new Object[]{type, oneOutput.toString()}));
+                // }
+                // tOutput.add(typeInst);
+                if(typeInst != null) {
+                    tOutput.add(typeInst);
                 }
-                tOutput.add(typeInst);
+                else {
+                    getXlogger().log(SwitchBuilder.class.getName(), Level.WARNING, MessageFormat.format("Unable to produce \"{0}\" from \"{1}\".", new Object[]{type, oneOutput.toString()}), oneOutput);
+                }                
             }
             
             return new Data(dataId, type, tOutput.toArray());

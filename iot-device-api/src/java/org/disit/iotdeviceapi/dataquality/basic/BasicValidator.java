@@ -128,7 +128,7 @@ public class BasicValidator extends Validator {
                             throw new IotDeviceApiException(exMsg);
                         }
                         if(cardinality < Integer.parseInt(minValueVarDataValue.toString())) {
-                            if(andOr.equals(BasicValidatorConst.CFG_VL_OR)) {
+                            if(BasicValidatorConst.CFG_VL_OR.equals(andOr)) {
                                 validationFailuresCounter++;
                                 String msg = MessageFormat.format("One of the data quality checks in an OR validation group failed: min cardinality constraint value \"{0}\" found in ref data \"{1}\" that is greater than the detected cardinality of data \"{2}\" that is equal to \"{3}\". Validating data: \"{4}\". ValidatOR: \"{5}\". ValidatION: \"{6}\".", 
                                     new Object[]{Integer.parseInt(minValueVarDataValue.toString()), validationRef, currentData.getId(), String.valueOf(cardinality), currentData.getId(), this.id, validationID});
@@ -163,7 +163,7 @@ public class BasicValidator extends Validator {
                     }
                     int minCardinality = Integer.parseInt(minCardinalityStr);
                     if(cardinality < minCardinality) {
-                        if(andOr.equals(BasicValidatorConst.CFG_VL_OR)) {
+                        if(BasicValidatorConst.CFG_VL_OR.equals(andOr)) {
                             validationFailuresCounter++;
                             String msg = MessageFormat.format("One of the data quality checks in an OR validation group failed: min cardinality constraint value \"{0}\" greater than the detected cardinality of data \"{1}\" that is equal to \"{2}\". Validating data: \"{3}\". ValidatOR: \"{4}\". ValidatION: \"{5}\".", 
                                 new Object[]{String.valueOf(minCardinality), currentData.getId(), String.valueOf(cardinality), currentData.getId(), this.id, validationID});
@@ -226,7 +226,7 @@ public class BasicValidator extends Validator {
                             throw new IotDeviceApiException(exMsg);
                         }
                         if(cardinality > Integer.parseInt(maxValueVarDataValue.toString())) {
-                            if(andOr.equals(BasicValidatorConst.CFG_VL_OR)) {
+                            if(BasicValidatorConst.CFG_VL_OR.equals(andOr)) {
                                 validationFailuresCounter++;
                                 String msg = MessageFormat.format("One of the data quality checks in an OR validation group failed: max cardinality constraint value \"{0}\" found in ref data \"{1}\" that is lower than the detected cardinality of data \"{2}\" that is equal to \"{3}\". Validating data: \"{4}\". ValidatOR: \"{5}\". ValidatION: \"{6}\".", 
                                     new Object[]{Integer.parseInt(maxValueVarDataValue.toString()), validationRef, currentData.getId(), String.valueOf(cardinality), currentData.getId(), this.id, validationID});
@@ -261,7 +261,7 @@ public class BasicValidator extends Validator {
                     }
                     int maxCardinality = Integer.parseInt(maxCardinalityStr);
                     if(cardinality > maxCardinality) {
-                        if(andOr.equals(BasicValidatorConst.CFG_VL_OR)) {
+                        if(BasicValidatorConst.CFG_VL_OR.equals(andOr)) {
                             validationFailuresCounter++;
                             String msg = MessageFormat.format("One of the data quality checks in an OR validation group failed: max cardinality constraint value \"{0}\" lower than the detected cardinality of data \"{1}\" that is equal to \"{2}\". Validating data: \"{3}\". ValidatOR: \"{4}\". ValidatION: \"{5}\".", 
                                 new Object[]{String.valueOf(maxCardinality), currentData.getId(), String.valueOf(cardinality), currentData.getId(), this.id, validationID});
@@ -349,7 +349,7 @@ public class BasicValidator extends Validator {
                     }
                     
                     if(!oneMatched) {
-                        if(andOr.equals(BasicValidatorConst.CFG_VL_OR)) {
+                        if(BasicValidatorConst.CFG_VL_OR.equals(andOr)) {
                             validationFailuresCounter++;
                             String msg = MessageFormat.format("One of the data quality checks in an OR validation group failed: no matches for value \"{0}\" of data \"{1}\" . ValidatOR: \"{2}\". ValidatION: \"{3}\".", 
                                 new Object[]{dObj.toString(), currentData.getId(), this.id, validationID});
@@ -369,7 +369,7 @@ public class BasicValidator extends Validator {
                     }
 
                     if(BasicValidatorConst.CFG_VAL_OPERAND_AND.equals(op) && oneFailed) {
-                        if(andOr.equals(BasicValidatorConst.CFG_VL_OR)) {
+                        if(BasicValidatorConst.CFG_VL_OR.equals(andOr)) {
                             validationFailuresCounter++;
                             String msg = MessageFormat.format("One of the data quality checks in an OR validation group failed: value \"{0}\" of data \"{1}\" does not match one or more of the values listed in the constraint. ValidatOR: \"{2}\". ValidatION: \"{3}\".", 
                                 new Object[]{dObj.toString(), currentData.getId(), this.id, validationID});
@@ -543,7 +543,7 @@ public class BasicValidator extends Validator {
                     }
                     
                     if(!oneMatched) {
-                        if(andOr.equals(BasicValidatorConst.CFG_VL_OR)) {
+                        if(BasicValidatorConst.CFG_VL_OR.equals(andOr)) {
                             validationFailuresCounter++;
                             String msg = MessageFormat.format("One of the data quality checks in an OR validation group failed: value \"{0}\" of data \"{1}\" greater than all threshold values listed in the constraint. ValidatOR: \"{2}\". ValidatION: \"{3}\".", 
                                 new Object[]{dObj.toString(), currentData.getId(), this.id, validationID});
@@ -563,7 +563,7 @@ public class BasicValidator extends Validator {
                     }
 
                     if(BasicValidatorConst.CFG_VAL_OPERAND_AND.equals(op) && oneFailed) {
-                        if(andOr.equals(BasicValidatorConst.CFG_VL_OR)) {
+                        if(BasicValidatorConst.CFG_VL_OR.equals(andOr)) {
                             validationFailuresCounter++;
                             String msg = MessageFormat.format("One of the data quality checks in an OR validation group failed: value \"{0}\" of data \"{1}\" greater than one or more of the threshold values listed in the constraint. ValidatOR: \"{2}\". ValidatION: \"{3}\".", 
                                 new Object[]{dObj.toString(), currentData.getId(), this.id, validationID});
@@ -739,7 +739,7 @@ public class BasicValidator extends Validator {
                     }
 
                     if(!oneMatched) {
-                        if(andOr.equals(BasicValidatorConst.CFG_VL_OR)) {
+                        if(BasicValidatorConst.CFG_VL_OR.equals(andOr)) {
                             validationFailuresCounter++;
                             String msg = MessageFormat.format("One of the data quality checks in an OR validation group failed: value \"{0}\" of data \"{1}\" lower than all threshold values listed in the constraint. ValidatOR: \"{2}\". ValidatION: \"{3}\".", 
                                     new Object[]{dObj.toString(), currentData.getId(), this.id, validationID});
@@ -759,7 +759,7 @@ public class BasicValidator extends Validator {
                     }
 
                     if(BasicValidatorConst.CFG_VAL_OPERAND_AND.equals(op) && oneFailed) {
-                        if(andOr.equals(BasicValidatorConst.CFG_VL_OR)) {
+                        if(BasicValidatorConst.CFG_VL_OR.equals(andOr)) {
                             validationFailuresCounter++;
                             String msg = MessageFormat.format("One of the data quality checks in an OR validation group failed: value \"{0}\" of data \"{1}\" lower than one or more of the threshold values listed in the constraint. ValidatOR: \"{2}\". ValidatION: \"{3}\".", 
                                     new Object[]{dObj.toString(), currentData.getId(), this.id, validationID});
@@ -806,7 +806,7 @@ public class BasicValidator extends Validator {
                 Object[] refValue = refData.getValue();
                 if(refValue == null) refValue = new Object[0];
                 if(cardinality != refValue.length) {
-                    if(andOr.equals(BasicValidatorConst.CFG_VL_OR)) {
+                    if(BasicValidatorConst.CFG_VL_OR.equals(andOr)) {
                         validationFailuresCounter++;
                         String msg = MessageFormat.format("One of the data quality checks in an OR validation group failed: \"{0}\" has cardinality {1}, while \"{2}\" has cardinality {3}. ValidatOR: \"{4}\". ValidatION: \"{5}\".", 
                                 new Object[]{currentData.getId(), cardinality, refData.getId(), refValue.length, this.id, validationID});

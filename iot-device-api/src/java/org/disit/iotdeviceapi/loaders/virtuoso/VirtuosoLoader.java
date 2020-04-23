@@ -24,6 +24,7 @@ import java.util.logging.Level;
 import org.disit.iotdeviceapi.repos.Repos;
 import org.disit.iotdeviceapi.datatypes.Data;
 import org.disit.iotdeviceapi.datatypes.Quad;
+import org.disit.iotdeviceapi.datatypes.UrlWrapper;
 import org.disit.iotdeviceapi.loaders.Loader;
 import org.disit.iotdeviceapi.utils.Const;
 import org.openrdf.query.QueryLanguage;
@@ -126,7 +127,8 @@ public class VirtuosoLoader extends Loader {
                             String queryProperty = MessageFormat.format(getFormatting().get(properties.getType()), new Object[]{ 
                                 properties.getValue().length > 1 ? properties.getValue()[i].toString() : properties.getValue()[0].toString()
                             });
-                            String queryFiller = MessageFormat.format(getFormatting().get(fillers.getType()), new Object[]{ 
+                            boolean isUri = new UrlWrapper().fromString(fillers.getValue().length > 1 ? fillers.getValue()[i].toString() : fillers.getValue()[0].toString()) != null;                                                                        
+                            String queryFiller = MessageFormat.format(getFormatting().get(isUri ? "uri" : fillers.getType()), new Object[]{ 
                                 fillers.getValue().length > 1 ? fillers.getValue()[i].toString() : fillers.getValue()[0].toString()
                             });
                             TupleQuery tq = this.mRepositoryConnection.prepareTupleQuery(QueryLanguage.SPARQL, 
@@ -146,7 +148,8 @@ public class VirtuosoLoader extends Loader {
                                             String queryGraph = MessageFormat.format(getFormatting().get(graphs.getType()), new Object[]{graph.toString()});
                                             String querySubject = MessageFormat.format(getFormatting().get(subjects.getType()), new Object[]{subject.toString()});
                                             String queryProperty = MessageFormat.format(getFormatting().get(properties.getType()), new Object[]{property.toString()});
-                                            String queryFiller = MessageFormat.format(getFormatting().get(fillers.getType()), new Object[]{filler.toString()});
+                                            boolean isUri = new UrlWrapper().fromString(filler.toString()) != null;                                                                                                                 
+                                            String queryFiller = MessageFormat.format(getFormatting().get(isUri ? "uri" : fillers.getType()), new Object[]{filler.toString()});
                                             TupleQuery tq = this.mRepositoryConnection.prepareTupleQuery(QueryLanguage.SPARQL, 
                                             MessageFormat.format("INSERT '{' GRAPH {0} '{' {1} {2} {3} '}' '}' ", 
                                                     new Object[]{queryGraph, querySubject, queryProperty, queryFiller}));
@@ -202,7 +205,8 @@ public class VirtuosoLoader extends Loader {
                             String queryProperty = MessageFormat.format(getFormatting().get(properties.getType()), new Object[]{ 
                                 properties.getValue().length > 1 ? properties.getValue()[i].toString() : properties.getValue()[0].toString()
                             });
-                            String queryFiller = MessageFormat.format(getFormatting().get(fillers.getType()), new Object[]{ 
+                            boolean isUri = new UrlWrapper().fromString(fillers.getValue().length > 1 ? fillers.getValue()[i].toString() : fillers.getValue()[0].toString()) != null;                                                                        
+                            String queryFiller = MessageFormat.format(getFormatting().get(isUri ? "uri" : fillers.getType()), new Object[]{ 
                                 fillers.getValue().length > 1 ? fillers.getValue()[i].toString() : fillers.getValue()[0].toString()
                             });
                             String deleteWhat = MessageFormat.format("{0} {1} {2} . ", new Object[]{querySubject, queryProperty, queryFiller});
@@ -223,7 +227,8 @@ public class VirtuosoLoader extends Loader {
                                             String queryGraph = MessageFormat.format(getFormatting().get(graphs.getType()), new Object[]{graph.toString()});
                                             String querySubject = MessageFormat.format(getFormatting().get(subjects.getType()), new Object[]{subject.toString()});
                                             String queryProperty = MessageFormat.format(getFormatting().get(properties.getType()), new Object[]{property.toString()});
-                                            String queryFiller = MessageFormat.format(getFormatting().get(fillers.getType()), new Object[]{filler.toString()});
+                                            boolean isUri = new UrlWrapper().fromString(filler.toString()) != null;                                          
+                                            String queryFiller = MessageFormat.format(getFormatting().get(isUri ? "uri" : fillers.getType()), new Object[]{filler.toString()});
                                             String deleteWhat = MessageFormat.format("{0} {1} {2} . ", new Object[]{querySubject, queryProperty, queryFiller});
                                             TupleQuery tq = this.mRepositoryConnection.prepareTupleQuery(QueryLanguage.SPARQL, 
                                                     MessageFormat.format("DELETE '{' GRAPH {0} '{' {1} '}' '}' ", 
@@ -284,7 +289,8 @@ public class VirtuosoLoader extends Loader {
                             String queryProperty = MessageFormat.format(getFormatting().get(properties.getType()), new Object[]{ 
                                 properties.getValue().length > 1 ? properties.getValue()[i].toString() : properties.getValue()[0].toString()
                             });
-                            String queryFiller = MessageFormat.format(getFormatting().get(fillers.getType()), new Object[]{ 
+                            boolean isUri = new UrlWrapper().fromString(fillers.getValue().length > 1 ? fillers.getValue()[i].toString() : fillers.getValue()[0].toString()) != null;                                                                        
+                            String queryFiller = MessageFormat.format(getFormatting().get(isUri ? "uri" : fillers.getType()), new Object[]{ 
                                 fillers.getValue().length > 1 ? fillers.getValue()[i].toString() : fillers.getValue()[0].toString()
                             });
                             if(!queryPerGraphAndSubject.containsKey(queryGraph)) {
@@ -325,7 +331,8 @@ public class VirtuosoLoader extends Loader {
                                             String queryGraph = MessageFormat.format(getFormatting().get(graphs.getType()), new Object[]{graph.toString()});
                                             String querySubject = MessageFormat.format(getFormatting().get(subjects.getType()), new Object[]{subject.toString()});
                                             String queryProperty = MessageFormat.format(getFormatting().get(properties.getType()), new Object[]{property.toString()});
-                                            String queryFiller = MessageFormat.format(getFormatting().get(fillers.getType()), new Object[]{filler.toString()});
+                                            boolean isUri = new UrlWrapper().fromString(filler.toString()) != null;   
+                                            String queryFiller = MessageFormat.format(getFormatting().get(isUri ? "uri" : fillers.getType()), new Object[]{filler.toString()});
                                             if(!queryPerGraphAndSubject.containsKey(queryGraph)) {
                                                 HashMap<String, String[]> bysubj = new HashMap<>();
                                                 queryPerGraphAndSubject.put(queryGraph, bysubj);

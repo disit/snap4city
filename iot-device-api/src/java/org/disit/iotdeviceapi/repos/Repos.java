@@ -52,4 +52,8 @@ public class Repos {
         return this.parameters.get(key);
     }
     
+    public HashMap<String, String> getParameters() {
+        return parameters;
+    }
+    
 }

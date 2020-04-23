@@ -23,6 +23,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
+import javax.activation.MimeType;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -40,6 +41,8 @@ import org.disit.iotdeviceapi.parser.Parser;
 import org.disit.iotdeviceapi.dataquality.Validator;
 import org.disit.iotdeviceapi.utils.IotDeviceApiException;
 import org.disit.iotdeviceapi.logging.XLogger;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 
 /**
  * 
@@ -195,8 +198,21 @@ public class Insert extends HttpServlet {
                     }
                 }
                                 
-                if(cfgNode.hasAttribute(ParserConst.CFG_AT_OUTPUT_DATA) && ParserConst.CFG_AT_OUTPUT_TRUE.equals(cfgNode.getAttribute(ParserConst.CFG_AT_OUTPUT_DATA)) && builtData.isTriggered()) {
-                    builtData.setOutput(true);
+                if(cfgNode.hasAttribute(ParserConst.CFG_AT_OUTPUT_DATA) && builtData.isTriggered()) {
+                    try {
+                        Data outputCfgData = data.get(cfgNode.getAttribute(ParserConst.CFG_AT_OUTPUT_DATA));
+                        JSONObject outputCfg = (JSONObject)JSONValue.parse(outputCfgData.getValue()[0].toString());
+                        builtData.setOutput(outputCfg);
+                    }
+                    catch(Exception outputException) {
+                        JSONObject outputCfg = new JSONObject();
+                        outputCfg.put(ParserConst.CFG_AT_OUTPUT_TYPE, "text/plain;charset=UTF-8");
+                        outputCfg.put(ParserConst.CFG_AT_OUTPUT_GLUE, "");
+                        outputCfg.put(ParserConst.CFG_AT_OUTPUT_TRAIL, "");
+                        outputCfg.put(ParserConst.CFG_AT_OUTPUT_TAIL, "");
+                        builtData.setOutput(outputCfg);
+                        xlogger.log(Insert.class.getName(), Level.WARNING, "Unable to load output configuration. Default configuration will be used.",outputException);
+                    }                    
                 }
                 
                 if(cfgNode.hasAttribute(ParserConst.CFG_AT_DATA_LOAD) && !ParserConst.CFG_RLDRID_VOLATILE.equals(cfgNode.getAttribute(ParserConst.CFG_AT_DATA_LOAD))) {
@@ -232,17 +248,46 @@ public class Insert extends HttpServlet {
                 response.setContentType("text/plain;charset=UTF-8");
                 String responseString = "DONE";
                 for(String id:data.keySet()) {
-                    if(data.get(id).isOutput()) {
+                    if(data.get(id).getOutput() != null) {
                         String newResponseString = new String();
                         if(null != data.get(id).getValue()) {
                             for(Object obj: data.get(id).getValue()) {
                                 if(null != obj) {
-                                    newResponseString = newResponseString+obj.toString();
+                                    String glue = "";
+                                    try { 
+                                        glue = data.get(id).getOutput().get(ParserConst.CFG_AT_OUTPUT_GLUE).toString(); 
+                                    } catch(Exception glueExc) { 
+                                        xlogger.log(ListStaticAttr.class.getName(), Level.WARNING, "Invalid or missing glue for output data. Empty string will be used.", data.get(id).getOutput());
+                                    }
+                                    newResponseString = newResponseString+glue+obj.toString();
+                                    try { 
+                                        response.setContentType(new MimeType(data.get(id).getOutput().get(ParserConst.CFG_AT_OUTPUT_TYPE).toString()).toString()); 
+                                    } catch(Exception e) {
+                                        xlogger.log(ListStaticAttr.class.getName(), Level.WARNING, "Invalid or missing Content-type for output data. text/plain will be used.", data.get(id).getOutput());
+                                    }
                                 }
                             }
                         }
                         if(!newResponseString.isEmpty()) {
-                            responseString = newResponseString;
+                            String trail = "";
+                            try { 
+                                trail = data.get(id).getOutput().get(ParserConst.CFG_AT_OUTPUT_TRAIL).toString(); 
+                            } catch(Exception trailExc) { 
+                                xlogger.log(ListStaticAttr.class.getName(), Level.WARNING, "Invalid or missing trail for output data. Empty string will be used.", data.get(id).getOutput());
+                            }
+                            String tail = "";
+                            try { 
+                                tail = data.get(id).getOutput().get(ParserConst.CFG_AT_OUTPUT_TAIL).toString(); 
+                            } catch(Exception tailExc) { 
+                                xlogger.log(ListStaticAttr.class.getName(), Level.WARNING, "Invalid or missing tail for output data. Empty string will be used.", data.get(id).getOutput());
+                            }
+                            String glue = "";
+                            try { 
+                                glue = data.get(id).getOutput().get(ParserConst.CFG_AT_OUTPUT_GLUE).toString(); 
+                            } catch(Exception glueExc) { 
+                                xlogger.log(ListStaticAttr.class.getName(), Level.WARNING, "Invalid or missing glue for output data. Empty string will be used.", data.get(id).getOutput());
+                            }
+                            responseString = trail.concat(newResponseString.substring(glue.length())).concat(tail);                        
                         }
                     }
                 }

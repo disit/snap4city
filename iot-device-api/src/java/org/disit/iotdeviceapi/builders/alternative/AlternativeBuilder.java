@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 import org.disit.iotdeviceapi.builders.Builder;
-import org.disit.iotdeviceapi.builders.constb.ConstBuilder;
 import org.disit.iotdeviceapi.datatypes.Data;
 import org.disit.iotdeviceapi.datatypes.DataType;
 import org.disit.iotdeviceapi.logging.XLogger;
@@ -29,7 +28,7 @@ import org.disit.iotdeviceapi.parser.ParserConst;
 import org.disit.iotdeviceapi.providers.Provider;
 import org.disit.iotdeviceapi.repos.Repos;
 import org.disit.iotdeviceapi.utils.Const;
-import org.disit.iotdeviceapi.utils.IotDeviceApiException;
+// import org.disit.iotdeviceapi.utils.IotDeviceApiException;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -75,10 +74,16 @@ public class AlternativeBuilder extends Builder {
                 Constructor<?> typeConstructor = typeClass.getConstructor();
                 DataType typeInst = (DataType)typeConstructor.newInstance();
                 typeInst = typeInst.fromString(oneValue.toString());
-                if(typeInst == null) {
-                    throw new IotDeviceApiException(MessageFormat.format("Unable to produce \"{0}\" from \"{1}\".", new Object[]{type, oneValue.toString()}));
+                // if(typeInst == null) {
+                //     throw new IotDeviceApiException(MessageFormat.format("Unable to produce \"{0}\" from \"{1}\".", new Object[]{type, oneValue.toString()}));
+                // }
+                // tValues.add(typeInst);
+                if(typeInst != null) {
+                    tValues.add(typeInst);
                 }
-                tValues.add(typeInst);
+                else {
+                    getXlogger().log(AlternativeBuilder.class.getName(), Level.WARNING, MessageFormat.format("Unable to produce \"{0}\" from \"{1}\".", new Object[]{type, oneValue.toString()}),oneValue);
+                }
             }
 
             if(!tValues.isEmpty()) return new Data(dataId, type, tValues.toArray());
@@ -87,7 +92,7 @@ public class AlternativeBuilder extends Builder {
         }
         catch(Exception e) {
             setStatus(Const.ERROR);
-            getXlogger().log(ConstBuilder.class.getName(), Level.SEVERE, "ConstBuilder error", e);
+            getXlogger().log(AlternativeBuilder.class.getName(), Level.SEVERE, "AlternativeBuilder error", e);
             return new Data(getCfg().getAttribute(ParserConst.CFG_AT_DATA_ID), getCfg().getAttribute(ParserConst.CFG_AT_DATA_TYPE), null); 
         }
     }

@@ -43,7 +43,7 @@ public class VirtuosoProvider extends Provider{
     
     @Override
     public Object[] get(Object[] queries) {
-        
+        if(queries == null) return null;
         RepositoryConnection conn = null;
         try {
             Repository repo;
@@ -75,9 +75,10 @@ public class VirtuosoProvider extends Provider{
                     Set<String> variables = bs.getBindingNames();
                     String row = "{\n";
                     for(String variable: variables) {
-                        row+= "\t\""+variable+"\": \""+bs.getValue(variable).stringValue()+"\"\n";
+                        row+= "\t\""+variable+"\": \""+bs.getValue(variable).stringValue()+"\",\n";
                     }
-                    row+="}";
+                    row = row.substring(0, row.length()-2).concat("\n");
+                    row+="}";                    
                     output.add(row);
                }
             }
