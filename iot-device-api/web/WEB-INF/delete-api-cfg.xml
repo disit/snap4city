@@ -227,6 +227,7 @@
 						<match-value>amqp</match-value>
 						<match-value>mqtt</match-value>
 						<match-value>ngsi</match-value>
+                        <match-value>ngsi w/MultiService</match-value>
 					</match>	
 				</pick-validator>
 			</validate>
@@ -290,6 +291,7 @@
                             </pick-validator>
                         </validate>
                         
+                        <!--
                         <validate ref="attribute-valueunit">
                             <pick-validator ref="basic">
                                 <same-cardinality id="attribute-valueunit.same-cardinality.attribute-valuename" lev="SEVERE" ref="attribute-valuename"/> 
@@ -300,6 +302,7 @@
                                 </match>
                             </pick-validator>
                         </validate>
+                        -->
 
                         <validate ref="latitude">
                             <pick-validator ref="basic">

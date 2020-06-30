@@ -226,6 +226,7 @@
 						<match-value>amqp</match-value>
 						<match-value>mqtt</match-value>
 						<match-value>ngsi</match-value>
+						<match-value>ngsi w/MultiService</match-value>
 					</match>	
 				</pick-validator>
 			</validate>

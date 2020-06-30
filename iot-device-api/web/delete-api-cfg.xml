@@ -227,6 +227,7 @@
 						<match-value>amqp</match-value>
 						<match-value>mqtt</match-value>
 						<match-value>ngsi</match-value>
+                        <match-value>ngsi w/MultiService</match-value>
 					</match>	
 				</pick-validator>
 			</validate>
@@ -278,8 +279,8 @@
                                     <match-value>url</match-value>
                                     <match-value>vector</match-value>
                                     <match-value>wkt</match-value>
-                                    <match-value>xml</match-value>
-                                </match>                                 
+                                    <match-value>xml</match-value>                       
+                                </match>
                             </pick-validator>
                         </validate>
                         
@@ -290,6 +291,7 @@
                             </pick-validator>
                         </validate>
                         
+                        <!--
                         <validate ref="attribute-valueunit">
                             <pick-validator ref="basic">
                                 <same-cardinality id="attribute-valueunit.same-cardinality.attribute-valuename" lev="SEVERE" ref="attribute-valuename"/> 
@@ -300,6 +302,7 @@
                                 </match>
                             </pick-validator>
                         </validate>
+                        -->
 
                         <validate ref="latitude">
                             <pick-validator ref="basic">
@@ -441,7 +444,7 @@
                     <alternative ref="computed-service-uri"/>
                 </data>
                                 
-                <data id="iot-sensor-uri-old" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#IoTSensor</data> 
+		<data id="iot-sensor-uri-old" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#IoTSensor</data> 
                 <data id="iot-sensor-uri" type="uri" builder="const" loader="volatile">http://www.w3.org/ns/sosa/Sensor</data>
 		
 		<data id="iot-actuator-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#IoTActuator</data>
@@ -525,8 +528,7 @@
 				<case><if>sensor</if><then ref="iot-sensor-uri-old"/></case>
 				<case><if>actuator</if><then ref="iot-actuator-uri"/></case>
 			</switch>
-		</data>
-		
+		</data>		
 
                 <data id="attribute-valuename" type="string" builder="jsonp" loader="volatile">
 			<source ref="request-body"/>
@@ -604,14 +606,31 @@
                     <switch ref="value_type_mapping_array">
             		<case><if ref="air-quality-uri" /><then ref="air-quality-uri" /> </case>
                     </switch>
-                </data>       
+                </data>  
+                
+                <data id="subnature-uri" type="uri" builder="jsonp" loader="volatile">
+			<source ref="request-body"/>
+			<query>subnature</query>
+		</data>
+                                                
+                <data id="subnature-name" type="string" builder="jsonp" loader="volatile">
+			<source ref="request-body"/>
+			<query>subnature</query>
+		</data>
+                
+                <data id="built-subnature-uri" type="uri" builder="template" loader="volatile">
+                        <template>http://www.disit.org/km4city/schema#{0}</template>
+			<param index="0" value="subnature-name"/>
+		</data>
                 
                 <data id="readytouse_value_type_mapping_array" type="uri" builder="alternative" loader="volatile">
-			<alternative ref="airQualityDocet"/>
+			<alternative ref="subnature-uri"/>
+                        <alternative ref="built-subnature-uri"/>
+                        <alternative ref="airQualityDocet"/>
                         <alternative ref="value_type_mapping_array"/>
                         <alternative ref="device-type-old"/>
-		</data>                                                  	                 
-                       
+		</data>              	                                       
+                
                 <data id="graph-uri.service-uri.is-a.value_type_mapping_array" type="quad" builder="bean" loader="virtuoso">
 			<member name="graph" ref="graph-uri"/> 
 			<member name="subject" ref="service-uri"/> 
@@ -712,7 +731,7 @@
 			<member name="property" ref="is-a"/>
 			<member name="filler" ref="device-type"/>
 		</data>		
-
+		
                 <!-- -->
                 <data id="device-organization-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#organization</data>
 		<data id="graph-uri.service-uri.device-organization-uri.organization" type="quad" builder="bean" loader="virtuoso">
@@ -1078,7 +1097,7 @@
 			<member name="filler" ref="attribute-validity"/> 
 		</data>
                 
-                <!-- Private/Public device (useless from 2019-04-16 onward ) -->
+                <!-- Private/Public device (useless from 2019-04-16 onward) -->
                 <data id="avail-property-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#ownership</data>
                 <data id="device-avail-query" type="string" builder="template" loader="volatile">
 			<template>select ?avail '{' graph &lt;{0}&gt; '{' optional '{' &lt;{1}&gt; &lt;{2}&gt; ?v '}' . bind(if(bound(?v),str(?v),"public") as ?avail ) '}' '}' </template>
@@ -1097,19 +1116,21 @@
                 	<source ref="device-avail-json"/>
 			<query>avail</query>
                 </data>
-                
+
                 <!-- Visibility -->
                 <data id="device-visib" type="string" builder="jsonp" loader="volatile">
 			<source ref="request-body"/>
 			<query>visibility</query>
                         <default ref="device-avail-from-virtuoso"/>
 		</data>
+                
                 <!-- Ownership -->
                 <data id="device-owner" type="string" builder="jsonp" loader="volatile">
 			<source ref="request-body"/>
 			<query>ownership</query>
                         <default ref="device-visib"/>
 		</data>
+                
                 <!-- Visibility || Ownership -->
                 <data id="device-ownership" type="string" builder="switch" loader="volatile">
 			<switch ref="device-owner">
@@ -1120,14 +1141,61 @@
 			</switch>
 		</data>
                 
-                <!--
+                <!--  not inserted from 2019-04-16 onward
                 <data id="graph-uri.service-uri.avail-property-uri.device-avail" type="quad" builder="bean" loader="virtuoso">
 			<member name="graph" ref="graph-uri"/> 
 			<member name="subject" ref="service-uri"/> 
 			<member name="property" ref="avail-property-uri"/>
                         <member name="filler" ref="device-ownership"/>
-		</data>
+		</data> 
                 -->
+                
+                <!-- Static attributes -->
+                
+                <data id="static-attributes-query" type="string" builder="template" loader="volatile">                    
+                    <template>
+                        select distinct ?uri ?label '{'
+                            '{' select ?uri ?label '{' ?uri &lt;http://www.w3.org/2000/01/rdf-schema#domain&gt; &lt;{0}&gt; ; &lt;http://www.w3.org/2000/01/rdf-schema#label&gt; ?label . filter(lang(?label) = ''en'') '}' '}' 
+                            union
+                            '{' select ?uri ?label '{' bind( &lt;http://schema.org/addressLocality&gt; as ?uri ) . bind( "Locality" as ?label ) . &lt;{0}&gt; a owl:Class '}' '}'
+                            union
+                            '{' select ?uri ?label '{' bind( &lt;http://schema.org/addressRegion&gt; as ?uri ) . bind( "Region" as ?label ) . &lt;{0}&gt; a owl:Class '}' '}'        
+                            union
+                            '{' select ?uri ?label '{' bind( &lt;http://schema.org/streetAddress&gt; as ?uri ) . bind( "Street address" as ?label ) . &lt;{0}&gt; a owl:Class '}' '}'   
+                            union
+                            '{' select ?uri ?label '{' bind( &lt;http://www.disit.org/km4city/schema#houseNumber&gt; as ?uri ) . &lt;http://www.disit.org/km4city/schema#houseNumber&gt; &lt;http://www.w3.org/2000/01/rdf-schema#label&gt; ?label . filter(lang(?label) = ''en'') . &lt;{0}&gt; a owl:Class '}' '}'
+                            union
+                            '{' select ?uri ?label '{' bind( &lt;http://www.disit.org/km4city/schema#isInRoad&gt; as ?uri ) . &lt;http://www.disit.org/km4city/schema#isInRoad&gt; &lt;http://www.w3.org/2000/01/rdf-schema#label&gt; ?label . filter(lang(?label) = ''en'') . &lt;{0}&gt; a owl:Class '}' '}'
+                        '}'
+                    </template>
+                    <param index="0" value="readytouse_value_type_mapping_array"/>
+                </data>             
+                
+                <data id="static-attributes-result" type="string" builder="lookup" loader="volatile">
+			<lookup>
+				<priority>1</priority>
+				<provider>virtuoso-provider</provider>
+				<query ref="static-attributes-query" />
+			</lookup>
+		</data>
+                
+                <data id="static-attributes-uris" type="uri" builder="jsonp" loader="volatile">
+			<source ref="static-attributes-result"/>
+			<query>uri</query>                        
+		</data>
+                
+                <data id="static-attributes-values" type="string" builder="jsonp" loader="volatile">
+			<source ref="request-body"/>
+			<query ref="static-attributes-uris" onMissing="clean"/>
+		</data>
+ 
+                <data id="graph-uri.service-uri.static-attributes-uris.static-attributes-values" type="quad" builder="bean" loader="virtuoso">
+			<member name="graph" ref="graph-uri"/> 
+			<member name="subject" ref="service-uri"/> 
+			<member name="property" ref="static-attributes-uris"/>
+			<member name="filler" ref="static-attributes-values"/> 
+		</data>
+
                               
 	</process>
 
