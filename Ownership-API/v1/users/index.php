@@ -61,39 +61,3 @@ if(isset($result['result']['access_token'])) {
 }
 
 ownership_access_log(['op'=>$OPERATION,'check'=>$checkUname, 'user'=>$uinfo->username,'role'=>$uinfo->mainRole,'result'=>$rslt]);
-
-function http_get($url, $token) {
-  $opts = array('http' =>
-      array(
-          'method'  => 'GET',
-          "header" => "Accept: application/json\r\nAuthorization: Bearer $token\r\n"
-      )
-  );
-  
-  # Create the context
-  $context = stream_context_create($opts);
-  # Get the response (you can use this for GET)
-  $result = file_get_contents($url, false, $context);
-  //echo "result:$result\n";
-  //var_dump($http_response_header);
-  return array("httpcode"=>explode(" ",$http_response_header[0])[1],"result"=>json_decode($result, true));
-}
-
-function http_post($url, $data, $mimetype) {
-  $opts = array('http' =>
-      array(
-          'method'  => 'POST',
-          'header'  => 'Content-type: '.$mimetype,
-          'content' => $data,
-          'ignore_errors' => true 
-      )
-  );
-  
-  # Create the context
-  $context = stream_context_create($opts);
-  # Get the response (you can use this for GET)
-  $result = file_get_contents($url, false, $context);
-  //echo "result:$result\n";
-  //var_dump($http_response_header);
-  return array("httpcode"=>explode(" ",$http_response_header[0])[1],"result"=>json_decode($result, true));
-}

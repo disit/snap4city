@@ -45,6 +45,8 @@ if(isset($o->elementDetails)) {
   $elementDetails = $o->elementDetails;
   $o->elementDetails=json_encode($o->elementDetails);
 }
+
+//check id manadtory attrs are present
 $mandatoryAttrs = array('elementId','elementType','elementName');
 foreach($mandatoryAttrs as $a) {
   if(!isset($o->$a)) {
@@ -54,7 +56,9 @@ foreach($mandatoryAttrs as $a) {
     exit;  
   }
 }
-$validTypes = array('AppID','IOTID','ServiceURI','ServiceGraphID','DashboardID','DAAppID','BrokerID','ModelID','PortiaID','HeatmapID','DeviceGroupID');
+
+//check if it is of a valid type
+$validTypes = array('AppID','IOTID','ServiceURI','ServiceGraphID','DashboardID','DAAppID','BrokerID','ModelID','PortiaID','HeatmapID','DeviceGroupID','SynopticTmplID','SynopticID');
 if(!in_array($o->elementType,$validTypes)) {
     header("HTTP/1.1 400 BAD REQUEST");
     echo '{"error":"invalid elementType '.$o->elementType.'"}';
@@ -65,6 +69,7 @@ $optionalAttrs = array('elementUrl','elementDetails');
 
 $db=mysqli_connect($db_host,$db_user,$db_pwd,$database) or die("DB connection error ");
 
+//check if it is already present
 if($uinfo->mainRole=='RootAdmin')
   $userFilter = "1 ";
 else
@@ -102,6 +107,12 @@ if($r && $c=mysqli_fetch_array($r)) {
       exit;          
     }
   }
+  //check if it is registering an edge iotapp
+  if(isset($_REQUEST['wstunnel']) && $_REQUEST['wstunnel']=='true' && 
+          $o->elementType=='AppID' && isset($elementDetails->edgegateway_type)) {       
+      $wstunnel_result = 'wstun: ' . wsTunnelRegisterClient($o);
+  }  
+  //start update data
   $attrs = array('username','elementName','elementUrl','elementDetails');
   $sets = array();
   foreach($attrs as $a) {
@@ -145,6 +156,13 @@ if($r && $c=mysqli_fetch_array($r)) {
   $r = mysqli_query($db, $q);
   if($r && ($c=mysqli_fetch_array($r)) && $c[0]<$limit) {
     $o->username=$uinfo->username;
+
+    //check if it is registering an edge iotapp
+    if(isset($_REQUEST['wstunnel']) && $_REQUEST['wstunnel']=='true' && 
+            $o->elementType=='AppID' && isset($elementDetails->edgegateway_type)) {       
+      $wstunnel_result = 'wstun: ' . wsTunnelRegisterClient($o);
+    }
+
     //insert
     $attrs =  array_merge(array('username'), $mandatoryAttrs, $optionalAttrs);
     $values = array();
@@ -178,7 +196,7 @@ if($r && $c=mysqli_fetch_array($r)) {
     echo '{"error":"reached limit of '.$limit.'","limit":'.$limit.',"current":'.$c[0].'}';
     ownership_access_log(['op'=>$OPERATION,'user'=>$uinfo->username,'role'=>$uinfo->mainRole,'result'=>" for $org:".$o->elementType." reached limit ".$c[0]."/$limit"]);
     exit;          
-  }
+  }  
 }
 
 if(isset($o->elementDetails)) {
@@ -186,4 +204,4 @@ if(isset($o->elementDetails)) {
 }
 echo json_encode($o);
 
-ownership_access_log(['op'=>$OPERATION,'user'=>$uinfo->username,'type'=>$o->elementType,'id'=>$o->elementId,'result'=>'SUCCESS']);
+ownership_access_log(['op'=>$OPERATION,'user'=>$uinfo->username,'type'=>$o->elementType,'id'=>$o->elementId,'result'=>'SUCCESS '.$wstunnel_result]);

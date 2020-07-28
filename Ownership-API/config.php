@@ -49,3 +49,18 @@ $ldapPort = '389';
 $ldapBaseDN = 'dc=ldap,dc=organization,dc=org';
 $ldapAdminDN = 'cn=admin,dc=ldap,dc=organization,dc=org';
 $ldapAdminPwd = 'password';
+
+//set the keys with the same values used in dashboard-builder
+$encryptionMethod = "AES-256-CBC";
+$encryptionInitKey = "...";
+$encryptionIvKey = "...";
+
+$datamanager_api_url = 'http://localhost/mypersonaldata/api';
+
+// uncomment if using wstunnel server for edge iotapps
+#$wstunnel_db_host = 'localhost';
+#$wstunnel_database = 'wstunnel';
+#$wstunnel_db_user = 'user';
+#$wstunnel_db_passw = 'password';
+
+#$iot_app_edge_url = 'http://localhost/edge/';

@@ -72,6 +72,9 @@ if($limit || $offset) {
   $count = $o[0];
 }
 
+header("Access-Control-Allow-Origin: *");
+header("Content-type: application/json");
+
 $r=mysqli_query($db,"SELECT * FROM ownership WHERE $deleteFilter AND ".$userFilter.$filter.$limit.$offset) or die("query error: ".  mysqli_error($db));
 if(isset($count)) {
   echo '{ "count":'.$count.", \"data\":\n";
@@ -90,6 +93,15 @@ while($o=mysqli_fetch_object($r)) {
   }
   if($o->elementDetails!=null) {
     $o->elementDetails=json_decode($o->elementDetails);
+  }
+  if(isset($_REQUEST['delegations'])) {
+    $delegations = getElementDelegations($o->elementId, $o->elementType, $accessToken);
+    $o->usersDelegations = $delegations['users'];
+    $o->orgsDelegations = $delegations['orgs'];
+    $o->grpsDelegations = $delegations['grps'];
+  }
+  if(isset($encryptionMethod)) {
+    $o->uid = encryptOSSL($o->username);
   }
   echo json_encode($o)."\n";
   $i++;
