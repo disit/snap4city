@@ -118,6 +118,9 @@
             <th scope="col" onclick="KPIDataSorter.setSortOnField('username');KPIDataTabler.renderTable();"
                 style="cursor: pointer;">Username
                 {{#sortusernameASC}}&darr;{{/sortusernameASC}} {{#sortusernameDESC}}&uarr;{{/sortusernameDESC}}</th>
+            <th scope="col" onclick="KPIDataSorter.setSortOnField('organizations');KPIDataTabler.renderTable();"
+                style="cursor: pointer;">Organization
+                {{#sortorganizationsASC}}&darr;{{/sortorganizationsASC}} {{#sortorganizationsDESC}}&uarr;{{/sortorganizationsDESC}}</th>
             <th scope="col">Controls</th>
             <th scope="col">Data</th>
             <!-- {{#enableEdit}} -->
@@ -151,6 +154,7 @@
                 <!-- {{/enableEdit}} -->
             </td>
             <td>{{username}}</td>
+            <td>{{organizations}}</td>
             <td><button type="button" onclick="KPIDataTabler.showKPIDataModal({{id}});"
                     class="btn viewDashBtn">View</button>
                 <!-- {{#enableEdit}} -->

@@ -12,7 +12,7 @@ var KPIEditor = {
             onLoad: 'check-sso'
         }).success(
             function (authenticated) {
-                console.log(authenticated);
+                //console.log(authenticated);
                 if (authenticated) {
                     console.log("AUTHENTICATED");
                     console.log("Render Table");
@@ -39,6 +39,10 @@ var KPIEditor = {
         } else {
             alert("Insert Username");
         }
+    },
+
+    isRoot: function(){
+        return KPIEditor.keycloak.tokenParsed.roles.includes("RootAdmin");
     },
 
     checkParameters: function () {

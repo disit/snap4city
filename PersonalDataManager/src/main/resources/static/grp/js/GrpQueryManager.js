@@ -8,7 +8,12 @@ var GrpQueryManager = {
     
     createGetDeviceGrpTableQuery: function (privacy, pageNumber, pageSize, sortDirection, sortBy, searchKey, accessToken) {
         if(privacy != "public") {
-            return "devicegroup/" + privacy + "/?sourceRequest=" + GrpQueryManager.sourceRequest + "&accessToken=" + accessToken + (pageNumber || pageNumber == 0 ? "&pageNumber=" + pageNumber : "") + (pageSize ? "&pageSize=" + pageSize : "") + (sortDirection ? "&sortDirection=" + sortDirection : "") + (sortBy ? "&sortBy=" + sortBy : "") + (searchKey ? "&searchKey=" + searchKey : "");
+        	if (privacy != ""){
+        		return "devicegroup/" + privacy + "/?sourceRequest=" + GrpQueryManager.sourceRequest + "&accessToken=" + accessToken + (pageNumber || pageNumber == 0 ? "&pageNumber=" + pageNumber : "") + (pageSize ? "&pageSize=" + pageSize : "") + (sortDirection ? "&sortDirection=" + sortDirection : "") + (sortBy ? "&sortBy=" + sortBy : "") + (searchKey ? "&searchKey=" + searchKey : "");
+        	} else {
+        		return "devicegroup/?sourceRequest=" + GrpQueryManager.sourceRequest + "&accessToken=" + accessToken + (pageNumber || pageNumber == 0 ? "&pageNumber=" + pageNumber : "") + (pageSize ? "&pageSize=" + pageSize : "") + (sortDirection ? "&sortDirection=" + sortDirection : "") + (sortBy ? "&sortBy=" + sortBy : "") + (searchKey ? "&searchKey=" + searchKey : "");
+        	}
+            
         }
         else {
             return "public/devicegroup/?sourceRequest=" + GrpQueryManager.sourceRequest + "&accessToken=" + accessToken + (pageNumber || pageNumber == 0 ? "&pageNumber=" + pageNumber : "") + (pageSize ? "&pageSize=" + pageSize : "") + (sortDirection ? "&sortDirection=" + sortDirection : "") + (sortBy ? "&sortBy=" + sortBy : "") + (searchKey ? "&searchKey=" + searchKey : "");

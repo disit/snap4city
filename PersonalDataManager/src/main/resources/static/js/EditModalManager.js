@@ -136,7 +136,7 @@ var EditModalManager = {
 
     errorCheckOrganization: function (_error) {
         console.log(_error);
-        if (_error != null) {
+        if (_error != null && typeof _error == "string") {
             var organization = _error.substring(_error.indexOf("=") + 1, _error.indexOf(","));
             if (organization.toLowerCase() == "helsinki") {
                 EditModalManager.currentCoordinates = [60.169286, 24.939103];
@@ -152,51 +152,111 @@ var EditModalManager = {
         EditModalManager.createMap();
     },
 
-    createNatureSelection: function () {
+    createNatureSelection: function (_savedNature, _savedSubNature) {
+        EditModalManager.savedNature = _savedNature;
+        EditModalManager.savedSubNature = _savedSubNature;
         $.ajax({
-            url: "json/categories.json",
-            async: false,
+            url: "https://processloader.snap4city.org/processloader/api/dictionary/?type=nature",
             cache: false,
             dataType: "json",
             success: function (_data) {
                 var natureArray = [];
-                for (var i = 0; i < _data.length; i++) {
+                for (var i = 0; i < _data.content.length; i++) {
                     natureArray.push({
-                        "key": _data[i].key,
-                        "value": _data[i].title
+                        "key": _data.content[i].value,
+                        "id": _data.content[i].id,
+                        "value": _data.content[i].label
                     });
                 }
                 ViewManager.render({
                     "arrayToSelection": natureArray
                 }, "#selectNatureKPIDataEdit", "templates/arrayToSelection.mst.html");
                 $("#selectNatureKPIDataEdit").on('change', function () {
-                    EditModalManager.createSubNatureSelection($("#selectNatureKPIDataEdit").val());
+                    $("#selectSubNatureKPIDataEdit").html("");
+                    EditModalManager.createSubNatureSelection($("#selectNatureKPIDataEdit").find(':selected').attr('data-id'));
                 });
+                $("#selectNatureKPIDataEdit").val(EditModalManager.savedNature).trigger('change');
+                EditModalManager.savedNature = "";
             }
         });
     },
 
     createSubNatureSelection: function (_nature) {
         $.ajax({
-            url: "json/categories.json",
-            async: false,
+            url: "https://processloader.snap4city.org/processloader/api/dictionary/?type=subnature&parent=" + _nature,
             cache: false,
             dataType: "json",
             success: function (_data) {
                 var subNatureArray = [];
-                for (var i = 0; i < _data.length; i++) {
-                    if (_data[i].key == _nature) {
-                        for (var j = 0; j < _data[i].children.length; j++) {
-                            subNatureArray.push({
-                                "key": _data[i].children[j].key,
-                                "value": _data[i].children[j].title
-                            });
-                        }
-                    }
+                for (var i = 0; i < _data.content.length; i++) {
+                    subNatureArray.push({
+                        "key": _data.content[i].value,
+                        "id": _data.content[i].id,
+                        "value": _data.content[i].label
+                    });
                 }
                 ViewManager.render({
                     "arrayToSelection": subNatureArray
                 }, "#selectSubNatureKPIDataEdit", "templates/arrayToSelection.mst.html");
+                
+                if (EditModalManager.savedSubNature != ""){
+                    $("#selectSubNatureKPIDataEdit").val(EditModalManager.savedSubNature);
+                    EditModalManager.savedSubNature = "";
+                }
+            }
+        });
+    },
+
+    createValueTypeSelection: function (_savedValueType, _savedValueUnit) {
+        EditModalManager.savedValueType = _savedValueType;
+        EditModalManager.savedValueUnit = _savedValueUnit;
+        $.ajax({
+            url: "https://processloader.snap4city.org/processloader/api/dictionary/?type=valuetype",
+            cache: false,
+            dataType: "json",
+            success: function (_data) {
+                var valueTypeArray = [];
+                for (var i = 0; i < _data.content.length; i++) {
+                    valueTypeArray.push({
+                        "key": _data.content[i].value,
+                        "id": _data.content[i].id,
+                        "value": _data.content[i].label
+                    });
+                }
+                ViewManager.render({
+                    "arrayToSelection": valueTypeArray
+                }, "#selectValueTypeKPIDataEdit", "templates/arrayToSelection.mst.html");
+                $("#selectValueTypeKPIDataEdit").on('change', function () {
+                    $("#selectValueUnitKPIDataEdit").html("");
+                    EditModalManager.createValueUnitSelection($("#selectValueTypeKPIDataEdit").find(':selected').attr('data-id'));
+                });
+                $("#selectValueTypeKPIDataEdit").val(EditModalManager.savedValueType).trigger('change');
+                EditModalManager.savedValueType = "";
+            }
+        });
+    },
+
+    createValueUnitSelection: function (_valuetype) {
+        $.ajax({
+            url: "https://processloader.snap4city.org/processloader/api/dictionary/?type=valueunit&parent=" + _valuetype,
+            cache: false,
+            dataType: "json",
+            success: function (_data) {
+                var valueUnitArray = [];
+                for (var i = 0; i < _data.content.length; i++) {
+                    valueUnitArray.push({
+                        "key": _data.content[i].value,
+                        "id": _data.content[i].id,
+                        "value": _data.content[i].label
+                    });
+                }
+                ViewManager.render({
+                    "arrayToSelection": valueUnitArray
+                }, "#selectValueUnitKPIDataEdit", "templates/arrayToSelection.mst.html");
+                if (EditModalManager.savedValueUnit != ""){
+                    $("#selectValueUnitKPIDataEdit").val(EditModalManager.savedValueUnit);
+                    EditModalManager.savedValueUnit = "";
+                }
             }
         });
     }

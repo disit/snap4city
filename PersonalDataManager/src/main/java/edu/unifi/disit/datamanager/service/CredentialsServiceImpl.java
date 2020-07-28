@@ -67,7 +67,7 @@ public class CredentialsServiceImpl implements ICredentialsService {
 		List<String> roles = (List<String>) SecurityContextHolder.getContext().getAuthentication().getCredentials();
 		String usernameSC = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		// assure the username is the same than the specified one
-		if ((!usernameSC.equals(username)) && (!roles.contains(UserRolesType.RootAdmin.toString())))
+		if ((!usernameSC.equalsIgnoreCase(username)) && (!roles.contains(UserRolesType.RootAdmin.toString())))
 			throw new CredentialsException(messages.getMessage("credentials.ko.usernameowner", null, lang));
 	}
 

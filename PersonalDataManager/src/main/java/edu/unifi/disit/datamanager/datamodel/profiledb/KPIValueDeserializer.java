@@ -63,7 +63,7 @@ public class KPIValueDeserializer extends StdDeserializer<KPIValue> {
 					try {
 						kpivalues.setDataTime(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(jnode.get("dataTime").asText()));
 					} catch (ParseException d) {
-						logger.error("Parsing error {}", d);
+						logger.warn("Parsing error date {}", jnode.get("dataTime").asText());
 					}
 				}
 			}
@@ -78,9 +78,9 @@ public class KPIValueDeserializer extends StdDeserializer<KPIValue> {
 					kpivalues.setInsertTime(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX").parse(jnode.get("insertTime").asText()));
 				} catch (ParseException e) {
 					try {
-						kpivalues.setInsertTime(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(jnode.get("dataTime").asText()));
+						kpivalues.setInsertTime(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(jnode.get("insertTime").asText()));
 					} catch (ParseException d) {
-						logger.error("Parsing error {}", d);
+						logger.warn("Parsing error date {}", jnode.get("insertTime").asText());
 					}
 				}
 			}

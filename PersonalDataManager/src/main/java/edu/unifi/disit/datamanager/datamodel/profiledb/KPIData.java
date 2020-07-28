@@ -13,6 +13,7 @@
    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA. */
 package edu.unifi.disit.datamanager.datamodel.profiledb;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -33,7 +34,9 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "kpidata")
-public class KPIData implements Comparable<KPIData> {
+public class KPIData implements Comparable<KPIData>, Serializable {
+
+	private static final long serialVersionUID = 1877829622537559204L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -13,20 +13,26 @@
    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA. */
 package edu.unifi.disit.datamanager.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Vector;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.unifi.disit.datamanager.datamodel.ldap.LDAPUserDAO;
 import edu.unifi.disit.datamanager.datamodel.profiledb.Delegation;
@@ -36,15 +42,6 @@ import edu.unifi.disit.datamanager.datamodel.profiledb.OwnershipDAO;
 import edu.unifi.disit.datamanager.datamodel.sensors.Sensor;
 import edu.unifi.disit.datamanager.exception.CredentialsException;
 import edu.unifi.disit.datamanager.exception.DelegationNotValidException;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Vector;
-import javax.servlet.http.HttpServletRequest;
-import org.springframework.data.domain.PageRequest;
 
 @Service
 public class DeviceGroupServiceImpl implements IDeviceGroupService {
@@ -65,241 +62,243 @@ public class DeviceGroupServiceImpl implements IDeviceGroupService {
 
 	@Autowired
 	ICredentialsService credentialsService;
-        
-        @Autowired
+
+	@Autowired
 	ISensorService sensorService;
 
-	@PersistenceContext 
-	private EntityManager entityManager;  
-        
-        @Autowired
-        private HttpServletRequest request;
+	@PersistenceContext
+	private EntityManager entityManager;
 
-    @Override
-    public DeviceGroup saveDeviceGroup(DeviceGroup deviceGroup) throws CredentialsException {
-        logger.debug("saveDeviceGroup INVOKED on deviceGroup {}", deviceGroup.getName());
+	@Autowired
+	private HttpServletRequest request;
+
+	@Override
+	public DeviceGroup saveDeviceGroup(DeviceGroup deviceGroup) throws CredentialsException {
+		logger.debug("saveDeviceGroup INVOKED on deviceGroup {}", deviceGroup.getName());
 		if (deviceGroup.getUsername() == null || deviceGroup.getUsername().equals("")) {
 			deviceGroup.setUsername(credentialsService.getLoggedUsername(new Locale("en")));
 		}
 		if (deviceGroup.getOwnership() == null || deviceGroup.getOwnership().equals("")) {
 			deviceGroup.setOwnership("private");
 		}
-		if(deviceGroup.getInsertTime() == null) deviceGroup.setInsertTime(new Date());
-                deviceGroup.setUpdateTime(new Date());
+		if (deviceGroup.getInsertTime() == null)
+			deviceGroup.setInsertTime(new Date());
+		deviceGroup.setUpdateTime(new Date());
 		deviceGroup.setOrganizations(
 				ldapRepository.getOUnames(credentialsService.getLoggedUsername(new Locale("en"))).toString());
 		return deviceGroupRepository.save(deviceGroup);
-    }
+	}
 
-    @Override
-    public boolean makeDeviceGroupPublic(String username, Long grpId, String elementType, Locale lang) throws DelegationNotValidException, CredentialsException {
-        Delegation delegation = new Delegation(username, "ANONYMOUS", null, null, grpId.toString(), elementType,
+	@Override
+	public boolean makeDeviceGroupPublic(String username, Long grpId, String elementType, Locale lang) throws DelegationNotValidException, CredentialsException {
+		Delegation delegation = new Delegation(username, "ANONYMOUS", null, null, grpId.toString(), elementType,
 				new Date(), null, null, null);
 
-        logger.debug("makeDeviceGroupPublic");
+		logger.debug("makeDeviceGroupPublic");
 
-        if (delegationService.postDelegationFromUser(username, delegation, lang) != null) {
-                logger.debug("makeDeviceGroupPublic TRUE");
-                return true;
-        }
+		if (delegationService.postDelegationFromUser(username, delegation, lang) != null) {
+			logger.debug("makeDeviceGroupPublic TRUE");
+			return true;
+		}
 
-        logger.debug("makeDeviceGroupPublic FALSE");
-        return false;
-        
-    }
+		logger.debug("makeDeviceGroupPublic FALSE");
+		return false;
 
-    @Override
-    public boolean makeDeviceGroupPrivate(Long grpId, Locale lang) throws DelegationNotValidException, CredentialsException {
-        List<Delegation> listDelegation = delegationService.findByElementIdNoPages(Long.toString(grpId));
+	}
 
-        logger.debug("makeDeviceGroupPrivate");
+	@Override
+	public boolean makeDeviceGroupPrivate(Long grpId, Locale lang) throws DelegationNotValidException, CredentialsException {
+		List<Delegation> listDelegation = delegationService.findByElementIdNoPages(Long.toString(grpId));
 
-        listDelegation.removeIf(x -> !x.getUsernameDelegated().equals("ANONYMOUS"));
+		logger.debug("makeDeviceGroupPrivate");
 
-        if (!listDelegation.isEmpty()) {
-                listDelegation.forEach(x -> {
-                        x.setDeleteTime(new Date());
-                        try {
-                                delegationService.putDelegationFromUser(x.getUsernameDelegator(), x, x.getId(), lang);
-                        } catch (DelegationNotValidException e) {
-                                logger.warn("Delegation Not Valid", e);
-                        }catch (CredentialsException e) {
-                                logger.warn("Rights exception", e);
-                        }
-                });
-        }
-        return false;
-        
-    }
+		listDelegation.removeIf(x -> !x.getUsernameDelegated().equals("ANONYMOUS"));
 
-    @Override
-    public Page<DeviceGroup> findAll(PageRequest pageRequest) throws CredentialsException, MalformedURLException, IOException {
-        logger.debug("findAll INVOKED on pageNumber {}, pageSize {}", pageRequest.getPageNumber(), pageRequest.getPageSize());
-	Page<DeviceGroup> groups = deviceGroupRepository.findByDeleteTimeIsNull(pageRequest);      
-        DeviceGroupServiceImpl.this.fixSizes(groups);
-        return groups;
-    }
+		if (!listDelegation.isEmpty()) {
+			listDelegation.forEach(x -> {
+				x.setDeleteTime(new Date());
+				try {
+					delegationService.putDelegationFromUser(x.getUsernameDelegator(), x, x.getId(), lang);
+				} catch (DelegationNotValidException e) {
+					logger.warn("Delegation Not Valid", e);
+				} catch (CredentialsException e) {
+					logger.warn("Rights exception", e);
+				}
+			});
+		}
+		return false;
 
-    @Override
-    public Page<DeviceGroup> findByHighLevelTypeFiltered(String highLevelType, String searchKey, PageRequest pageRequest) throws CredentialsException, MalformedURLException, IOException {
-        logger.debug("findByHighLevelTypeFiltered INVOKED on highLevelType {} searchKey {}", highLevelType, searchKey);
-	Page<DeviceGroup> groups = deviceGroupRepository.findKPIDataFilteredPage(null, highLevelType, searchKey, pageRequest);
-        DeviceGroupServiceImpl.this.fixSizes(groups);
-        return groups;
-    }
+	}
 
-    @Override
-    public Page<DeviceGroup> findAllFiltered(String searchKey, PageRequest pageRequest) throws CredentialsException, MalformedURLException, IOException {
-        logger.debug("findAllFiltered INVOKED on searchKey {}", searchKey);
-	Page<DeviceGroup> groups = deviceGroupRepository.findKPIDataFilteredPage(null, null, searchKey, pageRequest);
-        DeviceGroupServiceImpl.this.fixSizes(groups);
-        return groups;
-    }
+	@Override
+	public Page<DeviceGroup> findAll(PageRequest pageRequest) throws CredentialsException, MalformedURLException, IOException {
+		logger.debug("findAll INVOKED on pageNumber {}, pageSize {}", pageRequest.getPageNumber(), pageRequest.getPageSize());
+		Page<DeviceGroup> groups = deviceGroupRepository.findByDeleteTimeIsNull(pageRequest);
+		DeviceGroupServiceImpl.this.fixSizes(groups);
+		return groups;
+	}
 
-    @Override
-    public Page<DeviceGroup> findByHighLevelType(String highLevelType, PageRequest pageRequest) throws CredentialsException, MalformedURLException, IOException {
-        logger.debug("findByHighLevelType INVOKED on highLevelType {}", highLevelType);
-	Page<DeviceGroup> groups = deviceGroupRepository.findKPIDataFilteredPage(null, highLevelType, null, pageRequest);
-        DeviceGroupServiceImpl.this.fixSizes(groups);
-        return groups;
-    }
+	@Override
+	public Page<DeviceGroup> findByHighLevelTypeFiltered(String highLevelType, String searchKey, PageRequest pageRequest) throws CredentialsException, MalformedURLException, IOException {
+		logger.debug("findByHighLevelTypeFiltered INVOKED on highLevelType {} searchKey {}", highLevelType, searchKey);
+		Page<DeviceGroup> groups = deviceGroupRepository.findKPIDataFilteredPage(null, highLevelType, searchKey, pageRequest);
+		DeviceGroupServiceImpl.this.fixSizes(groups);
+		return groups;
+	}
 
-    @Override
-    public Page<DeviceGroup> findByUsername(String loggedUsername, PageRequest pageRequest) throws CredentialsException, MalformedURLException, IOException {
-        logger.debug("findByUsername INVOKED on username {}", loggedUsername);
-	Page<DeviceGroup> groups = deviceGroupRepository.findKPIDataFilteredPage(loggedUsername, null, null, pageRequest);
-        DeviceGroupServiceImpl.this.fixSizes(groups);
-        return groups;
-    }
+	@Override
+	public Page<DeviceGroup> findAllFiltered(String searchKey, PageRequest pageRequest) throws CredentialsException, MalformedURLException, IOException {
+		logger.debug("findAllFiltered INVOKED on searchKey {}", searchKey);
+		Page<DeviceGroup> groups = deviceGroupRepository.findKPIDataFilteredPage(null, null, searchKey, pageRequest);
+		DeviceGroupServiceImpl.this.fixSizes(groups);
+		return groups;
+	}
 
-    @Override
-    public Page<DeviceGroup> findByUsernameByHighLevelTypeFiltered(String loggedUsername, String highLevelType, String searchKey, PageRequest pageRequest) throws CredentialsException, MalformedURLException, IOException {
-        logger.debug("findByUsernameByHighLevelTypeFiltered INVOKED on username {} highLevelType {} searchKey {}", loggedUsername, highLevelType, searchKey);
-	Page<DeviceGroup> groups = deviceGroupRepository.findKPIDataFilteredPage(loggedUsername, highLevelType, searchKey, pageRequest);
-        DeviceGroupServiceImpl.this.fixSizes(groups);
-        return groups;
-    }
+	@Override
+	public Page<DeviceGroup> findByHighLevelType(String highLevelType, PageRequest pageRequest) throws CredentialsException, MalformedURLException, IOException {
+		logger.debug("findByHighLevelType INVOKED on highLevelType {}", highLevelType);
+		Page<DeviceGroup> groups = deviceGroupRepository.findKPIDataFilteredPage(null, highLevelType, null, pageRequest);
+		DeviceGroupServiceImpl.this.fixSizes(groups);
+		return groups;
+	}
 
-    @Override
-    public Page<DeviceGroup> findByUsernameFiltered(String loggedUsername, String searchKey, PageRequest pageRequest) throws CredentialsException, MalformedURLException, IOException {
-        logger.debug("findByUsernameFiltered INVOKED on username {} searchKey {}", loggedUsername, searchKey);
-	Page<DeviceGroup> groups = deviceGroupRepository.findKPIDataFilteredPage(loggedUsername, null, searchKey, pageRequest);
-        DeviceGroupServiceImpl.this.fixSizes(groups);
-        return groups;
-    }
+	@Override
+	public Page<DeviceGroup> findByUsername(String loggedUsername, PageRequest pageRequest) throws CredentialsException, MalformedURLException, IOException {
+		logger.debug("findByUsername INVOKED on username {}", loggedUsername);
+		Page<DeviceGroup> groups = deviceGroupRepository.findKPIDataFilteredPage(loggedUsername, null, null, pageRequest);
+		DeviceGroupServiceImpl.this.fixSizes(groups);
+		return groups;
+	}
 
-    @Override
-    public Page<DeviceGroup> findByUsernameByHighLevelType(String loggedUsername, String highLevelType, PageRequest pageRequest) throws CredentialsException, MalformedURLException, IOException {
-        logger.debug("findByUsernameByHighLevelType INVOKED on username {} highLevelType {}", loggedUsername, highLevelType);
-	Page<DeviceGroup> groups = deviceGroupRepository.findKPIDataFilteredPage(loggedUsername, highLevelType, null, pageRequest);
-        DeviceGroupServiceImpl.this.fixSizes(groups);
-        return groups;
-    }
+	@Override
+	public Page<DeviceGroup> findByUsernameByHighLevelTypeFiltered(String loggedUsername, String highLevelType, String searchKey, PageRequest pageRequest) throws CredentialsException, MalformedURLException, IOException {
+		logger.debug("findByUsernameByHighLevelTypeFiltered INVOKED on username {} highLevelType {} searchKey {}", loggedUsername, highLevelType, searchKey);
+		Page<DeviceGroup> groups = deviceGroupRepository.findKPIDataFilteredPage(loggedUsername, highLevelType, searchKey, pageRequest);
+		DeviceGroupServiceImpl.this.fixSizes(groups);
+		return groups;
+	}
 
-    @Override
-    public List<DeviceGroup> findAllNoPages() throws CredentialsException, MalformedURLException, IOException {
-        logger.debug("findAll INVOKED");
-	List<DeviceGroup> groups = deviceGroupRepository.findKPIDataFilteredList(null, null, null);
-        fixSizes(groups);
-        return groups;
-    }
+	@Override
+	public Page<DeviceGroup> findByUsernameFiltered(String loggedUsername, String searchKey, PageRequest pageRequest) throws CredentialsException, MalformedURLException, IOException {
+		logger.debug("findByUsernameFiltered INVOKED on username {} searchKey {}", loggedUsername, searchKey);
+		Page<DeviceGroup> groups = deviceGroupRepository.findKPIDataFilteredPage(loggedUsername, null, searchKey, pageRequest);
+		DeviceGroupServiceImpl.this.fixSizes(groups);
+		return groups;
+	}
 
-    @Override
-    public List<DeviceGroup> findByHighLevelTypeFilteredNoPages(String highLevelType, String searchKey) throws CredentialsException, MalformedURLException, IOException {
-        logger.debug("findByHighLevelTypeFiltered INVOKED on highLevelType {} searchKey {}", highLevelType, searchKey);
-	List<DeviceGroup> groups = deviceGroupRepository.findKPIDataFilteredList(null, highLevelType, searchKey);
-        fixSizes(groups);
-        return groups;
-    }
+	@Override
+	public Page<DeviceGroup> findByUsernameByHighLevelType(String loggedUsername, String highLevelType, PageRequest pageRequest) throws CredentialsException, MalformedURLException, IOException {
+		logger.debug("findByUsernameByHighLevelType INVOKED on username {} highLevelType {}", loggedUsername, highLevelType);
+		Page<DeviceGroup> groups = deviceGroupRepository.findKPIDataFilteredPage(loggedUsername, highLevelType, null, pageRequest);
+		DeviceGroupServiceImpl.this.fixSizes(groups);
+		return groups;
+	}
 
-    @Override
-    public List<DeviceGroup> findAllFilteredNoPages(String searchKey) throws CredentialsException, MalformedURLException, IOException {
-        logger.debug("findAllFiltered INVOKED on searchKey {}", searchKey);
-	List<DeviceGroup> groups = deviceGroupRepository.findKPIDataFilteredList(null, null, searchKey);
-        fixSizes(groups);
-        return groups;
-    }
+	@Override
+	public List<DeviceGroup> findAllNoPages() throws CredentialsException, MalformedURLException, IOException {
+		logger.debug("findAll INVOKED");
+		List<DeviceGroup> groups = deviceGroupRepository.findKPIDataFilteredList(null, null, null);
+		fixSizes(groups);
+		return groups;
+	}
 
-    @Override
-    public List<DeviceGroup> findByHighLevelTypeNoPages(String highLevelType) throws CredentialsException, MalformedURLException, IOException {
-        logger.debug("findByHighLevelType INVOKED on highLevelType {}", highLevelType);
-	List<DeviceGroup> groups = deviceGroupRepository.findKPIDataFilteredList(null, highLevelType, null);
-        fixSizes(groups);
-        return groups;
-    }
+	@Override
+	public List<DeviceGroup> findByHighLevelTypeFilteredNoPages(String highLevelType, String searchKey) throws CredentialsException, MalformedURLException, IOException {
+		logger.debug("findByHighLevelTypeFiltered INVOKED on highLevelType {} searchKey {}", highLevelType, searchKey);
+		List<DeviceGroup> groups = deviceGroupRepository.findKPIDataFilteredList(null, highLevelType, searchKey);
+		fixSizes(groups);
+		return groups;
+	}
 
-    @Override
-    public List<DeviceGroup> findByUsernameNoPages(String loggedUsername) throws CredentialsException, MalformedURLException, IOException {
-        logger.debug("findByUsername INVOKED on username {}", loggedUsername);
-	List<DeviceGroup> groups = deviceGroupRepository.findKPIDataFilteredList(loggedUsername, null, null);
-        fixSizes(groups);
-        return groups;
-    }
+	@Override
+	public List<DeviceGroup> findAllFilteredNoPages(String searchKey) throws CredentialsException, MalformedURLException, IOException {
+		logger.debug("findAllFiltered INVOKED on searchKey {}", searchKey);
+		List<DeviceGroup> groups = deviceGroupRepository.findKPIDataFilteredList(null, null, searchKey);
+		fixSizes(groups);
+		return groups;
+	}
 
-    @Override
-    public List<DeviceGroup> findByUsernameByHighLevelTypeFilteredNoPages(String loggedUsername, String highLevelType, String searchKey) throws CredentialsException, MalformedURLException, IOException {
-        logger.debug("findByUsernameByHighLevelTypeFiltered INVOKED on username {} highLevelType {} searchKey {}", loggedUsername, highLevelType, searchKey);
-	List<DeviceGroup> groups = deviceGroupRepository.findKPIDataFilteredList(loggedUsername, highLevelType, searchKey);
-        fixSizes(groups);
-        return groups;
-    }
+	@Override
+	public List<DeviceGroup> findByHighLevelTypeNoPages(String highLevelType) throws CredentialsException, MalformedURLException, IOException {
+		logger.debug("findByHighLevelType INVOKED on highLevelType {}", highLevelType);
+		List<DeviceGroup> groups = deviceGroupRepository.findKPIDataFilteredList(null, highLevelType, null);
+		fixSizes(groups);
+		return groups;
+	}
 
-    @Override
-    public List<DeviceGroup> findByUsernameFilteredNoPages(String loggedUsername, String searchKey) throws CredentialsException, MalformedURLException, IOException {
-        logger.debug("findByUsernameFiltered INVOKED on username {} searchKey {}", loggedUsername, searchKey);
-	List<DeviceGroup> groups = deviceGroupRepository.findKPIDataFilteredList(loggedUsername, null, searchKey);
-        fixSizes(groups);
-        return groups;
-    }
+	@Override
+	public List<DeviceGroup> findByUsernameNoPages(String loggedUsername) throws CredentialsException, MalformedURLException, IOException {
+		logger.debug("findByUsername INVOKED on username {}", loggedUsername);
+		List<DeviceGroup> groups = deviceGroupRepository.findKPIDataFilteredList(loggedUsername, null, null);
+		fixSizes(groups);
+		return groups;
+	}
 
-    @Override
-    public List<DeviceGroup> findByUsernameByHighLevelTypeNoPages(String loggedUsername, String highLevelType) throws CredentialsException, MalformedURLException, IOException {
-        logger.debug("findByUsernameByHighLevelType INVOKED on username {} highLevelType {}", loggedUsername, highLevelType);
-	List<DeviceGroup> groups = deviceGroupRepository.findKPIDataFilteredList(loggedUsername, highLevelType, null);
-        fixSizes(groups);
-        return groups;
-    }
+	@Override
+	public List<DeviceGroup> findByUsernameByHighLevelTypeFilteredNoPages(String loggedUsername, String highLevelType, String searchKey) throws CredentialsException, MalformedURLException, IOException {
+		logger.debug("findByUsernameByHighLevelTypeFiltered INVOKED on username {} highLevelType {} searchKey {}", loggedUsername, highLevelType, searchKey);
+		List<DeviceGroup> groups = deviceGroupRepository.findKPIDataFilteredList(loggedUsername, highLevelType, searchKey);
+		fixSizes(groups);
+		return groups;
+	}
 
-    @Override
-    public Page<DeviceGroup> findByUsernameDelegatedByHighLevelTypeFiltered(String usernameDelegated, String elementType, String highLevelType, String searchKey, Pageable pageable) throws CredentialsException, MalformedURLException, IOException {
-        logger.debug(
+	@Override
+	public List<DeviceGroup> findByUsernameFilteredNoPages(String loggedUsername, String searchKey) throws CredentialsException, MalformedURLException, IOException {
+		logger.debug("findByUsernameFiltered INVOKED on username {} searchKey {}", loggedUsername, searchKey);
+		List<DeviceGroup> groups = deviceGroupRepository.findKPIDataFilteredList(loggedUsername, null, searchKey);
+		fixSizes(groups);
+		return groups;
+	}
+
+	@Override
+	public List<DeviceGroup> findByUsernameByHighLevelTypeNoPages(String loggedUsername, String highLevelType) throws CredentialsException, MalformedURLException, IOException {
+		logger.debug("findByUsernameByHighLevelType INVOKED on username {} highLevelType {}", loggedUsername, highLevelType);
+		List<DeviceGroup> groups = deviceGroupRepository.findKPIDataFilteredList(loggedUsername, highLevelType, null);
+		fixSizes(groups);
+		return groups;
+	}
+
+	@Override
+	public Page<DeviceGroup> findByUsernameDelegatedByHighLevelTypeFiltered(String usernameDelegated, String elementType, String highLevelType, String searchKey, Pageable pageable)
+			throws CredentialsException, MalformedURLException, IOException {
+		logger.debug(
 				"findByUsernameByHighLevelTypeFiltered INVOKED on usernameDelegated {} elementType {} highLevelType {} searchKey {}",
 				usernameDelegated, elementType, highLevelType, searchKey);
 		if (usernameDelegated.equals("ANONYMOUS")) {
 			Page<DeviceGroup> pageKPIData = deviceGroupRepository.findByUsernameDelegatedAndElementTypeContainingAndDeleteTimeIsNull(usernameDelegated,
 					elementType, highLevelType, searchKey, pageable);
-			pageKPIData.getContent().forEach(x->anonymize(x));
-                        DeviceGroupServiceImpl.this.fixSizes(pageKPIData);
-        return pageKPIData;
+			pageKPIData.getContent().forEach(x -> anonymize(x));
+			DeviceGroupServiceImpl.this.fixSizes(pageKPIData);
+			return pageKPIData;
 		}
 		Page<DeviceGroup> groups = deviceGroupRepository.findByUsernameDelegatedAndElementTypeContainingAndDeleteTimeIsNull(usernameDelegated,
 				elementType, highLevelType, searchKey, pageable);
-                DeviceGroupServiceImpl.this.fixSizes(groups);
-        return groups;
-    }
+		DeviceGroupServiceImpl.this.fixSizes(groups);
+		return groups;
+	}
 
-    @Override
-    public List<DeviceGroup> findByUsernameDelegatedByHighLevelTypeFilteredNoPages(String usernameDelegated, String elementType, String highLevelType, String searchKey) throws CredentialsException, MalformedURLException, IOException {
-        logger.debug(
+	@Override
+	public List<DeviceGroup> findByUsernameDelegatedByHighLevelTypeFilteredNoPages(String usernameDelegated, String elementType, String highLevelType, String searchKey) throws CredentialsException, MalformedURLException, IOException {
+		logger.debug(
 				"findByUsernameByHighLevelTypeFiltered INVOKED on usernameDelegated {} elementType {} highLevelType {} searchKey {}",
 				usernameDelegated, elementType, highLevelType, searchKey);
 		if (usernameDelegated.equals("ANONYMOUS")) {
 			List<DeviceGroup> listKPIData = deviceGroupRepository.findByUsernameDelegatedAndElementTypeContainingAndDeleteTimeIsNull(usernameDelegated,
 					elementType, highLevelType, searchKey);
-			listKPIData.forEach(x->anonymize(x));
-                        fixSizes(listKPIData);
-        return listKPIData;
+			listKPIData.forEach(x -> anonymize(x));
+			fixSizes(listKPIData);
+			return listKPIData;
 		}
 		List<DeviceGroup> groups = deviceGroupRepository.findByUsernameDelegatedAndElementTypeContainingAndDeleteTimeIsNull(usernameDelegated,
 				elementType, highLevelType, searchKey);
-                fixSizes(groups);
-        return groups;
-    }
+		fixSizes(groups);
+		return groups;
+	}
 
-    @Override
-    public Page<DeviceGroup> findByUsernameDelegatedByHighLevelTypeByOrganizationFiltered(String usernameDelegated,
+	@Override
+	public Page<DeviceGroup> findByUsernameDelegatedByHighLevelTypeByOrganizationFiltered(String usernameDelegated,
 			String elementType, String highLevelType, String searchKey, Pageable pageable) throws CredentialsException, MalformedURLException, IOException {
-        String organization = ldapRepository.getOUnames(credentialsService.getLoggedUsername(new Locale("en")))
+		String organization = ldapRepository.getOUnames(credentialsService.getLoggedUsername(new Locale("en")))
 				.toString();
 		logger.debug(
 				"findByUsernameDelegatedByHighLevelTypeByOrganizationFiltered INVOKED on usernameDelegated {} elementType {} highLevelType {} searchKey {} organization {}",
@@ -308,20 +307,20 @@ public class DeviceGroupServiceImpl implements IDeviceGroupService {
 			Page<DeviceGroup> pageKPIData = deviceGroupRepository
 					.findByUsernameDelegatedByOrganizationAndElementTypeContainingAndDeleteTimeIsNull(usernameDelegated,
 							elementType, highLevelType, searchKey, organization, pageable);
-			pageKPIData.getContent().forEach(x->anonymize(x));
-                        DeviceGroupServiceImpl.this.fixSizes(pageKPIData);
-        return pageKPIData;
+			pageKPIData.getContent().forEach(x -> anonymize(x));
+			DeviceGroupServiceImpl.this.fixSizes(pageKPIData);
+			return pageKPIData;
 		}
 		Page<DeviceGroup> groups = deviceGroupRepository.findByUsernameDelegatedByOrganizationAndElementTypeContainingAndDeleteTimeIsNull(
 				usernameDelegated, elementType, highLevelType, searchKey, organization, pageable);
-                DeviceGroupServiceImpl.this.fixSizes(groups);
-        return groups;
-    }
+		DeviceGroupServiceImpl.this.fixSizes(groups);
+		return groups;
+	}
 
-    @Override
-    public List<DeviceGroup> findByUsernameDelegatedByHighLevelTypeByOrganizationFilteredNoPages(String usernameDelegated,
+	@Override
+	public List<DeviceGroup> findByUsernameDelegatedByHighLevelTypeByOrganizationFilteredNoPages(String usernameDelegated,
 			String elementType, String highLevelType, String searchKey) throws CredentialsException, MalformedURLException, IOException {
-        String organization = ldapRepository.getOUnames(credentialsService.getLoggedUsername(new Locale("en")))
+		String organization = ldapRepository.getOUnames(credentialsService.getLoggedUsername(new Locale("en")))
 				.toString();
 		logger.debug(
 				"findByUsernameDelegatedByHighLevelTypeByOrganizationFiltered INVOKED on usernameDelegated {} elementType {} highLevelType {} searchKey {} organization {}",
@@ -330,149 +329,151 @@ public class DeviceGroupServiceImpl implements IDeviceGroupService {
 			List<DeviceGroup> listKPIData = deviceGroupRepository
 					.findByUsernameDelegatedByOrganizationAndElementTypeContainingAndDeleteTimeIsNull(usernameDelegated,
 							elementType, highLevelType, searchKey, organization);
-			listKPIData.forEach(x->anonymize(x));
-                        fixSizes(listKPIData);
-        return listKPIData;
+			listKPIData.forEach(x -> anonymize(x));
+			fixSizes(listKPIData);
+			return listKPIData;
 		}
 		List<DeviceGroup> groups = deviceGroupRepository.findByUsernameDelegatedByOrganizationAndElementTypeContainingAndDeleteTimeIsNull(
 				usernameDelegated, elementType, highLevelType, searchKey, organization);
-                fixSizes(groups);
-        return groups;
-    }
-    
-    private DeviceGroup anonymize(DeviceGroup toReturn) {
-                    entityManager.detach(toReturn);
-                    toReturn.setUsername(null);
-            return toReturn;
-    }
-        
-    @Override
-    public DeviceGroup getDeviceGroupById(long id, Locale lang, boolean anonymize) throws IOException {
-            logger.debug("getDeviceGroupById INVOKED on id {}", id);
-            if (anonymize) {
-                    return anonymize(deviceGroupRepository.findOne(id));
-            }
-            DeviceGroup grp = deviceGroupRepository.findOne(id);
-            if(grp != null) fixSize(grp);
-            return grp;
-    }
-    
-    @Override
-    public boolean updateUsernameDelegatorOnOwnershipChange(String newOwner, Long kpiId, Locale lang)
-                    throws DelegationNotValidException, CredentialsException {
+		fixSizes(groups);
+		return groups;
+	}
 
-            List<Delegation> listDelegation = delegationService.findByElementIdNoPages(Long.toString(kpiId));
+	private DeviceGroup anonymize(DeviceGroup toReturn) {
+		entityManager.detach(toReturn);
+		toReturn.setUsername(null);
+		return toReturn;
+	}
 
-            listDelegation.forEach(x -> {
-                    x.setUsernameDelegator(newOwner);
-                    try {
-                            delegationService.putDelegationFromUser(credentialsService.getLoggedUsername(lang), x, x.getId(), lang);
-                    } catch (DelegationNotValidException e) {
-                            logger.warn("Delegation Not Valid", e);
-                    }catch (CredentialsException e) {
-                            logger.warn("Rights exception", e);
-                    }
-            });
+	@Override
+	public DeviceGroup getDeviceGroupById(long id, Locale lang, boolean anonymize) throws IOException {
+		logger.debug("getDeviceGroupById INVOKED on id {}", id);
+		if (anonymize) {
+			return anonymize(deviceGroupRepository.findOne(id));
+		}
+		DeviceGroup grp = deviceGroupRepository.findOne(id);
+		if (grp != null)
+			fixSize(grp);
+		return grp;
+	}
 
-            return true;
-    }
+	@Override
+	public boolean updateUsernameDelegatorOnOwnershipChange(String newOwner, Long kpiId, Locale lang)
+			throws DelegationNotValidException, CredentialsException {
 
-    @Override
-    public boolean lastUpdatedNow(long grpId) {
-        try {
-            DeviceGroup grp = deviceGroupRepository.findOne(grpId);
-            grp.setUpdateTime(new Date());
-            deviceGroupRepository.save(grp);
-            return true;
-        }
-        catch(Exception e) {
-            return false;
-        }
-    }
-    
-    private void fixSizes(Page<DeviceGroup> groups) throws IOException {
-        String sensorsToValidate = "";
-        for(DeviceGroup group: groups) {
-            if(group.getSensors() != null) {
-                if(!sensorsToValidate.isEmpty()) sensorsToValidate+=",";
-                sensorsToValidate+=group.getSensors();                
-            }
-        } 
-        if(sensorsToValidate.isEmpty()) return;
-        Vector<String> validSensorIds = validSensors(sensorsToValidate);
-        for(DeviceGroup group: groups) {
-            if(group.getSensors() != null) {
-                for(String sensorId: group.getSensors().split(",")) {
-                    if(validSensorIds.contains(sensorId)) {
-                        group.setSize(group.getSize()+1);
-                    }
-                }              
-            }
-        }
-    }
-    
-    private void fixSizes(List<DeviceGroup> groups) throws IOException {
-        String sensorsToValidate = "";
-        for(DeviceGroup group: groups) {
-            if(group.getSensors() != null) {
-                if(!sensorsToValidate.isEmpty()) sensorsToValidate+=",";
-                sensorsToValidate+=group.getSensors();                
-            }
-        } 
-        if(sensorsToValidate.isEmpty()) return;
-        Vector<String> validSensorIds = validSensors(sensorsToValidate);
-        for(DeviceGroup group: groups) {
-            if(group.getSensors() != null) {
-                for(String sensorId: group.getSensors().split(",")) {
-                    if(validSensorIds.contains(sensorId)) {
-                        group.setSize(group.getSize()+1);
-                    }
-                }              
-            }
-        }
-    }
-    
-    private void fixSize(DeviceGroup group) throws IOException {
-        String sensorsToValidate = "";
-        if(group.getSensors() != null) {
-            if(!sensorsToValidate.isEmpty()) sensorsToValidate+=",";
-            sensorsToValidate+=group.getSensors();                
-        }
-        if(sensorsToValidate.isEmpty()) return;
-        Vector<String> validSensorIds = validSensors(sensorsToValidate);
-        if(group.getSensors() != null) {
-            for(String sensorId: group.getSensors().split(",")) {
-                if(validSensorIds.contains(sensorId)) {
-                    group.setSize(group.getSize()+1);
-                }
-            }              
-        }
-    }
-    
-    private Vector<String> validSensors(String sensors) throws MalformedURLException, IOException {
-                
-        String response = sensorService.getSensors(request.getParameter("accessToken"),null,null,null,sensors);            
-        /*URL url = new URL(request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+request.getContextPath()+"/api/v1/sensors?accessToken="+request.getParameter("accessToken")+"&id="+sensors);            
-        logger.debug("CALL TO SENSORS API FROM validSensors(String sensors) IN DeviceGroupElementServiceImpl {}",request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+request.getContextPath()+"/api/v1/sensors?accessToken="+request.getParameter("accessToken")+"&id="+sensors);
-        
-        HttpURLConnection huc = (HttpURLConnection) url.openConnection();
-        huc.setRequestMethod("GET");
-        int responseCode = huc.getResponseCode();
-        if(responseCode == 404) return new Vector<>();
-        BufferedReader in = new BufferedReader(new InputStreamReader(huc.getInputStream()));
-        String response = "";
-        String inputLine;
-        while ((inputLine = in.readLine()) != null) response+=inputLine;
-        in.close();   */
-        
-        ObjectMapper mapper = new ObjectMapper();
-        Sensor[] validSensors = mapper.readValue(response, Sensor[].class);      
-        Vector<String> validSensorIds = new Vector<>();
-        for(Sensor validSensor: validSensors) {
-            validSensorIds.add(String.valueOf(validSensor.getId()));
-        }
-        return validSensorIds;
-        
-    }
-    
+		List<Delegation> listDelegation = delegationService.findByElementIdNoPages(Long.toString(kpiId));
+
+		listDelegation.forEach(x -> {
+			x.setUsernameDelegator(newOwner);
+			try {
+				delegationService.putDelegationFromUser(credentialsService.getLoggedUsername(lang), x, x.getId(), lang);
+			} catch (DelegationNotValidException e) {
+				logger.warn("Delegation Not Valid", e);
+			} catch (CredentialsException e) {
+				logger.warn("Rights exception", e);
+			}
+		});
+
+		return true;
+	}
+
+	@Override
+	public boolean lastUpdatedNow(long grpId) {
+		try {
+			DeviceGroup grp = deviceGroupRepository.findOne(grpId);
+			grp.setUpdateTime(new Date());
+			deviceGroupRepository.save(grp);
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	private void fixSizes(Page<DeviceGroup> groups) throws IOException {
+		String sensorsToValidate = "";
+		for (DeviceGroup group : groups) {
+			if (group.getSensors() != null) {
+				if (!sensorsToValidate.isEmpty())
+					sensorsToValidate += ",";
+				sensorsToValidate += group.getSensors();
+			}
+		}
+		if (sensorsToValidate.isEmpty())
+			return;
+		Vector<String> validSensorIds = validSensors(sensorsToValidate);
+		for (DeviceGroup group : groups) {
+			if (group.getSensors() != null) {
+				for (String sensorId : group.getSensors().split(",")) {
+					if (validSensorIds.contains(sensorId)) {
+						group.setSize(group.getSize() + 1);
+					}
+				}
+			}
+		}
+	}
+
+	private void fixSizes(List<DeviceGroup> groups) throws IOException {
+		String sensorsToValidate = "";
+		for (DeviceGroup group : groups) {
+			if (group.getSensors() != null) {
+				if (!sensorsToValidate.isEmpty())
+					sensorsToValidate += ",";
+				sensorsToValidate += group.getSensors();
+			}
+		}
+		if (sensorsToValidate.isEmpty())
+			return;
+		Vector<String> validSensorIds = validSensors(sensorsToValidate);
+		for (DeviceGroup group : groups) {
+			if (group.getSensors() != null) {
+				for (String sensorId : group.getSensors().split(",")) {
+					if (validSensorIds.contains(sensorId)) {
+						group.setSize(group.getSize() + 1);
+					}
+				}
+			}
+		}
+	}
+
+	private void fixSize(DeviceGroup group) throws IOException {
+		String sensorsToValidate = "";
+		if (group.getSensors() != null) {
+			if (!sensorsToValidate.isEmpty())
+				sensorsToValidate += ",";
+			sensorsToValidate += group.getSensors();
+		}
+		if (sensorsToValidate.isEmpty())
+			return;
+		Vector<String> validSensorIds = validSensors(sensorsToValidate);
+		if (group.getSensors() != null) {
+			for (String sensorId : group.getSensors().split(",")) {
+				if (validSensorIds.contains(sensorId)) {
+					group.setSize(group.getSize() + 1);
+				}
+			}
+		}
+	}
+
+	private Vector<String> validSensors(String sensors) throws MalformedURLException, IOException {
+
+		String response = sensorService.getSensors(request.getParameter("accessToken"), null, null, null, sensors);
+		/*
+		 * URL url = new URL(request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+request.getContextPath()+"/api/v1/sensors?accessToken="+request.getParameter("accessToken")+"&id="+sensors);
+		 * logger.debug("CALL TO SENSORS API FROM validSensors(String sensors) IN DeviceGroupElementServiceImpl {}",request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+request.getContextPath()+
+		 * "/api/v1/sensors?accessToken="+request.getParameter("accessToken")+"&id="+sensors);
+		 * 
+		 * HttpURLConnection huc = (HttpURLConnection) url.openConnection(); huc.setRequestMethod("GET"); int responseCode = huc.getResponseCode(); if(responseCode == 404) return new Vector<>(); BufferedReader in = new BufferedReader(new
+		 * InputStreamReader(huc.getInputStream())); String response = ""; String inputLine; while ((inputLine = in.readLine()) != null) response+=inputLine; in.close();
+		 */
+
+		ObjectMapper mapper = new ObjectMapper();
+		Sensor[] validSensors = mapper.readValue(response, Sensor[].class);
+		Vector<String> validSensorIds = new Vector<>();
+		for (Sensor validSensor : validSensors) {
+			validSensorIds.add(String.valueOf(validSensor.getId()));
+		}
+		return validSensorIds;
+
+	}
+
 }

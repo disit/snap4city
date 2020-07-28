@@ -874,6 +874,22 @@ public class roleTest {
 		assertEquals(false, result.getResult());
 	}
 
+	@Test
+	public void check_alldelegation_ko() throws ClientProtocolException, IOException {
+
+		// Given
+		HttpUriRequest request = new HttpGet(
+				"http://localhost:8080/datamanager/api/v1/delegation&accessToken=" + getAccessTokenADifino()
+						+ "&sourceRequest=test");
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		assertThat(
+				httpResponse.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.FORBIDDEN.value()));
+	}
+
 	// --------------------------------------------------------------------------------------------------------------------
 	private String getAccessTokenADifino() throws IOException {
 		return get("accesstoken.finaluser=");

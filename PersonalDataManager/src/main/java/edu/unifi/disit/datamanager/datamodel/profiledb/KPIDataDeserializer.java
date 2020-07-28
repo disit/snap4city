@@ -96,7 +96,7 @@ public class KPIDataDeserializer extends StdDeserializer<KPIData> {
 					try {
 						kpidata.setLastDate(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(jnode.get("lastDate").asText()));
 					} catch (ParseException d) {
-						logger.error("Parsing error {}", d);
+						logger.warn("Parsing error date {}", jnode.get("lastDate").asText());
 					}
 				}
 			}
@@ -120,7 +120,7 @@ public class KPIDataDeserializer extends StdDeserializer<KPIData> {
 			kpidata.setValueType(jnode.get("valueType").asText());
 		}
 		if (jnode.get("valueUnit") != null) {
-			kpidata.setValueType(jnode.get("valueUnit").asText());
+			kpidata.setValueUnit(jnode.get("valueUnit").asText());
 		}
 		if (jnode.get("metric") != null) {
 			kpidata.setMetric(jnode.get("metric").asText());

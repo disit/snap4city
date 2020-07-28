@@ -12,6 +12,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package edu.unifi.disit.datamanager.datamodel.profiledb;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -33,7 +34,9 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "delegation")
-public class Delegation implements Cloneable {
+public class Delegation implements Cloneable, Serializable {
+
+	private static final long serialVersionUID = 4846169944943418363L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

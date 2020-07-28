@@ -12,6 +12,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package edu.unifi.disit.datamanager.datamodel.profiledb;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -33,138 +34,140 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "devicegroupelement")
-public class DeviceGroupElement {
+public class DeviceGroupElement implements Serializable {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
-    @Column(name = "insert_time")
-    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private Date insertTime;
+	private static final long serialVersionUID = -8775532689760406093L;
 
-    @Column(name = "delete_time")
-    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private Date deleteTime;
-    
-    @Column(name = "elementId")
-    private String elementId;
-    
-    @Column(name = "elementType")
-    private String elementType;
-    
-    @Column(name = "device_group_id")
-    private Long deviceGroupId;
-    
-    @Formula("( select g.username from devicegroup g where g.id = device_group_id ) ")
-    private String deviceGroupContact;
-    
-    @Formula("( select o.username from devicegroup g, ownership o where g.id = device_group_id and o.elementId = elementId and o.elementType = elementType union select o.username from devicegroup g, kpidata o where g.id = device_group_id and o.id = elementId and 'MyKPI' = elementType )")
-    private String username;
-    
-    @Formula("( select o.elementName from devicegroup g, ownership o where g.id = device_group_id and o.elementId = elementId and o.elementType = elementType union select o.value_name from devicegroup g, kpidata o where g.id = device_group_id and o.id = elementId and 'MyKPI' = elementType )")
-    private String elementName;
-    
-    @Formula("(select case when elementType = 'IOTID' then 'IOT Device' when elementType = 'AppID' then 'IOT App' when elementType = 'DAAppID' then 'Data Analytics' when elementType = 'BrokerID' then 'IOT Broker' when elementType = 'PortiaID' then 'Web Scraping' when elementType = 'ModelID' then 'IOT Device Model' when elementType = 'HeatmapID' then 'Heatmap' when elementType = 'ServiceGraphID' then 'Service Graph' when elementType = 'DashboardID' then 'Dashboard' when elementType = 'ServiceURI' then 'Service URI' else elementType end )")
-    private String elmtTypeLbl;
-    
-    // default with nothing
-    public DeviceGroupElement() {
-            super();
-    }
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    // default with everything
-    public DeviceGroupElement(Long id, Long deviceGroupId, String elementId, String elementType) {
-            super();
-            this.id = id;
-            this.deviceGroupId = deviceGroupId;
-            this.elementId = elementId;
-            this.elementType = elementType;
-    }
+	@Column(name = "insert_time")
+	@DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+	private Date insertTime;
 
-    public Long getId() {
-        return id;
-    }
+	@Column(name = "delete_time")
+	@DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+	private Date deleteTime;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	@Column(name = "elementId")
+	private String elementId;
 
-    public String getElementId() {
-        return elementId;
-    }
+	@Column(name = "elementType")
+	private String elementType;
 
-    public void setElementId(String elementId) {
-        this.elementId = elementId;
-    }
+	@Column(name = "device_group_id")
+	private Long deviceGroupId;
 
-    public String getElementType() {
-        return elementType;
-    }
+	@Formula("( select g.username from devicegroup g where g.id = device_group_id ) ")
+	private String deviceGroupContact;
 
-    public void setElementType(String elementType) {
-        this.elementType = elementType;
-    }
+	@Formula("( select o.username from devicegroup g, ownership o where g.id = device_group_id and o.elementId = elementId and o.elementType = elementType union select o.username from devicegroup g, kpidata o where g.id = device_group_id and o.id = elementId and 'MyKPI' = elementType )")
+	private String username;
 
-    public Date getInsertTime() {
-        return insertTime;
-    }
+	@Formula("( select o.elementName from devicegroup g, ownership o where g.id = device_group_id and o.elementId = elementId and o.elementType = elementType union select o.value_name from devicegroup g, kpidata o where g.id = device_group_id and o.id = elementId and 'MyKPI' = elementType )")
+	private String elementName;
 
-    public void setInsertTime(Date insertTime) {
-        this.insertTime = insertTime;
-    }
+	@Formula("(select case when elementType = 'IOTID' then 'IOT Device' when elementType = 'AppID' then 'IOT App' when elementType = 'DAAppID' then 'Data Analytics' when elementType = 'BrokerID' then 'IOT Broker' when elementType = 'PortiaID' then 'Web Scraping' when elementType = 'ModelID' then 'IOT Device Model' when elementType = 'HeatmapID' then 'Heatmap' when elementType = 'ServiceGraphID' then 'Service Graph' when elementType = 'DashboardID' then 'Dashboard' when elementType = 'ServiceURI' then 'Service URI' else elementType end )")
+	private String elmtTypeLbl;
 
-    public Date getDeleteTime() {
-        return deleteTime;
-    }
+	// default with nothing
+	public DeviceGroupElement() {
+		super();
+	}
 
-    public void setDeleteTime(Date deleteTime) {
-        this.deleteTime = deleteTime;
-    }
+	// default with everything
+	public DeviceGroupElement(Long id, Long deviceGroupId, String elementId, String elementType) {
+		super();
+		this.id = id;
+		this.deviceGroupId = deviceGroupId;
+		this.elementId = elementId;
+		this.elementType = elementType;
+	}
 
-    public Long getDeviceGroupId() {
-        return deviceGroupId;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public void setDeviceGroupId(Long deviceGroupId) {
-        this.deviceGroupId = deviceGroupId;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public String getUsername() {
-        return username;
-    }
+	public String getElementId() {
+		return elementId;
+	}
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+	public void setElementId(String elementId) {
+		this.elementId = elementId;
+	}
 
-    public String getElementName() {
-        return elementName;
-    }
+	public String getElementType() {
+		return elementType;
+	}
 
-    public void setElementName(String elementName) {
-        this.elementName = elementName;
-    }
+	public void setElementType(String elementType) {
+		this.elementType = elementType;
+	}
 
-    public String getElmtTypeLbl() {
-        return elmtTypeLbl;
-    }
+	public Date getInsertTime() {
+		return insertTime;
+	}
 
-    public void setElmtTypeLbl(String elmtTypeLbl) {
-        this.elmtTypeLbl = elmtTypeLbl;
-    }
+	public void setInsertTime(Date insertTime) {
+		this.insertTime = insertTime;
+	}
 
-    public String getDeviceGroupContact() {
-        return deviceGroupContact;
-    }
+	public Date getDeleteTime() {
+		return deleteTime;
+	}
 
-    public void setDeviceGroupContact(String deviceGroupContact) {
-        this.deviceGroupContact = deviceGroupContact;
-    }
-    
-    @Override
-    public String toString() {
-            return "DeviceGroupElement [id=" + id + ", insertTime=" + insertTime + ", deleteTime=" + deleteTime + ", deviceGroupId=" + deviceGroupId + ", elementId=" + elementId + ", elementType=" + elementType + "]";
-    }
+	public void setDeleteTime(Date deleteTime) {
+		this.deleteTime = deleteTime;
+	}
+
+	public Long getDeviceGroupId() {
+		return deviceGroupId;
+	}
+
+	public void setDeviceGroupId(Long deviceGroupId) {
+		this.deviceGroupId = deviceGroupId;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getElementName() {
+		return elementName;
+	}
+
+	public void setElementName(String elementName) {
+		this.elementName = elementName;
+	}
+
+	public String getElmtTypeLbl() {
+		return elmtTypeLbl;
+	}
+
+	public void setElmtTypeLbl(String elmtTypeLbl) {
+		this.elmtTypeLbl = elmtTypeLbl;
+	}
+
+	public String getDeviceGroupContact() {
+		return deviceGroupContact;
+	}
+
+	public void setDeviceGroupContact(String deviceGroupContact) {
+		this.deviceGroupContact = deviceGroupContact;
+	}
+
+	@Override
+	public String toString() {
+		return "DeviceGroupElement [id=" + id + ", insertTime=" + insertTime + ", deleteTime=" + deleteTime + ", deviceGroupId=" + deviceGroupId + ", elementId=" + elementId + ", elementType=" + elementType + "]";
+	}
 
 }

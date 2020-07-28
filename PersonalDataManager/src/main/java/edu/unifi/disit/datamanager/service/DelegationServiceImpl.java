@@ -20,6 +20,7 @@ import java.util.Locale;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -40,6 +41,9 @@ import edu.unifi.disit.datamanager.exception.LDAPException;
 
 @Service
 public class DelegationServiceImpl implements IDelegationService {
+
+	@Autowired
+	CacheManager cacheManager;
 
 	@Autowired
 	LDAPUserDAO lu;
@@ -163,7 +167,7 @@ public class DelegationServiceImpl implements IDelegationService {
 		if (delegation.getUsernameDelegator() == null)
 			delegation.setUsernameDelegator(username);
 		// check if the username is different
-		else if (!delegation.getUsernameDelegator().equals(username))
+		else if (!delegation.getUsernameDelegator().equalsIgnoreCase(username))
 			throw new DelegationNotValidException(messages.getMessage("postdelegation.ko.usernamedifferent", null, lang));
 
 		// check username delegated exist
@@ -173,14 +177,18 @@ public class DelegationServiceImpl implements IDelegationService {
 			throw new DelegationNotValidException(messages.getMessage("postdelegation.ko.delegatednotrecognized", null, lang));
 
 		// check that this delegation does not exist already
-		if (!delegationRepo.getSameDelegation(delegation, lang).isEmpty())
+		if (!delegationRepo.getSameDelegation(delegation).isEmpty())
 			throw new DelegationNotValidException(messages.getMessage("postdelegation.ko.delegationalreadypresent", null, lang));
 
 		// update delegation insert time
 		delegation.setInsertTime(new Date());
 		delegation.setDeleteTime(null);
 
-		return delegationRepo.save(delegation);
+		Delegation toreturn = delegationRepo.save(delegation);
+
+		invalidateCache();
+
+		return toreturn;
 	}
 
 	@Override
@@ -206,6 +214,8 @@ public class DelegationServiceImpl implements IDelegationService {
 		todelete.setDeleteTime(new Date());
 
 		delegationRepo.save(todelete);
+
+		invalidateCache();
 	}
 
 	// return OK even if nothing is found
@@ -225,6 +235,9 @@ public class DelegationServiceImpl implements IDelegationService {
 			d.setDeleteTime(new Date());
 			delegationRepo.save(d);
 		}
+
+		if (delegations.size() > 0)
+			invalidateCache();
 	}
 
 	@Override
@@ -243,7 +256,11 @@ public class DelegationServiceImpl implements IDelegationService {
 				&& (delegation.getGroupnameDelegated() == null || (!lu.groupnameExist(delegation.getGroupnameDelegated()))))
 			throw new DelegationNotValidException(messages.getMessage("postdelegation.ko.delegatednotrecognized", null, lang));
 
-		return delegationRepo.save(delegation);
+		Delegation toreturn = delegationRepo.save(delegation);
+
+		invalidateCache();
+
+		return toreturn;
 	}
 
 	@Override
@@ -289,4 +306,20 @@ public class DelegationServiceImpl implements IDelegationService {
 		return toreturn;
 	}
 
+	@Override
+	public List<Delegation> getAllDelegations(String variableName, String motivation, String elementType, Locale lang) throws CredentialsException {
+
+		// TODO this service is avaialble just for rootadmin at the moment
+		// TODO it's possiible to generalize and give also to the normal user this funzionality
+		credentialsService.checkRootCredentials(lang);
+
+		return delegationRepo.getAllDelegations(variableName, motivation, elementType);
+	}
+
+	// the cache has a timelimit set to a large interval (10 minutes)
+	// the cache SHOULD BE invalidated if a specific delegation for an user is updated/deleted/insert,
+	// but for multiple keys we are not able to purge the single entry... so we purge all
+	private void invalidateCache() {
+		cacheManager.getCache("delegationDelegatedByUsername").clear();
+	}
 }

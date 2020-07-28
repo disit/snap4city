@@ -76,6 +76,11 @@
 			<scope>test</scope>
 			<version>1.5.7.RELEASE</version>
 		</dependency>
+		<dependency>
+    		<groupId>org.springframework.boot</groupId>
+    		<artifactId>spring-boot-starter-cache</artifactId>
+			<version>1.5.7.RELEASE</version>    		
+		</dependency>
 		<!-- spring dependencies -->
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -124,6 +129,16 @@
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-c3p0</artifactId>
 			<version>5.0.12.Final</version>
+		</dependency>
+		<dependency>
+            <groupId>org.ehcache</groupId>
+            <artifactId>ehcache</artifactId>
+            <version>3.4.0</version>
+        </dependency>
+        <dependency>
+    		<groupId>javax.cache</groupId>
+    		<artifactId>cache-api</artifactId>
+    		<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -282,7 +297,6 @@
 			<name>Spring Releases</name>
 			<url>https://repo.spring.io/libs-release</url>
 		</repository>
-
 	</repositories>
 
 	<pluginRepositories>

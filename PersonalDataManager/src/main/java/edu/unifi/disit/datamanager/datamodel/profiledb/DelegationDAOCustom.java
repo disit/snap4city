@@ -15,10 +15,13 @@ package edu.unifi.disit.datamanager.datamodel.profiledb;
 import java.util.List;
 import java.util.Locale;
 
+import org.springframework.cache.annotation.Cacheable;
+
 import edu.unifi.disit.datamanager.exception.LDAPException;
 
 public interface DelegationDAOCustom {
 
+	@Cacheable(value = "delegationDelegatedByUsername")
 	List<Delegation> getDelegationDelegatedByUsername(String username, String variableName, String motivation, Boolean deleted, String groupname, String elementType, Locale lang) throws LDAPException;
 
 	List<Delegation> getDelegationDelegatorByUsername(String username, String variableName, String motivation, Boolean deleted, String elementType);
@@ -27,5 +30,7 @@ public interface DelegationDAOCustom {
 
 	List<Delegation> getPublicDelegationFromAppId(String appId, String variableName, String motivation, Boolean deleted, String elementType);
 
-	List<Delegation> getSameDelegation(Delegation d, Locale lang);
+	List<Delegation> getSameDelegation(Delegation d);
+
+	List<Delegation> getAllDelegations(String variableName, String motivation, String elementType);
 }

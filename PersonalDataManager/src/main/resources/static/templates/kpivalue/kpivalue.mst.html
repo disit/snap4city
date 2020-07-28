@@ -1,197 +1,206 @@
 <!-- {{#response}} -->
 <div class="row" style="padding: 15px;">
-    <div class="col-sm-2">
-        <button id="backButtonToMyKPIDataList" class="btn btn-secondary" style="color: white;padding: 0.5rem;"
-            type="button" onclick="KPIDataTabler.renderTable();">Return
-            to My KPI Data List</button>
-    </div>
+	<div class="col-sm-2">
+		<button id="backButtonToMyKPIDataList" class="btn btn-secondary"
+			style="color: white; padding: 0.5rem;" type="button"
+			onclick="KPIDataTabler.renderTable();">Return to My KPI Data
+			List</button>
+	</div>
 
 </div>
 <!-- {{#currentKPIData}} -->
 <div class="row" style="padding: 15px;">
-    <div class="col-sm-8 offset-sm-2">
-        <div class="alert alert-light">
-            <strong style="margin-right: 30px">Values of KPIData:</strong> <strong
-                style="margin-right: 10px">No.</strong> {{id}} <strong
-                style="margin-right: 10px; margin-left: 10px;">Nature</strong>
-            {{nature}} | <strong style="margin-right: 10px;margin-left: 10px;">Sub Nature</strong> {{subNature}} |
-            <strong style="margin-right: 10px; margin-left: 10px;">Value
-                Name</strong> {{valueName}}
-        </div>
-    </div>
+	<div class="col-sm-8 offset-sm-2">
+		<div class="alert alert-light">
+			<strong style="margin-right: 30px">Values of KPIData:</strong> <strong
+				style="margin-right: 10px">No.</strong> {{id}} <strong
+				style="margin-right: 10px; margin-left: 10px;">Nature</strong>
+			{{nature}} | <strong style="margin-right: 10px; margin-left: 10px;">Sub
+				Nature</strong> {{subNature}} | <strong
+				style="margin-right: 10px; margin-left: 10px;">Value Name</strong>
+			{{valueName}} | <strong
+				style="margin-right: 10px; margin-left: 10px;">DB of Values</strong>
+			{{dbValuesType}}
+		</div>
+	</div>
 
 </div>
 <!-- {{/currentKPIData}} -->
 <div class="row" style="padding: 15px;">
-    <div class="col-md-2">
-        <select id="selectSizeKPIValue" class="custom-select custom-select"
-            onchange="KPIValuePager.setCurrentSize($('#selectSizeKPIValue').val());KPIValueTabler.renderTable({{kpiId}}, '{{kpiDataType}}');">
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="20">20</option>
-            <option value="30">30</option>
-            <option value="50">50</option>
-            <option value="100">100</option>
-            <option value="200">200</option>
-        </select>
-    </div>
-    <div class="col-md-2 offset-md-3" style="text-align: center; margin: 0.5rem;">
-        <!-- {{#enableEdit}} -->
-        <button class="btn btn-warning" style="color: white;padding: 0.5rem;" type="button"
-            onclick="KPIValueTabler.editKPIValueModal('');">Add
-            New My KPI Value</button>
-        <!-- {{/enableEdit}} -->
+	<div class="col-md-2">
+		<select id="selectSizeKPIValue" class="custom-select custom-select"
+			onchange="KPIValuePager.setCurrentSize($('#selectSizeKPIValue').val());KPIValueTabler.renderTable({{kpiId}}, '{{kpiDataType}}');">
+			<option value="5">5</option>
+			<option value="10">10</option>
+			<option value="20">20</option>
+			<option value="30">30</option>
+			<option value="50">50</option>
+			<option value="100">100</option>
+			<option value="200">200</option>
+		</select>
+	</div>
+	<div class="col-md-2 offset-md-3"
+		style="text-align: center; margin: 0.5rem;">
+		<!-- {{#enableEdit}} -->
+		<button class="btn btn-warning" style="color: white; padding: 0.5rem;"
+			type="button" onclick="KPIValueTabler.editKPIValueModal('');">Add
+			New My KPI Value</button>
+		<!-- {{/enableEdit}} -->
 
-    </div>
-    <div class="col-md-2 offset-md-3">
-        <div class="input-group">
-            <input type="text" id="inputFilterKPIValue" class="form-control" placeholder="Filter Table"
-                aria-label="Filter Table" aria-describedby="button-addon2" max="{{totalPages}}" min="1" \>
-            <div class="input-group-append">
-                <button class="btn btn-outline-secondary" type="button"
-                    onclick="$('#inputFilterKPIValue').val('');KPIValueFilter.setCurrentSearchKey(''); KPIValueTabler.renderTable({{kpiId}}, '{{kpiDataType}}');"
-                    id="button-addon2" style="background-color: #eee;">&times;</button>
-            </div>
-            <div class="input-group-append">
-                <button class="btn btn-outline-secondary" type="button"
-                    onclick="KPIValueFilter.setCurrentSearchKey($('#inputFilterKPIValue').val()); KPIValueTabler.renderTable({{kpiId}}, '{{kpiDataType}}');"
-                    id="button-addon2" style="background-color: #eee;">Search</button>
-            </div>
-        </div>
-    </div>
+	</div>
+	<div class="col-md-2 offset-md-3">
+		<div class="input-group">
+			<input type="text" id="inputFilterKPIValue" class="form-control"
+				placeholder="Filter Table" aria-label="Filter Table"
+				aria-describedby="button-addon2" max="{{totalPages}}" min="1" />
+			<div class="input-group-append">
+				<button class="btn btn-outline-secondary" type="button"
+					onclick="$('#inputFilterKPIValue').val('');KPIValueFilter.setCurrentSearchKey(''); KPIValueTabler.renderTable({{kpiId}}, '{{kpiDataType}}');"
+					id="button-addon2" style="background-color: #eee;">&times;</button>
+			</div>
+			<div class="input-group-append">
+				<button class="btn btn-outline-secondary" type="button"
+					onclick="KPIValueFilter.setCurrentSearchKey($('#inputFilterKPIValue').val()); KPIValueTabler.renderTable({{kpiId}}, '{{kpiDataType}}');"
+					id="button-addon2" style="background-color: #eee;">Search</button>
+			</div>
+		</div>
+	</div>
 
 
 </div>
-<table class="table table-striped table-bordered" style="background-color: white">
-    <caption></caption>
-    <thead>
-        <tr style="background: rgb(0, 162, 211); color: rgb(255, 255, 255); font-size: 1em;">
-            <th scope="col"
-                onclick="KPIValueSorter.setSortOnField('id');KPIValueTabler.renderTable({{kpiId}}, '{{kpiDataType}}');"
-                style="cursor: pointer;">No.
-                {{#sortidASC}}&darr;{{/sortidASC}}
-                {{#sortidDESC}}&uarr;{{/sortidDESC}}</th>
-            <th scope="col"
-                onclick="KPIValueSorter.setSortOnField('value');KPIValueTabler.renderTable({{kpiId}}, '{{kpiDataType}}');"
-                style="cursor: pointer;">Value
-                {{#sortvalueASC}}&darr;{{/sortvalueASC}}
-                {{#sortvalueDESC}}&uarr;{{/sortvalueDESC}}</th>
-            <th scope="col"
-                onclick="KPIValueSorter.setSortOnField('latitude');KPIValueTabler.renderTable({{kpiId}}, '{{kpiDataType}}');"
-                style="cursor: pointer;">Latitude
-                {{#sortlatitudeASC}}&darr;{{/sortlatitudeASC}}
-                {{#sortlatitudeDESC}}&uarr;{{/sortlatitudeDESC}}</th>
-            <th scope="col"
-                onclick="KPIValueSorter.setSortOnField('longitude');KPIValueTabler.renderTable({{kpiId}}, '{{kpiDataType}}');"
-                style="cursor: pointer;">Longitude
-                {{#sortlongitudeASC}}&darr;{{/sortlongitudeASC}}
-                {{#sortlongitudeDESC}}&uarr;{{/sortlongitudeDESC}}</th>
-            <th scope="col"
-                onclick="KPIValueSorter.setSortOnField('dataTime');KPIValueTabler.renderTable({{kpiId}}, '{{kpiDataType}}');"
-                style="cursor: pointer;">Data
-                Time
-                {{#sortdataTimeASC}}&darr;{{/sortdataTimeASC}}
-                {{#sortdataTimeDESC}}&uarr;{{/sortdataTimeDESC}}</th>
-            <th scope="col"
-                onclick="KPIValueSorter.setSortOnField('insertTime');KPIValueTabler.renderTable({{kpiId}}, '{{kpiDataType}}');"
-                style="cursor: pointer;">Insert
-                Time
-                {{#sortinsertTimeASC}}&darr;{{/sortinsertTimeASC}} {{#sortinsertTimeDESC}}&uarr;{{/sortinsertTimeDESC}}
-            </th>
-            <!-- {{#enableEdit}} -->
-            <th scope="col">Controls</th>
-            <!-- {{/enableEdit}} -->
-        </tr>
-    </thead>
-    <tbody>
-        <!-- {{#content}} -->
-        <tr>
-            <td>{{id}}</td>
-            <td>{{value}}</td>
-            <td>{{latitude}}</td>
-            <td>{{longitude}}</td>
-            <td>{{#timestampToDate}}{{dataTime}}{{/timestampToDate}}</td>
-            <td>{{#timestampToDate}}{{insertTime}}{{/timestampToDate}}</td>
-            <!-- {{#enableEdit}} -->
-            <td><button type="button" onclick="KPIValueTabler.editKPIValueModal({{kpiId}}, {{id}});"
-                    class=" btn editDashBtn">Edit</button>
-                <button type="button"
-                    onclick="KPIValueTabler.deleteKPIValueModal({{id}}, {{kpiId}}, '{{value}}', '{{dataTime}}', '{{insertTime}}');"
-                    class="btn deleteDashBtn">Delete</button></td>
-            <!-- {{/enableEdit}} -->
-        </tr>
-        <!-- {{/content}} -->
-    </tbody>
+<table class="table table-striped table-bordered"
+	style="background-color: white">
+	<caption></caption>
+	<thead>
+		<tr
+			style="background: rgb(0, 162, 211); color: rgb(255, 255, 255); font-size: 1em;">
+			<th scope="col"
+				onclick="KPIValueSorter.setSortOnField('id');KPIValueTabler.renderTable({{kpiId}}, '{{kpiDataType}}');"
+				style="cursor: pointer;">No. {{#sortidASC}}&darr;{{/sortidASC}}
+				{{#sortidDESC}}&uarr;{{/sortidDESC}}</th>
+			<th scope="col"
+				onclick="KPIValueSorter.setSortOnField('value');KPIValueTabler.renderTable({{kpiId}}, '{{kpiDataType}}');"
+				style="cursor: pointer;">Value
+				{{#sortvalueASC}}&darr;{{/sortvalueASC}}
+				{{#sortvalueDESC}}&uarr;{{/sortvalueDESC}}</th>
+			<th scope="col"
+				onclick="KPIValueSorter.setSortOnField('latitude');KPIValueTabler.renderTable({{kpiId}}, '{{kpiDataType}}');"
+				style="cursor: pointer;">Latitude
+				{{#sortlatitudeASC}}&darr;{{/sortlatitudeASC}}
+				{{#sortlatitudeDESC}}&uarr;{{/sortlatitudeDESC}}</th>
+			<th scope="col"
+				onclick="KPIValueSorter.setSortOnField('longitude');KPIValueTabler.renderTable({{kpiId}}, '{{kpiDataType}}');"
+				style="cursor: pointer;">Longitude
+				{{#sortlongitudeASC}}&darr;{{/sortlongitudeASC}}
+				{{#sortlongitudeDESC}}&uarr;{{/sortlongitudeDESC}}</th>
+			<th scope="col"
+				onclick="KPIValueSorter.setSortOnField('dataTime');KPIValueTabler.renderTable({{kpiId}}, '{{kpiDataType}}');"
+				style="cursor: pointer;">Data Time
+				{{#sortdataTimeASC}}&darr;{{/sortdataTimeASC}}
+				{{#sortdataTimeDESC}}&uarr;{{/sortdataTimeDESC}}</th>
+			<th scope="col"
+				onclick="KPIValueSorter.setSortOnField('insertTime');KPIValueTabler.renderTable({{kpiId}}, '{{kpiDataType}}');"
+				style="cursor: pointer;">Insert Time
+				{{#sortinsertTimeASC}}&darr;{{/sortinsertTimeASC}}
+				{{#sortinsertTimeDESC}}&uarr;{{/sortinsertTimeDESC}}</th>
+			<!-- {{#enableEdit}} -->
+			<th scope="col">Controls</th>
+			<!-- {{/enableEdit}} -->
+		</tr>
+	</thead>
+	<tbody>
+		<!-- {{#content}} -->
+		<tr>
+			<td>{{id}}</td>
+			<td>{{value}}</td>
+			<td>{{latitude}}</td>
+			<td>{{longitude}}</td>
+			<td>{{#timestampToDate}}{{dataTime}}{{/timestampToDate}}</td>
+			<td>{{#timestampToDate}}{{insertTime}}{{/timestampToDate}}</td>
+			<!-- {{#enableEdit}} -->
+			<td><button type="button"
+					onclick="KPIValueTabler.editKPIValueModal({{kpiId}}, '{{id}}');"
+					class=" btn editDashBtn">Edit</button>
+				<button type="button"
+					onclick="KPIValueTabler.deleteKPIValueModal('{{id}}', {{kpiId}}, '{{value}}', '{{dataTime}}', '{{insertTime}}');"
+					class="btn deleteDashBtn">Delete</button></td>
+			<!-- {{/enableEdit}} -->
+		</tr>
+		<!-- {{/content}} -->
+	</tbody>
 </table>
-</div>
-
 
 <div class="row">
-    <div class="col-sm-3">
-        <div class="pagination" style="background-color: #eee;">
-            <p>Showing <span class="badge">{{showingFrom}}</span> to
-                <span class="badge"> {{showingTo}}</span>
-                of
-                <span class="badge">{{totalElements}}</span>
-                My KPI Value </p>
-        </div>
-    </div>
+	<div class="col-sm-3">
+		<div class="pagination" style="background-color: #eee;">
+			<p>
+				Showing <span class="badge">{{showingFrom}}</span> to <span
+					class="badge"> {{showingTo}}</span> of <span class="badge">{{totalElements}}</span>
+				My KPI Value
+			</p>
+		</div>
+	</div>
 
-    <div class="col-sm-6">
-        <!-- Pagination Bar -->
-        <div th:fragment='paginationbar'>
-            <div class="text-center">
-                <ul class='pagination pagination-centered'>
-                    <li class="page-item {{#first}} disabled {{/first}}">
-                        <span class="page-link" style="color: #337ab7"
-                            onclick="KPIValuePager.setCurrentPage(0); KPIValueTabler.renderTable({{kpiId}}, '{{kpiDataType}}');">First</span>
-                    </li>
-                    <li class="page-item {{#first}} disabled {{/first}}">
-                        <span class="page-link" style="color: #337ab7"
-                            onclick="KPIValuePager.setCurrentPage({{number}} - 1); KPIValueTabler.renderTable({{kpiId}}, '{{kpiDataType}}');">&lt;</span>
-                    </li>
-                    <li class="page-item {{#disableTwoPreviousNumber}} disabled {{/disableTwoPreviousNumber}}">
-                        <span class="page-link" style="color: #337ab7"
-                            onclick="KPIValuePager.setCurrentPage({{number}} - 2); KPIValueTabler.renderTable({{kpiId}}, '{{kpiDataType}}');">{{twoPreviousNumber}}</span>
-                    </li>
-                    <li class="page-item {{#disablePreviousNumber}} disabled {{/disablePreviousNumber}}">
-                        <span class="page-link" style="color: #337ab7"
-                            onclick="KPIValuePager.setCurrentPage({{number}} - 1); KPIValueTabler.renderTable({{kpiId}}, '{{kpiDataType}}');">{{previousNumber}}</span>
-                    </li>
-                    <li class="page-item">
-                        <span class="page-link" style="background-color: #337ab7;border-color: #337ab7;color: white">
-                            {{labelNumber}}</span>
-                    </li>
-                    <li class="page-item {{#disableNextNumber}} disabled {{/disableNextNumber}}">
-                        <span class="page-link" style="color: #337ab7"
-                            onclick="KPIValuePager.setCurrentPage({{number}} + 1); KPIValueTabler.renderTable({{kpiId}}, '{{kpiDataType}}');">{{nextNumber}}</span>
-                    </li>
-                    <li class="page-item {{#disableTwoNextNumber}} disabled {{/disableTwoNextNumber}}">
-                        <span class="page-link" style="color: #337ab7"
-                            onclick="KPIValuePager.setCurrentPage({{number}} + 2); KPIValueTabler.renderTable({{kpiId}}, '{{kpiDataType}}');">{{twoNextNumber}}</span>
-                    </li>
-                    <li class="page-item {{#last}} disabled {{/last}}">
-                        <span class="page-link" style="color: #337ab7"
-                            onclick="KPIValuePager.setCurrentPage({{number}} + 1); KPIValueTabler.renderTable({{kpiId}}, '{{kpiDataType}}');">&gt;</span>
-                    </li>
-                    <li class="page-item {{#last}} disabled {{/last}}">
-                        <span class="page-link" style="color: #337ab7"
-                            onclick="KPIValuePager.setCurrentPage({{totalPages}} - 1); KPIValueTabler.renderTable({{kpiId}}, '{{kpiDataType}}');">Last</span>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
+	<div class="col-sm-6">
+		<!-- Pagination Bar -->
+		<div th:fragment='paginationbar'>
+			<div class="text-center">
+				<ul class='pagination pagination-centered'>
+					<li class="page-item {{#first}} disabled {{/first}}"><span
+						class="page-link" style="color: #337ab7"
+						onclick="KPIValuePager.setCurrentPage(0); KPIValueTabler.renderTable({{kpiId}}, '{{kpiDataType}}');">First</span>
+					</li>
+					<li class="page-item {{#first}} disabled {{/first}}"><span
+						class="page-link" style="color: #337ab7"
+						onclick="KPIValuePager.setCurrentPage({{number}} - 1); KPIValueTabler.renderTable({{kpiId}}, '{{kpiDataType}}');">&lt;</span>
+					</li>
+					<li
+						class="page-item {{#disableTwoPreviousNumber}} disabled {{/disableTwoPreviousNumber}}">
+						<span class="page-link" style="color: #337ab7"
+						onclick="KPIValuePager.setCurrentPage({{number}} - 2); KPIValueTabler.renderTable({{kpiId}}, '{{kpiDataType}}');">{{twoPreviousNumber}}</span>
+					</li>
+					<li
+						class="page-item {{#disablePreviousNumber}} disabled {{/disablePreviousNumber}}">
+						<span class="page-link" style="color: #337ab7"
+						onclick="KPIValuePager.setCurrentPage({{number}} - 1); KPIValueTabler.renderTable({{kpiId}}, '{{kpiDataType}}');">{{previousNumber}}</span>
+					</li>
+					<li class="page-item"><span class="page-link"
+						style="background-color: #337ab7; border-color: #337ab7; color: white">
+							{{labelNumber}}</span></li>
+					<li
+						class="page-item {{#disableNextNumber}} disabled {{/disableNextNumber}}">
+						<span class="page-link" style="color: #337ab7"
+						onclick="KPIValuePager.setCurrentPage({{number}} + 1); KPIValueTabler.renderTable({{kpiId}}, '{{kpiDataType}}');">{{nextNumber}}</span>
+					</li>
+					<li
+						class="page-item {{#disableTwoNextNumber}} disabled {{/disableTwoNextNumber}}">
+						<span class="page-link" style="color: #337ab7"
+						onclick="KPIValuePager.setCurrentPage({{number}} + 2); KPIValueTabler.renderTable({{kpiId}}, '{{kpiDataType}}');">{{twoNextNumber}}</span>
+					</li>
+					<li class="page-item {{#last}} disabled {{/last}}"><span
+						class="page-link" style="color: #337ab7"
+						onclick="KPIValuePager.setCurrentPage({{number}} + 1); KPIValueTabler.renderTable({{kpiId}}, '{{kpiDataType}}');">&gt;</span>
+					</li>
+					<li class="page-item {{#last}} disabled {{/last}}"><span
+						class="page-link" style="color: #337ab7"
+						onclick="KPIValuePager.setCurrentPage({{totalPages}} - 1); KPIValueTabler.renderTable({{kpiId}}, '{{kpiDataType}}');">Last</span>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
 
-    <div class="col-sm-3">
-        <div class="input-group">
-            <input type="number" id="inputGoToPageKPIValue" class="form-control" placeholder="Page Number"
-                aria-label="Page Number" aria-describedby="button-addon2" max="{{totalPages}}" min="1" \>
-            <div class="input-group-append">
-                <button class="btn btn-outline-secondary" type="button"
-                    onclick="KPIValuePager.setCurrentPage($('#inputGoToPageKPIValue').val() - 1); KPIValueTabler.renderTable({{kpiId}}, '{{kpiDataType}}');"
-                    id="button-addon2" style="background-color: #eee;">Go</button>
-            </div>
-        </div>
-    </div>
-    <!-- {{/response}} -->
+	<div class="col-sm-3">
+		<div class="input-group">
+			<input type="number" id="inputGoToPageKPIValue" class="form-control"
+				placeholder="Page Number" aria-label="Page Number"
+				aria-describedby="button-addon2" max="{{totalPages}}" min="1" />
+			<div class="input-group-append">
+				<button class="btn btn-outline-secondary" type="button"
+					onclick="KPIValuePager.setCurrentPage($('#inputGoToPageKPIValue').val() - 1); KPIValueTabler.renderTable({{kpiId}}, '{{kpiDataType}}');"
+					id="button-addon2" style="background-color: #eee;">Go</button>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- {{/response}} -->

@@ -64,6 +64,7 @@ var KPIDataTabler = {
 
         for (var i = 0; i < _response.content.length; i++) {
             _response.content[i].isPublic = (_response.content[i].ownership == "public");
+            _response.content[i].organizations = _response.content[i].organizations.substring(_response.content[i].organizations.indexOf("=") + 1, _response.content[i].organizations.indexOf(","))
         }
 
         _response.enableEdit = KPIDataTabler.enableEdit;
@@ -153,14 +154,17 @@ var KPIDataTabler = {
                     _response[category] = _response.kpidata[category];
                 }
             }
-            /* if (_response.valueUnit != null) {
-                _response[_response.valueUnit + "Selected"] = true;
-            } */
+            if (_response.dbValuesType != null) {
+                _response[_response.dbValuesType + "Selected"] = true;
+            }
             if (_response.dataType != null) {
                 _response[_response.dataType + "Selected"] = true;
             }
             if (_response.ownership != null) {
                 _response[_response.ownership + "Selected"] = true;
+            }
+            if (_response.organizations != null) {
+                _response[_response.organizations.substring(_response.organizations.indexOf("=") + 1, _response.organizations.indexOf(",")) + "Selected"] = true;
             }
             _response.lastDate = Utility.timestampToFormatDate(_response.lastDate);
             _response.lastCheck = Utility.timestampToFormatDate(_response.lastCheck);
@@ -176,9 +180,19 @@ var KPIDataTabler = {
             EditModalManager.currentLatitude = _response.latitude;
             EditModalManager.currentLongitude = _response.longitude;
             EditModalManager.checkOrganizationAndCreateMap("KPIDataEdit");
-            EditModalManager.createNatureSelection();
-            $("#selectNatureKPIDataEdit").val(_response.nature).trigger('change');
-            $("#selectSubNatureKPIDataEdit").val(_response.subNature);
+            EditModalManager.createNatureSelection(_response.nature, _response.subNature);
+            EditModalManager.createValueTypeSelection(_response.valueType, _response.valueUnit);
+            //CHECK ROOT
+            $("#selectOrganizationKPIDataEditContainer").hide();
+            if (KPIEditor.isRoot()){
+                $("#selectOrganizationKPIDataEditContainer").show();
+            }
+            //CHECK FIREFOX FOR DATETIME-LOCAL
+            $("#timezonedesignator").hide();
+            if (typeof InstallTrigger !== 'undefined'){
+                $("#timezonedesignator").show();
+            }
+           
         } else {
             ViewManager.render({
                 "kpidata": _response
@@ -199,16 +213,14 @@ var KPIDataTabler = {
     },
 
     saveKPIData: function (kpiDataToSave) {
+        
         if (kpiDataToSave == null) {
             kpiData = {
                 "highLevelType": $("#inputHighLevelTypeKPIDataEdit").val(),
                 "valueName": $("#inputValueNameKPIDataEdit").val(),
-                "valueType": $("#inputValueTypeKPIDataEdit").val(),
                 "metric": $("#inputMetricKPIDataEdit").val(),
                 "description": $("#inputDescriptionKPIDataEdit").val(),
                 "info": $("#inputInfoKPIDataEdit").val(),
-                "latitude": $("#inputLatitudeKPIDataEdit").val(),
-                "longitude": $("#inputLongitudeKPIDataEdit").val(),
                 "metadata": [{
                         "key": "note",
                         "value": $("#inputNoteMyPOIModal").val()
@@ -247,7 +259,11 @@ var KPIDataTabler = {
                     }
                 ]
             }
-
+            if (KPIEditor.isRoot()){
+                if ($("#selectOrganizationKPIDataEdit").val() != ""){
+                    kpiData.organizations = "[ou=" + $("#selectOrganizationKPIDataEdit").val()  + ",dc=ldap,dc=disit,dc=org]";
+                }
+            }
             if ($("#selectNatureKPIDataEdit").val() != "") {
                 kpiData.nature = $("#selectNatureKPIDataEdit").val();
             }
@@ -257,11 +273,23 @@ var KPIDataTabler = {
             if ($("#selectValueUnitKPIDataEdit").val() != "") {
                 kpiData.valueUnit = $("#selectValueUnitKPIDataEdit").val();
             }
+            if ($("#selectValueTypeKPIDataEdit").val() != "") {
+                kpiData.valueType = $("#selectValueTypeKPIDataEdit").val();
+            }
             if ($("#selectDataTypeKPIDataEdit").val() != "") {
                 kpiData.dataType = $("#selectDataTypeKPIDataEdit").val();
             }
+            if ($("#selectDBValuesTypeKPIDataEdit").val() != "") {
+                kpiData.dbValuesType = $("#selectDBValuesTypeKPIDataEdit").val();
+            }
             if ($("#inputIdKPIDataEdit").val() != "") {
                 kpiData.id = $("#inputIdKPIDataEdit").val();
+            }
+            if (typeof $("#inputLatitudeKPIDataEdit").val() != "undefined" && $("#inputLatitudeKPIDataEdit").val() != "") {
+                kpiData.latitude = $("#inputLatitudeKPIDataEdit").val().replace(',','.');
+            }
+            if (typeof $("#inputLongitudeKPIDataEdit").val() != "undefined" && $("#inputLongitudeKPIDataEdit").val() != "") {
+                kpiData.longitude = $("#inputLongitudeKPIDataEdit").val().replace(',','.');
             }
             if ($("#inputUsernameKPIDataEdit").val() != "") {
                 kpiData.username = $("#inputUsernameKPIDataEdit").val();

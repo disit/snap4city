@@ -54,10 +54,10 @@ var KPIValueTabler = {
             _response.disableTwoNextNumber = true;
         }
 
-        _response["sort" + _response.sort[0].property + _response.sort[0].direction] = true;
-
         _response.insertTime = Utility.timestampToFormatDate(_response.insertTime);
         _response.dataTime = Utility.timestampToFormatDate(_response.dataTime);
+
+        _response["sort" + _response.sort[0].property + _response.sort[0].direction] = true;
 
         _response.kpiId = KPIValueTabler.currentKpiId;
         _response.kpiDataType = KPIValueTabler.currentKpiDataType;
@@ -133,6 +133,11 @@ var KPIValueTabler = {
         EditModalManager.currentLatitude = _response.latitude;
         EditModalManager.currentLongitude = _response.longitude;
         EditModalManager.checkOrganizationAndCreateMap("KPIValueEdit");
+        //CHECK FIREFOX FOR DATETIME-LOCAL
+        $("#timezonedesignator").hide();
+        if (typeof InstallTrigger !== 'undefined'){
+            $("#timezonedesignator").show();
+        }
     },
 
     deleteKPIValueModal: function (_id, _kpiId, _value, _dataTime, _insertTime, _latitude, _longitude) {
@@ -150,6 +155,7 @@ var KPIValueTabler = {
     },
 
     saveKPIValue: function () {
+        
         kpiValue = {
             "value": $("#inputValueKPIValueEdit").val(),
             "latitude": $("#inputLatitudeKPIValueEdit").val(),

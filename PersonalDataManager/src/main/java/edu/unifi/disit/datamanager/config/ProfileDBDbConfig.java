@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceBuilder;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -31,6 +32,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 //config file is needed (even empty) to enable messageService
 @Configuration
+@EnableCaching // needed for annotation @Cachable... (not needed if set interatly via entity manager)
 @EnableTransactionManagement
 @EnableJpaRepositories(
 		entityManagerFactoryRef = "profiledbEntityManagerFactory",
@@ -88,6 +90,7 @@ public class ProfileDBDbConfig {
 				.persistenceUnit("Ownership")
 				.persistenceUnit("Activity")
 				.persistenceUnit("ActivityViolation")
+
 				.build();
 	}
 
@@ -104,4 +107,5 @@ public class ProfileDBDbConfig {
 	// props.put("hibernate.implicit_naming_strategy", SpringImplicitNamingStrategy.class.getName());
 	// return props;
 	// }
+
 }

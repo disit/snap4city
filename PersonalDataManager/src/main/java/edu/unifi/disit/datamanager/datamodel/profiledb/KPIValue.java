@@ -87,6 +87,19 @@ public class KPIValue implements Comparable<KPIValue> {
 		this.latitude = latitude;
 		this.longitude = longitude;
 	}
+	
+	public KPIValue(Date insertTime, Date dataTime, Date elapseTime, Date deleteTime, String value, String latitude,
+			String longitude, Long kpiId) {
+		super();
+		this.insertTime = insertTime;
+		this.dataTime = dataTime;
+		this.elapseTime = elapseTime;
+		this.deleteTime = deleteTime;
+		this.value = value;
+		this.latitude = latitude;
+		this.longitude = longitude;
+		this.kpiId = kpiId;
+	}
 
 	public Long getId() {
 		return id;

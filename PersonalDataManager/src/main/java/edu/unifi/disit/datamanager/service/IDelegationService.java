@@ -69,4 +69,5 @@ public interface IDelegationService {
 
 	List<Delegation> findByElementIdNoPagesWithoutAnonymousFiltered(String elementId, String searchKey);
 
+	List<Delegation> getAllDelegations(String variableName, String motivation, String elementType, Locale lang) throws CredentialsException;
 }

@@ -1,0 +1,80 @@
+openapi: 3.0.1
+info:
+  title: DWS API
+  description: This API supports the addition of sensors to groups of objects, and the validation of added sensors over the time, through the provisioning of listing of sensors from the Dashboard Wizard, each with its owner associated. Full-text searches and searches by id are allowed. Privacy is ensured.
+  version: '1.0'
+servers:
+  - url: http://192.168.0.47/dashboardSmartCity/api/
+    description: Internal testing
+  - url: https://www.snap4city.org/dashboardSmartCity/api/
+    description: Production usage
+paths:
+  /sensors.php:
+    get:
+      tags:
+        - Sensors
+      summary: It provides back listings of sensors enforcing ownership.
+      parameters:
+        - name: accessToken
+          in: query
+          description: The user's access token.
+          required: true
+          schema:
+            type: string
+        - name: pageNum
+          in: query
+          description: Page number, to be used for paged listings.
+          required: false
+          schema:
+            type: string
+        - name: pageSize
+          in: query
+          description: The maximum size of each page, to be used for paged listings.
+          required: false
+          schema:
+            type: string  
+        - name: search
+          in: query
+          description: For full-text search in sensors. Search is performed in device type, device name, and sensor name, respectively corresponding to sub_nature, unique_name_id, low_level_type fields of the _DashboardWizard_ table.
+          required: false
+          schema:
+            type: string  
+        - name: id
+          in: query
+          description: A comma-separated list of sensors, each identified through its _id_ in the _DashboardWizard_ table. If provided, the API will return at most the specified sensors. The full-text search is also operated if the _search_ parameter is provided. Ownership always is enforced (privacy of data is granted).
+          required: false
+          schema:
+            type: string                 
+      responses:
+        '200':
+          description: A JSON array that contains sensors that are visible to the token's owner.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      description: The _id_ of the sensor in the _DashboardWizard_ table.
+                      example: 588
+                    deviceType:
+                      type: string
+                      description: The type of the device where the sensor locates.
+                      example: Air_quality_monitoring_station
+                    deviceName:
+                      type: string
+                      description: The name of the device where the sensor locates.
+                      example: 373773207E330100
+                    deviceId:
+                      type: string
+                      description: The unique identifier of the device where the sensor locates, expressed in the form of a URI.
+                      example: http://www.disit.org/km4city/resource/iot/orionFinland/Helsinki/373773207E330100
+                    deviceOwner:
+                      type: string
+                      description: The owner of the device (and therefore of sensors located in it), retrieved through a call to the Ownership API. It is _null_ for public devices.
+                    valueName:
+                      type: string
+                      description: The name of the sensor.
+                      example: airQualityPM10

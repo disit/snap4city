@@ -1,0 +1,1083 @@
+openapi: 3.0.1
+info:
+  title: Object Groups API
+  description: This API allow the management of groups of objects.
+  version: '1.0'
+servers:
+  - url: http://192.168.0.47:8081/test/datamanager/api/v1
+    description: Internal testing
+  - url: https://www.snap4city.org/mypersonaldata/api/v1
+    description: Production usage
+paths:
+  /devicegroup:
+    post:
+      tags:
+        - Groups
+      summary: It creates a new empty group
+      parameters:
+        - $ref: '#/components/parameters/accessToken'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/group'
+      responses:
+        '200':
+          description: A JSON representation of the newly created group.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/group'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+    get:
+      tags: 
+        - Groups
+      summary: It provides a list or page of groups.
+      parameters:
+        - $ref: '#/components/parameters/accessToken'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
+        - $ref: '#/components/parameters/pageNumber'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sortDirection'
+        - $ref: '#/components/parameters/sortBy'
+        - $ref: '#/components/parameters/searchKey'
+        - $ref: '#/components/parameters/highLevelType'
+      responses:
+        '200':
+          $ref: '#/components/responses/groups'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized        
+        '500':
+          description: Internal Server Error        
+  /api/v1/devicegroup/public:
+    get:
+      deprecated: true
+      tags: 
+        - Groups
+      summary: It provides a list or page of public groups.
+      parameters:
+        - $ref: '#/components/parameters/accessToken'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
+        - $ref: '#/components/parameters/pageNumber'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sortDirection'
+        - $ref: '#/components/parameters/sortBy'
+        - $ref: '#/components/parameters/searchKey'
+        - $ref: '#/components/parameters/highLevelType'
+      responses:
+        '200':
+          $ref: '#/components/responses/groups'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized        
+        '500':
+          description: Internal Server Error    
+  /api/v1/public/devicegroup:
+    get:
+      tags: 
+        - Groups
+      summary: It provides a list or page of public groups.
+      parameters:
+        - $ref: '#/components/parameters/accessToken'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
+        - $ref: '#/components/parameters/pageNumber'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sortDirection'
+        - $ref: '#/components/parameters/sortBy'
+        - $ref: '#/components/parameters/searchKey'
+        - $ref: '#/components/parameters/highLevelType'
+      responses:
+        '200':
+          $ref: '#/components/responses/groups'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized        
+        '500':
+          description: Internal Server Error            
+  /api/v1/devicegroup/organization:
+    get:
+      tags: 
+        - Groups
+      summary: It provides a list or page of public groups managed by the organization of the requester.
+      parameters:
+        - $ref: '#/components/parameters/accessToken'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
+        - $ref: '#/components/parameters/pageNumber'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sortDirection'
+        - $ref: '#/components/parameters/sortBy'
+        - $ref: '#/components/parameters/searchKey'
+        - $ref: '#/components/parameters/highLevelType'
+      responses:
+        '200':
+          $ref: '#/components/responses/groups'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized        
+        '500':
+          description: Internal Server Error    
+  /api/v1/devicegroup/delegated:
+    get:
+      tags: 
+        - Groups
+      summary: It provides a list or page of groups that the requester can access in read-only mode.
+      parameters:
+        - $ref: '#/components/parameters/accessToken'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
+        - $ref: '#/components/parameters/pageNumber'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sortDirection'
+        - $ref: '#/components/parameters/sortBy'
+        - $ref: '#/components/parameters/searchKey'
+        - $ref: '#/components/parameters/highLevelType'
+      responses:
+        '200':
+          $ref: '#/components/responses/groups'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized        
+        '500':
+          description: Internal Server Error      
+  /api/v1/devicegroup/{id}:
+    get:
+      tags: 
+        - Groups
+      summary: It provides metadata about the specified group.
+      parameters:
+        - $ref: '#/components/parameters/accessToken'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer        
+      responses:
+        '200':
+          description: A JSON representation of the requested group.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/group'
+        '204':
+          description: No content        
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal Server Error
+    patch:
+      tags: 
+        - Groups
+      summary: It updates the specified group.
+      parameters:
+        - $ref: '#/components/parameters/accessToken'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer              
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/group'
+      responses:
+        '200':
+          description: A JSON representation of the group after the update.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/group'
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal Server Error
+    delete:
+      tags: 
+        - Groups
+      summary: It performs a logical delete of the specified group.
+      parameters:
+        - $ref: '#/components/parameters/accessToken'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer              
+      responses:
+        '200':
+          description: A JSON representation of the group after the logical delete.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/group'
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal Server Error          
+  /api/v1/public/devicegroup/{id}:
+    get:
+      tags: 
+        - Groups
+      summary: It provides metadata about the specified public group.
+      parameters:
+        - $ref: '#/components/parameters/accessToken'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer        
+      responses:
+        '200':
+          description: A JSON representation of the requested group.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/group'
+        '204':
+          description: No content        
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal Server Error 
+  /api/v1/devicegroup/{groupId}/elements:
+    get:
+      tags: 
+        - Elements
+      summary: It provides a list or page of the elements in the specified group.
+      parameters:
+        - $ref: '#/components/parameters/accessToken'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
+        - $ref: '#/components/parameters/pageNumber'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sortDirection'
+        - $ref: '#/components/parameters/sortBy'
+        - $ref: '#/components/parameters/searchKey'
+        - $ref: '#/components/parameters/highLevelType'
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: integer          
+      responses:
+        '200':
+          $ref: '#/components/responses/elements'
+        '204':
+          description: If the group cannot be found, or the list of its elements cannot be retrieved.        
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized        
+        '500':
+          description: Internal Server Error        
+    post:
+      tags: 
+        - Elements
+      summary: It adds objects to the specified group.
+      parameters:
+        - $ref: '#/components/parameters/accessToken'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: integer        
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/element'
+      responses:
+        '200':
+          $ref: '#/components/responses/elements'
+        '204':
+          description: If the group cannot be found.
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized        
+        '500':
+          description: Internal Server Error        
+    delete:
+      tags: 
+        - Elements
+      summary: It performs a logical removal of all elements from the specified group.
+      parameters:
+        - $ref: '#/components/parameters/accessToken'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: integer          
+      responses:
+        '200':
+          $ref: '#/components/responses/elements'
+        '204':
+          description: If the group cannot be found, or the list of its elements cannot be retrieved.
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized        
+        '500':
+          description: Internal Server Error       
+  /api/v1/public/devicegroup/{groupId}/elements:
+    get:
+      tags: 
+        - Elements
+      summary: It provides a list or page of the elements in the specified public group.
+      parameters:
+        - $ref: '#/components/parameters/accessToken'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
+        - $ref: '#/components/parameters/pageNumber'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sortDirection'
+        - $ref: '#/components/parameters/sortBy'
+        - $ref: '#/components/parameters/searchKey'
+        - $ref: '#/components/parameters/highLevelType'
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: integer          
+      responses:
+        '200':
+          $ref: '#/components/responses/elements'
+        '204':
+          description: If the group cannot be found, or the list of its elements cannot be retrieved.        
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized        
+        '500':
+          description: Internal Server Error            
+  /api/v1/devicegroup/{groupId}/elements/{elementId}:
+    delete:
+      tags: 
+        - Elements
+      summary: It performs a logical removal of the specified element from the specified group.
+      parameters:
+        - $ref: '#/components/parameters/accessToken'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: integer          
+        - name: elementId
+          in: path
+          required: true
+          schema:
+            type: integer            
+      responses:
+        '200':
+          description: Returns the identifier of the successfully removed element.
+        '204':
+          description: If the group or the element cannot be found.
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized        
+        '500':
+          description: Internal Server Error  
+  /api/v1/devicegroup/{groupId}/availElmtTypesToAdd:
+    get:
+      tags: 
+        - Elements
+      summary: It provides the list of the types of objects that the requester owns and that can be added to the group.
+      parameters:
+        - $ref: '#/components/parameters/accessToken'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/lang'
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: integer          
+      responses:
+        '200':
+          description: Array of strings each indicating a type of object that the requester can add to the group.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '204':
+          description: If the requester owns no suitable objects or an unexpected error occurs.        
+        '401':
+          description: Unauthorized        
+  /api/v1/devicegroup/{groupId}/availElmtToAdd:
+    get:
+      tags: 
+        - Elements
+      summary: It provides the list of the objects of the requested type that the requester can add to the group.
+      parameters:
+        - $ref: '#/components/parameters/accessToken'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/lang'
+        - $ref: '#/components/parameters/elmtType'
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: integer          
+      responses:
+        '200':
+          description: Array of objects that the requester can add to the group.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '204':
+          description: If the requester owns no suitable objects or an unexpected error occurs.        
+        '401':
+          description: Unauthorized      
+  /api/v1/groupelement:
+    get:
+      tags: 
+        - Elements
+      summary: It provides the listing of groups where the specified object can be found.
+      parameters:
+        - $ref: '#/components/parameters/accessToken'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
+        - $ref: '#/components/parameters/elementId'
+        - $ref: '#/components/parameters/elementType'
+      responses:
+        '200':
+          description: List of _elements_, each representing the relation between the specified object and a group where it can be found.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/element'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized        
+        '500':
+          description: Internal Server Error  
+  /api/v1/devicegroup/{groupId}/delegations/{delegationId}:
+    get:
+      tags:
+        - Delegation
+      summary: It provides information about the requested delegation.
+      parameters:
+        - $ref: '#/components/parameters/accessToken'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: integer   
+        - name: delegationId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          $ref: '#/components/responses/delegation'
+        '204':
+          description: If the delegation cannot be found.      
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized        
+        '500':
+          description: Internal Server Error       
+    put:
+      tags:
+        - Delegation
+      summary: It updates an existing delegation.
+      parameters:
+        - $ref: '#/components/parameters/accessToken'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: integer   
+        - name: delegationId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/delegation'
+      responses:
+        '200':
+          $ref: '#/components/responses/delegation'
+        '204':
+          description: If the delegation to be updated cannot be found.      
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized        
+        '500':
+          description: Internal Server Error  
+    patch:
+      tags:
+        - Delegation
+      summary: It updates an existing delegation.
+      parameters:
+        - $ref: '#/components/parameters/accessToken'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: integer   
+        - name: delegationId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/delegation'
+      responses:
+        '200':
+          $ref: '#/components/responses/delegation'
+        '204':
+          description: If the delegation to be updated cannot be found.      
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized        
+        '500':
+          description: Internal Server Error         
+    delete:
+      tags:
+        - Delegation
+      summary: It performs a logical deletion of an existing delegation.
+      parameters:
+        - $ref: '#/components/parameters/accessToken'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: integer   
+        - name: delegationId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          $ref: '#/components/responses/delegation'
+        '204':
+          description: If the delegation to be updated cannot be found.      
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized        
+        '500':
+          description: Internal Server Error                
+  /api/v1/devicegroup/{groupId}/delegations:
+    get:
+      tags: 
+        - Delegation
+      summary: It provides a list or page of the delegations given for the specified group.
+      parameters:
+        - $ref: '#/components/parameters/accessToken'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
+        - $ref: '#/components/parameters/pageNumber'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sortDirection'
+        - $ref: '#/components/parameters/sortBy'
+        - $ref: '#/components/parameters/searchKey'
+        - $ref: '#/components/parameters/highLevelType'
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          $ref: '#/components/responses/delegations'
+        '204':
+          description: If the group cannot be found, or the list of its delegations cannot be retrieved.        
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized        
+        '500':
+          description: Internal Server Error        
+    post:
+      tags:
+        - Delegation
+      summary: It provides information about the requested delegation.
+      parameters:
+        - $ref: '#/components/parameters/accessToken'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: integer   
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/delegation'
+      responses:
+        '200':
+          $ref: '#/components/responses/elements'
+        '204':
+          description: If the group cannot be found.      
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized        
+        '500':
+          description: Internal Server Error       
+             
+        
+components:
+  parameters:
+    sourceRequest:
+      name: sourceRequest
+      in: query
+      required: true
+      schema:
+        type: string
+    sourceId:
+      name: sourceId
+      in: query
+      required: false
+      schema:
+        type: string
+    lang:
+      name: lang
+      in: query
+      required: false
+      schema:
+        type: string  
+    pageNumber:
+      name: pageNumber
+      description: Required for requesting paginated listings.
+      in: query
+      required: false
+      schema:
+        type: integer
+    pageSize:
+      name: pageSize
+      description: Required for requesting paginated listings.
+      in: query
+      required: false
+      schema:
+        type: integer
+    sortDirection:
+      name: sortDirection
+      in: query
+      required: false
+      schema: 
+        type: string
+        enum: [asc,desc]
+    sortBy:
+      name: sortBy
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [id,highLevelType,name,description,updateTime,username,ownership]
+    searchKey:
+      name: searchKey
+      description: It allows to perform a full-text filtering of groups. 
+      in: query
+      required: false
+      schema:
+        type: string
+    highLevelType:
+      name: highLevelType
+      in: query
+      required: false
+      schema:
+        type: string        
+        enum: [MyGroup]
+    elmtType:
+      name: elmtType
+      description: The type of the objects to be listed.
+      in: query
+      required: false
+      schema:
+        type: string      
+    elementId:
+      name: elementId
+      description: "The identifier of the object to be searched. Identifiers of objects of different types can have different structures: it depends of data sources from where objects come."
+      in: query
+      required: true
+      schema:
+        type: string        
+    elementType:
+      name: elementType
+      description: The type of the objects to be searched.
+      in: query
+      required: true
+      schema:
+        type: string            
+    accessToken:
+      name: accessToken
+      in: query
+      description: The user's access token.
+      required: true
+      schema:
+        type: string    
+  schemas:
+    group:
+      type: object
+      required:
+        - highLevelType
+        - name
+        - description
+      properties:
+        id:
+          type: integer
+          description: The unique identifier of the group.
+          example: 1
+        name:
+          type: string
+          description: The name of the group.
+          example: Prova
+        description:
+          type: string
+          description: A textual description for the group.
+          example: Description of group Prova
+        highLevelType:
+          type: string
+          enum: [MyGroup]
+          example: MyGroup
+        insertTime:
+          type: string
+          format: date-time
+          description: Date and time when the group was created.
+          example: 2019-12-10 17:31:45
+        updateTime:
+          type: string
+          format: date-time
+          description: Date and time of the most recent modification of the group, as for its composition or metadata.
+          example: 2019-12-19 09:56:55
+        deleteTime:
+          type: string
+          format: date-time
+          description: Date and time when the group was deleted.
+          example: 2019-12-19 09:56:55
+        organizations:
+          type: string
+          description: The organization that manages the group.
+          example: [ou=Firenze,dc=foo,dc=example,dc=org]
+        ownership:
+          type: string
+          enum: [public,private]
+          description: Wheter the group is public or private.
+          example: public
+        username:
+          type: string
+          description: The username of the owner of the group.
+          example: snap4city
+        size:
+          type: integer
+          description: The number of the elements in the group at the time of the request.
+          example: 10
+    element:
+      type: object
+      required:
+        - elementId
+        - deviceGroupId
+        - elementType
+        - insertTime
+      properties:
+        id:
+          type: integer
+          description: The unique identifier of the _membership relation_ that links objects to groups. 
+          example: 1
+        elementId:
+          type: string
+          description: The unique identifier of the _object_ (the group member) in the table or API call response from where the object comes.
+          example: Firenze:broker:device1
+        elementType:
+          type: string
+          description: The type of the _object_ (the group member) based on the data source from where the object comes and/or on the categorization that is performed of items internally at that data source.
+          example: IOTID
+        elmtTypeLbl:
+          type: string
+          description: User-friendly version of the elementType.
+          example: IOT Device
+        elementName:
+          type: string
+          description: The name of the object.
+          example: p89BigExampleA221  
+        username:
+          type: string
+          description: The username of the owner of the object.
+          example: snap4city          
+        deviceGroupId:
+          type: integer
+          description: The unique identifier of the group.
+          example: 6
+        deviceGroupUrl:
+          type: integer
+          description: The Web address where it is possible to get full details about the group.
+          example: https://www.snap4city.org/mypersonaldata/?id=17          
+        deviceGroupContact:
+          type: string
+          description: The username of the owner of the group.
+          example: snap4city         
+        insertTime:
+          type: string
+          format: date-time
+          description: Date and time when the element was added to the group.
+          example: 2019-12-10 17:31:45
+        deleteTime:
+          type: string
+          format: date-time
+          description: Date and time when the element was removed from the group.
+          example: 2019-12-19 09:56:55
+    delegation:
+      type: object
+      required:
+        - usernameDelegated
+        - elementId
+        - elementType
+      properties:
+        id:
+          type: integer
+          description: The unique identifier of the delegation.
+          example: 1
+        usernameDelegator:
+          type: string
+          description: The username of the user that gives the delegation.
+          example: adifino
+        usernameDelegated:
+          type: string
+          description: The username of the user that gets the delegations.
+          example: snap4city
+        variableName:
+          type: string
+          description: Unused for groups.
+        motivation:
+          type: string      
+          description: Unused for groups.
+        elementId:
+          type: string
+          description: The unique identifier of the group for which the delegation is given.
+          example: 65
+        elementType:
+          type: string
+          enum: [MyGroup]
+          example: MyGroup
+        insertTime:
+          type: string
+          format: date-time
+          description: Date and time when the element was added to the group.
+          example: 2019-12-10 17:31:45
+        delegationDetails:
+          type: string
+          description: Unused for groups.
+        groupnameDelegated:
+          type: string
+          description: Unused for groups.
+  responses:
+    groups:
+      description: A JSON document representing a page of groups of objects, or a simple array of groups of objects.
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - type: array
+                description: When pagination is not requested.
+                items:
+                  $ref: '#/components/schemas/group'
+              - type: object
+                description: When pagination is requested.
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/group'
+                  first:
+                    type: boolean
+                  last:
+                    type: boolean
+                  number:
+                    type: integer
+                    description: The zero-based number of the returned page.
+                  totalPages:
+                    type: integer
+                    description: The total number of the pages, resulting from the division of the _totalElements_ by the _size_.
+                  numberOfElements:
+                    type: integer
+                    description: Number of the items in the returned page.
+                  size:
+                    type: integer
+                    description: Maximum number of items that can be returned in a single page.
+                  totalElements:
+                    type: integer
+                    description: Total number of the items across all pages.
+                  sort:
+                    type: array
+                    items:
+                      type: object
+                      description: Implementation-specific description of the sorting criteria.
+    elements:
+      description: A JSON document representing a page of elements in a group of objects, or a simple array of elements.
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - type: array
+                description: When pagination is not requested.
+                items:
+                  $ref: '#/components/schemas/element'
+              - type: object
+                description: When pagination is requested.
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/element'
+                  first:
+                    type: boolean
+                  last:
+                    type: boolean
+                  number:
+                    type: integer
+                    description: The zero-based number of the returned page.
+                  totalPages:
+                    type: integer
+                    description: The total number of the pages, resulting from the division of the _totalElements_ by the _size_.
+                  numberOfElements:
+                    type: integer
+                    description: Number of the items in the returned page.
+                  size:
+                    type: integer
+                    description: Maximum number of items that can be returned in a single page.
+                  totalElements:
+                    type: integer
+                    description: Total number of the items across all pages.
+                  sort:
+                    type: array
+                    items:
+                      type: object
+                      description: Implementation-specific description of the sorting criteria.   
+    delegation:
+      description: A JSON document that describes a delegation.
+      content:
+        application/json:
+          schema:           
+            $ref: '#/components/schemas/delegation'
+    delegations:
+      description: A JSON document representing a page of delegations given for a group, or a simple array of delegations.
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - type: array
+                description: When pagination is not requested.
+                items:
+                  $ref: '#/components/schemas/delegation'
+              - type: object
+                description: When pagination is requested.
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/delegation'
+                  first:
+                    type: boolean
+                  last:
+                    type: boolean
+                  number:
+                    type: integer
+                    description: The zero-based number of the returned page.
+                  totalPages:
+                    type: integer
+                    description: The total number of the pages, resulting from the division of the _totalElements_ by the _size_.
+                  numberOfElements:
+                    type: integer
+                    description: Number of the items in the returned page.
+                  size:
+                    type: integer
+                    description: Maximum number of items that can be returned in a single page.
+                  totalElements:
+                    type: integer
+                    description: Total number of the items across all pages.
+                  sort:
+                    type: array
+                    items:
+                      type: object
+                      description: Implementation-specific description of the sorting criteria.   
+      

@@ -290,7 +290,8 @@ public class GrpElementsController {
 					"Wrong Device Group Data", null, request.getRemoteAddr());
 
 			Set<String> elementTypes = null;
-			DeviceGroup grpData = deviceGroupService.getDeviceGroupById(grpId, null, false);
+			// DeviceGroup grpData =
+			deviceGroupService.getDeviceGroupById(grpId, null, false);// used just for CredentialsException?
 			if (credentialService.isRoot(lang)) {
 				elementTypes = deviceGroupElementService.getAllElmtTypes();
 			} else {
@@ -335,7 +336,8 @@ public class GrpElementsController {
 					"Wrong Device Group Data", null, request.getRemoteAddr());
 
 			Set<Object> items = null;
-			DeviceGroup grpData = deviceGroupService.getDeviceGroupById(grpId, null, false);
+			// DeviceGroup grpData =
+			deviceGroupService.getDeviceGroupById(grpId, null, false); // used just for CredentialsException?
 			if (credentialService.isRoot(lang)) {
 				items = deviceGroupElementService.getAllItems(elmtType);
 			} else {
@@ -607,14 +609,14 @@ public class GrpElementsController {
 
 	}
 
-        // -------------------GET ALL Device Group Element Pageable ---------------
+	// -------------------GET ALL Device Group Element Pageable ---------------
 	@GetMapping("/api/v1/groupelement")
 	public ResponseEntity<Object> getGroupElement(
 			@RequestParam(value = "sourceRequest") String sourceRequest,
 			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
-                        @RequestParam(value = "elementId") String elementId,
-                        @RequestParam(value = "elementType") String elementType,
+			@RequestParam(value = "elementId") String elementId,
+			@RequestParam(value = "elementType") String elementType,
 			HttpServletRequest request) {
 
 		logger.info(
@@ -622,14 +624,14 @@ public class GrpElementsController {
 				elementId, elementType, sourceRequest, sourceId, lang);
 
 		try {
-			
-                    List<DeviceGroupElement> el = deviceGroupElementService.getByUserAndElmtIdAndElmtType(credentialService.getLoggedUsername(lang),elementId, elementType);
 
-                    logger.info("Returning Group Element List ");
+			List<DeviceGroupElement> el = deviceGroupElementService.getByUserAndElmtIdAndElmtType(credentialService.getLoggedUsername(lang), elementId, elementType);
 
-                    return new ResponseEntity<>(el, HttpStatus.OK);
-                                			
-		}  catch (IllegalArgumentException | NoSuchMessageException d) {
+			logger.info("Returning Group Element List ");
+
+			return new ResponseEntity<>(el, HttpStatus.OK);
+
+		} catch (IllegalArgumentException | NoSuchMessageException d) {
 			logger.warn("Wrong Arguments", d);
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
@@ -640,5 +642,5 @@ public class GrpElementsController {
 		}
 
 	}
-        
+
 }

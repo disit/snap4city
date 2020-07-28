@@ -3,7 +3,11 @@ var QueryManager = {
     sourceRequest: "kpieditor",
 
     createGetKPIDataTableQuery: function (privacy, pageNumber, pageSize, sortDirection, sortBy, searchKey) {
-        return "kpidata/" + privacy + "/?sourceRequest=" + QueryManager.sourceRequest  + (pageNumber || pageNumber == 0 ? "&pageNumber=" + pageNumber : "") + (pageSize ? "&pageSize=" + pageSize : "") + (sortDirection ? "&sortDirection=" + sortDirection : "") + (sortBy ? "&sortBy=" + sortBy : "") + (searchKey ? "&searchKey=" + searchKey : "");
+    	if (privacy != ""){
+    		return "kpidata/" + privacy + "/?sourceRequest=" + QueryManager.sourceRequest  + (pageNumber || pageNumber == 0 ? "&pageNumber=" + pageNumber : "") + (pageSize ? "&pageSize=" + pageSize : "") + (sortDirection ? "&sortDirection=" + sortDirection : "") + (sortBy ? "&sortBy=" + sortBy : "") + (searchKey ? "&searchKey=" + searchKey : "");
+    	} else {
+    		return "kpidata/?sourceRequest=" + QueryManager.sourceRequest  + (pageNumber || pageNumber == 0 ? "&pageNumber=" + pageNumber : "") + (pageSize ? "&pageSize=" + pageSize : "") + (sortDirection ? "&sortDirection=" + sortDirection : "") + (sortBy ? "&sortBy=" + sortBy : "") + (searchKey ? "&searchKey=" + searchKey : "");
+    	}
     },
 
     createGetKPIDataByIdQuery: function (id) {

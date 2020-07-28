@@ -16,6 +16,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -87,6 +88,27 @@ public class delegationTest {
 	}
 
 	@Test
+	public void get_delegated_usernameExist2() throws ClientProtocolException, IOException {
+
+		// Given
+		HttpUriRequest request = new HttpGet("http://localhost:8080/datamanager/api/v1/username/adifino/delegated?accessToken=" + getAccessTokenRoot() + "&sourceRequest=test");
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		ObjectMapper mapper = new ObjectMapper();
+		List<Delegation> result = mapper.readValue(EntityUtils.toString(httpResponse.getEntity()), new TypeReference<List<Delegation>>() {
+		});
+
+		assertThat(
+				httpResponse.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.OK.value()));
+
+		assertEquals(5, result.size());
+	}
+
+	@Test
 	public void get_public() throws ClientProtocolException, IOException {
 
 		// Given
@@ -152,6 +174,21 @@ public class delegationTest {
 	}
 
 	@Test
+	public void get_delegated_usernameExist2_V1_elementType_ok() throws ClientProtocolException, IOException {
+
+		// Given
+		HttpUriRequest request = new HttpGet("http://localhost:8080/datamanager/api/v1/username/ADifino/delegated?accessToken=" + getAccessTokenRoot() + "&sourceRequest=test&elementType=DASHID");
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		assertThat(
+				httpResponse.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.NO_CONTENT.value()));
+	}
+
+	@Test
 	public void get_delegated_usernameExist2_V1() throws ClientProtocolException, IOException {
 
 		// Given
@@ -169,7 +206,7 @@ public class delegationTest {
 				httpResponse.getStatusLine().getStatusCode(),
 				equalTo(HttpStatus.OK.value()));
 
-		assertEquals(3, result.size());
+		assertEquals(5, result.size());
 	}
 
 	@Test
@@ -226,7 +263,7 @@ public class delegationTest {
 				httpResponse.getStatusLine().getStatusCode(),
 				equalTo(HttpStatus.OK.value()));
 
-		assertEquals(3, result.size());
+		assertEquals(5, result.size());
 	}
 
 	@Test
@@ -248,6 +285,27 @@ public class delegationTest {
 				equalTo(HttpStatus.OK.value()));
 
 		assertEquals(1, result.size());
+	}
+
+	@Test
+	public void get_delegated_usernameExistFiltromotivation0() throws ClientProtocolException, IOException {
+
+		// Given
+		HttpUriRequest request = new HttpGet("http://localhost:8080/datamanager/api/v1/username/ADifino/delegated?motivation=Shared%20Position&accessToken=" + getAccessTokenRoot() + "&sourceRequest=test");
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		ObjectMapper mapper = new ObjectMapper();
+		List<Delegation> result = mapper.readValue(EntityUtils.toString(httpResponse.getEntity()), new TypeReference<List<Delegation>>() {
+		});
+
+		assertThat(
+				httpResponse.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.OK.value()));
+
+		assertEquals(2, result.size());
 	}
 
 	@Test
@@ -508,7 +566,7 @@ public class delegationTest {
 				httpResponse.getStatusLine().getStatusCode(),
 				equalTo(HttpStatus.OK.value()));
 
-		assertEquals(3, result.size());
+		assertEquals(5, result.size());
 	}
 
 	@Test
@@ -529,7 +587,7 @@ public class delegationTest {
 				httpResponse.getStatusLine().getStatusCode(),
 				equalTo(HttpStatus.OK.value()));
 
-		assertEquals(3, result.size());
+		assertEquals(5, result.size());
 	}
 
 	@Test
@@ -1692,6 +1750,98 @@ public class delegationTest {
 
 		assertEquals(true, result.getResult());
 		assertEquals("MYGROUP-DELEGATED", result.getMessage());
+	}
+
+	@Test
+	public void check_alldelegation_ok1() throws ClientProtocolException, IOException {
+
+		// Given
+		HttpUriRequest request = new HttpGet(
+				"http://localhost:8080/datamanager/api/v1/delegation?accessToken=" + getAccessTokenRoot()
+						+ "&sourceRequest=test");
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		ObjectMapper mapper = new ObjectMapper();
+		List<Delegation> result = mapper.readValue(EntityUtils.toString(httpResponse.getEntity()), new TypeReference<List<Delegation>>() {
+		});
+
+		assertThat(
+				httpResponse.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.OK.value()));
+
+		assertTrue(result.size() > 1030);
+	}
+
+	@Test
+	public void check_alldelegation_ok2() throws ClientProtocolException, IOException {
+
+		// Given
+		HttpUriRequest request = new HttpGet(
+				"http://localhost:8080/datamanager/api/v1/delegation?elementType=MyKPI&accessToken=" + getAccessTokenRoot()
+						+ "&sourceRequest=test");
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		ObjectMapper mapper = new ObjectMapper();
+		List<Delegation> result = mapper.readValue(EntityUtils.toString(httpResponse.getEntity()), new TypeReference<List<Delegation>>() {
+		});
+
+		assertThat(
+				httpResponse.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.OK.value()));
+
+		assertEquals(result.size(), 5);
+	}
+
+	@Test
+	public void check_alldelegation_ok3() throws ClientProtocolException, IOException {
+
+		// Given
+		HttpUriRequest request = new HttpGet(
+				"http://localhost:8080/datamanager/api/v1/delegation?elementType=AppID&variableName=altro&accessToken=" + getAccessTokenRoot()
+						+ "&sourceRequest=test");
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		ObjectMapper mapper = new ObjectMapper();
+		List<Delegation> result = mapper.readValue(EntityUtils.toString(httpResponse.getEntity()), new TypeReference<List<Delegation>>() {
+		});
+
+		assertThat(
+				httpResponse.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.OK.value()));
+
+		assertEquals(result.size(), 3);
+	}
+
+	@Test
+	public void check_alldelegation_ok4() throws ClientProtocolException, IOException {
+
+		// Given
+		HttpUriRequest request = new HttpGet(
+				"http://localhost:8080/datamanager/api/v1/delegation?elementType=DASHID&motivation=Shared%20Position3&accessToken=" + getAccessTokenRoot()
+						+ "&sourceRequest=test");
+
+		// When
+		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+		// Then
+		ObjectMapper mapper = new ObjectMapper();
+		List<Delegation> result = mapper.readValue(EntityUtils.toString(httpResponse.getEntity()), new TypeReference<List<Delegation>>() {
+		});
+
+		assertThat(
+				httpResponse.getStatusLine().getStatusCode(),
+				equalTo(HttpStatus.OK.value()));
+
+		assertEquals(result.size(), 1);
 	}
 
 	private HttpEntity createEntity(Delegation delegation) throws JsonGenerationException, JsonMappingException, IOException {

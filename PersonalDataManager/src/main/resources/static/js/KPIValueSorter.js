@@ -1,6 +1,6 @@
 var KPIValueSorter = {
     currentSortDirection: "desc",
-    currentSortBy: "id",
+    currentSortBy: "dataTime",
 
     setSortOnField: function (field) {
         if (KPIValueSorter.currentSortBy == field) {

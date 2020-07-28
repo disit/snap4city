@@ -14,6 +14,7 @@ package edu.unifi.disit.datamanager.datamodel.profiledb;
 
 import java.util.List;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,9 +24,10 @@ import org.springframework.stereotype.Repository;
 public interface DeviceGroupElementDAO extends JpaRepository<DeviceGroupElement, Long>, DeviceGroupElementDAOCustom {
 
 	Page<DeviceGroupElement> findByDeviceGroupIdAndDeleteTimeIsNull(Long grpId, Pageable pageable);
-    
-        List<DeviceGroupElement> findByUsernameAndElementIdAndElementTypeAndDeleteTimeIsNull(String username, String elementId, String elementType);
 
+	List<DeviceGroupElement> findByUsernameAndElementIdAndElementTypeAndDeleteTimeIsNull(String username, String elementId, String elementType);
+
+	@Cacheable("deviceGroupElementByDeviceGroupId")
 	List<DeviceGroupElement> findByDeviceGroupIdAndDeleteTimeIsNull(Long grpId);
 
 	List<DeviceGroupElement> findByElementIdAndElementTypeAndDeleteTimeIsNull(String elementId, String elementType);

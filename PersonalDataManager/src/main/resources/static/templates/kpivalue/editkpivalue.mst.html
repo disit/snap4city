@@ -26,12 +26,21 @@
                     <li class="list-group-item">
                         <div class="row">
                             <div class="col-sm-4"><strong>Data Time *</strong></div>
-                            <div class="col-sm-8">
-                                <input id="inputDataTimeKPIValueEdit" required class="form-control" type="datetime-local"
-                                    value="{{dataTime}}"></input>
+                                <div class="col-sm-8">
+                                        <input id="inputDataTimeKPIValueEdit"
+                                                class="form-control" type="datetime-local"
+                                                value="{{dataTime}}"
+                                                pattern="\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z)"
+                                                placeholder="YYYY-MM-DDThh:mmTZD"></input>
+
+                                </div>
+                                <div class="row" id="timezonedesignator" style="display: none;">
+                                    <div class="col-sm-4"></div>
+                                    <div class="col-sm-8">TZD = time zone designator (Z or
+                                            +hh:mm or -hh:mm)</div>
                             </div>
                         </div>
-                    </li>
+                </li>
                     {{/isEdit}}
                     <li class="list-group-item">
                         <div class="row">

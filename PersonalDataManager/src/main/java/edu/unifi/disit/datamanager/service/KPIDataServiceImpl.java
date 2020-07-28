@@ -86,8 +86,10 @@ public class KPIDataServiceImpl implements IKPIDataService {
 			kpidata.setHealthiness("false");
 		}
 		kpidata.setInsertTime(new Date());
-		kpidata.setOrganizations(
-				ldapRepository.getOUnames(credentialsService.getLoggedUsername(new Locale("en"))).toString());
+		if (!credentialsService.isRoot(new Locale("en"))) {
+			kpidata.setOrganizations(
+					ldapRepository.getOUnames(credentialsService.getLoggedUsername(new Locale("en"))).toString());
+		}
 		return kpiDataRepository.save(kpidata);
 	}
 

@@ -12,38 +12,36 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package edu.unifi.disit.datamanager.controller.rest;
 
-import edu.unifi.disit.datamanager.service.ISensorService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import edu.unifi.disit.datamanager.service.ISensorService;
 
 @RestController
 public class SensorController {
-    
-        @Value("${grpsensors.datasource.url}")
+
+	@Value("${grpsensors.datasource.url}")
 	private String baseurl;
-        
-        @Autowired
+
+	@Autowired
 	ISensorService sensorService;
 
-        @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE, value="/api/v1/sensors")
-        public String getSensors(
-                @RequestParam("accessToken") String accessToken,
-                @RequestParam(value = "pageNum", required = false, defaultValue = "1") String pageNum,
-                @RequestParam(value = "pageSize", required = false, defaultValue = "10") String pageSize,
-                @RequestParam(value = "search", required = false, defaultValue = "") String search,
-                @RequestParam(value = "id", required = false, defaultValue = "") String id) throws IOException {          
-            
-            return sensorService.getSensors(accessToken, pageNum, pageSize, search, id);
-            
-        }
+	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE, value = "/api/v1/sensors")
+	public String getSensors(
+			@RequestParam("accessToken") String accessToken,
+			@RequestParam(value = "pageNum", required = false, defaultValue = "1") String pageNum,
+			@RequestParam(value = "pageSize", required = false, defaultValue = "10") String pageSize,
+			@RequestParam(value = "search", required = false, defaultValue = "") String search,
+			@RequestParam(value = "id", required = false, defaultValue = "") String id) throws IOException {
+
+		return sensorService.getSensors(accessToken, pageNum, pageSize, search, id);
+
+	}
 
 }

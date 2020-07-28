@@ -34,7 +34,7 @@ public class DeviceGroupElementSerializer extends StdSerializer<DeviceGroupEleme
         @Autowired
         private HttpServletRequest request;
         
-        @Value("${grp.url}")
+        @Value("${grp.url:#{null}}")
 	private String grpUrl;
 
 	public DeviceGroupElementSerializer() {
@@ -55,7 +55,14 @@ public class DeviceGroupElementSerializer extends StdSerializer<DeviceGroupEleme
 		}
 		if (grp.getDeviceGroupId() != null) {
 			jgen.writeNumberField("deviceGroupId", grp.getDeviceGroupId());
-                        if(request != null) jgen.writeStringField("deviceGroupUrl", String.format(grpUrl,grp.getDeviceGroupId()));
+                        if(request != null) {
+                            if(grpUrl != null) {
+                                jgen.writeStringField("deviceGroupUrl", String.format(grpUrl,grp.getDeviceGroupId()));
+                            }
+                            else {
+                                jgen.writeStringField("deviceGroupUrl", String.format(request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+request.getContextPath()+"/grp/?id=%d",grp.getDeviceGroupId()));
+                            }
+                        }
                         jgen.writeStringField("deviceGroupContact", grp.getDeviceGroupContact());
 		}
 		if (grp.getDeleteTime() != null) {

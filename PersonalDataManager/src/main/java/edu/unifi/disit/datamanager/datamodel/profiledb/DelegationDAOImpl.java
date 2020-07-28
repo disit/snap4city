@@ -25,6 +25,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,7 +44,7 @@ public class DelegationDAOImpl implements DelegationDAOCustom {
 
 	// used for check existence before new insert
 	@Override
-	public List<Delegation> getSameDelegation(Delegation d, Locale lang) {
+	public List<Delegation> getSameDelegation(Delegation d) {
 
 		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Delegation> criteria = cb.createQuery(Delegation.class);
@@ -55,10 +56,10 @@ public class DelegationDAOImpl implements DelegationDAOCustom {
 		List<Predicate> predicates = getCommonPredicates(cb, delegationRoot, d.getVariableName(), d.getMotivation(), false, d.getElementType());
 
 		if (d.getUsernameDelegator() != null)
-			predicates.add(cb.equal(delegationRoot.get("usernameDelegator"), d.getUsernameDelegator()));
+			predicates.add(cb.equal(cb.upper(delegationRoot.get("usernameDelegator")), d.getUsernameDelegator().toUpperCase()));
 
 		if (d.getUsernameDelegated() != null)
-			predicates.add(cb.equal(delegationRoot.get("usernameDelegated"), d.getUsernameDelegated()));
+			predicates.add(cb.equal(cb.upper(delegationRoot.get("usernameDelegated")), d.getUsernameDelegated().toUpperCase()));
 
 		if (d.getElementId() != null)
 			predicates.add(cb.equal(delegationRoot.get("elementId"), d.getElementId()));
@@ -95,7 +96,7 @@ public class DelegationDAOImpl implements DelegationDAOCustom {
 
 		Predicate predicate1 = cb.conjunction();
 		Predicate predicate2 = cb.conjunction();
-		predicate1.getExpressions().add(cb.equal(delegationRoot.get("usernameDelegated"), username));// username
+		predicate1.getExpressions().add(cb.equal(cb.upper(delegationRoot.get("usernameDelegated")), username.toUpperCase()));// username
 		if (!groupnames.isEmpty()) {
 			predicate2.getExpressions().add(cb.in(pathDelegatedGroup).value(groupnames));// groupname i belong
 			predicates.add(cb.or(predicate1, predicate2));
@@ -111,6 +112,8 @@ public class DelegationDAOImpl implements DelegationDAOCustom {
 		criteria.where(cb.and(predicates.toArray(new Predicate[predicates.size()])));
 
 		return entityManager.createQuery(criteria).getResultList();
+		// to be used instead of @Cachable
+		// return entityManager.createQuery(criteria).setHint("org.hibernate.cacheable", true).setHint("org.hibernate.cacheRegion", "delegation").getResultList();
 	}
 
 	@Override
@@ -124,7 +127,7 @@ public class DelegationDAOImpl implements DelegationDAOCustom {
 
 		List<Predicate> predicates = getCommonPredicates(cb, delegationRoot, variableName, motivation, deleted, elementType);
 
-		predicates.add(cb.equal(delegationRoot.get("usernameDelegator"), username));// username
+		predicates.add(cb.equal(cb.upper(delegationRoot.get("usernameDelegator")), username.toUpperCase()));// username
 
 		criteria.where(cb.and(predicates.toArray(new Predicate[predicates.size()])));
 
@@ -162,6 +165,22 @@ public class DelegationDAOImpl implements DelegationDAOCustom {
 
 		predicates.add(cb.equal(delegationRoot.get("elementId"), appId));// appId
 		predicates.add(cb.equal(delegationRoot.get("usernameDelegated"), "ANONYMOUS"));// specific user
+
+		criteria.where(cb.and(predicates.toArray(new Predicate[predicates.size()])));
+
+		return entityManager.createQuery(criteria).getResultList();
+	}
+
+	@Override
+	public List<Delegation> getAllDelegations(String variableName, String motivation, String elementType) {
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<Delegation> criteria = cb.createQuery(Delegation.class);
+
+		// mainquery
+		Root<Delegation> delegationRoot = criteria.from(Delegation.class);
+		criteria.select(delegationRoot);
+
+		List<Predicate> predicates = getCommonPredicates(cb, delegationRoot, variableName, motivation, null, elementType);
 
 		criteria.where(cb.and(predicates.toArray(new Predicate[predicates.size()])));
 
