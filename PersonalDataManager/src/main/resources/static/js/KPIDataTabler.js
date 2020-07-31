@@ -163,9 +163,9 @@ var KPIDataTabler = {
             if (_response.ownership != null) {
                 _response[_response.ownership + "Selected"] = true;
             }
-            if (_response.organizations != null) {
+            /*if (_response.organizations != null) {
                 _response[_response.organizations.substring(_response.organizations.indexOf("=") + 1, _response.organizations.indexOf(",")) + "Selected"] = true;
-            }
+            }*/
             _response.lastDate = Utility.timestampToFormatDate(_response.lastDate);
             _response.lastCheck = Utility.timestampToFormatDate(_response.lastCheck);
         } else if (KPIDataTabler.currentHighLevelType != "changeownership") {
@@ -186,6 +186,7 @@ var KPIDataTabler = {
             $("#selectOrganizationKPIDataEditContainer").hide();
             if (KPIEditor.isRoot()){
                 $("#selectOrganizationKPIDataEditContainer").show();
+                EditModalManager.createOrganizationListSelection(_response.organizations.substring(_response.organizations.indexOf("=") + 1, _response.organizations.indexOf(",")));
             }
             //CHECK FIREFOX FOR DATETIME-LOCAL
             $("#timezonedesignator").hide();

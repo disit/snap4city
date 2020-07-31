@@ -23,6 +23,12 @@ public class ConfigurationServiceImpl implements IConfigurationService {
 
 	@Value("${spring.openidconnect.userinfo_endpoint}")
 	private String authenticationUrl;
+	
+	@Value("${config.kpi.dictionary}")
+	private String dictionaryUrl;
+	
+	@Value("${config.kpi.organizationlist}")
+	private String organizationList;
 
 	@Value("${config.kpi.authentication.clientid}")
 	private String kpiAuthenticationClientId;
@@ -35,6 +41,8 @@ public class ConfigurationServiceImpl implements IConfigurationService {
 		HashMap<String, String> config = new HashMap<String, String>();
 		if (version.equals("v1")) {
 			config.put("Authentication.url", authenticationUrl);
+			config.put("Dictionary.url", dictionaryUrl);
+			config.put("organization.list", organizationList);
 			config.put("kpi.Authentication.clientId", kpiAuthenticationClientId);
 			config.put("grp.Authentication.clientId", grpAuthenticationClientId);
 		}

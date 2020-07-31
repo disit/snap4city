@@ -160,7 +160,7 @@ public class publicTest {
 				httpResponse.getStatusLine().getStatusCode(),
 				equalTo(HttpStatus.OK.value()));
 
-		assertEquals(10, result.size());
+		assertEquals(355, result.size());
 	}
 
 	@Test
@@ -276,7 +276,7 @@ public class publicTest {
 				httpResponse.getStatusLine().getStatusCode(),
 				equalTo(HttpStatus.OK.value()));
 
-		assertEquals(10, result.size());
+		assertEquals(355, result.size());
 	}
 
 	@Test

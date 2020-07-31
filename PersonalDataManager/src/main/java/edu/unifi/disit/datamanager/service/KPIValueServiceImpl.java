@@ -26,11 +26,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import edu.unifi.disit.datamanager.datamodel.profiledb.KPIValue;
 import edu.unifi.disit.datamanager.datamodel.profiledb.KPIValueDAO;
 import edu.unifi.disit.datamanager.datamodel.profiledb.OwnershipDAO;
+import edu.unifi.disit.datamanager.eventDrivenMessages.KafkaProducerConfig;
 import edu.unifi.disit.datamanager.exception.CredentialsException;
 import edu.unifi.disit.datamanager.exception.DataNotValidException;
 
@@ -57,47 +62,54 @@ public class KPIValueServiceImpl implements IKPIValueService {
 	@PersistenceContext
 	private EntityManager entityManager;
 
+	@Autowired
+	private KafkaTemplate<String, Object> kafkaTemplate;
+
 	@Override
-	public KPIValue getKPIValueById(Long id, Locale lang) throws  CredentialsException {
+	public KPIValue getKPIValueById(Long id, Locale lang) throws CredentialsException {
 		logger.debug("getKPIValueById INVOKED on id {}", id);
 		return kpiValueRepository.findOne(id);
 	}
 
 	@Override
-	public Page<KPIValue> findByKpiId(Long kpiId, Pageable pageable)
-			throws  CredentialsException {
-		logger.debug("findAllByKpiId INVOKED on kpiId {}",  kpiId);
+	public Page<KPIValue> findByKpiId(Long kpiId, Pageable pageable) throws CredentialsException {
+		logger.debug("findAllByKpiId INVOKED on kpiId {}", kpiId);
 		return kpiValueRepository.findByKpiIdAndDeleteTimeIsNull(kpiId, pageable);
 	}
 
 	@Override
 	public Page<KPIValue> findByKpiIdFiltered(Long kpiId, String searchKey, Pageable pageable)
-			throws  CredentialsException {
-		logger.debug("findAllFilteredByKpiId INVOKED on searchKey {} kpiId {}",  searchKey, kpiId);
-		return kpiValueRepository.findByKpiIdAndValueContainingAllIgnoreCaseAndDeleteTimeIsNull(kpiId, searchKey, pageable);
+			throws CredentialsException {
+		logger.debug("findAllFilteredByKpiId INVOKED on searchKey {} kpiId {}", searchKey, kpiId);
+		return kpiValueRepository.findByKpiIdAndValueContainingAllIgnoreCaseAndDeleteTimeIsNull(kpiId, searchKey,
+				pageable);
 	}
 
 	@Override
 	public List<KPIValue> findByKpiIdNoPages(Long kpiId) {
-		logger.debug("findByKpiIdNoPages INVOKED on kpiId {}",  kpiId);
+		logger.debug("findByKpiIdNoPages INVOKED on kpiId {}", kpiId);
 		return kpiValueRepository.findByKpiIdAndDeleteTimeIsNull(kpiId);
 	}
 
 	@Override
-	public List<KPIValue> findByKpiIdGeoLocated(Long kpiId) throws  CredentialsException {
-		logger.debug("findByKpiIdGeoLocated INVOKED on kpiId {}",  kpiId);
-		return kpiValueRepository.findByKpiIdAndDeleteTimeIsNullAndLatitudeIsNotNullAndLongitudeIsNotNullAndLatitudeNotLikeAndLongitudeNotLike(kpiId, "", "");
+	public List<KPIValue> findByKpiIdGeoLocated(Long kpiId) throws CredentialsException {
+		logger.debug("findByKpiIdGeoLocated INVOKED on kpiId {}", kpiId);
+		return kpiValueRepository
+				.findByKpiIdAndDeleteTimeIsNullAndLatitudeIsNotNullAndLongitudeIsNotNullAndLatitudeNotLikeAndLongitudeNotLike(
+						kpiId, "", "");
 	}
-	
+
 	@Override
 	public List<KPIValue> findByKpiIdFilteredNoPages(Long kpiId, String searchKey) {
-		logger.debug("findAllFilteredByKpiId INVOKED on searchKey {} kpiId {}",  searchKey, kpiId);
+		logger.debug("findAllFilteredByKpiId INVOKED on searchKey {} kpiId {}", searchKey, kpiId);
 		return kpiValueRepository.findByKpiIdAndValueContainingAllIgnoreCaseAndDeleteTimeIsNull(kpiId, searchKey);
 	}
 
 	@Override
-	public List<KPIValue> findByKpiIdNoPagesWithLimit(Long kpiId, Date from, Date to, Integer first, Integer last, Locale lang) throws  DataNotValidException {
-		logger.debug("findByKpiIdNoPagesWithLimit INVOKED on kpiId {}, from {}, to {}, first {}, last {}", kpiId,from, to, first, last);
+	public List<KPIValue> findByKpiIdNoPagesWithLimit(Long kpiId, Date from, Date to, Integer first, Integer last,
+			Locale lang) throws DataNotValidException {
+		logger.debug("findByKpiIdNoPagesWithLimit INVOKED on kpiId {}, from {}, to {}, first {}, last {}", kpiId, from,
+				to, first, last);
 
 		if ((first != 0) && (last != 0)) {
 			throw new DataNotValidException(messages.getMessage("getdata.ko.firstandlastspecified", null, lang));
@@ -107,35 +119,57 @@ public class KPIValueServiceImpl implements IKPIValueService {
 	}
 
 	@Override
-	public KPIValue saveKPIValue(KPIValue kpivalue) throws  CredentialsException {
-		logger.debug("saveKPIValue INVOKED on kpivalue {}",  kpivalue.getId());
+	public KPIValue saveKPIValue(KPIValue kpivalue) throws CredentialsException {
+		logger.debug("saveKPIValue INVOKED on kpivalue {}", kpivalue.getId());
 		kpivalue.setInsertTime(new Date());
-		return kpiValueRepository.save(kpivalue);
+		kpivalue = kpiValueRepository.save(kpivalue);
+		if (Boolean.TRUE.equals(KafkaProducerConfig.getSendMessageOnEventDriveMessages())) {
+			try {
+			sendMessageOnEventDriveMessages(KafkaProducerConfig.getPrefixTopic() + kpivalue.getKpiId().toString(),
+					kpivalue);
+			} catch (Exception e) {
+				logger.error("Kafka Problem", e.getMessage());
+			}
+		}
+		return kpivalue;
 	}
 
 	@Override
-	public void deleteKPIValue(Long id) throws  CredentialsException {
-		logger.debug("deleteKPIValue INVOKED on id {}",  id);
+	public void deleteKPIValue(Long id) throws CredentialsException {
+		logger.debug("deleteKPIValue INVOKED on id {}", id);
 		kpiValueRepository.delete(id);
-		
+
 	}
 
 	@Override
-	public List<Date> getKPIValueDates(Long kpiId) throws  CredentialsException {
-		logger.debug("getKPIValueDates INVOKED on kpiId {}",  kpiId);
+	public List<Date> getKPIValueDates(Long kpiId) throws CredentialsException {
+		logger.debug("getKPIValueDates INVOKED on kpiId {}", kpiId);
 		return kpiValueRepository.findByKpiIdDistinctDateAndDeleteTimeIsNull(kpiId);
 	}
-	
+
 	@Override
-	public List<Date> getKPIValueDatesCoordinatesOptionallyNull(Long kpiId) throws  CredentialsException {
-		logger.debug("getKPIValueDates INVOKED on kpiId {}",  kpiId);
+	public List<Date> getKPIValueDatesCoordinatesOptionallyNull(Long kpiId) throws CredentialsException {
+		logger.debug("getKPIValueDates INVOKED on kpiId {}", kpiId);
 		return kpiValueRepository.findByKpiIdDistinctDateAndDeleteTimeIsNullWithCoordinatesOptionallyNull(kpiId);
 	}
 
-	
-	
-	
-	
-	
-	
+	private void sendMessageOnEventDriveMessages(String topicName, Object obj) {
+		ListenableFuture<SendResult<String, Object>> future = kafkaTemplate.send(topicName, obj);
+
+		future.addCallback(new ListenableFutureCallback<SendResult<String, Object>>() {
+
+			@Override
+			public void onSuccess(SendResult<String, Object> result) {
+				logger.debug("Sent message=[topicName=" + topicName + ",content=" + obj.toString() + "] with offset=["
+						+ result.getRecordMetadata().offset() + "]");
+			}
+
+			@Override
+			public void onFailure(Throwable ex) {
+				logger.debug("Unable to send message=[topicName=" + topicName + ",content=" + obj.toString()
+						+ "] due to : " + ex.getMessage());
+			}
+		});
+	}
+
 }

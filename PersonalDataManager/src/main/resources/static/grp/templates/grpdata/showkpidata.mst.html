@@ -10,16 +10,16 @@
         <div class="modal-body" style="padding: 0px;">
             
             <ul class="list-group" style="border: none;">
-                <li class="list-group-item"><b>High Level Type</b> <span style="float: right;">{{highLevelType}}</span></li>                
-                <li class="list-group-item"><b>Name</b> <span style="float: right;">{{name}}<!-- {{#enableEdit}} -->
+                <li class="list-group-item"><strong>High Level Type</strong> <span style="float: right;">{{highLevelType}}</span></li>                
+                <li class="list-group-item"><strong>Name</strong> <span style="float: right;">{{name}}<!-- {{#enableEdit}} -->
             <button type="button" onclick="DeviceGrpTabler.editDeviceGrpModal({{id}}, '{{highLevelType}}');" class=" btn editDashBtn">Edit</button><!-- {{/enableEdit}} --></span></li>
-                <li class="list-group-item"><b>Description</b> <span style="float: right;">{{description}}<!-- {{#enableEdit}} -->
+                <li class="list-group-item"><strong>Description</strong> <span style="float: right;">{{description}}<!-- {{#enableEdit}} -->
             <button type="button" onclick="DeviceGrpTabler.editDeviceGrpModal({{id}}, '{{highLevelType}}');" class=" btn editDashBtn">Edit</button><!-- {{/enableEdit}} --></span></li>                
-                <li class="list-group-item"><b>Created</b> <span style="float: right;">{{insertTime}}</span></li>
-                <li class="list-group-item"><b>Last Change</b> <span style="float: right;">{{updateTime}}</span></li>                
-                <li class="list-group-item"><b>Owner Username</b> <span style="float: right;">{{username}} <!-- {{#enableEdit}} --><button type="button" onclick="DeviceGrpTabler.editDeviceGrpModal({{id}}, 'changeownership');" class="btn editDashBtn">Change
+                <li class="list-group-item"><strong>Created</strong> <span style="float: right;">{{insertTime}}</span></li>
+                <li class="list-group-item"><strong>Last Change</strong> <span style="float: right;">{{updateTime}}</span></li>                
+                <li class="list-group-item"><strong>Owner Username</strong> <span style="float: right;">{{username}} <!-- {{#enableEdit}} --><button type="button" onclick="DeviceGrpTabler.editDeviceGrpModal({{id}}, 'changeownership');" class="btn editDashBtn">Change
                     </button><!-- {{/enableEdit}} --></span></li>                            
-                <li class="list-group-item"><b>Public/Private</b> <span style="float: right;">{{ownership}}<!-- {{#enableEdit}} -->
+                <li class="list-group-item"><strong>Public/Private</strong> <span style="float: right;">{{ownership}}<!-- {{#enableEdit}} -->
         <!-- {{^isPublic}} -->
         <button type="button" onclick="DeviceGrpTabler.makePublic({{id}});" class="btn editDashBtn">Toggle
         </button>
@@ -29,11 +29,11 @@
         </button>
         <!-- {{/isPublic}} -->
         <!-- {{/enableEdit}} --></span></li>
-                <li class="list-group-item"><b>Organizations</b> <span style="float: right;">{{organizations}}</span></li>    
-                <li class="list-group-item" id="modalgrpcontent"><b>Content</b> <span style="float: right;">{{size}}&nbsp;
+                <li class="list-group-item"><strong>Organizations</strong> <span style="float: right;">{{organizations}}</span></li>    
+                <li class="list-group-item" id="modalgrpcontent"><strong>Content</strong> <span style="float: right;">{{size}}&nbsp;
             <!-- {{#viewEnabled}} --><button type="button" onclick="GrpElementFilter.setCurrentSearchKey(''); GrpElementTabler.renderTable({{id}},true);" class="btn viewDashBtn">View</button><!-- {{/viewEnabled}} -->
             <!-- {{#enableEdit}} --><button type="button" class="btn editDashBtn" onclick=" GrpElementFilter.setCurrentSearchKey(''); GrpElementTabler.renderTable({{id}}); ">Edit</button><!-- {{/enableEdit}} -->            </span></li>   
-                <!-- {{#enableEdit}} --><li class="list-group-item" id="modalgrpvisib"><b>Visibility</b> <span style="float: right;"><button type="button" onclick="GrpDelegationFilter.setCurrentSearchKey(''); GrpDelegationTabler.renderTable({{id}}, '{{highLevelType}}');" class="btn editDashBtn">Delegate
+                <!-- {{#enableEdit}} --><li class="list-group-item" id="modalgrpvisib"><strong>Visibility</strong> <span style="float: right;"><button type="button" onclick="GrpDelegationFilter.setCurrentSearchKey(''); GrpDelegationTabler.renderTable({{id}}, '{{highLevelType}}');" class="btn editDashBtn">Delegate
                 </button>
                 
             </span></li>   <!-- {{/enableEdit}} -->

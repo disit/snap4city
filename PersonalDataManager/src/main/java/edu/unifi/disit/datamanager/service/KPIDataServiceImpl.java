@@ -90,6 +90,8 @@ public class KPIDataServiceImpl implements IKPIDataService {
 			kpidata.setOrganizations(
 					ldapRepository.getOUnames(credentialsService.getLoggedUsername(new Locale("en"))).toString());
 		}
+		
+		
 		return kpiDataRepository.save(kpidata);
 	}
 

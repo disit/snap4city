@@ -156,7 +156,7 @@ var EditModalManager = {
         EditModalManager.savedNature = _savedNature;
         EditModalManager.savedSubNature = _savedSubNature;
         $.ajax({
-            url: "https://processloader.snap4city.org/processloader/api/dictionary/?type=nature",
+            url: EditModalManager.dictionaryUrl + "?type=nature",
             cache: false,
             dataType: "json",
             success: function (_data) {
@@ -183,7 +183,7 @@ var EditModalManager = {
 
     createSubNatureSelection: function (_nature) {
         $.ajax({
-            url: "https://processloader.snap4city.org/processloader/api/dictionary/?type=subnature&parent=" + _nature,
+            url: EditModalManager.dictionaryUrl + "?type=subnature&parent=" + _nature,
             cache: false,
             dataType: "json",
             success: function (_data) {
@@ -211,7 +211,7 @@ var EditModalManager = {
         EditModalManager.savedValueType = _savedValueType;
         EditModalManager.savedValueUnit = _savedValueUnit;
         $.ajax({
-            url: "https://processloader.snap4city.org/processloader/api/dictionary/?type=valuetype",
+            url: EditModalManager.dictionaryUrl + "?type=valuetype",
             cache: false,
             dataType: "json",
             success: function (_data) {
@@ -238,7 +238,7 @@ var EditModalManager = {
 
     createValueUnitSelection: function (_valuetype) {
         $.ajax({
-            url: "https://processloader.snap4city.org/processloader/api/dictionary/?type=valueunit&parent=" + _valuetype,
+            url: EditModalManager.dictionaryUrl + "?type=valueunit&parent=" + _valuetype,
             cache: false,
             dataType: "json",
             success: function (_data) {
@@ -259,6 +259,25 @@ var EditModalManager = {
                 }
             }
         });
+    },
+    
+    createOrganizationListSelection: function (_organization) {
+    	EditModalManager.savedOrganization = _organization;
+        var organizationArray = [];
+        for (var i = 0; i < EditModalManager.organizationList.length; i++) {
+            organizationArray.push({
+                "key": EditModalManager.organizationList[i],
+                "id": EditModalManager.organizationList[i],
+                "value": EditModalManager.organizationList[i]
+            });
+        }
+        ViewManager.render({
+            "arrayToSelection": organizationArray
+        }, "#selectOrganizationKPIDataEdit", "templates/arrayToSelection.mst.html");
+        if (EditModalManager.savedOrganization != ""){
+            $("#selectOrganizationKPIDataEdit").val(EditModalManager.savedOrganization);
+            EditModalManager.savedOrganization = "";
+        }
     }
 
 }
