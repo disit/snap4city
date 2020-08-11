@@ -163,9 +163,11 @@ var KPIDataTabler = {
             if (_response.ownership != null) {
                 _response[_response.ownership + "Selected"] = true;
             }
-            /*if (_response.organizations != null) {
-                _response[_response.organizations.substring(_response.organizations.indexOf("=") + 1, _response.organizations.indexOf(",")) + "Selected"] = true;
-            }*/
+            /*
+			 * if (_response.organizations != null) {
+			 * _response[_response.organizations.substring(_response.organizations.indexOf("=") +
+			 * 1, _response.organizations.indexOf(",")) + "Selected"] = true; }
+			 */
             _response.lastDate = Utility.timestampToFormatDate(_response.lastDate);
             _response.lastCheck = Utility.timestampToFormatDate(_response.lastCheck);
         } else if (KPIDataTabler.currentHighLevelType != "changeownership") {
@@ -182,13 +184,18 @@ var KPIDataTabler = {
             EditModalManager.checkOrganizationAndCreateMap("KPIDataEdit");
             EditModalManager.createNatureSelection(_response.nature, _response.subNature);
             EditModalManager.createValueTypeSelection(_response.valueType, _response.valueUnit);
-            //CHECK ROOT
+            // CHECK ROOT
             $("#selectOrganizationKPIDataEditContainer").hide();
             if (KPIEditor.isRoot()){
                 $("#selectOrganizationKPIDataEditContainer").show();
-                EditModalManager.createOrganizationListSelection(_response.organizations.substring(_response.organizations.indexOf("=") + 1, _response.organizations.indexOf(",")));
+                var kpiOrganization = "";
+                if (typeof _response.organizations != "undefined"){
+                	kpiOrganization = _response.organizations.substring(_response.organizations.indexOf("=") + 1, _response.organizations.indexOf(","));
+                }
+                
+                EditModalManager.createOrganizationListSelection(kpiOrganization);
             }
-            //CHECK FIREFOX FOR DATETIME-LOCAL
+            // CHECK FIREFOX FOR DATETIME-LOCAL
             $("#timezonedesignator").hide();
             if (typeof InstallTrigger !== 'undefined'){
                 $("#timezonedesignator").show();
