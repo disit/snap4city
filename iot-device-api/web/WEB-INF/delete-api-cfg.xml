@@ -227,7 +227,7 @@
 						<match-value>amqp</match-value>
 						<match-value>mqtt</match-value>
 						<match-value>ngsi</match-value>
-                        <match-value>ngsi w/MultiService</match-value>
+                                                <match-value>ngsi w/MultiService</match-value>
 					</match>	
 				</pick-validator>
 			</validate>
@@ -1154,19 +1154,27 @@
                 
                 <data id="static-attributes-query" type="string" builder="template" loader="volatile">                    
                     <template>
-                        select distinct ?uri ?label '{'
-                            '{' select ?uri ?label '{' ?uri &lt;http://www.w3.org/2000/01/rdf-schema#domain&gt; &lt;{0}&gt; ; &lt;http://www.w3.org/2000/01/rdf-schema#label&gt; ?label . filter(lang(?label) = ''en'') '}' '}' 
-                            union
-                            '{' select ?uri ?label '{' bind( &lt;http://schema.org/addressLocality&gt; as ?uri ) . bind( "Locality" as ?label ) . &lt;{0}&gt; a owl:Class '}' '}'
-                            union
-                            '{' select ?uri ?label '{' bind( &lt;http://schema.org/addressRegion&gt; as ?uri ) . bind( "Region" as ?label ) . &lt;{0}&gt; a owl:Class '}' '}'        
-                            union
-                            '{' select ?uri ?label '{' bind( &lt;http://schema.org/streetAddress&gt; as ?uri ) . bind( "Street address" as ?label ) . &lt;{0}&gt; a owl:Class '}' '}'   
-                            union
-                            '{' select ?uri ?label '{' bind( &lt;http://www.disit.org/km4city/schema#houseNumber&gt; as ?uri ) . &lt;http://www.disit.org/km4city/schema#houseNumber&gt; &lt;http://www.w3.org/2000/01/rdf-schema#label&gt; ?label . filter(lang(?label) = ''en'') . &lt;{0}&gt; a owl:Class '}' '}'
-                            union
-                            '{' select ?uri ?label '{' bind( &lt;http://www.disit.org/km4city/schema#isInRoad&gt; as ?uri ) . &lt;http://www.disit.org/km4city/schema#isInRoad&gt; &lt;http://www.w3.org/2000/01/rdf-schema#label&gt; ?label . filter(lang(?label) = ''en'') . &lt;{0}&gt; a owl:Class '}' '}'
-                        '}'
+                        select distinct ?uri ?label ?type '{'
+						'{' 
+							select ?uri ?label ?type '{' ?uri rdfs:domain &lt;{0}&gt; ; rdfs:label ?label . optional '{' ?uri rdfs:range ?type '}' . filter(lang(?label) = "en") '}'  
+						'}'union '{'
+							values (?uri  ?label ?type ) '{' 
+								(schema:addressLocality "Locality" UNDEF) 
+								(schema:addressRegion "Region" UNDEF) 
+								(schema:streetAddress "Street address" UNDEF) 
+								(km4c:houseNumber "Street number" UNDEF) 
+								(km4c:isInRoad UNDEF UNDEF) 
+								(dcterms:description "Description" xsd:string)
+								(km4c:minCapacity "Minumum capacity" xsd:string)
+								(km4c:maxCapacity "Maximum capacity" xsd:string)
+								(km4c:maintenanceUrl "Maintenance url" xsd:string)
+								(schema:url "Use url" xsd:string)
+								(foaf:name "Name" UNDEF)
+							'}'
+							optional '{' ?uri rdfs:label ?label FILTER(LANG(?label)="en")'}'
+							optional '{' ?uri rdfs:range ?type filter(?type!=rdfs:Literal)'}' . 
+						'}'  
+						'}' order by str(?label)
                     </template>
                     <param index="0" value="readytouse_value_type_mapping_array"/>
                 </data>             
