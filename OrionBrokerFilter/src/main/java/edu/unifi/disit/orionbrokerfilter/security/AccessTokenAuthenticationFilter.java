@@ -121,8 +121,8 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		final HttpServletRequest req = (HttpServletRequest) request;
 		MultiReadHttpServletRequest multiReadRequest = new MultiReadHttpServletRequest((HttpServletRequest) request);
 
+		// retrieve eventually certicate
 		String pksha1 = null;
-
 		X509Certificate[] certs = (X509Certificate[]) multiReadRequest.getAttribute("javax.servlet.request.X509Certificate");
 		if ((certs != null) && (certs.length > 0)) {
 			String pk = new String(Base64.encode(certs[0].getPublicKey().getEncoded()), StandardCharsets.UTF_8);
@@ -131,10 +131,35 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 			logger.debug("sha1 public key is: {}", pksha1);
 		}
 
+		// retrieve k1 k2 credentials
 		String k1 = multiReadRequest.getParameter("k1");
 		String k2 = multiReadRequest.getParameter("k2");
-		String elementId = req.getParameter("elementid");
+
+		// retrieve NGSI info
 		String queryType = ((HttpServletRequest) request).getServletPath();
+		String elementId = req.getParameter("elementid");
+
+		// eventually enrich with Multi-tenancy info
+		if (req.getHeader("Fiware-Service") != null || req.getHeader("Fiware-ServicePath") != null) {// check always to be made
+			if (req.getHeader("Fiware-ServicePath") != null)
+				elementId = req.getHeader("Fiware-ServicePath") + "." + elementId;
+			else
+				elementId = "." + elementId;
+			if (req.getHeader("Fiware-Service") != null)
+				elementId = req.getHeader("Fiware-Service") + "." + elementId;
+			else
+				elementId = "." + elementId;
+
+			logger.debug("elementid became:" + elementId);
+		}
+
+		// retrieve eventually accessToken. The enforcement/management of this access token is still not used in the Orion Filter
+		// the access is granted via k1/k2/certificate
+		String accessToken = null;
+		if ((req.getHeader("Authorization") != null) && (req.getHeader("Authorization").length() > 8)) {
+			accessToken = req.getHeader("Authorization").substring(7);
+			logger.debug("accessToken arrived:" + accessToken);
+		}
 
 		if ((elementId != null)) {
 
@@ -146,7 +171,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 
 			try {
 
-				String sensorName = getSensorName(multiReadRequest, isWriteQuery(queryType), elementId);// can be null
+				String sensorName = getSensorName(multiReadRequest, isWriteQuery(queryType), req.getParameter("elementid"));// can return null, the passed elementid is the original one
 				if (sensorName != null)
 					logger.debug("sensor's name {}", sensorName);
 
@@ -399,7 +424,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 				.build();
 		logger.debug("query isPublicFromKB {}", uriComponents.toUri());
 
-		RestTemplate restTemplate = new RestTemplate();
+		// RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();
 		HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
 
@@ -473,6 +498,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(token_endpoint).build();
 		logger.debug("query getAccessToken {}", uriComponents.toUri());
 
+		// RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 		HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<MultiValueMap<String, String>>(params, headers);
@@ -522,6 +548,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(token_endpoint).build();
 		logger.debug("Query getRefreshToken {}", uriComponents.toUri());
 
+		// RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 		HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<MultiValueMap<String, String>>(params, headers);
@@ -562,7 +589,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 				.build();
 		logger.debug("query getOwnerCredentials {}", uriComponents.toUri());
 
-		RestTemplate restTemplate = new RestTemplate();
+		// RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();
 		HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
 
@@ -641,7 +668,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 				.build();
 		logger.debug("query getOwnerCredentials {}", uriComponents.toUri());
 
-		RestTemplate restTemplate = new RestTemplate();
+		// RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();
 		HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
 
@@ -690,7 +717,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 				.build();
 		logger.debug("query getDelegatedCredentials {}", uriComponents.toUri());
 
-		RestTemplate restTemplate = new RestTemplate();
+		// RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();
 		HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
 

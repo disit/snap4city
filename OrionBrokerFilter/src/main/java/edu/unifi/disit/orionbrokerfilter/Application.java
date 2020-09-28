@@ -12,6 +12,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package edu.unifi.disit.orionbrokerfilter;
 
+import java.util.concurrent.TimeUnit;
+
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -46,14 +48,11 @@ public class Application extends SpringBootServletInitializer {
 	}
 
 	@Bean
-	public ClientHttpRequestFactory createRequestFactory(@Value("${connection.timeout}") String timeout) {
+	public ClientHttpRequestFactory createRequestFactory(@Value("${connection.timeout}") String timeout, @Value("${connection.max}") String maxConnections) {
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
-		// connectionManager.setMaxTotal(maxTotalConn);
-		// connectionManager.setDefaultMaxPerRoute(maxPerChannel);
-
-		// httpRequestFactory.setConnectionRequestTimeout(60000);
-		// httpRequestFactory.setConnectTimeout(60000);
-		// httpRequestFactory.setReadTimeout(60000);
+		connectionManager.setMaxTotal(Integer.parseInt(maxConnections));
+		connectionManager.setDefaultMaxPerRoute(Integer.parseInt(maxConnections));
+		connectionManager.closeIdleConnections(Integer.parseInt(timeout), TimeUnit.MILLISECONDS);
 
 		RequestConfig config = RequestConfig.custom().
 		/*		*/setConnectTimeout(Integer.parseInt(timeout)).
@@ -65,6 +64,6 @@ public class Application extends SpringBootServletInitializer {
 
 	@Bean
 	public RestTemplate restTemplate(ClientHttpRequestFactory factory) {
-		return new RestTemplate();
+		return new RestTemplate(factory);
 	}
 }
