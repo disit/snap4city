@@ -1,16 +1,25 @@
 <?php
 
+/* Snap4City profilesnap4city for drupal 7.
+   Copyright (C) 2015 DISIT Lab http://www.disit.org - University of Florence
 
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as
+   published by the Free Software Foundation, either version 3 of the
+   License, or (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Affero General Public License for more details.
+
+   You should have received a copy of the GNU Affero General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
 /*
-
   List of all owned app 
   Return a Rendered table
 */
-
-
-
-
 
 function retrieve_myactivityPersonaldata_app_list_datatable()
 {
@@ -36,7 +45,7 @@ function retrieve_myactivityPersonaldata_app_list_datatable()
 
 
 //If user is rootAdmin 21 on prod
-	if (user_has_role(11))
+	if (user_has_role(21))
         {
 
 
@@ -226,7 +235,7 @@ function retrieve_myactivityPersonaldata_app_list_datatable()
     $query->distinct();
 
 
-    if (user_has_role(11))
+    if (user_has_role(21))
         {
 
             //$query->condition('ac.delegated_username',$user->name,'='); 

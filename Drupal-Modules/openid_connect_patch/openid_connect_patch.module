@@ -1,0 +1,43 @@
+<?php
+/* Snap4City openid_connect_patch for drupal 7.
+   Copyright (C) 2015 DISIT Lab http://www.disit.org - University of Florence
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as
+   published by the Free Software Foundation, either version 3 of the
+   License, or (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Affero General Public License for more details.
+
+   You should have received a copy of the GNU Affero General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>. */
+   
+/**
+ * Implement hook_openid_connect_pre_authorize().
+ */
+function openid_connect_patch_openid_connect_pre_authorize($tokens, $user_data, $userinfo, $client_name) {
+    $sub = openid_connect_extract_sub($user_data, $userinfo);
+    if (empty($sub)) {
+        return;
+    }
+
+    if (openid_connect_user_load_by_sub($sub, $client_name)) {
+        return; // User already exists - continue as normal
+    }
+
+    $email = $userinfo["email"];
+    if (empty($email)) {
+        return; // No email address - continue as normal
+    }
+
+    $account = user_load_by_mail($email);
+    if (empty($account)) {
+        return; // No existing user with matching email address - continue as normal
+    }
+
+    // Connect existing user account with this sub:
+    openid_connect_connect_account($account, $client_name, $sub);
+}

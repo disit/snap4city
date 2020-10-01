@@ -1,5 +1,20 @@
 <?php
+/* Snap4City og_simpleldap_group module for drupal 7.
+   Copyright (C) 2015 DISIT Lab http://www.disit.org - University of Florence
 
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as
+   published by the Free Software Foundation, either version 3 of the
+   License, or (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Affero General Public License for more details.
+
+   You should have received a copy of the GNU Affero General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>. */
+   
 function og_simpleldap_group_block_info() {
   $blocks = array();
   $blocks['orggroups'] = array(
@@ -81,39 +96,6 @@ function og_simpleldap_group_block_view($delta = '') {
   }
   return $block;
 }
-
-/*
-function og_simpleldap_group_user_login(&$edit, $account) {
-  if(isset($account->data['first_login_state'])) {
-    $first_login_state = $account->data['first_login_state'];
-    watchdog('og_simpleldap_group', "TEST login user $account->username state: $first_login_state");
-    if($first_login_state == "INSERT")
-      user_save($account, array("first_login_state"=>"LOGIN1"));
-    else if($first_login_state != "LOGINN")
-      user_save($account, array("first_login_state"=>"LOGINN"));            
-  } else {
-    watchdog('og_simpleldap_group', "TEST login user $account->username nostate");
-    user_save($account, array("first_login_state"=>"LOGINN"));            
-  }
-}
-
-function og_simpleldap_group_user_insert(&$edit, $account, $category) {
-  watchdog('og_simpleldap_group', "TEST added user $account->username");
-  user_save($account, array("first_login_state"=>"INSERT"));
-}
-
-function og_simpleldap_group_user_update(&$edit, $account, $category) {
-  if(isset($account->data['first_login_state'])) {
-    $first_login_state = $account->data['first_login_state'];
-    watchdog('og_simpleldap_group', "TEST updated user $account->username $first_login_state");
-    if($first_login_state == 'LOGIN1') {
-      user_save($account, array("first_login_state"=>"SAVED"));
-      user_logout_current_user();
-      drupal_goto("https://main.snap4city.org");
-    }
-  }
-}
-*/
 
 /**
  * Gets called after an entity has been inserted/updated/deleted to database.
@@ -293,54 +275,6 @@ function og_simpleldap_group_entity_postupdate($entity, $entity_type) {
               watchdog('og_simpleldap_group', "user update NO og_user_node " . __FUNCTION__);          
           }
         }        
-        //Add to og default        
-/*        $groupIDQuery= db_select('node','n')
-                ->fields('n',array('nid'))
-                ->condition('n.title', 'Other')
-                ->condition('n.type', 'disitgroup');
-   
-        $groupID = $groupIDQuery->execute()->fetchfield(0);
-
-        watchdog('og_simpleldap_group', "Group ID Other {$groupID}");
-
-        $values = array(
-            'entity_type' => 'user',
-            'entity' => $id,
-            'field_name' => FALSE,
-            'state' => 1,
-        );
-                        
-        og_group('node', $groupID, $values);
-                    
-        // Get the live simple_ldap config.
-        $ldaphost = variable_get('simple_ldap_host');
-        $ldapport = variable_get('simple_ldap_port');
-        $starttls = variable_get('simple_ldap_starttls');
-        $binddn = variable_get('simple_ldap_binddn');
-        $bindpw = variable_get('simple_ldap_bindpw');
-
-        $basedn = simple_ldap_user_variable_get('simple_ldap_user_basedn');
-        
-        $ldap = ldap_connect($ldaphost, $ldapport);
-        ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, 3);
-        ldap_set_option($ldap, LDAP_OPT_REFERRALS, 0);
-
-        $ldapbind = ldap_bind($ldap, $binddn, $bindpw);
-
-        $userNameQuery= db_select('users','u')
-                ->fields('u',array('name'))
-                ->condition('u.uid', $id);
-   
-        $userName = $userNameQuery->execute()->fetchfield(0);
-        $dn="cn=".$userName.",".$basedn;
-        $ou_name = "ou=other,".$basedn;
-        $ou_info['l'] = $dn; // User's DN is added to group's 'member' array instead of memeberuid
-
-        watchdog('og_simpleldap_group', "Adding the user $userName in OU $ou_name In ".__FUNCTION__);
-        if(!ldap_mod_add($ldap,$ou_name,$ou_info)) {
-          _og_simpleldap_group_ldap_error($ldap);
-        }
-*/
     }
 }
 
@@ -394,23 +328,6 @@ function og_simpleldap_group_user_delete($account) {
 function og_simpleldap_group_entity_postdelete($entity, $entity_type) {
     list($id) = entity_extract_ids($entity_type, $entity);
     watchdog('og_simpleldap_group', "The deleted entity {$entity_type} id is {$id} from " . __FUNCTION__);
-/*    if($entity_type=='user') {
-        // Get the live simple_ldap config.
-        $ldaphost = variable_get('simple_ldap_host');
-        $ldapport = variable_get('simple_ldap_port');
-        $starttls = variable_get('simple_ldap_starttls');
-        $binddn = variable_get('simple_ldap_binddn');
-        $bindpw = variable_get('simple_ldap_bindpw');
-        $basedn=simple_ldap_user_variable_get('simple_ldap_user_basedn');
-
-        // Connect with LDAP
-        $ldap = ldap_connect($ldaphost, $ldapport);
-        ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, 3);
-        ldap_set_option($ldap, LDAP_OPT_REFERRALS, 0);
-        $ldapbind = ldap_bind($ldap, $binddn, $bindpw);
-        
-        _og_simpleldap_group_remove_ldap_membership($ldap, $id, $entity, $basedn);      
-    } */
 }
 
 /**
