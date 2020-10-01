@@ -11,4 +11,6 @@
 * Setup drupal:
   * add Content type "Organization" with machine name "disitorg" and set it as Group in the Organic groups section
   * add Content type "Organization group" with machine name "disitgroup" and set it as Group and Group content"
-  * ...TBD...
+  * setup the simple LDAP module to use the ldap server used by snap4city tools
+  * setup the OpenID Connect module to use the keycloak server used by the snap4city tools
+  * ...TBC...
