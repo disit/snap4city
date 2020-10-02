@@ -99,6 +99,9 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 	@Value("${spring.elapsingcache.minutes}")
 	private Integer minutesElapsingCache;
 
+	@Value("${multitenancy:false}")
+	private Boolean multitenancy;
+
 	@Autowired
 	private MessageSource messages;
 
@@ -140,7 +143,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		String elementId = req.getParameter("elementid");
 
 		// eventually enrich with Multi-tenancy info
-		if (req.getHeader("Fiware-Service") != null || req.getHeader("Fiware-ServicePath") != null) {// check always to be made
+		if (multitenancy) {// check always to be made
 			if (req.getHeader("Fiware-ServicePath") != null)
 				elementId = req.getHeader("Fiware-ServicePath") + "." + elementId;
 			else
