@@ -147,7 +147,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 			if (req.getHeader("Fiware-ServicePath") != null)
 				elementId = req.getHeader("Fiware-ServicePath") + "." + elementId;
 			else
-				elementId = "." + elementId;
+				elementId = "/." + elementId;
 			if (req.getHeader("Fiware-Service") != null)
 				elementId = req.getHeader("Fiware-Service") + "." + elementId;
 			else
