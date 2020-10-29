@@ -19,6 +19,13 @@ import java.util.HashMap;
 import org.disit.iotdeviceapi.datatypes.Data;
 import org.disit.iotdeviceapi.logging.XLogger;
 import org.w3c.dom.Element;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.StringWriter;
+import java.text.MessageFormat;
 
 /**
  * 
@@ -70,5 +77,21 @@ public abstract class Validator {
     public void setStatus(int status) {
         this.status = status;
     }
+    
+    public String toString() { 
+        try {
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            DOMSource source = new DOMSource(this.getConfig());
+            StreamResult result = new StreamResult(new StringWriter());
+            transformer.transform(source, result);
+            String strObject = result.getWriter().toString();
+            
+            return MessageFormat.format("The test that failed is the following:\n\n{0}",new Object[]{strObject});
+        }
+        catch(Exception e) {
+            return "Unable to produce a string representation for the configuration of the validator.";
+        }
+    } 
     
 }

@@ -17,6 +17,8 @@
    You should have received a copy of the GNU Affero General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
+
+<!DOCTYPE api-cfg SYSTEM "iotdeviceapi.dtd">
    
 <api-cfg xmlns="http://www.disit.org/ServiceMap/api/v1/iot">
 
@@ -41,9 +43,9 @@
 	
 	<repos>
 		<repo id="virtuoso">
-			<param key="virtuosoEndpoint" value="localhost:1111"/>
-			<param key="virtuosoUser" value="dba"/>
-			<param key="virtuosoPwd" value="dba"/>
+                        <param key="virtuosoEndpoint" value="&virtUrl;"/>
+                        <param key="virtuosoUser" value="&virtUsr;"/>
+                        <param key="virtuosoPwd" value="&virtPwd;"/>
 			<param key="virtuosoTimeout" value="600"/>
 			<param key="virtuosoDeleteInsert" value="property"/>
 		</repo>
@@ -99,16 +101,31 @@
 	
 		<validators>
 			<validator id="basic" class="org.disit.iotdeviceapi.dataquality.basic.BasicValidator"/>
+                        <validator id="deviceAccessControl" class="org.disit.iotdeviceapi.dataquality.security.DeviceAccessControl"/>
 		</validators>
 		
 		<validations>
+                    
+                    <validate ref="authorization">
+                            <pick-validator ref="basic" description="Must authenticate. Send HTTP header Authorization: Bearer [token].">
+                                    <min-cardinality id="authorization.min-cardinality" lev="SEVERE">1</min-cardinality>
+                                    <max-cardinality id="authorization.max-cardinality" lev="SEVERE">1</max-cardinality>
+                            </pick-validator>                          
+                    </validate>    
                         
                     <validate ref="uri-exists">
-                        <pick-validator ref="basic">
+                        <pick-validator ref="basic" description="One URI at least of the device attribute(s) to be disabled must be specified."> 
                             <min-cardinality id="uri-exists.min-cardinality.1" lev="SEVERE">1</min-cardinality>
                         </pick-validator>
                     </validate>
-
+                    
+                    <validate ref="invalid-uri">
+                        <pick-validator ref="deviceAccessControl" description="The requester must be the owner of the device, identified through a valid access token that must be sent through the Authorization: Bearer [token] HTTP header.">
+                            <endpoint>&ownership;</endpoint>
+                            <authorization ref="authorization"/>
+                        </pick-validator>
+                    </validate>                      
+                        
 		</validations>
 		
 	</data-quality>
@@ -127,6 +144,14 @@
 				<query>{raw}</query>
 			</lookup>
 		</data>
+                
+                <data id="authorization" type="string" builder="lookup" loader="volatile">
+			<lookup>
+				<priority>1</priority>
+				<provider>request</provider>
+				<query>authorization</query>
+			</lookup>                    
+                </data>
 		
 		<data id="graph-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/resource/iot-data</data>
 		

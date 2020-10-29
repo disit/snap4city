@@ -13,7 +13,6 @@
 
    You should have received a copy of the GNU Affero General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
-
 package org.disit.iotdeviceapi;
 
 import org.disit.iotdeviceapi.builders.Builder;
@@ -26,29 +25,31 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import javax.activation.MimeType;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.disit.iotdeviceapi.dataquality.Validator;
 import org.disit.iotdeviceapi.parser.ParserConst;
-import org.disit.iotdeviceapi.parser.Parser;
-import org.disit.iotdeviceapi.repos.Repos;
 import org.disit.iotdeviceapi.datatypes.Data;
+import org.disit.iotdeviceapi.repos.Repos;
 import org.disit.iotdeviceapi.loaders.Loader;
 import org.disit.iotdeviceapi.providers.Provider;
 import org.disit.iotdeviceapi.utils.Const;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.disit.iotdeviceapi.parser.Parser;
+import org.disit.iotdeviceapi.dataquality.Validator;
 import org.disit.iotdeviceapi.utils.IotDeviceApiException;
 import org.disit.iotdeviceapi.logging.XLogger;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 /**
  * 
  * @author Mirco Soderi @ DISIT DINFO UNIFI (mirco.soderi at unifi dot it)
  */
-public class Delete extends HttpServlet {
+@WebServlet(name = "Move", urlPatterns = {"/Move"})
+public class Move extends HttpServlet {
 
     HashMap<String, Loader> mLoaders; 
     int status;
@@ -62,14 +63,15 @@ public class Delete extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
+    
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
+        
         response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Warning", "Should send your requests via HTTP POST.");
-                  
+           
     }
-
+    
     /**
      * Handles the HTTP <code>GET</code> method.
      *
@@ -106,18 +108,18 @@ public class Delete extends HttpServlet {
 
             // Parsing config file & initializing Xlogger
             
-            String cfgFile = getServletConfig().getInitParameter(ParserConst.WEBXML_INIPAR_CFGFILE);
+            String cfgFile = getServletConfig().getInitParameter(ParserConst.WEBXML_INIPAR_CFGFILE);           
             cfgParser = new Parser(cfgFile, request);
             if(Const.ERROR == cfgParser.getStatus()) {
                 throw new IotDeviceApiException(500,"Error while initializing parser. No Xlog available for this request. See preceeding errors for further details.");
             }
-            
+                    
             cfgParser.parseLogCfg();
             if(Const.ERROR == cfgParser.getStatus()) {
                 throw new Exception("Error while retrieving Xlog configuration. No Xlog available for this request. See preceeding errors for further details.");
             }
             
-            xlogger = new XLogger(Delete.class.getName(),cfgParser.getLoggingFolder());
+            xlogger = new XLogger(Move.class.getName(),cfgParser.getLoggingFolder());
             if(Const.ERROR == xlogger.getStatus()) {
                 throw new IotDeviceApiException(500,"Error while initializing Xlog. No Xlog available for this request. See preceeding errors for further details.");
             }
@@ -134,7 +136,7 @@ public class Delete extends HttpServlet {
             if(Const.ERROR == cfgParser.getStatus()) {
                 throw new IotDeviceApiException(400,"Error while parsing configuration.");
             }
-            
+
             // Retrieving parsing results
             
             HashMap<String, Repos> repos = cfgParser.getRepos();
@@ -145,11 +147,11 @@ public class Delete extends HttpServlet {
             HashMap<String, ArrayList<Validator>> validations = cfgParser.getValidations();
             this.mLoaders = loaders; 
             
-            xlogger.log(Delete.class.getName(), Level.INFO, "request", repos.get(ParserConst.REQUEST).getParameter(ParserConst.REQUEST_RAW));
+            xlogger.log(Move.class.getName(), Level.INFO, "request", repos.get(ParserConst.REQUEST).getParameter(ParserConst.REQUEST_RAW));
             if(Const.ERROR == xlogger.getStatus()) {
                 throw new IotDeviceApiException(500,"Error while logging request payload.");
             }
-                        
+
             // Building data
             
             HashMap<String, Data> data = new HashMap<>();
@@ -162,6 +164,7 @@ public class Delete extends HttpServlet {
                 Constructor builderConstructor = builders.get(builderID);
                 Builder builder = (Builder)builderConstructor.newInstance(cfgNode, repos, datatypes, providers, data, xlogger);
                 Data builtData = builder.build();
+                
                 if(Const.ERROR == builder.getStatus()) {
                     throw new IotDeviceApiException(400,MessageFormat.format("Error while building data: {0}.",new Object[]{cfgNode.getAttribute(ParserConst.CFG_AT_DATA_ID)}));
                 }
@@ -180,13 +183,13 @@ public class Delete extends HttpServlet {
                 
                 data.put(builtData.getId(), builtData);
                 
-                xlogger.log(Delete.class.getName(), Level.FINE, "successfull data built", MessageFormat.format("Successfull build of data: {0}.",new Object[]{builtData.getId()}));
+                xlogger.log(Move.class.getName(), Level.FINE, "successfull data built", MessageFormat.format("Successfull build of data: {0}.",new Object[]{builtData.getId()}));
                 
                 if(cfgNode.hasAttribute(ParserConst.CFG_AT_DATA_TRIGGER)) {
                     if (null == data.get(cfgNode.getAttribute(ParserConst.CFG_AT_DATA_TRIGGER)).getValue() || 
                             0 == data.get(cfgNode.getAttribute(ParserConst.CFG_AT_DATA_TRIGGER)).getValue().length) {
                         builtData.setTriggered(false);
-                        xlogger.log(Delete.class.getName(), Level.FINE, "untriggered data", MessageFormat.format("Data found to be untriggered: {0}. It is expected not to be produced in output, nor to be persisted by loaders. It could be employed for cleaning purposes in full updates.",new Object[]{builtData.getId()}));
+                        xlogger.log(Move.class.getName(), Level.FINE, "untriggered data", MessageFormat.format("Data found to be untriggered: {0}. It is expected not to be produced in output, nor to be persisted by loaders. It could be employed for cleaning purposes in full updates.",new Object[]{builtData.getId()}));
                     }
                 }
                                 
@@ -203,17 +206,17 @@ public class Delete extends HttpServlet {
                         outputCfg.put(ParserConst.CFG_AT_OUTPUT_TRAIL, "");
                         outputCfg.put(ParserConst.CFG_AT_OUTPUT_TAIL, "");
                         builtData.setOutput(outputCfg);
-                        xlogger.log(Delete.class.getName(), Level.WARNING, "Unable to load output configuration. Default configuration will be used.",outputException);
+                        xlogger.log(Move.class.getName(), Level.WARNING, "Unable to load output configuration. Default configuration will be used.",outputException);
                     }                    
                 }
                 
                 if(cfgNode.hasAttribute(ParserConst.CFG_AT_DATA_LOAD) && !ParserConst.CFG_RLDRID_VOLATILE.equals(cfgNode.getAttribute(ParserConst.CFG_AT_DATA_LOAD))) {
-                    loaders.get(cfgNode.getAttribute(ParserConst.CFG_AT_DATA_LOAD)).unload(builtData);
+                    loaders.get(cfgNode.getAttribute(ParserConst.CFG_AT_DATA_LOAD)).load(builtData);
                     if(Const.ERROR == loaders.get(cfgNode.getAttribute(ParserConst.CFG_AT_DATA_LOAD)).getStatus()) {
-                        throw new IotDeviceApiException(500,MessageFormat.format("Error while unloading data: {0}.",new Object[]{builtData.getId()}));
+                        throw new IotDeviceApiException(500,MessageFormat.format("Error while loading data: {0}.",new Object[]{builtData.getId()}));
                     }
                     else {
-                        xlogger.log(Delete.class.getName(), Level.FINE, "successfull data load", MessageFormat.format("Data loaded successfully: {0}", new Object[]{builtData.getId()}));
+                        xlogger.log(Move.class.getName(), Level.FINE, "successfull data load", MessageFormat.format("Data loaded successfully: {0}", new Object[]{builtData.getId()}));
                     }
                 }
                 
@@ -229,7 +232,7 @@ public class Delete extends HttpServlet {
                     throw new IotDeviceApiException(500,MessageFormat.format("Error while disconnecting loader: {0}.", new Object[]{loaderID}));
                 }
                 else {
-                    xlogger.log(Delete.class.getName(), Level.FINE, "loader disconnected", MessageFormat.format("Loader {0} disconnected.", new Object[]{loaderID}));
+                    xlogger.log(Move.class.getName(), Level.FINE, "loader disconnected", MessageFormat.format("Loader {0} disconnected.", new Object[]{loaderID}));
                 }
             }
             
@@ -284,7 +287,7 @@ public class Delete extends HttpServlet {
                     }
                 }
                 out.print(responseString);
-                xlogger.log(Delete.class.getName(), Level.INFO, "response", responseString);
+                xlogger.log(Move.class.getName(), Level.INFO, "response", responseString);
             }
             catch(Exception e) {
                 setStatus(Const.ERROR);
@@ -307,8 +310,8 @@ public class Delete extends HttpServlet {
                 });
             }
             
-            if(xlogger!=null) xlogger.log(Delete.class.getName(), Level.SEVERE, "delete error", e);
-            
+            if(xlogger!=null) xlogger.log(Move.class.getName(), Level.SEVERE, "move error", e);
+
             response.setHeader("Access-Control-Allow-Origin", "*");
             response.setHeader("Warning", e.getMessage());
             
@@ -319,7 +322,7 @@ public class Delete extends HttpServlet {
             }  
             
         }
-        
+ 
     }
 
     /**
@@ -329,16 +332,15 @@ public class Delete extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "This servlet deletes data based on a XML configuration.";
+        return "This servlet builds and persists data based on a XML configuration.";
     }
-
+    
+    private void setStatus(int status) {
+        this.status = status;
+    }
+    
     public int getStatus() {
         return status;
     }
 
-    private void setStatus(int status) {
-        this.status = status;
-    }
-
-    
 }

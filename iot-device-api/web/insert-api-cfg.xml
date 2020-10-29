@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 
 <!--
    IOTDEVICEAPI
@@ -18,69 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<!-- SAMPLE INPUT
-
-    {
-            "id": "ARDUINO_ST_4201",
-            "type": "Temperature",
-            "kind": "sensor",
-            "protocol": "ngsi",
-            "format": "csv",
-            "macaddress": "",
-            "model": "Modello del sensore",
-            "producer": "Produttore del sensore",
-            "latitude": "43",
-            "longitude": "11",
-            "frequency": 0,
-            "broker": {
-                    "name": "orionUNIMI",
-                    "type": "ngsi",
-                    "ip": "159.149.129.184",
-                    "port": "1026",
-                    "login": "",
-                    "password": "",
-                    "latitude": "43",
-                    "longitude": "11",
-                    "created": "2018-03-12 15:17:11"
-            },
-            "attributes": [{
-                    "value_name": "latitude",
-                    "data_type": "float",
-                    "value_type": "latitude",
-                    "value_unit": "#",
-                    "value_refresh_rate": 10,
-                    "healthiness_criteria": "refresh_rate",
-                    "order": 1
-            }, {
-                    "value_name": "longitude",
-                    "data_type": "float",
-                    "value_type": "longitude",
-                    "value_unit": "#",
-                    "value_refresh_rate": 10,
-                    "healthiness_criteria": "refresh_rate",
-                    "order": 2
-            }, {
-                    "value_name": "temp",
-                    "data_type": "float",
-                    "value_type": "temperature",
-                    "value_unit":"°C",
-                    "value_refresh_rate": 300,		
-                    "healthiness_criteria":"within_bounds",
-                    "value_bounds":"-10;+60"
-                    "order": 3
-            }, {
-                    "value_name": "maxtemp",
-                    "data_type": "integer",
-                    "value_type": "max_temperature",
-                    "value_unit": "°C",
-                    "value_refresh_rate": 30,	
-                    "healthiness_criteria": "different_values",
-                    "different_values": 20160
-                    "order": 4
-            }]
-    }
-    
--->
+<!DOCTYPE api-cfg SYSTEM "iotdeviceapi.dtd">
    
 <api-cfg xmlns="http://www.disit.org/ServiceMap/api/v1/iot">
 
@@ -105,13 +43,13 @@
 	<!-- A repo is where the data can be read from and/or written to -->
 	
 	<repos>
-		<repo id="virtuoso">
-			<param key="virtuosoEndpoint" value="localhost:1111"/>
-			<param key="virtuosoUser" value="dba"/>
-			<param key="virtuosoPwd" value="dba"/>
-			<param key="virtuosoTimeout" value="600"/>
-			<param key="virtuosoDeleteInsert" value="subject"/>
-		</repo>
+                <repo id="virtuoso">
+                    <param key="virtuosoEndpoint" value="&virtUrl;"/>
+                    <param key="virtuosoUser" value="&virtUsr;"/>
+                    <param key="virtuosoPwd" value="&virtPwd;"/>
+                    <param key="virtuosoTimeout" value="600"/>
+                    <param key="virtuosoDeleteInsert" value="subject"/>
+                </repo>
 	</repos>
 
 	<!-- A provider is a software component that retrieves data from a data source -->
@@ -169,26 +107,36 @@
 	
 		<validators>
 			<validator id="basic" class="org.disit.iotdeviceapi.dataquality.basic.BasicValidator"/>
+                        <validator id="deviceAccessControl" class="org.disit.iotdeviceapi.dataquality.security.DeviceAccessControl"/>
+                        <validator id="deviceAlreadyExists" class="org.disit.iotdeviceapi.dataquality.security.DeviceAlreadyExists"/>
+                        <validator id="validateToken" class="org.disit.iotdeviceapi.dataquality.security.ValidateToken"/>
 		</validators>
 		
 		<validations>
+                    
+                        <validate ref="authorization">
+                            <pick-validator ref="basic" description="Must authenticate. Send HTTP header Authorization: Bearer [token].">
+                                    <min-cardinality id="authorization.min-cardinality" lev="SEVERE">1</min-cardinality>
+                                    <max-cardinality id="authorization.max-cardinality" lev="SEVERE">1</max-cardinality>
+                            </pick-validator>                          
+                        </validate>  
 		
 			<validate ref="broker-uri-p0">
-				<pick-validator ref="basic">
+				<pick-validator ref="basic" description="One and only one broker name must be present.">
 					<min-cardinality id="broken-uri-p0.min-cardinality" lev="SEVERE">1</min-cardinality>
 					<max-cardinality id="broken-uri-p0.max-cardinality" lev="SEVERE">1</max-cardinality>
 				</pick-validator>
 			</validate>
 			
 			<validate ref="service-uri-p1">
-				<pick-validator ref="basic">
+				<pick-validator ref="basic" description="One and only one device ID must be present.">
 					<min-cardinality id="service-uri-p1.min-cardinality" lev="SEVERE">1</min-cardinality>
 					<max-cardinality id="service-uri-p1.max-cardinality" lev="SEVERE">1</max-cardinality>
 				</pick-validator>
 			</validate>
 			
 			<validate ref="kind">
-				<pick-validator ref="basic">
+				<pick-validator ref="basic" description="The kind of device must be present and it must be one of {sensor,actuator}.">
 					<min-cardinality id="kind.min-cardinality" lev="SEVERE">1</min-cardinality>
 					<max-cardinality id="kind.max-cardinality" lev="SEVERE">1</max-cardinality>
 					<match id="kind.match" op="or" lev="SEVERE">
@@ -199,27 +147,27 @@
 			</validate>
 			
 			<validate ref="frequency">
-				<pick-validator ref="basic">
+				<pick-validator ref="basic" description="The sampling frequency of the device must be specified once at most.">
 					<max-cardinality id="frequency.max-cardinality" lev="SEVERE">1</max-cardinality>
 				</pick-validator>
 			</validate>
 			
 			<validate ref="latitude">
-				<pick-validator ref="basic">
+				<pick-validator ref="basic" description="One and only one latitude must be specified for the device.">
 					<min-cardinality id="latitude.min-cardinality" lev="SEVERE">1</min-cardinality>
 					<max-cardinality id="latitude.max-cardinality" lev="SEVERE">1</max-cardinality>
 				</pick-validator>
 			</validate>
 			
 			<validate ref="longitude">
-				<pick-validator ref="basic">
+				<pick-validator ref="basic" description="One and only one longitude must be specified for the device.">
 					<min-cardinality id="longitude.min-cardinality" lev="SEVERE">1</min-cardinality>
 					<max-cardinality id="longitude.max-cardinality" lev="SEVERE">1</max-cardinality>
 				</pick-validator>
 			</validate>
 			
 			<validate ref="broker-type">
-				<pick-validator ref="basic">
+				<pick-validator ref="basic" description="One and only one type must be specified for the broker and it must be one of {amqp,mqtt,ngsi,ngsi w/MultiService}.">
 					<min-cardinality id="broker-type.min-cardinality" lev="SEVERE">1</min-cardinality>
 					<max-cardinality id="broker-type.max-cardinality" lev="SEVERE">1</max-cardinality>
 					<match id="broker-type.match" op="or" lev="SEVERE">
@@ -232,20 +180,20 @@
 			</validate>
 			
 			<validate ref="my-sosa-procedure-uri-p0">
-				<pick-validator ref="basic">
+				<pick-validator ref="basic" description="At least one type must be specified for the device.">
 					<min-cardinality id="my-sosa-procedure-uri-p0.min-cardinality" lev="WARNING">1</min-cardinality>
 				</pick-validator>
 			</validate>
 			
 			<validate ref="broker-ip">
-				<pick-validator ref="basic">
+				<pick-validator ref="basic" description="One and only one IP address must be specified for the broker.">
 					<min-cardinality id="broker-ip.min-cardinality" lev="SEVERE">1</min-cardinality>
 					<max-cardinality id="broker-ip.max-cardinality" lev="WARNING">1</max-cardinality>
 				</pick-validator>
 			</validate>
 		
 			<validate ref="broker-port">
-				<pick-validator ref="basic">
+				<pick-validator ref="basic" description="One and only one port number must be specified for the broker.">
 					<min-cardinality id="broker-port.min-cardinality" lev="SEVERE">1</min-cardinality>
 					<max-cardinality id="broker-port.max-cardinality" lev="SEVERE">1</max-cardinality>
 				</pick-validator>
@@ -253,7 +201,7 @@
                         
                         
                         <validate ref="attribute-datatype">
-                            <pick-validator ref="basic">
+                            <pick-validator ref="basic" description="One and only one data type must be specified for each of the device attributes, and it must match one of the values in the enumeration below here.">
                                 <same-cardinality id="attribute-datatype.same-cardinality.attribute-valuename" lev="SEVERE" ref="attribute-valuename"/>
                                 <match id="attribute-datatype.allowed-values" op="or" lev="SEVERE">
                                     <match-value>binary</match-value>
@@ -303,7 +251,7 @@
 -->
 
                         <validate ref="latitude">
-                            <pick-validator ref="basic">
+                            <pick-validator ref="basic" description="The value of latitude must be in (-90,90).">
                                 <lower-than id="latitude.lower-than" op="and" equality="include" lev="SEVERE">
                                     <lower-than-value>90</lower-than-value>
                                 </lower-than>
@@ -313,7 +261,7 @@
                             </pick-validator>
                         </validate>
                         <validate ref="longitude">
-                            <pick-validator ref="basic">
+                            <pick-validator ref="basic" description="The value of longitude must be in (-180,180).">
                                 <lower-than id="longitude.lower-than" op="and" equality="include" lev="SEVERE">
                                     <lower-than-value>180</lower-than-value>
                                 </lower-than>
@@ -345,24 +293,42 @@
                         -->
                         
                         <validate ref="attribute-valuename">
-                            <pick-validator ref="basic">
+                            <pick-validator ref="basic" description="At least one name must be specified for each of the device attributes.">
                                 <min-cardinality id="attribute-valuename.min-cardinality.1" lev="SEVERE">1</min-cardinality>
                             </pick-validator>
                         </validate>
                         
                         <validate ref="existing-measure-uris">
-                            <pick-validator ref="basic">
+                            <pick-validator ref="basic" description="One and only one value type must be specified for each of the device attributes, AND IT MUST MATCH ONE OF THE VALUES CONFIGURED IN THE KNOWLEDGE BASE.">
                                 <same-cardinality id="existing-measure-uris.same-cardinality.attribute-valuename" ref="attribute-valuename" lev="SEVERE"/>
                             </pick-validator>
                         </validate>
                         
                         <validate ref="device-avail">
-                            <pick-validator ref="basic">
+                            <pick-validator ref="basic" description="Disused.">
                                 <match id="device-avail-public-or-private" op="or" lev="SEVERE">
                                     <match-value>public</match-value>
                                     <match-value>private</match-value>
                                 </match>
                             </pick-validator>
+                        </validate>
+                        
+                        <validate ref="received-service-uri">
+                            <pick-validator ref="deviceAccessControl" description="The requester must be the owner of the device, identified through a valid access token that must be sent through the Authorization: Bearer [token] HTTP header.">
+                                <endpoint>&ownership;</endpoint>
+                                <authorization ref="authorization"/>
+                            </pick-validator>
+                        </validate>
+
+                        <validate ref="service-uri">                            
+                            <pick-validator ref="validateToken" description="The access token must be valid.">
+                                <endpoint>&keycloak;</endpoint>
+                                <authorization ref="authorization"/>
+                            </pick-validator>                
+                            <pick-validator ref="deviceAlreadyExists" description="If the URI is not provided (first insert), and the computed URI corresponds to the URI of an existing device, it is not accepted.">
+                                <endpoint>&servicemap;</endpoint>
+                                <authorization ref="authorization"/>
+                            </pick-validator>                  
                         </validate>
 
 		</validations>
@@ -383,6 +349,14 @@
 				<query>{raw}</query>
 			</lookup>
 		</data>
+                
+                <data id="authorization" type="string" builder="lookup" loader="volatile">
+			<lookup>
+				<priority>1</priority>
+				<provider>request</provider>
+				<query>authorization</query>
+			</lookup>                    
+                </data>
 		
 		<data id="graph-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/resource/iot-data</data>
 		
@@ -434,12 +408,12 @@
                     <query>uri</query>
                 </data>
                 
-                <data id="service-uri" type="uri" builder="alternative" loader="volatile" output="true">
+                <data id="service-uri" type="uri" builder="alternative" loader="volatile" output="true" > 
                     <alternative ref="received-service-uri"/>
                     <alternative ref="computed-service-uri"/>
 		</data>
                 
-		<data id="reusable-service-uri" type="string" builder="alternative" loader="volatile" output="true">
+		<data id="reusable-service-uri" type="string" builder="alternative" loader="volatile" output="true" > 
                     <alternative ref="received-service-uri"/>
                     <alternative ref="computed-service-uri"/>
                 </data>
@@ -649,6 +623,32 @@
 			<query>frequency</query>
 		</data>	
 	
+        
+                <data id="current-position-query" type="string" builder="template" loader="volatile">                    
+                    <template>
+                        select ?lat ?long '{' &lt;{0}&gt; &lt;http://www.w3.org/2003/01/geo/wgs84_pos#lat&gt; ?lat; &lt;http://www.w3.org/2003/01/geo/wgs84_pos#long&gt; ?long '}' 
+                    </template>
+                    <param index="0" value="service-uri"/> 
+                </data>  
+                
+                <data id="current-position-result" type="string" builder="lookup" loader="volatile">
+			<lookup>
+				<priority>1</priority>
+				<provider>virtuoso-provider</provider>
+				<query ref="current-position-query" />
+			</lookup>
+		</data>
+                
+                <data id="current-latitude" type="float" builder="jsonp" loader="volatile">
+			<source ref="current-position-result"/>
+			<query>lat</query>                        
+		</data>
+        
+                <data id="current-longitude" type="float" builder="jsonp" loader="volatile">
+			<source ref="current-position-result"/>
+			<query>long</query>                        
+		</data>
+        
 		<data id="device-latitude" type="float" builder="jsonp" loader="volatile">
 			<source ref="request-body"/>
 			<query>latitude</query>
@@ -661,6 +661,7 @@
 		
 		<data id="latitude" type="float" builder="alternative" loader="volatile">
 			<alternative ref="device-latitude"/>
+                        <alternative ref="current-latitude"/>
 			<alternative ref="broker-latitude"/>
 		</data>
 		
@@ -676,6 +677,7 @@
 		
 		<data id="longitude" type="float" builder="alternative" loader="volatile">
 			<alternative ref="device-longitude"/>
+                        <alternative ref="current-longitude"/>
 			<alternative ref="broker-longitude"/>
 		</data>	
 		
@@ -1247,6 +1249,7 @@
 								(km4c:maintenanceUrl "Maintenance url" xsd:string)
 								(schema:url "Use url" xsd:string)
 								(foaf:name "Name" UNDEF)
+                                                                (km4c:isMobile "Is Mobile" xsd:string)
 							'}'
 							optional '{' ?uri rdfs:label ?label FILTER(LANG(?label)="en")'}'
 							optional '{' ?uri rdfs:range ?type filter(?type!=rdfs:Literal)'}' . 
@@ -1254,7 +1257,7 @@
 						'}' order by str(?label)
                     </template>
                     <param index="0" value="readytouse_value_type_mapping_array"/>
-                </data>             
+                </data>  
                 
                 <data id="static-attributes-result" type="string" builder="lookup" loader="volatile">
 			<lookup>
@@ -1280,7 +1283,24 @@
 			<member name="property" ref="static-attributes-uris"/>
 			<member name="filler" ref="static-attributes-values"/> 
 		</data>
-
+                
+                <!-- isMobile -->
+                
+                <data id="isMobileUri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#isMobile</data>
+                <data id="isMobileTrue" type="bool" builder="const" loader="volatile">true</data>
+                <data id="isMobile" type="uri" builder="switch" loader="volatile">
+                    <switch ref="attribute-valuetype">
+                        <case><if>latitude_longitude</if><then ref="isMobileUri"/></case>
+                    </switch>
+		</data>
+                <data id="graph-uri.service-uri.isMobile.true" type="quad" builder="bean" loader="virtuoso">
+                    <member name="graph" ref="graph-uri"/> 
+                    <member name="subject" ref="service-uri"/> 
+                    <member name="property" ref="isMobile"/>
+                    <member name="filler" ref="isMobileTrue"/>
+		</data>           
+                
 	</process>
 
 </api-cfg>
+ 

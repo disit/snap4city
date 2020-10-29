@@ -17,12 +17,17 @@ package org.disit.iotdeviceapi.parser;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.lang.reflect.Constructor;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,7 +46,9 @@ import org.disit.iotdeviceapi.utils.IotDeviceApiException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /**
  * 
@@ -109,6 +116,7 @@ public class Parser {
         
         if(Const.OK == this.status) {
             this.cfgFilePath = cfgFilePath;
+            if(!this.cfgFilePath.startsWith("/")) this.cfgFilePath = System.getProperty("user.home")+(!System.getProperty("user.home").endsWith("/")?"/":"")+this.cfgFilePath;
             parseCfgRoot();
         }
         
@@ -124,14 +132,44 @@ public class Parser {
         if(Const.OK == getStatus()) parseValidations();
         if(Const.OK == getStatus()) parseDataNodes();
     }
-    
+        
     private void parseCfgRoot() {
         try {    
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             DocumentBuilder db = dbf.newDocumentBuilder(); 
+            class MyEntityResolver implements EntityResolver {
+                String cfgFile;
+                public MyEntityResolver(String cfgFile) {
+                    super();
+                    this.cfgFile = cfgFile;
+                }
+
+                @Override
+                public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+                    String entityFilename = systemId.split("/")[systemId.split("/").length-1];     
+                    String cfgFolder = this.cfgFile.substring(0, 1+this.cfgFile.lastIndexOf("/"));
+                    try {                        
+                        File entityFile = new File(cfgFolder+entityFilename);
+                        if(entityFile.exists()) {
+                            InputStream inputStream = new FileInputStream(entityFile);
+                            Reader reader = new InputStreamReader(inputStream,"UTF-8");
+                            return new InputSource(reader);
+                        }
+                        else {
+                            Logger.getLogger(Parser.class.getName()).log(Level.WARNING, "File not found: \"{0}{1}\", using: \"/WEB-INF/{2}\"", new Object[]{cfgFolder, entityFilename, entityFilename});
+                            return new InputSource(request.getServletContext().getResourceAsStream("/WEB-INF/"+entityFilename));
+                        }
+                    }
+                    catch(Exception e) {
+                        Logger.getLogger(Parser.class.getName()).log(Level.WARNING, "Error reading from: \"{0}{1}\", using: \"/WEB-INF/{2}\"", new Object[]{cfgFolder, entityFilename, entityFilename});
+                        return new InputSource(request.getServletContext().getResourceAsStream("/WEB-INF/"+entityFilename));
+                    }
+                }
+            }
+            db.setEntityResolver(new MyEntityResolver(this.cfgFilePath));
             OutputStreamWriter errorWriter = new OutputStreamWriter(System.err, "UTF-8");
             db.setErrorHandler(new ParserErrorHandler(new PrintWriter(errorWriter, true)));
-            File cfgFile = new File(System.getProperty("user.home")+this.cfgFilePath);
+            File cfgFile = new File(this.cfgFilePath);
             Document cfg;
             if(cfgFile.exists()) {
                 cfg = db.parse(cfgFile);
@@ -407,6 +445,9 @@ public class Parser {
                     requestRepos.setParameter(key+"["+String.valueOf(i)+"]", request.getParameterMap().get(key)[i]);
                 }
             }
+        }
+        for(String headerName: Collections.list(request.getHeaderNames())) {
+            requestRepos.setParameter(headerName, request.getHeader(headerName));
         }
         }
         catch(Exception e) {

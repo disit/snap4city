@@ -18,69 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<!-- SAMPLE INPUT
-
-    {
-            "id": "ARDUINO_ST_4201",
-            "type": "Temperature",
-            "kind": "sensor",
-            "protocol": "ngsi",
-            "format": "csv",
-            "macaddress": "",
-            "model": "Modello del sensore",
-            "producer": "Produttore del sensore",
-            "latitude": "43",
-            "longitude": "11",
-            "frequency": 0,
-            "broker": {
-                    "name": "orionUNIMI",
-                    "type": "ngsi",
-                    "ip": "159.149.129.184",
-                    "port": "1026",
-                    "login": "",
-                    "password": "",
-                    "latitude": "43",
-                    "longitude": "11",
-                    "created": "2018-03-12 15:17:11"
-            },
-            "attributes": [{
-                    "value_name": "latitude",
-                    "data_type": "float",
-                    "value_type": "latitude",
-                    "value_unit": "#",
-                    "value_refresh_rate": 10,
-                    "healthiness_criteria": "refresh_rate",
-                    "order": 1
-            }, {
-                    "value_name": "longitude",
-                    "data_type": "float",
-                    "value_type": "longitude",
-                    "value_unit": "#",
-                    "value_refresh_rate": 10,
-                    "healthiness_criteria": "refresh_rate",
-                    "order": 2
-            }, {
-                    "value_name": "temp",
-                    "data_type": "float",
-                    "value_type": "temperature",
-                    "value_unit":"°C",
-                    "value_refresh_rate": 300,		
-                    "healthiness_criteria":"within_bounds",
-                    "value_bounds":"-10;+60"
-                    "order": 3
-            }, {
-                    "value_name": "maxtemp",
-                    "data_type": "integer",
-                    "value_type": "max_temperature",
-                    "value_unit": "°C",
-                    "value_refresh_rate": 30,	
-                    "healthiness_criteria": "different_values",
-                    "different_values": 20160
-                    "order": 4
-            }]
-    }
-    
--->
+<!DOCTYPE api-cfg SYSTEM "iotdeviceapi.dtd">
    
 <api-cfg xmlns="http://www.disit.org/ServiceMap/api/v1/iot">
 
@@ -98,21 +36,20 @@
 			<xlog-level class="org.disit.iotdeviceapi.builders.bean.BeanBuilder" level="SEVERE"/>
 			<xlog-level class="org.disit.iotdeviceapi.loaders.virtuoso.VirtuosoLoader" level="INFO"/>
 			<xlog-level class="org.disit.iotdeviceapi.dataquality.basic.BasicValidator" level="INFO"/>
-<xlog-level class="org.disit.iotdeviceapi.providers.virtuoso.VirtuosoProvider" level="INFO"/>
+                        <xlog-level class="org.disit.iotdeviceapi.providers.virtuoso.VirtuosoProvider" level="INFO"/>
 		</xlogs>
 	</admin>
 	
 	<!-- A repo is where the data can be read from and/or written to -->
 	
 	<repos>
-		<repo id="virtuoso">
-			<param key="virtuosoEndpoint" value="localhost:1111"/>
-			<param key="virtuosoUser" value="dba"/>
-			<param key="virtuosoPwd" value="dba"/>
-			<param key="virtuosoTimeout" value="600"/>
-                        <!-- Set virtuosoDeleteInsert to "subject" if you need a transactional delete, set to "disabled" otherwise. -->
-			<param key="virtuosoDeleteInsert" value="subject"/>
-		</repo>
+                <repo id="virtuoso">
+                    <param key="virtuosoEndpoint" value="&virtUrl;"/>
+                    <param key="virtuosoUser" value="&virtUsr;"/>
+                    <param key="virtuosoPwd" value="&virtPwd;"/>
+                    <param key="virtuosoTimeout" value="600"/>
+                    <param key="virtuosoDeleteInsert" value="subject"/>
+                </repo>
 	</repos>
 
 	<!-- A provider is a software component that retrieves data from a data source -->
@@ -169,203 +106,23 @@
 	<data-quality>
 	
 		<validators>
-			<validator id="basic" class="org.disit.iotdeviceapi.dataquality.basic.BasicValidator"/>
+			<validator id="deviceAccessControl" class="org.disit.iotdeviceapi.dataquality.security.DeviceAccessControl"/>
+                        <validator id="basic" class="org.disit.iotdeviceapi.dataquality.basic.BasicValidator"/>
 		</validators>
 		
 		<validations>
-		
-			<validate ref="broker-uri-p0">
-				<pick-validator ref="basic">
-					<min-cardinality id="broken-uri-p0.min-cardinality" lev="SEVERE">1</min-cardinality>
-					<max-cardinality id="broken-uri-p0.max-cardinality" lev="SEVERE">1</max-cardinality>
-				</pick-validator>
-			</validate>
-			
-			<validate ref="service-uri-p1">
-				<pick-validator ref="basic">
-					<min-cardinality id="service-uri-p1.min-cardinality" lev="SEVERE">1</min-cardinality>
-					<max-cardinality id="service-uri-p1.max-cardinality" lev="SEVERE">1</max-cardinality>
-				</pick-validator>
-			</validate>
-			
-			<validate ref="kind">
-				<pick-validator ref="basic">
-					<min-cardinality id="kind.min-cardinality" lev="SEVERE">1</min-cardinality>
-					<max-cardinality id="kind.max-cardinality" lev="SEVERE">1</max-cardinality>
-					<match id="kind.match" op="or" lev="SEVERE">
-						<match-value>sensor</match-value>
-						<match-value>actuator</match-value>
-					</match>
-				</pick-validator>
-			</validate>
-			
-			<validate ref="frequency">
-				<pick-validator ref="basic">
-					<max-cardinality id="frequency.max-cardinality" lev="SEVERE">1</max-cardinality>
-				</pick-validator>
-			</validate>
-			
-			<validate ref="latitude">
-				<pick-validator ref="basic">
-					<min-cardinality id="latitude.min-cardinality" lev="SEVERE">1</min-cardinality>
-					<max-cardinality id="latitude.max-cardinality" lev="SEVERE">1</max-cardinality>
-				</pick-validator>
-			</validate>
-			
-			<validate ref="longitude">
-				<pick-validator ref="basic">
-					<min-cardinality id="longitude.min-cardinality" lev="SEVERE">1</min-cardinality>
-					<max-cardinality id="longitude.max-cardinality" lev="SEVERE">1</max-cardinality>
-				</pick-validator>
-			</validate>
-			
-			<validate ref="broker-type">
-				<pick-validator ref="basic">
-					<min-cardinality id="broker-type.min-cardinality" lev="SEVERE">1</min-cardinality>
-					<max-cardinality id="broker-type.max-cardinality" lev="SEVERE">1</max-cardinality>
-					<match id="broker-type.match" op="or" lev="SEVERE">
-						<match-value>amqp</match-value>
-						<match-value>mqtt</match-value>
-						<match-value>ngsi</match-value>
-                                                <match-value>ngsi w/MultiService</match-value>
-					</match>	
-				</pick-validator>
-			</validate>
-			
-			<validate ref="my-sosa-procedure-uri-p0">
-				<pick-validator ref="basic">
-					<min-cardinality id="my-sosa-procedure-uri-p0.min-cardinality" lev="WARNING">1</min-cardinality>
-				</pick-validator>
-			</validate>
-			
-			<validate ref="broker-ip">
-				<pick-validator ref="basic">
-					<min-cardinality id="broker-ip.min-cardinality" lev="SEVERE">1</min-cardinality>
-					<max-cardinality id="broker-ip.max-cardinality" lev="WARNING">1</max-cardinality>
-				</pick-validator>
-			</validate>
-		
-			<validate ref="broker-port">
-				<pick-validator ref="basic">
-					<min-cardinality id="broker-port.min-cardinality" lev="SEVERE">1</min-cardinality>
-					<max-cardinality id="broker-port.max-cardinality" lev="SEVERE">1</max-cardinality>
-				</pick-validator>
-			</validate>
-                        
-                        
-                        <validate ref="attribute-datatype">
-                            <pick-validator ref="basic">
-                                <same-cardinality id="attribute-datatype.same-cardinality.attribute-valuename" lev="SEVERE" ref="attribute-valuename"/>
-                                <match id="attribute-datatype.allowed-values" op="or" lev="SEVERE">
-                                    <match-value>binary</match-value>
-                                    <match-value>boolean</match-value>
-                                    <match-value>button</match-value>
-                                    <match-value>collection</match-value>
-                                    <match-value>date</match-value>
-                                    <match-value>datetime</match-value>
-                                    <match-value>float</match-value>
-                                    <match-value>html</match-value>
-                                    <match-value>identifier</match-value>
-                                    <match-value>image</match-value>
-                                    <match-value>integer</match-value>
-                                    <match-value>json</match-value>
-                                    <match-value>path</match-value>
-                                    <match-value>set</match-value>
-                                    <match-value>shape</match-value>
-                                    <match-value>string</match-value>
-                                    <match-value>switch</match-value>
-                                    <match-value>time</match-value>
-                                    <match-value>timestamp</match-value>
-                                    <match-value>url</match-value>
-                                    <match-value>vector</match-value>
-                                    <match-value>wkt</match-value>
-                                    <match-value>xml</match-value>                       
-                                </match>
+                    <validate ref="authorization">
+                            <pick-validator ref="basic" description="Must authenticate. Send HTTP header Authorization: Bearer [token].">
+                                    <min-cardinality id="authorization.min-cardinality" lev="SEVERE">1</min-cardinality>
+                                    <max-cardinality id="authorization.max-cardinality" lev="SEVERE">1</max-cardinality>
                             </pick-validator>
-                        </validate>
-                        
-                        <validate ref="measure-order">
-                            <pick-validator ref="basic" op="or" id="measure-order.all-or-nothing" lev="SEVERE">
-                                <max-cardinality id="or.measure-order.max-cardinality" lev="FINE">0</max-cardinality>
-                                <same-cardinality id="or.measure-order.same-cardinality.attribute-valuename" lev="FINE" ref="attribute-valuename"/>
-                            </pick-validator>
-                        </validate>
-                        
-                        <!--
-                        <validate ref="attribute-valueunit">
-                            <pick-validator ref="basic">
-                                <same-cardinality id="attribute-valueunit.same-cardinality.attribute-valuename" lev="SEVERE" ref="attribute-valuename"/> 
-                                <match id="attribute-valueunit.allowed-values" op="or" lev="SEVERE">                                    
-                                    <match-value>^(da|h|k|M|G|T|P|E|Z|Y|d|c|m|μ|n|p|f|a|z|y){0,1}(m|kg|s|A|K|mol|cd|rad|sr|Hz|N|Pa|J|W|C|V|F|Ω|S|Wb|T|H|°C|lm|lx|Bq|Gy|Sv|kat|min|h|d|°|′|″|ha|l|L|t|au|AU|Np|B|dB|Å|a|b|bar|mbar|atm|Ba|mmHg|Torr){1}$</match-value>
-                                    <match-value>^(&#37;|°C|lux|hPa|ppm|#|km/h|s|car/h|m/s|deg|mm|μm|V|euro|cbar|m|V|A|W|KWh|F|mA|VA){1}$</match-value>
-                                    <match-value>^(#|m|km/h|s|&#37;|ppm|A|C|KW/h|euro|lux|W|hPa|mm|cbar|V|car/h|µm|deg|m/s|mS/cm){1}$</match-value>
-                                </match>
-                            </pick-validator>
-                        </validate>
-                        -->
-
-                        <validate ref="latitude">
-                            <pick-validator ref="basic">
-                                <lower-than id="latitude.lower-than" op="and" equality="include" lev="SEVERE">
-                                    <lower-than-value>90</lower-than-value>
-                                </lower-than>
-                                <greater-than id="latitude.greater-than" op="and" equality="include" lev="SEVERE">
-                                    <greater-than-value>-90</greater-than-value>
-                                </greater-than>
-                            </pick-validator>
-                        </validate>
-                        <validate ref="longitude">
-                            <pick-validator ref="basic">
-                                <lower-than id="longitude.lower-than" op="and" equality="include" lev="SEVERE">
-                                    <lower-than-value>180</lower-than-value>
-                                </lower-than>
-                                <greater-than id="longitude.greater-than" op="and" equality="include" lev="SEVERE">
-                                    <greater-than-value>-180</greater-than-value>
-                                </greater-than>
-                            </pick-validator>
-                        </validate>
-                                       
-                        <!--
-                        <validate ref="attribute-healtinesscriteria">
-                            <pick-validator ref="basic">
-                                <same-cardinality id="attribute-healtinesscriteria.same-cardinality.attribute-valuename" lev="SEVERE" ref="attribute-valuename"/>
-                                <match id="attribute-healtinesscriteria.allowed-values" op="or" lev="SEVERE">
-                                    <match-value>refresh_rate</match-value>
-                                    <match-value>different_values</match-value>
-                                    <match-value>within_bounds</match-value>
-                                </match>
-                            </pick-validator>
-                        </validate>
-                        -->
-                        <!--
-                        <validate ref="attribute-refreshrate">
-                            <pick-validator ref="basic">
-                                <same-cardinality id="attribute-refreshrate.same-cardinality.attribute-valuename" lev="SEVERE" ref="attribute-valuename"/>
-                            </pick-validator>
-                        </validate>
-                        -->
-                        
-                        <validate ref="attribute-valuename">
-                            <pick-validator ref="basic">
-                                <min-cardinality id="attribute-valuename.min-cardinality.1" lev="SEVERE">1</min-cardinality>
-                            </pick-validator>
-                        </validate>
-
-                        <validate ref="existing-measure-uris">
-                            <pick-validator ref="basic">
-                                <same-cardinality id="existing-measure-uris.same-cardinality.attribute-valuename" ref="attribute-valuename" lev="SEVERE"/>
-                            </pick-validator>
-                        </validate>
-                        
-                        <validate ref="device-avail">
-                            <pick-validator ref="basic">
-                                <match id="device-avail-public-or-private" op="or" lev="SEVERE">
-                                    <match-value>public</match-value>
-                                    <match-value>private</match-value>
-                                </match>
-                            </pick-validator>
-                        </validate>
-
+                    </validate>                                              
+                    <validate ref="service-uri">
+                        <pick-validator ref="deviceAccessControl" description="The requester must be the owner of the device, identified through a valid access token that must be sent through the Authorization: Bearer [token] HTTP header.">
+                            <endpoint>&ownership;</endpoint>
+                            <authorization ref="authorization"/>
+                        </pick-validator>
+                    </validate>                 
 		</validations>
 		
 	</data-quality>
@@ -384,339 +141,57 @@
 				<query>{raw}</query>
 			</lookup>
 		</data>
+                
+                <data id="authorization" type="string" builder="lookup" loader="volatile">
+			<lookup>
+				<priority>1</priority>
+				<provider>request</provider>
+				<query>authorization</query>
+			</lookup>                    
+                </data>
 		
 		<data id="graph-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/resource/iot-data</data>
-		
-		<data id="broker-uri-p0" type="string" builder="jsonp" loader="volatile">
-			<source ref="request-body"/>
-			<query>broker.name</query>
-		</data>
-		<data id="broker-uri" type="uri" builder="template" loader="volatile">
-			<template>http://www.disit.org/km4city/resource/iot/{0}</template>
-			<param index="0" value="broker-uri-p0"/>
-		</data>
-                
-                <data id="reusable-broker-uri" type="string" builder="template" loader="volatile">
-			<template>http://www.disit.org/km4city/resource/iot/{0}</template>
-			<param index="0" value="broker-uri-p0"/>
-		</data>
-		
-		<data id="service-uri-p1" type="string" builder="jsonp" loader="volatile">
-			<source ref="request-body"/>
-			<query>id</query>
-		</data>
-<!-- -->        
-                <data id="service-uri-organization" type="string" builder="jsonp" loader="volatile">
-			<source ref="request-body"/>
-			<query>organization</query>
-		</data>
-                
-                <data id="computed-service-uri-with-org" type="string" builder="template" loader="volatile">
-			<template>{0}/{1}/{2}</template>
-			<param index="0" value="reusable-broker-uri"/>
-                        <param index="1" value="service-uri-organization"/>
-			<param index="2" value="service-uri-p1"/>
-		</data>
-                
-                <data id="computed-service-uri-without-org" type="string" builder="template" loader="volatile">
-			<template>{0}/{1}</template>
-			<param index="0" value="reusable-broker-uri"/>
-			<param index="1" value="service-uri-p1"/>
-		</data>
-        
-		<data id="computed-service-uri" type="string" builder="alternative" loader="volatile">
-                    <alternative ref="computed-service-uri-with-org"/>
-                    <alternative ref="computed-service-uri-without-org"/>
-		</data>
-<!-- -->                
-                <data id="received-service-uri" type="string" builder="jsonp" loader="volatile">
+				
+                <data id="service-uri" type="uri" builder="jsonp" loader="volatile">
                     <source ref="request-body"/>
                     <query>uri</query>
                 </data>
                 
-                <data id="service-uri" type="uri" builder="alternative" loader="volatile" output="true">
-                    <alternative ref="received-service-uri"/>
-                    <alternative ref="computed-service-uri"/>
-		</data>
-                
-		<data id="reusable-service-uri" type="string" builder="alternative" loader="volatile" output="true">
-                    <alternative ref="received-service-uri"/>
-                    <alternative ref="computed-service-uri"/>
-                </data>
                                 
-		<data id="iot-sensor-uri-old" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#IoTSensor</data> 
-                <data id="iot-sensor-uri" type="uri" builder="const" loader="volatile">http://www.w3.org/ns/sosa/Sensor</data>
-		
-		<data id="iot-actuator-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#IoTActuator</data>
-
-		<data id="is-a" type="uri" builder="const" loader="volatile">http://www.w3.org/1999/02/22-rdf-syntax-ns#type</data>
-		
-		<data id="schema-name-uri" type="uri" builder="const" loader="volatile">http://schema.org/name</data>
-		
-		<data id="my-sosa-procedure-uri-p0" type="string" builder="jsonp" loader="volatile">
-			<source ref="request-body"/>
-			<query>type</query>
-		</data>
-		
-		<data id="my-sosa-procedure-uri" type="uri" builder="template" loader="volatile">
-			<template>http://www.disit.org/km4city/resource/iot/{0}</template>
-			<param index="0" value="my-sosa-procedure-uri-p0"/>
-		</data>
-		
-		<data id="sosa-procedure-uri" type="uri" builder="const" loader="volatile">http://www.w3.org/ns/sosa/Procedure</data>
-		
-		<data id="implements-procedure-uri" type="uri" builder="const" loader="volatile">http://www.w3.org/ns/ssn/implements</data>
+                <!-- geom -->
                 
-		<data id="ssn-property-uri" type="uri" builder="const" loader="volatile">http://www.w3.org/ns/ssn/Property</data>
-		
-		<data id="sosa-observes-uri" type="uri" builder="const" loader="volatile">http://www.w3.org/ns/sosa/observes</data>
-		
-		<data id="my-frequency-uri" type="uri" builder="template" loader="volatile">
-			<template>{0}/frequency</template>
-			<param index="0" value="reusable-service-uri"/>
-		</data>
-		
-		<data id="frequency-uri" type="uri" builder="const" loader="volatile">http://www.w3.org/ns/ssn/Frequency</data>
-		
-		<data id="schema-value-uri" type="uri" builder="const" loader="volatile">http://schema.org/value</data>
-		
-		<data id="schema-unit-code-uri" type="uri" builder="const" loader="volatile">http://schema.org/unitCode</data>
-		
-		<data id="my-system-capability-uri" type="uri" builder="template" loader="volatile">
-			<template>{0}/systemCapability</template>
-			<param index="0" value="reusable-service-uri"/>
-		</data>
-		
-		<data id="system-capability-uri" type="uri" builder="const" loader="volatile">http://www.w3.org/ns/ssn/SystemCapability</data>
-		
-		<data id="has-system-property-uri" type="uri" builder="const" loader="volatile">http://www.w3.org/ns/ssn/hasSystemProperty</data>
-		
-		<data id="has-system-capability-uri" type="uri" builder="const" loader="volatile">http://www.w3.org/ns/ssn/hasSystemCapability</data>
-		
-		<data id="wgs84-long-uri" type="uri" builder="const" loader="volatile">http://www.w3.org/2003/01/geo/wgs84_pos#long</data>
-		
-		<data id="wgs84-lat-uri" type="uri" builder="const" loader="volatile">http://www.w3.org/2003/01/geo/wgs84_pos#lat</data>
-		
-		<data id="broker-endpoint-uri" type="uri" builder="const" loader="volatile">http://purl.oclc.org/NET/UNIS/fiware/iot-lite#endpoint</data>
-		
-		<data id="exposed-by-uri" type="uri" builder="const" loader="volatile">http://purl.oclc.org/NET/UNIS/fiware/iot-lite#exposedBy</data>
-		
-		<data id="sensor" type="string" builder="const" loader="volatile">sensor</data>
-		
-		<data id="actuator" type="string" builder="const" loader="volatile">actuator</data>
-		
-		<data id="temp" type="string" builder="const" loader="volatile">temp</data>
-		
-		<data id="hum" type="string" builder="const" loader="volatile">hum</data>
-		
-		<data id="sec" type="string" builder="const" loader="volatile">SEC</data>
-		
-		<data id="kind" type="string" builder="jsonp" loader="volatile">
-			<source ref="request-body"/>
-			<query>kind</query>
-		</data>
-		
-		<data id="device-type" type="uri" builder="switch" loader="volatile">
-			<switch ref="kind">
-				<case><if>sensor</if><then ref="iot-sensor-uri"/></case>
-				<case><if>actuator</if><then ref="iot-actuator-uri"/></case>
-			</switch>
-		</data>
-                
-                <data id="device-type-old" type="uri" builder="switch" loader="volatile">
-			<switch ref="kind">
-				<case><if>sensor</if><then ref="iot-sensor-uri-old"/></case>
-				<case><if>actuator</if><then ref="iot-actuator-uri"/></case>
-			</switch>
-		</data>		
-
-                <data id="attribute-valuename" type="string" builder="jsonp" loader="volatile">
-			<source ref="request-body"/>
-			<query>attributes.value_name</query>
-		</data>
-                
-                <data id="attribute-valuetype" type="string" builder="jsonp" loader="volatile">
-			<source ref="request-body"/>
-			<query>attributes.value_type</query>
-		</data>
-                
-                <data id="attribute-datatype" type="string" builder="jsonp" loader="volatile">
-			<source ref="request-body"/>
-			<query>attributes.data_type</query>
-		</data>
-                <data id="measure-order" type="integer" builder="jsonp" loader="volatile">
-			<source ref="request-body"/>
-			<query>attributes.order</query>
-                        <default>0</default>
-                </data>
-                <data id="attribute-valueunit" type="string" builder="jsonp" loader="volatile">
-			<source ref="request-body"/>
-			<query>attributes.value_unit</query>
-                </data>
-
-                <data id="measure-uri" type="uri" builder="template" loader="volatile">
-                    <template>http://www.disit.org/km4city/resource/value_type/{0}</template>
-                    <param index="0" value="attribute-valuetype"/>
-                </data>
-                <data id="measure-uri-validation-query" type="string" builder="template" loader="volatile">
-			<template>select * '{' &lt;{0}&gt; &lt;{1}&gt; ?v '}'</template>
-			<param index="0" value="measure-uri"/>
-                        <param index="1" value="is-a"/>
-		</data>
-                <data id="existing-measure-uris" type="string" builder="lookup" loader="volatile">
-			<lookup>
-				<priority>1</priority>
-				<provider>virtuoso-provider</provider>
-				<query ref="measure-uri-validation-query" />
-			</lookup>
-		</data>
-                <data id="device-attribute-uri" type="uri" builder="template" loader="volatile">
-                    <template>{0}/{1}</template>
-                    <param index="0" value="reusable-service-uri"/>
-                    <param index="1" value="attribute-valuename"/>
-                </data> 
-                <data id="sosa-is-observed-by-uri" type="uri" builder="const" loader="volatile">http://www.w3.org/ns/sosa/isObservedBy</data>
-
-                <!-- value_type mapping -->
-                <data id="value_type_mapping" type="string" builder="template" loader="volatile">
-                    <!-- <template>select distinct ?s '{' graph &lt;urn:test:value_types_mapping&gt; '{' &lt;{0}&gt; &lt;http://purl.org/dc/terms/source&gt; ?s '}' . graph &lt;{1}&gt; '{' &lt;{2}&gt; &lt;{3}&gt; &lt;{4}&gt; ; ?p ?v '}' '}'</template> -->
-                    <template>select distinct ?s '{' graph &lt;urn:test:value_types_mapping&gt; '{' &lt;{0}&gt; &lt;http://purl.org/dc/terms/source&gt; ?s '}' . filter("{1}" = "sensor") '}'</template>
-                    <param index="0" value="measure-uri"/>
-                    <param index="1" value="kind"/>
-                    <!-- <param index="1" value="graph-uri"/>
+                <data id="latlong" type="string" builder="template" loader="volatile">                    
+                    <template>select ?lat ?long '{' graph &lt;{0}&gt; '{' &lt;{1}&gt; a ?c . filter(str(?c) = "http://www.disit.org/km4city/schema#IoTSensor" || str(?c) = "http://www.w3.org/ns/sosa/Sensor" || str(?c) = "http://www.disit.org/km4city/schema#IoTActuator" || str(?c) = "http://www.disit.org/km4city/schema#MobileSensor" ) . &lt;{2}&gt; &lt;http://www.w3.org/2003/01/geo/wgs84_pos#lat&gt; ?lat;  &lt;http://www.w3.org/2003/01/geo/wgs84_pos#long&gt; ?long '}' '}' </template>
+                    <param index="0" value="graph-uri"/>
+                    <param index="1" value="service-uri"/>
                     <param index="2" value="service-uri"/>
-                    <param index="3" value="is-a"/>
-                    <param index="4" value="iot-sensor-uri"/> -->
                 </data>
                 
-                <data id="value_type_mapping_result" type="string" builder="lookup" loader="volatile">
+                <data id="latlong-res" type="string" builder="lookup" loader="volatile">
 			<lookup>
 				<priority>1</priority>
 				<provider>virtuoso-provider</provider>
-				<query ref="value_type_mapping" />
+				<query ref="latlong" />
 			</lookup>
 		</data>
-                <data id="value_type_mapping_array" type="string" builder="jsonp" loader="volatile">
-			<source ref="value_type_mapping_result"/>
-			<query>s</query>                        
+                <data id="latitude" type="float" builder="jsonp" loader="volatile">
+			<source ref="latlong-res"/>
+			<query>lat</query>                        
+		</data>
+                <data id="longitude" type="float" builder="jsonp" loader="volatile">
+			<source ref="latlong-res"/>
+			<query>long</query>                        
 		</data>
                 
-                <data id="air-quality-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#Air_quality_monitoring_station</data>
-                <data id="airQualityDocet" type="uri" builder="switch" loader="volatile"> 
-                    <switch ref="value_type_mapping_array">
-            		<case><if ref="air-quality-uri" /><then ref="air-quality-uri" /> </case>
-                    </switch>
-                </data>  
-                
-                <data id="subnature-uri" type="uri" builder="jsonp" loader="volatile">
-			<source ref="request-body"/>
-			<query>subnature</query>
-		</data>
-                                                
-                <data id="subnature-name" type="string" builder="jsonp" loader="volatile">
-			<source ref="request-body"/>
-			<query>subnature</query>
-		</data>
-                
-                <data id="built-subnature-uri" type="uri" builder="template" loader="volatile">
-                        <template>http://www.disit.org/km4city/schema#{0}</template>
-			<param index="0" value="subnature-name"/>
-		</data>
-                
-                <data id="readytouse_value_type_mapping_array" type="uri" builder="alternative" loader="volatile">
-			<alternative ref="subnature-uri"/>
-                        <alternative ref="built-subnature-uri"/>
-                        <alternative ref="airQualityDocet"/>
-                        <alternative ref="value_type_mapping_array"/>
-                        <alternative ref="device-type-old"/>
-		</data>              	                                       
-                
-                <data id="graph-uri.service-uri.is-a.value_type_mapping_array" type="quad" builder="bean" loader="virtuoso">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="service-uri"/> 
-			<member name="property" ref="is-a"/>
-			<member name="filler" ref="readytouse_value_type_mapping_array"/>
-		</data>	
-                
-                <!-- -->
-                
-		<data id="frequency" type="string" builder="jsonp" loader="volatile">
-			<source ref="request-body"/>
-			<query>frequency</query>
-		</data>	
-	
-		<data id="device-latitude" type="float" builder="jsonp" loader="volatile">
-			<source ref="request-body"/>
-			<query>latitude</query>
-		</data>	
-
-		<data id="broker-latitude" type="float" builder="jsonp" loader="volatile">
-			<source ref="request-body"/>
-			<query>broker.latitude</query>
-		</data>	
-		
-		<data id="latitude" type="float" builder="alternative" loader="volatile">
-			<alternative ref="device-latitude"/>
-			<alternative ref="broker-latitude"/>
-		</data>
-		
-		<data id="device-longitude" type="float" builder="jsonp" loader="volatile">
-			<source ref="request-body"/>
-			<query>longitude</query>
-		</data>	
-
-		<data id="broker-longitude" type="float" builder="jsonp" loader="volatile">
-			<source ref="request-body"/>
-			<query>broker.longitude</query>
-		</data>	
-		
-		<data id="longitude" type="float" builder="alternative" loader="volatile">
-			<alternative ref="device-longitude"/>
-			<alternative ref="broker-longitude"/>
-		</data>	
-		
-		<data id="broker-type" type="string" builder="jsonp" loader="volatile">
-			<source ref="request-body"/>
-			<query>broker.type</query>
-		</data>
-		
-		<data id="amqp-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#AMQPBroker</data>
-		
-		<data id="mqtt-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#MQTTBroker</data>
-		
-		<data id="ngsi-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#NGSIBroker</data>
-		
-		<data id="broker-type-uri" type="uri" builder="switch" loader="volatile">
-			<switch ref="broker-type">
-				<case><if>amqp</if><then ref="amqp-uri"/></case>
-				<case><if>mqtt</if><then ref="mqtt-uri"/></case>
-				<case><if>ngsi</if><then ref="ngsi-uri"/></case>
-			</switch>
-		</data>	
-
-		<data id="broker-ip" type="string" builder="jsonp" loader="volatile">
-			<source ref="request-body"/>
-			<query>broker.ip</query>
-		</data>		
-		
-		<data id="broker-port" type="string" builder="jsonp" loader="volatile">
-			<source ref="request-body"/>
-			<query>broker.port</query>
-		</data>
-	
-		<data id="broker-endpoint" type="string" builder="template" loader="volatile">
-			<template>{0}:{1}</template>
-			<param index="0" value="broker-ip"/>
-			<param index="1" value="broker-port"/>
-		</data>
-		
-		<data id="device-geometry" type="geometry" builder="template" loader="volatile">
+                <data id="device-geometry" type="geometry" builder="template" loader="volatile">
 			<template>POINT({0} {1})</template>
 			<param index="0" value="longitude"/>
 			<param index="1" value="latitude"/>
 		</data>
-		
-		<data id="device-geometry-uri" type="uri" builder="const" loader="volatile">http://www.w3.org/2003/01/geo/wgs84_pos#geometry</data>
+                
+                <data id="device-geometry-uri" type="uri" builder="const" loader="volatile">http://www.w3.org/2003/01/geo/wgs84_pos#geometry</data>
+                <data id="device-latitude-uri" type="uri" builder="const" loader="volatile">http://www.w3.org/2003/01/geo/wgs84_pos#lat</data>
+                <data id="device-longitude-uri" type="uri" builder="const" loader="volatile">http://www.w3.org/2003/01/geo/wgs84_pos#long</data>
 		
 		<data id="graph-uri.service-uri.device-geometry-uri.device-geometry" type="quad" builder="bean" loader="virtuoso">
 			<member name="graph" ref="graph-uri"/> 
@@ -724,487 +199,201 @@
 			<member name="property" ref="device-geometry-uri"/>
 			<member name="filler" ref="device-geometry"/>
 		</data>
-		
-		<data id="graph-uri.service-uri.is-a.device-type" type="quad" builder="bean" loader="virtuoso">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="service-uri"/> 
-			<member name="property" ref="is-a"/>
-			<member name="filler" ref="device-type"/>
-		</data>		
-		
-                <!-- -->
-                <data id="device-organization-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#organization</data>
-		<data id="graph-uri.service-uri.device-organization-uri.organization" type="quad" builder="bean" loader="virtuoso">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="service-uri"/> 
-			<member name="property" ref="device-organization-uri"/>
-			<member name="filler" ref="service-uri-organization"/>
-		</data>	
-                <!-- -->                
                 
-		<data id="graph-uri.service-uri.schema-name-uri.model" type="quad" builder="bean" loader="virtuoso">
+                <data id="graph-uri.service-uri.device-latitude-uri.device-latitude" type="quad" builder="bean" loader="virtuoso">
 			<member name="graph" ref="graph-uri"/> 
 			<member name="subject" ref="service-uri"/> 
-			<member name="property" ref="schema-name-uri"/>
-                        <member name="filler" ref="service-uri-p1"/>
-		</data>		
-		
-                <!--
-		<data id="graph-uri.my-sosa-procedure-uri.is-a.sosa-procedure-uri" type="quad" builder="bean" loader="virtuoso">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="my-sosa-procedure-uri"/> 
-			<member name="property" ref="is-a"/>
-			<member name="filler" ref="sosa-procedure-uri"/>
-		</data>	
-                -->	
-		
-		<data id="graph-uri.service-uri.implements-procedure-uri.my-sosa-procedure-uri" type="quad" builder="bean" loader="virtuoso">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="service-uri"/> 
-			<member name="property" ref="implements-procedure-uri"/>
-			<member name="filler" ref="my-sosa-procedure-uri"/>
-		</data>		
-                
-                <data id="device-attribute-class-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#DeviceAttribute</data>
-                <data id="graph-uri.device-attribute-uri.is-a.device-attribute-class-uri" type="quad" builder="bean" loader="virtuoso">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="device-attribute-uri"/> 
-			<member name="property" ref="is-a"/>
-			<member name="filler" ref="device-attribute-class-uri"/>
-		</data>	
-                
-                <data id="graph-uri.measure-uri.sosa-is-observed-by-uri.service-uri" type="quad" builder="bean" loader="virtuoso">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="measure-uri"/> 
-			<member name="property" ref="sosa-is-observed-by-uri"/>
-			<member name="filler" ref="service-uri"/>
-		</data>	
-                               
-                <data id="device-has-attribute-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#hasAttribute</data>
-                <data id="graph-uri.service-uri.device-has-attribute-uri.device-attribute-uri" type="quad" builder="bean" loader="virtuoso">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="service-uri"/> 
-			<member name="property" ref="device-has-attribute-uri"/>
-			<member name="filler" ref="device-attribute-uri"/>
-		</data>
-		
-		<data id="graph-uri.service-uri.sosa-observes-uri.measure-uri" type="quad" builder="bean" loader="virtuoso">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="service-uri"/> 
-			<member name="property" ref="sosa-observes-uri"/>
-			<member name="filler" ref="measure-uri"/>
+			<member name="property" ref="device-latitude-uri"/>
+			<member name="filler" ref="latitude"/>
 		</data>
                 
-                <data id="attribute-datatype-property-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#data_type</data>
-                <data id="graph-uri.device-attribute-uri.attribute-datatype-property-uri.attribute-datatype" type="quad" builder="bean" loader="virtuoso">
+                <data id="graph-uri.service-uri.device-longitude-uri.device-longitude" type="quad" builder="bean" loader="virtuoso">
 			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="device-attribute-uri"/> 
-			<member name="property" ref="attribute-datatype-property-uri"/>
-			<member name="filler" ref="attribute-datatype"/>
-		</data>	
+			<member name="subject" ref="service-uri"/> 
+			<member name="property" ref="device-longitude-uri"/>
+			<member name="filler" ref="longitude"/>
+		</data>
                 
-                <data id="attribute-valuetype-property-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#value_type</data>
-                <data id="graph-uri.device-attribute-uri.attribute-valuetype-property-uri.measure-uri" type="quad" builder="bean" loader="virtuoso">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="device-attribute-uri"/> 
-			<member name="property" ref="attribute-valuetype-property-uri"/>
-			<member name="filler" ref="measure-uri"/>
-		</data>	
-                
-                <data id="attribute-valuename-property-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#value_name</data>
-                <data id="graph-uri.device-attribute-uri.schema-name-uri.attribute-valuename" type="quad" builder="bean" loader="virtuoso">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="device-attribute-uri"/> 
-			<member name="property" ref="attribute-valuename-property-uri"/>
-			<member name="filler" ref="attribute-valuename"/>
-		</data>	
+                <!-- string -->
 
-                <data id="measure-order-property-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#order</data>
-                <data id="graph-uri.device-attribute-uri.measure-order-property-uri.measure-order" type="quad" builder="bean" loader="virtuoso">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="device-attribute-uri"/> 
-			<member name="property" ref="measure-order-property-uri"/>
-			<member name="filler" ref="measure-order"/>
-		</data>	
-                
-                <data id="attribute-valueunit-property-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#value_unit</data>
-                <data id="graph-uri.device-attribute-uri.attribute-valueunit-property-uri.attribute-valueunit" type="quad" builder="bean" loader="virtuoso">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="device-attribute-uri"/> 
-			<member name="property" ref="attribute-valueunit-property-uri"/>
-			<member name="filler" ref="attribute-valueunit"/>
-		</data>	
-		
-		<data id="graph-uri.my-frequency-uri.is-a.frequency-uri" type="quad" builder="bean" loader="virtuoso" trigger="frequency">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="my-frequency-uri"/> 
-			<member name="property" ref="is-a"/>
-			<member name="filler" ref="frequency-uri"/>
-		</data>		
-		
-		<data id="graph-uri.my-frequency-uri.schema-value.frequency" type="quad" builder="bean" loader="virtuoso" trigger="frequency">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="my-frequency-uri"/> 
-			<member name="property" ref="schema-value-uri"/>
-			<member name="filler" ref="frequency"/>
-		</data>		
-		
-		<data id="graph-uri.my-frequency-uri.schema-unit-code.sec" type="quad" builder="bean" loader="virtuoso" trigger="frequency">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="my-frequency-uri"/> 
-			<member name="property" ref="schema-unit-code-uri"/>
-			<member name="filler" ref="sec"/>
-		</data>		
-		
-		<data id="graph-uri.my-system-capability-uri.is-a.system-capability-uri" type="quad" builder="bean" loader="virtuoso" trigger="frequency">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="my-system-capability-uri"/> 
-			<member name="property" ref="is-a"/>
-			<member name="filler" ref="system-capability-uri"/> 
-		</data>		
-		
-		<data id="graph-uri.my-system-capability-uri.has-system-property-uri.my-frequency-uri" type="quad" builder="bean" loader="virtuoso" trigger="frequency">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="my-system-capability-uri"/> 
-			<member name="property" ref="has-system-property-uri"/>
-			<member name="filler" ref="my-frequency-uri"/> 
-		</data>		
-		
-		<data id="graph-uri.service-uri.has-system-capability-uri.my-system-capability-uri" type="quad" builder="bean" loader="virtuoso" trigger="frequency">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="service-uri"/> 
-			<member name="property" ref="has-system-capability-uri"/>
-			<member name="filler" ref="my-system-capability-uri"/> 
-		</data>		
-		
-		<data id="graph-uri.service-uri.wgs84-lat-uri.latitude" type="quad" builder="bean" loader="virtuoso">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="service-uri"/> 
-			<member name="property" ref="wgs84-lat-uri"/>
-			<member name="filler" ref="latitude"/> 
-		</data>		
-		
-		<data id="graph-uri.service-uri.wgs84-long-uri.longitude" type="quad" builder="bean" loader="virtuoso">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="service-uri"/> 
-			<member name="property" ref="wgs84-long-uri"/>
-			<member name="filler" ref="longitude"/> 
-		</data>		
-		
-		<data id="graph-uri.service-uri.exposed-by-uri.broker-uri" type="quad" builder="bean" loader="virtuoso">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="service-uri"/> 
-			<member name="property" ref="exposed-by-uri"/>
-			<member name="filler" ref="broker-uri"/> 
-		</data>		
-                
-                <data id="protocol-property-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#protocol</data>
-                <data id="protocol" type="string" builder="jsonp" loader="volatile">
-			<source ref="request-body"/>
-			<query>protocol</query>
-		</data>
-                <data id="graph-uri.service-uri.protocol-property-uri.protocol" type="quad" builder="bean" loader="virtuoso">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="service-uri"/> 
-			<member name="property" ref="protocol-property-uri"/>
-			<member name="filler" ref="protocol"/> 
-		</data>	
-                
-                
-                <data id="format-property-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#format</data>
-                <data id="format" type="string" builder="jsonp" loader="volatile">
-			<source ref="request-body"/>
-			<query>format</query>
-		</data>      
-                <data id="graph-uri.service-uri.format-property-uri.format" type="quad" builder="bean" loader="virtuoso">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="service-uri"/> 
-			<member name="property" ref="format-property-uri"/>
-			<member name="filler" ref="format"/> 
-		</data>	
-                
-                
-                <data id="macaddress-property-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#macaddress</data>
-                <data id="macaddress" type="string" builder="jsonp" loader="volatile">
-			<source ref="request-body"/>
-			<query>macaddress</query>
-		</data>  
-                <data id="graph-uri.service-uri.macaddress-property-uri.macaddress" type="quad" builder="bean" loader="virtuoso">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="service-uri"/> 
-			<member name="property" ref="macaddress-property-uri"/>
-			<member name="filler" ref="macaddress"/> 
-		</data>	
-                
-                
-                <data id="model-property-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#model</data>
-                <data id="model" type="string" builder="jsonp" loader="volatile">
-			<source ref="request-body"/>
-			<query>model</query>
-		</data>  
-                <data id="graph-uri.service-uri.model-property-uri.model" type="quad" builder="bean" loader="virtuoso">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="service-uri"/> 
-			<member name="property" ref="model-property-uri"/>
-			<member name="filler" ref="model"/> 
-		</data>	     
-                
-                
-                <data id="producer-property-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#producer</data>
-                <data id="producer" type="string" builder="jsonp" loader="volatile">
-			<source ref="request-body"/>
-			<query>producer</query>
-		</data>  
-                <data id="graph-uri.service-uri.producer-property-uri.producer" type="quad" builder="bean" loader="virtuoso">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="service-uri"/> 
-			<member name="property" ref="producer-property-uri"/>
-			<member name="filler" ref="producer"/> 
-		</data>	  
-                
-                
-                <data id="properties-status-property-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#propertiesStatus</data>
-                <data id="properties-status" type="string" builder="jsonp" loader="volatile">
-			<source ref="request-body"/>
-			<query>pStatus</query>
-		</data>  
-                <data id="graph-uri.service-uri.properties-status-property-uri.properties-status" type="quad" builder="bean" loader="virtuoso">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="service-uri"/> 
-			<member name="property" ref="properties-status-property-uri"/>
-			<member name="filler" ref="properties-status"/> 
-		</data>
-                
-                
-                <data id="attributes-status-property-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#attributesStatus</data>
-                <data id="attributes-status" type="string" builder="jsonp" loader="volatile">
-			<source ref="request-body"/>
-			<query>aStatus</query>
-		</data>  
-                
-                <data id="graph-uri.service-uri.attributes-status-property-uri.attributes-status" type="quad" builder="bean" loader="virtuoso">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="service-uri"/> 
-			<member name="property" ref="attributes-status-property-uri"/>
-			<member name="filler" ref="attributes-status"/> 
-		</data>
-  
-                <data id="created-property-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#created</data>
-                <data id="device-created" type="string" builder="jsonp" loader="volatile">
-			<source ref="request-body"/>
-			<query>created</query>
-		</data>  
-                <data id="graph-uri.service-uri.created-property-uri.device-created" type="quad" builder="bean" loader="virtuoso">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="service-uri"/> 
-			<member name="property" ref="created-property-uri"/>
-			<member name="filler" ref="device-created"/> 
-		</data>
-                
-                <data id="attribute-refreshrate-property-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#value_refresh_rate</data>
-                <data id="attribute-refreshrate" type="integer" builder="jsonp" loader="volatile">
-			<source ref="request-body"/>
-			<query>attributes.value_refresh_rate</query>
-                        <default>0</default> <!-- -->
-		</data>  
-                <data id="graph-uri.device-attribute-uri.attribute-refreshrate-property-uri.attribute-refreshrate" type="quad" builder="bean" loader="virtuoso">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="device-attribute-uri"/> 
-			<member name="property" ref="attribute-refreshrate-property-uri"/>
-			<member name="filler" ref="attribute-refreshrate"/> 
-		</data>
-                
-                <!--
-                <data id="attribute-healthinesscriteria-property-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#healthiness_criteria</data>
-                <data id="attribute-healthinesscriteria" type="string" builder="jsonp" loader="volatile">
-                    <source ref="request-body"/>
-                    <query>attributes.healthiness_criteria</query>
-		</data>  
-                <data id="graph-uri.device-attribute-uri.attribute-healthinesscriteria-property-uri.healthiness-criteria" type="quad" builder="bean" loader="virtuoso">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="device-attribute-uri"/> 
-			<member name="property" ref="attribute-healthinesscriteria-property-uri"/>
-			<member name="filler" ref="attribute-healthinesscriteria"/> 
-		</data>
-                -->
-                
-                <data id="attribute-differentvalues-property-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#different_values</data>
-                <data id="attribute-differentvalues" type="integer" builder="jsonp" loader="volatile">
-			<source ref="request-body"/>
-			<query>attributes.different_values</query>
-                        <default>0</default>
-		</data>  
-                <data id="graph-uri.device-attribute-uri.attribute-differentvalues-property-uri.attribute-differentvalues" type="quad" builder="bean" loader="virtuoso">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="device-attribute-uri"/> 
-			<member name="property" ref="attribute-differentvalues-property-uri"/>
-			<member name="filler" ref="attribute-differentvalues"/> 
-		</data>
-                
-                <data id="attribute-valuebounds-property-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#value_bounds</data>
-                <data id="attribute-valuebounds" type="string" builder="jsonp" loader="volatile">
-			<source ref="request-body"/>
-			<query>attributes.value_bounds</query>
-                        <default>unspecified</default>
-		</data>  
-                <data id="graph-uri.device-attribute-uri.attribute-valuebounds-property-uri.attribute-valuebounds" type="quad" builder="bean" loader="virtuoso">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="device-attribute-uri"/> 
-			<member name="property" ref="attribute-valuebounds-property-uri"/>
-			<member name="filler" ref="attribute-valuebounds"/> 
-		</data>
-                
-                <data id="attribute-editable-property-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#editable</data>
-                <data id="attribute-editable" type="string" builder="jsonp" loader="volatile">
-			<source ref="request-body"/>
-			<query>attributes.editable</query>
-                        <default>false</default>
-		</data>  
-                <data id="graph-uri.device-attribute-uri.attribute-editable-property-uri.attribute-editable" type="quad" builder="bean" loader="virtuoso">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="device-attribute-uri"/> 
-			<member name="property" ref="attribute-editable-property-uri"/>
-			<member name="filler" ref="attribute-editable"/> 
-		</data>
-                
-                <data id="valid-property-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#disabled</data>
-                <data id="attribute-validity-query" type="string" builder="template" loader="volatile">
-			<template>select ?disabled '{' graph &lt;{0}&gt; '{' optional '{' &lt;{1}&gt; &lt;{2}&gt; ?v '}' . bind(if(bound(?v),str(?v),"false") as ?disabled ) '}' '}' </template>
-			<param index="0" value="graph-uri"/>
-                        <param index="1" value="device-attribute-uri"/>
-                        <param index="2" value="valid-property-uri"/>
-		</data>
-                <data id="attribute-validity-json" type="string" builder="lookup" loader="volatile">
-			<lookup>
-				<priority>1</priority>
-				<provider>virtuoso-provider</provider>
-				<query ref="attribute-validity-query" />
-			</lookup>
-		</data>
-                <data id="attribute-validity-from-virtuoso" type="bool" builder="jsonp" loader="volatile">
-                	<source ref="attribute-validity-json"/>
-			<query>disabled</query>
+                <data id="resources-list-query-string" type="string" builder="template" loader="volatile">                    
+                    <template>select ?s ?p ?v '{' graph &lt;{0}&gt; '{' &lt;{1}&gt; a ?c . filter(str(?c) = "http://www.disit.org/km4city/schema#IoTSensor" || str(?c) = "http://www.w3.org/ns/sosa/Sensor" ||  str(?c) = "http://www.disit.org/km4city/schema#IoTActuator" || str(?c) = "http://www.disit.org/km4city/schema#MobileSensor" ) . ?s ?p ?v . filter(contains(str(?s),"{2}")) . filter(datatype(?v) = &lt;http://www.w3.org/2001/XMLSchema#string&gt; )  '}' '}'</template>
+                    <param index="0" value="graph-uri"/>
+                    <param index="1" value="service-uri"/>
+                    <param index="2" value="service-uri"/>
                 </data>
-                <data id="attribute-validity" type="bool" builder="jsonp" loader="volatile">
-			<source ref="request-body"/>
-			<query>attributes.disabled</query>
-                        <default ref="attribute-validity-from-virtuoso"/>
-		</data>  
-                <data id="graph-uri.device-attribute-uri.valid-property-uri.device-validity" type="quad" builder="bean" loader="virtuoso">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="device-attribute-uri"/> 
-			<member name="property" ref="valid-property-uri"/>
-			<member name="filler" ref="attribute-validity"/> 
-		</data>
                 
-                <!-- Private/Public device (useless from 2019-04-16 onward) -->
-                <data id="avail-property-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#ownership</data>
-                <data id="device-avail-query" type="string" builder="template" loader="volatile">
-			<template>select ?avail '{' graph &lt;{0}&gt; '{' optional '{' &lt;{1}&gt; &lt;{2}&gt; ?v '}' . bind(if(bound(?v),str(?v),"public") as ?avail ) '}' '}' </template>
-			<param index="0" value="graph-uri"/>
-                        <param index="1" value="service-uri"/>
-                        <param index="2" value="avail-property-uri"/>
-		</data>
-                <data id="device-avail-json" type="string" builder="lookup" loader="volatile">
+                <data id="resources-list-result-string" type="string" builder="lookup" loader="volatile">
 			<lookup>
 				<priority>1</priority>
 				<provider>virtuoso-provider</provider>
-				<query ref="device-avail-query" />
+				<query ref="resources-list-query-string" />
 			</lookup>
 		</data>
-                <data id="device-avail-from-virtuoso" type="string" builder="jsonp" loader="volatile">
-                	<source ref="device-avail-json"/>
-			<query>avail</query>
+                <data id="resources-list-subj-string" type="uri" builder="jsonp" loader="volatile">
+			<source ref="resources-list-result-string"/>
+			<query>s</query>                        
+		</data>
+                <data id="resources-list-prop-string" type="uri" builder="jsonp" loader="volatile">
+			<source ref="resources-list-result-string"/>
+			<query>p</query>                        
+		</data>
+                <data id="resources-list-filler-string" type="string" builder="jsonp" loader="volatile">
+			<source ref="resources-list-result-string"/>
+			<query>v</query>                        
+		</data>
+                
+                <data id="del.string" type="quad" builder="bean" loader="virtuoso">
+			<member name="graph" ref="graph-uri"/> 
+			<member name="subject" ref="resources-list-subj-string"/> 
+			<member name="property" ref="resources-list-prop-string"/>
+			<member name="filler" ref="resources-list-filler-string"/>
+		</data>	
+                
+                <!-- float -->
+                
+                <data id="resources-list-query-float" type="string" builder="template" loader="volatile">                    
+                    <template>select ?s ?p ?v '{' graph &lt;{0}&gt; '{' &lt;{1}&gt; a ?c . filter(str(?c) = "http://www.disit.org/km4city/schema#IoTSensor" || str(?c) = "http://www.w3.org/ns/sosa/Sensor" || str(?c) = "http://www.disit.org/km4city/schema#IoTActuator" || str(?c) = "http://www.disit.org/km4city/schema#MobileSensor" ) . ?s ?p ?v . filter(contains(str(?s),"{2}")) . filter(datatype(?v) = &lt;http://www.w3.org/2001/XMLSchema#float&gt; )  '}' '}'</template>
+                    <param index="0" value="graph-uri"/>
+                    <param index="1" value="service-uri"/>
+                    <param index="2" value="service-uri"/>
                 </data>
-
-                <!-- Visibility -->
-                <data id="device-visib" type="string" builder="jsonp" loader="volatile">
-			<source ref="request-body"/>
-			<query>visibility</query>
-                        <default ref="device-avail-from-virtuoso"/>
-		</data>
                 
-                <!-- Ownership -->
-                <data id="device-owner" type="string" builder="jsonp" loader="volatile">
-			<source ref="request-body"/>
-			<query>ownership</query>
-                        <default ref="device-visib"/>
-		</data>
-                
-                <!-- Visibility || Ownership -->
-                <data id="device-ownership" type="string" builder="switch" loader="volatile">
-			<switch ref="device-owner">
-				<case><if>private</if><then>private</then></case>
-                                <case><if>MyOwnPrivate</if><then>private</then></case>
-				<case><if>public</if><then>public</then></case>
-                                <case><if>MyOwnPublic</if><then>public</then></case>                                
-			</switch>
-		</data>
-                
-                <!--  not inserted from 2019-04-16 onward
-                <data id="graph-uri.service-uri.avail-property-uri.device-avail" type="quad" builder="bean" loader="virtuoso">
-			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="service-uri"/> 
-			<member name="property" ref="avail-property-uri"/>
-                        <member name="filler" ref="device-ownership"/>
-		</data> 
-                -->
-                
-                <!-- Static attributes -->
-                
-                <data id="static-attributes-query" type="string" builder="template" loader="volatile">                    
-                    <template>
-                        select distinct ?uri ?label ?type '{'
-						'{' 
-							select ?uri ?label ?type '{' ?uri rdfs:domain &lt;{0}&gt; ; rdfs:label ?label . optional '{' ?uri rdfs:range ?type '}' . filter(lang(?label) = "en") '}'  
-						'}'union '{'
-							values (?uri  ?label ?type ) '{' 
-								(schema:addressLocality "Locality" UNDEF) 
-								(schema:addressRegion "Region" UNDEF) 
-								(schema:streetAddress "Street address" UNDEF) 
-								(km4c:houseNumber "Street number" UNDEF) 
-								(km4c:isInRoad UNDEF UNDEF) 
-								(dcterms:description "Description" xsd:string)
-								(km4c:minCapacity "Minumum capacity" xsd:string)
-								(km4c:maxCapacity "Maximum capacity" xsd:string)
-								(km4c:maintenanceUrl "Maintenance url" xsd:string)
-								(schema:url "Use url" xsd:string)
-								(foaf:name "Name" UNDEF)
-							'}'
-							optional '{' ?uri rdfs:label ?label FILTER(LANG(?label)="en")'}'
-							optional '{' ?uri rdfs:range ?type filter(?type!=rdfs:Literal)'}' . 
-						'}'  
-						'}' order by str(?label)
-                    </template>
-                    <param index="0" value="readytouse_value_type_mapping_array"/>
-                </data>             
-                
-                <data id="static-attributes-result" type="string" builder="lookup" loader="volatile">
+                <data id="resources-list-result-float" type="string" builder="lookup" loader="volatile">
 			<lookup>
 				<priority>1</priority>
 				<provider>virtuoso-provider</provider>
-				<query ref="static-attributes-query" />
+				<query ref="resources-list-query-float" />
 			</lookup>
 		</data>
-                
-                <data id="static-attributes-uris" type="uri" builder="jsonp" loader="volatile">
-			<source ref="static-attributes-result"/>
-			<query>uri</query>                        
+                <data id="resources-list-subj-float" type="uri" builder="jsonp" loader="volatile">
+			<source ref="resources-list-result-float"/>
+			<query>s</query>                        
+		</data>
+                <data id="resources-list-prop-float" type="uri" builder="jsonp" loader="volatile">
+			<source ref="resources-list-result-float"/>
+			<query>p</query>                        
+		</data>
+                <data id="resources-list-filler-float" type="float" builder="jsonp" loader="volatile">
+			<source ref="resources-list-result-float"/>
+			<query>v</query>                        
 		</data>
                 
-                <data id="static-attributes-values" type="string" builder="jsonp" loader="volatile">
-			<source ref="request-body"/>
-			<query ref="static-attributes-uris" onMissing="clean"/>
-		</data>
- 
-                <data id="graph-uri.service-uri.static-attributes-uris.static-attributes-values" type="quad" builder="bean" loader="virtuoso">
+                <data id="del.float" type="quad" builder="bean" loader="virtuoso">
 			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="service-uri"/> 
-			<member name="property" ref="static-attributes-uris"/>
-			<member name="filler" ref="static-attributes-values"/> 
+			<member name="subject" ref="resources-list-subj-float"/> 
+			<member name="property" ref="resources-list-prop-float"/>
+			<member name="filler" ref="resources-list-filler-float"/>
+		</data>	
+                
+                <!-- integer -->
+                
+                <data id="resources-list-query-int" type="string" builder="template" loader="volatile">                    
+                    <template>select ?s ?p ?v '{' graph &lt;{0}&gt; '{' &lt;{1}&gt; a ?c . filter(str(?c) = "http://www.disit.org/km4city/schema#IoTSensor" || str(?c) = "http://www.w3.org/ns/sosa/Sensor" || str(?c) = "http://www.disit.org/km4city/schema#IoTActuator" || str(?c) = "http://www.disit.org/km4city/schema#MobileSensor" ) . ?s ?p ?v . filter(contains(str(?s),"{2}")) . filter(datatype(?v) = &lt;http://www.w3.org/2001/XMLSchema#integer&gt; )  '}' '}'</template>
+                    <param index="0" value="graph-uri"/>
+                    <param index="1" value="service-uri"/>
+                    <param index="2" value="service-uri"/>
+                </data>
+                
+                <data id="resources-list-result-int" type="string" builder="lookup" loader="volatile">
+			<lookup>
+				<priority>1</priority>
+				<provider>virtuoso-provider</provider>
+				<query ref="resources-list-query-int" />
+			</lookup>
 		</data>
-
-                              
+                <data id="resources-list-subj-int" type="uri" builder="jsonp" loader="volatile">
+			<source ref="resources-list-result-int"/>
+			<query>s</query>                        
+		</data>
+                <data id="resources-list-prop-int" type="uri" builder="jsonp" loader="volatile">
+			<source ref="resources-list-result-int"/>
+			<query>p</query>                        
+		</data>
+                <data id="resources-list-filler-int" type="integer" builder="jsonp" loader="volatile">
+			<source ref="resources-list-result-int"/>
+			<query>v</query>                        
+		</data>
+                
+                <data id="del.int" type="quad" builder="bean" loader="virtuoso">
+			<member name="graph" ref="graph-uri"/> 
+			<member name="subject" ref="resources-list-subj-int"/> 
+			<member name="property" ref="resources-list-prop-int"/>
+			<member name="filler" ref="resources-list-filler-int"/>
+		</data>	
+                
+                <!-- boolean -->
+                
+                <data id="resources-list-query-boolean" type="string" builder="template" loader="volatile">                    
+                    <template>select ?s ?p ?v '{' graph &lt;{0}&gt; '{' &lt;{1}&gt; a ?c . filter(str(?c) = "http://www.disit.org/km4city/schema#IoTSensor" || str(?c) = "http://www.w3.org/ns/sosa/Sensor" || str(?c) = "http://www.disit.org/km4city/schema#IoTActuator" || str(?c) = "http://www.disit.org/km4city/schema#MobileSensor" ) . ?s ?p ?v . filter(contains(str(?s),"{2}")) . filter(datatype(?v) = &lt;http://www.w3.org/2001/XMLSchema#boolean&gt; )  '}' '}'</template>
+                    <param index="0" value="graph-uri"/>
+                    <param index="1" value="service-uri"/>
+                    <param index="2" value="service-uri"/>
+                </data>
+                
+                <data id="resources-list-result-boolean" type="string" builder="lookup" loader="volatile">
+			<lookup>
+				<priority>1</priority>
+				<provider>virtuoso-provider</provider>
+				<query ref="resources-list-query-boolean" />
+			</lookup>
+		</data>
+                <data id="resources-list-subj-boolean" type="uri" builder="jsonp" loader="volatile">
+			<source ref="resources-list-result-boolean"/>
+			<query>s</query>                        
+		</data>
+                <data id="resources-list-prop-boolean" type="uri" builder="jsonp" loader="volatile">
+			<source ref="resources-list-result-boolean"/>
+			<query>p</query>                        
+		</data>
+                <data id="resources-list-filler-boolean" type="bool" builder="jsonp" loader="volatile">
+			<source ref="resources-list-result-boolean"/>
+			<query>v</query>                        
+		</data>
+                
+                <data id="del.boolean" type="quad" builder="bean" loader="virtuoso">
+			<member name="graph" ref="graph-uri"/> 
+			<member name="subject" ref="resources-list-subj-boolean"/> 
+			<member name="property" ref="resources-list-prop-boolean"/>
+			<member name="filler" ref="resources-list-filler-boolean"/>
+		</data>	
+                
+                <!-- uri -->
+                
+                <data id="resources-list-query-uri" type="string" builder="template" loader="volatile">                    
+                    <template>select ?s ?p ?v '{' graph &lt;{0}&gt; '{' &lt;{1}&gt; a ?c . filter(str(?c) = "http://www.disit.org/km4city/schema#IoTSensor" || str(?c) = "http://www.w3.org/ns/sosa/Sensor" || str(?c) = "http://www.disit.org/km4city/schema#IoTActuator" || str(?c) = "http://www.disit.org/km4city/schema#MobileSensor" ) . ?s ?p ?v . filter(contains(str(?s),"{2}")) . filter(isURI(?v))  '}' '}'</template>
+                    <param index="0" value="graph-uri"/>
+                    <param index="1" value="service-uri"/>
+                    <param index="2" value="service-uri"/>
+                </data>
+                
+                <data id="resources-list-result-uri" type="string" builder="lookup" loader="volatile">
+			<lookup>
+				<priority>1</priority>
+				<provider>virtuoso-provider</provider>
+				<query ref="resources-list-query-uri" />
+			</lookup>
+		</data>
+                <data id="resources-list-subj-uri" type="uri" builder="jsonp" loader="volatile">
+			<source ref="resources-list-result-uri"/>
+			<query>s</query>                        
+		</data>
+                <data id="resources-list-prop-uri" type="uri" builder="jsonp" loader="volatile">
+			<source ref="resources-list-result-uri"/>
+			<query>p</query>                        
+		</data>
+                <data id="resources-list-filler-uri" type="uri" builder="jsonp" loader="volatile" >
+			<source ref="resources-list-result-uri"/>
+			<query>v</query>                        
+		</data>
+                
+                <data id="del.uri" type="quad" builder="bean" loader="virtuoso" >
+			<member name="graph" ref="graph-uri"/> 
+			<member name="subject" ref="resources-list-subj-uri"/> 
+			<member name="property" ref="resources-list-prop-uri"/>
+			<member name="filler" ref="resources-list-filler-uri"/>
+		</data>	
+             
 	</process>
 
 </api-cfg>

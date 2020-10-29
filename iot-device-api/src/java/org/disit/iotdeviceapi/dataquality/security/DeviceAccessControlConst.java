@@ -13,32 +13,15 @@
 
    You should have received a copy of the GNU Affero General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
-package org.disit.iotdeviceapi.utils;
+package org.disit.iotdeviceapi.dataquality.security;
 
 /**
  * 
  * @author Mirco Soderi @ DISIT DINFO UNIFI (mirco.soderi at unifi dot it)
  */
-public class IotDeviceApiException extends Exception {
-    
-    private int httpStatus;
-    
-    public IotDeviceApiException(String message) {
-        super(message);
-        this.httpStatus = 500;
-    }
-    
-    public IotDeviceApiException(int httpStatus, String message) {
-        super(message);
-        this.httpStatus = httpStatus;
-    }
-
-    public int getHttpStatus() {
-        return httpStatus;
-    }
-
-    public void setHttpStatus(int httpStatus) {
-        this.httpStatus = httpStatus;
-    }
-    
+public final class DeviceAccessControlConst {
+    public static final String CFG_EL_ENDPOINT = "endpoint";
+    public static final String CFG_AT_REF = "ref";
+    public static final String CFG_EL_AUTHORIZATION = "authorization";
+    public static final String CFG_REQ_URL = "{0}?type=IOTID&elementId={1}&accessToken={2}";
 }

@@ -25,12 +25,13 @@
 	<!-- Administrative configurations, such as logging indications and similar -->
 	
 	<admin>
-		<xlogs destination="/iot-log2/enable">
-			<xlog-level class="org.disit.iotdeviceapi.Enable" level="INFO"/>
+		<xlogs destination="/iot-log2/move">
+			<xlog-level class="org.disit.iotdeviceapi.Move" level="INFO"/>
 			<xlog-level class="org.disit.iotdeviceapi.config.ConfigParser" level="INFO"/>
 			<xlog-level class="org.disit.iotdeviceapi.providers.request.RequestProvider" level="SEVERE"/>
 			<xlog-level class="org.disit.iotdeviceapi.builders.constb.ConstBuilder" level="SEVERE"/>
 			<xlog-level class="org.disit.iotdeviceapi.builders.template.TemplateBuilder" level="SEVERE"/>
+			<xlog-level class="org.disit.iotdeviceapi.builders.switchb.SwitchBuilder" level="SEVERE"/>
 			<xlog-level class="org.disit.iotdeviceapi.builders.lookup.LookupBuilder" level="SEVERE"/>
 			<xlog-level class="org.disit.iotdeviceapi.builders.bean.BeanBuilder" level="SEVERE"/>
 			<xlog-level class="org.disit.iotdeviceapi.loaders.virtuoso.VirtuosoLoader" level="INFO"/>
@@ -43,9 +44,9 @@
 	
 	<repos>
 		<repo id="virtuoso">
-                        <param key="virtuosoEndpoint" value="&virtUrl;"/>
-                        <param key="virtuosoUser" value="&virtUsr;"/>
-                        <param key="virtuosoPwd" value="&virtPwd;"/>
+			<param key="virtuosoEndpoint" value="&virtUrl;"/>
+			<param key="virtuosoUser" value="&virtUsr;"/>
+			<param key="virtuosoPwd" value="&virtPwd;"/>
 			<param key="virtuosoTimeout" value="600"/>
 			<param key="virtuosoDeleteInsert" value="property"/>
 		</repo>
@@ -63,18 +64,23 @@
 	<builders>
 		<builder id="const" class="org.disit.iotdeviceapi.builders.constb.ConstBuilder"/>
 		<builder id="template" class="org.disit.iotdeviceapi.builders.template.TemplateBuilder"/>
+		<builder id="switch" class="org.disit.iotdeviceapi.builders.switchb.SwitchBuilder"/>
 		<builder id="lookup" class="org.disit.iotdeviceapi.builders.lookup.LookupBuilder"/>
 		<builder id="bean" class="org.disit.iotdeviceapi.builders.bean.BeanBuilder"/>
 		<builder id="jsonp" class="org.disit.iotdeviceapi.builders.jsonparser.JsonParser"/>
+		<builder id="alternative" class="org.disit.iotdeviceapi.builders.alternative.AlternativeBuilder"/>
 	</builders>
 	
 	<!-- Data types are the expected types of the pieces of data that are built along the process, each represented through a high-level context-dependent name, and a low-level Java class. -->
 
 	<datatypes>
 		<datatype id="string" class="org.disit.iotdeviceapi.datatypes.StringWrapper"/>
+		<datatype id="integer" class="org.disit.iotdeviceapi.datatypes.IntWrapper"/>
+		<datatype id="float" class="org.disit.iotdeviceapi.datatypes.FloatWrapper"/>
 		<datatype id="uri" class="org.disit.iotdeviceapi.datatypes.UrlWrapper"/>
 		<datatype id="quad" class="org.disit.iotdeviceapi.datatypes.Quad"/>
-		<datatype id="bool" class="org.disit.iotdeviceapi.datatypes.BoolWrapper"/>
+		<datatype id="geometry" class="org.disit.iotdeviceapi.datatypes.StringWrapper"/>
+                <datatype id="bool" class="org.disit.iotdeviceapi.datatypes.BoolWrapper"/>
 	</datatypes>
 	
 	<!-- A Loader is a software component that persists pieces of data -->
@@ -85,9 +91,9 @@
 				<formatting ref="string">&quot;{0}&quot;</formatting>
 				<formatting ref="integer">&quot;{0}&quot;^^&lt;http://www.w3.org/2001/XMLSchema#integer&gt;</formatting>
 				<formatting ref="float">&quot;{0}&quot;^^&lt;http://www.w3.org/2001/XMLSchema#float&gt;</formatting>
-                                <formatting ref="bool">&quot;{0}&quot;^^&lt;http://www.w3.org/2001/XMLSchema#boolean&gt;</formatting>
 				<formatting ref="uri">&lt;{0}&gt;</formatting>
 				<formatting ref="geometry">&quot;{0}&quot;^^&lt;http://www.openlinksw.com/schemas/virtrdf#Geometry&gt;</formatting>
+                                <formatting ref="bool">&quot;{0}&quot;^^&lt;http://www.w3.org/2001/XMLSchema#boolean&gt;</formatting>
 			</formattings>
 		</loader>
 	</loaders>
@@ -105,26 +111,34 @@
 		</validators>
 		
 		<validations>
-                        
-                    <validate ref="authorization">
+			
+                        <validate ref="authorization">
                             <pick-validator ref="basic" description="Must authenticate. Send HTTP header Authorization: Bearer [token].">
                                     <min-cardinality id="authorization.min-cardinality" lev="SEVERE">1</min-cardinality>
                                     <max-cardinality id="authorization.max-cardinality" lev="SEVERE">1</max-cardinality>
-                            </pick-validator>                          
-                    </validate>  
-                                        
-                    <validate ref="uri-exists">
-                        <pick-validator ref="basic" description="One URI at least of the device attribute(s) to be enabled must be specified.">
-                            <min-cardinality id="uri-exists.min-cardinality.1" lev="SEVERE">1</min-cardinality>
-                        </pick-validator>
-                    </validate>
+                            </pick-validator>
+                        </validate>  			
                     
-                    <validate ref="invalid-uri">
-                        <pick-validator ref="deviceAccessControl" description="The requester must be the owner of the device, identified through a valid access token that must be sent through the Authorization: Bearer [token] HTTP header.">
-                            <endpoint>&ownership;</endpoint>
-                            <authorization ref="authorization"/>
-                        </pick-validator>
-                    </validate>   
+                        <validate ref="latitude">
+				<pick-validator ref="basic" description="One and only one value for the new latitude must be provided.">
+					<min-cardinality id="latitude.min-cardinality" lev="SEVERE">1</min-cardinality>
+					<max-cardinality id="latitude.max-cardinality" lev="SEVERE">1</max-cardinality>
+				</pick-validator>
+			</validate>
+			
+			<validate ref="longitude">
+				<pick-validator ref="basic" description="One and only one value for the new longitude must be provided.">
+					<min-cardinality id="longitude.min-cardinality" lev="SEVERE">1</min-cardinality>
+					<max-cardinality id="longitude.max-cardinality" lev="SEVERE">1</max-cardinality>
+				</pick-validator>
+			</validate>
+                        
+                        <validate ref="service-uri">
+                            <pick-validator ref="deviceAccessControl" description="The requester must be the owner of the device, identified through a valid access token that must be sent through the Authorization: Bearer [token] HTTP header.">
+                                <endpoint>&ownership;</endpoint>
+                                <authorization ref="authorization"/>
+                            </pick-validator>
+                        </validate>  			
 
 		</validations>
 		
@@ -151,46 +165,59 @@
 				<provider>request</provider>
 				<query>authorization</query>
 			</lookup>                    
-                </data>
+                </data>                
 		
 		<data id="graph-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/resource/iot-data</data>
-		
-                <data id="invalid-uri" type="uri" builder="jsonp" loader="volatile" output="true">
-                    	<source ref="request-body"/>
-			<query>uri</query>
-                </data>
-                
-                <data id="is-a" type="uri" builder="const" loader="volatile">http://www.w3.org/1999/02/22-rdf-syntax-ns#type</data>
-
-                <data id="device-attribute-class-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#DeviceAttribute</data>
-
-                <data id="query-uri-exists" type="string" builder="template" loader="volatile">
-			<template>select * '{' graph &lt;{0}&gt; '{' &lt;{1}&gt; &lt;{2}&gt; &lt;{3}&gt; ; ?p ?v '}' '}'  </template>
-			<param index="0" value="graph-uri"/>
-			<param index="1" value="invalid-uri"/>
-                        <param index="2" value="is-a"/>
-                        <param index="3" value="device-attribute-class-uri"/>
+				
+                <data id="service-uri" type="uri" builder="jsonp" loader="volatile">
+                    <source ref="request-body"/>
+                    <query>uri</query>
                 </data>
                                 
-                <data id="uri-exists" type="string" builder="lookup" loader="volatile">
-			<lookup>
-				<priority>1</priority>
-				<provider>virtuoso-provider</provider>
-				<query ref="query-uri-exists" />
-			</lookup>
+		<data id="latitude" type="float" builder="jsonp" loader="volatile">
+			<source ref="request-body"/>
+			<query>latitude</query>
+		</data>	
+		
+		<data id="longitude" type="float" builder="jsonp" loader="volatile">
+			<source ref="request-body"/>
+			<query>longitude</query>
+		</data>	
+
+		<data id="device-geometry" type="geometry" builder="template" loader="volatile">
+			<template>POINT({0} {1})</template>
+			<param index="0" value="longitude"/>
+			<param index="1" value="latitude"/>
 		</data>
+		
+		<data id="device-geometry-uri" type="uri" builder="const" loader="volatile">http://www.w3.org/2003/01/geo/wgs84_pos#geometry</data>
                 
-                <data id="valid-property-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#disabled</data>
-                
-                <data id="bool-false" type="bool" builder="const" loader="volatile">false</data>
-                
-                <data id="graph-uri.invalid-uri.valid-property-uri.bool-true" type="quad" builder="bean" loader="virtuoso">
+                <data id="wgs84-long-uri" type="uri" builder="const" loader="volatile">http://www.w3.org/2003/01/geo/wgs84_pos#long</data>
+		
+		<data id="wgs84-lat-uri" type="uri" builder="const" loader="volatile">http://www.w3.org/2003/01/geo/wgs84_pos#lat</data>
+		
+		<data id="graph-uri.service-uri.wgs84-lat-uri.latitude" type="quad" builder="bean" loader="virtuoso">
 			<member name="graph" ref="graph-uri"/> 
-			<member name="subject" ref="invalid-uri"/> 
-			<member name="property" ref="valid-property-uri"/>
-			<member name="filler" ref="bool-false"/> 
-		</data>
+			<member name="subject" ref="service-uri"/> 
+			<member name="property" ref="wgs84-lat-uri"/>
+			<member name="filler" ref="latitude"/> 
+		</data>		
+		
+		<data id="graph-uri.service-uri.wgs84-long-uri.longitude" type="quad" builder="bean" loader="virtuoso">
+			<member name="graph" ref="graph-uri"/> 
+			<member name="subject" ref="service-uri"/> 
+			<member name="property" ref="wgs84-long-uri"/>
+			<member name="filler" ref="longitude"/> 
+		</data>		
                 
+                <data id="graph-uri.service-uri.device-geometry-uri.device-geometry" type="quad" builder="bean" loader="virtuoso">
+			<member name="graph" ref="graph-uri"/> 
+			<member name="subject" ref="service-uri"/> 
+			<member name="property" ref="device-geometry-uri"/>
+			<member name="filler" ref="device-geometry"/>
+		</data>
+		               
 	</process>
 
 </api-cfg>
+ 

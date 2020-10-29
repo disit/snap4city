@@ -111,7 +111,7 @@ public class Insert extends HttpServlet {
             String cfgFile = getServletConfig().getInitParameter(ParserConst.WEBXML_INIPAR_CFGFILE);           
             cfgParser = new Parser(cfgFile, request);
             if(Const.ERROR == cfgParser.getStatus()) {
-                throw new IotDeviceApiException("Error while initializing parser. No Xlog available for this request. See preceeding errors for further details.");
+                throw new IotDeviceApiException(500, "Error while initializing parser. No Xlog available for this request. See preceeding errors for further details.");
             }
                     
             cfgParser.parseLogCfg();
@@ -121,12 +121,12 @@ public class Insert extends HttpServlet {
             
             xlogger = new XLogger(Insert.class.getName(),cfgParser.getLoggingFolder());
             if(Const.ERROR == xlogger.getStatus()) {
-                throw new IotDeviceApiException("Error while initializing Xlog. No Xlog available for this request. See preceeding errors for further details.");
+                throw new IotDeviceApiException(500, "Error while initializing Xlog. No Xlog available for this request. See preceeding errors for further details.");
             }
             
             xlogger.setConfig(cfgParser.getLoggingLevels());  
             if(Const.ERROR == xlogger.getStatus()) {
-                throw new IotDeviceApiException("Error while configuring Xlog. No Xlog available for this request. See preceeding errors for further details.");
+                throw new IotDeviceApiException(500, "Error while configuring Xlog. No Xlog available for this request. See preceeding errors for further details.");
             }
             
             cfgParser.setXlogger(xlogger);
@@ -134,7 +134,7 @@ public class Insert extends HttpServlet {
             cfgParser.parse();
             
             if(Const.ERROR == cfgParser.getStatus()) {
-                throw new IotDeviceApiException("Error while parsing configuration.");
+                throw new IotDeviceApiException(400, "Error while parsing configuration.");
             }
 
             // Retrieving parsing results
@@ -149,7 +149,7 @@ public class Insert extends HttpServlet {
             
             xlogger.log(Insert.class.getName(), Level.INFO, "request", repos.get(ParserConst.REQUEST).getParameter(ParserConst.REQUEST_RAW));
             if(Const.ERROR == xlogger.getStatus()) {
-                throw new IotDeviceApiException("Error while logging request payload.");
+                throw new IotDeviceApiException(500, "Error while logging request payload.");
             }
 
             // Building data
@@ -171,7 +171,7 @@ public class Insert extends HttpServlet {
                 }
                 
                 if(Const.ERROR == builder.getStatus()) {
-                    throw new IotDeviceApiException(MessageFormat.format("Error while building data: {0}.",new Object[]{cfgNode.getAttribute(ParserConst.CFG_AT_DATA_ID)}));
+                    throw new IotDeviceApiException(400, MessageFormat.format("Error while building data: {0}.",new Object[]{cfgNode.getAttribute(ParserConst.CFG_AT_DATA_ID)}));
                 }
                 
                 if(validations != null) {
@@ -180,7 +180,7 @@ public class Insert extends HttpServlet {
                         for(Validator validation: builtDataValidations) {
                             builtData = validation.clean(builtData, data);
                             if(Const.ERROR == validation.getStatus()) {
-                                throw new IotDeviceApiException(MessageFormat.format("Validation failed for data: {0}.",new Object[]{builtData.getId()}));
+                                throw new IotDeviceApiException(400, MessageFormat.format("Validation failed for data: {0}.\n\n{1}",new Object[]{builtData.getId(),validation.toString()}));
                             }
                         }
                     }
@@ -218,7 +218,7 @@ public class Insert extends HttpServlet {
                 if(cfgNode.hasAttribute(ParserConst.CFG_AT_DATA_LOAD) && !ParserConst.CFG_RLDRID_VOLATILE.equals(cfgNode.getAttribute(ParserConst.CFG_AT_DATA_LOAD))) {
                     loaders.get(cfgNode.getAttribute(ParserConst.CFG_AT_DATA_LOAD)).load(builtData);
                     if(Const.ERROR == loaders.get(cfgNode.getAttribute(ParserConst.CFG_AT_DATA_LOAD)).getStatus()) {
-                        throw new IotDeviceApiException(MessageFormat.format("Error while loading data: {0}.",new Object[]{builtData.getId()}));
+                        throw new IotDeviceApiException(500, MessageFormat.format("Error while loading data: {0}.",new Object[]{builtData.getId()}));
                     }
                     else {
                         xlogger.log(Insert.class.getName(), Level.FINE, "successfull data load", MessageFormat.format("Data loaded successfully: {0}", new Object[]{builtData.getId()}));
@@ -234,7 +234,7 @@ public class Insert extends HttpServlet {
                     loaders.get(loaderID).disconnect(getStatus());
                 }
                 if(Const.ERROR == loaders.get(loaderID).getStatus()) {
-                    throw new IotDeviceApiException(MessageFormat.format("Error while disconnecting loader: {0}.", new Object[]{loaderID}));
+                    throw new IotDeviceApiException(500, MessageFormat.format("Error while disconnecting loader: {0}.", new Object[]{loaderID}));
                 }
                 else {
                     xlogger.log(Insert.class.getName(), Level.FINE, "loader disconnected", MessageFormat.format("Loader {0} disconnected.", new Object[]{loaderID}));
@@ -298,7 +298,7 @@ public class Insert extends HttpServlet {
                 setStatus(Const.ERROR);
             }
             if(Const.ERROR == this.status) {
-                throw new IotDeviceApiException("Error while producing output.");
+                throw new IotDeviceApiException(500, "Error while producing output.");
             }
             
         }
@@ -319,6 +319,12 @@ public class Insert extends HttpServlet {
 
             response.setHeader("Access-Control-Allow-Origin", "*");
             response.setHeader("Warning", e.getMessage());
+            
+            if(e instanceof IotDeviceApiException) response.setStatus(((IotDeviceApiException)e).getHttpStatus());
+            else response.setStatus(500);
+            try (PrintWriter out = response.getWriter()) {
+                out.print(e.getMessage());          
+            }  
             
         }
  
