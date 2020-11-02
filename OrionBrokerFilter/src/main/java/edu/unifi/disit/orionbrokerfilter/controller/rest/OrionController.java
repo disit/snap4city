@@ -23,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,10 +52,12 @@ public class OrionController {
 		return new ResponseEntity<String>("alive", HttpStatus.OK);
 	}
 
+	// ------------------------------------------------------------------------------------------------------------------------------------------------------------- V1
 	// -------------------POST queryContex ---------------------------------------------
 	@RequestMapping(value = "/v1/queryContext", method = RequestMethod.POST, consumes = { "application/json" }, produces = { "application/json" })
 	@ResponseBody
-	public ResponseEntity<String> queryContextV1(@RequestBody String payload, @RequestParam(value = "limit", required = false) String limit,
+	public ResponseEntity<String> queryContextV1(@RequestBody String payload,
+			@RequestParam(value = "limit", required = false) String limit,
 			@RequestParam(value = "details", required = false) String details,
 			@RequestHeader HttpHeaders headers) {
 
@@ -68,57 +71,125 @@ public class OrionController {
 				.queryParams(params)
 				.build();
 
-		return proxyPostRequest(uriComponents, payload, headers);
+		return proxyRequest(uriComponents, payload, headers, HttpMethod.POST);
 	}
 
 	// -------------------POST updateContext ---------------------------------------------
 	@RequestMapping(value = "/v1/updateContext", method = RequestMethod.POST, consumes = { "application/json" }, produces = { "application/json" })
 	@ResponseBody
-	public ResponseEntity<String> updateContextV1(@RequestBody String payload, @RequestHeader HttpHeaders headers) {
+	public ResponseEntity<String> updateContextV1(@RequestBody String payload,
+			@RequestHeader HttpHeaders headers) {
 
 		UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(orionbroker_endpoint + "/v1/updateContext")
 				.build();
 
-		return proxyPostRequest(uriComponents, payload, headers);
+		return proxyRequest(uriComponents, payload, headers, HttpMethod.POST);
 	}
 
 	// -------------------POST subscribeContext ---------------------------------------------
 	@RequestMapping(value = "/v1/subscribeContext", method = RequestMethod.POST, consumes = { "application/json" }, produces = { "application/json" })
 	@ResponseBody
-	public ResponseEntity<String> subscribeContextV1(@RequestBody String payload, @RequestHeader HttpHeaders headers) {
+	public ResponseEntity<String> subscribeContextV1(@RequestBody String payload,
+			@RequestHeader HttpHeaders headers) {
 
 		UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(orionbroker_endpoint + "/v1/subscribeContext")
 				.build();
 
-		return proxyPostRequest(uriComponents, payload, headers);
+		return proxyRequest(uriComponents, payload, headers, HttpMethod.POST);
 	}
 
 	// -------------------POST unsubscribeContext ---------------------------------------------
 	@RequestMapping(value = "/v1/unsubscribeContext", method = RequestMethod.POST, consumes = { "application/json" }, produces = { "application/json" })
 	@ResponseBody
-	public ResponseEntity<String> unsubscribeContextV1(@RequestBody String payload, @RequestHeader HttpHeaders headers) {
+	public ResponseEntity<String> unsubscribeContextV1(@RequestBody String payload,
+			@RequestHeader HttpHeaders headers) {
 
 		UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(orionbroker_endpoint + "/v1/unsubscribeContext")
 				.build();
 
-		return proxyPostRequest(uriComponents, payload, headers);
+		return proxyRequest(uriComponents, payload, headers, HttpMethod.POST);
 	}
 
-	private ResponseEntity<String> proxyPostRequest(UriComponents uriComponents, String payload, HttpHeaders headers) {
+	// ------------------------------------------------------------------------------------------------------------------------------------------------------------- V2
+	// -------------------GET query ---------------------------------------------
+	@RequestMapping(path = "/v2/entities/{deviceId}", method = RequestMethod.GET, produces = { "application/json" })
+	@ResponseBody
+	public ResponseEntity<String> queryV2(@PathVariable("deviceId") String deviceId,
+			@RequestParam(value = "limit", required = false) String limit,
+			@RequestParam(value = "offset", required = false) String offset,
+			@RequestParam(value = "details", required = false) String details,
+			@RequestParam(value = "type", required = true) String type,
+			@RequestParam(value = "attrs", required = false) String attributes,
+			@RequestHeader HttpHeaders headers) {
+
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+		params.add("type", type);
+		if (attributes != null)
+			params.add("attrs", attributes);
+		if (limit != null)
+			params.add("limit", limit);
+		if (offset != null)
+			params.add("offset", offset);
+		if (details != null)
+			params.add("details", details);
+
+		UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(orionbroker_endpoint + "/v2/entities/" + deviceId)
+				.queryParams(params)
+				.build();
+
+		return proxyRequest(uriComponents, null, headers, HttpMethod.GET);
+	}
+
+	// -------------------PATCH update ---------------------------------------------
+	@RequestMapping(value = "/v2/entities/{deviceId}/attrs", method = RequestMethod.PATCH, consumes = { "application/json" }, produces = { "application/json" })
+	@ResponseBody
+	public ResponseEntity<String> updateV2(@PathVariable("deviceId") String deviceId, @RequestBody String payload, @RequestHeader HttpHeaders headers) {
+
+		UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(orionbroker_endpoint + "/v2/entities/" + deviceId + "/attrs")
+				.build();
+
+		return proxyRequest(uriComponents, payload, headers, HttpMethod.PATCH);
+	}
+
+	// -------------------POST subscribe ---------------------------------------------
+	@RequestMapping(value = "/v2/subscriptions", method = RequestMethod.POST, consumes = { "application/json" }, produces = { "application/json" })
+	@ResponseBody
+	public ResponseEntity<String> subscribeV2(@RequestBody String payload, @RequestHeader HttpHeaders headers) {
+		logger.info("/v2/subscriptions");
+
+		UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(orionbroker_endpoint + "/v2/subscriptions")
+				.build();
+
+		return proxyRequest(uriComponents, payload, headers, HttpMethod.POST);
+	}
+
+	// -------------------DELETE unsubscribe---------------------------------------------
+	@RequestMapping(path = "/v2/subscriptions/{subId}", method = RequestMethod.DELETE, produces = { "application/json" })
+	@ResponseBody
+	public ResponseEntity<String> unsubscribeV2(@PathVariable("subId") String subId, @RequestHeader HttpHeaders headers) {
+		logger.info("Deleting in v2");
+
+		UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(orionbroker_endpoint + "/v2/subscriptions/" + subId)
+				.build();
+
+		return proxyRequest(uriComponents, null, headers, HttpMethod.DELETE);
+	}
+
+	// ------------------------------------------------------------------------------------------------------------------------------------------------------------- Proxy request
+	private ResponseEntity<String> proxyRequest(UriComponents uriComponents, String payload, HttpHeaders headers, HttpMethod method) {
 		logger.info("Proxying request to {} on {}", uriComponents.toString(), payload);
 
-		// RestTemplate restTemplate = new RestTemplate();
-		HttpEntity<String> entity = new HttpEntity<>(payload, headers);
+		HttpEntity<String> entity = (payload != null) ? new HttpEntity<>(payload, headers) : new HttpEntity<>(headers);
 
 		try {
-			ResponseEntity<String> response = restTemplate.exchange(uriComponents.toUri(), HttpMethod.POST, entity, String.class);
+			ResponseEntity<String> response = restTemplate.exchange(uriComponents.toUri(), method, entity, String.class);
 			logger.debug(response);
 			return response;
 		} catch (HttpClientErrorException e) {
-			logger.error("Trouble in proxyPostRequest", e);
+			logger.error("Trouble in proxyRequest: ", e);
 			return new ResponseEntity<String>(e.getMessage(), e.getStatusCode());
 		} catch (Exception e) {
-			logger.error("BIG Trouble in proxyPostRequest", e);
+			logger.error("BIG Trouble in proxyRequest: ", e);
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}

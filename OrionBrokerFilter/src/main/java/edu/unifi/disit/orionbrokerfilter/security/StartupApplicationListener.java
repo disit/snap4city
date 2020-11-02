@@ -34,6 +34,9 @@ public class StartupApplicationListener implements
 	@Value("${spring.prefixelementID}")
 	private String prefixelementID;
 
+	@Value("${multitenancy:false}")
+	private Boolean multitenancy;
+
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {
 		logger.info("OrionBrokerFilter UP and RUNNING");
@@ -42,5 +45,10 @@ public class StartupApplicationListener implements
 		if (originsAccepted != null)
 			logger.info("cors enabled on {}", originsAccepted);
 		logger.info("ElementID prefix is {}", prefixelementID);
+		if (multitenancy)
+			logger.info("Support MT/SP enabled");
+		else
+			logger.info("Support MT/SP disabled");
+		logger.info("Support v2 enabled");
 	}
 }

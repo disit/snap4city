@@ -64,7 +64,7 @@ public class MultiHttpSecurityConfig {
 					.csrf().disable()
 					.addFilterBefore(myCorsFilter, ChannelProcessingFilter.class)
 					.addFilterBefore(myAccessTokenAuthenticationFilter, BasicAuthenticationFilter.class)
-					.antMatcher("/v1/**")
+					.antMatcher("/v*/**")
 					.authorizeRequests()
 					/**/.anyRequest().hasRole("USER");
 		}

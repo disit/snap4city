@@ -174,7 +174,17 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 
 			try {
 
-				String sensorName = getSensorName(multiReadRequest, isWriteQuery(queryType), req.getParameter("elementid"));// can return null, the passed elementid is the original one
+				String sensorName = null;
+
+				if (req.getRequestURL().toString().indexOf("/v1/") >= 0) {
+					logger.debug("Searching sensor name in API v1 body.");
+					sensorName = getSensorNameV1(multiReadRequest, isWriteQuery(queryType), elementId);// can return null, the passed elementid is the original one
+				} else if (req.getRequestURL().toString().indexOf("/v2/") >= 0) {
+					logger.debug("Searching sensor name in API v2 body.");
+					sensorName = getSensorNameV2(multiReadRequest, req);// can return null, the passed elementid is the original one
+				} else
+					throw new CredentialsNotValidException(messages.getMessage("login.ko.requesturlmalformed", null, multiReadRequest.getLocale()));
+
 				if (sensorName != null)
 					logger.debug("sensor's name {}", sensorName);
 
@@ -205,7 +215,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		filterChain.doFilter(multiReadRequest, response);// DO WE NEED IT???
 	}
 
-	private String getSensorName(HttpServletRequest multiReadRequest, boolean isWriteQuery, String elementId) throws IOException, NoSuchMessageException, CredentialsNotValidException {
+	private String getSensorNameV1(HttpServletRequest multiReadRequest, boolean isWriteQuery, String elementId) throws IOException, NoSuchMessageException, CredentialsNotValidException {
 
 		String entityBody = IOUtils.toString(multiReadRequest.getInputStream(), StandardCharsets.UTF_8.toString());
 
@@ -216,7 +226,6 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		if (startIndex == -1) {
 			logger.warn(messages.getMessage("login.ko.sensornamenotpresent", null, multiReadRequest.getLocale()) + " entityBody is {}", entityBody);
 			// throw new CredentialsNotValidException(messages.getMessage("login.ko.sensornamenotpresent", null, multiReadRequest.getLocale()));
-
 			return null;
 		}
 
@@ -245,10 +254,9 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 
 		if (endIndex - startIndex >= 3) {
 			// a sensor name is retrieved -> it's a query or an update!
-
 			// ensure the elementid passed as parameter is included in the entityBody
 			if (entityBody.indexOf(elementId) == -1) {
-				logger.warn(messages.getMessage("login.ko.elementidnotvalid", null, multiReadRequest.getLocale()) + " entityBody is {}", entityBody);
+				logger.warn(messages.getMessage("login.ko.elementidnotvalid", null, multiReadRequest.getLocale()) + "(2) entityBody is {}", entityBody);
 				throw new CredentialsNotValidException(messages.getMessage("login.ko.elementidnotvalid", null, multiReadRequest.getLocale()));
 			}
 
@@ -256,6 +264,47 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		} else {
 			return null;// no sensor name are retrieved -> it's a subscription or unsubscription!
 		}
+	}
+
+	private String getSensorNameV2(HttpServletRequest multiReadRequest, HttpServletRequest req) throws IOException, NoSuchMessageException, CredentialsNotValidException {
+		String attribute = null;
+		int attributeStart;
+		int attributeEnd;
+		String entityBody = IOUtils.toString(multiReadRequest.getInputStream(), StandardCharsets.UTF_8.toString()).replace(" ", "");
+
+		try {
+			switch (req.getMethod()) {
+			case "GET":// Query
+				attribute = req.getParameter("attrs");
+				if (attribute.indexOf(',') != -1) {
+					attribute = attribute.substring(0, attribute.indexOf(','));// consider just the first one
+				}
+				;
+				return attribute;
+			case "POST":// Subscription
+				int notificationIndex = entityBody.indexOf("notification");
+				int attrsIndex = entityBody.indexOf("attrs", notificationIndex);
+				attributeStart = entityBody.indexOf("[\"", attrsIndex) + 2;
+				attributeEnd = entityBody.indexOf("\"", attributeStart);
+				attribute = entityBody.substring(attributeStart, attributeEnd);
+				if (entityBody.indexOf(req.getParameter("elementid")) == -1) {
+					logger.warn(messages.getMessage("login.ko.elementidnotvalid", null, multiReadRequest.getLocale()) + " entityBody is {}", entityBody);
+					throw new CredentialsNotValidException(messages.getMessage("login.ko.elementidnotvalid", null, multiReadRequest.getLocale()));
+				}
+				return attribute;
+			case "PATCH":// Update
+				attributeStart = entityBody.indexOf("{\"") + 2;
+				attributeEnd = entityBody.indexOf("\":");
+				attribute = entityBody.substring(attributeStart, attributeEnd).trim();
+				return attribute;
+			case "DELETE":// Unsubscription
+				return null;
+			}
+		} catch (Exception err) {
+			logger.warn("Attribute name not detected!");
+			return null;
+		}
+		return null;
 	}
 
 	private void writeResponseError(ServletResponse response, String msg) throws JsonProcessingException, IOException {
@@ -485,6 +534,8 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 	}
 
 	private String getAccessToken(Locale lang) throws CredentialsNotValidException {
+
+		// TODO: check validity of the refreshtoken. If it is elapsed, forse refreshToken = null
 
 		if (refreshToken == null)
 			getRefreshToken(lang);

@@ -55,7 +55,7 @@
 		<Logger name="org.hibernate" level="warn" />
 		<Logger name="org.springframework" level="warn" />
 		<Logger name="com.mchange.v2.c3p0" level="warn" />
-		<Logger name="org.apache.http.conn.ssl" level="debug" />
-		
+		<Logger name="org.apache.http.conn.ssl" level="warn" />
+		<Logger name="org.apache" level="warn" />
 	</Loggers>
 </Configuration>
