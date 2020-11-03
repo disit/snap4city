@@ -1,0 +1,1138 @@
+:toc: left
+
+----
+Common HTTP response:
+ HTTP/1.1 200 OK (if content is returned)
+ HTTP/1.1 204 No content (if no content is returned)
+ HTTP/1.1 400 Bad request (if an error arise parsing client request)
+ HTTP/1.1 401 Not Authorized (if an autherization error arise parsing client request)  
+ HTTP/1.1 500 Internal Server Error (if an error arise on server side) 
+ HTTP/1.1 501 Not Implemented (if the invoked api is not supported anymore)
+----
+
+== DATA MANAGER (FROM IOT APP)
+
+=== Get DATA
+
+Return a JSON representation of the DATA belonging to the specified *<APPID>* (if *<APPID>* starts with http%3A%2F%2F, it is uri decoded).
+
+- Mandatory *<sourceRequest>* : (String) Name of the module that call the api (can be: "iotapp", "dashboardwizard", "dashboardmanager"...)
+- Mandatory *<accessToken>* : (String) AccessToken that grant the access. Has to be valid, not elapsed and belong to the owner of the *<APPID>* or to an user with RootAdmin privilege
+- Optional *<lang>* : (Locale) Language of the module that call the api (default is "en")
+- Optional *<from>* : (Timestamp) Lower bound filter (format is "yyyy-MM-dd'T'HH:mm:ss")
+- Optional *<to>* : (Timestamp) Upper bound filter (format "yyyy-MM-dd'T'HH:mm:ss")
+- Optional *<first>* : (Integer) How many data has to be returned, from the first one, ordered by data_time (cannot be used with *<last>*, default is "0" means ALL, maxValue=1000) 
+- Optional *<last>* : (Integer) How many data has to be returned, from the last one, ordered by data_time (cannot be used with *<first>*, default is "0" means ALL)
+- Optional *<variableName>* : (String) "variableName" filter
+- Optional *<motivation>* : (String) "motivation" filter
+- Optional *<delegated>* : (Boolean) If true, the api return just the data from an APPID that has been delegated (default is "false")
+- Optional *<anonymous>* : (Boolean) If true, the api return just the data from an APPID that has been configured as public (default is "false"). To be used with *<delegated>*=true. 
+
+:toc!: //workaround to avoid toc in inner tables
+
+[cols="h,5a"]
+|===
+| HTTP request
+| [source,http,options="nowrap"]
+----
+GET /datamanager/api/v1/apps/*<APPID>*/data HTTP/1.1
+Host: 192.168.0.10:8080
+Content-Type: application/x-www-form-urlencoded
+
+accessToken=ACCESSTOKEN&sourceRequest=iotapp&(optional)lang=en
+----
+
+| HTTP response (success) 
+| [source,http,options="nowrap"]
+----
+HTTP/1.1 200
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Set-Cookie: JSESSIONID=4957DA5D3A00B8BBEF612C72D1A4A20C; Path=/datamanager; HttpOnly
+Content-Type: application/json;charset=UTF-8
+Transfer-Encoding: chunked
+Date: Thu, 07 Jun 2018 12:46:06 GMT
+
+[{"username":"adifino","dataTime":1523529262000,"APPName":"nr28","APPID":"6ff3a0ea0a5d92f345fa13c95d0b35ff77204413b9c98e3a71b1d269a26af11e","motivation":"Shared Position","variableName":"latitude_longitude","variableValue":"[43.20,11.15]","variableUnit":"gradi decimali"},{"username":"adifino","dataTime":1524242072000,"APPName":"nr28","APPID":"6ff3a0ea0a5d92f345fa13c95d0b35ff77204413b9c98e3a71b1d269a26af11e","motivation":"Shared Position","variableName":"latitude_longitude","variableValue":"[43.7991694,11.2393286]","variableUnit":"gradi decimali"}]
+----
+
+| HTTP response (fail) 
+| [source,http,options="nowrap"]
+----
+HTTP/1.1 400
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Set-Cookie: JSESSIONID=E5E2F039C05CF7CD6416ED3E52EAD567; Path=/datamanager; HttpOnly
+Content-Type: text/plain;charset=UTF-8
+Content-Length: 51
+Date: Thu, 07 Jun 2018 12:49:33 GMT
+Connection: close
+
+The passed DATA has the APP_ID field not recognized
+----
+
+| example CURL request
+| [source,bash]
+----
+$ curl -k -i -X GET "http://192.168.0.10:8080/datamanager/api/v1/apps/6ff3a0ea0a5d92f345fa13c95d0b35ff77204413b9c98e3a71b1d269a26af11e/data?accessToken=ACCESSTOKEN&sourceRequest=iotapp"
+----
+|===
+
+=== Post DATA
+
+Send a JSON representation of a DATA for the specified *<APPID>* (if *<APPID>* starts with http%3A%2F%2F, it is uri decoded). If the DATA are successfully stored, it returns HTTP200 and a JSON representation of the DATA. 
+If the DATA to store include the field *<id>*  an HTTP400 is returned (+explanation in the Entity). The fields *<insertTime>*, *<deleteTime>*, *<elapseTime>* are override by the server. 
+If the *<username>* is null, the correct data is retrieved from the *<APPID>*.
+
+- Mandatory *<sourceRequest>* : (String) Name of the module that call the api (can be: "iotapp", "dashboardwizard", "dashboardmanager"...)
+- Mandatory *<accessToken>* : (String) AccessToken that grant the access. Has to be valid, not elapsed and belong to the owner of the *<APPID>* or to an user with RootAdmin privilege
+- Optional *<lang>* : (Locale) Language of the module that call the api (default is "en")
+ 
+[cols="h,5a"]
+|===
+| HTTP request
+| [source,http,options="nowrap"]
+----
+POST /datamanager/api/v1/apps/*<APPID>*/data HTTP/1.1
+Host: 192.168.0.10:8080
+Content-Type: application/json; charset=utf8
+
+{"dataTime":1521021146000,"APPID":"nr2gwzc","motivation":"TIPO5","variableName":"LAT","variableValue":"43.11","variableUnit":"coord"}
+----
+
+| HTTP response (success) 
+| [source,http,options="nowrap"]
+----
+HTTP/1.1 200
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Set-Cookie: JSESSIONID=1191CA73EA9C1D27DC5F33BE3F737544; Path=/datamanager; HttpOnly
+Content-Type: application/json;charset=UTF-8
+Transfer-Encoding: chunked
+Date: Thu, 07 Jun 2018 13:37:59 GMT
+
+{"username":"angelo.difino","dataTime":1521021146000,"APPName":"TestSave","APPID":"nr2gwzc","motivation":"TIPO5","variableName":"LATITUDE","variableValue":"43.11","variableUnit":"coord"}
+----
+
+| HTTP response (fail id not null) 
+| [source,http,options="nowrap"]
+---- 
+HTTP/1.1 400
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Set-Cookie: JSESSIONID=80388DF8D7A80EFAC8B0F6211915E25E; Path=/datamanager; HttpOnly
+Content-Type: text/plain;charset=UTF-8
+Content-Length: 41
+Date: Thu, 07 Jun 2018 13:37:40 GMT
+Connection: close
+
+The passed DATA has the ID field NOT null
+----
+
+| example CURL request
+| [source,bash]
+----
+$ curl -k -i -H "Content-Type: application/json" -X POST -d "{\"dataTime\":1521021146000,\"APPID\":\"nr2gwzc\",\"motivation\":\"TIPO5\",\"variableName\":\"LATITUDE\",\"variableValue\":\"43.11\",\"variableUnit\":\"coord\"}" "http://192.168.0.10:8080/datamanager/api/v1/apps/nr2gwzc/data?accessToken=ACCESSTOKEN&sourceRequest=iotapp"
+----
+
+|===
+
+=== Get DELEGATED v1
+
+Return a JSON representation of the DELEGATIONS that has been given to the user that own the specified *<APPID>* (if *<APPID>* starts with http%3A%2F%2F, it is uri decoded). A value of usernameDelegated=ANONYMOUS means a public/anonymous delegation. A null value of appId and appType means the delegation is valid for Annotation made by the user (out of the IOT-APP context). It does not return the group's delegations.
+
+- Mandatory *<sourceRequest>* : (String) Name of the module that call the api (can be: "iotapp", "dashboardwizard", "dashboardmanager"...)
+- Mandatory *<accessToken>* : (String) AccessToken that grant the access. Has to be valid, not elapsed and belong to the owner of the *<APPID>* or to an user with RootAdmin privilege
+- Optional *<lang>* : (Locale) Language of the module that call the api (default is "en")
+- Optional *<variableName>* : (String) "variableName" filter
+- Optional *<motivation>* : (String) "motivation" filter
+- Optional *<deleted>* : (Boolean) if set to true, also the delegations marked as "DELETED" will be returned (*<deleteTime>* field is set to a value not null)
+- Optional *<groupname>* : (String) if specified, return just the delegation made from user in the specified group/ou. It has to be URL Encoded. Example of groupname are: (organization) ou=Firenze,dc=foo,dc=example,dc=org (group) cn=Firenze Servizi,ou=Firenze,dc=foo,dc=example,dc=org 
+ 
+[cols="h,5a"]
+|===
+| HTTP request
+| [source,http,options="nowrap"]
+----
+GET /datamanager/api/v1/apps/*<APPID>*/delegated HTTP/1.1
+Host: 192.168.0.10:8080
+Content-Type: application/x-www-form-urlencoded
+
+accessToken=ACCESSTOKEN&sourceRequest=iotapp&(optional)lang=en
+----
+
+| HTTP response (success) 
+| [source,http,options="nowrap"]
+----
+HTTP/1.1 200
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Set-Cookie: JSESSIONID=B419506EC54D864E98ADE617013CEC76; Path=/datamanager; HttpOnly
+Content-Type: application/json;charset=UTF-8
+Transfer-Encoding: chunked
+Date: Thu, 07 Jun 2018 13:45:59 GMT
+
+[{"id":27,"usernameDelegator":"pb1","usernameDelegated":"adifino","variableName":"latitude_longitude","motivation":"Shared Position","elementId":"cab5c0cbf1585a072488954723e198c1c16f6fe3bb220120ba4a25416e7ed9a3","elementType":"AppID"},{"id":28,"usernameDelegator":"pb1","usernameDelegated":"adifino","variableName":"altro","motivation":"altro","elementId":"cab5c0cbf1585a072488954723e198c1c16f6fe3bb220120ba4a25416e7ed9a3","elementType":"AppID"},{"id":34,"usernameDelegator":"snap4city","usernameDelegated":"adifino","elementId":"http://www.disit.org/km4city/resource/SensoreSigfoxSM_C3AEB","elementType":"ServiceURI"},{"id":35,"usernameDelegator":"snap4city","usernameDelegated":"adifino","elementId":"http://www.disit.org/km4city/resource/SensoreSigfoxSM_17AB75","elementType":"ServiceURI"}]
+----
+
+| example CURL request
+| [source,bash]
+----
+$ curl -k -i -X GET "http://192.168.0.10:8080/datamanager/api/v1/apps/6ff3a0ea0a5d92f345fa13c95d0b35ff77204413b9c98e3a71b1d269a26af11e/delegated?accessToken=ACCESSTOKEN&sourceRequest=iotapp"
+----
+|===
+
+=== Get DELEGATED v2
+
+Same as V1, but supporting group's delegations.
+Return a JSON representation of the DELEGATIONS that has been given to the user (and to the groups the user belongs to) that own the specified *<APPID>* (if *<APPID>* starts with http%3A%2F%2F, it is uri decoded). A value of usernameDelegated=ANONYMOUS means a public/anonymous delegation. A null value of appId and appType means the delegation is valid for Annotation made by the user (out of the IOT-APP context).
+
+- Mandatory *<sourceRequest>* : (String) Name of the module that call the api (can be: "iotapp", "dashboardwizard", "dashboardmanager"...)
+- Mandatory *<accessToken>* : (String) AccessToken that grant the access. Has to be valid, not elapsed and belong to the owner of the *<APPID>* or to an user with RootAdmin privilege
+- Optional *<lang>* : (Locale) Language of the module that call the api (default is "en")
+- Optional *<variableName>* : (String) "variableName" filter
+- Optional *<motivation>* : (String) "motivation" filter
+- Optional *<deleted>* : (Boolean) if set to true, also the delegations marked as "DELETED" will be returned (*<deleteTime>* field is set to a value not null)
+- Optional *<groupname>* : (String) if specified, return just the delegation made from user in the specified group/ou. It has to be URL Encoded. Example of groupname are: (organization) ou=Firenze,dc=foo,dc=example,dc=org (group) cn=Firenze Servizi,ou=Firenze,dc=foo,dc=example,dc=org 
+ 
+[cols="h,5a"]
+|===
+| HTTP request
+| [source,http,options="nowrap"]
+----
+GET /datamanager/api/v2/apps/*<APPID>*/delegated HTTP/1.1
+Host: 192.168.0.10:8080
+Content-Type: application/x-www-form-urlencoded
+
+accessToken=ACCESSTOKEN&sourceRequest=iotapp&(optional)lang=en
+----
+
+| HTTP response (success) 
+| [source,http,options="nowrap"]
+----
+HTTP/1.1 200
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Set-Cookie: JSESSIONID=B419506EC54D864E98ADE617013CEC76; Path=/datamanager; HttpOnly
+Content-Type: application/json;charset=UTF-8
+Transfer-Encoding: chunked
+Date: Thu, 07 Jun 2018 13:45:59 GMT
+
+[{"id":27,"usernameDelegator":"pb1","usernameDelegated":"adifino","variableName":"latitude_longitude","motivation":"Shared Position","elementId":"cab5c0cbf1585a072488954723e198c1c16f6fe3bb220120ba4a25416e7ed9a3","elementType":"AppID"},{"id":28,"usernameDelegator":"pb1","usernameDelegated":"adifino","variableName":"altro","motivation":"altro","elementId":"cab5c0cbf1585a072488954723e198c1c16f6fe3bb220120ba4a25416e7ed9a3","elementType":"AppID"},{"id":34,"usernameDelegator":"snap4city","usernameDelegated":"adifino","elementId":"http://www.disit.org/km4city/resource/SensoreSigfoxSM_C3AEB","elementType":"ServiceURI"},{"id":35,"usernameDelegator":"snap4city","usernameDelegated":"adifino","elementId":"http://www.disit.org/km4city/resource/SensoreSigfoxSM_17AB75","elementType":"ServiceURI"},{"id":47,"usernameDelegator":"tester1","variableName":"latitude_longitude","motivation":"Shared Position","elementId":"cab5c0cbf1585a072488954723e198c1c16f6fe3bb220120ba4a25416e7ed9a3","elementType":"DASH_ID","insertTime":1535099430000,"groupnameDelegated":"ou=Firenze,dc=foo,dc=example,dc=org"}]
+----
+
+| example CURL request
+| [source,bash]
+----
+$ curl -k -i -X GET "http://192.168.0.10:8080/datamanager/api/v2/apps/6ff3a0ea0a5d92f345fa13c95d0b35ff77204413b9c98e3a71b1d269a26af11e/delegated?accessToken=ACCESSTOKEN&sourceRequest=iotapp"
+----
+|===
+
+=== Get DELEGATOR v1
+
+Return a JSON representation of the DELEGATIONS that the specified *<APPID>* gave to an user (if *<APPID>* starts with http%3A%2F%2F, it is uri decoded). A value of usernameDelegated=ANONYMOUS means a public/anonymous delegation. A null value of appId and appType means the delegation is valid for Annotation made by the user (out of the IOT-APP context). It does not return the group's delegations.
+
+- Mandatory parameters *<sourceRequest>* has to be specified (request coming from "iotapp", "dashboardwizard", "dashboardmanager"....)
+- Mandatory *<accessToken>* : (String) AccessToken that grant the access. Has to be valid, not elapsed and belong to the owner of the *<APPID>*
+- Optional *<lang>* : (Locale) Language of the module that call the api (default is "en")
+- Optional *<variableName>* : (String) "variableName" filter
+- Optional *<motivation>* : (String) "motivation" filter
+- Optional *<deleted>* : (Boolean) if set to true, also the delegations marked as "DELETED" will be returned (*<deleteTime>* field is set to a value not null)
+
+
+[cols="h,5a"]
+|===
+| HTTP request
+| [source,http,options="nowrap"]
+----
+GET /datamanager/api/v1/apps/*<APPID>*/delegator HTTP/1.1
+Host: 192.168.0.10:8080
+Content-Type: application/x-www-form-urlencoded
+
+accessToken=ACCESSTOKEN&sourceRequest=iotapp&(optional)lang=en
+----
+
+| HTTP response (success) 
+| [source,http,options="nowrap"]
+----
+HTTP/1.1 200
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Set-Cookie: JSESSIONID=7B7322B7738D53E8CD6EB173A16393C0; Path=/datamanager; HttpOnly
+Content-Type: application/json;charset=UTF-8
+Transfer-Encoding: chunked
+Date: Thu, 07 Jun 2018 13:48:36 GMT
+
+[{"id":10,"usernameDelegator":"adifino","usernameDelegated":"pb1","variableName":"latitude_longitude","motivation":"Shared Position","elementId":"6ff3a0ea0a5d92f345fa13c95d0b35ff77204413b9c98e3a71b1d269a26af11e","elementType":"AppID"},{"id":19,"usernameDelegator":"adifino","usernameDelegated":"badii","variableName":"latitude_longitude","motivation":"Shared Position","elementId":"6ff3a0ea0a5d92f345fa13c95d0b35ff77204413b9c98e3a71b1d269a26af11e","elementType":"AppID"},{"id":21,"usernameDelegator":"adifino","usernameDelegated":"snap4city","variableName":"latitude_longitude","motivation":"Shared Position","elementId":"6ff3a0ea0a5d92f345fa13c95d0b35ff77204413b9c98e3a71b1d269a26af11e","elementType":"AppID"},{"id":29,"usernameDelegator":"adifino","usernameDelegated":"ANONYMOUS","variableName":"latitude_longitude","motivation":"Shared Position","elementId":"6ff3a0ea0a5d92f345fa13c95d0b35ff77204413b9c98e3a71b1d269a26af11e","elementType":"AppID"}]
+----
+
+| example CURL request
+| [source,bash]
+----
+$ curl -k -i -X GET "http://192.168.0.10:8080/datamanager/api/v1/apps/6ff3a0ea0a5d92f345fa13c95d0b35ff77204413b9c98e3a71b1d269a26af11e/delegator?accessToken=ACCESSTOKEN&sourceRequest=iotapp"
+----
+|===
+
+=== Get DELEGATOR v2
+
+Same as V1, but supporting group's delegations.
+Return a JSON representation of the DELEGATIONS that the specified *<APPID>* gave to an user (and to a group) (if *<APPID>* starts with http%3A%2F%2F, it is uri decoded). A value of usernameDelegated=ANONYMOUS means a public/anonymous delegation. A null value of appId and appType means the delegation is valid for Annotation made by the user (out of the IOT-APP context). 
+
+- Mandatory parameters *<sourceRequest>* has to be specified (request coming from "iotapp", "dashboardwizard", "dashboardmanager"....)
+- Mandatory *<accessToken>* : (String) AccessToken that grant the access. Has to be valid, not elapsed and belong to the owner of the *<APPID>* or to an user with RootAdmin privilege
+- Optional *<lang>* : (Locale) Language of the module that call the api (default is "en")
+- Optional *<variableName>* : (String) "variableName" filter
+- Optional *<motivation>* : (String) "motivation" filter
+- Optional *<deleted>* : (Boolean) if set to true, also the delegations marked as "DELETED" will be returned (*<deleteTime>* field is set to a value not null)
+
+
+[cols="h,5a"]
+|===
+| HTTP request
+| [source,http,options="nowrap"]
+----
+GET /datamanager/api/v2/apps/*<APPID>*/delegator HTTP/1.1
+Host: 192.168.0.10:8080
+Content-Type: application/x-www-form-urlencoded
+
+accessToken=ACCESSTOKEN&sourceRequest=iotapp&(optional)lang=en
+----
+
+| HTTP response (success) 
+| [source,http,options="nowrap"]
+----
+HTTP/1.1 200
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Set-Cookie: JSESSIONID=7B7322B7738D53E8CD6EB173A16393C0; Path=/datamanager; HttpOnly
+Content-Type: application/json;charset=UTF-8
+Transfer-Encoding: chunked
+Date: Thu, 07 Jun 2018 13:48:36 GMT
+
+[{"id":10,"usernameDelegator":"adifino","usernameDelegated":"pb1","variableName":"latitude_longitude","motivation":"Shared Position","elementId":"6ff3a0ea0a5d92f345fa13c95d0b35ff77204413b9c98e3a71b1d269a26af11e","elementType":"AppID"},{"id":19,"usernameDelegator":"adifino","usernameDelegated":"badii","variableName":"latitude_longitude","motivation":"Shared Position","elementId":"6ff3a0ea0a5d92f345fa13c95d0b35ff77204413b9c98e3a71b1d269a26af11e","elementType":"AppID"},{"id":21,"usernameDelegator":"adifino","usernameDelegated":"snap4city","variableName":"latitude_longitude","motivation":"Shared Position","elementId":"6ff3a0ea0a5d92f345fa13c95d0b35ff77204413b9c98e3a71b1d269a26af11e","elementType":"AppID"},{"id":29,"usernameDelegator":"adifino","usernameDelegated":"ANONYMOUS","variableName":"latitude_longitude","motivation":"Shared Position","elementId":"6ff3a0ea0a5d92f345fa13c95d0b35ff77204413b9c98e3a71b1d269a26af11e","elementType":"AppID"},{"id":37,"usernameDelegator":"adifino","variableName":"latitude_longitude","motivation":"Shared Position","elementId":"6ff3a0ea0a5d92f345fa13c95d0b35ff77204413b9c98e3a71b1d269a26af11e","elementType":"AppID","insertTime":1535099430000,"groupnameDelegated":"ou=Helsinki,dc=foo,dc=example,dc=org"}]
+----
+
+| example CURL request
+| [source,bash]
+----
+$ curl -k -i -X GET "http://192.168.0.10:8080/datamanager/api/v2/apps/6ff3a0ea0a5d92f345fa13c95d0b35ff77204413b9c98e3a71b1d269a26af11e/delegator?accessToken=ACCESSTOKEN&sourceRequest=iotapp"
+----
+|===
+
+=== Check Access
+
+Check if the user specifeid in the *<accessToken>* is able to access the specified *<APPID>* (if *<APPID>* starts with http%3A%2F%2F, it is uri decoded). If the access is granted, it returns a JSON messge with "result":true and "message": "OWNER", "ROOTADMIN", "DELEGATED" or "GROUP-DELEGATED" or "PUBLIC" in base of the access granted; otherwise return a JSON message with "result":false
+
+- Mandatory *<sourceRequest>* : (String) Name of the module that call the api (can be: "iotapp", "dashboardwizard", "dashboardmanager"...)
+- Mandatory *<accessToken>* : (String) AccessToken that grant the access. Has to be valid and not elapsed.
+- Optional *<lang>* : (Locale) Language of the module that call the api (default is "en")
+
+[cols="h,5a"]
+|===
+| HTTP request
+| [source,http,options="nowrap"]
+----
+GET /datamanager/api/v1/apps/*<APPID>*/access/check HTTP/1.1
+Host: 192.168.0.10:8080
+Content-Type: application/x-www-form-urlencoded
+
+accessToken=ACCESSTOKEN&sourceRequest=iotapp&(optional)lang=en
+----
+
+| HTTP response (success) 
+| [source,http,options="nowrap"]
+----
+HTTP/1.1 200 OK
+Server: Apache-Coyote/1.1
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Set-Cookie: JSESSIONID=7E0C096F5906B4D6E388083F5FCDC3E1; Path=/datamanager; HttpOnly
+Content-Type: application/json;charset=UTF-8
+Transfer-Encoding: chunked
+Date: Wed, 28 Mar 2018 16:58:52 GMT
+
+{"result":true,"message":"DELEGATED"}
+----
+
+| example CURL request
+| [source,bash]
+----
+$ curl -k -i -X GET "http://192.168.0.10:8080/datamanager/api/v1/apps/nrb404g/access/check?accessToken=ACCESSTOKEN&sourceRequest=iotapp"
+----
+|===
+
+=== Delete DELEGATION
+
+Delete all the DELEGATIONS belonging to the specified *<APPID>* (if *<APPID>* starts with http%3A%2F%2F, it is uri decoded).
+
+- Mandatory parameters *<sourceRequest>* has to be specified (request coming from "iotapp", "dashboardwizard", "dashboardmanager"....)
+- Mandatory *<accessToken>* : (String) AccessToken that grant the access. Has to be valid, not elapsed and belong to the owner of the *<APPID>* or to an user with RootAdmin privilege
+- Optional *<lang>* : (Locale) Language of the module that call the api (default is "en")
+
+[cols="h,5a"]
+|===
+| HTTP request
+| [source,http,options="nowrap"]
+----
+DELETE /datamanager/api/v1/apps/*<APPID>*/delegations HTTP/1.1
+Host: 192.168.0.10:8080
+Content-Type: application/json; charset=utf8
+
+accessToken=ACCESSTOKEN&sourceRequest=iotapp&(optional)lang=en
+----
+
+| HTTP response (success) 
+| [source,http,options="nowrap"]
+----
+HTTP/1.1 200
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Set-Cookie: JSESSIONID=7B7322B7738D53E8CD6EB173A16393C0; Path=/datamanager; HttpOnly
+Content-Type: application/json;charset=UTF-8
+Transfer-Encoding: chunked
+Date: Thu, 07 Jun 2018 13:48:36 GMT
+
+----
+
+| example CURL request
+| [source,bash]
+----
+
+curl -k -i -X DELETE "http://192.168.0.10:8080/datamanager/api/v1/apps/6ff3a0ea0a5d92f345fa13c95d0b35ff77204413b9c98e3a71b1d269a26af11e/delegations?accessToken=ACCESSTOKEN&sourceRequest=iotapp"
+
+----
+|===
+
+== DATA MANAGER (FROM USERNAME)
+
+=== Get DATA
+
+Return a JSON representation of the DATA belonging to the specified *<USERNAME>*.
+
+- Mandatory *<sourceRequest>* : (String) Name of the module that call the api (can be: "iotapp", "dashboardwizard", "dashboardmanager"...)
+- Mandatory *<accessToken>* : (String) AccessToken that grant the access. Has to be valid, not elapsed and belong to the *<USERNAME>* or to an user with RootAdmin privilege
+- Optional *<lang>* : (Locale) Language of the module that call the api (default is "en")
+- Optional *<from>* : (Timestamp) Lower bound filter (format is "yyyy-MM-dd'T'HH:mm:ss")
+- Optional *<to>* : (Timestamp) Upper bound filter (format "yyyy-MM-dd'T'HH:mm:ss")
+- Optional *<first>* : (Integer) How many data has to be returned, from the first one, ordered by data_time (cannot be used with *<last>*, default is "0" means ALL, maxValue=1000) 
+- Optional *<last>* : (Integer) How many data has to be returned, from the last one, ordered by data_time (cannot be used with *<first>*, default is "0" means ALL)
+- Optional *<variableName>* : (String) "variableName" filter
+- Optional *<motivation>* : (String) "motivation" filter
+- Optional *<delegated>* : (Boolean) If true, the api return just the data from an APPID that has been delegated (default is "false")
+- Optional *<anonymous>* : (Boolean) If true, the api return just the data from an APPID that has been configured as public (default is "false"). To be used with *<delegated>*=true.
+
+[cols="h,5a"]
+|===
+| HTTP request
+| [source,http,options="nowrap"]
+----
+GET /datamanager/api/v1/username/*<USERNAME>*/data HTTP/1.1
+Host: 192.168.0.10:8080
+Content-Type: application/x-www-form-urlencoded
+
+accessToken=ACCESSTOKEN&sourceRequest=iotapp&(optional)lang=en
+----
+
+| HTTP response (success) 
+| [source,http,options="nowrap"]
+----
+HTTP/1.1 200
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Set-Cookie: JSESSIONID=4957DA5D3A00B8BBEF612C72D1A4A20C; Path=/datamanager; HttpOnly
+Content-Type: application/json;charset=UTF-8
+Transfer-Encoding: chunked
+Date: Thu, 07 Jun 2018 12:46:06 GMT
+
+[{"username":"adifino","dataTime":1523529262000,"APPName":"nr28","APPID":"6ff3a0ea0a5d92f345fa13c95d0b35ff77204413b9c98e3a71b1d269a26af11e","motivation":"Shared Position","variableName":"latitude_longitude","variableValue":"[43.20,11.15]","variableUnit":"gradi decimali"},{"username":"adifino","dataTime":1524242072000,"APPName":"nr28","APPID":"6ff3a0ea0a5d92f345fa13c95d0b35ff77204413b9c98e3a71b1d269a26af11e","motivation":"Shared Position","variableName":"latitude_longitude","variableValue":"[43.7991694,11.2393286]","variableUnit":"gradi decimali"}]
+----
+
+| HTTP response (fail) 
+| [source,http,options="nowrap"]
+----
+HTTP/1.1 400
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Set-Cookie: JSESSIONID=E5E2F039C05CF7CD6416ED3E52EAD567; Path=/datamanager; HttpOnly
+Content-Type: text/plain;charset=UTF-8
+Content-Length: 51
+Date: Thu, 07 Jun 2018 12:49:33 GMT
+Connection: close
+
+The passed DATA has the APP_ID field not recognized
+
+----
+
+| example CURL request
+| [source,bash]
+----
+$ curl -k -i -X GET "http://192.168.0.10:8080/datamanager/api/v1/username/adifino/data?accessToken=ACCESSTOKEN&sourceRequest=iotapp"
+----
+|===
+
+=== Post DATA
+
+Send a JSON representation of a DATA for the specified *<USERNAME>*. If the DATA are successfully stored, it returns HTTP200 and a JSON representation of the new version of the DATA. 
+If the DATA to store include the field *<id>*  an HTTP400 is returned (+explanation in the Entity). The fields *<insertTime>*, *<deleteTime>*, *<elapseTime>* are override by the server. 
+
+- Mandatory *<sourceRequest>* : (String) Name of the module that call the api (can be: "iotapp", "dashboardwizard", "dashboardmanager"...)
+- Mandatory *<accessToken>* : (String) AccessToken that grant the access. Has to be valid, not elapsed  and belong to the *<USERNAME>* or to an user with RootAdmin privilege
+- Optional *<lang>* : (Locale) Language of the module that call the api (default is "en")
+
+[cols="h,5a"]
+|===
+| HTTP request
+| [source,http,options="nowrap"]
+----
+POST /datamanager/api/v1/username/*<USERNAME>*/data HTTP/1.1
+Host: 192.168.0.10:8080
+Content-Type: application/json; charset=utf8
+
+{"dataTime":1521021146000,"motivation":"TIPO5","variableName":"LAT","variableValue":"43.11","variableUnit":"coord"}
+
+----
+
+| HTTP response (success) 
+| [source,http,options="nowrap"]
+----
+HTTP/1.1 200
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Set-Cookie: JSESSIONID=1191CA73EA9C1D27DC5F33BE3F737544; Path=/datamanager; HttpOnly
+Content-Type: application/json;charset=UTF-8
+Transfer-Encoding: chunked
+Date: Thu, 07 Jun 2018 13:37:59 GMT
+
+{"username":"angelo.difino","dataTime":1521021146000,"APPName":"TestSave","APPID":"nr2gwzc","motivation":"TIPO5","variableName":"LATITUDE","variableValue":"43.11","variableUnit":"coord"}
+----
+
+| HTTP response (fail id not null) 
+| [source,http,options="nowrap"]
+---- 
+HTTP/1.1 400 Bad Request
+Server: Apache-Coyote/1.1
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Set-Cookie: JSESSIONID=41392AC518B4B9650F043B8E76A27499; Path=/datacollector; HttpOnly
+Content-Type: text/plain;charset=UTF-8
+Content-Length: 41
+Date: Wed, 28 Mar 2018 15:10:28 GMT
+Connection: close
+
+The passed DATA has the ID field NOT null
+----
+
+| example CURL request
+| [source,bash]
+----
+$ curl -k -i -H "Content-Type: application/json" -X POST -d "{\"dataTime\":1521021146000,\"APPID\":\"nr2gwzc\",\"motivation\":\"TIPO5\",\"variableName\":\"LATITUDE\",\"variableValue\":\"43.11\",\"variableUnit\":\"coord\"}" "http://192.168.0.10:8080/datamanager/api/v1/username/adifino/data?accessToken=ACCESSTOKEN&sourceRequest=iotapp"
+----
+|===
+
+=== Get DELEGATED v1
+
+Return a JSON representation of the DELEGATIONS that has been given to the specified *<username>*. A value of usernameDelegated=ANONYMOUS means a public/anonymous delegation. A null value of appId and appType means the delegation is valid for Annotation made by the user (out of the IOT-APP context). It does not return the group's delegations.
+
+- Mandatory *<sourceRequest>* : (String) Name of the module that call the api (can be: "iotapp", "dashboardwizard", "dashboardmanager"...)
+- Mandatory *<accessToken>* : (String) AccessToken that grant the access. Has to be valid, not elapsed  and belong to the *<USERNAME>* or to an user with RootAdmin privilege
+- Optional *<lang>* : (Locale) Language of the module that call the api (default is "en")
+- Optional *<variableName>* : (String) "variableName" filter
+- Optional *<motivation>* : (String) "motivation" filter
+- Optional *<deleted>* : (Boolean) if set to true, also the delegations marked as "DELETED" will be returned (*<deleteTime>* field is set to a value not null)
+- Optional *<groupname>* : (String) if specified, return just the delegation made from user in the specified group/ou. It has to be URL Encoded. Example of groupname are: (organization) ou=Firenze,dc=foo,dc=example,dc=org (group) cn=Firenze Servizi,ou=Firenze,dc=foo,dc=example,dc=org
+
+[cols="h,5a"]
+|===
+| HTTP request
+| [source,http,options="nowrap"]
+----
+GET /datamanager/api/v1/username/*<username>*/delegated HTTP/1.1
+Host: 192.168.0.10:8080
+Content-Type: application/x-www-form-urlencoded
+
+accessToken=ACCESSTOKEN&sourceRequest=iotapp&(optional)lang=en
+----
+
+| HTTP response (success) 
+| [source,http,options="nowrap"]
+----
+HTTP/1.1 200 OK
+Server: Apache-Coyote/1.1
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Set-Cookie: JSESSIONID=7E0C096F5906B4D6E388083F5FCDC3E1; Path=/datamanager; HttpOnly
+Content-Type: application/json;charset=UTF-8
+Transfer-Encoding: chunked
+Date: Wed, 28 Mar 2018 16:58:52 GMT
+
+[{"id":20,"usernameDelegator":"badii","usernameDelegated":"snap4city","variableName":"latitude_longitude","motivation":"Shared Position","elementId":"f9208f95d7a81d04e7925bb9c7ed388fb9e0c2ce94dab850f55db554cc92c299","elementType":"AppID"},{"id":21,"usernameDelegator":"adifino","usernameDelegated":"snap4city","variableName":"latitude_longitude","motivation":"Shared Position","elementId":"6ff3a0ea0a5d92f345fa13c95d0b35ff77204413b9c98e3a71b1d269a26af11e","elementType":"AppID"},{"id":22,"usernameDelegator":"PaoloNesi","usernameDelegated":"snap4city","variableName":"latitude_longitude","motivation"
+:"Shared Position","elementId":"244a29787d16e7ba720163890c87a76e05dfccfac835cc0fd2700ddf0480f137","elementType":"AppID"},{"id":23,"usernameDelegator":"nicola.mitolo","usernameDelegated":"snap4city","variableName":"latitude_longitude","motivation":"Shared Position","elementId":"d2799619ee16ae9ef5496859cb583eeec87a383af5d2ed51fc4cb1ca60b22f31","elementType":"AppID"}]
+----
+
+| example CURL request
+| [source,bash]
+----
+$ curl -k -i -X GET "http://192.168.0.10:8080/datamanager/api/v1/username/adifino/delegated?accessToken=ACCESSTOKEN&sourceRequest=iotapp"
+----
+|===
+
+=== Get DELEGATED v2
+
+Same as V1, but supporting group's delegations.
+Return a JSON representation of the DELEGATIONS that has been given to the specified *<username>* (and to the groups the user belongs to). A value of usernameDelegated=ANONYMOUS means a public/anonymous delegation. A null value of appId and appType means the delegation is valid for Annotation made by the user (out of the IOT-APP context).
+
+- Mandatory *<sourceRequest>* : (String) Name of the module that call the api (can be: "iotapp", "dashboardwizard", "dashboardmanager"...)
+- Mandatory *<accessToken>* : (String) AccessToken that grant the access. Has to be valid, not elapsed  and belong to the *<USERNAME>* or to an user with RootAdmin privilege
+- Optional *<lang>* : (Locale) Language of the module that call the api (default is "en")
+- Optional *<variableName>* : (String) "variableName" filter
+- Optional *<motivation>* : (String) "motivation" filter
+- Optional *<deleted>* : (Boolean) if set to true, also the delegations marked as "DELETED" will be returned (*<deleteTime>* field is set to a value not null)
+- Optional *<groupname>* : (String) if specified, return just the delegation made from user in the specified group/ou. It has to be URL Encoded. Example of groupname are: (organization) ou=Firenze,dc=foo,dc=example,dc=org (group) cn=Firenze Servizi,ou=Firenze,dc=foo,dc=example,dc=org
+
+[cols="h,5a"]
+|===
+| HTTP request
+| [source,http,options="nowrap"]
+----
+GET /datamanager/api/v2/username/*<username>*/delegated HTTP/1.1
+Host: 192.168.0.10:8080
+Content-Type: application/x-www-form-urlencoded
+
+accessToken=ACCESSTOKEN&sourceRequest=iotapp&(optional)lang=en
+----
+
+| HTTP response (success) 
+| [source,http,options="nowrap"]
+----
+HTTP/1.1 200 OK
+Server: Apache-Coyote/1.1
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Set-Cookie: JSESSIONID=7E0C096F5906B4D6E388083F5FCDC3E1; Path=/datamanager; HttpOnly
+Content-Type: application/json;charset=UTF-8
+Transfer-Encoding: chunked
+Date: Wed, 28 Mar 2018 16:58:52 GMT
+
+[{"id":20,"usernameDelegator":"badii","usernameDelegated":"snap4city","variableName":"latitude_longitude","motivation":"Shared Position","elementId":"f9208f95d7a81d04e7925bb9c7ed388fb9e0c2ce94dab850f55db554cc92c299","elementType":"AppID"},{"id":21,"usernameDelegator":"adifino","usernameDelegated":"snap4city","variableName":"latitude_longitude","motivation":"Shared Position","elementId":"6ff3a0ea0a5d92f345fa13c95d0b35ff77204413b9c98e3a71b1d269a26af11e","elementType":"AppID"},{"id":22,"usernameDelegator":"PaoloNesi","usernameDelegated":"snap4city","variableName":"latitude_longitude","motivation"
+:"Shared Position","elementId":"244a29787d16e7ba720163890c87a76e05dfccfac835cc0fd2700ddf0480f137","elementType":"AppID"},{"id":23,"usernameDelegator":"nicola.mitolo","usernameDelegated":"snap4city","variableName":"latitude_longitude","motivation":"Shared Position","elementId":"d2799619ee16ae9ef5496859cb583eeec87a383af5d2ed51fc4cb1ca60b22f31","elementType":"AppID"}, {"id":44,"usernameDelegator":"nicola.mitolo","variableName":"latitude_longitude","motivation":"Shared Position","elementId":"d2799619ee16ae9ef5496859cb583eeec87a383af5d2ed51fc4cb1ca60b22f31","elementType":"AppID","insertTime":1535099430000,"groupnameDelegated":"ou=Helsinki,dc=foo,dc=example,dc=org"}}]
+----
+
+| example CURL request
+| [source,bash]
+----
+$ curl -k -i -X GET "http://192.168.0.10:8080/datamanager/api/v2/username/adifino/delegated?accessToken=ACCESSTOKEN&sourceRequest=iotapp"
+----
+|===
+=== Get DELEGATOR v1
+
+Return a JSON representation of the DELEGATIONS that the specified *<username>* gave to an user. A value of usernameDelegated=ANONYMOUS means a public/anonymous delegation. A null value of appId and appType means the delegation is valid for Annotation made by the user (out of the IOT-APP context). It does not return the group's delegations.
+
+- Mandatory *<sourceRequest>* : (String) Name of the module that call the api (can be: "iotapp", "dashboardwizard", "dashboardmanager"...)
+- Mandatory *<accessToken>* : (String) AccessToken that grant the access. Has to be valid, not elapsed and belong to the *<USERNAME>* or to an user with RootAdmin privilege
+- Optional *<lang>* : (Locale) Language of the module that call the api (default is "en")
+- Optional *<variableName>* : (String) "variableName" filter
+- Optional *<motivation>* : (String) "motivation" filter
+- Optional *<deleted>* : (Boolean) if set to true, also the delegations marked as "DELETED" will be returned (*<deleteTime>* field is set to a value not null)
+
+
+[cols="h,5a"]
+|===
+| HTTP request
+| [source,http,options="nowrap"]
+----
+GET /datamanager/api/v1/username/*<username>*/delegator HTTP/1.1
+Host: 192.168.0.10:8080
+Content-Type: application/x-www-form-urlencoded
+
+accessToken=ACCESSTOKEN&sourceRequest=iotapp&(optional)lang=en
+----
+
+| HTTP response (success) 
+| [source,http,options="nowrap"]
+----
+HTTP/1.1 200 OK
+Server: Apache-Coyote/1.1
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Set-Cookie: JSESSIONID=7E0C096F5906B4D6E388083F5FCDC3E1; Path=/datamanager; HttpOnly
+Content-Type: application/json;charset=UTF-8
+Transfer-Encoding: chunked
+Date: Wed, 28 Mar 2018 16:58:52 GMT
+
+[{"id":26,"usernameDelegator":"snap4city","usernameDelegated":"nicola.mitolo","variableName":"latitude_longitude","motivation":"Shared Position","elementId":"0a18f0b11a97ce315d0ad6d479fac4d76d60fd5d7c
+41a9cb8c3c1d508e450bdd","elementType":"AppID"}]
+----
+
+| example CURL request
+| [source,bash]
+----
+$ curl -k -i -X GET "http://192.168.0.10:8080/datamanager/api/v1/username/adifino/delegator?accessToken=ACCESSTOKEN&sourceRequest=iotapp"
+----
+|===
+
+=== Get DELEGATOR v2
+
+Same as V1, but supporting group's delegations.
+Return a JSON representation of the DELEGATIONS that the specified *<username>* gave to an user and to a group. A value of usernameDelegated=ANONYMOUS means a public/anonymous delegation. A null value of appId and appType means the delegation is valid for Annotation made by the user (out of the IOT-APP context).
+
+- Mandatory *<sourceRequest>* : (String) Name of the module that call the api (can be: "iotapp", "dashboardwizard", "dashboardmanager"...)
+- Mandatory *<accessToken>* : (String) AccessToken that grant the access. Has to be valid, not elapsed  and belong to the *<USERNAME>* or to an user with RootAdmin privilege
+- Optional *<lang>* : (Locale) Language of the module that call the api (default is "en")
+- Optional *<variableName>* : (String) "variableName" filter
+- Optional *<motivation>* : (String) "motivation" filter
+- Optional *<deleted>* : (Boolean) if set to true, also the delegations marked as "DELETED" will be returned (*<deleteTime>* field is set to a value not null)
+
+
+[cols="h,5a"]
+|===
+| HTTP request
+| [source,http,options="nowrap"]
+----
+GET /datamanager/api/v2/username/*<username>*/delegator HTTP/1.1
+Host: 192.168.0.10:8080
+Content-Type: application/x-www-form-urlencoded
+
+accessToken=ACCESSTOKEN&sourceRequest=iotapp&(optional)lang=en
+----
+
+| HTTP response (success) 
+| [source,http,options="nowrap"]
+----
+HTTP/1.1 200 OK
+Server: Apache-Coyote/1.1
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Set-Cookie: JSESSIONID=7E0C096F5906B4D6E388083F5FCDC3E1; Path=/datamanager; HttpOnly
+Content-Type: application/json;charset=UTF-8
+Transfer-Encoding: chunked
+Date: Wed, 28 Mar 2018 16:58:52 GMT
+
+[{"id":26,"usernameDelegator":"snap4city","usernameDelegated":"nicola.mitolo","variableName":"latitude_longitude","motivation":"Shared Position","elementId":"0a18f0b11a97ce315d0ad6d479fac4d76d60fd5d7c
+41a9cb8c3c1d508e450bdd","elementType":"AppID"}, {"id":44,"usernameDelegator":"snap4city","variableName":"latitude_longitude","motivation":"Shared Position","elementId":"0a18f0b11a97ce315d0ad6d479fac4d76d60fd5d7c
+41a9cb8c3c1d508e450bdd","elementType":"AppID","insertTime":1535099430000,"groupnameDelegated":"ou=Helsinki,dc=foo,dc=example,dc=org"}]
+----
+
+| example CURL request
+| [source,bash]
+----
+$ curl -k -i -X GET "http://192.168.0.10:8080/datamanager/api/v2/username/adifino/delegator?accessToken=ACCESSTOKEN&sourceRequest=iotapp"
+----
+|===
+
+=== Check DELEGATIONS
+
+Check if a DELEGATION has been given for the specified *<username>*, *<elementID>* and *<variableName>*. If a delegation has been found, it returns a JSON messge with "result":true and "message": "DELEGATED" or "GROUP-DELEGATED" or "PUBLIC"; otherwise return a JSON message with "result":false
+
+- Mandatory *<sourceRequest>* : (String) Name of the module that call the api (can be: "iotapp", "dashboardwizard", "dashboardmanager"...)
+- Mandatory *<accessToken>* : (String) AccessToken that grant the access. Has to be valid, not elapsed and belong to the owner of the *<elementId>* or to an user with RootAdmin privilege
+- Mandatory *<variableName>* : (String) "variableName" filter
+- Mandatory *<elementId>* : (String) "elementId" filter
+- Optional *<lang>* : (Locale) Language of the module that call the api (default is "en")
+
+[cols="h,5a"]
+|===
+| HTTP request
+| [source,http,options="nowrap"]
+----
+GET /datamanager/api/v1/username/*<username>*/delegations/check HTTP/1.1
+Host: 192.168.0.10:8080
+Content-Type: application/x-www-form-urlencoded
+
+accessToken=ACCESSTOKEN&sourceRequest=iotapp&elementID=cab5c0cbf1585a072488954723e198c1c16f6fe3bb220120ba4a25416e7ed9a3&variableName=latitude_longitude&(optional)lang=en
+----
+
+| HTTP response (success) 
+| [source,http,options="nowrap"]
+----
+HTTP/1.1 200 OK
+Server: Apache-Coyote/1.1
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Set-Cookie: JSESSIONID=7E0C096F5906B4D6E388083F5FCDC3E1; Path=/datamanager; HttpOnly
+Content-Type: application/json;charset=UTF-8
+Transfer-Encoding: chunked
+Date: Wed, 28 Mar 2018 16:58:52 GMT
+
+{"result":true,"message":"DELEGATED"}
+----
+
+| example CURL request
+| [source,bash]
+----
+$ curl -k -i -X GET "http://192.168.0.10:8080/datamanager/api/v1/username/adifino/delegation/check?elementID=cab5c0cbf1585a072488954723e198c1c16f6fe3bb220120ba4a25416e7ed9a3&variableName=latitude_longitude&accessToken=ACCESSTOKEN&sourceRequest=iotapp"
+----
+|===
+
+=== Post DELEGATION
+
+Send a JSON representation of a DELEGATION for the specified *<username>*. If the DELEGATION are successfully stored, it returns HTTP200 and a JSON representation of the new version of the DELEGATION. If the DELEGATION to store include the field *<id>*  an HTTP400 is returned (+explanation in the Entity). The fields *<insertTime>*, *<deleteTime>*, *<elapseTime>* are override by the server. It checks that the username specified as DELEGATED exists in LDAP.
+
+
+- Mandatory *<sourceRequest>* : (String) Name of the module that call the api (can be: "iotapp", "dashboardwizard", "dashboardmanager"...)
+- Mandatory *<accessToken>* : (String) AccessToken that grant the access. Has to be valid, not elapsed and belong to the *<USERNAME>* or to an user with RootAdmin privilege
+- Optional *<lang>* : (Locale) Language of the module that call the api (default is "en")
+
+[cols="h,5a"]
+|===
+| HTTP request
+| [source,http,options="nowrap"]
+----
+POST /datamanager/api/v1/username/*<username>*/delegation HTTP/1.1
+Host: 192.168.0.10:8080
+Content-Type: application/json; charset=utf8
+
+{"usernameDelegated":"badii","elementId":"f52b8e936ba2c0a23a6c059055546f1011d19df1305667aa25300b732a09f9eb","elementType":"DASHID"}
+
+----
+
+| HTTP response (success) 
+| [source,http,options="nowrap"]
+----
+HTTP/1.1 200 OK
+Server: Apache-Coyote/1.1
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Set-Cookie: JSESSIONID=4CA6A869A863B44645B633BE4EE518E9; Path=/datacollector; HttpOnly
+Content-Type: application/json;charset=UTF-8
+Transfer-Encoding: chunked
+Date: Wed, 28 Mar 2018 15:07:27 GMT
+
+{"id":34,"usernameDelegator":"adifino","usernameDelegated":"badii","elementId":"f52b8e936ba2c0a23a6c059055546f1011d19df1305667aa25300b732a09f9eb","elementType":"DASHID"}
+----
+
+| HTTP response (fail id not null) 
+| [source,http,options="nowrap"]
+---- 
+HTTP/1.1 400 Bad Request
+Server: Apache-Coyote/1.1
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Set-Cookie: JSESSIONID=41392AC518B4B9650F043B8E76A27499; Path=/datacollector; HttpOnly
+Content-Type: text/plain;charset=UTF-8
+Content-Length: 41
+Date: Wed, 28 Mar 2018 15:10:28 GMT
+Connection: close
+
+The passed DELEGATION has the ID field NOT null
+----
+
+| example CURL request
+| [source,bash]
+----
+$ curl -k -i -H "Content-Type: application/json" -X POST -d "{\"usernameDelegated\":\"badii\",\"elementId\":\"f52b8e936ba2c0a23a6c059055546f1011d19df1305667aa25300b732a09f9eb\",\"elementType\":\"DASHID\"}" "http://192.168.0.10:8080/datamanager/api/v1/username/adifino/delegation?accessToken=ACCESSTOKEN&sourceRequest=iotapp"
+----
+|===
+
+=== Put DELEGATION
+
+Update a JSON representation of a DELEGATION for the specified *<DELEGATION_ID>*, belonging to the specified *<username>*. If the DELEGATION are successfully stored, it returns HTTP200 and a JSON representation of the new version of the DELEGATION. If the DELEGATION to store include the field *<id>*  an HTTP400 is returned (+explanation in the Entity). The fields *<insertTime>*, *<deleteTime>*, *<elapseTime>* are override by the server. It checks that the username specified as DELEGATED exists in LDAP.
+
+- Mandatory *<sourceRequest>* : (String) Name of the module that call the api (can be: "iotapp", "dashboardwizard", "dashboardmanager"...)
+- Mandatory *<accessToken>* : (String) AccessToken that grant the access. Has to be valid, not elapsed and belong to the *<USERNAME>* or to an user with RootAdmin privilege
+- Optional *<lang>* : (Locale) Language of the module that call the api (default is "en")
+
+[cols="h,5a"]
+|===
+| HTTP request
+| [source,http,options="nowrap"]
+----
+PUT /datamanager/api/v1/username/*<username>*/delegation/*<DELEGATION_ID>* HTTP/1.1
+Host: 192.168.0.10:8080
+Content-Type: application/json; charset=utf8
+
+{"id":34,"usernameDelegator":"adifino","usernameDelegated":"badii","elementId":"f52b8e936ba2c0a23a6c059055546f1011d19df1305667aa25300b732a09f9eb","elementType":"DASHID"}
+
+----
+
+| HTTP response (success) 
+| [source,http,options="nowrap"]
+----
+HTTP/1.1 200 OK
+Server: Apache-Coyote/1.1
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Set-Cookie: JSESSIONID=4CA6A869A863B44645B633BE4EE518E9; Path=/datacollector; HttpOnly
+Content-Type: application/json;charset=UTF-8
+Transfer-Encoding: chunked
+Date: Wed, 28 Mar 2018 15:07:27 GMT
+
+{"id":34,"usernameDelegator":"adifino","usernameDelegated":"badii","elementId":"f52b8e936ba2c0a23a6c059055546f1011d19df1305667aa25300b732a09f9eb","elementType":"DASHID"}
+----
+
+| HTTP response (fail id not null) 
+| [source,http,options="nowrap"]
+---- 
+HTTP/1.1 400 Bad Request
+Server: Apache-Coyote/1.1
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Set-Cookie: JSESSIONID=41392AC518B4B9650F043B8E76A27499; Path=/datacollector; HttpOnly
+Content-Type: text/plain;charset=UTF-8
+Content-Length: 41
+Date: Wed, 28 Mar 2018 15:10:28 GMT
+Connection: close
+
+You're not owner of the delgation to DELETE
+----
+
+| example CURL request
+| [source,bash]
+----
+$ curl -k -i -H "Content-Type: application/json" -X PUT -d "{\"id\":\"34\",\"usernameDelegated\":\"badii\",\"elementId\":\"f52b8e936ba2c0a23a6c059055546f1011d19df1305667aa25300b732a09f9eb\",\"elementType\":\"DASHID\"}" "http://192.168.0.10:8080/datamanager/api/v1/username/adifino/delegation/34?accessToken=ACCESSTOKEN&sourceRequest=iotapp"
+----
+|===
+
+=== Delete DELEGATION
+
+Delete a *<DELEGATION_ID>* belonging to the specified *<username>*.
+
+- Mandatory *<sourceRequest>* : (String) Name of the module that call the api (can be: "iotapp", "dashboardwizard", "dashboardmanager"...)
+- Mandatory *<accessToken>* : (String) AccessToken that grant the access. Has to be valid, not elapsed and belong to the *<USERNAME>* or to an user with RootAdmin privilege
+- Optional *<lang>* : (Locale) Language of the module that call the api (default is "en")
+
+[cols="h,5a"]
+|===
+| HTTP request
+| [source,http,options="nowrap"]
+----
+DELETE /datamanager/api/v1/username/*<username>*/delegation/*<DELEGATION_ID>* HTTP/1.1
+Host: 192.168.0.10:8080
+Content-Type: application/json; charset=utf8
+
+accessToken=ACCESSTOKEN&sourceRequest=iotapp&(optional)lang=en
+----
+
+| HTTP response (success) 
+| [source,http,options="nowrap"]
+----
+HTTP/1.1 200 OK
+Server: Apache-Coyote/1.1
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Set-Cookie: JSESSIONID=4CA6A869A863B44645B633BE4EE518E9; Path=/datacollector; HttpOnly
+Content-Type: application/json;charset=UTF-8
+Transfer-Encoding: chunked
+Date: Wed, 28 Mar 2018 15:07:27 GMT
+
+----
+
+| HTTP response (fail id not null) 
+| [source,http,options="nowrap"]
+---- 
+HTTP/1.1 400 Bad Request
+Server: Apache-Coyote/1.1
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Set-Cookie: JSESSIONID=41392AC518B4B9650F043B8E76A27499; Path=/datacollector; HttpOnly
+Content-Type: text/plain;charset=UTF-8
+Content-Length: 41
+Date: Wed, 28 Mar 2018 15:10:28 GMT
+Connection: close
+
+The passed DELEGATION has the ID not recognized
+----
+
+| example CURL request
+| [source,bash]
+----
+
+curl -k -i -X DELETE "http://192.168.0.10:8080/datamanager/api/v1/username/adifino/delegation/31?accessToken=ACCESSTOKEN&sourceRequest=iotapp"
+
+----
+|===
+
+
+== DATA MANAGER (ACTIVITY)
+
+=== Get ACTIVITY
+
+Return a JSON representation of the activities an *<Appid>* invoked.   
+
+- Mandatory *<accessToken>* : (String) AccessToken that grant the access. Has to be valid, not elapsed and belong to the owner of *<Appid>* or to an user with RootAdmin privilege
+- Optional *<lang>* : (Locale) Language of the module that call the api (default is "en")
+- Optional *<delegated>* : (String) If set to true, just the activities (in which a result included a data from my container) is returned. 
+
+[cols="h,5a"]
+|===
+| HTTP request
+| [source,http,options="nowrap"]
+----
+GET /datamanager/api/v1/apps/*<Appid>*/activity HTTP/1.1
+Host: 192.168.0.10:8080
+Content-Type: application/x-www-form-urlencoded
+
+accessToken=ACCESSTOKEN&sourceRequest=iotapp&delegated=true&(optional)lang=en
+----
+
+| HTTP response (success) 
+| [source,http,options="nowrap"]
+----
+HTTP/1.1 200 OK
+Server: Apache-Coyote/1.1
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Set-Cookie: JSESSIONID=7E0C096F5906B4D6E388083F5FCDC3E1; Path=/datamanager; HttpOnly
+Content-Type: application/json;charset=UTF-8
+Transfer-Encoding: chunked
+Date: Wed, 28 Mar 2018 16:58:52 GMT
+
+[{"id":156,"time":1526392725000,"appId":"f9208f95d7a81d04e7925bb9c7ed388fb9e0c2ce94dab850f55db554cc92c299","username":"badii","delegatedAppId":"244a29787d16e7ba720163890c87a76e05dfccfac835cc0fd2700ddf0480f137","delagatedUsername":"PaoloNesi"},{"id":164,"time":1526394166000,"appId":"f9208f95d7a81d04e7925bb9c7ed388fb9e0c2ce94dab850f55db554cc92c299","username":"badii","delegatedAppId":"244a29787d16e7ba720163890c87a76e05dfccfac835cc0fd2700ddf0480f137","delagatedUsername":"PaoloNesi"}]
+----
+
+| example CURL request
+| [source,bash]
+----
+$ curl -k -i -X GET "http://192.168.0.10:8080/datamanager/api/v1/apps/244a29787d16e7ba720163890c87a76e05dfccfac835cc0fd2700ddf0480f137/activity?delegated=true&accessToken=ACCESSTOKEN&sourceRequest=iotapp"
+----
+|===
+
+== DATA MANAGER (FROM OUTSIDE)
+
+=== Get DATA
+
+Return ALL the DATA.
+
+- Mandatory *<sourceRequest>* : (String) Name of the module that call the api (can be: "iotapp", "dashboardwizard", "dashboardmanager"...)
+- Mandatory *<accessToken>* : (String) AccessToken that grant the access. Has to be valid, not elapsed and belong to an user with RootAdmin privilege
+- Optional *<last>* : (Boolean) If set to true, just the last value for a combined key (username, appId, motivation, variableName) is returned (default is "false")
+- Optional *<lang>* : (Locale) Language of the module that call the api (default is "en")
+
+[cols="h,5a"]
+|===
+| HTTP request
+| [source,http,options="nowrap"]
+----
+GET /datamanager/api/v1/data HTTP/1.1
+Host: 192.168.0.47:8080
+Content-Type: application/x-www-form-urlencoded
+
+accessToken=ACCESSTOKEN&sourceRequest=iotapp&(optional)lang=en
+----
+
+| HTTP response (success) 
+| [source,http,options="nowrap"]
+----
+HTTP/1.1 200
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Content-Type: application/json;charset=UTF-8
+Transfer-Encoding: chunked
+Date: Tue, 10 Apr 2018 13:18:33 GMT
+
+[{"id":32,"uid":"66","dataTime":1523289275000,"APPName":"nr28","APPID":"6ff3a0ea0a5d92f345fa13c95d0b35ff77204413b9c98e3a71b1d269a26af11e","motivation":"TIPO4","variableName":"LATITUDE","variableValue":"50.50","variableUnit":"coord","uidName":"adifino"},{"id":1,"uid":"15","dataTime":1521021146000,"APPName":"nr27","APPID":"cab5c0cbf1585a072488954723e198c1c16f6fe3bb220120ba4a25416e7ed9a3","motivation":"SHARE","variableName":"LATITUDE","variableValue":"43.11","uidName":"pb1"}]
+----
+
+| example CURL request
+| [source,bash]
+----
+$ curl -k -i -X GET "http://192.168.0.10:8080/datamanager/api/v1/data?accessToken=ACCESSTOKEN&sourceRequest=iotapp"
+----
+|===

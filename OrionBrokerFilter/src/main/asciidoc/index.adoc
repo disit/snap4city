@@ -1,0 +1,291 @@
+:toc: left
+
+----
+Common HTTP response:
+ HTTP/1.1 200 OK (if content is returned)
+ HTTP/1.1 204 No content (if no content is returned)
+ HTTP/1.1 400 Bad request (if an error arise parsing client request)
+ HTTP/1.1 401 Not Authorized (if an autherization error arise parsing client request)  
+ HTTP/1.1 500 Internal Server Error (if an error arise on server side) 
+ HTTP/1.1 501 Not Implemented (if the invoked api is not supported anymore)
+
+----
+
+== Orion Filter
+
+=== queryContext
+
+Forward the queryContext POST message (if the query is authorized) to the localhost orion broker, conforming NGSI specification, and returns the result of the orion broker.
+
+- Mandatory *<elementid>* : (String) ElementID used in registration of the IOT Device.
+- Optional *<limit>* : (Integer) forward to orion broker, conforming NGSI specification
+- Optional *<details>* : (String: on/off) forward to orion broker, conforming NGSI specification
+- Optional *<k1>* : (String) k1 value returned when the IOT was registered.
+- Optional *<k2>* : (String) k2 value returned when the IOT was registered.
+- Optional *<client certificate>*: (X509 Certificate) the certificate of the client that identify the device. It has to be signed by the Snap4City certification authority
+
+:toc!: //workaround to avoid toc in inner tables
+
+[cols="h,5a"]
+|===
+| HTTP request
+| [source,http,options="nowrap"]
+----
+POST /v1/queryContext HTTP/1.1
+?elementid=<elementid>&(optional)k1=<k1>&(optional)k2=<k2>&(optional)lang=en&(optional)details=on&(optional)limit=20
+Host: broker1.snap4city.org:8080
+Content-Type: application/json
+
+{"entities":[{"type":"EdgeDevice","isPattern":"false","id":"RaspberryPi_Environment"}],"attributes":["temperature1"]}
+----
+
+| HTTP response (success) 
+| [source,http,options="nowrap"]
+----
+HTTP/1.1 200 OK
+Server: Apache-Coyote/1.1
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Set-Cookie: JSESSIONID=8C2A95F3A9AA4BC19DAE88C6D63913AA; Path=/orionbrokerfilter; Secure; HttpOnly
+Connection: Keep-Alive
+Fiware-Correlator: 8293f4b0-84f8-11e8-a88d-005056bd75c2
+Date: Wed, 11 Jul 2018 10:52:31 GMT
+Content-Type: application/json
+Content-Length: 426
+
+{
+  "contextResponses" : [
+    {
+      "contextElement" : {
+        "type" : "EdgeDevice",
+        "isPattern" : "false",
+        "id" : "RaspberryPi_Environment",
+        "attributes" : [
+          {
+            "name" : "temperature1",
+            "type" : "Float",
+            "value" : "26.00"
+          }
+        ]
+      },
+      "statusCode" : {
+        "code" : "200",
+        "reasonPhrase" : "OK"
+      }
+    }
+  ]
+}
+----
+
+| example CURL request
+| [source,bash]
+----
+$ curl -k -i -H "Content-Type: application/json" -X POST -d "{\"entities\":[{\"type\":\"EdgeDevice\",\"isPattern\":\"false\",\"id\":\"RaspberryPi_Environment\"}],\"attributes\":[\"temperature1\"]}" "https://broker1.snap4city.org:8080/v1/queryContext?k1=5d7b19b5-a934-4cf9-a896-49c7ac09c4d4&k2=d49b0c02-617d-4d75-aeee-a1abe707865e&elementid=RaspberryPi_Environment"
+----
+|===
+
+=== updateContext
+
+Forward the updateContext POST message (if the query is authorized) to the localhost orion broker, conforming NGSI specification, and returns the result of the orion broker.
+
+- Mandatory *<elementid>* : (String) ElementID used in registration of the IOT Device.
+- Optional *<k1>* : (String) k1 value returned when the IOT was registered.
+- Optional *<k2>* : (String) k2 value returned when the IOT was registered.
+- Optional *<client certificate>*: (X509 Certificate) the certificate of the client that identify the device. It has to be signed by the Snap4City certification authority
+
+[cols="h,5a"]
+|===
+| HTTP request
+| [source,http,options="nowrap"]
+----
+POST /v1/updateContext HTTP/1.1
+?elementid=<elementid>&(optional)k1=<k1>&(optional)k2=<k2>(optional)lang=en
+Host: broker1.snap4city.org:8080
+Content-Type: application/json
+
+{\"contextElements\":[{\"type\":\"EdgeDevice\",\"isPattern\":\"false\",\"id\":\"RaspberryPi_Environment\",\"attributes\":[{\"name\":\"temperature1\",\"value\":\"77.77\"}]}],\"updateAction\":\"APPEND\"}
+----
+
+| HTTP response (success) 
+| [source,http,options="nowrap"]
+----
+HTTP/1.1 200 OK
+Server: Apache-Coyote/1.1
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Set-Cookie: JSESSIONID=8C2A95F3A9AA4BC19DAE88C6D63913AA; Path=/orionbrokerfilter; Secure; HttpOnly
+Connection: Keep-Alive
+Fiware-Correlator: c95daf44-84f8-11e8-bd96-005056bd75c2
+Date: Wed, 11 Jul 2018 10:54:29 GMT
+Content-Type: application/json
+Content-Length: 416
+
+{
+  "contextResponses" : [
+    {
+      "contextElement" : {
+        "type" : "EdgeDevice",
+        "isPattern" : "false",
+        "id" : "RaspberryPi_Environment",
+        "attributes" : [
+          {
+            "name" : "temperature1",
+            "type" : "",
+            "value" : ""
+          }
+        ]
+      },
+      "statusCode" : {
+        "code" : "200",
+        "reasonPhrase" : "OK"
+      }
+    }
+  ]
+}
+----
+
+| example CURL request
+| [source,bash]
+----
+$ curl -k -i -H "Content-Type: application/json" -X POST -d "{\"contextElements\":[{\"type\":\"EdgeDevice\",\"isPattern\":\"false\",\"id\":\"RaspberryPi_Environment\",\"attributes\":[{\"name\":\"temperature1\",\"value\":\"77.77\"}]}],\"updateAction\":\"APPEND\"}" "https://broker1.snap4city.org:8080/v1/updateContext?k2=d49b0c02-617d-4d75-aeee-a1abe707865e&k1=5d7b19b5-a934-4cf9-a896-49c7ac09c4d4&elementid=RaspberryPi_Environment"
+----
+|===
+
+=== subscribeContext
+
+Forward the subscribeContext POST message (if the query is authorized) to the localhost orion broker, conforming NGSI specification, and returns the result of the orion broker.
+
+- Mandatory *<elementid>* : (String) ElementID used in registration of the IOT Device.
+- Optional *<k1>* : (String) k1 value returned when the IOT was registered.
+- Optional *<k2>* : (String) k2 value returned when the IOT was registered.
+- Optional *<client certificate>*: (X509 Certificate) the certificate of the client that identify the device. It has to be signed by the Snap4City certification authority
+
+[cols="h,5a"]
+|===
+| HTTP request
+| [source,http,options="nowrap"]
+----
+POST /v1/subscribeContext HTTP/1.1
+?elementid=<elementid>&(optional)k1=<k1>&(optional)k2=<k2>(optional)lang=en
+Host: broker1.snap4city.org:8080
+Content-Type: application/json
+
+{"entities":[{"type":"EdgeDevice","isPattern":"false","id":"RaspberryPi_Environment"}],"attributes":["temperature1"],"reference":"http://prova/","duration":"P1M","notifyConditions":[{"type":"ONCHANGE","condValues":"temperature1"}],"throttling":"PT10S"}
+----
+
+| HTTP response (success) 
+| [source,http,options="nowrap"]
+----
+HTTP/1.1 200 OK
+Server: Apache-Coyote/1.1
+Access-Control-Allow-Origin: https://www.km4city.org
+Access-Control-Allow-Credentials: true
+Access-Control-Allow-Methods: POST, PUT, GET, OPTIONS, DELETE
+Access-Control-Max-Age: 3600
+Access-Control-Allow-Headers: X-Requested-With, Authorization, Origin, Content-Type, Version
+Access-Control-Expose-Headers: X-Requested-With, Authorization, Origin, Content-Type
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+Strict-Transport-Security: max-age=31536000 ; includeSubDomains
+X-Frame-Options: DENY
+Set-Cookie: JSESSIONID=F5A543D732678CBEC92E05BCA268254C; Path=/orionbrokerfilter; Secure; HttpOnly
+Connection: Keep-Alive
+Fiware-Correlator: 2d4c270e-cbaf-11e8-8b40-005056bd75c2
+Date: Tue, 09 Oct 2018 10:36:27 GMT
+Content-Type: application/json
+Content-Length: 136
+
+{
+  "subscribeResponse" : {
+    "subscriptionId" : "5bbc84ab5c3d11f630d3026b",
+    "duration" : "P1M",
+    "throttling" : "PT10S"
+  }
+}
+----
+
+| example CURL request
+| [source,bash]
+----
+$ curl -k -i -H "Content-Type: application/json" -X POST -d "{\"entities\":[{\"type\":\"EdgeDevice\",\"isPattern\":\"false\",\"id\":\"RaspberryPi_Environment\"}],\"attributes\":[\"temperature1\"],\"reference\":\"http:\/\/prova\/\",\"duration\":\"P1M\",\"notifyConditions\":[{\"type\":\"ONCHANGE\",\"condValues\":\"temperature1\"}],\"throttling\":\"PT10S\"}" "https://broker1.snap4city.org:8080/v1/subscribeContext?k1=uDxsjuEsRE&k2=5Vg2Oc2UYm&elementid=RaspberryPi_Environment"
+----
+|===
+
+=== unsubscribeContext
+
+Forward the unsubscribeContext POST message (if the query is authorized) to the localhost orion broker, conforming NGSI specification, and returns the result of the orion broker.
+
+- Mandatory *<elementid>* : (String) ElementID used in registration of the IOT Device.
+- Optional *<k1>* : (String) k1 value returned when the IOT was registered.
+- Optional *<k2>* : (String) k2 value returned when the IOT was registered.
+- Optional *<client certificate>*: (X509 Certificate) the certificate of the client that identify the device. It has to be signed by the Snap4City certification authority
+
+[cols="h,5a"]
+|===
+| HTTP request
+| [source,http,options="nowrap"]
+----
+POST /v1/unsubscribeContext HTTP/1.1
+?elementid=<elementid>&(optional)k1=<k1>&(optional)k2=<k2>&(optional)lang=en
+Host: broker1.snap4city.org:8080
+Content-Type: application/json
+
+{"subscriptionId": subscriptionId	}
+----
+
+| HTTP response (success) 
+| [source,http,options="nowrap"]
+----
+
+HTTP/1.1 200 OK
+Server: Apache-Coyote/1.1
+Access-Control-Allow-Origin: https://www.km4city.org
+Access-Control-Allow-Credentials: true
+Access-Control-Allow-Methods: POST, PUT, GET, OPTIONS, DELETE
+Access-Control-Max-Age: 3600
+Access-Control-Allow-Headers: X-Requested-With, Authorization, Origin, Content-Type, Version
+Access-Control-Expose-Headers: X-Requested-With, Authorization, Origin, Content-Type
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+Strict-Transport-Security: max-age=31536000 ; includeSubDomains
+X-Frame-Options: DENY
+Set-Cookie: JSESSIONID=8C2A95F3A9AA4BC19DAE88C6D63913AA; Path=/orionbrokerfilter; Secure; HttpOnly
+Connection: Keep-Alive
+Fiware-Correlator: a7211ada-cbaf-11e8-ba0c-005056bd75c2
+Date: Tue, 09 Oct 2018 10:39:51 GMT
+Content-Type: application/json
+Content-Length: 122
+
+{
+  "subscriptionId" : "5bbc84ab5c3d11f630d3026b",
+  "statusCode" : {
+    "code" : "200",
+    "reasonPhrase" : "OK"
+  }
+}
+
+
+----
+
+| example CURL request
+| [source,bash]
+----
+
+curl -k -i -H "Content-Type: application/json" -X POST -d "{\"subscriptionId\": 5bbc84ab5c3d11f630d3026b}" "https://broker1.snap4city.org:8080/v1/unsubscribeContext?k1=d61f83f2-8c62-42fe-9e8f-7f014f21cd38&k2=8f9397e0-1a3e-4d44-9d85-fce2ea018690&elementid=angelo-prova97"
+
+----
+|===
