@@ -178,7 +178,8 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 
 				if (req.getRequestURL().toString().indexOf("/v1/") >= 0) {
 					logger.debug("Searching sensor name in API v1 body.");
-					sensorName = getSensorNameV1(multiReadRequest, isWriteQuery(queryType), elementId);// can return null, the passed elementid is the original one
+					// passing the original elementId, without path conversion...
+					sensorName = getSensorNameV1(multiReadRequest, isWriteQuery(queryType), req.getParameter("elementid"));// can return null, the passed elementid is the original one
 				} else if (req.getRequestURL().toString().indexOf("/v2/") >= 0) {
 					logger.debug("Searching sensor name in API v2 body.");
 					sensorName = getSensorNameV2(multiReadRequest, req);// can return null, the passed elementid is the original one
