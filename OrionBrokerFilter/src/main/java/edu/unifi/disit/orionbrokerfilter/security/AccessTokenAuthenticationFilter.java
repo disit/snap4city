@@ -14,15 +14,22 @@ package edu.unifi.disit.orionbrokerfilter.security;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyFactory;
+import java.security.PublicKey;
+import java.security.cert.X509Certificate;
+import java.security.spec.RSAPublicKeySpec;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
-import java.security.cert.X509Certificate;
+import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -34,6 +41,11 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.keycloak.TokenVerifier;
+import org.keycloak.common.VerificationException;
+import org.keycloak.jose.jws.JWSHeader;
+import org.keycloak.representations.AccessToken;
+import org.keycloak.representations.RefreshToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
@@ -118,6 +130,19 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 
 	String refreshToken = null;
 
+	static Map<String, Object> certInfos;
+
+	@SuppressWarnings("unchecked")
+	@PostConstruct
+	private void postConstruct() {
+		ObjectMapper om = new ObjectMapper();
+		try {
+			certInfos = om.readValue(new URL(token_endpoint.substring(0, token_endpoint.lastIndexOf("/")) + "/certs").openStream(), Map.class);
+		} catch (Exception e) {
+			logger.error("Cannot retrieve the certInfo");
+		}
+	}
+
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws JsonProcessingException, IOException, ServletException {
 
@@ -142,7 +167,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		String queryType = ((HttpServletRequest) request).getServletPath();
 		String elementId = req.getParameter("elementid");
 
-		// eventually enrich with Multi-tenancy info
+		// eventually enrich with MultiTenancy/ServicePath info
 		if (multitenancy) {// check always to be made
 			if (req.getHeader("Fiware-ServicePath") != null)
 				elementId = req.getHeader("Fiware-ServicePath") + "." + elementId;
@@ -158,11 +183,19 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 
 		// retrieve eventually accessToken. The enforcement/management of this access token is still not used in the Orion Filter
 		// the access is granted via k1/k2/certificate
-		String accessToken = null;
+		String requestUsername = null;
 		if ((req.getHeader("Authorization") != null) && (req.getHeader("Authorization").length() > 8)) {
-			accessToken = req.getHeader("Authorization").substring(7);
-			logger.debug("accessToken arrived:" + accessToken);
+			String requestAccessToken = req.getHeader("Authorization").substring(7);
+			logger.debug("accessToken arrived:" + requestAccessToken);
+			requestUsername = retrieveUserName(requestAccessToken);
 		}
+
+		String version = "unknown";
+		if (req.getRequestURL().toString().indexOf("/v1/") >= 0)
+			version = "v1";
+		else if (req.getRequestURL().toString().indexOf("/v2/") >= 0)
+			version = "v2";
+		logger.debug("Version is:" + version);
 
 		if ((elementId != null)) {
 
@@ -176,11 +209,11 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 
 				String sensorName = null;
 
-				if (req.getRequestURL().toString().indexOf("/v1/") >= 0) {
+				if (version.equals("v1")) {
 					logger.debug("Searching sensor name in API v1 body.");
 					// passing the original elementId, without path conversion...
-					sensorName = getSensorNameV1(multiReadRequest, isWriteQuery(queryType), req.getParameter("elementid"));// can return null, the passed elementid is the original one
-				} else if (req.getRequestURL().toString().indexOf("/v2/") >= 0) {
+					sensorName = getSensorNameV1(multiReadRequest, isWriteQuery(queryType, req, version, multiReadRequest.getLocale()), req.getParameter("elementid"));// can return null, the passed elementid is the original one
+				} else if (version.equals("v2")) {
 					logger.debug("Searching sensor name in API v2 body.");
 					sensorName = getSensorNameV2(multiReadRequest, req);// can return null, the passed elementid is the original one
 				} else
@@ -190,14 +223,14 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 					logger.debug("sensor's name {}", sensorName);
 
 				// if (!queryType.contains("unsubscribeContext"))
-				checkAuthorization(prefixelementID + ":" + elementId, k1, k2, queryType, sensorName, pksha1, request.getLocale());
+				checkAuthorization(prefixelementID + ":" + elementId, k1, k2, queryType, sensorName, pksha1, requestUsername, version, req, request.getLocale());
 
 				logger.debug("Credentials ARE VALID");
 
 				authUser();
 
 			} catch (CredentialsNotValidException e) {
-				logger.error("Credentials ARE NOT VALID", e);
+				logger.warn("Credentials ARE NOT VALID", e);
 
 				writeResponseError(response, e.getMessage());
 
@@ -205,15 +238,101 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 			}
 
 		} else {
-			logger.error("Credentials ARE NOT PRESENT");
+			logger.warn("Missing parameter: elementid");
 
-			writeResponseError(response, messages.getMessage("login.ko.credentialsnotpresent", null, request.getLocale()));
+			writeResponseError(response, messages.getMessage("login.ko.missingparameterelementid", null, request.getLocale()));
 
 			return;
 
 		}
 
 		filterChain.doFilter(multiReadRequest, response);// DO WE NEED IT???
+	}
+
+	@SuppressWarnings("unchecked")
+	private PublicKey retrievePublicKeyFromCertsEndpoint(JWSHeader jwsHeader) {
+		try {
+
+			List<Map<String, Object>> keys = (List<Map<String, Object>>) certInfos.get("keys");
+
+			Map<String, Object> keyInfo = null;
+			for (Map<String, Object> key : keys) {
+				String kid = (String) key.get("kid");
+
+				if (jwsHeader.getKeyId().equals(kid)) {
+					keyInfo = key;
+					break;
+				}
+			}
+
+			if (keyInfo == null) {
+				return null;
+			}
+
+			KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+			String modulusBase64 = (String) keyInfo.get("n");
+			String exponentBase64 = (String) keyInfo.get("e");
+
+			// see org.keycloak.jose.jwk.JWKBuilder#rs256
+			java.util.Base64.Decoder urlDecoder = java.util.Base64.getUrlDecoder();
+			BigInteger modulus = new BigInteger(1, urlDecoder.decode(modulusBase64));
+			BigInteger publicExponent = new BigInteger(1, urlDecoder.decode(exponentBase64));
+
+			return keyFactory.generatePublic(new RSAPublicKeySpec(modulus, publicExponent));
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	private boolean refreshTokenExpired() {
+		if (refreshToken == null)
+			return true;
+
+		try {
+			TokenVerifier<RefreshToken> verifier = TokenVerifier.create(refreshToken, RefreshToken.class);
+			RefreshToken token = verifier
+					.publicKey(retrievePublicKeyFromCertsEndpoint(verifier.getHeader()))
+					.verify()
+					.getToken();
+			return token.isExpired();
+		} catch (VerificationException e) {
+			return true;
+		}
+	}
+
+	private String retrieveUserName(String requestAccessToken) {
+
+		if (requestAccessToken == null)
+			return null;
+
+		String toreturn = null;
+
+		try {
+			TokenVerifier<AccessToken> verifier = TokenVerifier.create(requestAccessToken, AccessToken.class);
+			AccessToken token = verifier
+					.publicKey(retrievePublicKeyFromCertsEndpoint(verifier.getHeader()))
+					.verify()
+					.getToken();
+			if (!token.isExpired()) {
+				toreturn = token.getPreferredUsername();
+				if (toreturn == null) {
+					Map<String, Object> otherclaims = token.getOtherClaims();
+					toreturn = (String) otherclaims.get("username");
+
+				}
+			} else {
+				logger.warn("The passed accessToken is Expired");
+			}
+		} catch (VerificationException e) {
+			logger.warn("Verification failed");
+			return null;
+		}
+
+		logger.info("Retrieved username is:" + toreturn);
+
+		return toreturn;
 	}
 
 	private String getSensorNameV1(HttpServletRequest multiReadRequest, boolean isWriteQuery, String elementId) throws IOException, NoSuchMessageException, CredentialsNotValidException {
@@ -324,14 +443,15 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
 	}
 
-	private void checkAuthorization(String elementId, String k1, String k2, String queryType, String sensorName, String pksha1, Locale lang) throws CredentialsNotValidException, UnsupportedEncodingException {
+	private void checkAuthorization(String elementId, String k1, String k2, String queryType, String sensorName, String pksha1, String requestedUsername, String version, HttpServletRequest req, Locale lang)
+			throws CredentialsNotValidException, UnsupportedEncodingException {
 
 		CachedCredentials cc = getCachedCredentials(elementId, sensorName, lang);
 
 		if (cc.getIsPublic()) {
-			if (isWriteQuery(queryType)) {
+			if (isWriteQuery(queryType, req, version, lang)) {
 				logger.debug("The operation is WRITE on public");
-				if (cc.getOwnerCredentials().isValid(k1, k2, pksha1)) {
+				if (cc.getOwnerCredentials().isValid(requestedUsername, k1, k2, pksha1)) {
 					logger.debug("The owner credentials are valid");
 					return;
 				} else {
@@ -343,9 +463,9 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 				return;
 			}
 		} else {
-			if (isWriteQuery(queryType)) {
+			if (isWriteQuery(queryType, req, version, lang)) {
 				logger.debug("The operation is WRITE on private");
-				if (cc.getOwnerCredentials().isValid(k1, k2, pksha1)) {
+				if (cc.getOwnerCredentials().isValid(requestedUsername, k1, k2, pksha1)) {
 					logger.debug("The owner credentials are valid");
 					return;
 				} else {
@@ -354,7 +474,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 				}
 			} else {
 				logger.debug("The operation is READ on private");
-				if (cc.getOwnerCredentials().isValid(k1, k2, pksha1)) {
+				if (cc.getOwnerCredentials().isValid(requestedUsername, k1, k2, pksha1)) {
 					logger.debug("The owner credentials are valid");
 					return;
 				} else {
@@ -363,12 +483,12 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 					logger.debug("The owner credentials are not valid, check if there are any delegation");
 					for (Credentials c : cc.getDelegatedCredentials()) {
 						if (cc.getOwnerCredentials().getPksha1() == null) {// if the elementID is not protected with certificate, use k1, k2 enforcement
-							if (c.isValid(k1, k2)) {
+							if (c.isValid(requestedUsername, k1, k2, null)) {
 								logger.debug("One of the delegated credentials are valid, certificate not involved");
 								return;
 							}
-						} else {// if the elementID is protected with certificate: (1) check if there is a pksha1 and (2) check the username delegated is the same of the username included in the certicate
-							if ((pksha1 != null) && (c.isValid(getUsername(pksha1, lang)))) {
+						} else {// if the elementID is protected with certificate: check requestedUsername OR check the username delegated is the same of the username included in the certicate
+							if ((c.isValid(requestedUsername, getUsername(pksha1, lang)))) {
 								logger.debug("One of the delegated credentials are valid, certificate involved");
 								return;
 							}
@@ -382,6 +502,10 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 	}
 
 	private String getUsername(String pksha1, Locale lang) throws CredentialsNotValidException {
+
+		if (pksha1 == null)
+			return null;
+
 		String toreturn = null;
 		if ((toreturn = cachedPksha1UsernameOwnership.get(pksha1)) != null)
 			return toreturn;
@@ -395,8 +519,13 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		return toreturn;
 	}
 
-	private boolean isWriteQuery(String queryType) {
-		return queryType.contains("updateContext");
+	private boolean isWriteQuery(String queryType, HttpServletRequest req, String version, Locale lang) throws CredentialsNotValidException {
+		if (version.equals("v1")) {
+			return queryType.contains("updateContext");
+		} else if (version.equals("v2")) {
+			return req.getMethod().equals("PATCH");
+		} else
+			throw new CredentialsNotValidException(messages.getMessage("login.ko.versionnotrecognized", null, lang));
 	}
 
 	private CachedCredentials getCachedCredentials(String elementId, String sensorName, Locale lang) throws CredentialsNotValidException, UnsupportedEncodingException {
@@ -536,10 +665,10 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 
 	private String getAccessToken(Locale lang) throws CredentialsNotValidException {
 
-		// TODO: check validity of the refreshtoken. If it is elapsed, forse refreshToken = null
-
-		if (refreshToken == null)
+		if (refreshTokenExpired()) {
+			logger.debug("Refresh token is expired...");
 			getRefreshToken(lang);
+		}
 
 		String toreturn = new String();
 
@@ -585,7 +714,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 			toreturn = atNode.asText();
 		} catch (HttpClientErrorException | IOException e) {
 			refreshToken = null; // force to re-login
-			logger.error("Trouble in getAccessToken", e);
+			logger.error("Trouble in getRefresh", e);
 			throw new CredentialsNotValidException(messages.getMessage("login.ko.networkproblems", null, lang));
 		}
 

@@ -12,8 +12,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package edu.unifi.disit.orionbrokerfilter;
 
-import java.util.concurrent.TimeUnit;
-
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -30,6 +28,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
+
+import edu.unifi.disit.orionbrokerfilter.security.IdleConnectionMonitorThread;
 
 @EnableAutoConfiguration(exclude = { DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class })
 @SpringBootApplication
@@ -48,17 +48,25 @@ public class Application extends SpringBootServletInitializer {
 	}
 
 	@Bean
-	public ClientHttpRequestFactory createRequestFactory(@Value("${connection.timeout}") String timeout, @Value("${connection.max}") String maxConnections) {
+	public ClientHttpRequestFactory createRequestFactory(@Value("${connection.timeout}") String timeout, @Value("${connection.max}") String maxConnections) throws InterruptedException {
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
-		connectionManager.setMaxTotal(Integer.parseInt(maxConnections));
+		connectionManager.setMaxTotal(Integer.parseInt(maxConnections) * 2);
+		// connectionManager.closeExpiredConnections();
 		connectionManager.setDefaultMaxPerRoute(Integer.parseInt(maxConnections));
-		connectionManager.closeIdleConnections(Integer.parseInt(timeout), TimeUnit.MILLISECONDS);
+		// connectionManager.closeIdleConnections(Integer.parseInt(timeout), TimeUnit.MILLISECONDS);
+		// connectionManager.setValidateAfterInactivity(Integer.parseInt(timeout));
 
 		RequestConfig config = RequestConfig.custom().
 		/*		*/setConnectTimeout(Integer.parseInt(timeout)).
+		/*		*/setSocketTimeout(Integer.parseInt(timeout)).
 		/*		*/setConnectionRequestTimeout(Integer.parseInt(timeout)).build();
 
 		CloseableHttpClient httpClient = HttpClientBuilder.create().setConnectionManager(connectionManager).setDefaultRequestConfig(config).build();
+
+		IdleConnectionMonitorThread staleMonitor = new IdleConnectionMonitorThread(connectionManager, Integer.parseInt(timeout));
+		staleMonitor.start();
+		staleMonitor.join(1000);
+
 		return new HttpComponentsClientHttpRequestFactory(httpClient);
 	}
 

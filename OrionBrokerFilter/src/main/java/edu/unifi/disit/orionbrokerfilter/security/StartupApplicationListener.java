@@ -50,5 +50,6 @@ public class StartupApplicationListener implements
 		else
 			logger.info("Support MT/SP disabled");
 		logger.info("Support v2 enabled");
+		logger.info("Auth Bear Support enabled");
 	}
 }
