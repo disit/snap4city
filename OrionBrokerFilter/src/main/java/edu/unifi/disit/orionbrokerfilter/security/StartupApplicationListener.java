@@ -31,8 +31,14 @@ public class StartupApplicationListener implements
 	@Value("${cors.origins.accepted:#{null}}")
 	private String originsAccepted;
 
-	@Value("${spring.prefixelementID}")
-	private String prefixelementID;
+	@Value("${spring.prefix_serviceuri}")
+	private String prefixServiceuri;
+
+	@Value("${spring.organization}")
+	private String organization;
+
+	@Value("${spring.context_broker_name}")
+	private String contextBrokerName;
 
 	@Value("${multitenancy:false}")
 	private Boolean multitenancy;
@@ -44,7 +50,10 @@ public class StartupApplicationListener implements
 			logger.info("ServiceMap scenario enabled on {}", servicemapkb_endpoint);
 		if (originsAccepted != null)
 			logger.info("cors enabled on {}", originsAccepted);
-		logger.info("ElementID prefix is {}", prefixelementID);
+		logger.info("Prefix ServiceURI {}", prefixServiceuri);
+		logger.info("Organization {}", organization);
+		logger.info("Context Broker Name {}", contextBrokerName);
+
 		if (multitenancy)
 			logger.info("Support MT/SP enabled");
 		else

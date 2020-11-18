@@ -63,7 +63,7 @@ public class Credentials {
 	}
 
 	// check validity of the user
-	private boolean isValidUsername(String username) {
+	public boolean isValidUsername(String username) {
 		return ((username != null) && (this.username != null) && (this.username.equals(username)));
 	}
 
@@ -78,26 +78,14 @@ public class Credentials {
 	}
 
 	// if a reqUsername is specified: check validity of this user
-	// otherwise: check validity of the certUser
-	public boolean isValid(String reqUsername, String certUsername) {
-		if (reqUsername != null)
-			return isValidUsername(reqUsername);
-		else
-			return isValidUsername(certUsername);
-	}
-
-	// if a reqUsername is specified: check validity of this user
 	// otherwise, if pkasha is set: check validity of this pksha
 	// otherwise: check validity of k1, k2
-	public boolean isValid(String reqUsername, String k1, String k2, String pksha1) {
-		if (reqUsername != null)
-			return isValidUsername(reqUsername);
-		else {
-			if (this.pksha1 != null)
-				return isValidPK(pksha1);
-			else
-				return isValidK1K2(k1, k2);
-		}
+	public boolean isValid(String k1, String k2, String pksha1) {
+
+		if (this.pksha1 != null)
+			return isValidPK(pksha1);
+		else
+			return isValidK1K2(k1, k2);
 	}
 
 	@Override

@@ -74,7 +74,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.unifi.disit.orionbrokerfilter.datamodel.CachedCredentials;
+import edu.unifi.disit.orionbrokerfilter.datamodel.CheckCredential;
 import edu.unifi.disit.orionbrokerfilter.datamodel.Credentials;
+import edu.unifi.disit.orionbrokerfilter.datamodel.DelegationPublic;
 import edu.unifi.disit.orionbrokerfilter.datamodel.Ownership;
 import edu.unifi.disit.orionbrokerfilter.datamodel.Response;
 import edu.unifi.disit.orionbrokerfilter.exception.CredentialsNotValidException;
@@ -105,8 +107,14 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 	@Value("${spring.servicemapkb_endpoint:#{null}}")
 	private String servicemapkb_endpoint;
 
-	@Value("${spring.prefixelementID}")
-	private String prefixelementID;
+	@Value("${spring.prefix_serviceuri}")
+	private String prefixServiceUri;
+
+	@Value("${spring.organization}")
+	private String organization;
+
+	@Value("${spring.context_broker_name}")
+	private String contextBrokerName;
 
 	@Value("${spring.elapsingcache.minutes}")
 	private Integer minutesElapsingCache;
@@ -119,11 +127,15 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 
 	ObjectMapper objectMapper = new ObjectMapper();
 
+	// used for IOT-BUTTON like scenario
 	HashMap<String, CachedCredentials> cachedCredentials = new HashMap<String, CachedCredentials>();
-
+	HashMap<String, Ownership> cachedCredentialsOwnership = new HashMap<String, Ownership>();
 	HashMap<String, String> cachedPksha1UsernameOwnership = new HashMap<String, String>();
 
-	HashMap<String, Ownership> cachedOwnership = new HashMap<String, Ownership>();
+	// used for EDGE-CLOUD scenario
+	Map<String, ArrayList<CheckCredential>> cachedDelegation = new HashMap<String, ArrayList<CheckCredential>>();
+	Map<String, DelegationPublic> cachedDelegationPublic = new HashMap<String, DelegationPublic>();
+	Map<String, ArrayList<CheckCredential>> cachedOwnership = new HashMap<String, ArrayList<CheckCredential>>();
 
 	@Autowired
 	private RestTemplate restTemplate;
@@ -149,7 +161,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		final HttpServletRequest req = (HttpServletRequest) request;
 		MultiReadHttpServletRequest multiReadRequest = new MultiReadHttpServletRequest((HttpServletRequest) request);
 
-		// retrieve eventually certicate
+		// retrieve https certicate
 		String pksha1 = null;
 		X509Certificate[] certs = (X509Certificate[]) multiReadRequest.getAttribute("javax.servlet.request.X509Certificate");
 		if ((certs != null) && (certs.length > 0)) {
@@ -165,7 +177,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 
 		// retrieve NGSI info
 		String queryType = ((HttpServletRequest) request).getServletPath();
-		String elementId = req.getParameter("elementid");
+		String elementId = req.getParameter("elementid");// mandatory
 
 		// eventually enrich with MultiTenancy/ServicePath info
 		if (multitenancy) {// check always to be made
@@ -181,16 +193,15 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 			logger.debug("elementid became:" + elementId);
 		}
 
-		// retrieve eventually accessToken. The enforcement/management of this access token is still not used in the Orion Filter
-		// the access is granted via k1/k2/certificate
-		String requestUsername = null;
+		// retrieve eventually accessToken
+		String requestedAccessToken = null;
 		if ((req.getHeader("Authorization") != null) && (req.getHeader("Authorization").length() > 8)) {
-			String requestAccessToken = req.getHeader("Authorization").substring(7);
-			logger.debug("accessToken arrived:" + requestAccessToken);
-			requestUsername = retrieveUserName(requestAccessToken);
+			requestedAccessToken = req.getHeader("Authorization").substring(7);
+			logger.debug("accessToken arrived:" + requestedAccessToken);
 		}
 
-		String version = "unknown";
+		// retrieve NGSI version
+		String version = null;
 		if (req.getRequestURL().toString().indexOf("/v1/") >= 0)
 			version = "v1";
 		else if (req.getRequestURL().toString().indexOf("/v2/") >= 0)
@@ -209,21 +220,23 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 
 				String sensorName = null;
 
-				if (version.equals("v1")) {
+				if ("v1".equals(version)) {
 					logger.debug("Searching sensor name in API v1 body.");
-					// passing the original elementId, without path conversion...
+					// passing the original elementId, without any path conversion...
 					sensorName = getSensorNameV1(multiReadRequest, isWriteQuery(queryType, req, version, multiReadRequest.getLocale()), req.getParameter("elementid"));// can return null, the passed elementid is the original one
-				} else if (version.equals("v2")) {
+				} else if ("v2".equals(version)) {
 					logger.debug("Searching sensor name in API v2 body.");
 					sensorName = getSensorNameV2(multiReadRequest, req);// can return null, the passed elementid is the original one
 				} else
 					throw new CredentialsNotValidException(messages.getMessage("login.ko.requesturlmalformed", null, multiReadRequest.getLocale()));
 
-				if (sensorName != null)
-					logger.debug("sensor's name {}", sensorName);
+				String elementType = "IOTID";
+				if (sensorName != null) {
+					elementType = "ServiceURI";
+					logger.debug("sensor's name {} - It's a serviceURI", sensorName);
+				}
 
-				// if (!queryType.contains("unsubscribeContext"))
-				checkAuthorization(prefixelementID + ":" + elementId, k1, k2, queryType, sensorName, pksha1, requestUsername, version, req, request.getLocale());
+				checkAuthorization(organization + ":" + contextBrokerName + ":" + elementId, elementType, sensorName, k1, k2, pksha1, requestedAccessToken, queryType, version, req, request.getLocale());
 
 				logger.debug("Credentials ARE VALID");
 
@@ -302,7 +315,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		}
 	}
 
-	private String retrieveUserName(String requestAccessToken) {
+	private String retrieveUserName(String requestAccessToken, Locale lang) throws NoSuchMessageException, CredentialsNotValidException {
 
 		if (requestAccessToken == null)
 			return null;
@@ -324,10 +337,11 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 				}
 			} else {
 				logger.warn("The passed accessToken is Expired");
+				throw new CredentialsNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
 			}
 		} catch (VerificationException e) {
 			logger.warn("Verification failed");
-			return null;
+			throw new CredentialsNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
 		}
 
 		logger.info("Retrieved username is:" + toreturn);
@@ -344,7 +358,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		// retrieve "attributes index
 		int startIndex = entityBody.indexOf("attributes");
 		if (startIndex == -1) {
-			logger.warn(messages.getMessage("login.ko.sensornamenotpresent", null, multiReadRequest.getLocale()) + " entityBody is {}", entityBody);
+			logger.warn(messages.getMessage("login.ko.sensornamenotpresent", null, multiReadRequest.getLocale()));
 			// throw new CredentialsNotValidException(messages.getMessage("login.ko.sensornamenotpresent", null, multiReadRequest.getLocale()));
 			return null;
 		}
@@ -443,15 +457,131 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
 	}
 
-	private void checkAuthorization(String elementId, String k1, String k2, String queryType, String sensorName, String pksha1, String requestedUsername, String version, HttpServletRequest req, Locale lang)
+	private void checkAuthorization(String elementId, String elementType, String sensorName, String k1, String k2, String pksha1, String requestedAccessToken, String queryType, String version, HttpServletRequest req, Locale lang)
 			throws CredentialsNotValidException, UnsupportedEncodingException {
 
-		CachedCredentials cc = getCachedCredentials(elementId, sensorName, lang);
+		if (requestedAccessToken != null)// CLOUD-EDGE scenario
+			checkAuthorizationWithAccessToken(elementId, elementType, sensorName, requestedAccessToken, queryType, version, req, lang);
+		else// IOT-BUTTON like scenario
+			checkAuthorizationWithK1K2(elementId, elementType, sensorName, k1, k2, pksha1, queryType, version, req, lang);
+	}
 
+	private CheckCredential retrieveCachedOwnership(String elementId, String elementType, String username, String accessToken, Locale lang) throws CredentialsNotValidException {
+
+		// retrieve cached credentials for Ownership
+		ArrayList<CheckCredential> ownerships = cachedOwnership.get(elementId);
+		CheckCredential o = null;
+
+		if (ownerships == null) {
+			logger.debug("ownership not found in cache");
+			ownerships = new ArrayList<CheckCredential>();
+		} else {
+			// retrieve ownership for current username
+			o = ownerships.stream().filter(x -> username.equals(x.getUsername()) && elementType.equals(x.getElementType())).findAny().orElse(null);
+			logger.debug("ownership found in cache: {}", o);
+
+			if ((o != null) && (o.isElapsed())) {
+				logger.debug("ownership removed from cache since not valid anymore");
+				ownerships.remove(o);
+				cachedOwnership.put(elementId, ownerships);
+				o = null;
+			}
+		}
+
+		// if ownership not found or invalidated, retrieve new credentials for ownership
+		if (o == null) {
+			logger.debug("retrieving credentials for ownership");
+			o = getOwnershipCC(accessToken, elementId, elementType, username, lang);
+			ownerships.add(o);
+			cachedOwnership.put(elementId, ownerships);
+		}
+
+		return o;
+	}
+
+	private CheckCredential retrieveCachedDelegation(String elementId, String elementType, String username, String accessToken, Locale lang) throws CredentialsNotValidException, UnsupportedEncodingException {
+
+		// retrieve all cached credentials for Delegation
+		ArrayList<CheckCredential> delegations = cachedDelegation.get(elementId);
+		CheckCredential d = null;
+
+		if (delegations == null) {
+			logger.debug("delegation not found in cache");
+			delegations = new ArrayList<CheckCredential>();
+		} else {
+			// retrieve delegation for current username
+			d = delegations.stream().filter(x -> username.equals(x.getUsername()) && elementType.equals(x.getElementType())).findAny().orElse(null);
+			logger.debug("delegation found in cache: {}", d);
+			if ((d != null) && (d.isElapsed())) {
+				logger.debug("d removed from cache since not valid anymore");
+				delegations.remove(d);
+				cachedDelegation.put(elementId, delegations);
+				d = null;
+			}
+		}
+
+		// if delegation not found or invalidated, retrieve new credentials for delegation
+		if (d == null) {
+			logger.debug("retrieving credentials for delegation");
+			d = getDelegationCC(accessToken, elementId, elementType, username, lang);
+			delegations.add(d);
+			cachedDelegation.put(elementId, delegations);
+		}
+
+		return d;
+	}
+
+	private void checkAuthorizationWithAccessToken(String elementId, String elementType, String sensorName, String accessToken, String queryType, String version, HttpServletRequest req, Locale lang)
+			throws CredentialsNotValidException, UnsupportedEncodingException {
+
+		String requestUsername = retrieveUserName(accessToken, lang);
+
+		CheckCredential o = retrieveCachedOwnership(elementId, "IOTID", requestUsername, accessToken, lang);
+
+		if ((o != null) && (o.getResult())) {
+			logger.debug("Got ownership");
+			return;
+		} else {
+
+			if (isWriteQuery(queryType, req, version, lang)) {
+				logger.debug("Write OPERATION, not got ownership");
+				throw new CredentialsNotValidException(messages.getMessage("login.ko.credentialsnotvalid", null, lang));
+
+			} else {
+				logger.debug("Read OPERATION, not got ownership");
+				String sensorUri = (sensorName == null) ? elementId : prefixServiceUri + "/" + contextBrokerName + "/" + organization + "/" + elementId.substring(elementId.lastIndexOf(":") + 1) + "/" + sensorName;
+
+				// if the sensorUri is public and not elapsed, authorize
+				DelegationPublic dp = cachedDelegationPublic.get(sensorUri);
+				if ((dp != null) && (elementType.equalsIgnoreCase(dp.getElementType())))
+					if (cachedDelegationPublic.get(sensorUri).isElapsed())// if elapsed remove and continue
+						cachedDelegationPublic.remove(sensorUri);
+					else {
+						logger.debug("Read OPERATION on public, passed");
+						return;
+					}
+
+				CheckCredential d = retrieveCachedDelegation(sensorUri, elementType, requestUsername, accessToken, lang);
+				if ((d != null) && (d.getResult())) {
+					logger.debug("Got delegation");
+				} else {
+					logger.debug("NOT Got delegation");
+					throw new CredentialsNotValidException(messages.getMessage("login.ko.credentialsnotvalid", null, lang));
+				}
+			}
+		}
+	}
+
+	private void checkAuthorizationWithK1K2(String elementId, String elementType, String sensorName, String k1, String k2, String pksha1, String queryType, String version, HttpServletRequest req, Locale lang)
+			throws CredentialsNotValidException, UnsupportedEncodingException {
+
+		CachedCredentials cc = getCachedCredentials(elementId, elementType, sensorName, lang);
+
+		// enforcement
 		if (cc.getIsPublic()) {
 			if (isWriteQuery(queryType, req, version, lang)) {
 				logger.debug("The operation is WRITE on public");
-				if (cc.getOwnerCredentials().isValid(requestedUsername, k1, k2, pksha1)) {
+				if (cc.getOwnerCredentials().isValid(k1, k2, pksha1)) {
 					logger.debug("The owner credentials are valid");
 					return;
 				} else {
@@ -465,7 +595,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		} else {
 			if (isWriteQuery(queryType, req, version, lang)) {
 				logger.debug("The operation is WRITE on private");
-				if (cc.getOwnerCredentials().isValid(requestedUsername, k1, k2, pksha1)) {
+				if (cc.getOwnerCredentials().isValid(k1, k2, pksha1)) {
 					logger.debug("The owner credentials are valid");
 					return;
 				} else {
@@ -474,7 +604,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 				}
 			} else {
 				logger.debug("The operation is READ on private");
-				if (cc.getOwnerCredentials().isValid(requestedUsername, k1, k2, pksha1)) {
+				if (cc.getOwnerCredentials().isValid(k1, k2, pksha1)) {
 					logger.debug("The owner credentials are valid");
 					return;
 				} else {
@@ -483,12 +613,12 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 					logger.debug("The owner credentials are not valid, check if there are any delegation");
 					for (Credentials c : cc.getDelegatedCredentials()) {
 						if (cc.getOwnerCredentials().getPksha1() == null) {// if the elementID is not protected with certificate, use k1, k2 enforcement
-							if (c.isValid(requestedUsername, k1, k2, null)) {
+							if (c.isValid(k1, k2, null)) {
 								logger.debug("One of the delegated credentials are valid, certificate not involved");
 								return;
 							}
 						} else {// if the elementID is protected with certificate: check requestedUsername OR check the username delegated is the same of the username included in the certicate
-							if ((c.isValid(requestedUsername, getUsername(pksha1, lang)))) {
+							if ((c.isValidUsername(getUsername(pksha1, lang)))) {
 								logger.debug("One of the delegated credentials are valid, certificate involved");
 								return;
 							}
@@ -520,26 +650,26 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 	}
 
 	private boolean isWriteQuery(String queryType, HttpServletRequest req, String version, Locale lang) throws CredentialsNotValidException {
-		if (version.equals("v1")) {
+		if ("v1".equals(version)) {
 			return queryType.contains("updateContext");
-		} else if (version.equals("v2")) {
+		} else if ("v2".equals(version)) {
 			return req.getMethod().equals("PATCH");
 		} else
 			throw new CredentialsNotValidException(messages.getMessage("login.ko.versionnotrecognized", null, lang));
 	}
 
-	private CachedCredentials getCachedCredentials(String elementId, String sensorName, Locale lang) throws CredentialsNotValidException, UnsupportedEncodingException {
+	private CachedCredentials getCachedCredentials(String elementId, String elementType, String sensorName, Locale lang) throws CredentialsNotValidException, UnsupportedEncodingException {
 
 		String accessToken = null;
 
-		Ownership o = cachedOwnership.get(elementId);
+		Ownership o = cachedCredentialsOwnership.get(elementId);
 		if (o == null) {
 			logger.debug("ownership not found in cache");
 		} else {
 			logger.debug("ownership found in cache: {}", o);
 			if (o.isElapsed()) {
 				logger.debug("ownership remove from cache since not valid anymore");
-				cachedOwnership.remove(elementId);
+				cachedCredentialsOwnership.remove(elementId);
 				o = null;
 			}
 		}
@@ -547,7 +677,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		if (o == null) {
 			accessToken = getAccessToken(lang);
 			o = getOwnership(accessToken, elementId, lang);
-			cachedOwnership.put(elementId, o);
+			cachedCredentialsOwnership.put(elementId, o);
 		}
 
 		String sensorUri = (sensorName == null) ? elementId : o.getElementUrl() + "/" + sensorName;
@@ -579,7 +709,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 			if (accessToken == null)
 				accessToken = getAccessToken(lang);
 
-			cc = enrichDelegatedCredentials(cc, accessToken, sensorUri, lang);
+			cc = enrichDelegatedCredentials(cc, accessToken, sensorUri, elementType, lang);
 
 			cachedCredentials.put(sensorUri, cc);
 		}
@@ -888,15 +1018,17 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		return toreturn;
 	}
 
-	private CachedCredentials enrichDelegatedCredentials(CachedCredentials cc, String accessToken, String sensorUri, Locale lang) throws CredentialsNotValidException, UnsupportedEncodingException {
+	private CachedCredentials enrichDelegatedCredentials(CachedCredentials cc, String accessToken, String sensorUri, String elementType, Locale lang) throws CredentialsNotValidException, UnsupportedEncodingException {
 
 		List<Credentials> toreturn = new ArrayList<Credentials>();
 
 		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
 		params.add("accessToken", accessToken);
 		params.add("sourceRequest", "orionbrokerfilter");
+		params.add("elementType", elementType);
+		// TODO manage the delegation to group nad organization in the cachedcredential
 
-		UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(delegation_endpoint + "/" + URLEncoder.encode(sensorUri, StandardCharsets.UTF_8.toString()) + "/delegator")
+		UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(delegation_endpoint + "/v3/apps/" + URLEncoder.encode(sensorUri, StandardCharsets.UTF_8.toString()) + "/delegator")
 				.queryParams(params)
 				.build();
 		logger.debug("query getDelegatedCredentials {}", uriComponents.toUri());
@@ -966,4 +1098,106 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 
 		return cc;
 	}
+
+	private CheckCredential getOwnershipCC(String accessToken, String elementId, String elementType, String username, Locale lang) throws CredentialsNotValidException {
+
+		CheckCredential toreturn = null;
+
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+		params.add("type", elementType);
+		params.add("accessToken", accessToken);
+		params.add("elementId", elementId);
+
+		UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(ownership_endpoint)
+				.queryParams(params)
+				.build();
+		logger.debug("query getOwnerCredentials {}", uriComponents.toUri());
+
+		// RestTemplate restTemplate = new RestTemplate();
+		HttpHeaders headers = new HttpHeaders();
+		HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+
+		try {
+			ResponseEntity<String> response = restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, entity, String.class);
+			logger.debug("Response from  getOwnerCredentials {}", response);
+
+			ObjectMapper objectMapper = new ObjectMapper();
+
+			JsonNode rootNode = objectMapper.readTree(response.getBody().getBytes());
+			Iterator<JsonNode> els = rootNode.elements();
+
+			Boolean result = true;
+
+			if ((els == null) || (!els.hasNext())) {
+				logger.error("The retrieved data does not contains any elements");
+				result = false;
+			}
+
+			toreturn = new CheckCredential(elementType, username, result, minutesElapsingCache);
+		} catch (HttpClientErrorException | IOException e) {
+			logger.error("Trouble in getOwnerCredentials", e);
+			throw new CredentialsNotValidException(messages.getMessage("login.ko.networkproblems", null, lang));
+		}
+
+		return toreturn;
+	}
+
+	private CheckCredential getDelegationCC(String accessToken, String sensorUri, String elementType, String username, Locale lang) throws CredentialsNotValidException, UnsupportedEncodingException {
+
+		CheckCredential toreturn = null;
+
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+		params.add("accessToken", accessToken);
+		params.add("sourceRequest", "orionbrokerfilter");
+		params.add("elementType", elementType);
+		params.add("elementID", sensorUri);
+
+		UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(delegation_endpoint + "/v3/apps/" + URLEncoder.encode(sensorUri, StandardCharsets.UTF_8.toString()) + "/access/check")
+				.queryParams(params)
+				.build();
+		logger.debug("query checkDelegationCredentials {}", uriComponents.toUri());
+
+		// RestTemplate restTemplate = new RestTemplate();
+		HttpHeaders headers = new HttpHeaders();
+		HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+
+		try {
+			ResponseEntity<String> response = restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, entity, String.class);
+			logger.debug("Response from getDelegatedCredentials {}", response);
+
+			ObjectMapper objectMapper = new ObjectMapper();
+			Boolean result = false;
+
+			if (response.getBody() != null) {// 204 no content body
+				JsonNode rootNode = objectMapper.readTree(response.getBody().getBytes());
+
+				JsonNode resultNode = rootNode.path("result");
+				if ((resultNode == null) || (resultNode.isNull()) || (resultNode.isMissingNode())) {
+					logger.error("The retrieved data does not contains resultNode");
+					// throw new CredentialsNotValidException(messages.getMessage("login.ko.configurationerror", null, lang));
+				} else {
+
+					if (resultNode.asBoolean())
+						result = true;
+
+					JsonNode messageNode = rootNode.path("message");
+
+					if ((messageNode == null) || (messageNode.isNull()) || (messageNode.isMissingNode())) {
+						logger.debug("The retrieved data does not contains messageNode");
+						// throw new CredentialsNotValidException(messages.getMessage("login.ko.configurationerror", null, lang));
+					} else if ("PUBLIC".equalsIgnoreCase(messageNode.asText()))
+						cachedDelegationPublic.put(sensorUri, new DelegationPublic(elementType, minutesElapsingCache));
+				}
+
+			}
+
+			toreturn = new CheckCredential(elementType, username, result, minutesElapsingCache);
+		} catch (HttpClientErrorException | IOException e) {
+			logger.error("Trouble in getDelegatedCredentials", e);
+			throw new CredentialsNotValidException(messages.getMessage("login.ko.networkproblems", null, lang));
+		}
+
+		return toreturn;
+	}
+
 }
