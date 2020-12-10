@@ -181,3 +181,14 @@ CREATE TABLE `devicegroupelement` (
   `delete_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE `lightactivity` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `element_id` varchar(255) DEFAULT NULL,
+  `element_type` varchar(255) DEFAULT NULL,
+  `source_request` varchar(255) DEFAULT NULL,
+  `insert_time` datetime DEFAULT NULL,
+  `delete_time` datetime DEFAULT NULL,
+  `source_id` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;

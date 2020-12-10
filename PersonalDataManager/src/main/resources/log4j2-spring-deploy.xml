@@ -10,7 +10,12 @@
 				<TimeBasedTriggeringPolicy />
 				<SizeBasedTriggeringPolicy size="50 MB" />
 			</Policies>
-			<DefaultRolloverStrategy max="50" />
+			<DefaultRolloverStrategy max="50" >
+				<Delete basePath="${sys:logFileFolder}/datamanager/" maxDepth="2">
+          			<IfFileName glob="*/*.log.gz" />
+          			<IfLastModified age="60d" />
+        		</Delete>
+			</DefaultRolloverStrategy>
 		</RollingFile>
 		<RollingFile name="MyFileError" fileName="${sys:logFileFolder}/datamanager/datamanager-error.log" immediateFlush="true" append="true"	filePattern="${sys:logFileFolder}/datamanager/datamanager-error-$${date:yyyy-MM}/%d{yyyy-MM-dd}-%i.log.gz">
 			<ThresholdFilter level="error"/>

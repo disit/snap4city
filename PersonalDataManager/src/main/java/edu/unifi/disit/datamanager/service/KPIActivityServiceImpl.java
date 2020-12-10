@@ -56,9 +56,9 @@ public class KPIActivityServiceImpl implements IKPIActivityService {
 
 	@Autowired
 	OwnershipDAO ownershipRepo;
-
+	
 	@Autowired
-	ICredentialsService credentialsService;
+	ILightActivityService lightActivityService;
 
 	@Override
 	public void saveActivityFromUsername(String username, String sourceRequest, String sourceId, Long kpiId,
@@ -67,6 +67,9 @@ public class KPIActivityServiceImpl implements IKPIActivityService {
 
 		KPIActivity kpiActivity = new KPIActivity(username, sourceRequest, sourceId, kpiId, accessType.toString(),
 				domain.toString(), new Date(), null, null);
+		if (kpiId != null) {
+			lightActivityService.saveLightActivity(kpiId.toString(), "MyKPI", sourceRequest, sourceId);
+		}
 		kpiActivityRepo.save(kpiActivity);
 
 	}
