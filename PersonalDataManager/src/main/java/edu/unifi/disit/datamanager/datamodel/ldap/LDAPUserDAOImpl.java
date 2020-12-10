@@ -42,22 +42,6 @@ public class LDAPUserDAOImpl implements LDAPUserDAO {
 
 	private static final Logger logger = LogManager.getLogger();
 
-	// @Override
-	// public void create(LDAPUser person) {
-	// ldapTemplate.create(person);
-	// }
-	//
-	// @Override
-	// public void update(LDAPUser person) {
-	// ldapTemplate.update(person);
-	// }
-	//
-	// @Override
-	// public void delete(LDAPUser person) {
-	// ldapTemplate.delete(ldapTemplate.findByDn(buildDn(person), LDAPUser.class));
-	// }
-	//
-
 	@Override
 	public List<String> getGroupAndOUnames(String username) {
 		List<String> toreturn = getGroupnames(username);
@@ -113,12 +97,6 @@ public class LDAPUserDAOImpl implements LDAPUserDAO {
 	public boolean groupnameExist(String groupname) {
 
 		int startindexCN = groupname.indexOf("cn=");
-		// if (startindexCN == -1)
-		// return false;
-		//
-		// int endindexCN = groupname.indexOf(",", startindexCN + 3);
-		// if (endindexCN == -1)
-		// return false;
 
 		// ou has always to exist
 		int startindexOU = groupname.indexOf("ou=");

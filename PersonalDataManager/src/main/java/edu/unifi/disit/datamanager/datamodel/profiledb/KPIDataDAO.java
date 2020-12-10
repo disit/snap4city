@@ -16,7 +16,6 @@ package edu.unifi.disit.datamanager.datamodel.profiledb;
 import java.util.Date;
 import java.util.List;
 
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -27,31 +26,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public interface KPIDataDAO extends JpaRepository<KPIData, Long>, KPIDataDAOCustom {
-
-	KPIData findOne(long id);
-
+	
 	Page<KPIData> findAll(Pageable pageable);
 
 	Page<KPIData> findByDeleteTimeIsNull(Pageable pageable);
 
 	List<KPIData> findByDeleteTimeIsNull();
-
-	@Query("select k from KPIData as k where k.id in (select elementId from Delegation where elementType like %?2% and usernameDelegated = ?1 and deleteTime = NULL) and k.highLevelType like %?3% and deleteTime = NULL and (k.nature like %?4% or k.subNature like %?4% or k.valueName like %?4% or k.valueType like %?4% or k.dataType like %?4%)")
-	Page<KPIData> findByUsernameDelegatedAndElementTypeContainingAndDeleteTimeIsNull(
-			String usernameDelegated, String elementType, String highLevelType, String searchKey, Pageable pageable);
-
-	@Cacheable("kpidata")
-	@Query("select k from KPIData as k where k.id in (select elementId from Delegation where elementType like %?2% and usernameDelegated = ?1 and deleteTime = NULL) and k.highLevelType like %?3% and deleteTime = NULL and (k.nature like %?4% or k.subNature like %?4% or k.valueName like %?4% or k.valueType like %?4% or k.dataType like %?4%)")
-	List<KPIData> findByUsernameDelegatedAndElementTypeContainingAndDeleteTimeIsNull(String usernameDelegated, String elementType,
-			String highLevelType, String searchKey);
-
-	@Query("select k from KPIData as k where k.id in (select elementId from Delegation where elementType like %?2% and usernameDelegated = ?1 and deleteTime = NULL) and k.highLevelType like %?3% and k.organizations like ?5 and deleteTime = NULL and (k.nature like %?4% or k.subNature like %?4% or k.valueName like %?4% or k.valueType like %?4% or k.dataType like %?4%)")
-	Page<KPIData> findByUsernameDelegatedByOrganizationAndElementTypeContainingAndDeleteTimeIsNull(
-			String usernameDelegated, String elementType, String highLevelType, String searchKey, String organization, Pageable pageable);
-
-	@Query("select k from KPIData as k where k.id in (select elementId from Delegation where elementType like %?2% and usernameDelegated = ?1 and deleteTime = NULL) and k.highLevelType like %?3% and k.organizations like ?5 and deleteTime = NULL and (k.nature like %?4% or k.subNature like %?4% or k.valueName like %?4% or k.valueType like %?4% or k.dataType like %?4%)")
-	List<KPIData> findByUsernameDelegatedByOrganizationAndElementTypeContainingAndDeleteTimeIsNull(
-			String usernameDelegated, String elementType, String highLevelType, String searchKey, String organization);
 
 	List<KPIData> findByDeleteTimeBefore(Date time);
 

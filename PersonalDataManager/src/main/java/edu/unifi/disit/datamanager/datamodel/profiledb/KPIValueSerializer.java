@@ -64,6 +64,8 @@ public class KPIValueSerializer extends StdSerializer<KPIValue> {
 			jgen.writeStringField("longitude", kpiValues.getLongitude());
 		}
 
+		jgen.writeStringField("dbType", "MySQL");
+		
 		jgen.writeEndObject();
 	}
 }

@@ -22,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import edu.unifi.disit.datamanager.datamodel.profiledb.KPIData;
 import edu.unifi.disit.datamanager.exception.CredentialsException;
 import edu.unifi.disit.datamanager.exception.DelegationNotValidException;
+import edu.unifi.disit.datamanager.exception.LDAPException;
 
 public interface IKPIDataService {
 
@@ -67,24 +68,28 @@ public interface IKPIDataService {
 	void deleteKPIData(Long id) throws  CredentialsException;
 
 	Page<KPIData> findByUsernameDelegatedByHighLevelTypeFiltered(String usernameDelegated, String elementType, String highLevelType,
-			String searchKey, Pageable pageable) throws  CredentialsException;
+			String searchKey, Pageable pageable) throws  CredentialsException, LDAPException, CloneNotSupportedException;
 
 	List<KPIData> findByUsernameDelegatedByHighLevelTypeFilteredNoPages(String string, String highLevelType,
-			String highLevelType2, String searchKey) throws  CredentialsException;
+			String highLevelType2, String searchKey) throws  CredentialsException, LDAPException, CloneNotSupportedException;
 
 	Page<KPIData> findByUsernameDelegatedByHighLevelTypeByOrganizationFiltered(String string, String elementType,
-			String highLevelType, String searchKey, Pageable pageable);
+			String highLevelType, String searchKey, Pageable pageable) throws CredentialsException, LDAPException, CloneNotSupportedException;
 
 	List<KPIData> findByUsernameDelegatedByHighLevelTypeByOrganizationFilteredNoPages(String string, String elementType,
-			String highLevelType, String searchKey);
+			String highLevelType, String searchKey) throws CredentialsException, LDAPException, CloneNotSupportedException;
 
 	boolean makeKPIDataPublic(String username, Long kpiId, String elementType, Locale lang) throws DelegationNotValidException, CredentialsException;
 
-	boolean makeKPIDataPrivate(Long kpiId, Locale lang)
+	boolean makeKPIDataPrivate(Long kpiId, String elementType, Locale lang)
 			throws DelegationNotValidException, CredentialsException;
 
-	boolean updateUsernameDelegatorOnOwnershipChange(String newOwner, Long kpiId, Locale lang)
+	boolean updateUsernameDelegatorOnOwnershipChange(String newOwner, Long kpiId, String elementType, Locale lang)
 			throws DelegationNotValidException, CredentialsException;
 	
 	KPIData detachEntity(KPIData toReturn);
+
+	
+
+	
 }

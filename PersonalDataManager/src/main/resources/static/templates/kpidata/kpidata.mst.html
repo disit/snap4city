@@ -49,7 +49,7 @@
     <div class="col-md-3">
         <div class="input-group">
             <input type="text" id="inputFilterKPIData" class="form-control" placeholder="Filter Table"
-                aria-label="Filter Table" aria-describedby="button-addon2" max="{{totalPages}}" min="1">
+                aria-label="Filter Table" aria-describedby="button-addon2" onkeypress="return Utility.onKeyEnter(event);">
             <div class="input-group-append">
                 <button class="btn btn-outline-secondary" type="button"
                     onclick="$('#inputFilterKPIData').val('');KPIDataFilter.setCurrentSearchKey(''); KPIDataTabler.renderTable();"
@@ -58,7 +58,7 @@
             <div class="input-group-append">
                 <button class="btn btn-outline-secondary" type="button"
                     onclick="KPIDataFilter.setCurrentSearchKey($('#inputFilterKPIData').val()); KPIDataTabler.renderTable();"
-                    id="button-addon2" style="background-color: #eee;">Search</button>
+                    id="button-search" style="background-color: #eee;">Search</button>
             </div>
         </div>
     </div>
@@ -98,6 +98,10 @@
                 style="cursor: pointer;">Value
                 Unit
                 {{#sortvalueUnitASC}}&darr;{{/sortvalueUnitASC}} {{#sortvalueUnitDESC}}&uarr;{{/sortvalueUnitDESC}}</th>
+            <th scope="col" onclick="KPIDataSorter.setSortOnField('dbValuesType');KPIDataTabler.renderTable();"
+                style="cursor: pointer;">DB of Values
+                {{#sortdbValuesTypeASC}}&darr;{{/sortdbValuesTypeASC}}
+                {{#sortdbValuesTypeDESC}}&uarr;{{/sortdbValuesTypeDESC}}</th>
             <th scope="col" onclick="KPIDataSorter.setSortOnField('dataType');KPIDataTabler.renderTable();"
                 style="cursor: pointer;">Data
                 Type
@@ -120,7 +124,8 @@
                 {{#sortusernameASC}}&darr;{{/sortusernameASC}} {{#sortusernameDESC}}&uarr;{{/sortusernameDESC}}</th>
             <th scope="col" onclick="KPIDataSorter.setSortOnField('organizations');KPIDataTabler.renderTable();"
                 style="cursor: pointer;">Organization
-                {{#sortorganizationsASC}}&darr;{{/sortorganizationsASC}} {{#sortorganizationsDESC}}&uarr;{{/sortorganizationsDESC}}</th>
+                {{#sortorganizationsASC}}&darr;{{/sortorganizationsASC}}
+                {{#sortorganizationsDESC}}&uarr;{{/sortorganizationsDESC}}</th>
             <th scope="col">Controls</th>
             <th scope="col">Data</th>
             <!-- {{#enableEdit}} -->
@@ -138,6 +143,7 @@
             <td>{{valueName}}</td>
             <td>{{valueType}}</td>
             <td>{{valueUnit}}</td>
+            <td>{{dbValuesType}}</td>
             <td>{{dataType}}</td>
             <td>{{#timestampToDate}}{{lastDate}}{{/timestampToDate}}</td>
             <td>{{lastValue}}</td>
@@ -169,6 +175,8 @@
                     class="btn viewDashBtn">Values</button>
                 <button type="button" onclick="KPIMetadataTabler.renderTable({{id}});"
                     class="btn viewDashBtn">Metadata</button>
+                <button type="button" onclick="KPIDataTabler.openKPIKibanaLink({{id}});"
+                    class="btn viewDashBtn">Kibana</button>
             </td>
             <!-- {{#enableEdit}} -->
             <td>
@@ -176,11 +184,12 @@
                 <button type="button" onclick="KPIDelegationTabler.renderTable({{id}}, '{{highLevelType}}');"
                     class="btn editDashBtn">Delegate
                     Users</button>
+                    <button type="button" onclick="KPIOrgDelegationTabler.renderTable({{id}}, '{{highLevelType}}');"
+                    class="btn editDashBtn">Delegate
+                    Organizations</button>
                 <button type="button" onclick="KPIDataTabler.editKPIDataModal({{id}}, 'changeownership');"
                     class="btn editDashBtn">Change
                     Ownership</button>
-                <!--  <button type="button" onclick="KPIDelegationTabler.renderTable({{id}}, '{{highLevelType}}');" class="btn editDashBtn">Delegate
-                Groups</button> -->
             </td>
             <!-- {{/enableEdit}} -->
         </tr>

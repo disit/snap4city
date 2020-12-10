@@ -20,33 +20,66 @@ import java.util.Locale;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import edu.unifi.disit.datamanager.datamodel.elasticdb.KPIElasticValue;
 import edu.unifi.disit.datamanager.datamodel.profiledb.KPIValue;
 import edu.unifi.disit.datamanager.exception.CredentialsException;
 import edu.unifi.disit.datamanager.exception.DataNotValidException;
 
 public interface IKPIValueService {
 
-	KPIValue getKPIValueById(Long id, Locale lang) throws  CredentialsException;
+	KPIValue getKPIValueById(Long id, Locale lang) throws CredentialsException;
 
-	Page<KPIValue> findByKpiId(Long kpiId, Pageable pageable) throws  CredentialsException;
+	Page<KPIValue> findByKpiId(Long kpiId, Pageable pageable) throws CredentialsException;
+
+	Page<KPIValue> findByKpiIdFiltered(Long kpiId, String searchKey, Pageable pageable) throws CredentialsException;
+
+	List<KPIValue> findByKpiIdNoPages(Long kpiId) throws CredentialsException;
+
+	List<KPIValue> findByKpiIdGeoLocated(Long kpiId) throws CredentialsException;
+
+	List<KPIValue> findByKpiIdFilteredNoPages(Long kpiId, String searchKey) throws CredentialsException;
+
+	KPIValue saveKPIValue(KPIValue kpivalue) throws CredentialsException;
 	
-	Page<KPIValue> findByKpiIdFiltered(Long kpiId, String searchKey, Pageable pageable) throws  CredentialsException;
+	List<KPIValue> saveKPIValueList(List<KPIValue> kpiValue) throws CredentialsException;
 
-	List<KPIValue> findByKpiIdNoPages(Long kpiId)  throws  CredentialsException;
+	void deleteKPIValue(Long id) throws CredentialsException;
+
+	List<KPIValue> findByKpiIdNoPagesWithLimit(Long kpiId, Date from, Date to, Integer first, Integer last, Locale lang)
+			throws DataNotValidException;
+
+	List<Date> getKPIValueDates(Long kpiId) throws CredentialsException;
+
+	List<Date> getKPIValueDatesCoordinatesOptionallyNull(Long kpiId) throws CredentialsException;
+
+	KPIElasticValue getKPIElasticValueById(String id, Locale lang) throws CredentialsException;
+
+	Page<KPIElasticValue> findBySensorId(Long kpiId, Pageable pageable) throws CredentialsException;
+
+	Page<KPIElasticValue> findBySensorIdFiltered(Long kpiId, String searchKey, Pageable pageable)
+			throws CredentialsException;
+
+	List<KPIElasticValue> findBySensorIdNoPages(Long kpiId) throws CredentialsException;
+
+	// List<KPIElasticValue> findBySensorIdGeoLocated(Long kpiId) throws
+	// CredentialsException;
+
+	List<KPIElasticValue> findBySensorIdFilteredNoPages(Long kpiId, String searchKey) throws CredentialsException;
+
+	KPIElasticValue saveKPIElasticValue(KPIElasticValue kpivalue) throws CredentialsException;
 	
-	List<KPIValue> findByKpiIdGeoLocated(Long kpiId)  throws  CredentialsException;
+	List<KPIElasticValue> saveKPIElasticValueList(List<KPIElasticValue> kpiElasticValue) throws CredentialsException;
 
-	List<KPIValue> findByKpiIdFilteredNoPages(Long kpiId, String searchKey) throws  CredentialsException;
+	void deleteKPIElasticValue(String id) throws CredentialsException;
+
+	List<String> getKPIElasticValueDates(Long kpiId, boolean checkCoordinates)
+			throws CredentialsException;
+
+	List<KPIElasticValue> findBySensorIdNoPagesWithLimit(Long sensorId, Date from, Date to, Integer first, Integer last,
+			Locale lang) throws DataNotValidException;
+
+	List<KPIElasticValue> deleteKPIElasticValuesOfKpiId(Long kpiId) throws CredentialsException;
+
 	
-	KPIValue saveKPIValue(KPIValue kpivalue) throws  CredentialsException;
 
-	void deleteKPIValue(Long id) throws  CredentialsException;
-
-	List<KPIValue> findByKpiIdNoPagesWithLimit(Long kpiId, Date from, Date to, Integer first, Integer last, Locale lang) throws  DataNotValidException;
-
-	List<Date> getKPIValueDates(Long kpiId) throws  CredentialsException;
-
-	List<Date> getKPIValueDatesCoordinatesOptionallyNull(Long kpiId)
-			throws  CredentialsException;
-	
 }

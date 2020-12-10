@@ -7,7 +7,7 @@
 openapi: '3.0.0'
 info:
   title: My KPI API
-  version: 1.1.0
+  version: 1.2.0
 servers:
   - url: 'https://www.snap4city.org/mypersonaldata/api/v1'
 paths:
@@ -323,6 +323,33 @@ paths:
       responses:
         200:
           description: The KPI Data Value saved
+        204:
+          description: No Data Found
+        401:
+          description: Right Exceptions
+        400:
+          description: Problem with public or private ownership
+  /kpidata/{kpiId}/values/list:
+    post:
+      tags: [KPI Data Values]
+      summary: Save a KPI Data Value Array
+      description: Save the KPI Data Value Array passed on the body of the call on the database
+      security:
+        - accessToken: [] 
+      parameters:
+        - $ref: '#/components/parameters/kpiId'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceId'
+        - $ref: '#/components/parameters/lang'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KPIValueArray'
+      responses:
+        200:
+          description: The KPI Data Value Array saved
         204:
           description: No Data Found
         401:
@@ -1139,6 +1166,48 @@ paths:
           description: Right Exceptions
         400:
           description: Wrong Arguments
+  /lightactivities:
+    get:
+      tags: [KPI Data Light Activities]
+      summary: Retrieve all light activities of a KPI Data
+      description: Retrieve all light activities of a KPI Data
+      security:
+        - accessToken: [] 
+      parameters:
+        - $ref: '#/components/parameters/elementType'
+        - $ref: '#/components/parameters/elementId'
+        - $ref: '#/components/parameters/lang'
+      responses:
+        200:
+          description: A page or a list of KPI Data Light Activities
+        204:
+          description: No Data Found
+        401:
+          description: Right Exceptions
+        400:
+          description: Wrong Arguments
+          /lightactivities:
+    post:
+      tags: [KPI Data Light Activities]
+      summary: Retrieve all light activities of a KPI Data
+      description: Retrieve all light activities of a KPI Data
+      security:
+        - accessToken: [] 
+      parameters:
+        - $ref: '#/components/parameters/elementType'
+        - $ref: '#/components/parameters/elementId'
+        - $ref: '#/components/parameters/sourceRequest'
+        - $ref: '#/components/parameters/sourceIdRequired'
+        - $ref: '#/components/parameters/lang'
+      responses:
+        200:
+          description: A page or a list of KPI Data Light Activities
+        204:
+          description: No Data Found
+        401:
+          description: Right Exceptions
+        400:
+          description: Wrong Argumen
 components:
   securitySchemes:
     accessToken:            # arbitrary name for the security scheme
@@ -1204,6 +1273,10 @@ components:
           type: string
         value: 
            type: string
+    KPIValueArray:
+      type: "array"
+      items:
+        $ref: "#/components/schemas/KPIValue"
     KPIMetadata:
       type: "object"
       properties:
@@ -1230,6 +1303,13 @@ components:
       schema:
        type: string
       required: false
+      description: A string that allows you to identify the source among others having the same sourceRequest (which component of the platform calls the API). If 'iotapp' as sourceRequest is passed as sourceId, the unique id of that iotapp can be passed.
+    sourceIdRequired:
+      in: query
+      name: sourceId
+      schema:
+       type: string
+      required: true
       description: A string that allows you to identify the source among others having the same sourceRequest (which component of the platform calls the API). If 'iotapp' as sourceRequest is passed as sourceId, the unique id of that iotapp can be passed.
     sourceRequest:
       in: query
@@ -1352,6 +1432,21 @@ components:
         type: integer
       required: false
       description: Return the last elements in the time interval
+    elementType:
+      in: query
+      name: elementType
+      schema:
+        type: string
+        enum: ["MyKPI", "IOTID"]
+      required: true
+      description: Get the elements of type indicated
+    elementId:
+      in: query
+      name: elementId
+      schema:
+        type: string
+      required: true
+      description: Get the element of id indicated
     checkCoordinates:
       in: query
       name: checkCoordinates

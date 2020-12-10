@@ -123,7 +123,7 @@ public class PublicController {
 			}
 
 		} catch (DataNotValidException d) {
-			logger.error("Delegation not found {}", d);
+			logger.error("Delegation not found", d);
 
 			activityService.saveActivityViolationFromUsername("PUBLIC", sourceRequest, variableName, motivation, ActivityAccessType.READ,
 					request.getContextPath() + "?" + request.getQueryString(), d.getMessage(), d, request.getRemoteAddr());
@@ -131,7 +131,7 @@ public class PublicController {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 
 		} catch (ParseException e) {
-			logger.error("Parsing error {}", e);
+			logger.error("Parsing error ", e);
 
 			activityService.saveActivityViolationFromUsername("PUBLIC", sourceRequest, variableName, motivation, ActivityAccessType.READ,
 					request.getContextPath() + "?" + request.getQueryString(), e.getMessage(), e, request.getRemoteAddr());
@@ -153,7 +153,7 @@ public class PublicController {
 			try {
 				text = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse(text_string);
 			} catch (ParseException e1) {
-				logger.error("Parsing error {}", e1);
+				logger.error("Parsing error", e1);
 				throw e1;
 			}
 		}

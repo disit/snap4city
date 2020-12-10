@@ -52,10 +52,12 @@
 			<AppenderRef ref="MyFileWarn"/>
 			<AppenderRef ref="STDOUT"/>		
 		</Root>
+		<Logger name="org.apache.http" level="warn" />
 		<Logger name="org.hibernate" level="warn" />
 		<Logger name="org.springframework" level="warn" />
 		<Logger name="com.mchange.v2.c3p0" level="warn" />
-		<Logger name="org.apache.tomcat" level="warn" />		
-		
+		<Logger name="org.apache.tomcat" level="warn" />
+		<Logger name="org.ehcache" level="warn" />	
+		<Logger name="org.terracotta.offheapstore" level="warn" />	
 	</Loggers>
 </Configuration>

@@ -50,6 +50,8 @@
 		
 		<Logger name="org.hibernate" level="warn" />
 		<Logger name="org.springframework" level="warn" />
+		<Logger name="org.apache.http" level="warn" />
+		
 		
 	</Loggers>
 </Configuration>

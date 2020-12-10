@@ -55,14 +55,9 @@ public class LightActivity {
 
 	public LightActivity(Long id, String elementId, String elementType, String sourceRequest, String sourceId,
 			Date insertTime, Date deleteTime) {
-		super();
+		this(elementId, elementType, sourceRequest, sourceId, insertTime, deleteTime);
 		this.id = id;
-		this.elementId = elementId;
-		this.elementType = elementType;
-		this.sourceRequest = sourceRequest;
-		this.sourceId = sourceId;
-		this.insertTime = insertTime;
-		this.deleteTime = deleteTime;
+		
 	}
 
 	public LightActivity(String elementId, String elementType, String sourceRequest, String sourceId, Date insertTime,

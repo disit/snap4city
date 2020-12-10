@@ -13,12 +13,19 @@
 package edu.unifi.disit.datamanager.security;
 
 import java.io.IOException;
+import java.math.BigInteger;
+import java.net.URL;
+import java.security.KeyFactory;
+import java.security.PublicKey;
+import java.security.spec.RSAPublicKeySpec;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -28,9 +35,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.keycloak.TokenVerifier;
+import org.keycloak.common.VerificationException;
+import org.keycloak.jose.jws.JWSHeader;
+import org.keycloak.representations.AccessToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -59,7 +71,7 @@ import edu.unifi.disit.datamanager.service.IActivityService;
 @Component
 public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 
-	private static final Logger logger = LogManager.getLogger();
+	private static final Logger loggerDM = LogManager.getLogger();
 
 	@Autowired
 	IActivityService activityService;
@@ -70,10 +82,26 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 	@Value("${spring.openidconnect.userinfo_endpoint_test:#{null}}")
 	private String userinfo_endpoint_test;
 
+	@Value("${spring.openidconnect.enable_server_auth:#{false}}")
+	private boolean enableServerAuth;
+
 	@Autowired
 	private MessageSource messages;
 
 	ObjectMapper objectMapper = new ObjectMapper();
+
+	static Map<String, Object> certInfos;
+
+	@SuppressWarnings("unchecked")
+	@PostConstruct
+	private void postConstruct() {
+		ObjectMapper om = new ObjectMapper();
+		try {
+			certInfos = om.readValue(new URL(userinfo_endpoint + "realms/master/protocol/openid-connect/certs").openStream(), Map.class);
+		} catch (Exception e) {
+			logger.error("Cannot retrieve the certInfo");
+		}
+	}
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -96,11 +124,11 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 			try {
 
 				validation(accessToken, request.getLocale());
-				logger.info("Access token IS VALID");
+				loggerDM.info("Access token IS VALID");
 
 			} catch (AccessTokenNotValidException e) {
 
-				logger.info("Access token NOT VALID");
+				loggerDM.info("Access token NOT VALID");
 
 				activityService.saveActivityViolationFromUsername(null, req.getParameter("sourceRequest"), req.getParameter("variableName"), req.getParameter("motivation"), activityType,
 						((HttpServletRequest) request).getContextPath() + "?" + ((HttpServletRequest) request).getQueryString(),
@@ -118,17 +146,11 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 
 		} else {
 
-			logger.warn("Access token NOT PRESENT");
+			loggerDM.warn("Access token NOT PRESENT");
 
 			activityService.saveActivityViolationFromUsername(null, req.getParameter("sourceRequest"), req.getParameter("variableName"), req.getParameter("motivation"), activityType,
 					((HttpServletRequest) request).getContextPath() + "?" + ((HttpServletRequest) request).getQueryString(),
 					messages.getMessage("login.ko.accesstokennotpresent", null, request.getLocale()), null, ((HttpServletRequest) request).getRemoteAddr());
-
-			// Response toreturn2 = new Response();
-			// toreturn2.setResult(false);
-			// toreturn2.setMessage(messages.getMessage("login.ko.accesstokennotpresent", null, request.getLocale()));
-			// ((HttpServletResponse) response).setStatus(401);
-			// ((HttpServletResponse) response).getWriter().write(objectMapper.writeValueAsString(toreturn2));
 
 		}
 		filterChain.doFilter(request, response);// continue
@@ -154,49 +176,140 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
 
 		try {
-			checkValidationOnKeycloakServer(UriComponentsBuilder.fromHttpUrl(userinfo_endpoint + "realms/master/protocol/openid-connect/userinfo").build(), restTemplate, entity, lang);// check validation on www.snap4city.org/auth keycloak
-																																														// server
-		} catch (HttpClientErrorException e) {
-			logger.warn("AccessToken WAS NOT VALIDATED HttpClientErrorException {}", e);
+
+			if (!enableServerAuth)
+				checkValidationLocally(accesstoken, lang);
+			else
+				checkValidationOnKeycloakServer(UriComponentsBuilder.fromHttpUrl(userinfo_endpoint + "realms/master/protocol/openid-connect/userinfo").build(), restTemplate, entity, lang);// check validation on www.snap4city.org/auth
+																																															// keycloak
+			// server
+		} catch (Exception e) {
+			loggerDM.warn("AccessToken WAS NOT VALIDATED HttpClientErrorException ", e);
 			try {
 				if (userinfo_endpoint_test != null)
 					checkValidationOnKeycloakServer(UriComponentsBuilder.fromHttpUrl(userinfo_endpoint_test + "realms/master/protocol/openid-connect/userinfo").build(), restTemplate, entity, lang);// check validation on
 																																																		// www.snap4city.org/auth
 																																																		// keycloak server
 				else {
-					logger.error("AccessToken WAS NOT VALIDATED even on keycloak HttpClientErrorException {}", e);
+					loggerDM.warn("AccessToken WAS NOT VALIDATED even on keycloak HttpClientErrorException ", e);
 					throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
 				}
 
 			} catch (HttpClientErrorException e2) {
-				logger.error("AccessToken WAS NOT VALIDATED even on keycloak TEST HttpClientErrorException {}", e2);
+				loggerDM.warn("AccessToken WAS NOT VALIDATED even on keycloak TEST HttpClientErrorException", e2);
 				throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
 			} catch (JsonProcessingException e2) {
-				logger.warn("AccessToken WAS NOT VALIDATED even on keycloak TEST  JsonProcessingException {}", e2);
+				loggerDM.warn("AccessToken WAS NOT VALIDATED even on keycloak TEST  JsonProcessingException", e2);
 				throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
 			} catch (IOException e2) {
-				logger.warn("AccessToken WAS NOT VALIDATED even on keycloak TEST  IOException {}", e2);
+				loggerDM.warn("AccessToken WAS NOT VALIDATED even on keycloak TEST  IOException", e2);
 				throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
 			}
-		} catch (JsonProcessingException e) {
-			logger.warn("AccessToken WAS NOT VALIDATED JsonProcessingException {}", e);
-			throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
-		} catch (IOException e) {
-			logger.warn("AccessToken WAS NOT VALIDATED IOException {}", e);
+			// } catch (JsonProcessingException e) {
+			// loggerDM.warn("AccessToken WAS NOT VALIDATED JsonProcessingException ", e);
+			// throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
+			// } catch (IOException e) {
+			// loggerDM.warn("AccessToken WAS NOT VALIDATED IOException ", e);
+			// throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private PublicKey retrievePublicKeyFromCertsEndpoint(JWSHeader jwsHeader) {
+		try {
+
+			List<Map<String, Object>> keys = (List<Map<String, Object>>) certInfos.get("keys");
+
+			Map<String, Object> keyInfo = null;
+			for (Map<String, Object> key : keys) {
+				String kid = (String) key.get("kid");
+
+				if (jwsHeader.getKeyId().equals(kid)) {
+					keyInfo = key;
+					break;
+				}
+			}
+
+			if (keyInfo == null) {
+				return null;
+			}
+
+			KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+			String modulusBase64 = (String) keyInfo.get("n");
+			String exponentBase64 = (String) keyInfo.get("e");
+
+			// see org.keycloak.jose.jwk.JWKBuilder#rs256
+			java.util.Base64.Decoder urlDecoder = java.util.Base64.getUrlDecoder();
+			BigInteger modulus = new BigInteger(1, urlDecoder.decode(modulusBase64));
+			BigInteger publicExponent = new BigInteger(1, urlDecoder.decode(exponentBase64));
+
+			return keyFactory.generatePublic(new RSAPublicKeySpec(modulus, publicExponent));
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	private void checkValidationLocally(String requestAccessToken, Locale lang) throws NoSuchMessageException, AccessTokenNotValidException {
+
+		if (requestAccessToken == null) {
+			logger.warn("Empty accesstoken");
 			throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
 		}
+
+		try {
+			TokenVerifier<AccessToken> verifier = TokenVerifier.create(requestAccessToken, AccessToken.class);
+			AccessToken token = verifier
+					.publicKey(retrievePublicKeyFromCertsEndpoint(verifier.getHeader()))
+					.verify()
+					.getToken();
+
+			if (!token.isExpired()) {
+				Map<String, Object> otherclaims = token.getOtherClaims();
+
+				String username = token.getPreferredUsername();// try get from prefered username
+				if (username == null) {
+					username = (String) otherclaims.get("username");// fallback on username
+					if (username == null) {
+						logger.warn("Empty username in accesstoken");
+						throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
+					}
+				}
+
+				ArrayList<String> roles = (ArrayList<String>) otherclaims.get("roles");// try get from roles
+				if (roles == null) {
+					roles = (ArrayList<String>) otherclaims.get("role");// fallback on role
+					if (roles == null) {
+						logger.warn("Empty roles in accesstoken");
+						throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
+					}
+				}
+
+				loggerDM.info("AccessToken username {} + Roles {}", username, roles.toArray());
+				authUser(username, roles);
+			} else {
+				logger.warn("The passed accessToken is Expired");
+				throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
+			}
+		} catch (VerificationException e) {
+			logger.warn("Verification failed");
+			throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
+		}
+
 	}
 
 	private void checkValidationOnKeycloakServer(UriComponents uriComponents, RestTemplate restTemplate, HttpEntity<String> entity, Locale lang)
 			throws IOException, AccessTokenNotValidException {
 
-		logger.info("AccessToken check on {}", uriComponents.toUri());
+		loggerDM.info("AccessToken check on {}", uriComponents.toUri());
 
 		ResponseEntity<String> re = restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, entity, String.class);
 
 		String response = re.getBody();
 
-		logger.debug("got response:{}", response);
+		loggerDM.debug("got response:{}", response);
 
 		JsonNode jsonNode = objectMapper.readTree(response);
 
@@ -213,7 +326,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 			username = jn.asText();
 
 		if (username == null) {
-			logger.error("username not found");
+			loggerDM.error("username not found");
 			throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
 		}
 
@@ -234,14 +347,14 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		}
 
 		if (iroles == null) {
-			logger.error("roles not found");
+			loggerDM.error("roles not found");
 			throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
 		}
 
 		while (iroles.hasNext())
 			roles.add(iroles.next().asText());
 
-		logger.info("AccessToken username {} + Roles {}", username, roles.toArray());
+		loggerDM.info("AccessToken username {} + Roles {}", username, roles.toArray());
 
 		authUser(username, roles);
 	}

@@ -41,7 +41,7 @@ public class KPIValueDAOImpl implements KPIValueDAOCustom {
 		Root<KPIValue> dataRoot = criteria.from(KPIValue.class);
 		criteria.select(dataRoot);
 
-		if (last != 0) {
+		if (last != null) {
 			criteria.orderBy(cb.desc(dataRoot.get("dataTime")));
 		} else {
 			criteria.orderBy(cb.asc(dataRoot.get("dataTime")));
@@ -59,9 +59,9 @@ public class KPIValueDAOImpl implements KPIValueDAOCustom {
 	}
 
 	private List<KPIValue> getResults(CriteriaQuery<KPIValue> criteria, Integer first, Integer last) {
-		if (first != 0) {
+		if (first != null) {
 			return entityManager.createQuery(criteria).setMaxResults(first).getResultList();
-		} else if (last != 0) {
+		} else if (last != null) {
 			return entityManager.createQuery(criteria).setMaxResults(last).getResultList();
 		} else {
 			return entityManager.createQuery(criteria).getResultList();

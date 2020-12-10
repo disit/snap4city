@@ -2,14 +2,14 @@ var EditModalManager = {
 
     createMap: function () {
 
-        map = L.map('mapContainer').setView(EditModalManager.currentCoordinates, 9);
+        let map = L.map('mapContainer').setView(EditModalManager.currentCoordinates, EditModalManager.zoomLevel);
         L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
         var mapLayers = {};
 
-        drawnItems = new L.FeatureGroup();
+        let drawnItems = new L.FeatureGroup();
         map.addLayer(drawnItems);
 
         var editControl = new L.Control.Draw({
@@ -20,7 +20,7 @@ var EditModalManager = {
         });
         map.addControl(editControl);
 
-        drawControl = new L.Control.Draw({
+        let drawControl = new L.Control.Draw({
             draw: {
                 position: 'topleft',
                 polyline: false,
@@ -52,7 +52,7 @@ var EditModalManager = {
 
             drawControl.remove();
 
-            marker = {};
+            let marker = {};
 
             drawnItems.eachLayer(function (layer) {
                 marker = layer.toGeoJSON();
@@ -71,7 +71,7 @@ var EditModalManager = {
                 }
             });
 
-            marker = {};
+            let marker = {};
 
             drawnItems.eachLayer(function (layer) {
                 marker = layer.toGeoJSON();
@@ -95,7 +95,7 @@ var EditModalManager = {
 
             drawControl.remove();
 
-            map.setView([EditModalManager.currentLatitude,EditModalManager.currentLongitude], 11);
+            map.setView([EditModalManager.currentLatitude, EditModalManager.currentLongitude], 11);
 
             EditModalManager.currentLatitude = null;
             EditModalManager.currentLongitude = null;
@@ -110,46 +110,83 @@ var EditModalManager = {
         KPIEditor.keycloak.updateToken(30).success(function () {
             var query = QueryManager.createGetUsernameOrganizationQuery();
             APIClient.executeGetQuery(query, KPIEditor.keycloak.token, EditModalManager.successCheckOrganization, EditModalManager.errorCheckOrganization);
-        }).error(function () {
-            var query = QueryManager.createGetUsernameOrganizationQuery();
+        }).error(function (_error) {
+            console.log("EditModalManager.checkOrganizationAndCreateMap error: " + _error);
+            /* var query = QueryManager.createGetUsernameOrganizationQuery();
             APIClient.executeGetQuery(query, Authentication.refreshTokenGetAccessToken(), EditModalManager.successCheckOrganization, EditModalManager.errorCheckOrganization);
-
-        });
+         */});
     },
 
     successCheckOrganization: function (_data) {
+        EditModalManager.currentCoordinates = [43.78, 11.23];
+        EditModalManager.zoomLevel = 9;
         if (_data != null) {
-            var organization = _data.substring(_data.indexOf("=") + 1, _data.indexOf(","));
-            if (organization.toLowerCase() == "helsinki") {
-                EditModalManager.currentCoordinates = [60.169286, 24.939103];
-            } else if (organization.toLowerCase() == "antwerp") {
-                EditModalManager.currentCoordinates = [51.216784, 4.405688];
-            } else {
-                EditModalManager.currentCoordinates = [43.78, 11.23];
-            }
+            var organization = _data.substring(_data.indexOf("=") + 1, _data.indexOf(",")).toLowerCase();
+            KPIEditor.keycloak.updateToken(30).success(function () {
+                $.ajax({
+                    url: EditModalManager.orgInfoUrl + "?organizationName=" + organization + "&accessToken=" + KPIEditor.keycloak.token,
+                    cache: false,
+                    dataType: "json",
+                    success: function (_organizationData) {
+                        if (_organizationData.responseState == "Successful response" &&
+                            typeof _organizationData.organizationParams.gpsCentreLat != "undefined" &&
+                            typeof _organizationData.organizationParams.gpsCentreLng != "undefined" &&
+                            typeof _organizationData.organizationParams.zoomLevel != "undefined") {
+                            EditModalManager.currentCoordinates = [_organizationData.organizationParams.gpsCentreLat, _organizationData.organizationParams.gpsCentreLng];
+                            EditModalManager.zoomLevel = _organizationData.organizationParams.zoomLevel;
+                            EditModalManager.createMap();
+                        } else {
+                            EditModalManager.createMap();
+                        }
+                    },
+                    error: function () {
+                        EditModalManager.createMap();
+                    }
+                });
+            }).error(function (error) {
+                console.log("EditModalManager.successCheckOrganization error: " + error);
+                EditModalManager.createMap();
+            });
         } else {
-            EditModalManager.currentCoordinates = [43.78, 11.23];
+            EditModalManager.createMap();
         }
 
-        EditModalManager.createMap();
+
     },
 
     errorCheckOrganization: function (_error) {
-        console.log(_error);
-        if (_error != null && typeof _error == "string") {
-            var organization = _error.substring(_error.indexOf("=") + 1, _error.indexOf(","));
-            if (organization.toLowerCase() == "helsinki") {
-                EditModalManager.currentCoordinates = [60.169286, 24.939103];
-            } else if (organization.toLowerCase() == "antwerp") {
-                EditModalManager.currentCoordinates = [51.216784, 4.405688];
-            } else {
-                EditModalManager.currentCoordinates = [43.78, 11.23];
-            }
+        EditModalManager.currentCoordinates = [43.78, 11.23];
+        EditModalManager.zoomLevel = 9;
+        if (_error != null && typeof error == "string") {
+            var organization = _error.substring(_error.indexOf("=") + 1, _error.indexOf(",")).toLowerCase();
+            KPIEditor.keycloak.updateToken(30).success(function () {
+                $.ajax({
+                    url: "https://www.snap4city.org/dashboardSmartCity/api/getOrganizationParams.php?organizationName=" + organization + "&accessToken=" + KPIEditor.keycloak.token,
+                    cache: false,
+                    dataType: "json",
+                    success: function (_organizationData) {
+                        if (_organizationData.responseState == "Successful response" &&
+                            typeof _organizationData.organizationParams.gpsCentreLat != "undefined" &&
+                            typeof _organizationData.organizationParams.gpsCentreLng != "undefined" &&
+                            typeof _organizationData.organizationParams.zoomLevel != "undefined") {
+                            EditModalManager.currentCoordinates = [_organizationData.organizationParams.gpsCentreLat, _organizationData.organizationParams.gpsCentreLng];
+                            EditModalManager.zoomLevel = _organizationData.organizationParams.zoomLevel;
+                            EditModalManager.createMap();
+                        } else {
+                            EditModalManager.createMap();
+                        }
+                    },
+                    error: function () {
+                        EditModalManager.createMap();
+                    }
+                });
+            }).error(function (error) {
+                console.log("EditModalManager.errorCheckOrganization error: " + error);
+                EditModalManager.createMap();
+            });
         } else {
-            EditModalManager.currentCoordinates = [43.78, 11.23];
+            EditModalManager.createMap();
         }
-
-        EditModalManager.createMap();
     },
 
     createNatureSelection: function (_savedNature, _savedSubNature) {
@@ -198,8 +235,8 @@ var EditModalManager = {
                 ViewManager.render({
                     "arrayToSelection": subNatureArray
                 }, "#selectSubNatureKPIDataEdit", "templates/arrayToSelection.mst.html");
-                
-                if (EditModalManager.savedSubNature != ""){
+
+                if (EditModalManager.savedSubNature != "") {
                     $("#selectSubNatureKPIDataEdit").val(EditModalManager.savedSubNature);
                     EditModalManager.savedSubNature = "";
                 }
@@ -253,16 +290,16 @@ var EditModalManager = {
                 ViewManager.render({
                     "arrayToSelection": valueUnitArray
                 }, "#selectValueUnitKPIDataEdit", "templates/arrayToSelection.mst.html");
-                if (EditModalManager.savedValueUnit != ""){
+                if (EditModalManager.savedValueUnit != "") {
                     $("#selectValueUnitKPIDataEdit").val(EditModalManager.savedValueUnit);
                     EditModalManager.savedValueUnit = "";
                 }
             }
         });
     },
-    
+
     createOrganizationListSelection: function (_organization) {
-    	EditModalManager.savedOrganization = _organization;
+        EditModalManager.savedOrganization = _organization;
         var organizationArray = [];
         for (var i = 0; i < EditModalManager.organizationList.length; i++) {
             organizationArray.push({
@@ -274,7 +311,7 @@ var EditModalManager = {
         ViewManager.render({
             "arrayToSelection": organizationArray
         }, "#selectOrganizationKPIDataEdit", "templates/arrayToSelection.mst.html");
-        if (EditModalManager.savedOrganization != ""){
+        if (EditModalManager.savedOrganization != "") {
             $("#selectOrganizationKPIDataEdit").val(EditModalManager.savedOrganization);
             EditModalManager.savedOrganization = "";
         }

@@ -24,8 +24,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface KPIValueDAO extends JpaRepository<KPIValue, Long>, KPIValueDAOCustom {
-
-	KPIValue findOne(long id);
 	
 	Page<KPIValue> findAll(Pageable pageable);
 	
@@ -39,9 +37,10 @@ public interface KPIValueDAO extends JpaRepository<KPIValue, Long>, KPIValueDAOC
 	
 	@Query("select distinct(date(dataTime)) from KPIValue as v where v.kpiId = ?1 and v.latitude IS NOT NULL and v.longitude IS NOT NULL and v.deleteTime IS NULL")
 	List<Date> findByKpiIdDistinctDateAndDeleteTimeIsNull(Long kpiId);
-
+	
 	@Query("select distinct(date(dataTime)) from KPIValue as v where v.kpiId = ?1 and v.deleteTime IS NULL")
 	List<Date> findByKpiIdDistinctDateAndDeleteTimeIsNullWithCoordinatesOptionallyNull(Long kpiId);
+	
 	
 	List<KPIValue> findByKpiIdAndDeleteTimeIsNullAndLatitudeIsNotNullAndLongitudeIsNotNullAndLatitudeNotLikeAndLongitudeNotLike(
 			Long kpiId, String string, String string2);

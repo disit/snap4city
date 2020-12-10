@@ -64,7 +64,7 @@ public class AccessServiceImpl implements IAccessService {
 		Response response = checkDelegationAccess(elementID, elementType, null, credentialsService.getLoggedUsername(lang), lang);
 
 		// if no delegation has been found, investigate more on the ROOTADMIN role and OWNERSHIP
-		if (!response.getResult()) {
+		if (!Boolean.TRUE.equals(response.getResult())) {
 			// if the AT is from a RootAdmin
 			if (credentialsService.isRoot(lang)) {
 				response.setResult(true);
@@ -78,7 +78,7 @@ public class AccessServiceImpl implements IAccessService {
 				strippedElementID = elementID.substring(elementID.lastIndexOf('/') + 1);
 				logger.debug("strippedElementID is: {}", strippedElementID);
 			}
-			List<Ownership> owns = ownershipRepo.findByElementId(strippedElementID);
+			List<Ownership> owns = ownershipRepo.findByElementIdAndDeletedIsNull(strippedElementID);
 			for (Ownership own : owns)
 				if (own.getUsername().equals(credentialsService.getLoggedUsername(lang))) {
 					response.setResult(true);
@@ -100,7 +100,7 @@ public class AccessServiceImpl implements IAccessService {
 		return checkDelegationAccess(elementID, elementType, variableName, username, lang);
 	}
 
-	public Response checkDelegationAccess(String elementID, String elementType, String variableName, String username, Locale lang) throws CredentialsException {
+	public Response checkDelegationAccess(String elementID, String elementType, String variableName, String username, Locale lang) {
 		logger.debug("checkDelegations INVOKED on elementId {} elementType {} variableName {} username {} ", elementID, elementType, variableName, username);
 
 		Response response = new Response(false, null);

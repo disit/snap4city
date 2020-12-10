@@ -40,5 +40,4 @@ public interface DeviceGroupDAO extends JpaRepository<DeviceGroup, Long>, Device
     List<DeviceGroup> findByUsernameDelegatedByOrganizationAndElementTypeContainingAndDeleteTimeIsNull(
                     String usernameDelegated, String elementType, String highLevelType, String searchKey, String organization);
 
-    DeviceGroup findOne(long id);
 }

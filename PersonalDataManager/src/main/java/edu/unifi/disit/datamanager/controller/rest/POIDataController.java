@@ -42,6 +42,7 @@ import edu.unifi.disit.datamanager.datamodel.profiledb.POIData;
 import edu.unifi.disit.datamanager.exception.CredentialsException;
 import edu.unifi.disit.datamanager.exception.DataNotValidException;
 import edu.unifi.disit.datamanager.exception.DelegationNotValidException;
+import edu.unifi.disit.datamanager.exception.LDAPException;
 import edu.unifi.disit.datamanager.service.IAccessService;
 import edu.unifi.disit.datamanager.service.ICredentialsService;
 import edu.unifi.disit.datamanager.service.IKPIActivityService;
@@ -380,7 +381,7 @@ public class POIDataController {
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
-		} catch (IllegalArgumentException d) {
+		} catch (IllegalArgumentException | LDAPException | CloneNotSupportedException d) {
 			logger.warn("Wrong Arguments", d);
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
@@ -474,7 +475,7 @@ public class POIDataController {
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
-		} catch (IllegalArgumentException d) {
+		} catch (IllegalArgumentException | LDAPException | CloneNotSupportedException d) {
 			logger.warn("Wrong Arguments", d);
 
 			kpiActivityService.saveActivityViolationFromUsername("PUBLIC",
@@ -568,7 +569,7 @@ public class POIDataController {
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
-		} catch (IllegalArgumentException d) {
+		} catch (IllegalArgumentException | LDAPException | CloneNotSupportedException d) {
 			logger.warn("Wrong Arguments", d);
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),

@@ -44,6 +44,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import edu.unifi.disit.datamanager.datamodel.ActivityAccessType;
 import edu.unifi.disit.datamanager.datamodel.KPIActivityDomainType;
+import edu.unifi.disit.datamanager.datamodel.dto.KPIMetadataDTO;
 import edu.unifi.disit.datamanager.datamodel.profiledb.KPIData;
 import edu.unifi.disit.datamanager.datamodel.profiledb.KPIMetadata;
 import edu.unifi.disit.datamanager.exception.CredentialsException;
@@ -194,11 +195,13 @@ public class KPIMetadataController {
 	// -------------------POST New KPI Metadata ------------------------------------
 	@PostMapping("/api/v1/kpidata/{kpiId}/metadata")
 	public ResponseEntity<Object> postKPIMetadataV1(@PathVariable("kpiId") Long kpiId,
-			@RequestBody KPIMetadata kpiMetadata, @RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestBody KPIMetadataDTO dto, @RequestParam(value = "sourceRequest") String sourceRequest,
 			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) {
 
+		KPIMetadata kpiMetadata = new KPIMetadata(dto);
+		
 		logger.info("Requested postKPIMetadataV1 id {} sourceRequest {}", kpiMetadata.getId(), sourceRequest);
 
 		try {
@@ -243,11 +246,13 @@ public class KPIMetadataController {
 	// -------------------PUT New KPI Metadata ------------------------------------
 	@PutMapping("/api/v1/kpidata/{kpiId}/metadata/{id}")
 	public ResponseEntity<Object> putKPIMetadataV1(@PathVariable("kpiId") Long kpiId, @PathVariable("id") Long id,
-			@RequestBody KPIMetadata kpiMetadata, @RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestBody KPIMetadataDTO dto, @RequestParam(value = "sourceRequest") String sourceRequest,
 			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
 			HttpServletRequest request) {
 
+		KPIMetadata kpiMetadata = new KPIMetadata(dto);
+		
 		logger.info("Requested putKPIMetadataV1 id {} sourceRequest {}", id, sourceRequest);
 
 		try {
@@ -477,11 +482,11 @@ public class KPIMetadataController {
 			List<KPIMetadata> listKpiMetadata = null;
 			if (pageNumber != -1) {
 				if (searchKey.equals("")) {
-					pageKpiMetadata = kpiMetadataService.findAllByKpiId(kpiId, new PageRequest(pageNumber, pageSize,
-							new Sort(Direction.fromString(sortDirection), sortBy)));
+					pageKpiMetadata = kpiMetadataService.findAllByKpiId(kpiId, PageRequest.of(pageNumber, pageSize,
+							Sort.by(Direction.fromString(sortDirection), sortBy)));
 				} else {
-					pageKpiMetadata = kpiMetadataService.findAllFilteredByKpiId(kpiId, searchKey, new PageRequest(
-							pageNumber, pageSize, new Sort(Direction.fromString(sortDirection), sortBy)));
+					pageKpiMetadata = kpiMetadataService.findAllFilteredByKpiId(kpiId, searchKey, PageRequest.of(
+							pageNumber, pageSize, Sort.by(Direction.fromString(sortDirection), sortBy)));
 				}
 			} else {
 				if (searchKey.equals("")) {
@@ -574,11 +579,11 @@ public class KPIMetadataController {
 			List<KPIMetadata> listKpiMetadata = null;
 			if (pageNumber != -1) {
 				if (searchKey.equals("")) {
-					pageKpiMetadata = kpiMetadataService.findAllByKpiId(kpiId, new PageRequest(pageNumber, pageSize,
-							new Sort(Direction.fromString(sortDirection), sortBy)));
+					pageKpiMetadata = kpiMetadataService.findAllByKpiId(kpiId, PageRequest.of(pageNumber, pageSize,
+							Sort.by(Direction.fromString(sortDirection), sortBy)));
 				} else {
-					pageKpiMetadata = kpiMetadataService.findAllFilteredByKpiId(kpiId, searchKey, new PageRequest(
-							pageNumber, pageSize, new Sort(Direction.fromString(sortDirection), sortBy)));
+					pageKpiMetadata = kpiMetadataService.findAllFilteredByKpiId(kpiId, searchKey, PageRequest.of(
+							pageNumber, pageSize, Sort.by(Direction.fromString(sortDirection), sortBy)));
 				}
 			} else {
 				if (searchKey.equals("")) {

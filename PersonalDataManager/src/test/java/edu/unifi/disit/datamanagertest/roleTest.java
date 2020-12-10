@@ -71,7 +71,7 @@ public class roleTest {
 				httpResponse.getStatusLine().getStatusCode(),
 				equalTo(HttpStatus.OK.value()));
 
-		assertEquals(result.size() > 5, true);
+		assertEquals(true, result.size() > 5);
 	}
 
 	@Test
@@ -103,14 +103,14 @@ public class roleTest {
 
 		// Then
 		ObjectMapper mapper = new ObjectMapper();
-		List<Data> result = mapper.readValue(EntityUtils.toString(httpResponse.getEntity()), new TypeReference<List<Activity>>() {
+		List<Activity> result = mapper.readValue(EntityUtils.toString(httpResponse.getEntity()), new TypeReference<List<Activity>>() {
 		});
 
 		assertThat(
 				httpResponse.getStatusLine().getStatusCode(),
 				equalTo(HttpStatus.OK.value()));
 
-		assertEquals(result.size() > 5, true);
+		assertEquals(true, result.size() > 5);
 	}
 
 	@Test
@@ -154,7 +154,7 @@ public class roleTest {
 				httpResponse.getStatusLine().getStatusCode(),
 				equalTo(HttpStatus.OK.value()));
 
-		assertEquals(result.size() > 5, true);
+		assertEquals(true, result.size() > 5);
 	}
 
 	@Test
@@ -296,7 +296,7 @@ public class roleTest {
 
 		assertThat(httpResponse.getStatusLine().getStatusCode(), equalTo(HttpStatus.OK.value()));
 
-		assertEquals(result.size() > 5, true);
+		assertEquals(true, result.size() > 5);
 	}
 
 	@Test
@@ -492,7 +492,7 @@ public class roleTest {
 	}
 
 	@Test
-	public void check_owner_roleok_username() throws ClientProtocolException, IOException {
+	public void check_owner_roleko_username() throws ClientProtocolException, IOException {
 
 		// Given
 		HttpUriRequest request = new HttpGet(
@@ -504,15 +504,9 @@ public class roleTest {
 		HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
 
 		// Then
-		ObjectMapper mapper = new ObjectMapper();
-		Response result = mapper.readValue(EntityUtils.toString(httpResponse.getEntity()), new TypeReference<Response>() {
-		});
-
 		assertThat(
 				httpResponse.getStatusLine().getStatusCode(),
-				equalTo(HttpStatus.OK.value()));
-
-		assertEquals(false, result.getResult());
+				equalTo(HttpStatus.UNAUTHORIZED.value()));
 
 	}
 
@@ -812,7 +806,6 @@ public class roleTest {
 				equalTo(HttpStatus.OK.value()));
 
 		assertEquals(true, result.getResult());
-		assertEquals("PUBLIC", result.getMessage());
 	}
 
 	@Test
@@ -833,7 +826,6 @@ public class roleTest {
 				equalTo(HttpStatus.OK.value()));
 
 		assertEquals(true, result.getResult());
-		assertEquals("MYGROUP-DELEGATED", result.getMessage());
 	}
 
 	public void check_username_delegated_ko1_v3() throws ClientProtocolException, IOException {
@@ -895,14 +887,20 @@ public class roleTest {
 		return get("accesstoken.finaluser=");
 	}
 
-	@SuppressWarnings("resource")
 	private String get(String tosearch) throws IOException {
-		BufferedReader br = new BufferedReader(new FileReader("application-local-test.properties"));
-		String line;
-		while ((line = br.readLine()) != null) {
-			Integer index;
-			if ((index = line.indexOf(tosearch)) != -1) {
-				return line.substring(index + tosearch.length());
+		BufferedReader br = null;
+		try {
+			br = new BufferedReader(new FileReader("target/test-classes/application-local-test.properties"));
+		} catch (Exception e) {
+			br = new BufferedReader(new FileReader("application-local-test.properties"));
+		}
+		if (br != null) {
+			String line;
+			while ((line = br.readLine()) != null) {
+				Integer index;
+				if ((index = line.indexOf(tosearch)) != -1) {
+					return line.substring(index + tosearch.length());
+				}
 			}
 		}
 		throw new IOException(tosearch + " not found");

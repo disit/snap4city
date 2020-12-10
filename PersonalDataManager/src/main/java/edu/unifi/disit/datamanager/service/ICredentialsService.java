@@ -12,6 +12,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package edu.unifi.disit.datamanager.service;
 
+import java.util.List;
 import java.util.Locale;
 
 import edu.unifi.disit.datamanager.exception.CredentialsException;
@@ -29,4 +30,8 @@ public interface ICredentialsService {
 	public boolean isRoot(Locale lang);
 
 	public String getOrganization(Locale lang);
+
+	String getOrganizationUnit(Locale lang);
+
+	List<String> getOrganizationList(Locale lang);
 }

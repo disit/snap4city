@@ -116,7 +116,7 @@ public class CacheStatsTask implements SchedulingConfigurer {
 		try {
 			name = new ObjectName("*:type=CacheStatistics,*,Cache=" + cacheName);
 		} catch (MalformedObjectNameException ex) {
-			logger.error("Someting wrong with ObjectName {}", ex);
+			logger.error("Someting wrong with ObjectName", ex);
 		}
 		Set<ObjectName> beans = mbeanServer.queryNames(name, null);
 		if (beans.isEmpty()) {

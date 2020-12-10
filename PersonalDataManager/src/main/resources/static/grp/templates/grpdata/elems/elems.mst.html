@@ -10,8 +10,8 @@
 <div class="row" style="padding: 15px;">
     <div class="col-sm-8 offset-sm-2">
         <div class="alert alert-light">
-            <b style="margin-right: 30px">Device Group</strong> <b style="margin-right: 10px">ID</strong> {{id}} <b style="margin-right: 10px; margin-left: 10px;">Name</strong>
-            {{name}} <b style="margin-right: 10px;margin-left: 10px;">Description</strong> {{description}} 
+            <strong style="margin-right: 30px">Device Group</strong> <strong style="margin-right: 10px">ID</strong> {{id}} <strong style="margin-right: 10px; margin-left: 10px;">Name</strong>
+            {{name}} <strong style="margin-right: 10px;margin-left: 10px;">Description</strong> {{description}} 
         </div>
     </div>
 
@@ -67,26 +67,26 @@
 <table class="table table-striped table-bordered" style="background-color: white">
     <thead>
         <tr style="background: rgb(0, 162, 211); color: rgb(255, 255, 255); font-size: 1em;">
-            <th onclick="GrpElementSorter.setSortOnField('id');GrpElementTabler.renderTable('{{grpId}}',GrpElementTabler.forceReadonly);" style="cursor: pointer;">No.
+            <th scope="col" onclick="GrpElementSorter.setSortOnField('id');GrpElementTabler.renderTable('{{grpId}}',GrpElementTabler.forceReadonly);" style="cursor: pointer;">No.
                 {{#sortidASC}}&darr;{{/sortidASC}}
                 {{#sortidDESC}}&uarr;{{/sortidDESC}}</th>
-            <th onclick="GrpElementSorter.setSortOnField('username');GrpElementTabler.renderTable('{{grpId}}',GrpElementTabler.forceReadonly);"
+            <th scope="col" onclick="GrpElementSorter.setSortOnField('username');GrpElementTabler.renderTable('{{grpId}}',GrpElementTabler.forceReadonly);"
                 style="cursor: pointer;">Username
                 {{#sortusernameASC}}&darr;{{/sortusernameASC}}
                 {{#sortusernameDESC}}&uarr;{{/sortusernameDESC}}</th>
-            <th onclick="GrpElementSorter.setSortOnField('elementId');GrpElementTabler.renderTable('{{grpId}}',GrpElementTabler.forceReadonly);"
+            <th scope="col" onclick="GrpElementSorter.setSortOnField('elementId');GrpElementTabler.renderTable('{{grpId}}',GrpElementTabler.forceReadonly);"
                 style="cursor: pointer;">Element ID
                 {{#sortelementIdASC}}&darr;{{/sortelementIdASC}}
                 {{#sortelementIdDESC}}&uarr;{{/sortelementIdDESC}}</th>            
-            <th onclick="GrpElementSorter.setSortOnField('elementType');GrpElementTabler.renderTable('{{grpId}}',GrpElementTabler.forceReadonly);"
+            <th scope="col" onclick="GrpElementSorter.setSortOnField('elementType');GrpElementTabler.renderTable('{{grpId}}',GrpElementTabler.forceReadonly);"
                 style="cursor: pointer;">Element Type
                 {{#sortelementTypeASC}}&darr;{{/sortelementTypeASC}}
                 {{#sortelementTypeDESC}}&uarr;{{/sortelementTypeDESC}}</th>
-            <th onclick="GrpElementSorter.setSortOnField('elementName');GrpElementTabler.renderTable('{{grpId}}',GrpElementTabler.forceReadonly);"
+            <th scope="col" onclick="GrpElementSorter.setSortOnField('elementName');GrpElementTabler.renderTable('{{grpId}}',GrpElementTabler.forceReadonly);"
                 style="cursor: pointer;">Element Name
                 {{#sortelementNameASC}}&darr;{{/sortelementNameASC}}
                 {{#sortelementNameDESC}}&uarr;{{/sortelementNameDESC}}</th>
-            <th onclick="GrpElementSorter.setSortOnField('insertTime');GrpElementTabler.renderTable('{{grpId}}',GrpElementTabler.forceReadonly);"
+            <th scope="col" onclick="GrpElementSorter.setSortOnField('insertTime');GrpElementTabler.renderTable('{{grpId}}',GrpElementTabler.forceReadonly);"
                 style="cursor: pointer;">Added
                 {{#sortinsertTimeASC}}&darr;{{/sortinsertTimeASC}} {{#sortinsertTimeDESC}}&uarr;{{/sortinsertTimeDESC}}</th>
             <!-- <th>View</th> -->

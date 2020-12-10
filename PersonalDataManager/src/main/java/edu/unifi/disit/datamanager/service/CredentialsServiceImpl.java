@@ -15,8 +15,6 @@ package edu.unifi.disit.datamanager.service;
 import java.util.List;
 import java.util.Locale;
 
-//import org.apache.logging.log4j.LogManager;
-//import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,8 +28,6 @@ import edu.unifi.disit.datamanager.exception.CredentialsException;
 
 @Service
 public class CredentialsServiceImpl implements ICredentialsService {
-
-	// private static final Logger logger = LogManager.getLogger();
 
 	@Autowired
 	private MessageSource messages;
@@ -50,9 +46,9 @@ public class CredentialsServiceImpl implements ICredentialsService {
 		// assure the username is included in the list of the ownership of this appid
 		List<Ownership> owns = null;
 		if (elementType == null)// elementType can be null for backword compatibility
-			owns = ownershipRepo.findByElementId(appId);
+			owns = ownershipRepo.findByElementIdAndDeletedIsNull(appId);
 		else
-			owns = ownershipRepo.findByElementIdAndElementType(appId, elementType);
+			owns = ownershipRepo.findByElementIdAndElementTypeAndDeletedIsNull(appId, elementType);
 		boolean found = false;
 		for (Ownership own : owns)
 			if (own.getUsername().equals(username))
@@ -96,5 +92,16 @@ public class CredentialsServiceImpl implements ICredentialsService {
 	@Override
 	public String getOrganization(Locale lang) {
 		return ldapRepository.getOUnames(getLoggedUsername(new Locale("en"))).toString();
+	}
+
+	@Override
+	public List<String> getOrganizationList(Locale lang) {
+		return ldapRepository.getOUnames(getLoggedUsername(new Locale("en")));
+	}
+
+	@Override
+	public String getOrganizationUnit(Locale lang) {
+		String temp = getOrganization(lang);
+		return temp.substring(temp.indexOf('=') + 1, temp.indexOf(',')).toLowerCase();
 	}
 }

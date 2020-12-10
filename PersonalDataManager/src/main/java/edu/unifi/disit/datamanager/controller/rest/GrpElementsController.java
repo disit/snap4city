@@ -63,7 +63,7 @@ public class GrpElementsController {
 	@Autowired
 	IDeviceGroupService deviceGroupService;
 
-	@Autowired
+    @Autowired
 	IDeviceGroupElementService deviceGroupElementService;
 
 	@Autowired
@@ -91,7 +91,7 @@ public class GrpElementsController {
 			@RequestParam(value = "pageSize", required = false, defaultValue = "10") int pageSize,
 			@RequestParam(value = "sortDirection", required = false, defaultValue = "desc") String sortDirection,
 			@RequestParam(value = "sortBy", required = false, defaultValue = "insert_time") String sortBy,
-			@RequestParam(value = "searchKey", required = false, defaultValue = "") String searchKey,
+                        @RequestParam(value = "searchKey", required = false, defaultValue = "") String searchKey,
 			HttpServletRequest request) {
 
 		logger.info(
@@ -118,10 +118,10 @@ public class GrpElementsController {
 			if (pageNumber != -1) {
 				if (searchKey.isEmpty())
 					pageElement = deviceGroupElementService.findByDeviceGroupId(grpId,
-							new PageRequest(pageNumber, pageSize, new Sort(Direction.fromString(sortDirection), sortBy)));
+						PageRequest.of(pageNumber, pageSize, Sort.by(Direction.fromString(sortDirection), sortBy)));
 				else
 					pageElement = deviceGroupElementService.findByDeviceGroupIdFiltered(grpId, searchKey,
-							new PageRequest(pageNumber, pageSize, new Sort(Direction.fromString(sortDirection), sortBy)));
+						PageRequest.of(pageNumber, pageSize, Sort.by(Direction.fromString(sortDirection), sortBy)));
 			} else {
 				if (searchKey.isEmpty())
 					listElement = deviceGroupElementService.findByDeviceGroupIdNoPages(grpId);
@@ -187,7 +187,7 @@ public class GrpElementsController {
 
 	}
 
-	// -------------------GET ALL Device Group Element Pageable ---------------
+        // -------------------GET ALL Device Group Element Pageable ---------------
 	@DeleteMapping("/api/v1/devicegroup/{grpId}/elements")
 	public ResponseEntity<Object> deleteAllElementV1(@PathVariable("grpId") Long grpId,
 			@RequestParam(value = "sourceRequest") String sourceRequest,
@@ -233,9 +233,9 @@ public class GrpElementsController {
 
 				deviceGroupService.lastUpdatedNow(grpId);
 
-				logger.info("Deleted all elements from device group {}", grpId);
+                                logger.info("Deleted all elements from device group {}", grpId);
 
-				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
+                                kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
 						sourceId, grpId, ActivityAccessType.DELETE, KPIActivityDomainType.GROUPELEMENT);
 
 				return new ResponseEntity<>(listElement, HttpStatus.OK);
@@ -274,35 +274,35 @@ public class GrpElementsController {
 
 	}
 
-	// -------------------GET Group Element Types by Group Owner ---------------
+        // -------------------GET Group Element Types by Group Owner ---------------
 	@GetMapping("/api/v1/devicegroup/{grpId}/availElmtTypesToAdd")
 	public ResponseEntity<Object> getAvailElmtTypesToAdd(
 			@PathVariable("grpId") Long grpId,
 			@RequestParam(value = "sourceRequest") String sourceRequest,
-			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
-			HttpServletRequest request) {
-		try {
+                @RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
+                HttpServletRequest request) {
+            try {
 			logger.info("Requested getAvailElmtTypesToAdd sourceRequest {} grpId {} lang {} ", sourceRequest, grpId, lang);
 
-			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
-					sourceRequest, grpId, ActivityAccessType.READ, KPIActivityDomainType.GROUPELMTTYPES,
-					request.getRequestURI() + "?" + request.getQueryString(),
-					"Wrong Device Group Data", null, request.getRemoteAddr());
+                kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
+						sourceRequest, grpId, ActivityAccessType.READ, KPIActivityDomainType.GROUPELMTTYPES,
+						request.getRequestURI() + "?" + request.getQueryString(),
+						"Wrong Device Group Data", null, request.getRemoteAddr());
 
-			Set<String> elementTypes = null;
+                Set<String> elementTypes = null;
 			// DeviceGroup grpData =
 			deviceGroupService.getDeviceGroupById(grpId, null, false);// used just for CredentialsException?
 			if (credentialService.isRoot(lang)) {
 				elementTypes = deviceGroupElementService.getAllElmtTypes();
 			} else {
 				elementTypes = deviceGroupElementService.getAvailElmtTypesToAdd(credentialService.getLoggedUsername(lang));
-			}
+                }
 			if (elementTypes == null || elementTypes.isEmpty())
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			else
 				return new ResponseEntity<>(elementTypes, HttpStatus.OK);
 
-		} catch (CredentialsException d) {
+            } catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
@@ -313,42 +313,42 @@ public class GrpElementsController {
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (Exception e) {
-			logger.info("Failed getAvailElmtTypesToAdd sourceRequest {} exception {}  ", sourceRequest, e);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
+			logger.info("Failed getAvailElmtTypesToAdd sourceRequest {} exception", sourceRequest, e);
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	}
 	}
 
-	// -------------------GET Items to be added to group by Group owner ---------------
+        // -------------------GET Items to be added to group by Group owner ---------------
 	@GetMapping("/api/v1/devicegroup/{grpId}/availElmtToAdd")
 	public ResponseEntity<Object> getAvailElmtToAdd(
 			@PathVariable("grpId") Long grpId,
 			@RequestParam("elmtType") String elmtType,
 			@RequestParam(value = "sourceRequest") String sourceRequest,
-			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
-			HttpServletRequest request) {
-		try {
+                @RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
+                HttpServletRequest request) {
+            try {
 
 			logger.info("Requested getAvailElmtToAdd sourceRequest {} grpId {} elmtType {} lang {} ", sourceRequest, grpId, elmtType, lang);
 
-			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
-					sourceRequest, grpId, ActivityAccessType.READ, KPIActivityDomainType.METADATA,
-					request.getRequestURI() + "?" + request.getQueryString(),
-					"Wrong Device Group Data", null, request.getRemoteAddr());
+                kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
+                        sourceRequest, grpId, ActivityAccessType.READ, KPIActivityDomainType.METADATA,
+                        request.getRequestURI() + "?" + request.getQueryString(),
+                        "Wrong Device Group Data", null, request.getRemoteAddr());
 
-			Set<Object> items = null;
+                Set<Object> items = null;
 			// DeviceGroup grpData =
 			deviceGroupService.getDeviceGroupById(grpId, null, false); // used just for CredentialsException?
 			if (credentialService.isRoot(lang)) {
-				items = deviceGroupElementService.getAllItems(elmtType);
+                    items = deviceGroupElementService.getAllItems(elmtType);
 			} else {
 				items = deviceGroupElementService.getAvailItemsToAdd(credentialService.getLoggedUsername(lang), elmtType);
-			}
+                }
 			if (items == null || items.isEmpty())
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			else
 				return new ResponseEntity<>(items, HttpStatus.OK);
 
-		} catch (CredentialsException d) {
+            } catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
@@ -359,9 +359,9 @@ public class GrpElementsController {
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (Exception e) {
-			logger.info("Failed getAvailElmtToAdd sourceRequest {} exception {}  ", sourceRequest, e);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
+			logger.info("Failed getAvailElmtToAdd sourceRequest {} exception", sourceRequest, e);
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	}
 	}
 
 	// -------------------POST New Device Group Value ------------------------------------
@@ -373,13 +373,13 @@ public class GrpElementsController {
 			HttpServletRequest request) {
 
 		String logElmts = "";
-		String logElmtsType = "";
+                String logElmtsType = "";
 		for (DeviceGroupElement e : elements) {
 			logElmts = logElmts.concat(e.getElementId()).concat(" ");
-			logElmtsType = e.getElementType();
-		}
+                    logElmtsType = e.getElementType();
+                }
 
-		logger.info("Requested postAddNewElmtToGrpV1 grpId {} elmtsType {} logElmts {} sourceRequest {} lang{}", grpId, logElmtsType, logElmts, sourceRequest, lang);
+                logger.info("Requested postAddNewElmtToGrpV1 grpId {} elmtsType {} logElmts {} sourceRequest {} lang{}", grpId, logElmtsType, logElmts, sourceRequest, lang);
 
 		try {
 
@@ -397,14 +397,14 @@ public class GrpElementsController {
 				throw new CredentialsException();
 			}
 
-			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, sourceId, grpId,
-					ActivityAccessType.WRITE, KPIActivityDomainType.GROUPELEMENT);
+                        kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, sourceId, grpId,
+                                        ActivityAccessType.WRITE, KPIActivityDomainType.GROUPELEMENT);
 
 			List<DeviceGroupElement> createdElements = deviceGroupElementService.addElmtsToGrp(grpId, elements);
 
 			logger.info("Posted grpId {} elmtsType {} logElmts {} sourceRequest {} lang{}", grpId, logElmtsType, logElmts, sourceRequest, lang);
 
-			return ResponseEntity.status(HttpStatus.CREATED).body(createdElements);
+                        return ResponseEntity.status(HttpStatus.CREATED).body(createdElements);
 
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
@@ -428,7 +428,7 @@ public class GrpElementsController {
 		}
 	}
 
-	// -------------------DELETE New Device Group Value ------------------------------------
+        // -------------------DELETE New Device Group Value ------------------------------------
 	@DeleteMapping("/api/v1/devicegroup/{grpId}/elements/{id}")
 	public ResponseEntity<Object> removeGrpElmtFromGrpV1(@PathVariable("grpId") Long grpId, @PathVariable("id") Long id,
 			@RequestParam(value = "sourceRequest") String sourceRequest,
@@ -470,7 +470,7 @@ public class GrpElementsController {
 
 			kpiDelegationToDelete.setDeleteTime(new Date());
 
-			deviceGroupService.lastUpdatedNow(grpId);
+                        deviceGroupService.lastUpdatedNow(grpId);
 			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, sourceId, grpId,
 
 					ActivityAccessType.DELETE, KPIActivityDomainType.GROUPELEMENT);
@@ -499,7 +499,7 @@ public class GrpElementsController {
 		}
 	}
 
-	@GetMapping("/api/v1/public/devicegroup/{grpId}/elements")
+        @GetMapping("/api/v1/public/devicegroup/{grpId}/elements")
 	public ResponseEntity<Object> getPublicAllElementV1Pageable(@PathVariable("grpId") Long grpId,
 			@RequestParam(value = "sourceRequest") String sourceRequest,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
@@ -507,7 +507,7 @@ public class GrpElementsController {
 			@RequestParam(value = "pageSize", required = false, defaultValue = "10") int pageSize,
 			@RequestParam(value = "sortDirection", required = false, defaultValue = "desc") String sortDirection,
 			@RequestParam(value = "sortBy", required = false, defaultValue = "insert_time") String sortBy,
-			@RequestParam(value = "searchKey", required = false, defaultValue = "") String searchKey,
+                        @RequestParam(value = "searchKey", required = false, defaultValue = "") String searchKey,
 			HttpServletRequest request) {
 
 		logger.info(
@@ -531,19 +531,19 @@ public class GrpElementsController {
 			else {
 				if (!deviceGroupService.findByUsernameDelegatedByHighLevelTypeFilteredNoPages("ANONYMOUS", "My",
 						"MyGroup", "").contains(grpData)) {
-					throw new CredentialsException();
-				}
-			}
+                                    throw new CredentialsException();
+                            }
+                        }
 
 			Page<DeviceGroupElement> pageElement = null;
 			List<DeviceGroupElement> listElement = null;
 			if (pageNumber != -1) {
 				if (searchKey.isEmpty())
 					pageElement = deviceGroupElementService.findByDeviceGroupId(grpId,
-							new PageRequest(pageNumber, pageSize, new Sort(Direction.fromString(sortDirection), sortBy)));
+						PageRequest.of(pageNumber, pageSize, Sort.by(Direction.fromString(sortDirection), sortBy)));
 				else
 					pageElement = deviceGroupElementService.findByDeviceGroupIdFiltered(grpId, searchKey,
-							new PageRequest(pageNumber, pageSize, new Sort(Direction.fromString(sortDirection), sortBy)));
+						PageRequest.of(pageNumber, pageSize, Sort.by(Direction.fromString(sortDirection), sortBy)));
 			} else {
 				if (searchKey.isEmpty())
 					listElement = deviceGroupElementService.findByDeviceGroupIdNoPages(grpId);
@@ -609,14 +609,14 @@ public class GrpElementsController {
 
 	}
 
-	// -------------------GET ALL Device Group Element Pageable ---------------
+        // -------------------GET ALL Device Group Element Pageable ---------------
 	@GetMapping("/api/v1/groupelement")
 	public ResponseEntity<Object> getGroupElement(
 			@RequestParam(value = "sourceRequest") String sourceRequest,
 			@RequestParam(value = "sourceId", required = false) String sourceId,
 			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
-			@RequestParam(value = "elementId") String elementId,
-			@RequestParam(value = "elementType") String elementType,
+                        @RequestParam(value = "elementId") String elementId,
+                        @RequestParam(value = "elementType") String elementType,
 			HttpServletRequest request) {
 
 		logger.info(
@@ -627,11 +627,11 @@ public class GrpElementsController {
 
 			List<DeviceGroupElement> el = deviceGroupElementService.getByUserAndElmtIdAndElmtType(credentialService.getLoggedUsername(lang), elementId, elementType);
 
-			logger.info("Returning Group Element List ");
+                    logger.info("Returning Group Element List ");
 
-			return new ResponseEntity<>(el, HttpStatus.OK);
+                    return new ResponseEntity<>(el, HttpStatus.OK);
 
-		} catch (IllegalArgumentException | NoSuchMessageException d) {
+		}  catch (IllegalArgumentException | NoSuchMessageException d) {
 			logger.warn("Wrong Arguments", d);
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());

@@ -35,7 +35,7 @@ public class LightActivityServiceImpl implements ILightActivityService {
 	public LightActivity saveLightActivity(String elementId, String elementType, String sourceRequest,
 			String sourceId) {
 		if (elementId != null && elementType != null && sourceRequest != null && sourceId != null) {
-			logger.debug("saveLightActivity INVOKED on id {} elementId {} elementType {} sourceRequest {} sourceId {}",
+			logger.debug("saveLightActivity INVOKED on elementId {} elementType {} sourceRequest {} sourceId {}",
 					elementId, elementType, sourceRequest, sourceId);
 
 			List<LightActivity> listLightActivity = lightActivityRepo

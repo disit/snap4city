@@ -4,14 +4,18 @@ var KPIDelegationTabler = {
     currentHighLevelType: null,
 
     renderTable: function (kpiId, highLevelType) {
+        if (KPIDelegationTabler.currentKpiId != kpiId) {
+            KPIDelegationPager.currentPage = 0;
+        }
         KPIDelegationTabler.currentKpiId = kpiId;
         KPIDelegationTabler.currentHighLevelType = highLevelType;
         KPIEditor.keycloak.updateToken(30).success(function () {
             var query = QueryManager.createGetKPIDelegationTableQuery(KPIDelegationTabler.currentKpiId, KPIDelegationPager.currentPage, KPIDelegationPager.currentSize, KPIDelegationSorter.currentSortDirection, KPIDelegationSorter.currentSortBy, KPIDelegationFilter.currentSearchKey);
             APIClient.executeGetQuery(query, KPIEditor.keycloak.token, KPIDelegationTabler.successQuery, KPIDelegationTabler.errorQuery);
-        }).error(function () {
-            var query = QueryManager.createGetKPIDelegationTableQuery(KPIDelegationTabler.currentKpiId, KPIDelegationPager.currentPage, KPIDelegationPager.currentSize, KPIDelegationSorter.currentSortDirection, KPIDelegationSorter.currentSortBy, KPIDelegationFilter.currentSearchKey);
-            APIClient.executeGetQuery(query, Authentication.refreshTokenGetAccessToken(), KPIDelegationTabler.successQuery, KPIDelegationTabler.errorQuery);
+        }).error(function (_error) {
+            console.log("updateToken error: " + _error);
+            /* var query = QueryManager.createGetKPIDelegationTableQuery(KPIDelegationTabler.currentKpiId, KPIDelegationPager.currentPage, KPIDelegationPager.currentSize, KPIDelegationSorter.currentSortDirection, KPIDelegationSorter.currentSortBy, KPIDelegationFilter.currentSearchKey);
+            APIClient.executeGetQuery(query, Authentication.refreshTokenGetAccessToken(), KPIDelegationTabler.successQuery, KPIDelegationTabler.errorQuery);*/
         });
     },
 
@@ -91,11 +95,12 @@ var KPIDelegationTabler = {
     editKPIDelegationModal: function (_kpiId, _id) {
         if (_id != null && _id != "") {
             KPIEditor.keycloak.updateToken(30).success(function () {
-                var query = QueryManager.createGetKPIDelegationByIdQuery( _kpiId, _id);
-                APIClient.executeGetQuery(query, KPIEditor.keycloak.token, KPIDelegationTabler.successEditKPIDelegationModal, KPIDelegationTabler.errorQuery);
-            }).error(function () {
                 var query = QueryManager.createGetKPIDelegationByIdQuery(_kpiId, _id);
-                APIClient.executeGetQuery(query, Authentication.refreshTokenGetAccessToken(), KPIDelegationTabler.successEditKPIDelegationModal, KPIDelegationTabler.errorQuery);
+                APIClient.executeGetQuery(query, KPIEditor.keycloak.token, KPIDelegationTabler.successEditKPIDelegationModal, KPIDelegationTabler.errorQuery);
+            }).error(function (_error) {
+                console.log("updateToken error: " + _error);
+                /* var query = QueryManager.createGetKPIDelegationByIdQuery(_kpiId, _id);
+                    APIClient.executeGetQuery(query, Authentication.refreshTokenGetAccessToken(), KPIDelegationTabler.successEditKPIDelegationModal, KPIDelegationTabler.errorQuery);*/
             });
         } else {
             KPIDelegationTabler.successEditKPIDelegationModal(null);
@@ -152,18 +157,20 @@ var KPIDelegationTabler = {
         if (typeof kpiDelegation.id != "undefined") {
             KPIEditor.keycloak.updateToken(30).success(function () {
                 var query = QueryManager.createPatchKPIDelegationQuery(kpiDelegation.elementId, kpiDelegation.id);
-                APIClient.executePatchQuery(query, kpiDelegation, KPIEditor.keycloak.token,  KPIDelegationTabler.successSaveKPIDelegation, KPIDelegationTabler.errorQuery);
-            }).error(function () {
-                var query = QueryManager.createPatchKPIDelegationQuery(kpiDelegation.elementId, kpiDelegation.id);
-                APIClient.executePatchQuery(query, kpiDelegation, Authentication.refreshTokenGetAccessToken(),  KPIDelegationTabler.successSaveKPIDelegation, KPIDelegationTabler.errorQuery);
+                APIClient.executePatchQuery(query, kpiDelegation, KPIEditor.keycloak.token, KPIDelegationTabler.successSaveKPIDelegation, KPIDelegationTabler.errorQuery);
+            }).error(function (_error) {
+                console.log("updateToken error: " + _error);
+                /* var query = QueryManager.createPatchKPIDelegationQuery(kpiDelegation.elementId, kpiDelegation.id);
+                    APIClient.executePatchQuery(query, kpiDelegation, Authentication.refreshTokenGetAccessToken(),  KPIDelegationTabler.successSaveKPIDelegation, KPIDelegationTabler.errorQuery);*/
             });
         } else {
             KPIEditor.keycloak.updateToken(30).success(function () {
                 var query = QueryManager.createPostKPIDelegationQuery(kpiDelegation.elementId);
-                APIClient.executePostQuery(query, kpiDelegation, KPIEditor.keycloak.token,  KPIDelegationTabler.successSaveKPIDelegation, KPIDelegationTabler.errorQuery);
-            }).error(function () {
-                var query = QueryManager.createPostKPIDelegationQuery(kpiDelegation.elementId);
-                APIClient.executePostQuery(query, kpiDelegation, Authentication.refreshTokenGetAccessToken(),  KPIDelegationTabler.successSaveKPIDelegation, KPIDelegationTabler.errorQuery);
+                APIClient.executePostQuery(query, kpiDelegation, KPIEditor.keycloak.token, KPIDelegationTabler.successSaveKPIDelegation, KPIDelegationTabler.errorQuery);
+            }).error(function (_error) {
+                console.log("updateToken error: " + _error);
+                /* var query = QueryManager.createPostKPIDelegationQuery(kpiDelegation.elementId);
+                    APIClient.executePostQuery(query, kpiDelegation, Authentication.refreshTokenGetAccessToken(),  KPIDelegationTabler.successSaveKPIDelegation, KPIDelegationTabler.errorQuery);*/
             });
         }
     },
@@ -172,9 +179,10 @@ var KPIDelegationTabler = {
         KPIEditor.keycloak.updateToken(30).success(function () {
             var query = QueryManager.createGetKPIDelegationTableQuery(_kpiId, null, null, null, null, null);
             APIClient.executeGetQuery(query, KPIEditor.keycloak.token, successCallBack, errorCallBack);
-        }).error(function () {
-            var query = QueryManager.createGetKPIDelegationTableQuery(_kpiId, null, null, null, null, null);
-            APIClient.executeGetQuery(query, Authentication.refreshTokenGetAccessToken(), successCallBack, errorCallBack);
+        }).error(function (_error) {
+            console.log("updateToken error: " + _error);
+            /* var query = QueryManager.createGetKPIDelegationTableQuery(_kpiId, null, null, null, null, null);
+            APIClient.executeGetQuery(query, Authentication.refreshTokenGetAccessToken(), successCallBack, errorCallBack);*/
         });
     },
 
@@ -186,13 +194,14 @@ var KPIDelegationTabler = {
             } else {
                 APIClient.executeDeleteQuery(query, KPIEditor.keycloak.token, KPIDelegationTabler.successSaveKPIDelegation, KPIDelegationTabler.errorQuery);
             }
-        }).error(function () {
-            var query = QueryManager.createDeleteKPIDelegationQuery(_kpiId, _id);
+        }).error(function (_error) {
+            console.log("updateToken error: " + _error);
+            /* var query = QueryManager.createDeleteKPIDelegationQuery(_kpiId, _id);
             if (successCallBack != null && errorCallBack != null) {
                 APIClient.executeDeleteQuery(query, Authentication.refreshTokenGetAccessToken(), successCallBack, errorCallBack);
             } else {
                 APIClient.executeDeleteQuery(query, Authentication.refreshTokenGetAccessToken(), KPIDelegationTabler.successSaveKPIDelegation, KPIDelegationTabler.errorQuery);
-            }
+            }*/
         });
     },
 

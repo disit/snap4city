@@ -3,15 +3,22 @@ var KPIValueTabler = {
     currentKpiId: null,
     currentKpiDataType: null,
 
+
+
+
     renderTable: function (kpiId, dataType) {
+        if (KPIValueTabler.currentKpiId != kpiId) {
+            KPIValuePager.currentPage = 0;
+        }
         KPIValueTabler.currentKpiId = kpiId;
         KPIValueTabler.currentKpiDataType = dataType;
         KPIEditor.keycloak.updateToken(30).success(function () {
             var query = QueryManager.createGetKPIValueTableQuery(KPIValueTabler.currentKpiId, KPIValuePager.currentPage, KPIValuePager.currentSize, KPIValueSorter.currentSortDirection, KPIValueSorter.currentSortBy, KPIValueFilter.currentSearchKey);
             APIClient.executeGetQuery(query, KPIEditor.keycloak.token, KPIValueTabler.successQuery, KPIValueTabler.errorQuery);
-        }).error(function () {
-            var query = QueryManager.createGetKPIValueTableQuery(KPIValueTabler.currentKpiId, KPIValuePager.currentPage, KPIValuePager.currentSize, KPIValueSorter.currentSortDirection, KPIValueSorter.currentSortBy, KPIValueFilter.currentSearchKey);
-            APIClient.executeGetQuery(query, Authentication.refreshTokenGetAccessToken(), KPIValueTabler.successQuery, KPIValueTabler.errorQuery);
+        }).error(function (_error) {
+            console.log("updateToken error: " + _error);
+            /* var query = QueryManager.createGetKPIValueTableQuery(KPIValueTabler.currentKpiId, KPIValuePager.currentPage, KPIValuePager.currentSize, KPIValueSorter.currentSortDirection, KPIValueSorter.currentSortBy, KPIValueFilter.currentSearchKey);
+            APIClient.executeGetQuery(query, Authentication.refreshTokenGetAccessToken(), KPIValueTabler.successQuery, KPIValueTabler.errorQuery);*/
         });
     },
 
@@ -95,9 +102,10 @@ var KPIValueTabler = {
             KPIEditor.keycloak.updateToken(30).success(function () {
                 var query = QueryManager.createGetKPIValueByIdQuery(_kpiId, _id);
                 APIClient.executeGetQuery(query, KPIEditor.keycloak.token, KPIValueTabler.successEditKPIValueModal, KPIValueTabler.errorQuery);
-            }).error(function () {
-                var query = QueryManager.createGetKPIValueByIdQuery(_kpiId, _id);
-                APIClient.executeGetQuery(query, Authentication.refreshTokenGetAccessToken(), KPIValueTabler.successEditKPIValueModal, KPIValueTabler.errorQuery);
+            }).error(function (_error) {
+                console.log("updateToken error: " + _error);
+                /* var query = QueryManager.createGetKPIValueByIdQuery(_kpiId, _id);
+                    APIClient.executeGetQuery(query, Authentication.refreshTokenGetAccessToken(), KPIValueTabler.successEditKPIValueModal, KPIValueTabler.errorQuery);*/
             });
         } else {
             KPIValueTabler.successEditKPIValueModal(null);
@@ -127,7 +135,8 @@ var KPIValueTabler = {
             _response.validDataType = "text";
         }
         ViewManager.render({
-            "kpivalue": _response, "isEdit": isEdit
+            "kpivalue": _response,
+            "isEdit": isEdit
         }, "#genericModal", "templates/kpivalue/editkpivalue.mst.html");
         $('#genericModal').modal('show');
         EditModalManager.currentLatitude = _response.latitude;
@@ -135,7 +144,7 @@ var KPIValueTabler = {
         EditModalManager.checkOrganizationAndCreateMap("KPIValueEdit");
         //CHECK FIREFOX FOR DATETIME-LOCAL
         $("#timezonedesignator").hide();
-        if (typeof InstallTrigger !== 'undefined'){
+        if (typeof InstallTrigger !== 'undefined') {
             $("#timezonedesignator").show();
         }
     },
@@ -154,9 +163,31 @@ var KPIValueTabler = {
         $('#genericModal').modal('show');
     },
 
+    clearAllValuesModal: function () {
+        ViewManager.render({
+            "kpiId": KPIValueTabler.currentKpiId
+        }, "#genericModal", "templates/kpivalue/clearallvalues.mst.html");
+        $('#genericModal').modal('show');
+    },
+
+    clearAllValues: function (_kpiId) {
+        if (_kpiId != null && _kpiId != "") {
+            KPIEditor.keycloak.updateToken(30).success(function () {
+                var query = QueryManager.createClearAllKPIValueQuery(_kpiId);
+                APIClient.executeDeleteQuery(query, KPIEditor.keycloak.token, KPIValueTabler.successClearAllValues, KPIValueTabler.errorQuery);
+            }).error(function (_error) {
+                console.log("updateToken error: " + _error);
+                /* var query = QueryManager.createClearAllKPIValueQuery(_kpiId);
+                    APIClient.executeDeleteQuery(query, Authentication.refreshTokenGetAccessToken(), KPIValueTabler.successClearAllValues, KPIValueTabler.errorQuery);*/
+            });
+        } else {
+            KPIValueTabler.successEditKPIValueModal(null);
+        }
+    },
+
     saveKPIValue: function () {
-        
-        kpiValue = {
+
+        let kpiValue = {
             "value": $("#inputValueKPIValueEdit").val(),
             "latitude": $("#inputLatitudeKPIValueEdit").val(),
             "longitude": $("#inputLongitudeKPIValueEdit").val(),
@@ -178,29 +209,38 @@ var KPIValueTabler = {
             KPIEditor.keycloak.updateToken(30).success(function () {
                 delete kpiValue.dataTime;
                 var query = QueryManager.createPatchKPIValueQuery(kpiValue.kpiId, kpiValue.id);
-                APIClient.executePatchQuery(query, kpiValue, KPIEditor.keycloak.token,  KPIValueTabler.successSaveKPIValue, KPIValueTabler.errorQuery);
-            }).error(function () {
-                var query = QueryManager.createPatchKPIValueQuery(kpiValue.kpiId, kpiValue.id);
-                APIClient.executePatchQuery(query, kpiValue, Authentication.refreshTokenGetAccessToken(),  KPIValueTabler.successSaveKPIValue, KPIValueTabler.errorQuery);
+                APIClient.executePatchQuery(query, kpiValue, KPIEditor.keycloak.token, KPIValueTabler.successSaveKPIValue, KPIValueTabler.errorQuery);
+            }).error(function (_error) {
+                console.log("updateToken error: " + _error);
+                /* var query = QueryManager.createPatchKPIValueQuery(kpiValue.kpiId, kpiValue.id);
+                    APIClient.executePatchQuery(query, kpiValue, Authentication.refreshTokenGetAccessToken(), KPIValueTabler.successSaveKPIValue, KPIValueTabler.errorQuery);*/
             });
         } else {
             KPIEditor.keycloak.updateToken(30).success(function () {
                 var query = QueryManager.createPostKPIValueQuery(kpiValue.kpiId);
-                APIClient.executePostQuery(query, kpiValue, KPIEditor.keycloak.token,  KPIValueTabler.successSaveKPIValue, KPIValueTabler.errorQuery);
-            }).error(function () {
-                var query = QueryManager.createPostKPIValueQuery(kpiValue.kpiId);
-                APIClient.executePostQuery(query, kpiValue, Authentication.refreshTokenGetAccessToken(),  KPIValueTabler.successSaveKPIValue, KPIValueTabler.errorQuery);
+                APIClient.executePostQuery(query, kpiValue, KPIEditor.keycloak.token, KPIValueTabler.successSaveKPIValue, KPIValueTabler.errorQuery);
+            }).error(function (_error) {
+                console.log("updateToken error: " + _error);
+                /* var query = QueryManager.createPostKPIValueQuery(kpiValue.kpiId);
+                    APIClient.executePostQuery(query, kpiValue, Authentication.refreshTokenGetAccessToken(), KPIValueTabler.successSaveKPIValue, KPIValueTabler.errorQuery);*/
             });
         }
+    },
+
+    successClearAllValues: function (_response) {
+        console.log(_response);
+        $('#genericModal').modal('hide');
+        KPIValueTabler.renderTable(KPIValueTabler.currentKpiId);
     },
 
     deleteKPIValue(_kpiId, _id) {
         KPIEditor.keycloak.updateToken(30).success(function () {
             var query = QueryManager.createDeleteKPIValueQuery(_kpiId, _id);
             APIClient.executeDeleteQuery(query, KPIEditor.keycloak.token, KPIValueTabler.successSaveKPIValue, KPIValueTabler.errorQuery);
-        }).error(function () {
-            var query = QueryManager.createDeleteKPIValueQuery(_kpiId, _id);
-            APIClient.executeDeleteQuery(query, Authentication.refreshTokenGetAccessToken(), KPIValueTabler.successSaveKPIValue, KPIValueTabler.errorQuery);
+        }).error(function (_error) {
+            console.log("updateToken error: " + _error);
+            /* var query = QueryManager.createDeleteKPIValueQuery(_kpiId, _id);
+            APIClient.executeDeleteQuery(query, Authentication.refreshTokenGetAccessToken(), KPIValueTabler.successSaveKPIValue, KPIValueTabler.errorQuery);*/
         });
     },
 

@@ -101,51 +101,58 @@ public class DeleteDataTask implements SchedulingConfigurer {
 		Calendar c = Calendar.getInstance();
 		c.add(Calendar.MONTH, howmanymonthdata * -1);
 
-		// List<Data> datas = dataRepo.findByDeleteTimeBefore(c.getTime());
-		// if (datas.size() != 0) {
 		logger.debug("Deleting data");
-		dataRepo.deleteByDeleteTimeBefore(c.getTime());
-		// }
+		try {
+			dataRepo.deleteByDeleteTimeBefore(c.getTime());
+		} catch (Exception e) {
+			logger.warn("Catched exception Deleting data:", e);
+		}
 
-		// List<Delegation> delegations = delegationRepo.findByDeleteTimeBefore(c.getTime());
-		// if (delegations.size() != 0) {
 		logger.debug("Deleting delegation");
-		delegationRepo.deleteByDeleteTimeBefore(c.getTime());
-		// }
+		try {
+			delegationRepo.deleteByDeleteTimeBefore(c.getTime());
+		} catch (Exception e) {
+			logger.warn("Catched exception Deleting delegation:", e);
+		}
 
-		// List<KPIData> kpidatas = kpidataRepo.findByDeleteTimeBefore(c.getTime());
-		// if (kpidatas.size() != 0) {
 		logger.debug("Deleting kpidata");
-		kpidataRepo.deleteByDeleteTimeBefore(c.getTime());
-		// }
+		try {
+			kpidataRepo.deleteByDeleteTimeBefore(c.getTime());
+		} catch (Exception e) {
+			logger.warn("Catched exception Deleting kpidata:", e);
+		}
 
 		// removal of the activities
 		c = Calendar.getInstance();
 		c.add(Calendar.MONTH, howmanymonthactivity * -1);
 
-		// List<Activity> activities = activitiesRepo.findByTimeBefore(c.getTime());
-		// if (activities.size() != 0) {
 		logger.debug("Deleting activity");
-		activitiesRepo.deleteByTimeBefore(c.getTime());
-		// }
+		try {
+			activitiesRepo.deleteByTimeBefore(c.getTime());
+		} catch (Exception e) {
+			logger.warn("Catched exception Deleting activity:", e);
+		}
 
-		// List<ActivityViolation> activitiesViolation = activitiesViolationRepo.findByTimeBefore(c.getTime());
-		// if (activitiesViolation.size() != 0) {
 		logger.debug("Deleting activity violation");
-		activitiesViolationRepo.deleteByTimeBefore(c.getTime());
-		// }
+		try {
+			activitiesViolationRepo.deleteByTimeBefore(c.getTime());
+		} catch (Exception e) {
+			logger.warn("Catched exception Deleting activity violation:", e);
+		}
 
-		// List<KPIActivity> kpiactivities = kpiactivitiesRepo.findByInsertTimeBefore(c.getTime());
-		// if (kpiactivities.size() != 0) {
 		logger.debug("Deleting kpiactivity");
-		kpiactivitiesRepo.deleteByInsertTimeBefore(c.getTime());
-		// }
+		try {
+			kpiactivitiesRepo.deleteByInsertTimeBefore(c.getTime());
+		} catch (Exception e) {
+			logger.warn("Catched exception Deleting kpiactivity:", e);
+		}
 
-		// List<KPIActivityViolation> kpiactivitiesViolation = kpiactivitiesViolationRepo.findByInsertTimeBefore(c.getTime());
-		// if (kpiactivitiesViolation.size() != 0) {
 		logger.debug("Deleting activity kpiviolation");
-		kpiactivitiesViolationRepo.deleteByInsertTimeBefore(c.getTime());
-		// }
+		try {
+			kpiactivitiesViolationRepo.deleteByInsertTimeBefore(c.getTime());
+		} catch (Exception e) {
+			logger.warn("Catched exception Deleting activity kpiviolation:", e);
+		}
 
 		logger.debug("Deleting TERMINATED");
 

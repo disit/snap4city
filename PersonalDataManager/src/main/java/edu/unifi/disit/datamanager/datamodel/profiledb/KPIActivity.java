@@ -24,7 +24,11 @@ import javax.persistence.Table;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+@JsonSerialize(using = KPIActivitySerializer.class)
+@JsonDeserialize(using = KPIActivityDeserializer.class)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "kpiactivity")
@@ -62,17 +66,10 @@ public class KPIActivity {
 
 	public KPIActivity(Long id, String username, String sourceRequest, String sourceId, Long kpiId, String accessType, String domain,
 			Date insertTime, Date elapseTime, Date deleteTime) {
-		super();
+		this(username, sourceRequest, sourceId, kpiId, accessType, domain,
+	 insertTime, elapseTime, deleteTime);
 		this.id = id;
-		this.username = username;
-		this.kpiId = kpiId;
-		this.sourceRequest = sourceRequest;
-		this.sourceId = sourceId;
-		this.accessType = accessType;
-		this.domain = domain;
-		this.insertTime = insertTime;
-		this.elapseTime = elapseTime;
-		this.deleteTime = deleteTime;
+		
 	}
 
 	public KPIActivity(String username, String sourceRequest, String sourceId, Long kpiId, String accessType, String domain,

@@ -20,12 +20,15 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.ServletContextInitializer;
-import org.springframework.boot.web.support.SpringBootServletInitializer;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.firewall.HttpFirewall;
+import org.springframework.security.web.firewall.StrictHttpFirewall;
 
 import edu.unifi.disit.datamanager.datamodel.ldap.LDAPUserDAO;
 import edu.unifi.disit.datamanager.datamodel.ldap.LDAPUserDAOImpl;
@@ -68,7 +71,6 @@ public class Application extends SpringBootServletInitializer {
 		LdapContextSource ctxSrc = new LdapContextSource();
 		ctxSrc.setUrl(ldapUrl);
 		ctxSrc.setBase(ldapBasicDN);
-		// ctxSrc.setAnonymousReadOnly(true);
 		ctxSrc.setUserDn(ldapManagerdn);
 		ctxSrc.setPassword(ldapPassword);
 		return ctxSrc;
@@ -93,6 +95,21 @@ public class Application extends SpringBootServletInitializer {
 				servletContext.getSessionCookieConfig().setSecure(secure);
 			}
 		};
+	}
+	
+	@Bean
+	public HttpFirewall allowUrlEncodedPercentHttpFirewall() {
+	    StrictHttpFirewall firewall = new StrictHttpFirewall();
+	    firewall.setAllowUrlEncodedPercent(true);
+	    firewall.setAllowSemicolon(true);
+	    firewall.setAllowUrlEncodedSlash(true);
+	    firewall.setAllowUrlEncodedDoubleSlash(true);
+	    return firewall;
+	}
+	
+	@Bean
+	public BCryptPasswordEncoder bCryptPasswordEncoder() {
+	    return new BCryptPasswordEncoder();
 	}
 
 }

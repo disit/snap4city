@@ -98,6 +98,25 @@
                                         </li>
                                         <li class="list-group-item">
                                                 <div class="row">
+                                                        <div class="col-sm-4"><strong>DB of Values *</strong></div>
+                                                        <div class="col-sm-8">
+                                                                <select id="selectDBValuesTypeKPIDataEdit"
+                                                                        class="custom-select custom-select">
+                                                                        <option value="MySQL" {{#MySQLSelected}}
+                                                                                selected{{/MySQLSelected}}>MySQL
+                                                                        </option>
+                                                                        <option value="ElasticSearch"
+                                                                                {{#ElasticSearchSelected}}
+                                                                                selected{{/ElasticSearchSelected}}>
+                                                                                ElasticSearch
+                                                                        </option>
+
+                                                                </select>
+                                                        </div>
+                                                </div>
+                                        </li>
+                                        <li class="list-group-item">
+                                                <div class="row">
                                                         <div class="col-sm-4"><strong>Data Type</strong></div>
                                                         <div class="col-sm-8">
                                                                 <select id="selectDataTypeKPIDataEdit"

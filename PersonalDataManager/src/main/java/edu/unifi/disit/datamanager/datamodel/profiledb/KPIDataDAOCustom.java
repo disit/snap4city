@@ -15,11 +15,13 @@ package edu.unifi.disit.datamanager.datamodel.profiledb;
 
 import java.util.List;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface KPIDataDAOCustom {
 
+	@Cacheable("kpidatafindAllFilteredNoPages")
 	List<KPIData> findKPIDataFilteredList(String username, String highLevelType, String searchKey);
 
 	Page<KPIData> findKPIDataFilteredPage(String username, String highLevelType, String searchKey, Pageable pageable);

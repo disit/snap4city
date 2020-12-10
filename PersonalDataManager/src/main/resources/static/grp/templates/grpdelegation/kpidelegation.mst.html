@@ -10,8 +10,8 @@
 <div class="row" style="padding: 15px;">
     <div class="col-sm-8 offset-sm-2">
         <div class="alert alert-light">
-            <b style="margin-right: 30px">Device Group:</strong> <b style="margin-right: 10px">No.</strong> {{id}} <b style="margin-right: 10px; margin-left: 10px;">Name</strong>
-            {{name}} | <b style="margin-right: 10px;margin-left: 10px;">Description</strong> {{description}} 
+           <strong style="margin-right: 30px">Device Group:</strong><strong style="margin-right: 10px">No.</strong> {{id}}<strong style="margin-right: 10px; margin-left: 10px;">Name</strong>
+            {{name}} |<strong style="margin-right: 10px;margin-left: 10px;">Description</strong> {{description}} 
         </div>
     </div>
 
@@ -56,20 +56,20 @@
 <table class="table table-striped table-bordered" style="background-color: white">
     <thead>
         <tr style="background: rgb(0, 162, 211); color: rgb(255, 255, 255); font-size: 1em;">
-            <th onclick="GrpDelegationSorter.setSortOnField('id');GrpDelegationTabler.renderTable('{{kpiId}}');" style="cursor: pointer;">No.
+            <th scope="col"  onclick="GrpDelegationSorter.setSortOnField('id');GrpDelegationTabler.renderTable('{{kpiId}}');" style="cursor: pointer;">No.
                 {{#sortidASC}}&darr;{{/sortidASC}}
                 {{#sortidDESC}}&uarr;{{/sortidDESC}}</th>
-            <th onclick="GrpDelegationSorter.setSortOnField('usernameDelegated');GrpDelegationTabler.renderTable({kpiId});"
+            <th scope="col"  onclick="GrpDelegationSorter.setSortOnField('usernameDelegated');GrpDelegationTabler.renderTable({kpiId});"
                 style="cursor: pointer;">Username Delegated
                 {{#sortusernameDelegatedASC}}&darr;{{/sortusernameDelegatedASC}}
                 {{#sortusernameDelegatedDESC}}&uarr;{{/sortusernameDelegatedDESC}}</th>
-            <th onclick="GrpDelegationSorter.setSortOnField('insertTime');GrpDelegationTabler.renderTable('{{kpiId}}');"
+            <th  scope="col" onclick="GrpDelegationSorter.setSortOnField('insertTime');GrpDelegationTabler.renderTable('{{kpiId}}');"
                 style="cursor: pointer;">Insert
                 Time
                 {{#sortinsertTimeASC}}&darr;{{/sortinsertTimeASC}} {{#sortinsertTimeDESC}}&uarr;{{/sortinsertTimeDESC}}</th>
             <!-- <th>View</th> -->
             <!-- {{#enableEdit}} -->
-            <th>Controls</th>
+            <th scope="col" >Controls</th>
             <!-- {{/enableEdit}} -->
         </tr>
     </thead>

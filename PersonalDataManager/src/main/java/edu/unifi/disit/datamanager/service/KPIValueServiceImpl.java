@@ -13,6 +13,7 @@
    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA. */
 package edu.unifi.disit.datamanager.service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -26,12 +27,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
+import edu.unifi.disit.datamanager.datamodel.elasticdb.KPIElasticValue;
+import edu.unifi.disit.datamanager.datamodel.elasticdb.KPIElasticValueDAO;
 import edu.unifi.disit.datamanager.datamodel.profiledb.KPIValue;
 import edu.unifi.disit.datamanager.datamodel.profiledb.KPIValueDAO;
 import edu.unifi.disit.datamanager.datamodel.profiledb.OwnershipDAO;
@@ -51,6 +56,12 @@ public class KPIValueServiceImpl implements IKPIValueService {
 	KPIValueDAO kpiValueRepository;
 
 	@Autowired
+	KPIElasticValueDAO kpiElasticValueRepository;
+
+	@Autowired
+	ElasticsearchRestTemplate esRestTemplate;
+
+	@Autowired
 	OwnershipDAO ownershipRepo;
 
 	@Autowired
@@ -59,16 +70,19 @@ public class KPIValueServiceImpl implements IKPIValueService {
 	@Autowired
 	ICredentialsService credentialsService;
 
+	@Autowired
+	BCryptPasswordEncoder bCryptPasswordEncoder;
+
 	@PersistenceContext
 	private EntityManager entityManager;
-
+	
 	@Autowired
 	private KafkaTemplate<String, Object> kafkaTemplate;
 
 	@Override
 	public KPIValue getKPIValueById(Long id, Locale lang) throws CredentialsException {
 		logger.debug("getKPIValueById INVOKED on id {}", id);
-		return kpiValueRepository.findOne(id);
+		return kpiValueRepository.findById(id).orElse(null);
 	}
 
 	@Override
@@ -111,7 +125,7 @@ public class KPIValueServiceImpl implements IKPIValueService {
 		logger.debug("findByKpiIdNoPagesWithLimit INVOKED on kpiId {}, from {}, to {}, first {}, last {}", kpiId, from,
 				to, first, last);
 
-		if ((first != 0) && (last != 0)) {
+		if ((first != null) && (last != null)) {
 			throw new DataNotValidException(messages.getMessage("getdata.ko.firstandlastspecified", null, lang));
 		}
 
@@ -135,9 +149,17 @@ public class KPIValueServiceImpl implements IKPIValueService {
 	}
 
 	@Override
+	public List<KPIValue> saveKPIValueList(List<KPIValue> kpiValueList) throws CredentialsException {
+		logger.debug("saveKPIValueList");
+		List<KPIValue> list = new ArrayList<>();
+		kpiValueRepository.saveAll(kpiValueList).forEach(list::add);
+		return list;
+	}
+
+	@Override
 	public void deleteKPIValue(Long id) throws CredentialsException {
 		logger.debug("deleteKPIValue INVOKED on id {}", id);
-		kpiValueRepository.delete(id);
+		kpiValueRepository.deleteById(id);
 
 	}
 
@@ -151,6 +173,118 @@ public class KPIValueServiceImpl implements IKPIValueService {
 	public List<Date> getKPIValueDatesCoordinatesOptionallyNull(Long kpiId) throws CredentialsException {
 		logger.debug("getKPIValueDates INVOKED on kpiId {}", kpiId);
 		return kpiValueRepository.findByKpiIdDistinctDateAndDeleteTimeIsNullWithCoordinatesOptionallyNull(kpiId);
+	}
+
+	@Override
+	public KPIElasticValue getKPIElasticValueById(String id, Locale lang) throws CredentialsException {
+		logger.debug("getKPIValueById INVOKED on id {}", id);
+		this.setCorrectIndex();
+		return kpiElasticValueRepository.findById(id).orElse(null);
+	}
+
+	@Override
+	public Page<KPIElasticValue> findBySensorId(Long kpiId, Pageable pageable) throws CredentialsException {
+		logger.debug("findAllByKpiId INVOKED on kpiId {}", kpiId);
+		this.setCorrectIndex();
+		return kpiElasticValueRepository.findBySensorId(kpiId, pageable);
+	}
+
+	@Override
+	public Page<KPIElasticValue> findBySensorIdFiltered(Long kpiId, String searchKey, Pageable pageable)
+			throws CredentialsException {
+		logger.debug("findAllFilteredByKpiId INVOKED on searchKey {} kpiId {}", searchKey, kpiId);
+		this.setCorrectIndex();
+		return kpiElasticValueRepository.findBySensorIdAndValueContainingAllIgnoreCase(kpiId, searchKey, pageable);
+	}
+
+	@Override
+	public List<KPIElasticValue> findBySensorIdNoPages(Long kpiId) {
+		logger.debug("findByKpiIdNoPages INVOKED on kpiId {}", kpiId);
+		this.setCorrectIndex();
+		return kpiElasticValueRepository.findBySensorId(kpiId);
+	}
+
+	/*
+	 * @Override public List<KPIElasticValue> findBySensorIdGeoLocated(Long kpiId)
+	 * throws CredentialsException {
+	 * logger.debug("findByKpiIdGeoLocated INVOKED on kpiId {}", kpiId); return
+	 * kpiElasticValueRepository.
+	 * findBySensorIdAndLatitudeIsNotNullAndLongitudeIsNotNullAndLatitudeNotLikeAndLongitudeNotLike
+	 * (kpiId, "", ""); }
+	 */
+
+	@Override
+	public List<KPIElasticValue> findBySensorIdFilteredNoPages(Long kpiId, String searchKey) {
+		logger.debug("findAllFilteredByKpiId INVOKED on searchKey {} kpiId {}", searchKey, kpiId);
+		this.setCorrectIndex();
+		return kpiElasticValueRepository.findBySensorIdAndValueContainingAllIgnoreCase(kpiId, searchKey);
+	}
+
+	@Override
+	public KPIElasticValue saveKPIElasticValue(KPIElasticValue kpiElasticValue) throws CredentialsException {
+		logger.debug("saveKPIValue INVOKED on kpivalue {}", kpiElasticValue.getId());
+		this.setCorrectIndex();
+		kpiElasticValue = kpiElasticValueRepository.save(kpiElasticValue);
+		if (Boolean.TRUE.equals(KafkaProducerConfig.getSendMessageOnEventDriveMessages())) {
+			sendMessageOnEventDriveMessages(
+					KafkaProducerConfig.getPrefixTopic() + kpiElasticValue.getSensorId(), kpiElasticValue);
+		}
+		return kpiElasticValue;
+	}
+
+	@Override
+	public List<KPIElasticValue> saveKPIElasticValueList(List<KPIElasticValue> kpiElasticValueList)
+			throws CredentialsException {
+		logger.debug("saveKPIElasticValueList");
+		List<KPIElasticValue> list = new ArrayList<>();
+		this.setCorrectIndex();
+		kpiElasticValueRepository.saveAll(kpiElasticValueList).forEach(list::add);
+		return list;
+	}
+
+	@Override
+	public void deleteKPIElasticValue(String id) throws CredentialsException {
+		logger.debug("deleteKPIValue INVOKED on id {}", id);
+		this.setCorrectIndex();
+		kpiElasticValueRepository.deleteById(id);
+	}
+
+	@Override
+	public List<KPIElasticValue> deleteKPIElasticValuesOfKpiId(Long kpiId) throws CredentialsException {
+		logger.debug("deleteKPIValue INVOKED on id {}", kpiId);
+		this.setCorrectIndex();
+		return kpiElasticValueRepository.deleteBySensorId(kpiId);
+	}
+
+	@Override
+	public List<KPIElasticValue> findBySensorIdNoPagesWithLimit(Long sensorId, Date from, Date to, Integer first,
+			Integer last, Locale lang) throws DataNotValidException {
+		logger.debug("findBySensorIdNoPagesWithLimit INVOKED on kpiId {}, from {}, to {}, first {}, last {}", sensorId,
+				from, to, first, last);
+
+		if ((first != null) && (last != null)) {
+			throw new DataNotValidException(messages.getMessage("getdata.ko.firstandlastspecified", null, lang));
+		}
+
+		this.setCorrectIndex();
+		return kpiElasticValueRepository.findBySensorIdNoPagesWithLimit(sensorId.toString(), from, to, first, last);
+	}
+
+	@Override
+	public List<String> getKPIElasticValueDates(Long kpiId, boolean checkCoordinates) throws CredentialsException {
+		logger.debug("getKPIElasticValueDates INVOKED on kpiId {}", kpiId);
+		return kpiElasticValueRepository.getElasticValuesDates(kpiId.toString(), checkCoordinates);
+	}
+
+	private void setCorrectIndex() {
+		/*
+		 * String correctIndex = "sensorinew3-" +
+		 * credentialsService.getOrganizationUnit(new Locale("en"));
+		 * ConfigIndexBean.setIndexName(correctIndex); if
+		 * (!esRestTemplate.indexExists(correctIndex)) {
+		 * esRestTemplate.createIndex(correctIndex);
+		 * esRestTemplate.putMapping(KPIElasticValue.class); }
+		 */
 	}
 
 	private void sendMessageOnEventDriveMessages(String topicName, Object obj) {

@@ -31,9 +31,6 @@ import org.springframework.stereotype.Component;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class MyCorsFilter implements Filter {
 
-	//@Value("#{'${cors.origins.accepted}'.split(',')}")
-	//private List<String> originsAccepted;
-
 	public MyCorsFilter() {
 		super();
 	}
@@ -45,8 +42,6 @@ public class MyCorsFilter implements Filter {
 
 		String uri = request.getHeader("Origin");
 
-		//if (originsAccepted.contains(uri)) {
-
 			response.setHeader("Access-Control-Allow-Origin", uri);
 
 			// without this header jquery.ajax calls returns 401 even after successful login and SSESSIONID being succesfully stored.
@@ -56,7 +51,6 @@ public class MyCorsFilter implements Filter {
 			response.setHeader("Access-Control-Max-Age", "3600");
 			response.setHeader("Access-Control-Allow-Headers", "X-Requested-With, Authorization, Origin, Content-Type, Version");
 			response.setHeader("Access-Control-Expose-Headers", "X-Requested-With, Authorization, Origin, Content-Type");
-		//}
 
 		if (!request.getMethod().equals("OPTIONS")) {
 			chain.doFilter(req, res);

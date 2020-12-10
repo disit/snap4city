@@ -15,6 +15,7 @@ package edu.unifi.disit.datamanager.datamodel.ldap;
 import java.util.List;
 import java.util.Locale;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import edu.unifi.disit.datamanager.exception.LDAPException;
@@ -22,22 +23,11 @@ import edu.unifi.disit.datamanager.exception.LDAPException;
 @Service
 public interface LDAPUserDAO {
 
-	// void create(LDAPUser person);
-	//
-	// void update(LDAPUser person);
-	//
-	// void delete(LDAPUser person);
-	//
-	// List<String> getAllPersonNames();
-	//
-	// List<LDAPUser> findAll();
-	//
-	// LDAPUser findByPrimaryKey(String country, String company, String fullname);
-
 	List<String> getOUnames(String username);
 
 	List<String> getGroupnames(String username);
 
+	@Cacheable(value = "LDAPgetGroupAndOUnames")
 	List<String> getGroupAndOUnames(String username);
 
 	boolean usernameExist(String username);

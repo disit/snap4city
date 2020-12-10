@@ -28,6 +28,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import edu.unifi.disit.datamanager.datamodel.dto.KPIMetadataDTO;
+
 @JsonSerialize(using = KPIMetadataSerializer.class)
 @JsonDeserialize(using = KPIMetadataDeserializer.class)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -57,12 +59,8 @@ public class KPIMetadata implements Comparable<KPIMetadata> {
 	}
 
 	public KPIMetadata(Long id, String key, String value, Date deleteTime, Date elapseTime) {
-		super();
+		this(key, value, deleteTime, elapseTime);
 		this.id = id;
-		this.key = key;
-		this.value = value;
-		this.deleteTime = deleteTime;
-		this.elapseTime = elapseTime;
 	}
 
 	public KPIMetadata(String key, String value, Date deleteTime, Date elapseTime) {
@@ -71,6 +69,10 @@ public class KPIMetadata implements Comparable<KPIMetadata> {
 		this.value = value;
 		this.deleteTime = deleteTime;
 		this.elapseTime = elapseTime;
+	}
+	
+	public KPIMetadata(KPIMetadataDTO dto) {
+		this(dto.getId(), dto.getKey(), dto.getValue(), dto.getDeleteTime(), dto.getElapseTime());
 	}
 
 	public Long getId() {

@@ -54,7 +54,7 @@ public class KPIMetadataServiceImpl implements IKPIMetadataService {
 	@Override
 	public KPIMetadata getKPIMetadataById(Long id, Locale lang) throws  CredentialsException {
 		logger.debug("getKPIMetadataById INVOKED on id {}", id);
-		return kpiMetadataRepository.findOne(id);
+		return kpiMetadataRepository.findById(id).orElse(null);
 	}
 
 	@Override
@@ -95,7 +95,7 @@ public class KPIMetadataServiceImpl implements IKPIMetadataService {
 	@Override
 	public void deleteKPIMetadata(Long id) throws  CredentialsException {
 		logger.debug("deleteKPIMetadata INVOKED on id {}",  id);
-		kpiMetadataRepository.delete(id);
+		kpiMetadataRepository.deleteById(id);
 		
 	}
 	

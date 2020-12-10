@@ -17,7 +17,7 @@ import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceBuilder;
+import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.cache.annotation.EnableCaching;
@@ -61,6 +61,9 @@ public class ProfileDBDbConfig {
 	public DataSource dataSource() {
 		org.apache.tomcat.jdbc.pool.DataSource d = (org.apache.tomcat.jdbc.pool.DataSource) DataSourceBuilder.create().build();
 
+		//TODO capire se passare a hikari
+		
+		
 		d.setValidationQuery(validationQuery);
 		d.setRemoveAbandoned(true);
 		d.setTestOnBorrow(true);
@@ -83,7 +86,6 @@ public class ProfileDBDbConfig {
 		return builder
 				.dataSource(dataSource)
 				.packages("edu.unifi.disit.datamanager.datamodel.profiledb")
-				// .properties(jpaProperties())
 				.persistenceUnit("Data")
 				.persistenceUnit("Consent")
 				.persistenceUnit("Delegation")
@@ -100,12 +102,5 @@ public class ProfileDBDbConfig {
 			@Qualifier("profiledbEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
 		return new JpaTransactionManager(entityManagerFactory);
 	}
-
-	// private Map<String, Object> jpaProperties() {
-	// Map<String, Object> props = new HashMap<>();
-	// props.put("hibernate.physical_naming_strategy", SpringPhysicalNamingStrategy.class.getName());
-	// props.put("hibernate.implicit_naming_strategy", SpringImplicitNamingStrategy.class.getName());
-	// return props;
-	// }
 
 }

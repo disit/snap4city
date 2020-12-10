@@ -29,22 +29,34 @@ public class ConfigurationServiceImpl implements IConfigurationService {
 	
 	@Value("${config.kpi.organizationlist}")
 	private String organizationList;
-
+	
+	@Value("${config.kpi.orginfourl}")
+	private String orgInfoUrl;
+	
 	@Value("${config.kpi.authentication.clientid}")
 	private String kpiAuthenticationClientId;
 
 	@Value("${config.grp.authentication.clientid}")
 	private String grpAuthenticationClientId;
+	
+	@Value("${spring.ldap.basicdn}")
+	private String springLdapBasicDn;
+	
+	@Value("${elasticsearch.kibanahost}")
+	private String elasticSearchHosts;
 
 	@Override
 	public HashMap<String, String> getConfiguration(String version, Locale lang) {
-		HashMap<String, String> config = new HashMap<String, String>();
+		HashMap<String, String> config = new HashMap<>();
 		if (version.equals("v1")) {
 			config.put("Authentication.url", authenticationUrl);
+			config.put("orgInfo.url", orgInfoUrl);
 			config.put("Dictionary.url", dictionaryUrl);
 			config.put("organization.list", organizationList);
 			config.put("kpi.Authentication.clientId", kpiAuthenticationClientId);
 			config.put("grp.Authentication.clientId", grpAuthenticationClientId);
+			config.put("ldap.basicdn", springLdapBasicDn);
+			config.put("elasticsearch.hosts", elasticSearchHosts);
 		}
 		return config;
 	}

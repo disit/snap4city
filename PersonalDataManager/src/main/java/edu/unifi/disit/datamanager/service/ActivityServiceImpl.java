@@ -75,7 +75,7 @@ public class ActivityServiceImpl implements IActivityService {
 		logger.debug("saveActivityFromApp INVOKED on requestAppidOwner {}", requestAppidOwner);
 
 		// owner of the activity
-		List<Ownership> owns = ownershipRepo.findByElementId(requestAppidOwner);
+		List<Ownership> owns = ownershipRepo.findByElementIdAndDeletedIsNull(requestAppidOwner);
 		String requestUsername = getUsernames(owns);
 		String requestAppname = getElementNames(owns);
 
@@ -90,7 +90,7 @@ public class ActivityServiceImpl implements IActivityService {
 			for (Data data : delegatedDatas) {
 				if ((data.getAppId() != null) && (ht.get(data.getAppId()) == null)) {
 
-					List<Ownership> ownsDelega = ownershipRepo.findByElementId(data.getAppId());
+					List<Ownership> ownsDelega = ownershipRepo.findByElementIdAndDeletedIsNull(data.getAppId());
 
 					Activity delegated = new Activity(new Date(), requestAppidOwner, requestUsername, requestAppname, data.getAppId(), data.getUsername(), getElementNames(ownsDelega), sourceRequest, variableName, motivation,
 							accesstype.toString(), domain.toString(), null);
@@ -115,7 +115,7 @@ public class ActivityServiceImpl implements IActivityService {
 				if (data.getUsername() != null && username != null) {
 					if (!data.getUsername().equals(username) && data.getAppId() != null && ht.get(data.getAppId()) == null) {
 
-						List<Ownership> ownsDelega = ownershipRepo.findByElementId(data.getAppId());
+						List<Ownership> ownsDelega = ownershipRepo.findByElementIdAndDeletedIsNull(data.getAppId());
 
 						Activity delegated = new Activity(new Date(), null, username, username, data.getAppId(), data.getUsername(), getElementNames(ownsDelega), sourceRequest, variableName, motivation, accesstype.toString(),
 								domain.toString(), null);
@@ -139,7 +139,7 @@ public class ActivityServiceImpl implements IActivityService {
 		logger.debug("saveActivityDelegationFromAppId INVOKED on requestAppidOwner {}", requestAppidOwner);
 
 		// owner of the activity
-		List<Ownership> owns = ownershipRepo.findByElementId(requestAppidOwner);
+		List<Ownership> owns = ownershipRepo.findByElementIdAndDeletedIsNull(requestAppidOwner);
 		Activity owner = new Activity(new Date(), requestAppidOwner, getUsernames(owns), getElementNames(owns), null, usernameDelegator, null, sourceRequest, variableName, motivation, accessType.toString(), domain.toString(), null);
 
 		activityRepo.save(owner);// save owner
@@ -150,7 +150,7 @@ public class ActivityServiceImpl implements IActivityService {
 		logger.debug("saveActivityViolationFromAppId INVOKED on requestAppidOwner {}", appId);
 
 		// owner of the activity
-		List<Ownership> owns = ownershipRepo.findByElementId(appId);
+		List<Ownership> owns = ownershipRepo.findByElementIdAndDeletedIsNull(appId);
 
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
@@ -162,9 +162,9 @@ public class ActivityServiceImpl implements IActivityService {
 					ipAddress);
 			activityViolationRepo.save(av);
 		} catch (SerialException e) {
-			logger.error("SerialException {}", e);
+			logger.error("SerialException ", e);
 		} catch (SQLException e) {
-			logger.error("SQLException {}", e);
+			logger.error("SQLException ", e);
 		}
 	}
 
@@ -181,9 +181,9 @@ public class ActivityServiceImpl implements IActivityService {
 			ActivityViolation av = new ActivityViolation(new Date(), null, null, username, sourceRequest, variableName, motivation, accessType.toString(), queryString, message, new SerialBlob(sw.toString().getBytes()), ipAddress);
 			activityViolationRepo.save(av);
 		} catch (SerialException e) {
-			logger.error("SerialException {}", e);
+			logger.error("SerialException ", e);
 		} catch (SQLException e) {
-			logger.error("SQLException {}", e);
+			logger.error("SQLException ", e);
 		}
 	}
 
@@ -193,7 +193,7 @@ public class ActivityServiceImpl implements IActivityService {
 		logger.debug("saveActivityViolation INVOKED on requestAppidOwner {} user {}", appId, username);
 
 		// owner of the activity
-		List<Ownership> owns = ownershipRepo.findByElementId(appId);
+		List<Ownership> owns = ownershipRepo.findByElementIdAndDeletedIsNull(appId);
 
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
@@ -205,9 +205,9 @@ public class ActivityServiceImpl implements IActivityService {
 					ipAddress);
 			activityViolationRepo.save(av);
 		} catch (SerialException e) {
-			logger.error("SerialException {}", e);
+			logger.error("SerialException ", e);
 		} catch (SQLException e) {
-			logger.error("SQLException {}", e);
+			logger.error("SQLException ", e);
 		}
 	}
 

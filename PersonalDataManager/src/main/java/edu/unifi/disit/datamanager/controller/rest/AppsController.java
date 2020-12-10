@@ -101,7 +101,8 @@ public class AppsController {
 		if (appOwner != null)
 			logger.info("appOwner specified {}", appOwner);
 
-		if (appId.indexOf("%3A") != -1) {
+		// %3A should be avoided, use just %2F 
+		if ((appId.indexOf("%3A") != -1) || (appId.indexOf("%2F") != -1)) {
 			appId = URLDecoder.decode(appId, StandardCharsets.UTF_8.toString());
 			logger.info("appid decoded to {}", appId);
 		}
@@ -121,7 +122,7 @@ public class AppsController {
 				return new ResponseEntity<>(datas, HttpStatus.OK);
 			}
 		} catch (DelegationNotFoundException | NoSuchMessageException | DataNotValidException d) {
-			logger.error("Delegation not found {}", d);
+			logger.error("Delegation not found", d);
 
 			activityService.saveActivityViolationFromAppId(appId, sourceRequest, variableName, motivation, ActivityAccessType.READ, request.getContextPath() + "?" + request.getQueryString(),
 					d.getMessage(), d, request.getRemoteAddr());
@@ -150,7 +151,8 @@ public class AppsController {
 		if (sourceRequest != null)
 			logger.info("sourceRequest specified {}", sourceRequest);
 
-		if (appId.indexOf("%3A") != -1) {
+		// %3A should be avoided, use just %2F 
+		if ((appId.indexOf("%3A") != -1) || (appId.indexOf("%2F") != -1)) {
 			appId = URLDecoder.decode(appId, StandardCharsets.UTF_8.toString());
 			logger.info("appid decoded to {}", appId);
 		}
@@ -164,7 +166,7 @@ public class AppsController {
 
 			return new ResponseEntity<>(newData, HttpStatus.OK);
 		} catch (DataNotValidException d) {
-			logger.error("Data not valid {}", d);
+			logger.error("Data not valid", d);
 
 			activityService.saveActivityViolationFromAppId(appId, sourceRequest, null, null, ActivityAccessType.WRITE, request.getContextPath() + "?" + request.getQueryString(), d.getMessage(),
 					d, request.getRemoteAddr());
@@ -245,7 +247,8 @@ public class AppsController {
 		if (sourceRequest != null)
 			logger.info("sourceRequest specified {}", sourceRequest);
 
-		if (appId.indexOf("%3A") != -1) {
+		// %3A should be avoided, use just %2F 
+		if ((appId.indexOf("%3A") != -1) || (appId.indexOf("%2F") != -1)) {
 			appId = URLDecoder.decode(appId, StandardCharsets.UTF_8.toString());
 			logger.info("appid decoded to {}", appId);
 		}
@@ -346,7 +349,8 @@ public class AppsController {
 			logger.info("sourceRequest specified {}", sourceRequest);
 		if (appOwner != null)
 			logger.info("appOwner specified {}", appOwner);
-		if (appId.indexOf("%3A") != -1) {
+		// %3A should be avoided, use just %2F 
+		if ((appId.indexOf("%3A") != -1) || (appId.indexOf("%2F") != -1)) {
 			appId = URLDecoder.decode(appId, StandardCharsets.UTF_8.toString());
 			logger.info("appid decoded to {}", appId);
 		}
@@ -371,14 +375,14 @@ public class AppsController {
 				return new ResponseEntity<>(delegations, HttpStatus.OK);
 			}
 		} catch (DelegationNotValidException d) {
-			logger.error("Delegation not found {}", d);
+			logger.error("Delegation not found", d);
 
 			activityService.saveActivityViolationFromAppId(appId, sourceRequest, variableName, motivation, ActivityAccessType.READ, request.getContextPath() + "?" + request.getQueryString(),
 					d.getMessage(), d, request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		} catch (LDAPException le) {
-			logger.error("LDAP not valid {}", le);
+			logger.error("LDAP not valid ", le);
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) le.getMessage());
 		} catch (CredentialsException d) {
@@ -418,7 +422,8 @@ public class AppsController {
 		if (sourceRequest != null)
 			logger.info("sourceRequest specified {}", sourceRequest);
 
-		if (appId.indexOf("%3A") != -1) {
+		// %3A should be avoided, use just %2F 
+		if ((appId.indexOf("%3A") != -1) || (appId.indexOf("%2F") != -1)) {
 			appId = URLDecoder.decode(appId, StandardCharsets.UTF_8.toString());
 			logger.info("appid decoded to {}", appId);
 		}
@@ -468,7 +473,8 @@ public class AppsController {
 		if (sourceRequest != null)
 			logger.info("sourceRequest specified {}", sourceRequest);
 
-		if (appId.indexOf("%3A") != -1) {
+		// %3A should be avoided, use just %2F 
+		if ((appId.indexOf("%3A") != -1) || (appId.indexOf("%2F") != -1)) {
 			appId = URLDecoder.decode(appId, StandardCharsets.UTF_8.toString());
 			logger.info("appid decoded to {}", appId);
 		}

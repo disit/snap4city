@@ -64,7 +64,7 @@ public class ConfigController {
 			logger.info("No config found");
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} else {
-			logger.info("Returning config {}", config.toString());
+			logger.info("Returning config {}", config);
 			return new ResponseEntity<>(config,
 					HttpStatus.OK);
 		}

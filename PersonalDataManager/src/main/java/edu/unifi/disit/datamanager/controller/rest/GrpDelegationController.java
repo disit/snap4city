@@ -466,7 +466,7 @@ public class GrpDelegationController {
 			@RequestParam(value = "pageSize", required = false, defaultValue = "10") int pageSize,
 			@RequestParam(value = "sortDirection", required = false, defaultValue = "desc") String sortDirection,
 			@RequestParam(value = "sortBy", required = false, defaultValue = "insert_time") String sortBy,
-			@RequestParam(value = "searchKey", required = false, defaultValue = "") String searchKey,
+                        @RequestParam(value = "searchKey", required = false, defaultValue = "") String searchKey,
 			HttpServletRequest request) {
 
 		logger.info(
@@ -492,18 +492,18 @@ public class GrpDelegationController {
 			List<Delegation> listKpiDelegation = null;
 			if (pageNumber != -1) {
 				if (searchKey.equals("")) {
-					pageKpiDelegation = delegationService.findByElementIdWithoutAnonymous(Long.toString(kpiId),
-							new PageRequest(pageNumber, pageSize, new Sort(Direction.fromString(sortDirection), sortBy)));
+                                    pageKpiDelegation = delegationService.findByElementIdByElementTypeWithoutAnonymous(Long.toString(kpiId), kpiData.getHighLevelType(),
+						PageRequest.of(pageNumber, pageSize, Sort.by(Direction.fromString(sortDirection), sortBy)));
 				} else {
-					pageKpiDelegation = delegationService.findByElementIdWithoutAnonymousFiltered(Long.toString(kpiId), searchKey,
-							new PageRequest(pageNumber, pageSize, new Sort(Direction.fromString(sortDirection), sortBy)));
+                                    pageKpiDelegation = delegationService.findByElementIdWithoutAnonymousFiltered(Long.toString(kpiId), searchKey,
+						PageRequest.of(pageNumber, pageSize, Sort.by(Direction.fromString(sortDirection), sortBy)));
 				}
 			} else {
 				if (searchKey.equals("")) {
-					listKpiDelegation = delegationService.findByElementIdNoPagesWithoutAnonymous(Long.toString(kpiId));
+                                    listKpiDelegation = delegationService.findByElementIdByElementTypeNoPagesWithoutAnonymous(Long.toString(kpiId), kpiData.getHighLevelType());
 				} else {
-					listKpiDelegation = delegationService.findByElementIdNoPagesWithoutAnonymousFiltered(Long.toString(kpiId), searchKey);
-				}
+                                    listKpiDelegation = delegationService.findByElementIdNoPagesWithoutAnonymousFiltered(Long.toString(kpiId), searchKey);
+                                }
 			}
 
 			if (pageKpiDelegation == null && listKpiDelegation == null) {

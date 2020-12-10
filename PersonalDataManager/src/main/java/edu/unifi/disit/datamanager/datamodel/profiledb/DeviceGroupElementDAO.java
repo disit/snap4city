@@ -25,6 +25,8 @@ public interface DeviceGroupElementDAO extends JpaRepository<DeviceGroupElement,
 
 	Page<DeviceGroupElement> findByDeviceGroupIdAndDeleteTimeIsNull(Long grpId, Pageable pageable);
 
+	// TODO, remove this api since it relay on a fieldd [username] that should be transient
+	// see DeviceGroupElement.java
 	List<DeviceGroupElement> findByUsernameAndElementIdAndElementTypeAndDeleteTimeIsNull(String username, String elementId, String elementType);
 
 	@Cacheable("deviceGroupElementByDeviceGroupId")

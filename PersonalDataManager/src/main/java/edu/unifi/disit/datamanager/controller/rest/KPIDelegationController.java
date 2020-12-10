@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -27,6 +28,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -58,6 +60,11 @@ import edu.unifi.disit.datamanager.service.IKPIDataService;
 public class KPIDelegationController {
 
 	private static final Logger logger = LogManager.getLogger();
+
+	private static final String NO_DATA_FOUND = "No data found";
+	private static final String RIGHTS_EXCEPTION = "Rights exception";
+	private static final String WRONG_KPI_DATA = "Wrong KPI Data";
+	private static final String WRONG_ARGUMENTS = "Wrong Arguments";
 
 	@Autowired
 	IDelegationService delegationService;
@@ -95,30 +102,29 @@ public class KPIDelegationController {
 
 			KPIData kpiData = kpiDataService.getKPIDataById(kpiId, lang, false);
 			if (kpiData == null) {
-				logger.warn("Wrong KPI Data");
+				logger.warn(WRONG_KPI_DATA);
 
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.VALUE,
-						request.getRequestURI() + "?"
-								+ request.getQueryString(),
-						"Wrong KPI Data", null, request.getRemoteAddr());
+						request.getRequestURI() + "?" + request.getQueryString(), WRONG_KPI_DATA, null,
+						request.getRemoteAddr());
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
-					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), kpiData.getHighLevelType(), lang).getResult())) {
+					&& !Boolean.TRUE.equals(accessService
+							.checkAccessFromApp(Long.toString(kpiId), kpiData.getHighLevelType(), lang).getResult())) {
 				throw new CredentialsException();
 			}
 
 			Delegation delegation = delegationService.getDelegationById(id, lang);
 
 			if (delegation == null) {
-				logger.info("No data found");
+				logger.info(NO_DATA_FOUND);
 
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.DELEGATION,
-						request.getRequestURI() + "?"
-								+ request.getQueryString(),
-						"No data found", null, request.getRemoteAddr());
+						request.getRequestURI() + "?" + request.getQueryString(), NO_DATA_FOUND, null,
+						request.getRemoteAddr());
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else {
@@ -130,13 +136,12 @@ public class KPIDelegationController {
 				return new ResponseEntity<>(delegation, HttpStatus.OK);
 			}
 		} catch (CredentialsException d) {
-			logger.warn("Rights exception", d);
+			logger.warn(RIGHTS_EXCEPTION, d);
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.DELEGATION,
-					request.getRequestURI() + "?"
-							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d,
+					request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
@@ -157,40 +162,40 @@ public class KPIDelegationController {
 			KPIData kpiData = kpiDataService.getKPIDataById(kpiId, lang, false);
 
 			if (kpiData == null) {
-				logger.warn("Wrong KPI Data");
+				logger.warn(WRONG_KPI_DATA);
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION,
-						request.getRequestURI() + "?"
-								+ request.getQueryString(),
-						"Wrong KPI Data", null, request.getRemoteAddr());
+						request.getRequestURI() + "?" + request.getQueryString(), WRONG_KPI_DATA, null,
+						request.getRemoteAddr());
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
-					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), kpiData.getHighLevelType(), lang).getResult())) {
+					&& !Boolean.TRUE.equals(accessService
+							.checkAccessFromApp(Long.toString(kpiId), kpiData.getHighLevelType(), lang).getResult())) {
 				throw new CredentialsException();
 			}
 
-			if (kpiDelegation.getUsernameDelegated().equals("ANONYMOUS")) {
+			if (kpiDelegation.getUsernameDelegated() != null
+					&& kpiDelegation.getUsernameDelegated().equals("ANONYMOUS")) {
 				kpiData.setOwnership("public");
-				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, sourceId, kpiId,
-						ActivityAccessType.WRITE, KPIActivityDomainType.CHANGEOWNERSHIP);
+				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
+						sourceId, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.CHANGEOWNERSHIP);
 				kpiDataService.saveKPIData(kpiData);
 			}
 
-			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, sourceId, kpiId,
-					ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION);
+			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
+					sourceId, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION);
 
 			logger.info("Posted kpiDelegation {}", kpiDelegation.getId());
 			kpiDelegation.setElementId(kpiId.toString());
 			return userController.postDelegationV1(credentialService.getLoggedUsername(lang), kpiDelegation,
 					sourceRequest, lang, request);
 		} catch (CredentialsException d) {
-			logger.warn("Rights exception", d);
+			logger.warn(RIGHTS_EXCEPTION, d);
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION,
-					request.getRequestURI() + "?"
-							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d,
+					request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
@@ -212,39 +217,39 @@ public class KPIDelegationController {
 			KPIData kpiData = kpiDataService.getKPIDataById(kpiId, lang, false);
 
 			if (kpiData == null) {
-				logger.warn("Wrong KPI Data");
+				logger.warn(WRONG_KPI_DATA);
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION,
-						request.getRequestURI() + "?"
-								+ request.getQueryString(),
-						"Wrong KPI Data", null, request.getRemoteAddr());
+						request.getRequestURI() + "?" + request.getQueryString(), WRONG_KPI_DATA, null,
+						request.getRemoteAddr());
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
-					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), kpiData.getHighLevelType(), lang).getResult())) {
+					&& !Boolean.TRUE.equals(accessService
+							.checkAccessFromApp(Long.toString(kpiId), kpiData.getHighLevelType(), lang).getResult())) {
 				throw new CredentialsException();
 			}
 
 			Delegation oldKpiDelegation = delegationService.getDelegationById(id, lang);
 			if (oldKpiDelegation == null) {
-				logger.info("No data found");
+				logger.info(NO_DATA_FOUND);
 
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION,
-						request.getRequestURI() + "?"
-								+ request.getQueryString(),
-						"No data found", null, request.getRemoteAddr());
+						request.getRequestURI() + "?" + request.getQueryString(), NO_DATA_FOUND, null,
+						request.getRemoteAddr());
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
 
 			kpiDelegation.setId(oldKpiDelegation.getId());
-			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, sourceId, kpiId,
-					ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION);
+			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
+					sourceId, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION);
 
-			if (kpiDelegation.getUsernameDelegated().equals("ANONYMOUS")) {
+			if (kpiDelegation.getUsernameDelegated() != null
+					&& kpiDelegation.getUsernameDelegated().equals("ANONYMOUS")) {
 				kpiData.setOwnership("public");
-				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, sourceId, kpiId,
-						ActivityAccessType.WRITE, KPIActivityDomainType.CHANGEOWNERSHIP);
+				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
+						sourceId, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.CHANGEOWNERSHIP);
 				kpiDataService.saveKPIData(kpiData);
 			}
 
@@ -252,13 +257,12 @@ public class KPIDelegationController {
 			return userController.putDelegationV1(credentialService.getLoggedUsername(lang), kpiDelegation.getId(),
 					kpiDelegation, sourceRequest, lang, request);
 		} catch (CredentialsException d) {
-			logger.warn("Rights exception", d);
+			logger.warn(RIGHTS_EXCEPTION, d);
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION,
-					request.getRequestURI() + "?"
-							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d,
+					request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
@@ -280,27 +284,26 @@ public class KPIDelegationController {
 			KPIData kpiData = kpiDataService.getKPIDataById(kpiId, lang, false);
 
 			if (kpiData == null) {
-				logger.warn("Wrong KPI Data");
+				logger.warn(WRONG_KPI_DATA);
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION,
-						request.getRequestURI() + "?"
-								+ request.getQueryString(),
-						"Wrong KPI Data", null, request.getRemoteAddr());
+						request.getRequestURI() + "?" + request.getQueryString(), WRONG_KPI_DATA, null,
+						request.getRemoteAddr());
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
-					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), kpiData.getHighLevelType(), lang).getResult())) {
+					&& !Boolean.TRUE.equals(accessService
+							.checkAccessFromApp(Long.toString(kpiId), kpiData.getHighLevelType(), lang).getResult())) {
 				throw new CredentialsException();
 			}
 
 			Delegation oldKpiDelegation = delegationService.getDelegationById(id, lang);
 			if (oldKpiDelegation == null) {
-				logger.info("No data found");
+				logger.info(NO_DATA_FOUND);
 
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION,
-						request.getRequestURI() + "?"
-								+ request.getQueryString(),
-						"No data found", null, request.getRemoteAddr());
+						request.getRequestURI() + "?" + request.getQueryString(), NO_DATA_FOUND, null,
+						request.getRemoteAddr());
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
@@ -319,13 +322,14 @@ public class KPIDelegationController {
 				}
 			});
 
-			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, sourceId, kpiId,
-					ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION);
+			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
+					sourceId, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION);
 
-			if (oldKpiDelegation.getUsernameDelegated().equals("ANONYMOUS")) {
+			if (oldKpiDelegation.getUsernameDelegated() != null
+					&& oldKpiDelegation.getUsernameDelegated().equals("ANONYMOUS")) {
 				kpiData.setOwnership("public");
-				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, sourceId, kpiId,
-						ActivityAccessType.WRITE, KPIActivityDomainType.CHANGEOWNERSHIP);
+				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
+						sourceId, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.CHANGEOWNERSHIP);
 				kpiDataService.saveKPIData(kpiData);
 			}
 
@@ -333,13 +337,12 @@ public class KPIDelegationController {
 			return userController.putDelegationV1(credentialService.getLoggedUsername(lang), oldKpiDelegation.getId(),
 					oldKpiDelegation, sourceRequest, lang, request);
 		} catch (CredentialsException d) {
-			logger.warn("Rights exception", d);
+			logger.warn(RIGHTS_EXCEPTION, d);
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION,
-					request.getRequestURI() + "?"
-							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d,
+					request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
@@ -360,51 +363,49 @@ public class KPIDelegationController {
 			KPIData kpiData = kpiDataService.getKPIDataById(kpiId, lang, false);
 
 			if (kpiData == null) {
-				logger.warn("Wrong KPI Data");
+				logger.warn(WRONG_KPI_DATA);
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, kpiId, ActivityAccessType.DELETE, KPIActivityDomainType.DELEGATION,
-						request.getRequestURI() + "?"
-								+ request.getQueryString(),
-						"Wrong KPI Data", null, request.getRemoteAddr());
+						request.getRequestURI() + "?" + request.getQueryString(), WRONG_KPI_DATA, null,
+						request.getRemoteAddr());
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
-					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), kpiData.getHighLevelType(), lang).getResult())) {
+					&& !Boolean.TRUE.equals(accessService
+							.checkAccessFromApp(Long.toString(kpiId), kpiData.getHighLevelType(), lang).getResult())) {
 				throw new CredentialsException();
 			}
 
 			Delegation kpiDelegationToDelete = delegationService.getDelegationById(id, lang);
 			if (kpiDelegationToDelete == null) {
-				logger.info("No data found");
+				logger.info(NO_DATA_FOUND);
 
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, kpiId, ActivityAccessType.DELETE, KPIActivityDomainType.DELEGATION,
-						request.getRequestURI() + "?"
-								+ request.getQueryString(),
-						"No data found", null, request.getRemoteAddr());
+						request.getRequestURI() + "?" + request.getQueryString(), NO_DATA_FOUND, null,
+						request.getRemoteAddr());
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
 
 			kpiDelegationToDelete.setDeleteTime(new Date());
-			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest, sourceId, kpiId,
-					ActivityAccessType.DELETE, KPIActivityDomainType.DELEGATION);
+			kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
+					sourceId, kpiId, ActivityAccessType.DELETE, KPIActivityDomainType.DELEGATION);
 			logger.info("Deleted kpiDelegation {}", kpiDelegationToDelete.getId());
 			return userController.putDelegationV1(credentialService.getLoggedUsername(lang),
 					kpiDelegationToDelete.getId(), kpiDelegationToDelete, sourceRequest, lang, request);
 		} catch (CredentialsException d) {
-			logger.warn("Rights exception", d);
+			logger.warn(RIGHTS_EXCEPTION, d);
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, kpiId, ActivityAccessType.DELETE, KPIActivityDomainType.VALUE,
-					request.getRequestURI() + "?"
-							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d,
+					request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
 	}
 
-	// -------------------GET ALL KPI Delegation Pageable ---------------
+	// -------------------GET ALL USER KPI Delegation Pageable ---------------
 	@GetMapping("/api/v1/kpidata/{kpiId}/delegations")
 	public ResponseEntity<Object> getAllDelegationV1Pageable(@PathVariable("kpiId") Long kpiId,
 			@RequestParam(value = "sourceRequest") String sourceRequest,
@@ -423,25 +424,27 @@ public class KPIDelegationController {
 		try {
 			KPIData kpiData = kpiDataService.getKPIDataById(kpiId, lang, false);
 			if (kpiData == null) {
-				logger.warn("Wrong KPI Data");
+				logger.warn(WRONG_KPI_DATA);
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.DELEGATION,
-						request.getRequestURI() + "?"
-								+ request.getQueryString(),
-						"Wrong KPI Data", null, request.getRemoteAddr());
+						request.getRequestURI() + "?" + request.getQueryString(), WRONG_KPI_DATA, null,
+						request.getRemoteAddr());
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
-					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), kpiData.getHighLevelType(), lang).getResult())) {
+					&& !Boolean.TRUE.equals(accessService
+							.checkAccessFromApp(Long.toString(kpiId), kpiData.getHighLevelType(), lang).getResult())) {
 				throw new CredentialsException();
 			}
 
 			Page<Delegation> pageKpiDelegation = null;
 			List<Delegation> listKpiDelegation = null;
 			if (pageNumber != -1) {
-				pageKpiDelegation = delegationService.findByElementIdWithoutAnonymous(Long.toString(kpiId),
-						new PageRequest(pageNumber, pageSize, new Sort(Direction.fromString(sortDirection), sortBy)));
+				pageKpiDelegation = delegationService.findByElementIdByElementTypeWithoutAnonymous(Long.toString(kpiId),
+						kpiData.getHighLevelType(),
+						PageRequest.of(pageNumber, pageSize, Sort.by(Direction.fromString(sortDirection), sortBy)));
 			} else {
-				listKpiDelegation = delegationService.findByElementIdNoPagesWithoutAnonymous(Long.toString(kpiId));
+				listKpiDelegation = delegationService.findByElementIdByElementTypeNoPagesWithoutAnonymous(
+						Long.toString(kpiId), kpiData.getHighLevelType());
 			}
 
 			if (pageKpiDelegation == null && listKpiDelegation == null) {
@@ -449,9 +452,8 @@ public class KPIDelegationController {
 
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.DELEGATION,
-						request.getRequestURI() + "?"
-								+ request.getQueryString(),
-						"No delegation data found", null, request.getRemoteAddr());
+						request.getRequestURI() + "?" + request.getQueryString(), "No delegation data found", null,
+						request.getRemoteAddr());
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (pageKpiDelegation != null) {
 				logger.info("Returning KpiDelegationPage ");
@@ -469,23 +471,112 @@ public class KPIDelegationController {
 				return new ResponseEntity<>(listKpiDelegation, HttpStatus.OK);
 			}
 		} catch (CredentialsException d) {
-			logger.warn("Rights exception", d);
+			logger.warn(RIGHTS_EXCEPTION, d);
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.DELEGATION,
-					request.getRequestURI() + "?"
-							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d,
+					request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (IllegalArgumentException | NoSuchMessageException d) {
-			logger.warn("Wrong Arguments", d);
+			logger.warn(WRONG_ARGUMENTS, d);
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.VALUE,
-					request.getRequestURI() + "?"
-							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d,
+					request.getRemoteAddr());
+
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
+		}
+
+	}
+
+	// -------------------GET ALL ORG KPI Delegation Pageable ---------------
+	@GetMapping("/api/v1/kpidata/{kpiId}/orgdelegations")
+	public ResponseEntity<Object> getAllOrgDelegationV1Pageable(@PathVariable("kpiId") Long kpiId,
+			@RequestParam(value = "sourceRequest") String sourceRequest,
+			@RequestParam(value = "sourceId", required = false) String sourceId,
+			@RequestParam(value = "lang", required = false, defaultValue = "en") Locale lang,
+			@RequestParam(value = "pageNumber", required = false, defaultValue = "-1") int pageNumber,
+			@RequestParam(value = "pageSize", required = false, defaultValue = "10") int pageSize,
+			@RequestParam(value = "sortDirection", required = false, defaultValue = "desc") String sortDirection,
+			@RequestParam(value = "sortBy", required = false, defaultValue = "insert_time") String sortBy,
+			HttpServletRequest request) {
+
+		logger.info(
+				"Requested getAllDelegationV1Pageable pageNumber {} pageSize {} sortDirection {} sortBy {} kpiId {}",
+				pageNumber, pageSize, sortDirection, sortBy, kpiId);
+
+		try {
+			KPIData kpiData = kpiDataService.getKPIDataById(kpiId, lang, false);
+			if (kpiData == null) {
+				logger.warn(WRONG_KPI_DATA);
+				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
+						sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.DELEGATION,
+						request.getRequestURI() + "?" + request.getQueryString(), WRONG_KPI_DATA, null,
+						request.getRemoteAddr());
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			} else if (!kpiData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
+					&& !Boolean.TRUE.equals(accessService
+							.checkAccessFromApp(Long.toString(kpiId), kpiData.getHighLevelType(), lang).getResult())) {
+				throw new CredentialsException();
+			}
+
+			List<Delegation> delegationsList = delegationService
+					.findByElementIdByElementTypeNoPages(kpiData.getId().toString(), kpiData.getHighLevelType());
+			delegationsList = delegationsList.stream().filter(e -> e.getGroupnameDelegated() != null)
+					.collect(Collectors.toList());
+
+			Page<Delegation> pageKpiDelegation = null;
+			List<Delegation> listKpiDelegation = null;
+			if (pageNumber != -1) {
+				pageKpiDelegation = new PageImpl<>(delegationsList,
+						PageRequest.of(pageNumber, pageSize, Sort.by(Direction.fromString(sortDirection), sortBy)),
+						delegationsList.size());
+			} else {
+				listKpiDelegation = delegationsList;
+			}
+
+			if (pageKpiDelegation == null && listKpiDelegation == null) {
+				logger.info("No org delegation data found");
+
+				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
+						sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.DELEGATION,
+						request.getRequestURI() + "?" + request.getQueryString(), "No delegation data found", null,
+						request.getRemoteAddr());
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			} else if (pageKpiDelegation != null) {
+				logger.info("Returning KpiDelegationPage ");
+
+				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
+						sourceId, kpiId, ActivityAccessType.READ, KPIActivityDomainType.DELEGATION);
+
+				return new ResponseEntity<>(pageKpiDelegation, HttpStatus.OK);
+			} else {
+				logger.info("Returning KpiDelegationList ");
+
+				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
+						sourceId, kpiId, ActivityAccessType.READ, KPIActivityDomainType.DELEGATION);
+
+				return new ResponseEntity<>(listKpiDelegation, HttpStatus.OK);
+			}
+		} catch (CredentialsException d) {
+			logger.warn(RIGHTS_EXCEPTION, d);
+
+			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
+					sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.DELEGATION,
+					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d,
+					request.getRemoteAddr());
+
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
+		} catch (IllegalArgumentException | NoSuchMessageException d) {
+			logger.warn(WRONG_ARGUMENTS, d);
+
+			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
+					sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.VALUE,
+					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d,
+					request.getRemoteAddr());
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		}

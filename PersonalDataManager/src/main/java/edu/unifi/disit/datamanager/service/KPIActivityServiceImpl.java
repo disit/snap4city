@@ -92,9 +92,9 @@ public class KPIActivityServiceImpl implements IKPIActivityService {
 					new SerialBlob(sw.toString().getBytes()), ipAddress);
 			kpiActivityViolationRepo.save(kpiActivityViolation);
 		} catch (SerialException e) {
-			logger.error("SerialException {}", e);
+			logger.error("SerialException ", e);
 		} catch (SQLException e) {
-			logger.error("SQLException {}", e);
+			logger.error("SQLException ", e);
 		}
 
 	}
@@ -102,7 +102,7 @@ public class KPIActivityServiceImpl implements IKPIActivityService {
 	@Override
 	public KPIActivity getKPIActivityById(Long id, Locale lang) throws  CredentialsException {
 		logger.debug("getKPIActivityById INVOKED on id {}", id);
-		return kpiActivityRepo.findOne(id);
+		return kpiActivityRepo.findById(id).orElse(null);
 	}
 
 	@Override

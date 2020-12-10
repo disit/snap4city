@@ -46,6 +46,10 @@ var QueryManager = {
         return "kpidata/" + kpiId + "/values/" + id + "/?sourceRequest=" + QueryManager.sourceRequest ;
     },
 
+    createClearAllKPIValueQuery: function (kpiId) {
+        return "kpidata/" + kpiId + "/values/?sourceRequest=" + QueryManager.sourceRequest ;
+    },
+
     createGetKPIMetadataTableQuery: function (kpiId, pageNumber, pageSize, sortDirection, sortBy, searchKey) {
         return "kpidata/" + kpiId + "/metadata/?sourceRequest=" + QueryManager.sourceRequest  + (pageNumber || pageNumber == 0? "&pageNumber=" + pageNumber : "") + (pageSize ? "&pageSize=" + pageSize : "") + (sortDirection ? "&sortDirection=" + sortDirection : "") + (sortBy ? "&sortBy=" + sortBy : "") + (searchKey ? "&searchKey=" + searchKey : "");
     },
@@ -64,6 +68,10 @@ var QueryManager = {
 
     createDeleteKPIMetadataQuery: function (kpiId, id) {
         return "kpidata/" + kpiId + "/metadata/" + id + "/?sourceRequest=" + QueryManager.sourceRequest ;
+    },
+    
+    createGetKPIOrgDelegationTableQuery: function (kpiId, pageNumber, pageSize, sortDirection, sortBy, searchKey) {
+        return "kpidata/" + kpiId + "/orgdelegations/?sourceRequest=" + QueryManager.sourceRequest  + (pageNumber || pageNumber == 0? "&pageNumber=" + pageNumber : "") + (pageSize ? "&pageSize=" + pageSize : "") + (sortDirection ? "&sortDirection=" + sortDirection : "") + (sortBy ? "&sortBy=" + sortBy : "") + (searchKey ? "&searchKey=" + searchKey : "");
     },
 
     createGetKPIDelegationTableQuery: function (kpiId, pageNumber, pageSize, sortDirection, sortBy, searchKey) {

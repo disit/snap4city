@@ -35,7 +35,7 @@
     <div class="col-md-3">
         <div class="input-group">
             <input type="text" id="inputFilterKPIData" class="form-control" placeholder="Filter Table" aria-label="Filter Table"
-                aria-describedby="button-addon2" max="{{totalPages}}" min="1" \>
+                aria-describedby="button-addon2" max="{{totalPages}}" min="1">
             <div class="input-group-append">
                 <button class="btn btn-outline-secondary" type="button" onclick="$('#inputFilterKPIData').val('');DeviceGrpFilter.setCurrentSearchKey(''); DeviceGrpTabler.renderTable();"
                     id="button-addon2" style="background-color: #eee;">&times;</button>
@@ -55,28 +55,28 @@
 <table class="table table-striped table-bordered" style="background-color: white">
     <thead>
     <tr style="background: rgb(0, 162, 211); color: rgb(255, 255, 255); font-size: 1em;">
-        <th onclick="DeviceGrpSorter.setSortOnField('id');DeviceGrpTabler.renderTable();" style="cursor: pointer;">No.
+        <th scope="col" onclick="DeviceGrpSorter.setSortOnField('id');DeviceGrpTabler.renderTable();" style="cursor: pointer;">No.
             {{#sortidASC}}&darr;{{/sortidASC}}
             {{#sortidDESC}}&uarr;{{/sortidDESC}}</th>
-        <th onclick="DeviceGrpSorter.setSortOnField('highLevelType');DeviceGrpTabler.renderTable();" style="cursor: pointer;">High
+        <th scope="col" onclick="DeviceGrpSorter.setSortOnField('highLevelType');DeviceGrpTabler.renderTable();" style="cursor: pointer;">High
             Level Type
             {{#sorthighLevelTypeASC}}&darr;{{/sorthighLevelTypeASC}}
             {{#sorthighLevelTypeDESC}}&uarr;{{/sorthighLevelTypeDESC}}</th>
 
-        <th onclick="DeviceGrpSorter.setSortOnField('name');DeviceGrpTabler.renderTable();" style="cursor: pointer;">
+        <th scope="col" onclick="DeviceGrpSorter.setSortOnField('name');DeviceGrpTabler.renderTable();" style="cursor: pointer;">
             Name
             {{#sortnameASC}}&darr;{{/sortnameASC}} {{#sortnameDESC}}&uarr;{{/sortnameDESC}}</th>
-        <th onclick="DeviceGrpSorter.setSortOnField('description');DeviceGrpTabler.renderTable();" style="cursor: pointer;">Description
+        <th scope="col" onclick="DeviceGrpSorter.setSortOnField('description');DeviceGrpTabler.renderTable();" style="cursor: pointer;">Description
             {{#sortdescriptionASC}}&darr;{{/sortdescriptionASC}} {{#sortdescriptionDESC}}&uarr;{{/sortdescriptionDESC}}</th>
-        <th>Content</th>
+        <th scope="col" >Content</th>
         
-        <th onclick="DeviceGrpSorter.setSortOnField('updateTime');DeviceGrpTabler.renderTable();" style="cursor: pointer;">Last
+        <th scope="col" onclick="DeviceGrpSorter.setSortOnField('updateTime');DeviceGrpTabler.renderTable();" style="cursor: pointer;">Last
             Change
             {{#sortupdateTimeASC}}&darr;{{/sortupdateTimeASC}}
             {{#sortupdateTimeDESC}}&uarr;{{/sortupdateTimeDESC}}</th>
-        <th onclick="DeviceGrpSorter.setSortOnField('username');DeviceGrpTabler.renderTable();" style="cursor: pointer;">Owner Username
+        <th scope="col"  onclick="DeviceGrpSorter.setSortOnField('username');DeviceGrpTabler.renderTable();" style="cursor: pointer;">Owner Username
             {{#sortusernameASC}}&darr;{{/sortusernameASC}} {{#sortusernameDESC}}&uarr;{{/sortusernameDESC}}</th>
-        <th onclick="DeviceGrpSorter.setSortOnField('ownership');DeviceGrpTabler.renderTable();" style="cursor: pointer;">Ownership
+        <th scope="col"  onclick="DeviceGrpSorter.setSortOnField('ownership');DeviceGrpTabler.renderTable();" style="cursor: pointer;">Ownership
             {{#sortownershipASC}}&darr;{{/sortownershipASC}} {{#sortownershipDESC}}&uarr;{{/sortownershipDESC}}</th>
 
 

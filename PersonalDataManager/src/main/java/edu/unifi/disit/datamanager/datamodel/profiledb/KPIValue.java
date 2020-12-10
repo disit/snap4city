@@ -28,6 +28,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import edu.unifi.disit.datamanager.datamodel.dto.KPIValueDTO;
+
 @JsonSerialize(using = KPIValueSerializer.class)
 @JsonDeserialize(using = KPIValueDeserializer.class)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -65,15 +67,8 @@ public class KPIValue implements Comparable<KPIValue> {
 
 	public KPIValue(Long id, Date insertTime, Date dataTime, Date elapseTime, Date deleteTime, String value,
 			String latitude, String longitude) {
-		super();
+		this(insertTime, dataTime, elapseTime, deleteTime, value, latitude, longitude);
 		this.id = id;
-		this.insertTime = insertTime;
-		this.dataTime = dataTime;
-		this.elapseTime = elapseTime;
-		this.deleteTime = deleteTime;
-		this.value = value;
-		this.latitude = latitude;
-		this.longitude = longitude;
 	}
 
 	public KPIValue(Date insertTime, Date dataTime, Date elapseTime, Date deleteTime, String value, String latitude,
@@ -90,17 +85,15 @@ public class KPIValue implements Comparable<KPIValue> {
 	
 	public KPIValue(Date insertTime, Date dataTime, Date elapseTime, Date deleteTime, String value, String latitude,
 			String longitude, Long kpiId) {
-		super();
-		this.insertTime = insertTime;
-		this.dataTime = dataTime;
-		this.elapseTime = elapseTime;
-		this.deleteTime = deleteTime;
-		this.value = value;
-		this.latitude = latitude;
-		this.longitude = longitude;
+		this(insertTime, dataTime, elapseTime, deleteTime, value, latitude, longitude);
 		this.kpiId = kpiId;
 	}
 
+	public KPIValue(KPIValueDTO dto) {
+		this(dto.getId(), dto.getInsertTime(), dto.getDataTime(), dto.getElapseTime(), dto.getDeleteTime(), dto.getValue()
+		, dto.getLatitude(), dto.getLongitude());
+	}
+	
 	public Long getId() {
 		return id;
 	}

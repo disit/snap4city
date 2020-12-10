@@ -75,7 +75,7 @@ public class DataServiceImpl implements IDataService {
 
 		if (appOwner == null) {// to enable multi ownership
 			// retrieve ownership of this appId, if appOwner is not specified
-			List<Ownership> owns = ownershipRepo.findByElementId(appId);
+			List<Ownership> owns = ownershipRepo.findByElementIdAndDeletedIsNull(appId);
 
 			if (owns.isEmpty())
 				throw new DataNotValidException(messages.getMessage("getdata.ko.appidnotrecognized", null, lang));
@@ -119,7 +119,7 @@ public class DataServiceImpl implements IDataService {
 			throw new DataNotValidException(messages.getMessage("postdata.ko.appiddifferent", null, lang));
 
 		// check appid exist (and popolate appname)
-		List<Ownership> iotapps = ownershipRepo.findByElementId(appId);
+		List<Ownership> iotapps = ownershipRepo.findByElementIdAndDeletedIsNull(appId);
 		if (iotapps.isEmpty())
 			throw new DataNotValidException(messages.getMessage("postdata.ko.appidnotrecognized", null, lang));
 
@@ -233,7 +233,7 @@ public class DataServiceImpl implements IDataService {
 
 		credentialsService.checkUsernameCredentials(username, lang);// enforcement credentials
 
-		Data todelete = dataRepo.findById(dataId);
+		Data todelete = dataRepo.findById(dataId).orElse(null);
 
 		if (todelete == null)
 			throw new DataNotValidException(messages.getMessage("deletedata.ko.dataidnotfound", null, lang));

@@ -68,35 +68,35 @@ public class DelegationServiceImpl implements IDelegationService {
 	@Override
 	public Delegation getDelegationById(Long id, Locale lang) throws CredentialsException {
 		logger.debug("getDelegationById INVOKED on id {}", id);
-		return delegationRepo.findOne(id);
+		return delegationRepo.findById(id).orElse(null);
 	}
 
 	@Override
-	public Page<Delegation> findByElementId(String elementId, Pageable pageable)
+	public Page<Delegation> findByElementIdByElementType(String elementId, String elementType, Pageable pageable)
 			throws CredentialsException {
-		logger.debug("findByElementId INVOKED on elementId {}", elementId);
-		return delegationRepo.findByElementIdAndDeleteTimeIsNull(elementId, pageable);
+		logger.debug("findByElementId INVOKED on elementId {} elementType {}", elementId, elementType);
+		return delegationRepo.findByElementIdAndElementTypeAndDeleteTimeIsNull(elementId, elementType, pageable);
 	}
 
 	@Override
-	public Page<Delegation> findByElementIdWithoutAnonymous(String elementId, Pageable pageable)
+	public Page<Delegation> findByElementIdByElementTypeWithoutAnonymous(String elementId, String elementType, Pageable pageable)
 			throws CredentialsException {
-		logger.debug("findByElementId INVOKED on elementId {} usernameDelegated {}", elementId, "ANONYMOUS");
-		return delegationRepo.findByElementIdAndDeleteTimeIsNullAndUsernameDelegatedNotLike(elementId, "ANONYMOUS", pageable);
+		logger.debug("findByElementId INVOKED on elementId {} elementType {} usernameDelegated {}", elementId, elementType, "ANONYMOUS");
+		return delegationRepo.findByElementIdAndElementTypeAndDeleteTimeIsNullAndUsernameDelegatedNotLike(elementId, elementType, "ANONYMOUS", pageable);
 	}
 
 	@Override
-	public List<Delegation> findByElementIdNoPages(String elementId)
+	public List<Delegation> findByElementIdByElementTypeNoPages(String elementId, String elementType)
 			throws CredentialsException {
-		logger.debug("findByElementIdNoPages INVOKED on elementId {}", elementId);
-		return delegationRepo.findByElementIdAndDeleteTimeIsNull(elementId);
+		logger.debug("findByElementIdNoPages INVOKED on elementId {} elementType {}", elementId, elementType);
+		return delegationRepo.findByElementIdAndElementTypeAndDeleteTimeIsNull(elementId, elementType);
 	}
 
 	@Override
-	public List<Delegation> findByElementIdNoPagesWithoutAnonymous(String elementId)
+	public List<Delegation> findByElementIdByElementTypeNoPagesWithoutAnonymous(String elementId, String elementType)
 			throws CredentialsException {
-		logger.debug("findByElementId INVOKED on elementId {} usernameDelegated {}", elementId, "ANONYMOUS");
-		return delegationRepo.findByElementIdAndDeleteTimeIsNullAndUsernameDelegatedNotLike(elementId, "ANONYMOUS");
+		logger.debug("findByElementId INVOKED on on elementId {} elementType {} usernameDelegated {}", elementId, elementType, "ANONYMOUS");
+		return delegationRepo.findByElementIdAndElementTypeAndDeleteTimeIsNullAndUsernameDelegatedNotLike(elementId, elementType, "ANONYMOUS");
 	}
 
 	@Override
@@ -142,7 +142,7 @@ public class DelegationServiceImpl implements IDelegationService {
 
 		// retrieve the user belonging this appId
 		if (appOwner == null) {
-			List<Ownership> owns = ownershipRepo.findByElementId(appId);
+			List<Ownership> owns = ownershipRepo.findByElementIdAndDeletedIsNull(appId);
 			if (owns.isEmpty())
 				throw new DelegationNotValidException(messages.getMessage("getdelegation.ko.appidnotrecognized", null, lang));
 			else if (owns.size() > 1)
@@ -203,7 +203,7 @@ public class DelegationServiceImpl implements IDelegationService {
 			throw new DelegationNotValidException(messages.getMessage("deletedelegation.ko.idnotrecognized", null, lang));
 
 		// check username exist
-		List<Ownership> ownership = ownershipRepo.findByUsername(username);
+		List<Ownership> ownership = ownershipRepo.findByUsernameAndDeletedIsNull(username);
 		if ((ownership == null) || (ownership.isEmpty()))
 			throw new DelegationNotValidException(messages.getMessage("deletedelegation.ko.usernamenotrecognized", null, lang));
 
@@ -286,7 +286,7 @@ public class DelegationServiceImpl implements IDelegationService {
 	}
 
 	private List<Delegation> explodeDelegationAboutMyGroup(List<Delegation> delegations) throws CloneNotSupportedException {
-		List<Delegation> toreturn = new ArrayList<Delegation>();
+		List<Delegation> toreturn = new ArrayList<>();
 
 		for (Delegation d : delegations) {
 			if ((d.getElementType() != null) && (d.getElementType().equals(ElementType.MYGROUP.toString()))) {
@@ -320,6 +320,7 @@ public class DelegationServiceImpl implements IDelegationService {
 	// the cache SHOULD BE invalidated if a specific delegation for an user is updated/deleted/insert,
 	// but for multiple keys we are not able to purge the single entry... so we purge all
 	private void invalidateCache() {
-		cacheManager.getCache("delegationDelegatedByUsername").clear();
+		if (cacheManager.getCache("delegationDelegatedByUsername") != null)
+			cacheManager.getCache("delegationDelegatedByUsername").clear();
 	}
 }

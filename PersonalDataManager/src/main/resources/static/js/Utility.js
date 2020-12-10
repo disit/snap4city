@@ -21,6 +21,14 @@ var Utility = {
 	parseISOString : function(s) {
 		var b = s.split(/\D+/);
 		return new Date(Date.UTC(b[0], --b[1], b[2], b[3], b[4], b[5], b[6]));
-	}
+	},
+
+	onKeyEnter: function (event) {
+        if (event.which == 13 || event.keyCode == 13) {
+            $("#button-search").click();
+            return false;
+        }
+        return true;
+    }
 
 }

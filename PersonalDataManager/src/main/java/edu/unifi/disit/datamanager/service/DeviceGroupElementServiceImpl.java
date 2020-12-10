@@ -14,7 +14,6 @@
 package edu.unifi.disit.datamanager.service;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -87,7 +86,8 @@ public class DeviceGroupElementServiceImpl implements IDeviceGroupElementService
 	private String sensorApiUrl;
 
 	@Override
-	public Page<DeviceGroupElement> findByDeviceGroupId(Long grpId, PageRequest pageRequest) throws CredentialsException, MalformedURLException, IOException {
+	public Page<DeviceGroupElement> findByDeviceGroupId(Long grpId, PageRequest pageRequest)
+			throws CredentialsException, IOException {
 		logger.debug("findByDeviceGroupId INVOKED on grpId {}", grpId);
 		List<DeviceGroupElement> elmts = deviceGroupElementRepository.findByDeviceGroupIdAndDeleteTimeIsNull(grpId);
 		Iterator<DeviceGroupElement> it = elmts.iterator();
@@ -95,10 +95,11 @@ public class DeviceGroupElementServiceImpl implements IDeviceGroupElementService
 		while (it.hasNext()) {
 			DeviceGroupElement elmt = it.next();
 			if ("MyKPI".equals(elmt.getElementType())) {
-				if (kpiDataRepo.findOne(Long.valueOf(elmt.getElementId())).getDeleteTime() != null)
+				if (kpiDataRepo.findById(Long.valueOf(elmt.getElementId())).orElse(new KPIData())
+						.getDeleteTime() != null)
 					it.remove();
 			} else if (!"Sensor".equals(elmt.getElementType())) {
-				if (ownershipRepo.findByElementId(elmt.getElementId()).get(0).getDeleted() != null)
+				if (ownershipRepo.findByElementIdAndDeletedIsNull(elmt.getElementId()).get(0).getDeleted() != null)
 					it.remove();
 			} else {
 				if (!sensorsToFix.isEmpty())
@@ -123,11 +124,11 @@ public class DeviceGroupElementServiceImpl implements IDeviceGroupElementService
 				}
 			}
 		}
-		return new PageImpl<DeviceGroupElement>(elmts, pageRequest, elmts.size());
+		return new PageImpl<>(elmts, pageRequest, elmts.size());
 	}
 
 	@Override
-	public List<DeviceGroupElement> findByDeviceGroupIdNoPages(Long grpId) throws CredentialsException, MalformedURLException, IOException {
+	public List<DeviceGroupElement> findByDeviceGroupIdNoPages(Long grpId) throws CredentialsException, IOException {
 		logger.debug("findByDeviceGroupNoPages INVOKED on grpId {}", grpId);
 		List<DeviceGroupElement> elmts = deviceGroupElementRepository.findByDeviceGroupIdAndDeleteTimeIsNull(grpId);
 		Iterator<DeviceGroupElement> it = elmts.iterator();
@@ -135,10 +136,11 @@ public class DeviceGroupElementServiceImpl implements IDeviceGroupElementService
 		while (it.hasNext()) {
 			DeviceGroupElement elmt = it.next();
 			if ("MyKPI".equals(elmt.getElementType())) {
-				if (kpiDataRepo.findOne(Long.valueOf(elmt.getElementId())).getDeleteTime() != null)
+				if (kpiDataRepo.findById(Long.valueOf(elmt.getElementId())).orElse(new KPIData())
+						.getDeleteTime() != null)
 					it.remove();
 			} else if (!"Sensor".equals(elmt.getElementType())) {
-				if (ownershipRepo.findByElementId(elmt.getElementId()).get(0).getDeleted() != null)
+				if (ownershipRepo.findByElementIdAndDeletedIsNull(elmt.getElementId()).get(0).getDeleted() != null)
 					it.remove();
 			} else {
 				if (!sensorsToFix.isEmpty())
@@ -170,7 +172,7 @@ public class DeviceGroupElementServiceImpl implements IDeviceGroupElementService
 	@Override
 	public Set<String> getAvailElmtTypesToAdd(String username) {
 		List<Ownership> ownerships = ownershipRepo.findByUsernameAndDeletedIsNull(username);
-		Set<String> elementTypes = new HashSet<String>();
+		Set<String> elementTypes = new HashSet<>();
 		for (Ownership o : ownerships)
 			if ((!"Service Graph".equals(o.getElmtTypeLbl4Grps())) && !"Service URI".equals(o.getElmtTypeLbl4Grps()))
 				elementTypes.add(o.getElmtTypeLbl4Grps());
@@ -184,7 +186,7 @@ public class DeviceGroupElementServiceImpl implements IDeviceGroupElementService
 	@Override
 	public Set<String> getAllElmtTypes() {
 		List<Ownership> ownerships = ownershipRepo.findByDeletedIsNull();
-		Set<String> elementTypes = new HashSet<String>();
+		Set<String> elementTypes = new HashSet<>();
 		for (Ownership o : ownerships)
 			if ((!"Service Graph".equals(o.getElmtTypeLbl4Grps())) && !"Service URI".equals(o.getElmtTypeLbl4Grps()))
 				elementTypes.add(o.getElmtTypeLbl4Grps());
@@ -228,7 +230,7 @@ public class DeviceGroupElementServiceImpl implements IDeviceGroupElementService
 						e.setUsername(sensor.getDeviceOwner());
 						String elmtName = sensor.getDeviceType() + " " + sensor.getDeviceName() + " " + sensor.getValueName();
 						e.setElementName(elmtName.replaceAll("_", " "));
-						DeviceGroup g = deviceGroupRepository.findOne(e.getDeviceGroupId());
+						DeviceGroup g = deviceGroupRepository.findById(e.getDeviceGroupId()).orElse(new DeviceGroup());
 						if (g.getDeleteTime() != null)
 							i.remove();
 					}
@@ -237,7 +239,7 @@ public class DeviceGroupElementServiceImpl implements IDeviceGroupElementService
 			} catch (Exception e) {
 			}
 		}
-		return new ArrayList<DeviceGroupElement>();
+		return new ArrayList<>();
 	}
 
 	private String remap(String elementType) {
@@ -305,33 +307,37 @@ public class DeviceGroupElementServiceImpl implements IDeviceGroupElementService
 	@Override
 	public List<DeviceGroupElement> addElmtsToGrp(Long grpId, List<DeviceGroupElement> elements) {
 		try {
-			DeviceGroup grp = deviceGroupRepository.findOne(grpId);
+			DeviceGroup grp = deviceGroupRepository.findById(grpId).orElse(new DeviceGroup());
 			grp.setUpdateTime(new Date());
 			deviceGroupRepository.save(grp);
 		} catch (Exception e) {
 		}
-		return deviceGroupElementRepository.save(elements);
+		return deviceGroupElementRepository.saveAll(elements);
 	}
 
 	@Override
-	public Page<DeviceGroupElement> findByDeviceGroupIdFiltered(Long grpId, String searchKey, PageRequest pageRequest) throws MalformedURLException, IOException {
+	public Page<DeviceGroupElement> findByDeviceGroupIdFiltered(Long grpId, String searchKey, PageRequest pageRequest)
+			throws IOException {
 		logger.debug("findByDeviceGroupIdFiltered INVOKED on grpId {} searchKey {}", grpId, searchKey);
-		List<DeviceGroupElement> elmts = deviceGroupElementRepository.findByDeviceGroupIdAndDeleteTimeIsNullFiltered(grpId, searchKey);
+		List<DeviceGroupElement> elmts = deviceGroupElementRepository
+				.findByDeviceGroupIdAndDeleteTimeIsNullFiltered(grpId, searchKey);
 		Iterator<DeviceGroupElement> it = elmts.iterator();
 		while (it.hasNext()) {
 			DeviceGroupElement elmt = it.next();
 			if ("MyKPI".equals(elmt.getElementType())) {
-				if (kpiDataRepo.findOne(Long.valueOf(elmt.getElementId())).getDeleteTime() != null)
+				if (kpiDataRepo.findById(Long.valueOf(elmt.getElementId())).orElse(new KPIData())
+						.getDeleteTime() != null)
 					it.remove();
 			} else if (!"Sensor".equals(elmt.getElementType())) {
-				if (ownershipRepo.findByElementId(elmt.getElementId()).get(0).getDeleted() != null)
+				if (ownershipRepo.findByElementIdAndDeletedIsNull(elmt.getElementId()).get(0).getDeleted() != null)
 					it.remove();
 			} else {
 				it.remove();
 			}
 		}
 		String sensorsToChk = "";
-		List<DeviceGroupElement> forSensors = deviceGroupElementRepository.findByDeviceGroupIdAndDeleteTimeIsNull(grpId);
+		List<DeviceGroupElement> forSensors = deviceGroupElementRepository
+				.findByDeviceGroupIdAndDeleteTimeIsNull(grpId);
 		Iterator<DeviceGroupElement> fsit = forSensors.iterator();
 		while (fsit.hasNext()) {
 			DeviceGroupElement elmt = fsit.next();
@@ -358,29 +364,31 @@ public class DeviceGroupElementServiceImpl implements IDeviceGroupElementService
 				}
 			}
 		}
-		Page<DeviceGroupElement> page = new PageImpl<DeviceGroupElement>(elmts, pageRequest, elmts.size());
-		return page;
+		return new PageImpl<>(elmts, pageRequest, elmts.size());
 	}
 
 	@Override
-	public List<DeviceGroupElement> findByDeviceGroupIdNoPagesFiltered(Long grpId, String searchKey) throws MalformedURLException, IOException {
+	public List<DeviceGroupElement> findByDeviceGroupIdNoPagesFiltered(Long grpId, String searchKey)
+			throws IOException {
 		logger.debug("findByDeviceGroupIdNoPagesFiltered INVOKED on grpId {} searchKey {}", grpId, searchKey);
 		List<DeviceGroupElement> elmts = deviceGroupElementRepository.findByDeviceGroupIdAndDeleteTimeIsNullFiltered(grpId, searchKey);
 		Iterator<DeviceGroupElement> it = elmts.iterator();
 		while (it.hasNext()) {
 			DeviceGroupElement elmt = it.next();
 			if ("MyKPI".equals(elmt.getElementType())) {
-				if (kpiDataRepo.findOne(Long.valueOf(elmt.getElementId())).getDeleteTime() != null)
+				if (kpiDataRepo.findById(Long.valueOf(elmt.getElementId())).orElse(new KPIData())
+						.getDeleteTime() != null)
 					it.remove();
 			} else if (!"Sensor".equals(elmt.getElementType())) {
-				if (ownershipRepo.findByElementId(elmt.getElementId()).get(0).getDeleted() != null)
+				if (ownershipRepo.findByElementIdAndDeletedIsNull(elmt.getElementId()).get(0).getDeleted() != null)
 					it.remove();
 			} else {
 				it.remove();
 			}
 		}
 		String sensorsToChk = "";
-		List<DeviceGroupElement> forSensors = deviceGroupElementRepository.findByDeviceGroupIdAndDeleteTimeIsNull(grpId);
+		List<DeviceGroupElement> forSensors = deviceGroupElementRepository
+				.findByDeviceGroupIdAndDeleteTimeIsNull(grpId);
 		Iterator<DeviceGroupElement> fsit = forSensors.iterator();
 		while (fsit.hasNext()) {
 			DeviceGroupElement elmt = fsit.next();
@@ -411,9 +419,10 @@ public class DeviceGroupElementServiceImpl implements IDeviceGroupElementService
 	}
 
 	@Override
-	public DeviceGroupElement getDeviceGroupElementById(Long id) throws CredentialsException, MalformedURLException, IOException {
+	public DeviceGroupElement getDeviceGroupElementById(Long id)
+			throws CredentialsException, IOException {
 		logger.debug("getDeviceGroupElementById INVOKED on id {}", id);
-		DeviceGroupElement elmt = deviceGroupElementRepository.findOne(id);
+		DeviceGroupElement elmt = deviceGroupElementRepository.findById(id).orElse(new DeviceGroupElement());
 		if ("Sensor".equals(elmt.getElementType())) {
 			Sensor sensor = getSensor(elmt.getElementId());
 			if (sensor == null) {
@@ -426,7 +435,7 @@ public class DeviceGroupElementServiceImpl implements IDeviceGroupElementService
 		return elmt;
 	}
 
-	private Sensor getSensor(String sensorId) throws MalformedURLException, IOException {
+	private Sensor getSensor(String sensorId) throws IOException {
 
 		String response = sensorService.getSensors(request.getParameter("accessToken"), null, null, null, sensorId);
 		/*
@@ -443,7 +452,7 @@ public class DeviceGroupElementServiceImpl implements IDeviceGroupElementService
 
 	}
 
-	private HashMap<String, Sensor> getSensors(String sensorIds) throws MalformedURLException, IOException {
+	private HashMap<String, Sensor> getSensors(String sensorIds) throws IOException {
 
 		String response = sensorService.getSensors(request.getParameter("accessToken"), null, null, null, sensorIds);
 		/*
@@ -464,7 +473,7 @@ public class DeviceGroupElementServiceImpl implements IDeviceGroupElementService
 
 	}
 
-	private HashMap<String, Sensor> getSensors(String sensorIds, String search) throws MalformedURLException, IOException {
+	private HashMap<String, Sensor> getSensors(String sensorIds, String search) throws IOException {
 
 		String response = sensorService.getSensors(request.getParameter("accessToken"), null, null, search, sensorIds);
 		/*

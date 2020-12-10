@@ -69,7 +69,7 @@ public class DeviceGroupElementDeserializer extends StdDeserializer<DeviceGroupE
 					try {
 						kpidata.setInsertTime(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(jnode.get("insertTime").asText()));
 					} catch (ParseException d) {
-						logger.error("Parsing error {}", d);
+						logger.error("Parsing error", d);
 					}
 				}
 			}
@@ -88,7 +88,7 @@ public class DeviceGroupElementDeserializer extends StdDeserializer<DeviceGroupE
 					try {
 						kpidata.setDeleteTime(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(jnode.get("deleteTime").asText()));
 					} catch (ParseException d) {
-						logger.error("Parsing error {}", d);
+						logger.error("Parsing error", d);
 					}
 				}
 			}

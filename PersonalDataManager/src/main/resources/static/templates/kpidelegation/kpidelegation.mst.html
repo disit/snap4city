@@ -1,9 +1,15 @@
 <!-- {{#response}} -->
-<div class="row" style="padding: 15px;">
+<div class="row justify-content-between" style="padding: 15px;">
     <div class="col-sm-2">
         <button id="backButtonToMyKPIDataList" class="btn btn-secondary" style="color: white;padding: 0.5rem;" type="button" onclick="KPIDataTabler.renderTable();">Return
             to My KPI Data List</button>
     </div>
+
+    <div class="col-sm-2">
+		<button id="refreshButtonKPIMetadataList" class="btn btn-secondary"
+			style="color: white; padding: 0.5rem;" type="button"
+			onclick="KPIMDelegationTabler.renderTable(KPIMDelegationTabler.currentKpiId, KPIMDelegationTabler.currentHighLevelType);">Refresh</button>
+	</div>
 
 </div>
 <!-- {{#currentKPIData}} -->
@@ -40,14 +46,14 @@
     <div class="col-nd-2 offset-nd-3">
         <div class="input-group">
             <input type="text" id="inputFilterKPIDelegation" class="form-control" placeholder="Filter Table" aria-label="Filter Table"
-                aria-describedby="button-addon2" max="{{totalPages}}" min="1" \>
+                aria-describedby="button-addon2" onkeypress="return Utility.onKeyEnter(event);" \>
             <div class="input-group-append">
                 <button class="btn btn-outline-secondary" type="button" onclick="$('#inputFilterKPIDelegation').val('');KPIDelegationFilter.setCurrentSearchKey(''); KPIDelegationTabler.renderTable('{{kpiId}}');"
                     id="button-addon2" style="background-color: #eee;">&times;</button>
             </div>
             <div class="input-group-append">
                 <button class="btn btn-outline-secondary" type="button" onclick="KPIDelegationFilter.setCurrentSearchKey($('#inputFilterKPIDelegation').val()); KPIDelegationTabler.renderTable('{{kpiId}}');"
-                    id="button-addon2" style="background-color: #eee;">Search</button>
+                    id="button-search" style="background-color: #eee;">Search</button>
             </div>
         </div>
     </div>

@@ -21,6 +21,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.Formula;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -59,15 +60,25 @@ public class DeviceGroupElement implements Serializable {
 	@Column(name = "device_group_id")
 	private Long deviceGroupId;
 
+	@Transient
 	@Formula("( select g.username from devicegroup g where g.id = device_group_id ) ")
 	private String deviceGroupContact;
 
+	@Transient
+	@Formula("( select g.name from devicegroup g where g.id = device_group_id ) ")
+	private String deviceGroupName;
+
+	// @Transient TODO , make this field transient, so it is not included in tehe SELECT query towards the DB
+	// moreover, remove the findByUsernameAndElementIdAndElementTypeAndDeleteTimeIsNull in DAO
+	// see DeviceGroupElementDAO.java
 	@Formula("( select o.username from devicegroup g, ownership o where g.id = device_group_id and o.elementId = elementId and o.elementType = elementType union select o.username from devicegroup g, kpidata o where g.id = device_group_id and o.id = elementId and 'MyKPI' = elementType )")
 	private String username;
 
+	@Transient
 	@Formula("( select o.elementName from devicegroup g, ownership o where g.id = device_group_id and o.elementId = elementId and o.elementType = elementType union select o.value_name from devicegroup g, kpidata o where g.id = device_group_id and o.id = elementId and 'MyKPI' = elementType )")
 	private String elementName;
 
+	@Transient
 	@Formula("(select case when elementType = 'IOTID' then 'IOT Device' when elementType = 'AppID' then 'IOT App' when elementType = 'DAAppID' then 'Data Analytics' when elementType = 'BrokerID' then 'IOT Broker' when elementType = 'PortiaID' then 'Web Scraping' when elementType = 'ModelID' then 'IOT Device Model' when elementType = 'HeatmapID' then 'Heatmap' when elementType = 'ServiceGraphID' then 'Service Graph' when elementType = 'DashboardID' then 'Dashboard' when elementType = 'ServiceURI' then 'Service URI' else elementType end )")
 	private String elmtTypeLbl;
 
@@ -165,9 +176,18 @@ public class DeviceGroupElement implements Serializable {
 		this.deviceGroupContact = deviceGroupContact;
 	}
 
+	public String getDeviceGroupName() {
+		return deviceGroupName;
+	}
+
+	public void setDeviceGroupName(String deviceGroupName) {
+		this.deviceGroupName = deviceGroupName;
+	}
+
 	@Override
 	public String toString() {
-		return "DeviceGroupElement [id=" + id + ", insertTime=" + insertTime + ", deleteTime=" + deleteTime + ", deviceGroupId=" + deviceGroupId + ", elementId=" + elementId + ", elementType=" + elementType + "]";
+		return "DeviceGroupElement [id=" + id + ", insertTime=" + insertTime + ", deleteTime=" + deleteTime + ", deviceGroupId=" + deviceGroupId + ", deviceGroupName=" + deviceGroupName + ", elementId=" + elementId + ", elementType="
+				+ elementType + "]";
 	}
 
 }

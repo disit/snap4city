@@ -22,8 +22,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface KPIMetadataDAO extends JpaRepository<KPIMetadata, Long>, KPIMetadataDAOCustom {
-
-	KPIMetadata findOne(long id);
 	
 	Page<KPIMetadata> findAll(Pageable pageable);
 	

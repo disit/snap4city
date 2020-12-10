@@ -121,7 +121,7 @@ public class UserController {
 				return new ResponseEntity<>(datas, HttpStatus.OK);
 			}
 		} catch (DelegationNotFoundException | NoSuchMessageException | DataNotValidException d) {
-			logger.error("Delegation not found {}", d);
+			logger.error("Delegation not found", d);
 
 			activityService.saveActivityViolationFromUsername(username, sourceRequest, variableName, motivation, ActivityAccessType.READ,
 					request.getContextPath() + "?" + request.getQueryString(), d.getMessage(), d, request.getRemoteAddr());
@@ -135,7 +135,7 @@ public class UserController {
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (ParseException e) {
-			logger.error("Parsing error {}", e);
+			logger.error("Parsing error ", e);
 
 			activityService.saveActivityViolationFromUsername(username, sourceRequest, variableName, motivation, ActivityAccessType.READ,
 					request.getContextPath() + "?" + request.getQueryString(), e.getMessage(), e, request.getRemoteAddr());
@@ -168,7 +168,7 @@ public class UserController {
 
 			return new ResponseEntity<>(newData, HttpStatus.OK);
 		} catch (DataNotValidException d) {
-			logger.error("Data not valid {}", d);
+			logger.error("Data not valid", d);
 
 			activityService.saveActivityViolationFromUsername(username, sourceRequest, null, null, ActivityAccessType.READ, request.getContextPath() + "?" + request.getQueryString(),
 					d.getMessage(), d, request.getRemoteAddr());
@@ -336,7 +336,7 @@ public class UserController {
 				return new ResponseEntity<>(delegations, HttpStatus.OK);
 			}
 		} catch (LDAPException le) {
-			logger.error("LDAP not valid {}", le);
+			logger.error("LDAP not valid ", le);
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) le.getMessage());
 		} catch (CredentialsException d) {
@@ -432,7 +432,7 @@ public class UserController {
 
 			return new ResponseEntity<>(newDelegation, HttpStatus.OK);
 		} catch (DelegationNotValidException de) {
-			logger.error("Delegation not valid {}", de);
+			logger.error("Delegation not valid ", de);
 
 			activityService.saveActivityViolationFromUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), null, null, null, ActivityAccessType.WRITE,
 					request.getRequestURI() + "?" + request.getQueryString(), de.getMessage(), de, request.getRemoteAddr());
@@ -473,7 +473,7 @@ public class UserController {
 
 			return new ResponseEntity<>(newDelegation, HttpStatus.OK);
 		} catch (DelegationNotValidException de) {
-			logger.error("Delegation not valid {}", de);
+			logger.error("Delegation not valid ", de);
 
 			activityService.saveActivityViolationFromUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), null, null, null, ActivityAccessType.WRITE,
 					request.getRequestURI() + "?" + request.getQueryString(), de.getMessage(), de, request.getRemoteAddr());
@@ -513,7 +513,7 @@ public class UserController {
 
 			return new ResponseEntity<>(HttpStatus.OK);
 		} catch (DelegationNotValidException de) {
-			logger.error("Delegation not valid {}", de);
+			logger.error("Delegation not valid ", de);
 
 			activityService.saveActivityViolationFromUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), null, null, null, ActivityAccessType.DELETE,
 					request.getRequestURI() + "?" + request.getQueryString(), de.getMessage(), de, request.getRemoteAddr());
@@ -559,7 +559,7 @@ public class UserController {
 		try {
 			return new ResponseEntity<>(credentialService.getOrganization(lang), HttpStatus.OK);
 		} catch (NoSuchMessageException d) {
-			logger.error("Delegation not found {}", d);
+			logger.error("Delegation not found", d);
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		}
 	}
@@ -588,7 +588,7 @@ public class UserController {
 
 			return new ResponseEntity<>(HttpStatus.OK);
 		} catch (DataNotValidException d) {
-			logger.error("Data not valid {}", d);
+			logger.error("Data not valid", d);
 
 			activityService.saveActivityViolationFromUsername(username, sourceRequest, null, null, ActivityAccessType.DELETE, request.getContextPath() + "?" + request.getQueryString(),
 					d.getMessage(), d, request.getRemoteAddr());

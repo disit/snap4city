@@ -46,7 +46,9 @@ public class KPIValueDeserializer extends StdDeserializer<KPIValue> {
 		KPIValue kpivalues = new KPIValue();
 
 		if (jnode.get("id") != null) {
-			kpivalues.setId(jnode.get("id").asLong());
+			if (jnode.get("id").asLong() != 0) {
+				kpivalues.setId(jnode.get("id").asLong());
+			}
 		}
 		if (jnode.get("kpiId") != null) {
 			kpivalues.setKpiId(jnode.get("kpiId").asLong());
@@ -85,7 +87,9 @@ public class KPIValueDeserializer extends StdDeserializer<KPIValue> {
 				}
 			}
 		}
-
+		if (jnode.get("value_str") != null) {
+			kpivalues.setValue(jnode.get("value_str").asText());
+		}
 		if (jnode.get("value") != null) {
 			kpivalues.setValue(jnode.get("value").asText());
 		}

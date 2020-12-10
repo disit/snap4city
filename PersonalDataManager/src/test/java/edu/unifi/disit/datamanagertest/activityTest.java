@@ -88,12 +88,19 @@ public class activityTest {
 
 	@SuppressWarnings("resource")
 	private String get(String tosearch) throws IOException {
-		BufferedReader br = new BufferedReader(new FileReader("application-local-test.properties"));
-		String line;
-		while ((line = br.readLine()) != null) {
-			Integer index;
-			if ((index = line.indexOf(tosearch)) != -1) {
-				return line.substring(index + tosearch.length());
+		BufferedReader br = null;
+		try {
+			br = new BufferedReader(new FileReader("target/test-classes/application-local-test.properties"));
+		} catch (Exception e) {
+			br = new BufferedReader(new FileReader("application-local-test.properties"));
+		}
+		if (br != null) {
+			String line;
+			while ((line = br.readLine()) != null) {
+				Integer index;
+				if ((index = line.indexOf(tosearch)) != -1) {
+					return line.substring(index + tosearch.length());
+				}
 			}
 		}
 		throw new IOException(tosearch + " not found");

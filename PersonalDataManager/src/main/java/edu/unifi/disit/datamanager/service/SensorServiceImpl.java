@@ -29,24 +29,24 @@ public class SensorServiceImpl implements ISensorService {
 
 	// private static final Logger logger = LogManager.getLogger();
 
-	@Value("${grpsensors.datasource.url}")
+        @Value("${grpsensors.datasource.url}")
 	private String baseurl;
 
-	@Override
-	public String getSensors(String accessToken, String pageNum, String pageSize, String search, String id) throws IOException {
-		String pPageNum = pageNum != null ? pageNum : "1";
-		String pPageSize = pageSize != null ? pageSize : "10";
-		String pSearch = search != null ? search : "";
-		String pId = id != null ? id : "0";
+    @Override
+    public String getSensors(String accessToken, String pageNum, String pageSize, String search, String id) throws IOException {
+        String pPageNum = pageNum != null ? pageNum : "1";
+        String pPageSize = pageSize != null ? pageSize : "10";
+        String pSearch = search != null ? search : "";
+        String pId = id != null ? id : "0";
 		URL url = new URL(baseurl + "?accessToken=" + accessToken + "&pageNum=" + pPageNum + "&pageSize=" + pPageSize + "&search=" + pSearch + "&id=" + pId);
-		URLConnection c = url.openConnection();
-		BufferedReader in = new BufferedReader(new InputStreamReader(c.getInputStream()));
-		String response = "";
-		String inputLine;
+        URLConnection c = url.openConnection();
+        BufferedReader in = new BufferedReader(new InputStreamReader(c.getInputStream()));
+        String response = "";
+        String inputLine;
 		while ((inputLine = in.readLine()) != null)
 			response += inputLine;
 		in.close();
 		return response;
-	}
+    }
 
 }

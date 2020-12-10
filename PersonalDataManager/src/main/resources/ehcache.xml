@@ -15,7 +15,7 @@
     	<jsr107:mbeans enable-management="true" enable-statistics="true"/>
 	</cache>
     
-    <cache alias="kpidata">
+    <cache alias="kpidatafindAllFilteredNoPages">
 	    <expiry>
         	<ttl unit="seconds">2</ttl>
 	    </expiry>
@@ -27,10 +27,30 @@
     
     <cache alias="deviceGroupElementByDeviceGroupId">
 	    <expiry>
+        	<ttl unit="minutes">17</ttl>
+	    </expiry>
+    	<resources>
+            <offheap unit="MB">100</offheap>
+    	</resources>
+    	<jsr107:mbeans enable-management="true" enable-statistics="true"/>
+	</cache>
+
+    <cache alias="LDAPgetGroupAndOUnames">
+	    <expiry>
         	<ttl unit="minutes">10</ttl>
 	    </expiry>
     	<resources>
             <offheap unit="MB">10</offheap>
+    	</resources>
+    	<jsr107:mbeans enable-management="true" enable-statistics="true"/>
+	</cache>
+
+    <cache alias="OWNERSHIPfindByElementIdAndDeletedIsNull">
+	    <expiry>
+        	<ttl unit="minutes">10</ttl>
+	    </expiry>
+    	<resources>
+            <offheap unit="MB">100</offheap>
     	</resources>
     	<jsr107:mbeans enable-management="true" enable-statistics="true"/>
 	</cache>

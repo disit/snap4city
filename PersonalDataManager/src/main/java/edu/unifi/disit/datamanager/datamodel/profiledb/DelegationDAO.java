@@ -26,20 +26,20 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 // all with contrains: AndDeleteTimeIsNull
 public interface DelegationDAO extends JpaRepository<Delegation, Long>, DelegationDAOCustom {
-
+	
 	List<Delegation> findByElementIdAndDeleteTimeIsNull(String elementId);
 
 	List<Delegation> findByElementIdAndElementTypeAndDeleteTimeIsNull(String elementId, String elementType);
 
-	List<Delegation> findByElementIdAndDeleteTimeIsNullAndUsernameDelegatedNotLike(String elementId, String usernameDelegated);
+	List<Delegation> findByElementIdAndElementTypeAndDeleteTimeIsNullAndUsernameDelegatedNotLike(String elementId, String elementType, String usernameDelegated);
 
 	Delegation findByIdAndDeleteTimeIsNull(Long delegationId);
 
 	List<Delegation> findByDeleteTimeBefore(Date date);// used for proper delete
 
-	Page<Delegation> findByElementIdAndDeleteTimeIsNull(String elementId, Pageable pageable);
+	Page<Delegation> findByElementIdAndElementTypeAndDeleteTimeIsNull(String elementId, String elementType, Pageable pageable);
 
-	Page<Delegation> findByElementIdAndDeleteTimeIsNullAndUsernameDelegatedNotLike(String elementId, String usernameDelegated, Pageable pageable);
+	Page<Delegation> findByElementIdAndElementTypeAndDeleteTimeIsNullAndUsernameDelegatedNotLike(String elementId, String elementType, String usernameDelegated, Pageable pageable);
 
 	@Modifying
 	@Transactional
@@ -49,4 +49,6 @@ public interface DelegationDAO extends JpaRepository<Delegation, Long>, Delegati
 	Page<Delegation> findByElementIdAndDeleteTimeIsNullAndUsernameDelegatedNotLikeAndUsernameDelegatedLike(String elementId, String usernameDelegated, String searchKey, Pageable pageable);
 
 	List<Delegation> findByElementIdAndDeleteTimeIsNullAndUsernameDelegatedNotLikeAndUsernameDelegatedLike(String elementId, String usernameDelegated, String searchKey);
+
+	
 }

@@ -151,36 +151,36 @@ public class DeviceGroupController {
 			if (pageNumber != -1) {
 				if (credentialService.isRoot(lang)) {
 					if (searchKey.equals("") && highLevelType.equals("")) {
-						pageDeviceGroups = deviceGroupService.findAll(new PageRequest(pageNumber, pageSize,
-								new Sort(Direction.fromString(sortDirection), sortBy)));
+						pageDeviceGroups = deviceGroupService.findAll(PageRequest.of(pageNumber, pageSize,
+								Sort.by(Direction.fromString(sortDirection), sortBy)));
 					} else if (!searchKey.equals("") && !highLevelType.equals("")) {
 						pageDeviceGroups = deviceGroupService.findByHighLevelTypeFiltered(highLevelType, searchKey,
-								new PageRequest(pageNumber, pageSize,
-										new Sort(Direction.fromString(sortDirection), sortBy)));
+								PageRequest.of(pageNumber, pageSize,
+										Sort.by(Direction.fromString(sortDirection), sortBy)));
 					} else if (highLevelType.equals("")) {
-						pageDeviceGroups = deviceGroupService.findAllFiltered(searchKey, new PageRequest(pageNumber, pageSize,
-								new Sort(Direction.fromString(sortDirection), sortBy)));
+						pageDeviceGroups = deviceGroupService.findAllFiltered(searchKey, PageRequest.of(pageNumber, pageSize,
+								Sort.by(Direction.fromString(sortDirection), sortBy)));
 					} else {
-						pageDeviceGroups = deviceGroupService.findByHighLevelType(highLevelType, new PageRequest(pageNumber,
-								pageSize, new Sort(Direction.fromString(sortDirection), sortBy)));
+						pageDeviceGroups = deviceGroupService.findByHighLevelType(highLevelType, PageRequest.of(pageNumber,
+								pageSize, Sort.by(Direction.fromString(sortDirection), sortBy)));
 					}
 				} else {
 					if (searchKey.equals("") && highLevelType.equals("")) {
 						pageDeviceGroups = deviceGroupService.findByUsername(credentialService.getLoggedUsername(lang),
-								new PageRequest(pageNumber, pageSize,
-										new Sort(Direction.fromString(sortDirection), sortBy)));
+								PageRequest.of(pageNumber, pageSize,
+										Sort.by(Direction.fromString(sortDirection), sortBy)));
 					} else if (!searchKey.equals("") && !highLevelType.equals("")) {
 						pageDeviceGroups = deviceGroupService.findByUsernameByHighLevelTypeFiltered(
-								credentialService.getLoggedUsername(lang), highLevelType, searchKey, new PageRequest(
-										pageNumber, pageSize, new Sort(Direction.fromString(sortDirection), sortBy)));
+								credentialService.getLoggedUsername(lang), highLevelType, searchKey, PageRequest.of(
+										pageNumber, pageSize, Sort.by(Direction.fromString(sortDirection), sortBy)));
 					} else if (highLevelType.equals("")) {
 						pageDeviceGroups = deviceGroupService.findByUsernameFiltered(credentialService.getLoggedUsername(lang),
-								searchKey, new PageRequest(pageNumber, pageSize,
-										new Sort(Direction.fromString(sortDirection), sortBy)));
+								searchKey, PageRequest.of(pageNumber, pageSize,
+										Sort.by(Direction.fromString(sortDirection), sortBy)));
 					} else {
 						pageDeviceGroups = deviceGroupService.findByUsernameByHighLevelType(
-								credentialService.getLoggedUsername(lang), highLevelType, new PageRequest(pageNumber,
-										pageSize, new Sort(Direction.fromString(sortDirection), sortBy)));
+								credentialService.getLoggedUsername(lang), highLevelType, PageRequest.of(pageNumber,
+										pageSize, Sort.by(Direction.fromString(sortDirection), sortBy)));
 					}
 				}
 			} else {
@@ -299,12 +299,12 @@ public class DeviceGroupController {
 			if (pageNumber != -1) {
 				if (credentialService.isRoot(lang)) {
 					pageKpiData = deviceGroupService.findByUsernameDelegatedByHighLevelTypeFiltered("ANONYMOUS", "My",
-							highLevelType, searchKey, new PageRequest(pageNumber, pageSize,
-									new Sort(Direction.fromString(sortDirection), sortBy)));
+							highLevelType, searchKey, PageRequest.of(pageNumber, pageSize,
+									Sort.by(Direction.fromString(sortDirection), sortBy)));
 				} else {
 					pageKpiData = deviceGroupService.findByUsernameDelegatedByHighLevelTypeByOrganizationFiltered(
-							"ANONYMOUS", "My", highLevelType, searchKey, new PageRequest(pageNumber, pageSize,
-									new Sort(Direction.fromString(sortDirection), sortBy)));
+							"ANONYMOUS", "My", highLevelType, searchKey, PageRequest.of(pageNumber, pageSize,
+									Sort.by(Direction.fromString(sortDirection), sortBy)));
 				}
 			} else {
 				if (credentialService.isRoot(lang)) {
@@ -402,7 +402,7 @@ public class DeviceGroupController {
 
 				pageKpiData = deviceGroupService.findByUsernameDelegatedByHighLevelTypeFiltered("ANONYMOUS", "My",
 						highLevelType, searchKey,
-						new PageRequest(pageNumber, pageSize, new Sort(Direction.fromString(sortDirection), sortBy)));
+						PageRequest.of(pageNumber, pageSize, Sort.by(Direction.fromString(sortDirection), sortBy)));
 
 			} else {
 
@@ -497,7 +497,7 @@ public class DeviceGroupController {
 			if (pageNumber != -1) {
 				pageKpiData = deviceGroupService.findByUsernameDelegatedByHighLevelTypeByOrganizationFiltered("ANONYMOUS",
 						"My", highLevelType, searchKey,
-						new PageRequest(pageNumber, pageSize, new Sort(Direction.fromString(sortDirection), sortBy)));
+						PageRequest.of(pageNumber, pageSize, Sort.by(Direction.fromString(sortDirection), sortBy)));
 
 			} else {
 				listKpiData = deviceGroupService.findByUsernameDelegatedByHighLevelTypeByOrganizationFilteredNoPages(
@@ -590,7 +590,7 @@ public class DeviceGroupController {
 			if (pageNumber != -1) {
 				pageKpiData = deviceGroupService.findByUsernameDelegatedByHighLevelTypeFiltered(
 						credentialService.getLoggedUsername(lang), "My", highLevelType, searchKey,
-						new PageRequest(pageNumber, pageSize, new Sort(Direction.fromString(sortDirection), sortBy)));
+						PageRequest.of(pageNumber, pageSize, Sort.by(Direction.fromString(sortDirection), sortBy)));
 			} else {
 				listKpiData = deviceGroupService.findByUsernameDelegatedByHighLevelTypeFilteredNoPages(
 						credentialService.getLoggedUsername(lang), "My", highLevelType, searchKey);
@@ -717,7 +717,7 @@ public class DeviceGroupController {
 							sourceRequest, sourceId, newGrpData.getId(), ActivityAccessType.WRITE,
 							KPIActivityDomainType.CHANGEOWNERSHIP);
 
-					deviceGroupService.makeDeviceGroupPrivate(newGrpData.getId(), lang);
+					deviceGroupService.makeDeviceGroupPrivate(newGrpData.getId(),newGrpData.getHighLevelType(), lang);
 					deviceGroupService.makeDeviceGroupPublic(newGrpData.getUsername(), newGrpData.getId(),
 							newGrpData.getHighLevelType(), lang);
 				} else {
@@ -725,14 +725,14 @@ public class DeviceGroupController {
 							sourceRequest, sourceId, newGrpData.getId(), ActivityAccessType.WRITE,
 							KPIActivityDomainType.CHANGEOWNERSHIP);
 
-					deviceGroupService.makeDeviceGroupPrivate(newGrpData.getId(), lang);
+					deviceGroupService.makeDeviceGroupPrivate(newGrpData.getId(),newGrpData.getHighLevelType(), lang);
 				}
 			}
 
 			if (!newGrpData.getUsername().equals(oldUsername)) {
 				kpiActivityService.saveActivityFromUsername(credentialService.getLoggedUsername(lang), sourceRequest,
 						sourceId, newGrpData.getId(), ActivityAccessType.WRITE, KPIActivityDomainType.CHANGEOWNER);
-				deviceGroupService.updateUsernameDelegatorOnOwnershipChange(newGrpData.getUsername(), newGrpData.getId(),
+				deviceGroupService.updateUsernameDelegatorOnOwnershipChange(newGrpData.getUsername(), newGrpData.getId(),newGrpData.getHighLevelType(),
 						lang);
 			}
 

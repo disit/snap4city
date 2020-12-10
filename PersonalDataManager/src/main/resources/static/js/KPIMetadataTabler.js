@@ -3,13 +3,17 @@ var KPIMetadataTabler = {
     currentKpiId: null,
 
     renderTable: function (kpiId) {
+        if (KPIMetadataTabler.currentKpiId != kpiId) {
+            KPIMetadataPager.currentPage = 0;
+        }
         KPIMetadataTabler.currentKpiId = kpiId;
         KPIEditor.keycloak.updateToken(30).success(function () {
             var query = QueryManager.createGetKPIMetadataTableQuery(kpiId, KPIMetadataPager.currentPage, KPIMetadataPager.currentSize, KPIMetadataSorter.currentSortDirection, KPIMetadataSorter.currentSortBy, KPIMetadataFilter.currentSearchKey);
             APIClient.executeGetQuery(query, KPIEditor.keycloak.token, KPIMetadataTabler.successQuery, KPIMetadataTabler.errorQuery);
-        }).error(function () {
-            var query = QueryManager.createGetKPIMetadataTableQuery(kpiId, KPIMetadataPager.currentPage, KPIMetadataPager.currentSize, KPIMetadataSorter.currentSortDirection, KPIMetadataSorter.currentSortBy, KPIMetadataFilter.currentSearchKey);
-            APIClient.executeGetQuery(query, Authentication.refreshTokenGetAccessToken(), KPIMetadataTabler.successQuery, KPIMetadataTabler.errorQuery);
+        }).error(function (_error) {
+            console.log("updateToken error: " + _error);
+            /* var query = QueryManager.createGetKPIMetadataTableQuery(kpiId, KPIMetadataPager.currentPage, KPIMetadataPager.currentSize, KPIMetadataSorter.currentSortDirection, KPIMetadataSorter.currentSortBy, KPIMetadataFilter.currentSearchKey);
+            APIClient.executeGetQuery(query, Authentication.refreshTokenGetAccessToken(), KPIMetadataTabler.successQuery, KPIMetadataTabler.errorQuery);*/
         });
     },
 
@@ -87,9 +91,10 @@ var KPIMetadataTabler = {
             KPIEditor.keycloak.updateToken(30).success(function () {
                 var query = QueryManager.createGetKPIMetadataByIdQuery(_kpiId, _id);
                 APIClient.executeGetQuery(query, KPIEditor.keycloak.token, KPIMetadataTabler.successEditKPIMetadataModal, KPIMetadataTabler.errorQuery);
-            }).error(function () {
-                var query = QueryManager.createGetKPIMetadataByIdQuery(_kpiId, _id);
-                APIClient.executeGetQuery(query, Authentication.refreshTokenGetAccessToken(), KPIMetadataTabler.successEditKPIMetadataModal, KPIMetadataTabler.errorQuery);
+            }).error(function (_error) {
+                console.log("updateToken error: " + _error);
+                /* var query = QueryManager.createGetKPIMetadataByIdQuery(_kpiId, _id);
+                    APIClient.executeGetQuery(query, Authentication.refreshTokenGetAccessToken(), KPIMetadataTabler.successEditKPIMetadataModal, KPIMetadataTabler.errorQuery);*/
             });
         } else {
             KPIMetadataTabler.successEditKPIMetadataModal(null);
@@ -123,7 +128,7 @@ var KPIMetadataTabler = {
     },
 
     saveKPIMetadata: function () {
-        kpiMetadata = {
+        let kpiMetadata = {
             "value": $("#inputValueKPIMetadataEdit").val(),
             "key": $("#inputKeyKPIMetadataEdit").val()
 
@@ -142,18 +147,20 @@ var KPIMetadataTabler = {
         if (typeof kpiMetadata.id != "undefined") {
             KPIEditor.keycloak.updateToken(30).success(function () {
                 var query = QueryManager.createPatchKPIMetadataQuery(kpiMetadata.kpiId, kpiMetadata.id);
-                APIClient.executePatchQuery(query, kpiMetadata, KPIEditor.keycloak.token,  KPIMetadataTabler.successSaveKPIMetadata, KPIMetadataTabler.errorQuery);
-            }).error(function () {
-                var query = QueryManager.createPatchKPIMetadataQuery(kpiMetadata.kpiId, kpiMetadata.id);
-                APIClient.executePatchQuery(query, kpiMetadata, Authentication.refreshTokenGetAccessToken(),  KPIMetadataTabler.successSaveKPIMetadata, KPIMetadataTabler.errorQuery);
+                APIClient.executePatchQuery(query, kpiMetadata, KPIEditor.keycloak.token, KPIMetadataTabler.successSaveKPIMetadata, KPIMetadataTabler.errorQuery);
+            }).error(function (_error) {
+                console.log("updateToken error: " + _error);
+                /* var query = QueryManager.createPatchKPIMetadataQuery(kpiMetadata.kpiId, kpiMetadata.id);
+                    APIClient.executePatchQuery(query, kpiMetadata, Authentication.refreshTokenGetAccessToken(),  KPIMetadataTabler.successSaveKPIMetadata, KPIMetadataTabler.errorQuery);*/
             });
         } else {
             KPIEditor.keycloak.updateToken(30).success(function () {
                 var query = QueryManager.createPostKPIMetadataQuery(kpiMetadata.kpiId);
-                APIClient.executePostQuery(query, kpiMetadata, KPIEditor.keycloak.token,  KPIMetadataTabler.successSaveKPIMetadata, KPIMetadataTabler.errorQuery);
-            }).error(function () {
-                var query = QueryManager.createPostKPIMetadataQuery(kpiMetadata.kpiId);
-                APIClient.executePostQuery(query, kpiMetadata, Authentication.refreshTokenGetAccessToken(),  KPIMetadataTabler.successSaveKPIMetadata, KPIMetadataTabler.errorQuery);
+                APIClient.executePostQuery(query, kpiMetadata, KPIEditor.keycloak.token, KPIMetadataTabler.successSaveKPIMetadata, KPIMetadataTabler.errorQuery);
+            }).error(function (_error) {
+                console.log("updateToken error: " + _error);
+                /* var query = QueryManager.createPostKPIMetadataQuery(kpiMetadata.kpiId);
+                    APIClient.executePostQuery(query, kpiMetadata, Authentication.refreshTokenGetAccessToken(),  KPIMetadataTabler.successSaveKPIMetadata, KPIMetadataTabler.errorQuery);*/
             });
         }
     },
@@ -162,9 +169,10 @@ var KPIMetadataTabler = {
         KPIEditor.keycloak.updateToken(30).success(function () {
             var query = QueryManager.createDeleteKPIMetadataQuery(_kpiId, _id);
             APIClient.executeDeleteQuery(query, KPIEditor.keycloak.token, KPIMetadataTabler.successSaveKPIMetadata, KPIMetadataTabler.errorQuery);
-        }).error(function () {
-            var query = QueryManager.createDeleteKPIMetadataQuery(_kpiId, _id);
-            APIClient.executeDeleteQuery(query, Authentication.refreshTokenGetAccessToken(), KPIMetadataTabler.successSaveKPIMetadata, KPIMetadataTabler.errorQuery);
+        }).error(function (_error) {
+            console.log("updateToken error: " + _error);
+            /* var query = QueryManager.createDeleteKPIMetadataQuery(_kpiId, _id);
+            APIClient.executeDeleteQuery(query, Authentication.refreshTokenGetAccessToken(), KPIMetadataTabler.successSaveKPIMetadata, KPIMetadataTabler.errorQuery);*/
         });
     },
 

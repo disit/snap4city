@@ -21,11 +21,12 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Formula;
+import org.springframework.format.annotation.DateTimeFormat;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import org.hibernate.annotations.Formula;
-import org.springframework.format.annotation.DateTimeFormat;
 
 @JsonSerialize(using = DeviceGroupSerializer.class)
 @JsonDeserialize(using = DeviceGroupDeserializer.class)

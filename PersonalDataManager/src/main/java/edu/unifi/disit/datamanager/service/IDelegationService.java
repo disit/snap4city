@@ -55,14 +55,16 @@ public interface IDelegationService {
 
 	Delegation getDelegationById(Long id, Locale lang) throws CredentialsException;
 
-	Page<Delegation> findByElementId(String elementId, Pageable pageable) throws CredentialsException;
-
-	Page<Delegation> findByElementIdWithoutAnonymous(String elementId, Pageable pageable)
+	Page<Delegation> findByElementIdByElementType(String elementId, String elementType, Pageable pageable)
 			throws CredentialsException;
 
-	List<Delegation> findByElementIdNoPages(String elementId) throws CredentialsException;
+	Page<Delegation> findByElementIdByElementTypeWithoutAnonymous(String elementId, String elementType,
+			Pageable pageable) throws CredentialsException;
 
-	List<Delegation> findByElementIdNoPagesWithoutAnonymous(String elementId)
+	List<Delegation> findByElementIdByElementTypeNoPages(String elementId, String elementType)
+			throws CredentialsException;
+
+	List<Delegation> findByElementIdByElementTypeNoPagesWithoutAnonymous(String elementId, String elementType)
 			throws CredentialsException;
 
 	Page<Delegation> findByElementIdWithoutAnonymousFiltered(String elementId, String searchKey, PageRequest pageRequest);
@@ -70,4 +72,13 @@ public interface IDelegationService {
 	List<Delegation> findByElementIdNoPagesWithoutAnonymousFiltered(String elementId, String searchKey);
 
 	List<Delegation> getAllDelegations(String variableName, String motivation, String elementType, Locale lang) throws CredentialsException;
+
+	
+
+	
+
+	
+
+	
+
 }

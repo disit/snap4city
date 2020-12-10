@@ -29,6 +29,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import edu.unifi.disit.datamanager.datamodel.dto.KPIDataDTO;
+
 @JsonSerialize(using = KPIDataSerializer.class)
 @JsonDeserialize(using = KPIDataDeserializer.class)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -173,43 +175,24 @@ public class KPIData implements Comparable<KPIData>, Serializable {
 			String widgets, String parameters, String healtiness, String microAppExtServIcon, String ownership,
 			String description, String info, String latitude, String longitude, Date insertTime, Date deleteTime,
 			String dbValuesType, String dbValuesLink) {
-		super();
+		this(highLevelType, nature, subNature, valueName, valueType,
+		valueUnit, dataType, instanceUri, getInstances, lastDate, lastValue,
+		lastCheck, lastLatitude, lastLongitude, metric, savedDirect,
+		kbBased, smBased, username, organizations, appId, appName,
+		widgets, parameters, healtiness, microAppExtServIcon, ownership,
+		description, info, latitude, longitude, insertTime, deleteTime,
+		dbValuesType, dbValuesLink);
 		this.id = id;
-		this.highLevelType = highLevelType;
-		this.nature = nature;
-		this.subNature = subNature;
-		this.valueName = valueName;
-		this.valueType = valueType;
-		this.valueUnit = valueUnit;
-		this.dataType = dataType;
-		this.instanceUri = instanceUri;
-		this.getInstances = getInstances;
-		this.lastDate = lastDate;
-		this.lastValue = lastValue;
-		this.lastCheck = lastCheck;
-		this.lastLatitude = lastLatitude;
-		this.lastLongitude = lastLongitude;
-		this.metric = metric;
-		this.savedDirect = savedDirect;
-		this.kbBased = kbBased;
-		this.smBased = smBased;
-		this.username = username;
-		this.organizations = organizations;
-		this.appId = appId;
-		this.appName = appName;
-		this.widgets = widgets;
-		this.parameters = parameters;
-		this.healthiness = healtiness;
-		this.microAppExtServIcon = microAppExtServIcon;
-		this.ownership = ownership;
-		this.description = description;
-		this.info = info;
-		this.latitude = latitude;
-		this.longitude = longitude;
-		this.insertTime = insertTime;
-		this.deleteTime = deleteTime;
-		this.dbValuesType = dbValuesType;
-		this.dbValuesLink = dbValuesLink;
+	}
+	
+	public KPIData(KPIDataDTO dto) {
+		this(dto.getId(), dto.getHighLevelType(), dto.getNature(), dto.getSubNature(), dto.getValueName(), dto.getValueType()
+		, dto.getValueUnit(), dto.getDataType(), dto.getInstanceUri(), dto.getGetInstances(), dto.getLastDate(), dto.getLastValue()
+		, dto.getLastCheck(), dto.getLastLatitude(), dto.getLastLongitude(), dto.getMetric(), dto.getSavedDirect(), dto.getKbBased()
+		, dto.getSmBased(), dto.getUsername(), dto.getOrganizations(), dto.getAppId(), dto.getAppName(), dto.getWidgets()
+		, dto.getParameters(), dto.getHealthiness(), dto.getMicroAppExtServIcon(), dto.getOwnership(), dto.getDescription()
+		, dto.getInfo(), dto.getLatitude(), dto.getLongitude(), dto.getInsertTime(), dto.getDeleteTime(), dto.getDbValuesType()
+		, dto.getDbValuesLink());
 	}
 
 	public Long getId() {

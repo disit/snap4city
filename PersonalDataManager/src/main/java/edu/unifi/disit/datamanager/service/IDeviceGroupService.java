@@ -23,7 +23,6 @@ import org.springframework.data.domain.Pageable;
 import edu.unifi.disit.datamanager.exception.CredentialsException;
 import edu.unifi.disit.datamanager.exception.DelegationNotValidException;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import org.springframework.data.domain.PageRequest;
 
 public interface IDeviceGroupService {
@@ -32,57 +31,61 @@ public interface IDeviceGroupService {
     
     boolean makeDeviceGroupPublic(String username, Long grpId, String elementType, Locale lang) throws DelegationNotValidException, CredentialsException;
 
-    boolean makeDeviceGroupPrivate(Long grpId, Locale lang) throws DelegationNotValidException, CredentialsException;
+    boolean makeDeviceGroupPrivate(Long grpId, String elementType, Locale lang) throws DelegationNotValidException, CredentialsException;
 
-    Page<DeviceGroup> findAll(PageRequest pageRequest) throws CredentialsException, MalformedURLException, IOException;
+    Page<DeviceGroup> findAll(Pageable pageable) throws CredentialsException, IOException;
 
-    Page<DeviceGroup> findByHighLevelTypeFiltered(String highLevelType, String searchKey, PageRequest pageRequest) throws CredentialsException, MalformedURLException, IOException;
+    Page<DeviceGroup> findByHighLevelTypeFiltered(String highLevelType, String searchKey, PageRequest pageRequest) throws CredentialsException, IOException;
 
-    Page<DeviceGroup> findAllFiltered(String searchKey, PageRequest pageRequest) throws CredentialsException, MalformedURLException, IOException;
+    Page<DeviceGroup> findAllFiltered(String searchKey, PageRequest pageRequest) throws CredentialsException, IOException;
 
-    Page<DeviceGroup> findByHighLevelType(String highLevelType, PageRequest pageRequest) throws CredentialsException, MalformedURLException, IOException;
+    Page<DeviceGroup> findByHighLevelType(String highLevelType, PageRequest pageRequest) throws CredentialsException, IOException;
 
-    Page<DeviceGroup> findByUsername(String loggedUsername, PageRequest pageRequest) throws CredentialsException, MalformedURLException, IOException;
+    Page<DeviceGroup> findByUsername(String loggedUsername, PageRequest pageRequest) throws CredentialsException, IOException;
 
-    Page<DeviceGroup> findByUsernameByHighLevelTypeFiltered(String loggedUsername, String highLevelType, String searchKey, PageRequest pageRequest) throws CredentialsException, MalformedURLException, IOException;
+    Page<DeviceGroup> findByUsernameByHighLevelTypeFiltered(String loggedUsername, String highLevelType, String searchKey, PageRequest pageRequest) throws CredentialsException, IOException;
 
-    Page<DeviceGroup> findByUsernameFiltered(String loggedUsername, String searchKey, PageRequest pageRequest) throws CredentialsException, MalformedURLException, IOException;
+    Page<DeviceGroup> findByUsernameFiltered(String loggedUsername, String searchKey, PageRequest pageRequest) throws CredentialsException, IOException;
 
-    Page<DeviceGroup> findByUsernameByHighLevelType(String loggedUsername, String highLevelType, PageRequest pageRequest) throws CredentialsException, MalformedURLException, IOException;
+    Page<DeviceGroup> findByUsernameByHighLevelType(String loggedUsername, String highLevelType, PageRequest pageRequest) throws CredentialsException, IOException;
 
-    List<DeviceGroup> findAllNoPages() throws CredentialsException, MalformedURLException, IOException;
+    List<DeviceGroup> findAllNoPages() throws CredentialsException, IOException;
 
-    List<DeviceGroup> findByHighLevelTypeFilteredNoPages(String highLevelType, String searchKey) throws CredentialsException, MalformedURLException, IOException;
+    List<DeviceGroup> findByHighLevelTypeFilteredNoPages(String highLevelType, String searchKey) throws CredentialsException, IOException;
 
-    List<DeviceGroup> findAllFilteredNoPages(String searchKey) throws CredentialsException, MalformedURLException, IOException;
+    List<DeviceGroup> findAllFilteredNoPages(String searchKey) throws CredentialsException, IOException;
 
-    List<DeviceGroup> findByHighLevelTypeNoPages(String highLevelType) throws CredentialsException, MalformedURLException, IOException;
+    List<DeviceGroup> findByHighLevelTypeNoPages(String highLevelType) throws CredentialsException, IOException;
 
-    List<DeviceGroup> findByUsernameNoPages(String loggedUsername) throws CredentialsException, MalformedURLException, IOException;
+    List<DeviceGroup> findByUsernameNoPages(String loggedUsername) throws CredentialsException, IOException;
 
-    List<DeviceGroup> findByUsernameByHighLevelTypeFilteredNoPages(String loggedUsername, String highLevelType, String searchKey) throws CredentialsException, MalformedURLException, IOException;
+    List<DeviceGroup> findByUsernameByHighLevelTypeFilteredNoPages(String loggedUsername, String highLevelType, String searchKey) throws CredentialsException, IOException;
 
-    List<DeviceGroup> findByUsernameFilteredNoPages(String loggedUsername, String searchKey) throws CredentialsException, MalformedURLException, IOException;
+    List<DeviceGroup> findByUsernameFilteredNoPages(String loggedUsername, String searchKey) throws CredentialsException, IOException;
 
-    List<DeviceGroup> findByUsernameByHighLevelTypeNoPages(String loggedUsername, String highLevelType) throws CredentialsException, MalformedURLException, IOException;
+    List<DeviceGroup> findByUsernameByHighLevelTypeNoPages(String loggedUsername, String highLevelType) throws CredentialsException, IOException;
     
     Page<DeviceGroup> findByUsernameDelegatedByHighLevelTypeFiltered(String usernameDelegated, String elementType, String highLevelType,
-                    String searchKey, Pageable pageable) throws CredentialsException, MalformedURLException, IOException;
+                    String searchKey, Pageable pageable) throws CredentialsException, IOException;
 
     List<DeviceGroup> findByUsernameDelegatedByHighLevelTypeFilteredNoPages(String usernameDelegated, String elementType,
-                    String highLevelType, String searchKey) throws CredentialsException, MalformedURLException, IOException;
+                    String highLevelType, String searchKey) throws CredentialsException, IOException;
 
     Page<DeviceGroup> findByUsernameDelegatedByHighLevelTypeByOrganizationFiltered(String usernameDelegated,
-			String elementType, String highLevelType, String searchKey, Pageable pageable) throws CredentialsException, MalformedURLException, IOException;
+			String elementType, String highLevelType, String searchKey, Pageable pageable) throws CredentialsException, IOException;
 
     List<DeviceGroup> findByUsernameDelegatedByHighLevelTypeByOrganizationFilteredNoPages(String usernameDelegated,
-			String elementType, String highLevelType, String searchKey) throws CredentialsException, MalformedURLException, IOException;;
+			String elementType, String highLevelType, String searchKey) throws CredentialsException, IOException;
     
     DeviceGroup getDeviceGroupById(long id, Locale lang, boolean anonymize) throws  IOException, CredentialsException;
     
-    boolean updateUsernameDelegatorOnOwnershipChange(String newOwner, Long kpiId, Locale lang)
+    boolean updateUsernameDelegatorOnOwnershipChange(String newOwner, Long kpiId, String elementType, Locale lang)
 			throws DelegationNotValidException, CredentialsException;
     
     boolean lastUpdatedNow(long grpId);
+
+	
+
+	
     
 }

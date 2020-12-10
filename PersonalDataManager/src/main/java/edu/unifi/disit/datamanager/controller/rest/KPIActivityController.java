@@ -45,6 +45,9 @@ import edu.unifi.disit.datamanager.service.IKPIDataService;
 public class KPIActivityController {
 
 	private static final Logger logger = LogManager.getLogger();
+	private static final String NO_DATA_FOUND = "No data found";
+	private static final String RIGHTS_EXCEPTION = "Rights exception";
+	private static final String WRONG_KPI_DATA = "Wrong KPI Data";
 
 	@Autowired
 	IKPIDataService kpiDataService;
@@ -71,7 +74,7 @@ public class KPIActivityController {
 
 			KPIData kpiData = kpiDataService.getKPIDataById(kpiId, lang, false);
 			if (kpiData == null) {
-				logger.warn("Wrong KPI Data");
+				logger.warn(WRONG_KPI_DATA);
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
@@ -82,7 +85,7 @@ public class KPIActivityController {
 			KPIActivity kpiActivity = kpiActivityService.getKPIActivityById(id, lang);
 
 			if (kpiActivity == null) {
-				logger.info("No data found");
+				logger.info(NO_DATA_FOUND);
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else {
@@ -91,7 +94,7 @@ public class KPIActivityController {
 				return new ResponseEntity<>(kpiActivity, HttpStatus.OK);
 			}
 		} catch (CredentialsException d) {
-			logger.warn("Rights exception", d);
+			logger.warn(RIGHTS_EXCEPTION, d);
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
@@ -111,7 +114,7 @@ public class KPIActivityController {
 
 			KPIData kpiData = kpiDataService.getKPIDataById(kpiId, lang, true);
 			if (kpiData == null) {
-				logger.warn("Wrong KPI Data");
+				logger.warn(WRONG_KPI_DATA);
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (kpiData.getOwnership().equals("private") || !kpiData.getOwnership().equals("public")) {
@@ -121,7 +124,7 @@ public class KPIActivityController {
 			KPIActivity kpiActivity = kpiActivityService.getKPIActivityById(id, lang);
 
 			if (kpiActivity == null) {
-				logger.info("No data found");
+				logger.info(NO_DATA_FOUND);
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else {
@@ -130,7 +133,7 @@ public class KPIActivityController {
 				return new ResponseEntity<>(kpiActivity, HttpStatus.OK);
 			}
 		} catch (CredentialsException d) {
-			logger.warn("Rights exception", d);
+			logger.warn(RIGHTS_EXCEPTION, d);
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
@@ -161,7 +164,7 @@ public class KPIActivityController {
 		try {
 			KPIData kpiData = kpiDataService.getKPIDataById(kpiId, lang, false);
 			if (kpiData == null) {
-				logger.warn("Wrong KPI Data");
+				logger.warn(WRONG_KPI_DATA);
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
 					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), kpiData.getHighLevelType(), lang).getResult())) {
@@ -173,19 +176,19 @@ public class KPIActivityController {
 			if (pageNumber != -1) {
 
 				if (sourceRequestFilter.equals("") && accessType.equals("")) {
-					pageKpiActivity = kpiActivityService.findByKpiId(kpiId, new PageRequest(pageNumber, pageSize,
-							new Sort(Direction.fromString(sortDirection), sortBy)));
+					pageKpiActivity = kpiActivityService.findByKpiId(kpiId, PageRequest.of(pageNumber, pageSize,
+							Sort.by(Direction.fromString(sortDirection), sortBy)));
 				} else if (!sourceRequestFilter.equals("") && !accessType.equals("")) {
 					pageKpiActivity = kpiActivityService.findByKpiIdByAccessTypeBySourceRequest(kpiId, accessType,
-							sourceRequestFilter, new PageRequest(pageNumber, pageSize,
-									new Sort(Direction.fromString(sortDirection), sortBy)));
+							sourceRequestFilter, PageRequest.of(pageNumber, pageSize,
+									Sort.by(Direction.fromString(sortDirection), sortBy)));
 				} else if (accessType.equals("")) {
 					pageKpiActivity = kpiActivityService.findByKpiIdBySourceRequest(kpiId, sourceRequestFilter,
-							new PageRequest(pageNumber, pageSize,
-									new Sort(Direction.fromString(sortDirection), sortBy)));
+							PageRequest.of(pageNumber, pageSize,
+									Sort.by(Direction.fromString(sortDirection), sortBy)));
 				} else {
-					pageKpiActivity = kpiActivityService.findByKpiIdByAccessType(kpiId, accessType, new PageRequest(
-							pageNumber, pageSize, new Sort(Direction.fromString(sortDirection), sortBy)));
+					pageKpiActivity = kpiActivityService.findByKpiIdByAccessType(kpiId, accessType, PageRequest.of(
+							pageNumber, pageSize, Sort.by(Direction.fromString(sortDirection), sortBy)));
 				}
 
 			} else {
@@ -235,7 +238,7 @@ public class KPIActivityController {
 				return new ResponseEntity<>(listKpiActivity, HttpStatus.OK);
 			}
 		} catch (CredentialsException d) {
-			logger.warn("Rights exception", d);
+			logger.warn(RIGHTS_EXCEPTION, d);
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (IllegalArgumentException | NoSuchMessageException | DataNotValidException d) {
@@ -270,7 +273,7 @@ public class KPIActivityController {
 		try {
 			KPIData kpiData = kpiDataService.getKPIDataById(kpiId, lang, true);
 			if (kpiData == null) {
-				logger.warn("Wrong KPI Data");
+				logger.warn(WRONG_KPI_DATA);
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (kpiData.getOwnership().equals("private") || !kpiData.getOwnership().equals("public")) {
@@ -281,19 +284,19 @@ public class KPIActivityController {
 			List<KPIActivity> listKpiActivity = null;
 			if (pageNumber != -1) {
 				if (sourceRequestFilter.equals("") && accessType.equals("")) {
-					pageKpiActivity = kpiActivityService.findByKpiId(kpiId, new PageRequest(pageNumber, pageSize,
-							new Sort(Direction.fromString(sortDirection), sortBy)));
+					pageKpiActivity = kpiActivityService.findByKpiId(kpiId, PageRequest.of(pageNumber, pageSize,
+							Sort.by(Direction.fromString(sortDirection), sortBy)));
 				} else if (!sourceRequestFilter.equals("") && !accessType.equals("")) {
 					pageKpiActivity = kpiActivityService.findByKpiIdByAccessTypeBySourceRequest(kpiId, accessType,
-							sourceRequestFilter, new PageRequest(pageNumber, pageSize,
-									new Sort(Direction.fromString(sortDirection), sortBy)));
+							sourceRequestFilter, PageRequest.of(pageNumber, pageSize,
+									Sort.by(Direction.fromString(sortDirection), sortBy)));
 				} else if (accessType.equals("")) {
 					pageKpiActivity = kpiActivityService.findByKpiIdBySourceRequest(kpiId, sourceRequestFilter,
-							new PageRequest(pageNumber, pageSize,
-									new Sort(Direction.fromString(sortDirection), sortBy)));
+							PageRequest.of(pageNumber, pageSize,
+									Sort.by(Direction.fromString(sortDirection), sortBy)));
 				} else {
-					pageKpiActivity = kpiActivityService.findByKpiIdByAccessType(kpiId, accessType, new PageRequest(
-							pageNumber, pageSize, new Sort(Direction.fromString(sortDirection), sortBy)));
+					pageKpiActivity = kpiActivityService.findByKpiIdByAccessType(kpiId, accessType, PageRequest.of(
+							pageNumber, pageSize, Sort.by(Direction.fromString(sortDirection), sortBy)));
 				}
 			} else {
 				if (sourceRequestFilter.equals("") && accessType.equals("")) {
@@ -323,7 +326,7 @@ public class KPIActivityController {
 			}
 
 		} catch (CredentialsException d) {
-			logger.warn("Rights exception", d);
+			logger.warn(RIGHTS_EXCEPTION, d);
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (IllegalArgumentException | NoSuchMessageException d) {

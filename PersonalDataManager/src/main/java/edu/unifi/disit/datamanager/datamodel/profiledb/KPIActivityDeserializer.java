@@ -76,7 +76,7 @@ public class KPIActivityDeserializer extends StdDeserializer<KPIActivity> {
 					try {
 						kpiActivity.setInsertTime(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(jnode.get("dataTime").asText()));
 					} catch (ParseException d) {
-						logger.error("Parsing error {}", d);
+						logger.error("Parsing error", d);
 					}
 				}
 			}
