@@ -10,7 +10,7 @@
         	<ttl unit="minutes">5</ttl>
 	    </expiry>
     	<resources>
-            <offheap unit="MB">1000</offheap>
+            <offheap unit="MB">100</offheap>
     	</resources>
     	<jsr107:mbeans enable-management="true" enable-statistics="true"/>
 	</cache>
@@ -20,7 +20,7 @@
         	<ttl unit="seconds">2</ttl>
 	    </expiry>
     	<resources>
-            <offheap unit="MB">100</offheap>
+            <offheap unit="MB">10</offheap>
     	</resources>
     	<jsr107:mbeans enable-management="true" enable-statistics="true"/>
 	</cache>
@@ -30,7 +30,7 @@
         	<ttl unit="minutes">10</ttl>
 	    </expiry>
     	<resources>
-            <offheap unit="MB">100</offheap>
+            <offheap unit="MB">10</offheap>
     	</resources>
     	<jsr107:mbeans enable-management="true" enable-statistics="true"/>
 	</cache>
