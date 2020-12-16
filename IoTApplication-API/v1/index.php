@@ -25,8 +25,6 @@ include 'marathon.php';
 //check token
 include '../session.php';
 
-$db=mysqli_connect($db_host,$db_user,$db_pwd,$database) or die("DB connection error ");
-
 $op="";
 $uname=$uinfo->username;
 $aid='';
@@ -43,7 +41,7 @@ header("Access-Control-Allow-Origin: *");
 
 switch ($op) {
   case 'list':
-    echo json_encode(get_apps());
+    echo json_encode(get_apps("AppID;DAAppID;PortiaID", false));
     break;
   case 'new_nodered':
     if(isset($_REQUEST['type']) && ($_REQUEST['type']=='basic' || $_REQUEST['type']=='advanced'))
@@ -54,13 +52,13 @@ switch ($op) {
       else
         $image = $nodered_adv_img;
       $aid = $nrapp_id_prefix . random_str($app_id_length);
-      $app = array("id"=>$aid,"url"=>"https://iot-app.snap4city.org/nodered/$aid",'name'=>$name, 'type'=>$type, 'image'=>$image);
+      $app = array("id"=>$aid,"url"=>"$apps_base_url/nodered/$aid",'name'=>$name, 'type'=>$type, 'image'=>$image);
       $r=register_app($app);
       if($r['httpcode']!=200) {
           header("HTTP/1.1 400 BAD REQUEST");
           $app=array("error"=>$r['result']);
       } else {
-        $r=new_nodered($db, $aid, $uname, $name, $image);
+        $r=new_nodered($aid, $uname, $name, $image);
         if(isset($r['error'])) {
           $app = $r;
         }
@@ -93,7 +91,7 @@ switch ($op) {
             if(isset($_REQUEST['iotappid'])) {
               $iotappid = $_REQUEST['iotappid'];
             }
-            $app = array("id"=>$aid,"url"=>"https://iot-app.snap4city.org/plumber/$aid", 'name'=>$name, 'type'=>'plumber', 'image'=>$image, 'health'=>$health, 'iotappid' => $iotappid);
+            $app = array("id"=>$aid,"url"=>"$apps_base_url/plumber/$aid", 'name'=>$name, 'type'=>'plumber', 'image'=>$image, 'health'=>$health, 'iotappid' => $iotappid);
             $r=register_app($app);
             if($r['httpcode']!=200) {
                 $app=$r['result'];
@@ -119,11 +117,59 @@ switch ($op) {
       echo "{\"error\":\"invalid user name '$uname' or app name '$name' or missing id\"}";
     }      
     break;
+  case 'new_python':
+    if(strlen($uname)>0 && strlen($name)>0 && strlen($aid)>0) {
+      //check if application is already present
+      $r = get_app($aid);
+      if($r['httpcode']==200 && count($r['result'])>0) {
+        $a = $r['result'][0];
+        $app = array("id"=>$a['elementId'],"url"=>$a['elementUrl'], 'name'=>$a['elementName'], 'type'=>$a['elementDetails']['type'], 'image'=>$a['elementDetails']['image'], 'health'=>@$a['elementDetails']['health'] ?: NULL, 'created'=>$a['created']);
+        echo json_encode($app);            
+      } else {
+        if($_SERVER['REQUEST_METHOD']=='POST') {
+          if(isset($_FILES['PY_file']) && is_uploaded_file($_FILES['PY_file']['tmp_name'])) {
+            $r_file = $_FILES['PY_file']['tmp_name'];
+            $image = $python_img;
+            //$aid = $plumber_id_prefix . random_str($app_id_length);
+            $health = NULL;
+            /*if(isset($_REQUEST['health'])) {
+              $health = $_REQUEST['health'];
+            }*/
+            $iotappid = NULL;
+            if(isset($_REQUEST['iotappid'])) {
+              $iotappid = $_REQUEST['iotappid'];
+            }
+            $app = array("id"=>$aid,"url"=>"$apps_base_url/python/$aid", 'name'=>$name, 'type'=>'python', 'image'=>$image, 'health'=>$health, 'iotappid' => $iotappid);
+            $r=register_app($app);
+            if($r['httpcode']!=200) {
+                $app=$r['result'];
+                $app['error'] = 'failed register '.$app['error'];
+            } else {
+              $r= new_python($aid, $uname, $name, $image, $r_file, $health);
+              if(isset($r['error'])) {
+                $app = $r;
+              }
+            }
+            echo json_encode($app);
+          } else {
+            header("HTTP/1.1 400 BAD REQUEST");
+            echo "{\"error\":\"missing PY_file\"}";      
+          }
+        } else {
+            header("HTTP/1.1 400 BAD REQUEST");
+            echo "{\"error\":\"use POST method\"}";                
+        }
+      }
+    } else {
+      header("HTTP/1.1 400 BAD REQUEST");
+      echo "{\"error\":\"invalid user name '$uname' or app name '$name' or missing id\"}";
+    }      
+    break;
   case 'new_portia':
     if(strlen($uname)>0 && strlen($name)>0) {
       $aid = $portia_id_prefix . random_str($app_id_length);
       $image = $portia_img;
-      $app = array("id"=>$aid,"url"=>"https://iot-app.snap4city.org/portia/$aid",'name'=>$name, 'type'=>'portia', 'image'=>$image);
+      $app = array("id"=>$aid,"url"=>"$apps_base_url/portia/$aid",'name'=>$name, 'type'=>'portia', 'image'=>$image);
       $r=register_app($app);
       if($r['httpcode']!=200) {
           header("HTTP/1.1 400 BAD REQUEST");
@@ -173,7 +219,7 @@ switch ($op) {
     if(strlen($uname)>0 && strlen($aid)>0) {
       $r=get_app($aid);
       if($r['httpcode']==200 && count($r['result'])>0) {
-        restart_app($db,$uname,$aid);
+        restart_app($uname,$aid);
       }
     } else {
       header("HTTP/1.1 400 BAD REQUEST");
@@ -184,7 +230,7 @@ switch ($op) {
     if(strlen($uname)>0 && strlen($aid)>0) {
       $r=get_app($aid);
       if($r['httpcode']==200 && count($r['result'])>0) {
-        upgrade_app($db,$uname,$aid,$r['result'][0]);
+        upgrade_app($uname,$aid,$r['result'][0]);
       }
     } else {
       header("HTTP/1.1 400 BAD REQUEST");
@@ -199,7 +245,7 @@ switch ($op) {
         $r=delete_app($aid, $type);
         if($r['httpcode']==200) {
           remove_from_disces_em($aid);
-          rm_app($db,$uname,$aid);
+          rm_app($uname,$aid);
         } else {
           header("HTTP/1.1 400 BAD REQUEST");
           echo '{"error":"delete app id:'.$aid.' type:'.$type.' result:'.json_encode($r['result']).'}';
@@ -215,7 +261,7 @@ switch ($op) {
     break;
   case 'status':
     if(strlen($uname)>0 && strlen($aid)>0) {
-      status_app($db,$uname,$aid);
+      status_app($uname,$aid);
     } else {
       header("HTTP/1.1 400 BAD REQUEST");
       echo "{\"error\":\"invalid uname or id\"}";
@@ -231,6 +277,7 @@ function register_app($app) {
   
   switch($app['type']) {
     case 'plumber':
+    case 'python':
       $type = 'DAAppID';
       break;
     case 'portia':
@@ -263,7 +310,7 @@ function register_app($app) {
   return $result;
 }
 
-function get_apps($type, $onlyMine) {
+function get_apps($type = null, $onlyMine = null) {
   include "../config.php";
 
   if(!isset($type)) {
@@ -296,6 +343,9 @@ function get_apps($type, $onlyMine) {
               break;
             case 'plumber':
               $f = '/mnt/data/plumber/'.$app['id'].'/plumber.R';
+              break;
+            case 'python':
+              $f = '/mnt/data/python/'.$app['id'].'/service.py';
               break;
           }
           if($f) {
@@ -350,9 +400,11 @@ function store_on_disces_em($id,$json) {
   
   if(substr($id,0,1)!='/')
     $id = '/'.$id;
-  $db=mysqli_connect($disces_em,$disces_em_user,$disces_em_pwd,$disces_em_database) or die("DB disces connection error ");
-  $q = "INSERT INTO marathon_apps(app,json) VALUES ('".mysqli_escape_string($db, $id)."','".mysqli_escape_string($db, $json)."')";
-  mysqli_query($db, $q) or die("error disces-em ".  mysqli_error($db));
+  if($disces_em) {
+    $db=mysqli_connect($disces_em,$disces_em_user,$disces_em_pwd,$disces_em_database) or die("DB disces connection error ");
+    $q = "INSERT INTO marathon_apps(app,json) VALUES ('".mysqli_escape_string($db, $id)."','".mysqli_escape_string($db, $json)."')";
+    mysqli_query($db, $q) or die("error disces-em ".  mysqli_error($db));
+  }
 }
 
 function update_image_on_disces_em($id, $image) {
@@ -360,9 +412,11 @@ function update_image_on_disces_em($id, $image) {
   
   if(substr($id,0,1)!='/')
     $id = '/'.$id;
-  $db=mysqli_connect($disces_em,$disces_em_user,$disces_em_pwd,$disces_em_database) or die("DB disces connection error ");
-  $q = "UPDATE marathon_apps SET json=json_replace(json,'$.container.docker.image','".mysqli_escape_string($db, $image)."') WHERE app='".mysqli_escape_string($db, $id)."'";
-  mysqli_query($db, $q) or die("error disces-em ".  mysqli_error($db));
+  if($disces_em) {
+    $db=mysqli_connect($disces_em,$disces_em_user,$disces_em_pwd,$disces_em_database) or die("DB disces connection error ");
+    $q = "UPDATE marathon_apps SET json=json_replace(json,'$.container.docker.image','".mysqli_escape_string($db, $image)."') WHERE app='".mysqli_escape_string($db, $id)."'";
+    mysqli_query($db, $q) or die("error disces-em ".  mysqli_error($db));
+  }
 }
 
 function remove_from_disces_em($id) {
@@ -370,7 +424,9 @@ function remove_from_disces_em($id) {
   
   if(substr($id,0,1)!='/')
     $id = '/'.$id;
-  $db=mysqli_connect($disces_em,$disces_em_user,$disces_em_pwd,$disces_em_database) or die("DB connection error ");
-  $q = "DELETE FROM marathon_apps WHERE app='".mysqli_escape_string($db, $id)."'";
-  mysqli_query($db, $q) or die("error disces-em ".  mysqli_error($db));
+  if($disces_em) {
+    $db=mysqli_connect($disces_em,$disces_em_user,$disces_em_pwd,$disces_em_database) or die("DB connection error ");
+    $q = "DELETE FROM marathon_apps WHERE app='".mysqli_escape_string($db, $id)."'";
+    mysqli_query($db, $q) or die("error disces-em ".  mysqli_error($db));
+  }
 }

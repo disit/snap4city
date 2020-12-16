@@ -1,0 +1,8 @@
+{
+  "nginxProxyTimeout": 1800,
+  "marathonUrl": "http://localhost:8080",
+  "dbHost": "localhost",
+  "dbUser": "user",
+  "dbPassw": "password",
+  "dbSchema": "marathonproxy"
+}

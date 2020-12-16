@@ -11,11 +11,18 @@ var fs = require('fs');
 var ChildProcess = require('child_process');
 var mysql = require('mysql');
 
+let rawcfgdata = fs.readFileSync('config.json');
+let config = JSON.parse(rawcfgdata);
+console.log(new Date()+" START with config\n"+JSON.stringify(config, null, 2));
+
+var nginxProxyTimeout = config.nginxProxyTimeout || 1800;
+var marathon_url = config.marathonUrl || "http://localhost:8080";
+
 var db = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "debian",
-  database: "marathonproxy"
+  host: config.dbHost || "localhost",
+  user: config.dbUser || "user",
+  password: config.dbPassw || "password",
+  database: config.dbSchema || "marathonproxy"
 });
 
 db.connect(function(err) {
@@ -26,7 +33,7 @@ db.connect(function(err) {
 
 var tasks = {};
 var EventSource = require('eventsource');
-var es = new EventSource('http://192.168.1.187:8080/v2/events');
+var es = new EventSource(marathon_url+'/v2/events');
 var lastSave = null;
 var delayedSave = null;
 
@@ -43,6 +50,9 @@ es.addEventListener('status_update_event', function (e) {
       path2 = "";
     } else if(data.appId.startsWith("/pt")) {
       path = "portia"+data.appId;
+      path2 = path;
+    } else if(appId.startsWith("/py")) {
+      path = "python"+appId;
       path2 = "";
     }
 
@@ -75,7 +85,7 @@ es.addEventListener('health_status_changed_event', function (e) {
 updateConf();
 
 function updateConf() {
-  http.get('http://192.168.1.187:8080/v2/tasks', function(resp) {
+  http.get(marathon_url+'/v2/tasks', function(resp) {
     var data = '';
 
     // A chunk of data has been recieved.
@@ -100,6 +110,10 @@ function updateConf() {
         var path2 = path;
         if(appId.startsWith("/pl")) {
           path = "plumber"+appId;
+          path2 = "";
+        }
+        if(appId.startsWith("/py")) {
+          path = "python"+appId;
           path2 = "";
         }
         if(appId.startsWith("/pt")) {
@@ -136,7 +150,7 @@ function saveConf(force) {
   }
   var conf = '#updated '+new Date()+'\n\n';
   var count = 0;
-  var timeout = 300;
+
   for(var t in tasks) {
     var appId=t;
     var alive = tasks[t].alive;
@@ -155,10 +169,10 @@ function saveConf(force) {
         "  proxy_http_version 1.1;\n"+
         "  proxy_set_header Upgrade $http_upgrade;\n"+
         "  proxy_set_header Connection \"upgrade\";\n"+
-        "  proxy_connect_timeout "+timeout+";\n"+
-        "  proxy_send_timeout "+timeout+";\n"+
-        "  proxy_read_timeout "+timeout+";\n"+
-        "  send_timeout "+timeout+";\n"+
+        "  proxy_connect_timeout "+nginxProxyTimeout+";\n"+
+        "  proxy_send_timeout "+nginxProxyTimeout+";\n"+
+        "  proxy_read_timeout "+nginxProxyTimeout+";\n"+
+        "  send_timeout "+nginxProxyTimeout+";\n"+
         "  proxy_pass \"http://"+host+":"+port+"/"+path2+"\";\n"+
         "}\n\n";
     count++;
@@ -185,7 +199,7 @@ function saveConf(force) {
     console.log(conf);    
   }
 }
-
+/*
 function saveEvent(appId, eventType, host, port) {
 db.connect(function(err) {
   if (err) throw err;
@@ -218,6 +232,7 @@ function saveEvent(appId, eventType, host, port) {
     });
   });
 }
+*/
 
 function saveEvent(appId, eventType, host, port) {
   if(!host)
