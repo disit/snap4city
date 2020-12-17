@@ -1,10 +1,22 @@
 "use strict";
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+/* Snap4city IOT Application API
+   Copyright (C) 2018 DISIT Lab http://www.disit.org - University of Florence
 
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as
+   published by the Free Software Foundation, either version 3 of the
+   License, or (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Affero General Public License for more details.
+
+   You should have received a copy of the GNU Affero General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>. */
+
+// this script listen for the marathon events and writes an nginx conf to 
+// proxy requests to the correct host:port
 
 var http = require('http');
 var fs = require('fs');
@@ -14,22 +26,29 @@ var mysql = require('mysql');
 let rawcfgdata = fs.readFileSync('config.json');
 let config = JSON.parse(rawcfgdata);
 console.log(new Date()+" START with config\n"+JSON.stringify(config, null, 2));
+console.log(JSON.stringify(process.argv));
 
-var nginxProxyTimeout = config.nginxProxyTimeout || 1800;
-var marathon_url = config.marathonUrl || "http://localhost:8080";
+var nginxProxyTimeout = process.env.NGINX_PROXY_TIMEOUT || config.nginxProxyTimeout || 1800;
+var marathon_url = process.env.MARATHON_URL || config.marathonUrl || "http://localhost:8080";
+var changeLocalhost = process.env.CHANGE_LOCALHOST || config.changeLocalhost;
+var saveEvents = process.env.SAVE_EVENTS || config.saveEvents || "true";
+var nginxConfFile = process.env.NGINX_CONF_FILE || process.argv[2];
+var nginxReloadCmd = process.env.NGINX_RELOAD_CMD || process.argv[3];
 
-var db = mysql.createConnection({
-  host: config.dbHost || "localhost",
-  user: config.dbUser || "user",
-  password: config.dbPassw || "password",
-  database: config.dbSchema || "marathonproxy"
-});
-
-db.connect(function(err) {
-  if (err) throw err;
-  console.log("Connected!");
-  saveEvent("","START");
-});
+var db = null;
+if(saveEvents==="true") {
+  db = mysql.createConnection({
+    host: process.env.DB_HOST || config.dbHost || "localhost",
+    user: process.env.DB_USER ||config.dbUser || "user",
+    password: process.env.DB_PASSW || config.dbPassw || "password",
+    database: process.env.DB_SCHEMA ||config.dbSchema || "marathonproxy"
+  });
+  db.connect(function(err) {
+    if (err) throw err;
+    console.log("Connected!");
+    saveEvent("","START");
+  });
+}
 
 var tasks = {};
 var EventSource = require('eventsource');
@@ -55,6 +74,8 @@ es.addEventListener('status_update_event', function (e) {
       path = "python"+appId;
       path2 = "";
     }
+    if(data.host=="localhost" && changeLocalhost)
+      data.host = changeLocalhost;
 
     tasks[data.appId] = { "host": data.host, "port": data.ports[0], "alive":false, "taskId": data.taskId, "path": path, "path2": path2};
     console.log(new Date()+" "+data.appId+" RUNNING ON "+data.host+":"+data.ports[0]);
@@ -103,6 +124,9 @@ function updateConf() {
         if(t.healthCheckResults[0])
           alive=t.healthCheckResults[0].alive;
         var host = t.host;
+        if(host==="localhost" && changeLocalhost)
+          host = changeLocalhost;
+
         //var ipAddr = t.ipAddresses[0];
         var port = t.ports[0];
         var taskId = t.id;
@@ -178,14 +202,14 @@ function saveConf(force) {
     count++;
   }
   lastSave = new Date();
-  if(process.argv.length>2) {
-    fs.writeFile(process.argv[2], conf, function(err) {
+  if(nginxConfFile) {
+    fs.writeFile(nginxConfFile, conf, function(err) {
       if(err) {
         return console.log(err);
       }
-      console.log(process.argv[2]+" SAVED "+count);
-      if(process.argv.length>3) {
-        ChildProcess.exec(process.argv[3], function(err, stdout, stderr) {
+      console.log(nginxConfFile+" SAVED "+count);
+      if(nginxReloadCmd) {
+        ChildProcess.exec(nginxReloadCmd, function(err, stdout, stderr) {
           if (err) {
             // node couldn't execute the command
             console.log(err);
@@ -199,42 +223,11 @@ function saveConf(force) {
     console.log(conf);    
   }
 }
-/*
-function saveEvent(appId, eventType, host, port) {
-db.connect(function(err) {
-  if (err) throw err;
-  console.log("Connected!");
-  var sql = "INSERT INTO marathonevent (appId,eventType,host,port) VALUES ('"+appId+"', '"+eventType+"','"+host+"','"+port+"')";
-  con.query(sql, function (err, result) {
-    if (err) throw err;
-    console.log("event logged");
-  });
-});
-}
-
 
 function saveEvent(appId, eventType, host, port) {
-  if(!host)
-    host="NULL"
-  else
-    host="'"+host+"'"
-  if(!port)
-    port="NULL"
-  else
-    port="'"+port+"'"
-  db.connect(function(err) {
-    if (err) throw err;
-    console.log("Connected!");
-    var sql = "INSERT INTO marathonevent (appId,eventType,host,port) VALUES ('"+appId+"', '"+eventType+"',"+host+","+port+")";
-    db.query(sql, function (err, result) {
-      if (err) throw err;
-      console.log("1 record inserted");
-    });
-  });
-}
-*/
-
-function saveEvent(appId, eventType, host, port) {
+  if(db==null)
+    return;
+  
   if(!host)
     host="NULL"
   else
