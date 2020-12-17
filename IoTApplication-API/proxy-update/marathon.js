@@ -70,7 +70,7 @@ es.addEventListener('status_update_event', function (e) {
     } else if(data.appId.startsWith("/pt")) {
       path = "portia"+data.appId;
       path2 = path;
-    } else if(appId.startsWith("/py")) {
+    } else if(data.appId.startsWith("/py")) {
       path = "python"+appId;
       path2 = "";
     }
