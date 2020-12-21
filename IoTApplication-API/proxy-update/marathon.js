@@ -71,7 +71,7 @@ es.addEventListener('status_update_event', function (e) {
       path = "portia"+data.appId;
       path2 = path;
     } else if(data.appId.startsWith("/py")) {
-      path = "python"+appId;
+      path = "python"+data.appId;
       path2 = "";
     }
     if(data.host=="localhost" && changeLocalhost)
