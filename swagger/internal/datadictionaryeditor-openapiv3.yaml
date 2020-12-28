@@ -1,0 +1,124 @@
+openapi: 3.0.1
+info:
+  title: Data Dictionary Editor API
+  description: This API allows the creation and maintainment of a dictionary of terms for user input validation.
+  version: '1.0'
+servers:
+  - url: http://processloader.snap4city.org/processloader/api
+paths:
+  /dictionary:
+    get:
+      tags:
+        - Dictionary
+      summary: It retrieves the list of the terms that are in the dictionary.
+      parameters:
+        - name: id
+          description: Data dictionary element id.
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: type
+          description: Typology of dictionary elements.
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [ nature, subnature, sub_nature, sub nature, valueunit, value_unit, value unit, valuetype, value_type, value type] 
+        - name: parent
+          description: It filters dictionary elements by parent id. It must be combined with the _type_ parameter. It is applicable only when _type_ is set to _subnature_, or _valueunit_, or one of their variants.
+          in: query
+          required: false
+          schema:
+            type: string  
+        - name: child
+          description: It filters dictionary elements by child id. It must be combined with the _type_ parameter. It is applicable only when _type_ is set to _nature_, or _valuetype_, or one of its variants.
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: get_all
+          description: When sent, the full dictionary is returned, whichever the value of the parameter is. 
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The requested dictionary entry(s).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    enum: ["OK"]
+                  code:
+                    type: integer
+                    enum: [200]
+                  content:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: "1"
+                        value:
+                          type: string
+                          example: Accommodation
+                        label: 
+                          type: string
+                          example: Accommodation
+                        type:
+                          type: string
+                          example: nature
+                        parent_id:
+                          type: string
+                          example: "1000"
+                        parent_value:
+                          type: string
+                          example: oneword
+                        children_id: 
+                          type: array
+                          items: 
+                            type: string
+                          example: ["21", "22", "23", "24" ]
+                        children_value:
+                          type: array
+                          items:
+                            type: string
+                          example: [ "Agritourism", "Beach_resort", "Bed_and_breakfast", "Boarding_house"]   
+        '404':
+          description: No dictionary entry could be found that matches the filtering criterias.
+          content:
+            application/json:
+              schema:        
+                type: object
+                properties:
+                  result:
+                    type: string
+                    enum: ["ERROR"]
+                  code:
+                    type: integer
+                    enum: [404]
+                  content:
+                    type: string
+                    enum: ["Not found data"]
+        '500':
+          description: DB connection error.
+          content:
+            application/json:
+              schema:        
+                type: object
+                properties:
+                  result:
+                    type: string
+                    enum: ["ERROR"]
+                  code:
+                    type: integer
+                    enum: [500]
+                  content:
+                    type: string
+                    enum: ["DB connection error"]                    

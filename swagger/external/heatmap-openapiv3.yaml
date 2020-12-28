@@ -52,7 +52,7 @@ paths:
         required: true
         description: Specify whether the heatmap data is clustered (1) or not (0)
         schema:
-          type: string
+          type: integer
           enum:
             - 0
             - 1
@@ -133,6 +133,40 @@ paths:
       responses:
         "200":
           description: Status 200
+  /interp.php:
+    get:
+      summary: Get the interpolated value of a metric from location
+      parameters:
+        - name: latitude
+          in: query
+          required: true
+          description: The location's latitude
+          example: 43.11
+          schema:
+            type: number
+        - name: longitude
+          in: query
+          required: true
+          description: The location's longitude
+          example: 11.1
+          schema:
+            type: number
+        - name: dataset
+          in: query
+          required: true
+          description: The map's name
+          schema:
+            type: string
+        - name: date
+          in: query
+          required: true
+          description: The map's date
+          example: 2019-01-01T00:00:00Z
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Status 200
 servers:
   - url: https://heatmap.snap4city.org/
 components:
@@ -188,7 +222,9 @@ components:
         metricName:
           type: string
           description: The metric's name
-      example: { "mapName": "map",
+      example: |-
+        {
+          "mapName": "map",
           "metricName": "metric",
           "latitude":  43.11,
           "longitude": 11.10,
@@ -197,7 +233,7 @@ components:
           "description": "a map test",
           "days": 0,
           "date": "2019-01-01T00:00:00Z"
-          } 
+        }
     DataOutput:
       type: object
       properties:

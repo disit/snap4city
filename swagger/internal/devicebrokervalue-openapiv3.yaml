@@ -3,7 +3,7 @@ info:
   title: Device, Broker and Value Mgmt API
   version: '1.0'
 servers:
-  - url: http://{snap4city}/api
+  - url: https://iotdirectory.snap4city.org/api
     variables:
       snap4city:
         default: snap4city
@@ -12,44 +12,65 @@ paths:
     summary: Device Management
     get:
       tags: [Device]
-      summary: Insert, update, delete and retrieve devices and device attributes.
+      summary: Insert, update, delete, retrieve devices and device information.
       
       description: |
-        This API is for managing the IoT devices. It can be leveraged for inserting, updating, deleting, and retrieving information about a device of interest. The __action__ input parameter indicates what operation has to be performed:
+        This API is for managing the IoT devices. It can be leveraged for inserting, updating, deleting, and retrieving information about a device of interest. 
         
-        * __Insert__ - This API is intended for inserting a new device in the Iot-Directory. The user has to specify the required parameters for inserting a device. The status of the operation is returned. This operation also provides the registration in the Knowledge Base when the required fields have been specified. The fields required for being inserted in the Kwoledge Base are reported below. Finally, this API provides the  registration in the specified context broker (when the context broker requires a specific registration).  
+        For any APIs an Authorization __token__ in the Bearer format in the HTTP Header has to be specified, depending on the choosen scenario (see "nodered" params below).
         
-        * __Update__ - This API is intended for updating a device in the Iot-Directory. The user has to specify the required parameters for updating a device. The status of the operation is returned. This operation also provides the updating in the Knowledge base when the required fields have been specified and the updating in the specified context broker.
+        The __action__ input parameter indicates which operation has to be performed:
         
-        * __Delete__ - This API is intended for deleting a device from the Iot-Directory. The user has to specify the required parameters for deleting a device. The status of the operation is returned. This operation also provides the deletion from the Knowledge base when the required fields have been specified and the deletion from corresponding context broker.
+        * __Insert__ - This API is intended for inserting a new device in the Iot-Directory. The user has to specify the required parameters for inserting a device. The status of the operation is returned. This operation also provides the registration in the Knowledge Base. This API provides also the  registration in the specified context broker (when the context broker requires a specific registration).  
         
-        * __Get all devices__ - This API is intended for retrieving all device from the Iot-Directory. The user has to specify no parameters for retrieving all the device. The status of the operation is returned together with the requested data.
+        * __Update__ - This API is intended for updating a device in the Iot-Directory. The user has to specify the required parameters for updating a device. The status of the operation is returned. This operation also provides the updating in the Knowledge base and the updating in the specified context broker.
+        
+        * __Delete__ - This API is intended for deleting a device from the Iot-Directory. The user has to specify the required parameters for deleting a device. The status of the operation is returned. This operation also provides the deletion from the Knowledge base and the deletion from corresponding context broker.
+        
+        * __Get all device__ - This API is intended for retrieving all device from the Iot-Directory. The status of the operation is returned together with the requested data.
         
         * __Get device attributes__ - This API is intended for retrieving all the values associated with devices from the Iot-Directory. The user has to specify the required parameters for retrieving all the attributes. The status of the operation is returned together with the requested data.
         
-        * __Get parameter values__ - This API is intended for retrieving all values of the parameters value_type, data_type and value_unit that can be found in the Iot-Directory. The user is not expected to provide any input parameter. The status of the operation is returned together with the requested data.
-      
+        * __Get device__ - This API is intended for retrieving all available information about the specified Device. The status of the operation is returned together with the requested data.
+        
+        * __Download__ - This API is intended for retrieving the private key / certificate of a Device created with Authentication factor. The status of the operation is returned together with the requested data.
+
       parameters:
         - name: action
           in: query
-          description: The operation to be performed.
+          description: |
+          
+            The operation to be performed.
+            
+            _Required for actions:_ insert, update, delete, get_device_attributes.
           required: true
           schema:
             type: string
             enum: [insert,update,delete,get_all_device,get_device_attributes,get_param_values]
           example: insert
-        - name: id
+        - name: nodered
           in: query
-          description: Unique identifier for the device (in the specified context broker).
-          required: false
-          schema: 
+          description: If this parameter is present (it doesn't matter actually the passed value), the passed Authorization token has to be considered as an AccessToken, otherwise has to be considered as an RefreshToken
+          schema:
             type: string
-          example: provaMM7777
-        - name: devicetype
+          example: <any-value>
+        - name: id
           in: query
           description: |
           
-            The type of the device (e.g. Thermometer, TrainPass, Citylamp, fan)
+            Unique identifier for the device (in the specified context broker). Has to be conformant to regex: /[^a-zA-Z0-9_-]/ (if the device is imported from external source the character : is supported)
+            
+            _Required for actions:_ insert, update, delete, get_device_attribute, get_device, download.
+            
+          required: true
+          schema: 
+            type: string
+          example: provaMM7777
+        - name: type
+          in: query
+          description: |
+          
+            The type of the device (e.g. Thermometer, TrainPass, Citylamp, fan). It cannot be modified in update.
             
             _Required for actions:_ insert, update.
             
@@ -61,53 +82,136 @@ paths:
           in: query
           description: |
             
-            Name of the context broker that handles the device.
+            Name of the context broker that handles the device. Has to be conformant to regex: /[^a-zA-Z0-9_-]/
             
-            _Required for actions:_ insert, update, delete, get_device_attribute.
+            _Required for actions:_ insert, update, delete, get_device_attribute, get_device, download.
             
-          required: false
+          required: true
           schema:
             type: string
           example: mqttUNIFI
+        - name: gb_old_cb
+          in: query
+          description: |
+            
+            Name of the OLD context broker in case of upated.
+            
+            _Required for actions:_ update.
+            
+          required: true
+          schema:
+            type: string
+          example: mqttUNIFI          
         - name: kind
           in: query
           description: |
           
-            Sensor, or actuator.
+            It specifies if the value is a Sensor or an Actuator.
             
             _Required for actions:_ insert, update.
             
-          required: false
+          required: true
           schema:
             type: string
             enum: [sensor,actuator]
           example: sensor
-        - name: protocol
-          in: query
-          description: |
-          
-            One of the supported protocols (e.g. mqtt, ngsi, amqp).
-            
-            _Required for actions:_ insert, update.
-            
-          required: false
-          schema: 
-            type: string
-            enum: [mqtt,ngsi,amqp]
-          example: mqtt
         - name: format
           in: query
           description: |
             
-            Csv, xml, JSON.
+            Format of the value: Csv, xml, JSON.
             
             _Required for actions:_ insert, update.
             
-          required: false
+          required: true
           schema:
             type: string
             enum: [csv,xml,json]
           example: csv
+        - name: latitude
+          in: query
+          description: |
+            
+            Latitude coordinate of the device location.
+            
+            _Required for actions:_ insert, update.
+            
+          required: true
+          schema: 
+            type: number
+            format: float
+            maximum: 90
+            minimum: -90
+          example: 
+            43.769562
+        - name: longitude
+          in: query
+          description: |
+            
+            Longitude coordinate of the device location.
+            
+            _Required for actions:_ insert, update.
+            
+          required: true
+          schema:
+            type: number
+            format: float
+            maximum: 180
+            minimum: -180
+          example: 
+            11.255814   
+        - name: frequency
+          in: query
+          description: |
+          
+            Frequency at which it produces observations, in seconds.
+            
+            _Required for actions:_ insert, update.
+            
+          required: true
+          schema:
+            type: integer
+            format: int32
+          example: 
+            60            
+        - name: attributes
+          in: query
+          description: |
+          
+            A list of JSON objects representing the values generated by a device for each observation. The value_name has to be conformant to regex: /[^a-zA-Z0-9_-]/
+            
+            _Required for actions:_ insert, update.
+            
+          required: true
+          schema:
+            type: array
+            minItems: 1
+            items:
+              $ref: '#/components/schemas/attribute'
+        - name: deleteattributes
+          in: query
+          description: |
+            A list of JSON objects representing the values removed by a device. (when available otherwise string "[]"). The value_name has to be conformant to regex: /[^a-zA-Z0-9_-]/
+            
+            _Used in actions:_ update.
+            
+          required: false
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/attribute'
+        - name: newattributes
+          in: query
+          description: |
+            A list of JSON objects representing the values added to a device. (when available otherwise string "[]"). The value_name has to be conformant to regex: /[^a-zA-Z0-9_-]/
+            
+            _Used in actions:_ update.
+            
+          required: false
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/attribute'            
         - name: mac
           in: query
           description: |
@@ -136,7 +240,7 @@ paths:
           in: query
           description: |
           
-            Device model (when available otherwise empty string).
+            Device model (when available otherwise string "custom"). Has to be conformant to regex: /[^a-zA-Z0-9_-]/ and can include teh space character
             
             _Used in actions:_ insert, update.
             
@@ -144,46 +248,39 @@ paths:
           schema:
             type: string
           example: TMP36
-        - name: latitude
+        - name: k1
           in: query
           description: |
             
-            Latitude coordinate of the device location.
+            It specify the first part of the secret in case the device is of a protected Model (when available otherwise empty string)
             
-            _Required for actions:_ insert, update.
+            Used in actions:_ insert, update.
             
           required: false
           schema: 
-            type: number
-            format: float
-            maximum: 90
-            minimum: -90
-          example: 
-            43.769562
-        - name: longitude
+            type: string
+          example:
+            ab68e819-74fb-46c1-906c-2e22ea3ca537
+        - name: k2
           in: query
           description: |
             
-            Longitude coordinate of the device location.
+            It specify the second part of the secret in case the device is of a protected Model (when available otherwise empty string)
             
-            _Required for actions:_ insert, update.
+            Used in actions:_ insert, update.
             
           required: false
-          schema:
-            type: number
-            format: float
-            maximum: 180
-            minimum: -180
-          example: 
-            11.255814
-            
+          schema: 
+            type: string
+          example:
+            ab68e819-74fb-46c1-906c-2e22ea3ca537            
         - name: visibility
           in: query
           description: |
             
-            Public, or private.
+            __DEPRECATED__ It specify internally in the Iot-Directory if the IOT Device is Public or Private. (when available otherwise string "private")
             
-            _Required for actions:_ insert, update.
+            Used in actions:_ insert, update.
             
           required: false
           schema: 
@@ -191,6 +288,297 @@ paths:
             enum: [public,private]
           example:
             public
+        - name: shouldbeRegistered
+          in: query
+          description: |
+            
+            If this parameter is present (it doesn't matter actually the passed value) the device should be registered in KB (when available otherwise string "yes")
+            
+            Used in actions:_ insert.
+            
+          required: false
+          schema: 
+            type: string
+          example:
+            <any-value>
+        - name: service
+          in: query
+          description: |
+            
+            In case of context broker Multi-tenancy, it specifies the name of the Tenant to be used (when available otherwise empty string)
+            
+            Used in actions:_ insert, update, delete, get_device_attributes, get_device.
+            
+          required: false
+          schema: 
+            type: string
+          example:
+            House
+        - name: servicePath
+          in: query
+          description: |
+            
+            In case of context broker Multi-tenancy, it specifies the path to be used (when available otherwise empty string)
+            
+            Used in actions:_ insert, update, delete, get_device_attributes, get_device.
+            
+          required: false
+          schema: 
+            type: string
+          example:
+            /Floor1
+        - name: subnature
+          in: query
+          description: |
+            
+            KB Classification of the device (when available otherwise empty string)
+            
+            Used in actions:_ insert, update.
+            
+          required: false
+          schema: 
+            type: string
+          example:
+            Beach_resort    
+            
+        - name: static_attributes
+          in: query
+          description: |
+            
+            A list of JSON objects representing the Static attributes of the device (when available otherwise  string "[]")
+            
+            Used in actions:_ insert, update.
+            
+          required: false
+          schema: 
+            type: string
+          example:
+            [["http://schema.org/addressLocality","Firenze"]]     
+            
+        - name: edgegateway_type
+          in: query
+          description: |
+            
+            __DEPRECATED__ Type of edge device (when available otherwise empty string)
+            
+            Used in actions:_ insert, update.
+            
+          required: false
+          schema: 
+            type: string
+          example:
+            N/A          
+        - name: edgegateway_uri
+          in: query
+          description: |
+            
+            __DEPRECATED__ URL of edge device (when available otherwise empty string)
+            
+            Used in actions:_ insert, update.
+            
+          required: false
+          schema: 
+            type: string
+          example:
+            N/A    
+        - name: length
+          in: query
+          description: |
+            
+            How many entries to return (when available otherwise string "-1")
+            
+            Used in actions:_ get_all_device.
+            
+          required: false
+          schema: 
+            type: integer
+          example:
+            10           
+        - name: start
+          in: query
+          description: |
+            
+            Start point from entries to return (when available otherwise string "1")
+            
+            Used in actions:_ get_all_device.
+            
+          required: false
+          schema: 
+            type: integer
+          example:
+            1         
+        - name: draw
+          in: query
+          description: |
+            
+            Draw point from entries to return (when available otherwise string "1")
+            
+            Used in actions:_ get_all_device.
+            
+          required: false
+          schema: 
+            type: integer
+          example:
+            1       
+        - name: columns
+          in: query
+          description: |
+            
+            Array about the columns from entries to return (when available otherwise empty array)
+            
+            Used in actions:_ get_all_device.
+            
+          required: false
+          schema: 
+            type: string
+        - name: filename
+          in: query
+          description: |
+            
+            Filename of the file to download
+            
+            Used in actions:_ download.
+            
+          required: false
+          schema: 
+            type: string            
+          example: 
+            "/private/prova-modello2-cert-key.pem /certsdb/prova-modello2-cert-crt.pem"
+      responses:
+        200:
+          $ref: '#/components/responses/device'
+  /model.php:
+    summary: Model Management
+    get:
+      tags: [Model]
+      summary: Insert, update, delete, retrieve models and model information.
+      
+      description: |
+        This API is for managing the IoT models. It can be leveraged for inserting, updating, deleting, and retrieving information about a model of interest. 
+        
+        For any APIs an Authorization __token__ in the Bearer format in the HTTP Header has to be specified, depending on the choosen scenario (see "nodered" params below).
+        
+        The __action__ input parameter indicates which operation has to be performed:
+        
+        * __Insert__ - This API is intended for inserting a new model in the Iot-Directory. The user has to specify the required parameters for inserting a model. The status of the operation is returned.  
+        
+        * __Update__ - This API is intended for updating a model in the Iot-Directory. The user has to specify the required parameters for updating a model. The status of the operation is returned. 
+        
+        * __Delete__ - This API is intended for deleting a model from the Iot-Directory. The user has to specify the required parameters for deleting a model. The status of the operation is returned. 
+        
+        * __Get all models__ - This API is intended for retrieving all models from the Iot-Directory. The status of the operation is returned together with the requested data.
+        
+        * __Get value attributes__ - This API is intended for retrieving all the values associated with model from the Iot-Directory. The user has to specify the required parameters for retrieving all the attributes. The status of the operation is returned together with the requested data.
+        
+        * __Get model__ - This API is intended for retrieving all available information about the specified model. The status of the operation is returned together with the requested data.
+        
+        * __Get all models DataTable__ - DEPRECATED (use __Get all models__ instead) This API is intended for retrieving all models from the Iot-Directory in a paginated way. The status of the operation is returned together with the requested data.
+
+      parameters:
+        - name: action
+          in: query
+          description: |
+          
+            The operation to be performed.
+            
+            _Required for actions:_ insert, update, delete, get_model, get_value_attributes, get_all_models, get_all_models_DataTable.
+          required: true
+          schema:
+            type: string
+            enum: [insert, update, delete, get_model, get_value_attributes, get_all_models, get_all_models_DataTable]
+          example: insert
+        - name: nodered
+          in: query
+          description: If this parameter is present (it doesn't matter actually the passed value), the passed Authorization token has to be considered as an AccessToken, otherwise has to be considered as an RefreshToken
+          schema:
+            type: string
+          example: <any-value>
+        - name: name
+          in: query
+          description: |
+          
+            Unique name for the model. 
+            
+            _Required for actions:_  insert, update, get_model.
+            
+          required: true
+          schema: 
+            type: string
+          example: Model Thermo
+        - name: description
+          in: query
+          description: |
+          
+            Description for the model. 
+            
+            _Required for actions:_  insert, update.
+            
+          required: true
+          schema: 
+            type: string
+          example: Thermo description model
+        - name: id
+          in: query
+          description: |
+          
+            Unique identifier for the model. Has to be conformant to regex: /[^a-zA-Z0-9_-]/ 
+            
+            _Required for actions:_  update, delete, get_value_attribute.
+            
+          required: true
+          schema: 
+            type: string
+          example: 100
+        - name: type
+          in: query
+          description: |
+          
+            The type of the model (e.g. Thermometer, TrainPass, Citylamp, fan).
+            
+            _Required for actions:_ insert, update.
+            
+          required: true
+          schema:
+            type: string
+          example: Thermometer
+        - name: contextbroker
+          in: query
+          description: |
+            
+            Name of the context broker that handles the device. Has to be conformant to regex: /[^a-zA-Z0-9_-]/
+            
+            _Required for actions:_ insert, update.
+            
+          required: true
+          schema:
+            type: string
+          example: mqttUNIFI
+        - name: kind
+          in: query
+          description: |
+          
+            It specifies if the value is a Sensor or an Actuator.
+            
+            _Required for actions:_ insert, update.
+            
+          required: true
+          schema:
+            type: string
+            enum: [sensor,actuator]
+          example: sensor
+        - name: format
+          in: query
+          description: |
+            
+            Format of the value: Csv, xml, JSON.
+            
+            _Required for actions:_ insert, update.
+            
+          required: true
+          schema:
+            type: string
+            enum: [csv,xml,json]
+          example: csv
         - name: frequency
           in: query
           description: |
@@ -199,252 +587,216 @@ paths:
             
             _Required for actions:_ insert, update.
             
-          required: false
+          required: true
           schema:
             type: integer
             format: int32
           example: 
-            60
+            60           
+        - name: kgenerator
+          in: query
+          description: |
+          
+            Type of autehntication.
+            
+            _Required for actions:_ insert, update.
+            
+          required: true
+          schema:
+            type: string
+            enum: [normal, special, authenticated]
+          example: 
+            normal       
+        - name: hc
+          in: query
+          description: |
+          
+            DEPRECATED (use info in sensor value) Healthiness criteria 
+            
+            _Required for actions:_ insert, update.
+            
+          required: true
+          schema:
+            type: string
+            enum: [refresh_rate, different_values, within_bounds]
+          example: 
+            refresh_rate        
+        - name: hv
+          in: query
+          description: |
+          
+            DEPRECATED (use info in sensor value) Healthiness value
+            
+            _Required for actions:_ insert, update.
+            
+          required: true
+          schema:
+            type: string
+          example: 
+            300                
         - name: attributes
           in: query
           description: |
           
-            A list of JSON objects representing the values generated by a device for each observation. 
+            A list of JSON objects representing the values generated by a device for each observation. The value_name has to be conformant to regex: /[^a-zA-Z0-9_-]/
             
             _Required for actions:_ insert, update.
             
-          required: false
+          required: true
           schema:
             type: array
             minItems: 1
             items:
               $ref: '#/components/schemas/attribute'
-        - name: deleteattributes
+        - name: producer
           in: query
           description: |
-            A list of JSON objects representing the values removed by a device.
+          
+            Device producer (when available otherwise empty string). Here is required, meanwhile in device is not needed
             
-            _Used in actions:_ update.
+            _Used in actions:_ insert, update.
             
-          required: false
+          required: true
           schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/attribute'
-        - name: newattributes
+            type: string
+          example: Arduino
+        - name: service
           in: query
           description: |
-            A list of JSON objects representing the values generated by a device for each observation.
             
-            _Used in actions:_ update.
+            In case of context broker Multi-tenancy, it specifies the name of the Tenant to be used (when available otherwise empty string)
+            
+            Used in actions:_ insert, update.
             
           required: false
-          schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/attribute'
-
+          schema: 
+            type: string
+          example:
+            House
+        - name: servicePath
+          in: query
+          description: |
+            
+            In case of context broker Multi-tenancy, it specifies the path to be used (when available otherwise empty string)
+            
+            Used in actions:_ insert, update.
+            
+          required: false
+          schema: 
+            type: string
+          example:
+            /Floor1
+        - name: subnature
+          in: query
+          description: |
+            
+            KB Classification of the device (when available otherwise empty string)
+            
+            Used in actions:_ insert, update.
+            
+          required: false
+          schema: 
+            type: string
+          example:
+            Beach_resort    
+            
+        - name: static_attributes
+          in: query
+          description: |
+            
+            A list of JSON objects representing the Static attributes of the device (when available otherwise  string "[]")
+            
+            Used in actions:_ insert, update.
+            
+          required: false
+          schema: 
+            type: string
+          example:
+            [["http://schema.org/addressLocality","Firenze"]]     
+            
+        - name: edgegateway_type
+          in: query
+          description: |
+            
+            __DEPRECATED__ Type of edge device (when available otherwise empty string)
+            
+            Used in actions:_ insert, update.
+            
+          required: false
+          schema: 
+            type: string
+          example:
+            N/A          
+        - name: length
+          in: query
+          description: |
+            
+            How many entries to return (when available otherwise string "-1") DEPRECATED (use Get all models instead)
+            
+            Used in actions:_ get_all_models_DataTable.
+            
+          required: false
+          schema: 
+            type: integer
+          example:
+            10           
+        - name: start
+          in: query
+          description: |
+            
+            Start point from entries to return (when available otherwise string "1") DEPRECATED (use Get all models instead)
+            
+            Used in actions:_ get_all_models_DataTable.
+            
+          required: false
+          schema: 
+            type: integer
+          example:
+            1         
+        - name: draw
+          in: query
+          description: |
+            
+            Draw point from entries to return (when available otherwise string "1") DEPRECATED (use Get all models instead)
+            
+            Used in actions:_ get_all_models_DataTable.
+            
+          required: false
+          schema: 
+            type: integer
+          example:
+            1       
+        - name: columns
+          in: query
+          description: |
+            
+            Array about the columns from entries to return (when available otherwise empty array) DEPRECATED (use Get all models instead)
+            
+            Used in actions:_ get_all_models_DataTable.
+            
+          required: false
+          schema: 
+            type: string
       responses:
         200:
-          $ref: '#/components/responses/device'
-    post:
-      tags: [Device]
-      summary: Insert, update, delete and retrieve devices and device attributes.
-      
-      description: |
-        This API is for managing the IoT devices. It can be leveraged for inserting, updating, deleting, and retrieving information about a device of interest. The __action__ input parameter indicates what operation has to be performed:
-        
-        * __Insert__ - This API is intended for inserting a new device in the Iot-Directory. The user has to specify the required parameters for inserting a device. The status of the operation is returned. This operation also provides the registration in the Knowledge Base when the required fields have been specified. The fields required for being inserted in the Kwoledge Base are reported below. Finally, this API provides the  registration in the specified context broker (when the context broker requires a specific registration).  
-        
-        * __Update__ - This API is intended for updating a device in the Iot-Directory. The user has to specify the required parameters for updating a device. The status of the operation is returned. This operation also provides the updating in the Knowledge base when the required fields have been specified and the updating in the specified context broker.
-        
-        * __Delete__ - This API is intended for deleting a device from the Iot-Directory. The user has to specify the required parameters for deleting a device. The status of the operation is returned. This operation also provides the deletion from the Knowledge base when the required fields have been specified and the deletion from corresponding context broker.
-        
-        * __Get all devices__ - This API is intended for retrieving all device from the Iot-Directory. The user has to specify no parameters for retrieving all the device. The status of the operation is returned together with the requested data.
-        
-        * __Get device attributes__ - This API is intended for retrieving all the values associated with devices from the Iot-Directory. The user has to specify the required parameters for retrieving all the attributes. The status of the operation is returned together with the requested data.
-        
-        * __Get parameter values__ - This API is intended for retrieving all values of the parameters value_type, data_type and value_unit that can be found in the Iot-Directory. The user is not expected to provide any input parameter. The status of the operation is returned together with the requested data.
-        
-      requestBody:
-        required: true
-        content:
-          application/x-www-form-urlencoded:
-            schema: 
-              type: object
-              required:
-                - action
-              properties:
-                action:
-                  description: The operation to be performed.
-                  type: string
-                  enum: [insert,update,delete,get_all_device,get_device_attributes,get_param_values]
-                  example: insert
-                id:
-                  description: Unique identifier for the device (in the specified context broker).
-                  type: string
-                  example: provaMM7777
-                devicetype:
-                  description: |
-          
-                    The type of the device (e.g. Thermometer, TrainPass, Citylamp, fan)
-                    
-                    _Needed for actions:_ insert, update.
-                  type: string
-                  example: Thermometer
-                contextbroker:
-                  description: |
-                
-                    Name of the context broker that handles the device.
-            
-                    _Needed for actions:_ insert, update, delete, get_device_attribute.
-                  type: string
-                  example: mqttUNIFI
-                kind:
-                  description: |
-          
-                    Sensor, or actuator.
-            
-                    _Needed for actions:_ insert, update.
-            
-                  type: string
-                  enum: [sensor,actuator]
-                  example: sensor
-                protocol:
-                  description: |
-          
-                    One of the supported protocols (e.g. mqtt, ngsi, amqp).
-            
-                    _Needed for actions:_ insert, update.
-            
-                  type: string
-                  enum: [mqtt,ngsi,amqp]
-                  example: mqtt
-                format:
-                  description: |
-            
-                    Csv, xml, JSON.
-            
-                    _Needed for actions:_ insert, update.
-                  type: string
-                  enum: [csv,xml,json]
-                  example: csv
-                mac:
-                  description: |
-            
-                    Mac address of the device (when available otherwise empty string).
-            
-                    _Used in actions:_ insert, update.
-                  type: string
-                  example: 00-14-22-01-23-45
-                producer:
-                  description: |
-          
-                    Device producer (when available otherwise empty string).
-            
-                    _Used in actions:_ insert, update.
-                  type: string
-                  example: Arduino
-                model:
-                  description: |
-          
-                    Device model (when available otherwise empty string).
-            
-                    _Used in actions:_ insert, update.
-                  type: string
-                  example: TMP36
-                latitude:
-                  description: |
-            
-                    Latitude coordinate of the device location.
-            
-                    _Needed for actions:_ insert, update.
-                  type: number
-                  format: float
-                  maximum: 90
-                  minimum: -90
-                  example: 43.769562
-                longitude:
-                  description: |
-            
-                    Longitude coordinate of the device location.
-            
-                    _Needed for actions:_ insert, update.
-            
-                  type: number
-                  format: float
-                  maximum: 180
-                  minimum: -180
-                  example: 11.255814
-                visibility:
-                  description: |
-            
-                    Public, or private.
-            
-                    _Needed for actions:_ insert, update.
-            
-                  type: string
-                  enum: [public,private]
-                  example: public
-                frequency:
-                  description: |
-          
-                    Frequency at which it produces observations, in seconds.
-            
-                    _Needed for actions:_ insert, update.
-            
-                  type: integer
-                  format: int32
-                  example: 60
-                attributes:
-                  description: |
-          
-                    A list of JSON objects representing the values generated by a device for each observation. 
-                    
-                    _Required for actions:_ insert, update.
-                                
-                  type: array
-                  minItems: 1
-                  items:
-                    $ref: '#/components/schemas/attribute'
-                deleteattributes:
-                  description: |
-                    A list of JSON objects representing the values removed by a device.
-                    
-                    _Used in actions:_ update.    
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/attribute'                  
-                newattributes:
-                  description: |
-                    A list of JSON objects representing the values generated by a device for each observation.
-            
-                    _Used in actions:_ update.
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/attribute'
-      responses:
-        200:
-          $ref: '#/components/responses/device'
+          $ref: '#/components/responses/device'          
   /contextbroker.php:
     get:
       tags: [Broker]
-      summary: Context Broker
+      summary: Insert, update, delete, retrieve context brokers and context broker information
       
       description: |
-        This API is for the management of the context brokers. It allows to insert, update, delete, get the full listing of the brokers, and the full listing of the allowed configuration parameters, and get the configuration of a specific broker. The __action__ input parameter indicates what operation has to be performed:
+        This API is for the management of the context brokers. It allows to insert, update, delete, get the full listing of the brokers. The __action__ input parameter indicates what operation has to be performed:
         
-        * __Insert__ - This API is intended for inserting a new Context Broker in the Iot-Directory. The user has to specify the required parameters for inserting the Context Broker. The status of the operation is returned. This operation also registers the new broker in the Knowledge Base, when the required fields have been specified.
+        * __Insert__ - This API is intended for inserting a new Context Broker in the Iot-Directory. The user has to specify the required parameters for inserting the Context Broker. The status of the operation is returned.
         
-        * __Update__ - This API is intended for updating a Context Broker in the Iot-Directory. The user has to specify the required parameters for updating the Context Broker. The status of the operation is returned. This operation also updates the Knowledge Base when the required fields have been specified.
+        * __Update__ - This API is intended for updating a Context Broker in the Iot-Directory. The user has to specify the required parameters for updating the Context Broker. The status of the operation is returned. 
         
-        * __Delete__ - This API is intended for deleting a Context Broker from the Iot-Directory. The user has to specify the required parameters for deleting the Context Broker. The status of the operation is returned. This operation also deletes the broker from the Knowledge Base when the required fields have been specified.
+        * __Delete__ - This API is intended for deleting a Context Broker from the Iot-Directory. The user has to specify the required parameters for deleting the Context Broker. The status of the operation is returned. 
         
-        * __Get all Context Broker__ - This API is intended for retrieving all Context Brokers from the Iot-Directory. The user has to specify no parameters. The status of the operation is returned, together with the requested data.
+        * __Get all Contextbroker__ - This API is intended for retrieving all Context Brokers from the Iot-Directory. The user has to specify no parameters. The status of the operation is returned, together with the requested data.
         
-        * __Get config data__ - This API is intended for retrieving all config data from the Iot-Directory. The user has to specify no parameters. The status of the operation is returned, together with the requested data. 
-        
-        * __Get config data values__ - This API is intended for retrieving all config data values from the Iot-Directory. The user has to specify no parameters. The status of the operation is returned, together with the requested data. 
+        * __Get services by cb name__ - This API is intended for retrieving Context Brokers services information in specific case of a context broker supporting NGSI with multitenancy. The user has to specify the required parameters. The status of the operation is returned, together with the requested data.
         
       parameters:
         - name: action
@@ -453,59 +805,86 @@ paths:
           required: true
           schema: 
             type: string
-            enum: [insert, update, delete, get_all_contextbroker, get_config_data, get_config_data_values]
+            enum: [insert, update, delete, get_all_contextbroker, get_services_by_cb_name]
           example: insert
+        - name: nodered
+          in: query
+          description: If this parameter is present (it doesn't matter actually the passed value), the passed Authorization token has to be considered as an AccessToken, otherwise has to be considered as an RefreshToken
+          schema:
+            type: string
+          example: <any-value>          
         - name: name
           in: query
           description: |
             Name of the Context Broker that handles different devices. It is a unique identifier.
             
-            _Required for actions:_ insert, update, delete.
+            _Required for actions:_ insert, update, delete, get_services_by_cb_name.
             
-          required: false
+          required: true
           schema: 
             type: string
           example: rabbitUNIMI
+        - name: kind
+          in: query
+          description: |
+            Kind of the Context Broker. It can be an Internal or External
+            
+            _Required for actions:_ insert, update.
+            
+          required: true
+          schema: 
+            type: string
+            enum: [internal, external]
+          example: internal  
         - name: ip
           in: query
           description: |
             The Internet Protocol (IP) address of the Context Broker.
             
             _Required for actions:_ insert, update.
-          required: false
+          required: true
           schema: 
             type: string
           example: 159.149.129.184
-        - name: protocol
-          in: query
-          description: |
-            The communication protocol to be used for interfacing to the broker. It is expected to be one of the three communication protocols supported at today: mqtt, amqp, ngsi.
-            
-            _Required for actions:_ insert, update.
-            
-          required: false
-          schema:
-            type: string
-            enum: [mqtt,amqp,ngsi]
-          example: amqp
         - name: port
           in: query
           description: |
             The port number of the Context Broker.
             
             _Required for actions:_ insert, update.
-          required: false
+          required: true
           schema:
             type: integer
             format: int32
           example: 1026
+        - name: protocol
+          in: query
+          description: |
+            The type of protocol supported by this Context Broker.
+            
+            _Required for actions:_ insert, update.
+          required: true
+          schema:
+            type: string
+            enum: [amqp, coap, mqtt, ngsi, ngsi w/MultiService, sigfox]
+          example: ngsi         
+        - name: version
+          in: query
+          description: |
+            DEPRECATED The version of protocol supported by this Context Broker.
+            
+            _Required for actions:_ insert, update.
+          required: true
+          schema:
+            type: string
+          example: v1           
         - name: latitude
           in: query
           description: |
             Latitude coordinate of the Context Broker location (when available, otherwise an empty string).
             
             _Used in actions:_ insert, update.
-          required: false
+          required: true
           schema:
             type: string
           example: 43.769562
@@ -515,14 +894,14 @@ paths:
             Longitude coordinate of the Context Broker location (when available, otherwise an empty string).
             
             _Used in actions:_ insert, update.
-          required: false
+          required: true
           schema:
             type: string
           example: 11.255814
         - name: login
           in: query
           description: |
-            Login name for authenticating to the Context Broker (when available, otherwise an empty string).
+            Login name for authenticating to the Context Broker for Internal scenario (when available, otherwise an empty string).
             
             _Used in actions:_ insert, update.
           required: false
@@ -532,129 +911,105 @@ paths:
         - name: password
           in: query
           description: |
-            Login password for authenticating to the Context Broker (when available, otherwise an empty string).
+            Login password for authenticating to the Context Broker for Internal scenario  (when available, otherwise an empty string).
             
             _Used in actions:_ insert, update.
           required: false
           schema: 
             type: string
           example: prova25
-          
+        - name: sha
+          in: query
+          description: |
+            Sha of the certificate representing the Context Broker.
+            
+            _Used in actions:_ insert, update.
+          required: false
+          schema: 
+            type: string
+          example: efac28bd29b76c6fa9ba74efd937cd06ae992c8af23625a21a0471ff14800fed
+        - name: accesslink
+          in: query
+          description: |
+            external accesslink to contact the Context Broker.
+            
+            _Used in actions:_ insert, update.
+          required: false
+          schema: 
+            type: string
+          example: brokername.snap4city.org
+        - name: accessport
+          in: query
+          description: |
+            external accessport to contact the Context Broker.
+            
+            _Used in actions:_ insert, update.
+          required: false
+          schema: 
+            type: string
+          example: 80
+        - name: path
+          in: query
+          description: |
+            path to contact the Context Broker.
+            
+            _Used in actions:_ insert, update.
+          required: false
+          schema: 
+            type: string
+          example: /v2/entities
+        - name: visibility
+          in: query
+          description: |
+            DEPRECATED visibility to the Context Broker.
+            
+            _Used in actions:_ insert, update.
+          required: false
+          schema: 
+            type: string
+          example: private
+        - name: services
+          in: query
+          description: |
+            For Context Broker supporting ngsi with Multitenancy specify the list of available services.
+            
+            _Used in actions:_ insert, update.
+          required: false
+          schema: 
+            type: string
+          example: House          
+        - name: urlnificallback
+          in: query
+          description: |
+            For Context Broker supporting ngsi, if specified, it subsbibe for callback
+            
+            _Used in actions:_ insert, update.
+          required: false
+          schema: 
+            type: string
+          example: http://192.168.1.1:5577            
       responses:
         200:
           $ref: '#/components/responses/broker'
       
-    post:    
-      tags: [Broker]
-      summary: Context Broker
-      
-      description: |
-        This API is for the management of the context brokers. It allows to insert, update, delete, get the full listing of the brokers, and the full listing of the allowed configuration parameters, and get the configuration of a specific broker. The __action__ input parameter indicates what operation has to be performed:
-        
-        * __Insert__ - This API is intended for inserting a new Context Broker in the Iot-Directory. The user has to specify the required parameters for inserting the Context Broker. The status of the operation is returned. This operation also registers the new broker in the Knowledge Base, when the required fields have been specified.
-        
-        * __Update__ - This API is intended for updating a Context Broker in the Iot-Directory. The user has to specify the required parameters for updating the Context Broker. The status of the operation is returned. This operation also updates the Knowledge Base when the required fields have been specified.
-        
-        * __Delete__ - This API is intended for deleting a Context Broker from the Iot-Directory. The user has to specify the required parameters for deleting the Context Broker. The status of the operation is returned. This operation also deletes the broker from the Knowledge Base when the required fields have been specified.
-        
-        * __Get all Context Broker__ - This API is intended for retrieving all Context Brokers from the Iot-Directory. The user has to specify no parameters. The status of the operation is returned, together with the requested data.
-        
-        * __Get config data__ - This API is intended for retrieving all config data from the Iot-Directory. The user has to specify no parameters. The status of the operation is returned, together with the requested data. 
-        
-        * __Get config data values__ - This API is intended for retrieving all config data values from the Iot-Directory. The user has to specify no parameters. The status of the operation is returned, together with the requested data. 
-      requestBody:
-        required: true
-        content:
-          application/x-www-form-urlencoded:
-            schema: 
-              type: object
-              required:
-                - action
-              properties:
-                action:
-                  description: The operation to be performed.
-                  type: string
-                  enum: [insert, update, delete, get_all_contextbroker, get_config_data, get_config_data_values]
-                  example: insert
-                name:
-                  description: |
-                    Name of the Context Broker that handles different devices. It is a unique identifier.
-                    
-                    _Required for actions:_ insert, update, delete.
-                    
-                  type: string
-                  example: rabbitUNIMI
-                ip:
-                  description: |
-                    The Internet Protocol (IP) address of the Context Broker.
-                    
-                    _Required for actions:_ insert, update. 
-                  type: string
-                  example: 159.149.129.184
-                protocol:
-                  description: |
-                    The communication protocol to be used for interfacing to the broker. It is expected to be one of the three communication protocols supported at today: mqtt, amqp, ngsi.
-                    
-                    _Required for actions:_ insert, update.
-                  type: string
-                  enum: [mqtt,amqp,ngsi]
-                  example: amqp
-                port:
-                  description: |
-                    The port number of the Context Broker.
-                    
-                    _Required for actions:_ insert, update.
-                  type: integer
-                  format: int32
-                  example: 1026
-                latitude:
-                  description: |
-                    Latitude coordinate of the Context Broker location (when available, otherwise an empty string).
-                    
-                    _Used in actions:_ insert, update.
-                  type: string
-                  example: 43.769562
-                longitude:
-                  description: |
-                    Longitude coordinate of the Context Broker location (when available, otherwise an empty string).
-                    
-                    _Used in actions:_ insert, update.
-                  type: string
-                  example: 11.255814
-                login:
-                  description: |
-                    Login name for authenticating to the Context Broker (when available, otherwise an empty string).
-                    
-                    _Used in actions:_ insert, update.
-                  type: string
-                  example: prova
-                password:
-                  description: |
-                    Login password for authenticating to the Context Broker (when available, otherwise an empty string).
-                    
-                    _Used in actions:_ insert, update.
-                  type: string
-                  example: prova25
-      responses:
-        200:
-          $ref: '#/components/responses/broker'
+
   /value.php:
     summary: Values Management
     get:
       tags: [Value]
-      summary: Insert, update, delete, get all event values, get a specific event value.
+      summary: Insert, update, delete, retrieve values and value information.
       description: |
-        This API is for the management of the event values. It allows to insert, update, delete, get the full listing of the event values, and get the values for a specific event. The __action__ input parameter indicates what operation has to be performed:
+        This API is for the management of the event values. It allows to insert, update, delete, get the full listing of the event values, and check value informations. The __action__ input parameter indicates what operation has to be performed:
         
-        * __Insert__ - This API is intended for inserting a new value with a device already registered in the Iot-Directory. The user has to specify the required parameters for inserting a value. The status of the operation is returned. This operation also provides the registration in the Knowledge Base when the required fields have been specified. Finally the value is also reported in the structure of the device registered in the Context Broker (when this is required by the Context Broker).
+        * __Insert__ - This API is intended for inserting a new value with a device already registered in the Iot-Directory. The user has to specify the required parameters for inserting a value. The status of the operation is returned. This operation also provides the registration in the Knowledge Base. Finally the value is also reported in the structure of the device registered in the Context Broker (when this is required by the Context Broker).
         
-        * __Update__ - This API is intended for updating a value with a device already registered in the Iot-Directory. The user has to specify the required parameters for updating a value. The status of the operation is returned. This operation also provides the updating on the Knowledge Base when the required fields have been specified. Finally the value is also reported in the structure of the device registered in the Context Broker (when this is required by the Context Broker).
+        * __Update__ - This API is intended for updating a value with a device already registered in the Iot-Directory. The user has to specify the required parameters for updating a value. The status of the operation is returned. This operation also provides the updating on the Knowledge Base. Finally the value is also reported in the structure of the device registered in the Context Broker (when this is required by the Context Broker).
         
-        * __Delete__ - This API is intended for deleting a value from the Iot-Directory. The user has to specify the required parameters for deleting a value. The status of the operation is returned. This operation also provides the deletion from the Knowledge Base when the required fields have been specified and the deletion from the specified device.  
+        * __Delete__ - This API is intended for deleting a value from the Iot-Directory. The user has to specify the required parameters for deleting a value. The status of the operation is returned. This operation also provides the deletion from the Knowledge Base.  
         
         * __Get all event values__ - This API is intended for retrieving all values from the Iot-Directory. The user has to specify no parameters. The status of the operation is returned, together with the requested data. 
         
-        * __Get event value__ - This API is intended for retrieving all values from the Iot-Directory. The user has to specify the required parameters for retrieving event values. The status of the operation is returned, together with the requested data.
+        * __Check if last value__ - This API is intended for retrieving the number of the value of a specific device. The user has to specify the required parameters. The status of the operation is returned.
       parameters:
         - name: action
           in: query
@@ -662,15 +1017,21 @@ paths:
           required: true
           schema:
             type: string
-            enum: [insert,update,delete,get_all_event_value,get_event_value]
+            enum: [insert,update,delete,get_all_event_value,check_if_last_value]
           example: insert
+        - name: nodered
+          in: query
+          description: If this parameter is present (it doesn't matter actually the passed value), the passed Authorization token has to be considered as an AccessToken, otherwise has to be considered as an RefreshToken
+          schema:
+            type: string
+          example: <any-value>             
         - name: device
           in: query
           description: |
             The device unique identifier.
             
-            _Required for actions:_ insert, update, delete, get_event_value. 
-          required: false
+            _Required for actions:_ insert, update, delete, check_if_last_value. 
+          required: true
           schema: 
             type: string
           example: provaMM77
@@ -679,18 +1040,8 @@ paths:
           description: |
             Name of the Context Broker that handles the device.
             
-            _Required for actions:_ insert, update, get_event_value. 
-          required: false
-          schema: 
-            type: string
-          example: rabbitUNIMI
-        - name: cb
-          in: query
-          description: |
-            Name of the Context Broker that handles the device.
-            
-            _Required for actions:_ delete.
-          required: false
+            _Required for actions:_ insert, update, delete, check_if_last_value. 
+          required: true
           schema: 
             type: string
           example: rabbitUNIMI
@@ -699,7 +1050,7 @@ paths:
           description: |
             Name of the value (and unique in the specified device and context broker).
             
-            _Required for actions:_ insert, update, delete, get_event_value. 
+            _Required for actions:_ insert, update, delete. 
           required: false
           schema: 
             type: string
@@ -711,7 +1062,7 @@ paths:
             
             _Required for actions:_ insert, update. 
             
-          required: false
+          required: true
           schema: 
             type: string
           example: binary
@@ -721,7 +1072,7 @@ paths:
             Type of the value (e.g. Temperature, humidity, light, CO_concentration, and so on).
             
             _Required for actions:_ insert, update. 
-          required: false
+          required: true
           schema: 
             type: string
           example: actuator_canceller
@@ -731,7 +1082,7 @@ paths:
             Unit of measure of the value (eg. oC,  %, lux, ppm, and so on).
             
             _Required for actions:_ insert, update. 
-          required: false
+          required: true
           schema: 
             type: string
           example: lux
@@ -740,8 +1091,8 @@ paths:
           description: |
             It specifies if the measure can be only read (false) or a value can be assigned (true). 
             
-            _Required for actions:_ insert, update.
-          required: false
+            _Required for actions:_ insert, update, delete.
+          required: true
           schema:
             type: boolean
           example: true
@@ -751,7 +1102,7 @@ paths:
             The type of check to perform on values (value_refresh_rate, different_values or value_bounds).
             
             _Required for actions:_ insert, update.
-          required: false
+          required: true
           schema:
             type: string
             enum: [value_refresh_rate,different_values,value_bounds]
@@ -762,118 +1113,69 @@ paths:
             Healthiness value related to the healthiness criteria. The interpretetation varies depending of the adopted healthiness criteria: it could be the frequence of data acquisition (e.g. 300 seconds), the number of last values that have to have at least two different values, or the min and max allowed values.
             
             _Required for actions:_ insert, update.
-          required: false
+          required: true
           schema:
             type: string
           example: 100
+        - name: length
+          in: query
+          description: |
+            
+            How many entries to return (when available otherwise string "-1")
+            
+            Used in actions:_ get_all_event_value.
+            
+          required: false
+          schema: 
+            type: integer
+          example:
+            10           
+        - name: start
+          in: query
+          description: |
+            
+            Start point from entries to return (when available otherwise string "1")
+            
+            Used in actions:_ get_all_event_value.
+            
+          required: false
+          schema: 
+            type: integer
+          example:
+            1         
+        - name: draw
+          in: query
+          description: |
+            
+            Draw point from entries to return (when available otherwise string "1")
+            
+            Used in actions:_ get_all_event_value.
+            
+          required: false
+          schema: 
+            type: integer
+          example:
+            1       
+        - name: columns
+          in: query
+          description: |
+            
+            Array about the columns from entries to return (when available otherwise empty array)
+            
+            Used in actions:_ get_all_event_value.
+            
+          required: false
+          schema: 
+            type: string          
       responses:
         200:
           $ref: '#/components/responses/value'          
-    post:
-      tags: [Value]
-      summary: Insert, update, delete, get all event values, get a specific event value.
-      description: |
-        This API is for the management of the event values. It allows to insert, update, delete, get the full listing of the event values, and get the values for a specific event. The __action__ input parameter indicates what operation has to be performed:
-        
-        * __Insert__ - This API is intended for inserting a new value with a device already registered in the Iot-Directory. The user has to specify the required parameters for inserting a value. The status of the operation is returned. This operation also provides the registration in the Knowledge Base when the required fields have been specified. Finally the value is also reported in the structure of the device registered in the Context Broker (when this is required by the Context Broker).
-        
-        * __Update__ - This API is intended for updating a value with a device already registered in the Iot-Directory. The user has to specify the required parameters for updating a value. The status of the operation is returned. This operation also provides the updating on the Knowledge Base when the required fields have been specified. Finally the value is also reported in the structure of the device registered in the Context Broker (when this is required by the Context Broker).
-        
-        * __Delete__ - This API is intended for deleting a value from the Iot-Directory. The user has to specify the required parameters for deleting a value. The status of the operation is returned. This operation also provides the deletion from the Knowledge Base when the required fields have been specified and the deletion from the specified device.  
-        
-        * __Get all event values__ - This API is intended for retrieving all values from the Iot-Directory. The user has to specify no parameters. The status of the operation is returned, together with the requested data. 
-        
-        * __Get event value__ - This API is intended for retrieving all values from the Iot-Directory. The user has to specify the required parameters for retrieving event values. The status of the operation is returned, together with the requested data.
-      requestBody:
-        required: true
-        content:
-          application/x-www-form-urlencoded:
-            schema: 
-              type: object
-              required:
-                - action
-              properties:      
-                action:
-                  description: The operation to be performed.
-                  type: string
-                  enum: [insert,update,delete,get_all_event_value,get_event_value]
-                  example: insert
-                device:
-                  description: |
-                    The device unique identifier.
-                    
-                    _Required for actions:_ insert, update, delete, get_event_value. 
-                  type: string
-                  example: provaMM77
-                contextbroker:
-                  description: |
-                    Name of the Context Broker that handles the device.
-                    
-                    _Required for actions:_ insert, update, get_event_value. 
-                  type: string
-                  example: rabbitUNIMI
-                cb:
-                  description: |
-                    Name of the Context Broker that handles the device.
-                    
-                    _Required for actions:_ delete.
-                  type: string
-                  example: rabbitUNIMI
-                value_name:
-                  description: |
-                    Name of the value (and unique in the specified device and context broker).
-                    
-                    _Required for actions:_ insert, update, delete, get_event_value. 
-                  type: string
-                  example: ProvaVal
-                data_type:
-                  description: |
-                    Data type of the value (e.g. integer, float, string, boolean, and so on).
-                    
-                    _Required for actions:_ insert, update. 
-                    
-                  type: string
-                  example: binary
-                value_type:
-                  description: |
-                    Type of the value (e.g. Temperature, humidity, light, CO_concentration, and so on).
-                    
-                    _Required for actions:_ insert, update. 
-                  type: string
-                  example: actuator_canceller
-                value_unit:
-                  description: |
-                    Unit of measure of the value (eg. oC,  %, lux, ppm, and so on).
-                    
-                    _Required for actions:_ insert, update. 
-                  type: string
-                  example: lux
-                editable:
-                  description: |
-                    It specifies if the measure can be only read (false) or a value can be assigned (true). 
-                    
-                    _Required for actions:_ insert, update.
-                  type: boolean
-                  example: true
-                healthiness_criteria:
-                  description: |
-                    The type of check to perform on values (value_refresh_rate, different_values or value_bounds).
-                    
-                    _Required for actions:_ insert, update.
-                  type: string
-                  enum: [value_refresh_rate,different_values,value_bounds]
-                  example: value_refresh_rate 
-                healthiness_value:
-                  description: |
-                    Healthiness value related to the healthiness criteria. The interpretetation varies depending of the adopted healthiness criteria: it could be the frequence of data acquisition (e.g. 300 seconds), the number of last values that have to have at least two different values, or the min and max allowed values.
-                    
-                    _Required for actions:_ insert, update.
-                  type: string
-                  example: 100
-      responses:
-        200:
-          $ref: '#/components/responses/value'                    
-components:
+components:  
+  securitySchemes:
+    accessToken:            # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     attribute:
       description: A type of detection that a device is capable to perform.

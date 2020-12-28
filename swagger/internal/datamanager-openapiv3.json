@@ -22,12 +22,14 @@
         ],
         "summary": "Get DATA",
         "description": "It returns a JSON representation of the DATA belonging to the specified _APPID_. If _APPID_ starts with http%3A%2F%2F, it is decoded.",
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/sourceRequest"
-          },
-          {
-            "$ref": "#/components/parameters/accessToken"
           },
           {
             "$ref": "#/components/parameters/lang"
@@ -84,12 +86,14 @@
         ],
         "summary": "Post DATA",
         "description": "It stores a JSON representation of a DATA for the specified _APPID_. If _APPID_ starts with http%3A%2F%2F, it is decoded. If the DATA are successfully stored, it returns HTTP 200 and a JSON representation of the DATA. If the DATA to store include the field _id_ an HTTP 400 is returned (and an explanation is provided in the _Entity_). The fields _insertTime_, _deleteTime_, _elapseTime_ are overriden by the server. If the _username_ is missing, the correct data are retrieved from the _APPID_.\n",
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/sourceRequest"
-          },
-          {
-            "$ref": "#/components/parameters/accessToken"
           },
           {
             "$ref": "#/components/parameters/lang"
@@ -174,17 +178,20 @@
     },
     "/v1/apps/{APPID}/delegated": {
       "get": {
+        "deprecated": true,
         "tags": [
           "From IoT App"
         ],
         "summary": "Get DELEGATED v1",
         "description": "It returns a JSON representation of the DELEGATIONS that are given to the user that owns the specified _APPID_. If _APPID_ starts with http%3A%2F%2F, it is decoded. If _usernameDelegated_ is set to _ANONYMOUS_, the delegation is public/anonymous. Null values for _appId_ and _appType_ mean the delegation is valid for an Annotation made by the user (out of the IOT-APP context). It does not return the group's delegations.",
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/sourceRequest"
-          },
-          {
-            "$ref": "#/components/parameters/accessToken"
           },
           {
             "$ref": "#/components/parameters/lang"
@@ -231,17 +238,82 @@
     },
     "/v2/apps/{APPID}/delegated": {
       "get": {
+        "deprecated": true,
         "tags": [
           "From IoT App"
         ],
         "summary": "Get DELEGATED v2",
         "description": "Same as V1, but supporting group's delegations. It returns a JSON representation of the DELEGATIONS that are given to the user that owns the specified _APPID_. If _APPID_ starts with http%3A%2F%2F, it is decoded. If _usernameDelegated_ is set to _ANONYMOUS_, the delegation is public/anonymous. Null values for _appId_ and _appType_ mean the delegation is valid for an Annotation made by the user (out of the IOT-APP context).",
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/sourceRequest"
           },
           {
-            "$ref": "#/components/parameters/accessToken"
+            "$ref": "#/components/parameters/lang"
+          },
+          {
+            "$ref": "#/components/parameters/variableName"
+          },
+          {
+            "$ref": "#/components/parameters/motivation"
+          },
+          {
+            "$ref": "#/components/parameters/deleted"
+          },
+          {
+            "$ref": "#/components/parameters/groupname"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/delegations"
+          },
+          "204": {
+            "description": "No content (if no content is returned)."
+          },
+          "400": {
+            "description": "Bad request (if an error arise parsing client request)."
+          },
+          "401": {
+            "description": "Not Authorized (if an autherization error arise parsing client request)."
+          },
+          "500": {
+            "description": "Internal Server Error (if an error arise on server side)."
+          },
+          "501": {
+            "description": "Not Implemented (if the invoked api is not supported anymore)."
+          }
+        }
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/APPID"
+        }
+      ]
+    },
+    "/v3/apps/{APPID}/delegated": {
+      "get": {
+        "tags": [
+          "From IoT App"
+        ],
+        "summary": "Get DELEGATED v3",
+        "description": "Same as V2, but require the _elementType_ to be mandatory. It returns a JSON representation of the DELEGATIONS that are given to the user that owns the specified _APPID_. If _APPID_ starts with http%3A%2F%2F, it is decoded. If _usernameDelegated_ is set to _ANONYMOUS_, the delegation is public/anonymous. Null values for _appId_ and _appType_ mean the delegation is valid for an Annotation made by the user (out of the IOT-APP context).",
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/sourceRequest"
+          },
+          {
+            "$ref": "#/components/parameters/elementType"
           },
           {
             "$ref": "#/components/parameters/lang"
@@ -288,17 +360,20 @@
     },
     "/v1/apps/{APPID}/delegator": {
       "get": {
+        "deprecated": true,
         "tags": [
           "From IoT App"
         ],
         "summary": "Get DELEGATOR v1",
         "description": "It returns a JSON representation of the DELEGATIONS that the specified _APPID_ gave to an user. If _APPID_ starts with http%3A%2F%2F, it is decoded. If _usernameDelegated_ is set to _ANONYMOUS_, the delegation is public/anonymous. Null values for _appId_ and _appType_ mean the delegation is valid for an Annotation made by the user (out of the IOT-APP context). It does not return the group's delegations.",
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/sourceRequest"
-          },
-          {
-            "$ref": "#/components/parameters/accessTokenAppidOnly"
           },
           {
             "$ref": "#/components/parameters/lang"
@@ -342,17 +417,79 @@
     },
     "/v2/apps/{APPID}/delegator": {
       "get": {
+        "deprecated": true,
         "tags": [
           "From IoT App"
         ],
         "summary": "Get DELEGATOR v2",
         "description": "Same as V1, but supporting group's delegations. It returns a JSON representation of the DELEGATIONS that the specified _APPID_ gave to an user or group. If _APPID_ starts with http%3A%2F%2F, it is decoded. If _usernameDelegated_ is set to _ANONYMOUS_, the delegation is public/anonymous. Null values for _appId_ and _appType_ mean the delegation is valid for an Annotation made by the user (out of the IOT-APP context).",
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/sourceRequest"
           },
           {
-            "$ref": "#/components/parameters/accessToken"
+            "$ref": "#/components/parameters/lang"
+          },
+          {
+            "$ref": "#/components/parameters/variableName"
+          },
+          {
+            "$ref": "#/components/parameters/motivation"
+          },
+          {
+            "$ref": "#/components/parameters/deleted"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/delegations"
+          },
+          "204": {
+            "description": "No content (if no content is returned)."
+          },
+          "400": {
+            "description": "Bad request (if an error arise parsing client request)."
+          },
+          "401": {
+            "description": "Not Authorized (if an autherization error arise parsing client request)."
+          },
+          "500": {
+            "description": "Internal Server Error (if an error arise on server side)."
+          },
+          "501": {
+            "description": "Not Implemented (if the invoked api is not supported anymore)."
+          }
+        }
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/APPID"
+        }
+      ]
+    },
+    "/v3/apps/{APPID}/delegator": {
+      "get": {
+        "tags": [
+          "From IoT App"
+        ],
+        "summary": "Get DELEGATOR v3",
+        "description": "Same as V2, but require the _elementType_ to be mandatory. It returns a JSON representation of the DELEGATIONS that the specified _APPID_ gave to an user or group. If _APPID_ starts with http%3A%2F%2F, it is decoded. If _usernameDelegated_ is set to _ANONYMOUS_, the delegation is public/anonymous. Null values for _appId_ and _appType_ mean the delegation is valid for an Annotation made by the user (out of the IOT-APP context).",
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/sourceRequest"
+          },
+          {
+            "$ref": "#/components/parameters/elementType"
           },
           {
             "$ref": "#/components/parameters/lang"
@@ -396,17 +533,67 @@
     },
     "/v1/apps/{APPID}/access/check": {
       "get": {
+        "deprecated": true,
         "tags": [
           "From IoT App"
         ],
-        "summary": "Check Access",
+        "summary": "Check Access v1",
         "description": "Check if the user specifeid in the _accessToken_ is able to access the specified _APPID_ (if _APPID_ starts with http%3A%2F%2F, it is uri decoded). If the access is granted, it returns a JSON messge having _result_ set to _true_ and _message_ set to one of _OWNER_, _ROOTADMIN_, _DELEGATED_, _GROUP-DELEGATED_, _PUBLIC_. Otherwise, it returns a JSON message having _result_ set to _false_.\n",
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/sourceRequest"
           },
           {
-            "$ref": "#/components/parameters/accessTokenBasic"
+            "$ref": "#/components/parameters/lang"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/accesscheck"
+          },
+          "204": {
+            "description": "No content (if no content is returned)."
+          },
+          "400": {
+            "description": "Bad request (if an error arise parsing client request)."
+          },
+          "401": {
+            "description": "Not Authorized (if an autherization error arise parsing client request)."
+          },
+          "500": {
+            "description": "Internal Server Error (if an error arise on server side)."
+          },
+          "501": {
+            "description": "Not Implemented (if the invoked api is not supported anymore)."
+          }
+        }
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/APPID"
+        }
+      ]
+    },
+    "/v3/apps/{APPID}/access/check": {
+      "get": {
+        "tags": [
+          "From IoT App"
+        ],
+        "summary": "Check Access v3",
+        "description": "Same as V1, but require the _elementType_ to be mandatory. Check if the user specifeid in the _accessToken_ is able to access the specified _APPID_ (if _APPID_ starts with http%3A%2F%2F, it is uri decoded). If the access is granted, it returns a JSON messge having _result_ set to _true_ and _message_ set to one of _PUBLIC_, _DELEGATED_, _GROUP-DELEGATED_, _MYGROUP-PUBLIC_, _MYGROUP-DELEGATED_, _OWNER_, _ROOTADMIN_. Otherwise, it returns a JSON message having _result_ set to _false_.\n",
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/sourceRequest"
           },
           {
             "$ref": "#/components/parameters/lang"
@@ -441,17 +628,70 @@
     },
     "/v1/apps/{APPID}/delegations": {
       "delete": {
+        "deprecated": true,
         "tags": [
           "From IoT App"
         ],
-        "summary": "Delete DELEGATION",
+        "summary": "Delete DELEGATION v1",
         "description": "It deletes all the DELEGATIONS made by the specified _APPID_. If _APPID_ starts with http%3A%2F%2F, it is decoded.",
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/sourceRequest"
           },
           {
-            "$ref": "#/components/parameters/accessToken"
+            "$ref": "#/components/parameters/lang"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deletion has been completed successfully."
+          },
+          "204": {
+            "description": "No content (if no content is returned)."
+          },
+          "400": {
+            "description": "Bad request (if an error arise parsing client request)."
+          },
+          "401": {
+            "description": "Not Authorized (if an autherization error arise parsing client request)."
+          },
+          "500": {
+            "description": "Internal Server Error (if an error arise on server side)."
+          },
+          "501": {
+            "description": "Not Implemented (if the invoked api is not supported anymore)."
+          }
+        }
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/APPID"
+        }
+      ]
+    },
+    "/v3/apps/{APPID}/delegations": {
+      "delete": {
+        "tags": [
+          "From IoT App"
+        ],
+        "summary": "Delete DELEGATION v3",
+        "description": "It deletes all the DELEGATIONS made by the specified _APPID_. If _APPID_ starts with http%3A%2F%2F, it is decoded.",
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/sourceRequest"
+          },
+          {
+            "$ref": "#/components/parameters/elementType"
           },
           {
             "$ref": "#/components/parameters/lang"
@@ -491,12 +731,14 @@
         ],
         "summary": "Get DATA",
         "description": "It returns a JSON representation of the DATA belonging to the specified _USERNAME_.",
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/sourceRequest"
-          },
-          {
-            "$ref": "#/components/parameters/accessTokenUsername"
           },
           {
             "$ref": "#/components/parameters/lang"
@@ -553,12 +795,14 @@
         ],
         "summary": "Post DATA",
         "description": "It stores a JSON representation of a DATA for the specified _USERNAME_. If the DATA are successfully stored, it returns HTTP 200 and a JSON representation of the DATA. If the DATA to store include the field _id_ an HTTP 400 is returned (and an explanation is provided in the _Entity_). Fields _insertTime_, _deleteTime_, _elapseTime_ are overriden by the server.",
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/sourceRequest"
-          },
-          {
-            "$ref": "#/components/parameters/accessTokenUsername"
           },
           {
             "$ref": "#/components/parameters/lang"
@@ -643,17 +887,20 @@
     },
     "/v1/username/{USERNAME}/delegated": {
       "get": {
+        "deprecated": true,
         "tags": [
           "From Username"
         ],
         "summary": "Get DELEGATED v1",
         "description": "It returns a JSON representation of the DELEGATIONS that are given to the specified _USERNAME_ . If _usernameDelegated_ is set to _ANONYMOUS_, the delegation is public/anonymous. Null values for _appId_ and _appType_ mean the delegation is valid for an Annotation made by the user (out of the IOT-APP context). It does not return the group's delegations.",
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/sourceRequest"
-          },
-          {
-            "$ref": "#/components/parameters/accessTokenUsername"
           },
           {
             "$ref": "#/components/parameters/lang"
@@ -705,12 +952,14 @@
         ],
         "summary": "Get DELEGATED v2",
         "description": "Same as V1, but supporting group's delegations. It returns a JSON representation of the DELEGATIONS that are given to the specified _USERNAME_. If _usernameDelegated_ is set to _ANONYMOUS_, the delegation is public/anonymous. Null values for _appId_ and _appType_ mean the delegation is valid for an Annotation made by the user (out of the IOT-APP context).",
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/sourceRequest"
-          },
-          {
-            "$ref": "#/components/parameters/accessTokenUsername"
           },
           {
             "$ref": "#/components/parameters/lang"
@@ -726,6 +975,15 @@
           },
           {
             "$ref": "#/components/parameters/groupname"
+          },
+          {
+            "name": "elementType",
+            "required": false,
+            "in": "query",
+            "description": "elementType name filter",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -757,17 +1015,20 @@
     },
     "/v1/username/{USERNAME}/delegator": {
       "get": {
+        "deprecated": true,
         "tags": [
           "From Username"
         ],
         "summary": "Get DELEGATOR v1",
         "description": "It returns a JSON representation of the DELEGATIONS that the specified _USERNAME_ has given to an user. If _usernameDelegated_ is set to _ANONYMOUS_, the delegation is public/anonymous. Null values for _appId_ and _appType_ mean the delegation is valid for an Annotation made by the user (out of the IOT-APP context). It does not return the group's delegations.",
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/sourceRequest"
-          },
-          {
-            "$ref": "#/components/parameters/accessTokenUsername"
           },
           {
             "$ref": "#/components/parameters/lang"
@@ -816,12 +1077,14 @@
         ],
         "summary": "Get DELEGATOR v2",
         "description": "Same as V1, but supporting group's delegations. It returns a JSON representation of the DELEGATIONS that the specified _USERNAME_ gave to an user and to a group. If _usernameDelegated_ is set to _ANONYMOUS_, the delegation is public/anonymous. Null values for _appId_ and _appType_ mean the delegation is valid for an Annotation made by the user (out of the IOT-APP context).",
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/sourceRequest"
-          },
-          {
-            "$ref": "#/components/parameters/accessTokenUsername"
           },
           {
             "$ref": "#/components/parameters/lang"
@@ -834,6 +1097,15 @@
           },
           {
             "$ref": "#/components/parameters/deleted"
+          },
+          {
+            "name": "elementType",
+            "required": false,
+            "in": "query",
+            "description": "elementType name filter",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -865,23 +1137,108 @@
     },
     "/v1/username/{USERNAME}/delegations/check": {
       "get": {
+        "deprecated": true,
         "tags": [
           "From Username"
         ],
-        "summary": "Check DELEGATIONS",
+        "summary": "Check DELEGATIONS v1",
         "description": "It allows to check if a DELEGATION exist for the given _USERNAME_, _elementID_ and _variableName_. If a delegation is found, a JSON messge is returned with _result_ set to _true_, and _message_ set to one of _DELEGATED_, _GROUP-DELEGATED_, _PUBLIC_. If no DELEGATION can be found, a JSON message is returned with _result_ set to _false_.",
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/sourceRequest"
           },
           {
-            "$ref": "#/components/parameters/accessTokenElementid"
+            "name": "variableName",
+            "in": "query",
+            "description": "The variable name filter.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "personaldata"
+          },
+          {
+            "name": "elementID",
+            "in": "query",
+            "description": "The element ID filter.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "nr1ux28"
+          },
+          {
+            "$ref": "#/components/parameters/lang"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "If a delegation is found, a JSON messge is returned with _result_ set to _true_, and _message_ set to one of _OWNER_, _DELEGATED_, _GROUP-DELEGATED_, _PUBLIC_. If no DELEGATION can be found, a JSON message is returned with _result_ set to _false_.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "result",
+                    "message"
+                  ],
+                  "properties": {
+                    "result": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "enum": [
+                        "OWNER",
+                        "DELEGATED",
+                        "GROUP-DELEGATED",
+                        "PUBLIC"
+                      ],
+                      "example": "DELEGATED"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/USERNAME"
+        }
+      ]
+    },
+    "/v3/username/{USERNAME}/delegations/check": {
+      "get": {
+        "tags": [
+          "From Username"
+        ],
+        "summary": "Check DELEGATIONS v3",
+        "description": "Same as V2, but require the _elementType_ to be mandatory. It allows to check if a DELEGATION exist for the given _USERNAME_, _elementID_ and _variableName_. If a delegation is found, a JSON messge is returned with _result_ set to _true_, and _message_ set to one of _DELEGATED_, _GROUP-DELEGATED_, _PUBLIC_. If no DELEGATION can be found, a JSON message is returned with _result_ set to _false_.",
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/sourceRequest"
+          },
+          {
+            "$ref": "#/components/parameters/elementType"
           },
           {
             "name": "variableName",
             "in": "query",
             "description": "The variable name filter.",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             },
@@ -947,12 +1304,14 @@
         ],
         "summary": "Post DELEGATION",
         "description": "It stores a JSON representation of a DELEGATION for the specified _USERNAME_. If the DELEGATION is successfully stored, it returns HTTP 200 and a JSON representation of the new DELEGATION. If the DELEGATION to be stored includes the field _id_ an HTTP 400 is returned (and an explanation is provided in the _Entity_). Fields _insertTime_, _deleteTime_, and _elapseTime_ are overriden by the server. It is checked that the username specified as DELEGATED exists in LDAP.",
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/sourceRequest"
-          },
-          {
-            "$ref": "#/components/parameters/accessTokenUsername"
           },
           {
             "$ref": "#/components/parameters/lang"
@@ -1025,12 +1384,14 @@
         ],
         "summary": "Put DELEGATION",
         "description": "It stores an update for the JSON representation of a DELEGATION for the specified _DELEGATION_ID_, belonging to the specified _USERNAME_. If the DELEGATION is successfully stored, it returns an HTTP 200 and a JSON representation of the new version of the DELEGATION. If the DELEGATION includes the field _id_ an HTTP 400 is returned (and an explanation is provided in the _Entity_). Fields _insertTime_, _deleteTime_, and _elapseTime_ are overriden by the server. It is checked that the username specified as DELEGATED exists in LDAP.",
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/sourceRequest"
-          },
-          {
-            "$ref": "#/components/parameters/accessTokenUsername"
           },
           {
             "$ref": "#/components/parameters/lang"
@@ -1066,12 +1427,14 @@
         ],
         "summary": "Delete DELEGATION",
         "description": "It deletes a _DELEGATION_ID_ belonging to the specified _USERNAME_.",
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/sourceRequest"
-          },
-          {
-            "$ref": "#/components/parameters/accessTokenUsername"
           },
           {
             "$ref": "#/components/parameters/lang"
@@ -1109,14 +1472,110 @@
     },
     "/v1/apps/{APPID}/activity": {
       "get": {
+        "deprecated": true,
         "tags": [
           "Activity"
         ],
-        "summary": "Get ACTIVITY",
+        "summary": "Get ACTIVITY v1",
         "description": "It returns a JSON representation of the activities that an _APPID_ has invoked.",
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/accessToken"
+            "$ref": "#/components/parameters/lang"
+          },
+          {
+            "$ref": "#/components/parameters/activityDelegated"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "It returns a JSON representation of the activities that an _APPID_ has invoked.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "time",
+                    "appId",
+                    "username",
+                    "delegatedAppId",
+                    "delegatedUsername"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "format": "int32",
+                      "example": 156
+                    },
+                    "time": {
+                      "type": "integer",
+                      "format": "int64",
+                      "example": 1526392725000
+                    },
+                    "appId": {
+                      "type": "string",
+                      "example": "f9208f95d7a81d04e7925bb9c7ed388fb9e0c2ce94dab850f55db554cc92c299"
+                    },
+                    "username": {
+                      "type": "string",
+                      "example": "badii"
+                    },
+                    "delegatedAppId": {
+                      "type": "string",
+                      "example": "244a29787d16e7ba720163890c87a76e05dfccfac835cc0fd2700ddf0480f137"
+                    },
+                    "delegatedUsername": {
+                      "type": "string",
+                      "example": "PaoloNesi"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No content (if no content is returned)."
+          },
+          "400": {
+            "description": "Bad request (if an error arise parsing client request)."
+          },
+          "401": {
+            "description": "Not Authorized (if an autherization error arise parsing client request)."
+          },
+          "500": {
+            "description": "Internal Server Error (if an error arise on server side)."
+          },
+          "501": {
+            "description": "Not Implemented (if the invoked api is not supported anymore)."
+          }
+        }
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/APPID"
+        }
+      ]
+    },
+    "/v3/apps/{APPID}/activity": {
+      "get": {
+        "tags": [
+          "Activity"
+        ],
+        "summary": "Get ACTIVITY v3",
+        "description": "Same as V1, but require the _elementType_ to be mandatory. It returns a JSON representation of the activities that an _APPID_ has invoked.",
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/elementType"
           },
           {
             "$ref": "#/components/parameters/lang"
@@ -1200,13 +1659,15 @@
         "tags": [
           "From Outside"
         ],
-        "summary": "It returns ALL the DATA.",
+        "summary": "Get any DATA",
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/sourceRequest"
-          },
-          {
-            "$ref": "#/components/parameters/accessTokenRootadminOnly"
           },
           {
             "$ref": "#/components/parameters/lang"
@@ -1225,7 +1686,7 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/components/responses/getPublicData"
+            "$ref": "#/components/responses/getAllPublicData"
           },
           "204": {
             "description": "No content (if no content is returned)."
@@ -1244,10 +1705,207 @@
           }
         }
       }
+    },
+    "/v1/delegation": {
+      "get": {
+        "tags": [
+          "From Outside"
+        ],
+        "summary": "Get any DELEGATION",
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/sourceRequest"
+          },
+          {
+            "$ref": "#/components/parameters/lang"
+          },
+          {
+            "name": "elementType",
+            "required": false,
+            "in": "query",
+            "description": "elementType name filter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/variableName"
+          },
+          {
+            "$ref": "#/components/parameters/motivation"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/delegations"
+          },
+          "204": {
+            "description": "No content (if no content is returned)."
+          },
+          "400": {
+            "description": "Bad request (if an error arise parsing client request)."
+          },
+          "401": {
+            "description": "Forbidden (if an autherization error arise parsing client request)."
+          },
+          "500": {
+            "description": "Internal Server Error (if an error arise on server side)."
+          },
+          "501": {
+            "description": "Not Implemented (if the invoked api is not supported anymore)."
+          }
+        }
+      }
+    },
+    "/api/v1/public/access/check": {
+      "get": {
+        "tags": [
+          "From Outside"
+        ],
+        "summary": "Check if DATA is public",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/sourceRequest"
+          },
+          {
+            "name": "elementID",
+            "required": true,
+            "in": "query",
+            "description": "The identifier of the elementID to check",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "elementType",
+            "required": true,
+            "in": "query",
+            "description": "Type of the elementID (can be IOTID, DashboardID, AppID and so on)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "variableName",
+            "required": false,
+            "in": "query",
+            "description": "Variable name filter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "required": false,
+            "in": "query",
+            "description": "Language of the module that calls the API.",
+            "schema": {
+              "type": "string",
+              "default": "en"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/accesscheck"
+          },
+          "204": {
+            "description": "No content (if no content is returned)."
+          },
+          "400": {
+            "description": "Bad request (if an error arise parsing client request)."
+          },
+          "401": {
+            "description": "Not Authorized (if an autherization error arise parsing client request)."
+          },
+          "500": {
+            "description": "Internal Server Error (if an error arise on server side)."
+          },
+          "501": {
+            "description": "Not Implemented (if the invoked api is not supported anymore)."
+          }
+        }
+      }
+    },
+    "/api/v1/public/data": {
+      "get": {
+        "tags": [
+          "From Outside"
+        ],
+        "summary": "Get public DATA",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/sourceRequest"
+          },
+          {
+            "$ref": "#/components/parameters/variableName"
+          },
+          {
+            "$ref": "#/components/parameters/motivation"
+          },
+          {
+            "$ref": "#/components/parameters/from"
+          },
+          {
+            "$ref": "#/components/parameters/to"
+          },
+          {
+            "$ref": "#/components/parameters/first"
+          },
+          {
+            "$ref": "#/components/parameters/last"
+          },
+          {
+            "$ref": "#/components/parameters/lang"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/getData"
+          },
+          "204": {
+            "description": "No content (if no content is returned)."
+          },
+          "400": {
+            "description": "Bad request (if an error arise parsing client request). Remarkable example: the passed DATA has the _APP_ID_ field not recognized."
+          },
+          "401": {
+            "description": "Not Authorized (if an autherization error arise parsing client request)."
+          },
+          "500": {
+            "description": "Internal Server Error (if an error arise on server side)."
+          },
+          "501": {
+            "description": "Not Implemented (if the invoked api is not supported anymore)."
+          }
+        }
+      }
     }
   },
   "components": {
+    "securitySchemes": {
+      "accessToken": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
     "parameters": {
+      "elementType": {
+        "name": "elementType",
+        "in": "path",
+        "description": "The elementType that specify an APPID.",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "example": "IOTID"
+      },
       "APPID": {
         "name": "APPID",
         "in": "path",
@@ -1271,7 +1929,7 @@
       "accessToken": {
         "name": "accessToken",
         "in": "query",
-        "description": "The token that grants the access. It has to be valid, not elapsed and it has to belong to the owner of the _APPID_ or to an user with RootAdmin privileges.",
+        "description": "The token that grants the access. It has to be valid, not elapsed and it has to belong to the owner of the _APPID_ or to an user with RootAdmin privileges. The use of the accessToken in the parameter is __DEPRECATED__. Please pass the access token in the HTTP Header: \"Authorization: Bearer _accessToken_\".\n",
         "required": true,
         "schema": {
           "type": "string"
@@ -1280,7 +1938,7 @@
       "accessTokenAppidOnly": {
         "name": "accessToken",
         "in": "query",
-        "description": "The token that grants the access. It has to be valid, not elapsed and it has to belong to the owner of the _APPID_.",
+        "description": "The token that grants the access. It has to be valid, not elapsed and it has to belong to the owner of the _APPID_. The use of the accessToken in the parameter is __DEPRECATED__. Please pass the access token in the HTTP Header: \"Authorization: Bearer _accessToken_\".\n",
         "required": true,
         "schema": {
           "type": "string"
@@ -1289,7 +1947,7 @@
       "accessTokenUsername": {
         "name": "accessToken",
         "in": "query",
-        "description": "The token that grants the access. It has to be valid, not elapsed and it has to belong to the _USERNAME_ or to an user with RootAdmin privileges.",
+        "description": "The token that grants the access. It has to be valid, not elapsed and it has to belong to the _USERNAME_ or to an user with RootAdmin privileges. The use of the accessToken in the parameter is __DEPRECATED__. Please pass the access token in the HTTP Header: \"Authorization: Bearer _accessToken_\".\n",
         "required": true,
         "schema": {
           "type": "string"
@@ -1298,7 +1956,7 @@
       "accessTokenRootadminOnly": {
         "name": "accessToken",
         "in": "query",
-        "description": "The token that grants the access. It has to be valid, not elapsed and it has to belong to an user with RootAdmin privilege.",
+        "description": "The token that grants the access. It has to be valid, not elapsed and it has to belong to an user with RootAdmin privilege. The use of the accessToken in the parameter is __DEPRECATED__. Please pass the access token in the HTTP Header: \"Authorization: Bearer _accessToken_\".\n",
         "required": true,
         "schema": {
           "type": "string"
@@ -1307,7 +1965,7 @@
       "accessTokenBasic": {
         "name": "accessTokenBasic",
         "in": "query",
-        "description": "The token that grants the access. It has to be valid, and not elapsed.",
+        "description": "The token that grants the access. It has to be valid, and not elapsed. The use of the accessToken in the parameter is __DEPRECATED__. Please pass the access token in the HTTP Header: \"Authorization: Bearer _accessToken_\".\n",
         "required": true,
         "schema": {
           "type": "string"
@@ -1316,7 +1974,7 @@
       "accessTokenElementid": {
         "name": "accessToken",
         "in": "query",
-        "description": "The token that grants the access. It has to be valid, not elapsed and it has to belong to the owner of the _elementID_ or to an user with RootAdmin privileges.",
+        "description": "The token that grants the access. It has to be valid, not elapsed and it has to belong to the owner of the _elementID_ or to an user with RootAdmin privileges. The use of the accessToken in the parameter is __DEPRECATED__. Please pass the access token in the HTTP Header: \"Authorization: Bearer _accessToken_\".\n",
         "required": true,
         "schema": {
           "type": "string"
@@ -1356,7 +2014,7 @@
       "USERNAME": {
         "name": "USERNAME",
         "in": "path",
-        "description": "The unique identifier of the user.",
+        "description": "The unique identifier of the user. An user with _RootAdmin_ privileges can eventually specify the special string _ANY_ to retrieve DATA from any users.",
         "required": true,
         "schema": {
           "type": "string"
@@ -1536,7 +2194,7 @@
           }
         }
       },
-      "getPublicData": {
+      "getAllPublicData": {
         "description": "A JSON array with the retrieved data is returned.",
         "content": {
           "application/json": {

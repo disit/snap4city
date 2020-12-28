@@ -10,6 +10,7 @@ info:
   version: 1.0.0
 servers:
   - url: 'https://servicemap.disit.org/WebAppGrafo/api/v1'
+  - url: 'https://www.disit.org/superservicemap/api/v1/'
 paths:
   /:
     get:
@@ -50,12 +51,16 @@ paths:
         - $ref: '#/components/parameters/info'
         - $ref: '#/components/parameters/serviceUri'
         - $ref: '#/components/parameters/realtime'
+        - $ref: '#/components/parameters/requestFrom'
         - $ref: '#/components/parameters/valueName'
         - $ref: '#/components/parameters/fromTime'
         - $ref: '#/components/parameters/toTime'
         - $ref: '#/components/parameters/value_type'
+        - $ref: '#/components/parameters/healthiness'
         - $ref: '#/components/parameters/graphUri'
         - $ref: '#/components/parameters/fullCountParam'
+        - $ref: '#/components/parameters/accessToken'
+        - $ref: '#/components/parameters/apikey'
       responses:
         200:
           description: |
@@ -104,8 +109,8 @@ paths:
                   apiDoc: 
                     type: string
                     format: uri
-                    enum: [http://www.disit.org/6991]
-                    example: http://www.disit.org/6991
+                    enum: ["http://www.disit.org/6991"]
+                    example: "http://www.disit.org/6991"
               example:
                 externalValue: 'http://servicemap.disit.org/WebAppGrafo/api/v1'
                 
@@ -162,6 +167,7 @@ paths:
             format: int32
             default: 100
         - $ref: '#/components/parameters/uid'
+        - $ref: '#/components/parameters/requestFrom'
       responses:
         200:
           description: |
@@ -192,14 +198,14 @@ paths:
                   message:
                     type: string
                     enum: 
-                      - invalid 'selection' parameter (lat;long[;lat;long] | wkt:... | geo: ...)
+                      - "invalid 'selection' parameter (lat;long[;lat;long] | wkt:... | geo: ...)"
                     example: |
                       invalid 'selection' parameter (lat;long[;lat;long] | wkt:... | geo: ...)
                   apiDoc: 
                     type: string
                     format: uri
-                    enum: [http://www.disit.org/6991]
-                    example: http://www.disit.org/6991
+                    enum: [ "http://www.disit.org/6991" ]
+                    example: "http://www.disit.org/6991"
               example:
                 externalValue: 'http://servicemap.disit.org/WebAppGrafo/api/v1/events/?range=day&format=json&selection=invalid'
         404:
@@ -340,6 +346,8 @@ paths:
             
           schema:
             type: string
+            
+        - $ref: '#/components/parameters/requestFrom'
           
       responses:
         200:
@@ -385,8 +393,8 @@ paths:
                   apiDoc: 
                     type: string
                     format: uri
-                    enum: [http://www.disit.org/6991]
-                    example: http://www.disit.org/6991
+                    enum: [ "http://www.disit.org/6991" ]
+                    example: "http://www.disit.org/6991"
               example:
                 externalValue: 'http://servicemap.disit.org/WebAppGrafo/api/v1/location'
         
@@ -440,7 +448,7 @@ paths:
             _Example:_ e7c13b5ce309dcddce9f72c810c3f93c61ac1c47d66126127f7a78bd5c2cb8a2
           schema: 
             type: string
-
+        - $ref: '#/components/parameters/requestFrom'
       responses:
         200:
           description: The API provides an array of JSON objects of the agencies available, for each agency is provided the agency name and the agency URI used to identify the agency in other APIs. [[Example]](http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/agencies/)
@@ -492,7 +500,7 @@ paths:
             _Example:_ e7c13b5ce309dcddce9f72c810c3f93c61ac1c47d66126127f7a78bd5c2cb8a2
           schema: 
             type: string
-
+        - $ref: '#/components/parameters/requestFrom'
       responses:
         200:
           description: |
@@ -550,8 +558,8 @@ paths:
                   apiDoc: 
                     type: string
                     format: uri
-                    enum: [http://www.disit.org/6991]
-                    example: http://www.disit.org/6991
+                    enum: [ "http://www.disit.org/6991" ]
+                    example: "http://www.disit.org/6991"
               example:
                 externalValue: 'http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/bus-lines'
                 
@@ -600,6 +608,7 @@ paths:
             _Example:_ e7c13b5ce309dcddce9f72c810c3f93c61ac1c47d66126127f7a78bd5c2cb8a2
           schema: 
             type: string
+        - $ref: '#/components/parameters/requestFrom'
       responses:
         200:
           description: |
@@ -681,8 +690,8 @@ paths:
                   apiDoc: 
                     type: string
                     format: uri
-                    enum: [http://www.disit.org/6991]
-                    example: http://www.disit.org/6991
+                    enum: [ "http://www.disit.org/6991" ]
+                    example: "http://www.disit.org/6991"
               example:
                 externalValue: 'http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/bus-lines'
                 
@@ -718,6 +727,7 @@ paths:
             
           schema: 
             type: string
+        - $ref: '#/components/parameters/requestFrom'
       responses:
         200:
           description: The API provides a JSON Object with line number (aka line short name) and line name (aka line long name) and a GeoJSON FeatureCollection with the stops. The stops are provided in stop order, from the first to the last. [[Example]](http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/bus-stops/?route=http://www.disit.org/km4city/resource/Bus_tiemme_Trip_2205_262677)
@@ -754,8 +764,8 @@ paths:
                   apiDoc: 
                     type: string
                     format: uri
-                    enum: [http://www.disit.org/6991]
-                    example: http://www.disit.org/6991
+                    enum: [ "http://www.disit.org/6991" ]
+                    example: "http://www.disit.org/6991"
               example:
                 externalValue: 'http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/bus-stops/'
                 
@@ -821,6 +831,7 @@ paths:
             _Example:_ e7c13b5ce309dcddce9f72c810c3f93c61ac1c47d66126127f7a78bd5c2cb8a2
           schema: 
             type: string
+        - $ref: '#/components/parameters/requestFrom'
       responses:
         200:
           description: |
@@ -868,8 +879,8 @@ paths:
                   apiDoc: 
                     type: string
                     format: uri
-                    enum: [http://www.disit.org/6991]
-                    example: http://www.disit.org/6991
+                    enum: [ "http://www.disit.org/6991" ]
+                    example: "http://www.disit.org/6991"
               example:
                 externalValue: 'http://servicemap.disit.org/WebAppGrafo/api/v1/tpl'
                 
@@ -909,6 +920,24 @@ paths:
       description: The API provides the estimated current position of buses. Currently it provides the position of ATAF&Linea buses based on the timetable.
       parameters:
         - in: query
+          name: agency
+          description: |
+            The agency of interest (optional). The agency can be identified through its URI, or through its name. If not specified, the default agency is used that is configured for the Knowledge Base (e.g. ATAF for Tuscany).
+            
+            _Example:_ Ataf&Linea
+          schema: 
+            type: string
+          example: Ataf&Linea
+        - in: query
+          name: line
+          description: |
+            The line of interest (optional). The line can be identified through its URI, or through its name. If not specified, positions of all buses are returned.
+            
+            _Example:_ http://www.disit.org/km4city/resource/Bus_ataflinea_Route_2348415186
+          schema: 
+            type: string
+          example: http://www.disit.org/km4city/resource/Bus_ataflinea_Route_2348415186
+        - in: query
           name: uid
           description: |
             Optional user identifier.
@@ -925,6 +954,7 @@ paths:
             enum: [html, json]
             default: json
           example: json
+        - $ref: '#/components/parameters/requestFrom'          
       responses:
         200:
           description: |
@@ -935,9 +965,11 @@ paths:
               * detectionTime: the delay in minutes from the current time and the time the position was acquired.
           content:
             text/html:
-              $ref: '#/components/schemas/BusPositionHtmlDocument'
+              schema: 
+                $ref: '#/components/schemas/BusPositionHtmlDocument'
             application/json:
-              $ref: '#/components/schemas/FeatureCollection'
+              schema:
+                $ref: '#/components/schemas/FeatureCollection'
               
         404:
           description: Invalid user id.
@@ -1009,50 +1041,6 @@ paths:
           description: The API returns the HTTP code 200 when everything is ok, and the comment and possible rating have been delivered to the moderator.
         404:
           description: The API fails using HTTP error code 404 if the serviceURI is not valid, or the comment is not provided or user id is not provided.
-        
-  /photo/:
-    post:
-      tags: [Feedbacks]
-      summary: Service Photo API
-      description: The API accepts in POST as a multipart form the serviceUri, the user id and a photo in jpeg or png format. The photo provided is not automatically associated with the serviceUri a moderator will check it and decide.
-      parameters:
-        - in: formData
-          name: serviceUri
-          description: |
-            URI identifying a service.
-            
-            _Example:_ http://www.disit.org/km4city/resource/aserviceidentifier
-            
-          required: true
-          schema:
-            type: string
-            format: uri
- 
-        - in: formData
-          name: uid
-          description: |
-            A user identifier associated with the user providing the data.
-            
-            _Example:_ e7c13b5ce309dcddce9f72c810c3f93c61ac1c47d66126127f7a78bd5c2cb8a2
-            
-          required: true
-          schema: 
-            type: string
-
-        - in: formData
-          name: file
-          description: |
-            A part named _file_ with the photo to be uploaded, the part should contain the mimetype or the filename.
-            
-            _Example:_ image/jpeg
-            
-          required: true
-
-      responses:
-        200:
-          description: The API returns the HTTP code 200 when everything is ok, and the photo has been delivered to the moderator.
-        404:
-          description: The API fails using HTTP error code 404 if the serviceURI is not valid, user id is not provided or a part named _file_ is not present and the mimetype of this file cannot be found or if it’s not valid.
           
   /feedback/last/:
     get:
@@ -1080,6 +1068,7 @@ paths:
             minLength: 2
             maxLength: 2
             default: en
+        - $ref: '#/components/parameters/requestFrom'            
       responses:
         200:
           description: The API reports a JSON object with informations on the last contributions. [[Example]](http://servicemap.disit.org/WebAppGrafo/api/v1/feedback/last/)
@@ -1160,7 +1149,8 @@ paths:
             _Example:_ e7c13b5ce309dcddce9f72c810c3f93c61ac1c47d66126127f7a78bd5c2cb8a2
             
           schema: 
-            type: string              
+            type: string        
+        - $ref: '#/components/parameters/requestFrom'            
       responses:
         200:
           description: The API provides a JSON object with the path from the source to the destination. [[HTML Example]](http://servicemap.disit.org/WebAppGrafo/api/v1/shortestpath/?source=43.7767;11.2477&destination=43.7687;11.2620&format=html) [[JSON Example]](http://servicemap.disit.org/WebAppGrafo/api/v1/shortestpath/?source=43.7767;11.2477&destination=43.7687;11.2620)
@@ -1318,7 +1308,110 @@ paths:
                 format: html
               example:
                 externalValue: 'http://servicemap.disit.org/WebAppGrafo/api/v1/shortestpath/?source=43.7767;11.2477&destination=43.7687;11.2620&format=html'
-
+  /{organization}/wfs:
+    post:
+      tags: [WFS]
+      summary: WFS server
+      description: It allows to query the service map as if it was a WFS server.
+      parameters:
+        - in: path
+          name: organization
+          schema: 
+            type: string
+          required: true
+          description: The organization within whose boundaries resources are looked up.
+      requestBody:
+        description: A WFS-compliant request
+        required: true
+        content:
+          application/xml:
+            schema:
+              type: string
+      responses:
+        '200':
+          description: A WFS-compliant XML response
+    get:
+      tags: [WFS]
+      summary: WFS server
+      description: It allows to query the service map as if it was a WFS server.
+      parameters:
+        - in: path
+          name: organization
+          schema: 
+            type: string
+          required: true
+          description: The organization within whose boundaries resources are looked up.
+        - in: query
+          name: request
+          schema:
+            type: string
+        - in: query
+          name: service
+          schema:
+            type: string     
+        - in: query
+          name: acceptversions
+          schema:
+            type: string          
+        - in: query
+          name: typename
+          schema:
+            type: string  
+        - in: query
+          name: outputformat
+          schema:
+            type: string  
+        - in: query
+          name: storedquery_id
+          schema:
+            type: string  
+        - in: query
+          name: startindex
+          schema:
+            type: string  
+        - in: query
+          name: count
+          schema:
+            type: string  
+        - in: query
+          name: resulttype
+          schema:
+            type: string  
+        - in: query
+          name: resolve
+          schema:
+            type: string  
+        - in: query
+          name: resolvedepth
+          schema:
+            type: string  
+        - in: query
+          name: resolvetimeout
+          schema:
+            type: string  
+        - in: query
+          name: id
+          schema:
+            type: string  
+        - in: query
+          name: version
+          schema:
+            type: string  
+        - in: query
+          name: typenames
+          schema:
+            type: string  
+        - in: query
+          name: propertyname
+          schema:
+            type: string  
+        - in: query
+          name: filter
+          schema:
+            type: string              
+      responses:
+        '200':
+          description: A WFS-compliant XML response
 components:
   schemas:
     ServicesJsonDocument:
@@ -1448,7 +1541,7 @@ components:
           items:
             type: string
             format: uri
-          example: [ https://servicemap.disit.org/WebAppGrafo/api/v1/photo/thumbs/file-5697308527651966276.jpg, https://servicemap.disit.org/WebAppGrafo/api/v1/photo/thumbs/file-5967841092303360553.jpg, https://servicemap.disit.org/WebAppGrafo/api/v1/photo/thumbs/file-9101174593154930510.jpg]
+          example: [ "https://servicemap.disit.org/WebAppGrafo/api/v1/photo/thumbs/file-5697308527651966276.jpg", "https://servicemap.disit.org/WebAppGrafo/api/v1/photo/thumbs/file-5967841092303360553.jpg", "https://servicemap.disit.org/WebAppGrafo/api/v1/photo/thumbs/file-9101174593154930510.jpg"]
         multimedia:
           description: An URL to a multimedia resource.
           type: string
@@ -1543,14 +1636,14 @@ components:
               items:
                 type: string
                 format: uri
-              example: [https://servicemap.disit.org/WebAppGrafo/api/v1/photo/file-5697308527651966276.jpg, https://servicemap.disit.org/WebAppGrafo/api/v1/photo/file-5967841092303360553.jpg, https://servicemap.disit.org/WebAppGrafo/api/v1/photo/file-9101174593154930510.jpg]
+              example: [ "https://servicemap.disit.org/WebAppGrafo/api/v1/photo/file-5697308527651966276.jpg", "https://servicemap.disit.org/WebAppGrafo/api/v1/photo/file-5967841092303360553.jpg", "https://servicemap.disit.org/WebAppGrafo/api/v1/photo/file-9101174593154930510.jpg"]
             photoOrigs:
               description: Array of URLs to original photoes of the service, provided using the _Photo_ API.
               type: array
               items:
                 type: string
                 format: uri
-              example: [https://servicemap.disit.org/WebAppGrafo/api/v1/photo/originals/file-5697308527651966276.jpg, https://servicemap.disit.org/WebAppGrafo/api/v1/photo/originals/file-5967841092303360553.jpg, https://servicemap.disit.org/WebAppGrafo/api/v1/photo/originals/file-9101174593154930510.jpg]
+              example: [ "https://servicemap.disit.org/WebAppGrafo/api/v1/photo/originals/file-5697308527651966276.jpg", "https://servicemap.disit.org/WebAppGrafo/api/v1/photo/originals/file-5967841092303360553.jpg", "https://servicemap.disit.org/WebAppGrafo/api/v1/photo/originals/file-9101174593154930510.jpg"]
             wktGeometry:
               description: A Well Known Text geometry associated with the service.
               type: string
@@ -2756,7 +2849,30 @@ components:
         enum: [day, week, month]
       
       example: month
-    
+    requestFrom:
+      in: query
+      name: requestFrom
+      description: The parameter identifies the request's originator for monitoring purposes.
+      schema:
+        type: string
+    healthiness:
+      in: query
+      name: healthiness
+      description: The parameter allows to filter results by healthiness
+      schema:
+        type: boolean
+    accessToken:
+      in: query
+      name: accessToken
+      description: The parameter allows to perform authenticated requests, and therefore retrieve not only public data, but also private data that is owned or delegated to the user associated with the specified access token.
+      schema:
+        type: string
+    apikey:
+      in: query
+      name: apikey
+      description: The parameter identifies the request's originator for monitoring/authorization purposes.
+      schema:
+        type: string
 externalDocs:
   description: 'SMART CITY API WEB DOCUMENTATION'
   url: 'http://www.disit.org/drupal/?q=node/6597'

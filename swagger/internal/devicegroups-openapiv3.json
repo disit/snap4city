@@ -1,0 +1,3321 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Device Groups API",
+    "description": "This API allows to create and manage groups of IoT devices and other items.",
+    "contact": {
+      "name": "DISIT Lab",
+      "url": "https://www.disit.org/",
+      "email": "paolo.nesi@unifi.it"
+    },
+    "license": {
+      "name": "GNU General Public License, version 2",
+      "url": "https://www.gnu.org/licenses/old-licenses/gpl-2.0.html"
+    },
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://www.disit.org/test/datamanager/api/v1",
+      "description": "Test"
+    },
+    {
+      "url": "https://www.snap4city.org/mypersonaldata/grp/api/v1",
+      "description": "Production"
+    }
+  ],
+  "paths": {
+    "/devicegroup/": {
+      "get": {
+        "tags": [
+          "List"
+        ],
+        "summary": "List your own groups",
+        "parameters": [
+          {
+            "name": "sourceRequest",
+            "in": "query",
+            "description": "The category of the software module from where the request originates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Web"
+            }
+          },
+          {
+            "name": "sourceId",
+            "in": "query",
+            "description": "The unique identifier of software module from where the request originates",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "Swagger Try it out"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "The requester's locale",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "description": "The zero-based page number, for paginated requests. Skip to get the full (unsorted) listing.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": -1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "The number of results per page. Only used in paginated requests.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "The property to be used for sorting results",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "id",
+                "description",
+                "updateTime",
+                "highLevelType",
+                "name",
+                "ownership",
+                "username"
+              ],
+              "default": "id"
+            }
+          },
+          {
+            "name": "sortDirection",
+            "in": "query",
+            "description": "The direction of sorting",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "desc"
+            }
+          },
+          {
+            "name": "searchKey",
+            "in": "query",
+            "description": "For performing full-text searches.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "highLevelType",
+            "in": "query",
+            "description": "For filtering results by type.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "accessToken",
+            "in": "query",
+            "description": "An appropriate text through which the requester authenticates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJYQmNYSDJQbHdoeFhXeXlGdmRtdnhZeGVIOTZwQl80ZGZjU3VZQWFUQk9JIn0.eyJqdGkiOiI3MWFjNDkzOS0wM2NiLTRjZTItYjA3Mi0wOGZhN2UxYjdmMzciLCJleHAiOjE1NjAyMzk5MDMsIm5iZiI6MCwiaWF0IjoxNTYwMjM5ODQzLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvYXV0aC9yZWFsbXMvbWFzdGVyIiwic3ViIjoiZDNlYTEzMDYtZjBmOS00YjI1LWI3YzUtZTY0ZGZiZGY5NDllIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiYWRtaW4tY2xpIiwiYXV0aF90aW1lIjowLCJzZXNzaW9uX3N0YXRlIjoiMDE2MmU4YzMtMjViMy00ZmQ5LTg0MTYtZTI4YmQyN2I2MWJkIiwiYWNyIjoiMSIsInNjb3BlIjoiZW1haWwgcHJvZmlsZSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWRtaW4ifQ.MOu-XeCdt6M7ZJiYjQyo_hAtV3xEtmRaL6cxE-YdpsEoirm-QrQztPWFx0R6I7j6gkUuxum59zYSRS9ZPq9T207db7oKTqTEL_9WsrJXG0aCbkmpSL3En3q2zyiCKfbA4YrPYciHJkTF8LFhTgPWaXII7IwiyumDvcyl7wq_qDMJsihfM_Ewu86CrQzNs7UBirb40JiA6DeBipkI46T57E93FhA3lmRw_6IcDVVKxAiy5eQWpFwVJ7-g_jr7LW4AmhI_dSwwnfYI3JViX2V2Jw0AsveCb7sPAApAU3JdA3t2GpdGsjJDrNYaxrtq3yL7wzTQbYWvRzjp1309qK1YKw"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The listing of groups is returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 21
+                      },
+                      "description": {
+                        "type": "string",
+                        "example": "Devices deployed on that given place for that given project"
+                      },
+                      "insertTime": {
+                        "type": "integer",
+                        "example": 1590593353000
+                      },
+                      "updateTime": {
+                        "type": "integer",
+                        "example": 1590593372000
+                      },
+                      "highLevelType": {
+                        "type": "string",
+                        "example": "MyGroup"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Devices Project Alpha"
+                      },
+                      "organizations": {
+                        "type": "string",
+                        "example": "[ou=Antwerp,dc=foo,dc=example,dc=org]"
+                      },
+                      "ownership": {
+                        "type": "string",
+                        "enum": [
+                          "private",
+                          "public"
+                        ],
+                        "example": "private"
+                      },
+                      "username": {
+                        "type": "string",
+                        "example": "mirco"
+                      },
+                      "viewEnabled": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "size": {
+                        "type": "string",
+                        "example": "2 items"
+                      },
+                      "enableEdit": {
+                        "type": "boolean",
+                        "example": false
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No groups found"
+          },
+          "400": {
+            "description": "Malformed request"
+          },
+          "401": {
+            "description": "Authentication failed"
+          },
+          "500": {
+            "description": "Unexpected error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Manage"
+        ],
+        "summary": "Create a group",
+        "parameters": [
+          {
+            "name": "sourceRequest",
+            "in": "query",
+            "description": "The category of the software module from where the request originates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Web"
+            }
+          },
+          {
+            "name": "sourceId",
+            "in": "query",
+            "description": "The unique identifier of software module from where the request originates",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "Swagger Try it out"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "The requester's locale",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "en"
+            }
+          },
+          {
+            "name": "accessToken",
+            "in": "query",
+            "description": "An appropriate text through which the requester authenticates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJYQmNYSDJQbHdoeFhXeXlGdmRtdnhZeGVIOTZwQl80ZGZjU3VZQWFUQk9JIn0.eyJqdGkiOiI3MWFjNDkzOS0wM2NiLTRjZTItYjA3Mi0wOGZhN2UxYjdmMzciLCJleHAiOjE1NjAyMzk5MDMsIm5iZiI6MCwiaWF0IjoxNTYwMjM5ODQzLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvYXV0aC9yZWFsbXMvbWFzdGVyIiwic3ViIjoiZDNlYTEzMDYtZjBmOS00YjI1LWI3YzUtZTY0ZGZiZGY5NDllIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiYWRtaW4tY2xpIiwiYXV0aF90aW1lIjowLCJzZXNzaW9uX3N0YXRlIjoiMDE2MmU4YzMtMjViMy00ZmQ5LTg0MTYtZTI4YmQyN2I2MWJkIiwiYWNyIjoiMSIsInNjb3BlIjoiZW1haWwgcHJvZmlsZSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWRtaW4ifQ.MOu-XeCdt6M7ZJiYjQyo_hAtV3xEtmRaL6cxE-YdpsEoirm-QrQztPWFx0R6I7j6gkUuxum59zYSRS9ZPq9T207db7oKTqTEL_9WsrJXG0aCbkmpSL3En3q2zyiCKfbA4YrPYciHJkTF8LFhTgPWaXII7IwiyumDvcyl7wq_qDMJsihfM_Ewu86CrQzNs7UBirb40JiA6DeBipkI46T57E93FhA3lmRw_6IcDVVKxAiy5eQWpFwVJ7-g_jr7LW4AmhI_dSwwnfYI3JViX2V2Jw0AsveCb7sPAApAU3JdA3t2GpdGsjJDrNYaxrtq3yL7wzTQbYWvRzjp1309qK1YKw"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Metadata of the new group",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "highLevelType",
+                  "name",
+                  "description"
+                ],
+                "properties": {
+                  "highLevelType": {
+                    "type": "string",
+                    "enum": [
+                      "MyGroup"
+                    ],
+                    "example": "MyGroup"
+                  },
+                  "name": {
+                    "type": "string",
+                    "example": "one"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Description of group one"
+                  }
+                }
+              },
+              "example": "{ \"highLevelType\": \"MyGroup\", \"name\": \"one\", \"description\": \"Description of group one\" }"
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Group created"
+          },
+          "400": {
+            "description": "Malformed request"
+          },
+          "401": {
+            "description": "Authentication failed"
+          }
+        }
+      }
+    },
+    "/devicegroup/public/": {
+      "get": {
+        "deprecated": true,
+        "tags": [
+          "List"
+        ],
+        "summary": "Deprecated way of listing public groups",
+        "parameters": [
+          {
+            "name": "sourceRequest",
+            "in": "query",
+            "description": "The category of the software module from where the request originates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Web"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "The requester's locale",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "description": "The zero-based page number, for paginated requests. Skip to get the full (unsorted) listing.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": -1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "The number of results per page. Only used in paginated requests.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "The property to be used for sorting results",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "id",
+                "description",
+                "updateTime",
+                "highLevelType",
+                "name",
+                "ownership",
+                "username"
+              ],
+              "default": "id"
+            }
+          },
+          {
+            "name": "sortDirection",
+            "in": "query",
+            "description": "The direction of sorting",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "desc"
+            }
+          },
+          {
+            "name": "searchKey",
+            "in": "query",
+            "description": "For performing full-text searches.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "highLevelType",
+            "in": "query",
+            "description": "For filtering results by type.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The listing of groups is returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 21
+                      },
+                      "description": {
+                        "type": "string",
+                        "example": "Devices deployed on that given place for that given project"
+                      },
+                      "insertTime": {
+                        "type": "integer",
+                        "example": 1590593353000
+                      },
+                      "updateTime": {
+                        "type": "integer",
+                        "example": 1590593372000
+                      },
+                      "highLevelType": {
+                        "type": "string",
+                        "example": "MyGroup"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Devices Project Alpha"
+                      },
+                      "organizations": {
+                        "type": "string",
+                        "example": "[ou=Antwerp,dc=foo,dc=example,dc=org]"
+                      },
+                      "ownership": {
+                        "type": "string",
+                        "enum": [
+                          "private",
+                          "public"
+                        ],
+                        "example": "private"
+                      },
+                      "username": {
+                        "type": "string",
+                        "example": "mirco"
+                      },
+                      "viewEnabled": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "size": {
+                        "type": "string",
+                        "example": "2 items"
+                      },
+                      "enableEdit": {
+                        "type": "boolean",
+                        "example": false
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No groups found"
+          },
+          "400": {
+            "description": "Malformed request"
+          },
+          "401": {
+            "description": "Authentication failed"
+          },
+          "500": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    },
+    "/devicegroup/delegated/": {
+      "get": {
+        "tags": [
+          "List"
+        ],
+        "summary": "List your read-only groups",
+        "parameters": [
+          {
+            "name": "sourceRequest",
+            "in": "query",
+            "description": "The category of the software module from where the request originates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Web"
+            }
+          },
+          {
+            "name": "sourceId",
+            "in": "query",
+            "description": "The unique identifier of software module from where the request originates",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "Swagger Try it out"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "The requester's locale",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "description": "The zero-based page number, for paginated requests. Skip to get the full (unsorted) listing.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": -1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "The number of results per page. Only used in paginated requests.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "The property to be used for sorting results",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "id",
+                "description",
+                "updateTime",
+                "highLevelType",
+                "name",
+                "ownership",
+                "username"
+              ],
+              "default": "id"
+            }
+          },
+          {
+            "name": "sortDirection",
+            "in": "query",
+            "description": "The direction of sorting",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "desc"
+            }
+          },
+          {
+            "name": "searchKey",
+            "in": "query",
+            "description": "For performing full-text searches.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "highLevelType",
+            "in": "query",
+            "description": "For filtering results by type.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "accessToken",
+            "in": "query",
+            "description": "An appropriate text through which the requester authenticates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJYQmNYSDJQbHdoeFhXeXlGdmRtdnhZeGVIOTZwQl80ZGZjU3VZQWFUQk9JIn0.eyJqdGkiOiI3MWFjNDkzOS0wM2NiLTRjZTItYjA3Mi0wOGZhN2UxYjdmMzciLCJleHAiOjE1NjAyMzk5MDMsIm5iZiI6MCwiaWF0IjoxNTYwMjM5ODQzLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvYXV0aC9yZWFsbXMvbWFzdGVyIiwic3ViIjoiZDNlYTEzMDYtZjBmOS00YjI1LWI3YzUtZTY0ZGZiZGY5NDllIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiYWRtaW4tY2xpIiwiYXV0aF90aW1lIjowLCJzZXNzaW9uX3N0YXRlIjoiMDE2MmU4YzMtMjViMy00ZmQ5LTg0MTYtZTI4YmQyN2I2MWJkIiwiYWNyIjoiMSIsInNjb3BlIjoiZW1haWwgcHJvZmlsZSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWRtaW4ifQ.MOu-XeCdt6M7ZJiYjQyo_hAtV3xEtmRaL6cxE-YdpsEoirm-QrQztPWFx0R6I7j6gkUuxum59zYSRS9ZPq9T207db7oKTqTEL_9WsrJXG0aCbkmpSL3En3q2zyiCKfbA4YrPYciHJkTF8LFhTgPWaXII7IwiyumDvcyl7wq_qDMJsihfM_Ewu86CrQzNs7UBirb40JiA6DeBipkI46T57E93FhA3lmRw_6IcDVVKxAiy5eQWpFwVJ7-g_jr7LW4AmhI_dSwwnfYI3JViX2V2Jw0AsveCb7sPAApAU3JdA3t2GpdGsjJDrNYaxrtq3yL7wzTQbYWvRzjp1309qK1YKw"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The listing of groups is returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 21
+                      },
+                      "description": {
+                        "type": "string",
+                        "example": "Devices deployed on that given place for that given project"
+                      },
+                      "insertTime": {
+                        "type": "integer",
+                        "example": 1590593353000
+                      },
+                      "updateTime": {
+                        "type": "integer",
+                        "example": 1590593372000
+                      },
+                      "highLevelType": {
+                        "type": "string",
+                        "example": "MyGroup"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Devices Project Alpha"
+                      },
+                      "organizations": {
+                        "type": "string",
+                        "example": "[ou=Antwerp,dc=foo,dc=example,dc=org]"
+                      },
+                      "ownership": {
+                        "type": "string",
+                        "enum": [
+                          "private",
+                          "public"
+                        ],
+                        "example": "private"
+                      },
+                      "username": {
+                        "type": "string",
+                        "example": "mirco"
+                      },
+                      "viewEnabled": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "size": {
+                        "type": "string",
+                        "example": "2 items"
+                      },
+                      "enableEdit": {
+                        "type": "boolean",
+                        "example": false
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No groups found"
+          },
+          "400": {
+            "description": "Malformed request"
+          },
+          "401": {
+            "description": "Authentication failed"
+          },
+          "500": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    },
+    "/devicegroup/organization/": {
+      "get": {
+        "tags": [
+          "List"
+        ],
+        "summary": "List groups of your organization",
+        "parameters": [
+          {
+            "name": "sourceRequest",
+            "in": "query",
+            "description": "The category of the software module from where the request originates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Web"
+            }
+          },
+          {
+            "name": "sourceId",
+            "in": "query",
+            "description": "The unique identifier of software module from where the request originates",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "Swagger Try it out"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "The requester's locale",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "description": "The zero-based page number, for paginated requests. Skip to get the full (unsorted) listing.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": -1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "The number of results per page. Only used in paginated requests.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "The property to be used for sorting results",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "id",
+                "description",
+                "updateTime",
+                "highLevelType",
+                "name",
+                "ownership",
+                "username"
+              ],
+              "default": "id"
+            }
+          },
+          {
+            "name": "sortDirection",
+            "in": "query",
+            "description": "The direction of sorting",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "desc"
+            }
+          },
+          {
+            "name": "searchKey",
+            "in": "query",
+            "description": "For performing full-text searches.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "highLevelType",
+            "in": "query",
+            "description": "For filtering results by type.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "accessToken",
+            "in": "query",
+            "description": "An appropriate text through which the requester authenticates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJYQmNYSDJQbHdoeFhXeXlGdmRtdnhZeGVIOTZwQl80ZGZjU3VZQWFUQk9JIn0.eyJqdGkiOiI3MWFjNDkzOS0wM2NiLTRjZTItYjA3Mi0wOGZhN2UxYjdmMzciLCJleHAiOjE1NjAyMzk5MDMsIm5iZiI6MCwiaWF0IjoxNTYwMjM5ODQzLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvYXV0aC9yZWFsbXMvbWFzdGVyIiwic3ViIjoiZDNlYTEzMDYtZjBmOS00YjI1LWI3YzUtZTY0ZGZiZGY5NDllIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiYWRtaW4tY2xpIiwiYXV0aF90aW1lIjowLCJzZXNzaW9uX3N0YXRlIjoiMDE2MmU4YzMtMjViMy00ZmQ5LTg0MTYtZTI4YmQyN2I2MWJkIiwiYWNyIjoiMSIsInNjb3BlIjoiZW1haWwgcHJvZmlsZSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWRtaW4ifQ.MOu-XeCdt6M7ZJiYjQyo_hAtV3xEtmRaL6cxE-YdpsEoirm-QrQztPWFx0R6I7j6gkUuxum59zYSRS9ZPq9T207db7oKTqTEL_9WsrJXG0aCbkmpSL3En3q2zyiCKfbA4YrPYciHJkTF8LFhTgPWaXII7IwiyumDvcyl7wq_qDMJsihfM_Ewu86CrQzNs7UBirb40JiA6DeBipkI46T57E93FhA3lmRw_6IcDVVKxAiy5eQWpFwVJ7-g_jr7LW4AmhI_dSwwnfYI3JViX2V2Jw0AsveCb7sPAApAU3JdA3t2GpdGsjJDrNYaxrtq3yL7wzTQbYWvRzjp1309qK1YKw"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The listing of groups is returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 21
+                      },
+                      "description": {
+                        "type": "string",
+                        "example": "Devices deployed on that given place for that given project"
+                      },
+                      "insertTime": {
+                        "type": "integer",
+                        "example": 1590593353000
+                      },
+                      "updateTime": {
+                        "type": "integer",
+                        "example": 1590593372000
+                      },
+                      "highLevelType": {
+                        "type": "string",
+                        "example": "MyGroup"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Devices Project Alpha"
+                      },
+                      "organizations": {
+                        "type": "string",
+                        "example": "[ou=Antwerp,dc=foo,dc=example,dc=org]"
+                      },
+                      "ownership": {
+                        "type": "string",
+                        "enum": [
+                          "private",
+                          "public"
+                        ],
+                        "example": "private"
+                      },
+                      "username": {
+                        "type": "string",
+                        "example": "mirco"
+                      },
+                      "viewEnabled": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "size": {
+                        "type": "string",
+                        "example": "2 items"
+                      },
+                      "enableEdit": {
+                        "type": "boolean",
+                        "example": false
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No groups found"
+          },
+          "400": {
+            "description": "Malformed request"
+          },
+          "401": {
+            "description": "Authentication failed"
+          },
+          "500": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    },
+    "/public/devicegroup/": {
+      "get": {
+        "tags": [
+          "List"
+        ],
+        "summary": "List public groups",
+        "parameters": [
+          {
+            "name": "sourceRequest",
+            "in": "query",
+            "description": "The category of the software module from where the request originates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Web"
+            }
+          },
+          {
+            "name": "sourceId",
+            "in": "query",
+            "description": "The unique identifier of software module from where the request originates",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "Swagger Try it out"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "The requester's locale",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "description": "The zero-based page number, for paginated requests. Skip to get the full (unsorted) listing.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": -1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "The number of results per page. Only used in paginated requests.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "The property to be used for sorting results",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "id",
+                "description",
+                "updateTime",
+                "highLevelType",
+                "name",
+                "ownership",
+                "username"
+              ],
+              "default": "id"
+            }
+          },
+          {
+            "name": "sortDirection",
+            "in": "query",
+            "description": "The direction of sorting",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "desc"
+            }
+          },
+          {
+            "name": "searchKey",
+            "in": "query",
+            "description": "For performing full-text searches.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "highLevelType",
+            "in": "query",
+            "description": "For filtering results by type.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The listing of groups is returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 21
+                      },
+                      "description": {
+                        "type": "string",
+                        "example": "Devices deployed on that given place for that given project"
+                      },
+                      "insertTime": {
+                        "type": "integer",
+                        "example": 1590593353000
+                      },
+                      "updateTime": {
+                        "type": "integer",
+                        "example": 1590593372000
+                      },
+                      "highLevelType": {
+                        "type": "string",
+                        "example": "MyGroup"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Devices Project Alpha"
+                      },
+                      "organizations": {
+                        "type": "string",
+                        "example": "[ou=Antwerp,dc=foo,dc=example,dc=org]"
+                      },
+                      "ownership": {
+                        "type": "string",
+                        "enum": [
+                          "private",
+                          "public"
+                        ],
+                        "example": "private"
+                      },
+                      "username": {
+                        "type": "string",
+                        "example": "mirco"
+                      },
+                      "viewEnabled": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "size": {
+                        "type": "string",
+                        "example": "2 items"
+                      },
+                      "enableEdit": {
+                        "type": "boolean",
+                        "example": false
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No groups found"
+          },
+          "400": {
+            "description": "Malformed request"
+          },
+          "401": {
+            "description": "Authentication failed"
+          },
+          "500": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    },
+    "/devicegroup/{id}": {
+      "patch": {
+        "tags": [
+          "Manage"
+        ],
+        "summary": "Edit a group",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The unique identifier of the group",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 22
+            }
+          },
+          {
+            "name": "sourceRequest",
+            "in": "query",
+            "description": "The category of the software module from where the request originates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Web"
+            }
+          },
+          {
+            "name": "sourceId",
+            "in": "query",
+            "description": "The unique identifier of software module from where the request originates",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "Swagger Try it out"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "The requester's locale",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "en"
+            }
+          },
+          {
+            "name": "accessToken",
+            "in": "query",
+            "description": "An appropriate text through which the requester authenticates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJYQmNYSDJQbHdoeFhXeXlGdmRtdnhZeGVIOTZwQl80ZGZjU3VZQWFUQk9JIn0.eyJqdGkiOiI3MWFjNDkzOS0wM2NiLTRjZTItYjA3Mi0wOGZhN2UxYjdmMzciLCJleHAiOjE1NjAyMzk5MDMsIm5iZiI6MCwiaWF0IjoxNTYwMjM5ODQzLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvYXV0aC9yZWFsbXMvbWFzdGVyIiwic3ViIjoiZDNlYTEzMDYtZjBmOS00YjI1LWI3YzUtZTY0ZGZiZGY5NDllIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiYWRtaW4tY2xpIiwiYXV0aF90aW1lIjowLCJzZXNzaW9uX3N0YXRlIjoiMDE2MmU4YzMtMjViMy00ZmQ5LTg0MTYtZTI4YmQyN2I2MWJkIiwiYWNyIjoiMSIsInNjb3BlIjoiZW1haWwgcHJvZmlsZSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWRtaW4ifQ.MOu-XeCdt6M7ZJiYjQyo_hAtV3xEtmRaL6cxE-YdpsEoirm-QrQztPWFx0R6I7j6gkUuxum59zYSRS9ZPq9T207db7oKTqTEL_9WsrJXG0aCbkmpSL3En3q2zyiCKfbA4YrPYciHJkTF8LFhTgPWaXII7IwiyumDvcyl7wq_qDMJsihfM_Ewu86CrQzNs7UBirb40JiA6DeBipkI46T57E93FhA3lmRw_6IcDVVKxAiy5eQWpFwVJ7-g_jr7LW4AmhI_dSwwnfYI3JViX2V2Jw0AsveCb7sPAApAU3JdA3t2GpdGsjJDrNYaxrtq3yL7wzTQbYWvRzjp1309qK1YKw"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Metadata of the new group",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "highLevelType",
+                  "name",
+                  "description"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "example": 22
+                  },
+                  "highLevelType": {
+                    "type": "string",
+                    "enum": [
+                      "MyGroup"
+                    ],
+                    "example": "MyGroup"
+                  },
+                  "name": {
+                    "type": "string",
+                    "example": "one"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Description of group one"
+                  }
+                }
+              },
+              "example": "{ \"id\": 22, \"highLevelType\": \"MyGroup\", \"name\": \"one\", \"description\": \"Description of group one\" }"
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Group edited"
+          },
+          "204": {
+            "description": "Group not found"
+          },
+          "400": {
+            "description": "Malformed request"
+          },
+          "401": {
+            "description": "Authentication failed"
+          },
+          "500": {
+            "description": "Unexpected error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Manage"
+        ],
+        "summary": "Delete a group",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The unique identifier of the group",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 22
+            }
+          },
+          {
+            "name": "sourceRequest",
+            "in": "query",
+            "description": "The category of the software module from where the request originates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Web"
+            }
+          },
+          {
+            "name": "sourceId",
+            "in": "query",
+            "description": "The unique identifier of software module from where the request originates",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "Swagger Try it out"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "The requester's locale",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "en"
+            }
+          },
+          {
+            "name": "accessToken",
+            "in": "query",
+            "description": "An appropriate text through which the requester authenticates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJYQmNYSDJQbHdoeFhXeXlGdmRtdnhZeGVIOTZwQl80ZGZjU3VZQWFUQk9JIn0.eyJqdGkiOiI3MWFjNDkzOS0wM2NiLTRjZTItYjA3Mi0wOGZhN2UxYjdmMzciLCJleHAiOjE1NjAyMzk5MDMsIm5iZiI6MCwiaWF0IjoxNTYwMjM5ODQzLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvYXV0aC9yZWFsbXMvbWFzdGVyIiwic3ViIjoiZDNlYTEzMDYtZjBmOS00YjI1LWI3YzUtZTY0ZGZiZGY5NDllIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiYWRtaW4tY2xpIiwiYXV0aF90aW1lIjowLCJzZXNzaW9uX3N0YXRlIjoiMDE2MmU4YzMtMjViMy00ZmQ5LTg0MTYtZTI4YmQyN2I2MWJkIiwiYWNyIjoiMSIsInNjb3BlIjoiZW1haWwgcHJvZmlsZSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWRtaW4ifQ.MOu-XeCdt6M7ZJiYjQyo_hAtV3xEtmRaL6cxE-YdpsEoirm-QrQztPWFx0R6I7j6gkUuxum59zYSRS9ZPq9T207db7oKTqTEL_9WsrJXG0aCbkmpSL3En3q2zyiCKfbA4YrPYciHJkTF8LFhTgPWaXII7IwiyumDvcyl7wq_qDMJsihfM_Ewu86CrQzNs7UBirb40JiA6DeBipkI46T57E93FhA3lmRw_6IcDVVKxAiy5eQWpFwVJ7-g_jr7LW4AmhI_dSwwnfYI3JViX2V2Jw0AsveCb7sPAApAU3JdA3t2GpdGsjJDrNYaxrtq3yL7wzTQbYWvRzjp1309qK1YKw"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Group deleted"
+          },
+          "204": {
+            "description": "Group not found"
+          },
+          "401": {
+            "description": "Authentication failed"
+          },
+          "500": {
+            "description": "Unexpected error"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Manage"
+        ],
+        "summary": "Get metadata of a group",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The unique identifier of the group",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 22
+            }
+          },
+          {
+            "name": "sourceRequest",
+            "in": "query",
+            "description": "The category of the software module from where the request originates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Web"
+            }
+          },
+          {
+            "name": "sourceId",
+            "in": "query",
+            "description": "The unique identifier of software module from where the request originates",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "Swagger Try it out"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "The requester's locale",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "en"
+            }
+          },
+          {
+            "name": "accessToken",
+            "in": "query",
+            "description": "An appropriate text through which the requester authenticates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJYQmNYSDJQbHdoeFhXeXlGdmRtdnhZeGVIOTZwQl80ZGZjU3VZQWFUQk9JIn0.eyJqdGkiOiI3MWFjNDkzOS0wM2NiLTRjZTItYjA3Mi0wOGZhN2UxYjdmMzciLCJleHAiOjE1NjAyMzk5MDMsIm5iZiI6MCwiaWF0IjoxNTYwMjM5ODQzLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvYXV0aC9yZWFsbXMvbWFzdGVyIiwic3ViIjoiZDNlYTEzMDYtZjBmOS00YjI1LWI3YzUtZTY0ZGZiZGY5NDllIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiYWRtaW4tY2xpIiwiYXV0aF90aW1lIjowLCJzZXNzaW9uX3N0YXRlIjoiMDE2MmU4YzMtMjViMy00ZmQ5LTg0MTYtZTI4YmQyN2I2MWJkIiwiYWNyIjoiMSIsInNjb3BlIjoiZW1haWwgcHJvZmlsZSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWRtaW4ifQ.MOu-XeCdt6M7ZJiYjQyo_hAtV3xEtmRaL6cxE-YdpsEoirm-QrQztPWFx0R6I7j6gkUuxum59zYSRS9ZPq9T207db7oKTqTEL_9WsrJXG0aCbkmpSL3En3q2zyiCKfbA4YrPYciHJkTF8LFhTgPWaXII7IwiyumDvcyl7wq_qDMJsihfM_Ewu86CrQzNs7UBirb40JiA6DeBipkI46T57E93FhA3lmRw_6IcDVVKxAiy5eQWpFwVJ7-g_jr7LW4AmhI_dSwwnfYI3JViX2V2Jw0AsveCb7sPAApAU3JdA3t2GpdGsjJDrNYaxrtq3yL7wzTQbYWvRzjp1309qK1YKw"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Metadata are returned of the specified group",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 21
+                    },
+                    "description": {
+                      "type": "string",
+                      "example": "Devices deployed on that given place for that given project"
+                    },
+                    "insertTime": {
+                      "type": "integer",
+                      "example": 1590593353000
+                    },
+                    "updateTime": {
+                      "type": "integer",
+                      "example": 1590593372000
+                    },
+                    "highLevelType": {
+                      "type": "string",
+                      "example": "MyGroup"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Devices Project Alpha"
+                    },
+                    "organizations": {
+                      "type": "string",
+                      "example": "[ou=Antwerp,dc=foo,dc=example,dc=org]"
+                    },
+                    "ownership": {
+                      "type": "string",
+                      "enum": [
+                        "private",
+                        "public"
+                      ],
+                      "example": "private"
+                    },
+                    "username": {
+                      "type": "string",
+                      "example": "mirco"
+                    },
+                    "viewEnabled": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "size": {
+                      "type": "string",
+                      "example": "2 items"
+                    },
+                    "enableEdit": {
+                      "type": "boolean",
+                      "example": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "Group not found"
+          },
+          "401": {
+            "description": "Authentication failed"
+          },
+          "500": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    },
+    "/public/devicegroup/{id}": {
+      "get": {
+        "tags": [
+          "Manage"
+        ],
+        "summary": "Get metadata of a public group",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The unique identifier of the group",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 22
+            }
+          },
+          {
+            "name": "sourceRequest",
+            "in": "query",
+            "description": "The category of the software module from where the request originates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Web"
+            }
+          },
+          {
+            "name": "sourceId",
+            "in": "query",
+            "description": "The unique identifier of software module from where the request originates",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "Swagger Try it out"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "The requester's locale",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "en"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Metadata are returned of the specified group",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 21
+                    },
+                    "description": {
+                      "type": "string",
+                      "example": "Devices deployed on that given place for that given project"
+                    },
+                    "insertTime": {
+                      "type": "integer",
+                      "example": 1590593353000
+                    },
+                    "updateTime": {
+                      "type": "integer",
+                      "example": 1590593372000
+                    },
+                    "highLevelType": {
+                      "type": "string",
+                      "example": "MyGroup"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Devices Project Alpha"
+                    },
+                    "organizations": {
+                      "type": "string",
+                      "example": "[ou=Antwerp,dc=foo,dc=example,dc=org]"
+                    },
+                    "ownership": {
+                      "type": "string",
+                      "enum": [
+                        "private",
+                        "public"
+                      ],
+                      "example": "private"
+                    },
+                    "username": {
+                      "type": "string",
+                      "example": "mirco"
+                    },
+                    "viewEnabled": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "size": {
+                      "type": "string",
+                      "example": "2 items"
+                    },
+                    "enableEdit": {
+                      "type": "boolean",
+                      "example": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "Group not found"
+          },
+          "401": {
+            "description": "Authentication failed"
+          },
+          "500": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    },
+    "/devicegroup/{id}/elements/": {
+      "get": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "List items in group",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The unique identifier of the group",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 22
+            }
+          },
+          {
+            "name": "sourceRequest",
+            "in": "query",
+            "description": "The category of the software module from where the request originates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Web"
+            }
+          },
+          {
+            "name": "sourceId",
+            "in": "query",
+            "description": "The unique identifier of software module from where the request originates",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "Swagger Try it out"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "The requester's locale",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "description": "The zero-based page number, for paginated requests. Skip to get the full (unsorted) listing.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": -1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "The number of results per page. Only used in paginated requests.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "The property to be used for sorting results",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "id",
+                "description",
+                "updateTime",
+                "highLevelType",
+                "name",
+                "ownership",
+                "username"
+              ],
+              "default": "id"
+            }
+          },
+          {
+            "name": "sortDirection",
+            "in": "query",
+            "description": "The direction of sorting",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "desc"
+            }
+          },
+          {
+            "name": "searchKey",
+            "in": "query",
+            "description": "For performing full-text searches.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "accessToken",
+            "in": "query",
+            "description": "An appropriate text through which the requester authenticates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJYQmNYSDJQbHdoeFhXeXlGdmRtdnhZeGVIOTZwQl80ZGZjU3VZQWFUQk9JIn0.eyJqdGkiOiI3MWFjNDkzOS0wM2NiLTRjZTItYjA3Mi0wOGZhN2UxYjdmMzciLCJleHAiOjE1NjAyMzk5MDMsIm5iZiI6MCwiaWF0IjoxNTYwMjM5ODQzLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvYXV0aC9yZWFsbXMvbWFzdGVyIiwic3ViIjoiZDNlYTEzMDYtZjBmOS00YjI1LWI3YzUtZTY0ZGZiZGY5NDllIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiYWRtaW4tY2xpIiwiYXV0aF90aW1lIjowLCJzZXNzaW9uX3N0YXRlIjoiMDE2MmU4YzMtMjViMy00ZmQ5LTg0MTYtZTI4YmQyN2I2MWJkIiwiYWNyIjoiMSIsInNjb3BlIjoiZW1haWwgcHJvZmlsZSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWRtaW4ifQ.MOu-XeCdt6M7ZJiYjQyo_hAtV3xEtmRaL6cxE-YdpsEoirm-QrQztPWFx0R6I7j6gkUuxum59zYSRS9ZPq9T207db7oKTqTEL_9WsrJXG0aCbkmpSL3En3q2zyiCKfbA4YrPYciHJkTF8LFhTgPWaXII7IwiyumDvcyl7wq_qDMJsihfM_Ewu86CrQzNs7UBirb40JiA6DeBipkI46T57E93FhA3lmRw_6IcDVVKxAiy5eQWpFwVJ7-g_jr7LW4AmhI_dSwwnfYI3JViX2V2Jw0AsveCb7sPAApAU3JdA3t2GpdGsjJDrNYaxrtq3yL7wzTQbYWvRzjp1309qK1YKw"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The list of members of the group is returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "example": 119
+                          },
+                          "deviceGroupId": {
+                            "type": "integer",
+                            "example": 21
+                          },
+                          "deviceGroupUrl": {
+                            "type": "string",
+                            "format": "uri",
+                            "example": "http://192.168.0.47:8081/test/datamanager/grp/?id=21"
+                          },
+                          "deviceGroupContact": {
+                            "type": "string",
+                            "example": "badiiantwerp"
+                          },
+                          "insertTime": {
+                            "type": "integer",
+                            "example": 1590593493000
+                          },
+                          "elementId": {
+                            "type": "integer",
+                            "example": 17055900
+                          },
+                          "elementType": {
+                            "type": "string",
+                            "example": "MyKPI"
+                          },
+                          "elmtTypeLbl": {
+                            "type": "string",
+                            "example": "MyKPI"
+                          },
+                          "username": {
+                            "type": "string",
+                            "example": "badiiantwerp"
+                          },
+                          "elementName": {
+                            "type": "string",
+                            "example": "TestElasticSearch4.0"
+                          }
+                        }
+                      }
+                    },
+                    "last": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "totalPages": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "totalElements": {
+                      "type": "integer",
+                      "example": 2
+                    },
+                    "numberOfElements": {
+                      "type": "integer",
+                      "example": 2
+                    },
+                    "first": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "size": {
+                      "type": "integer",
+                      "example": 10
+                    },
+                    "number": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "sort": {
+                      "type": "object",
+                      "properties": {
+                        "direction": {
+                          "type": "string",
+                          "enum": [
+                            "ASC",
+                            "DESC"
+                          ],
+                          "example": "DESC"
+                        },
+                        "property": {
+                          "type": "string",
+                          "example": "id"
+                        },
+                        "ignoreCase": {
+                          "type": "boolean",
+                          "example": false
+                        },
+                        "nullHandling": {
+                          "type": "string",
+                          "example": "NATIVE"
+                        },
+                        "ascending": {
+                          "type": "boolean",
+                          "example": false
+                        },
+                        "descending": {
+                          "type": "boolean",
+                          "example": true
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "Group empty or not found"
+          },
+          "400": {
+            "description": "Malformed request"
+          },
+          "401": {
+            "description": "Authentication failed"
+          },
+          "500": {
+            "description": "Unexpected error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "Add items to group",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The unique identifier of the group",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 22
+            }
+          },
+          {
+            "name": "sourceRequest",
+            "in": "query",
+            "description": "The category of the software module from where the request originates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Web"
+            }
+          },
+          {
+            "name": "sourceId",
+            "in": "query",
+            "description": "The unique identifier of software module from where the request originates",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "Swagger Try it out"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "The requester's locale",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "accessToken",
+            "in": "query",
+            "description": "An appropriate text through which the requester authenticates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJYQmNYSDJQbHdoeFhXeXlGdmRtdnhZeGVIOTZwQl80ZGZjU3VZQWFUQk9JIn0.eyJqdGkiOiI3MWFjNDkzOS0wM2NiLTRjZTItYjA3Mi0wOGZhN2UxYjdmMzciLCJleHAiOjE1NjAyMzk5MDMsIm5iZiI6MCwiaWF0IjoxNTYwMjM5ODQzLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvYXV0aC9yZWFsbXMvbWFzdGVyIiwic3ViIjoiZDNlYTEzMDYtZjBmOS00YjI1LWI3YzUtZTY0ZGZiZGY5NDllIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiYWRtaW4tY2xpIiwiYXV0aF90aW1lIjowLCJzZXNzaW9uX3N0YXRlIjoiMDE2MmU4YzMtMjViMy00ZmQ5LTg0MTYtZTI4YmQyN2I2MWJkIiwiYWNyIjoiMSIsInNjb3BlIjoiZW1haWwgcHJvZmlsZSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWRtaW4ifQ.MOu-XeCdt6M7ZJiYjQyo_hAtV3xEtmRaL6cxE-YdpsEoirm-QrQztPWFx0R6I7j6gkUuxum59zYSRS9ZPq9T207db7oKTqTEL_9WsrJXG0aCbkmpSL3En3q2zyiCKfbA4YrPYciHJkTF8LFhTgPWaXII7IwiyumDvcyl7wq_qDMJsihfM_Ewu86CrQzNs7UBirb40JiA6DeBipkI46T57E93FhA3lmRw_6IcDVVKxAiy5eQWpFwVJ7-g_jr7LW4AmhI_dSwwnfYI3JViX2V2Jw0AsveCb7sPAApAU3JdA3t2GpdGsjJDrNYaxrtq3yL7wzTQbYWvRzjp1309qK1YKw"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "List of the elements to be added",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                },
+                "required": [
+                  "deviceGroupId",
+                  "elementId",
+                  "elementType",
+                  "insertTime"
+                ],
+                "properties": {
+                  "deviceGroupId": {
+                    "type": "integer",
+                    "example": 15
+                  },
+                  "elementId": {
+                    "type": "string",
+                    "example": "Firenze:orionUNIFI:Big500ExampleD377"
+                  },
+                  "elementType": {
+                    "type": "string",
+                    "example": "IOTID"
+                  },
+                  "insertTime": {
+                    "type": "integer",
+                    "example": 1594999001040
+                  }
+                }
+              },
+              "example": "{ \"deviceGroupId\": 15, \"elementId\": \"Firenze:orionUNIFI:Big500ExampleD377\", \"elementType\": \"IOTID\", \"insertTime\": 1594999001040 }"
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Items added to the group"
+          },
+          "204": {
+            "description": "Group not found"
+          },
+          "401": {
+            "description": "Authentication failed"
+          },
+          "500": {
+            "description": "Unexpected error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "Remove all items from group",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The unique identifier of the group",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 22
+            }
+          },
+          {
+            "name": "sourceRequest",
+            "in": "query",
+            "description": "The category of the software module from where the request originates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Web"
+            }
+          },
+          {
+            "name": "sourceId",
+            "in": "query",
+            "description": "The unique identifier of software module from where the request originates",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "Swagger Try it out"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "The requester's locale",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "accessToken",
+            "in": "query",
+            "description": "An appropriate text through which the requester authenticates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJYQmNYSDJQbHdoeFhXeXlGdmRtdnhZeGVIOTZwQl80ZGZjU3VZQWFUQk9JIn0.eyJqdGkiOiI3MWFjNDkzOS0wM2NiLTRjZTItYjA3Mi0wOGZhN2UxYjdmMzciLCJleHAiOjE1NjAyMzk5MDMsIm5iZiI6MCwiaWF0IjoxNTYwMjM5ODQzLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvYXV0aC9yZWFsbXMvbWFzdGVyIiwic3ViIjoiZDNlYTEzMDYtZjBmOS00YjI1LWI3YzUtZTY0ZGZiZGY5NDllIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiYWRtaW4tY2xpIiwiYXV0aF90aW1lIjowLCJzZXNzaW9uX3N0YXRlIjoiMDE2MmU4YzMtMjViMy00ZmQ5LTg0MTYtZTI4YmQyN2I2MWJkIiwiYWNyIjoiMSIsInNjb3BlIjoiZW1haWwgcHJvZmlsZSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWRtaW4ifQ.MOu-XeCdt6M7ZJiYjQyo_hAtV3xEtmRaL6cxE-YdpsEoirm-QrQztPWFx0R6I7j6gkUuxum59zYSRS9ZPq9T207db7oKTqTEL_9WsrJXG0aCbkmpSL3En3q2zyiCKfbA4YrPYciHJkTF8LFhTgPWaXII7IwiyumDvcyl7wq_qDMJsihfM_Ewu86CrQzNs7UBirb40JiA6DeBipkI46T57E93FhA3lmRw_6IcDVVKxAiy5eQWpFwVJ7-g_jr7LW4AmhI_dSwwnfYI3JViX2V2Jw0AsveCb7sPAApAU3JdA3t2GpdGsjJDrNYaxrtq3yL7wzTQbYWvRzjp1309qK1YKw"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Group emptied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 119
+                      },
+                      "deviceGroupId": {
+                        "type": "integer",
+                        "example": 21
+                      },
+                      "deviceGroupUrl": {
+                        "type": "string",
+                        "format": "uri",
+                        "example": "http://192.168.0.47:8081/test/datamanager/grp/?id=21"
+                      },
+                      "deviceGroupContact": {
+                        "type": "string",
+                        "example": "badiiantwerp"
+                      },
+                      "insertTime": {
+                        "type": "integer",
+                        "example": 1590593493000
+                      },
+                      "elementId": {
+                        "type": "integer",
+                        "example": 17055900
+                      },
+                      "elementType": {
+                        "type": "string",
+                        "example": "MyKPI"
+                      },
+                      "elmtTypeLbl": {
+                        "type": "string",
+                        "example": "MyKPI"
+                      },
+                      "username": {
+                        "type": "string",
+                        "example": "badiiantwerp"
+                      },
+                      "elementName": {
+                        "type": "string",
+                        "example": "TestElasticSearch4.0"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "Group not found or empty"
+          },
+          "400": {
+            "description": "Malformed request"
+          },
+          "401": {
+            "description": "Authentication failed"
+          },
+          "500": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    },
+    "/devicegroup/{grpId}/elements/{membershipId}": {
+      "delete": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "Remove one item from group",
+        "parameters": [
+          {
+            "name": "grpId",
+            "in": "path",
+            "description": "The unique identifier of the group",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 22
+            }
+          },
+          {
+            "name": "membershipId",
+            "in": "path",
+            "description": "The unique identifier of the belonging of the element to the group",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 3
+            }
+          },
+          {
+            "name": "sourceRequest",
+            "in": "query",
+            "description": "The category of the software module from where the request originates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Web"
+            }
+          },
+          {
+            "name": "sourceId",
+            "in": "query",
+            "description": "The unique identifier of software module from where the request originates",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "Swagger Try it out"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "The requester's locale",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "accessToken",
+            "in": "query",
+            "description": "An appropriate text through which the requester authenticates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJYQmNYSDJQbHdoeFhXeXlGdmRtdnhZeGVIOTZwQl80ZGZjU3VZQWFUQk9JIn0.eyJqdGkiOiI3MWFjNDkzOS0wM2NiLTRjZTItYjA3Mi0wOGZhN2UxYjdmMzciLCJleHAiOjE1NjAyMzk5MDMsIm5iZiI6MCwiaWF0IjoxNTYwMjM5ODQzLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvYXV0aC9yZWFsbXMvbWFzdGVyIiwic3ViIjoiZDNlYTEzMDYtZjBmOS00YjI1LWI3YzUtZTY0ZGZiZGY5NDllIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiYWRtaW4tY2xpIiwiYXV0aF90aW1lIjowLCJzZXNzaW9uX3N0YXRlIjoiMDE2MmU4YzMtMjViMy00ZmQ5LTg0MTYtZTI4YmQyN2I2MWJkIiwiYWNyIjoiMSIsInNjb3BlIjoiZW1haWwgcHJvZmlsZSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWRtaW4ifQ.MOu-XeCdt6M7ZJiYjQyo_hAtV3xEtmRaL6cxE-YdpsEoirm-QrQztPWFx0R6I7j6gkUuxum59zYSRS9ZPq9T207db7oKTqTEL_9WsrJXG0aCbkmpSL3En3q2zyiCKfbA4YrPYciHJkTF8LFhTgPWaXII7IwiyumDvcyl7wq_qDMJsihfM_Ewu86CrQzNs7UBirb40JiA6DeBipkI46T57E93FhA3lmRw_6IcDVVKxAiy5eQWpFwVJ7-g_jr7LW4AmhI_dSwwnfYI3JViX2V2Jw0AsveCb7sPAApAU3JdA3t2GpdGsjJDrNYaxrtq3yL7wzTQbYWvRzjp1309qK1YKw"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Removed",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "integer",
+                  "example": 3
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "Group or item not found"
+          },
+          "401": {
+            "description": "Authentication failed"
+          },
+          "500": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    },
+    "/public/devicegroup/{id}/elements/": {
+      "get": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "List items in public group",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The unique identifier of the group",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 22
+            }
+          },
+          {
+            "name": "sourceRequest",
+            "in": "query",
+            "description": "The category of the software module from where the request originates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Web"
+            }
+          },
+          {
+            "name": "sourceId",
+            "in": "query",
+            "description": "The unique identifier of software module from where the request originates",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "Swagger Try it out"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "The requester's locale",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "description": "The zero-based page number, for paginated requests. Skip to get the full (unsorted) listing.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": -1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "The number of results per page. Only used in paginated requests.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "The property to be used for sorting results",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "id",
+                "description",
+                "updateTime",
+                "highLevelType",
+                "name",
+                "ownership",
+                "username"
+              ],
+              "default": "id"
+            }
+          },
+          {
+            "name": "sortDirection",
+            "in": "query",
+            "description": "The direction of sorting",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "desc"
+            }
+          },
+          {
+            "name": "searchKey",
+            "in": "query",
+            "description": "For performing full-text searches.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The list of members of the group is returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "example": 119
+                          },
+                          "deviceGroupId": {
+                            "type": "integer",
+                            "example": 21
+                          },
+                          "deviceGroupUrl": {
+                            "type": "string",
+                            "format": "uri",
+                            "example": "http://192.168.0.47:8081/test/datamanager/grp/?id=21"
+                          },
+                          "deviceGroupContact": {
+                            "type": "string",
+                            "example": "badiiantwerp"
+                          },
+                          "insertTime": {
+                            "type": "integer",
+                            "example": 1590593493000
+                          },
+                          "elementId": {
+                            "type": "integer",
+                            "example": 17055900
+                          },
+                          "elementType": {
+                            "type": "string",
+                            "example": "MyKPI"
+                          },
+                          "elmtTypeLbl": {
+                            "type": "string",
+                            "example": "MyKPI"
+                          },
+                          "username": {
+                            "type": "string",
+                            "example": "badiiantwerp"
+                          },
+                          "elementName": {
+                            "type": "string",
+                            "example": "TestElasticSearch4.0"
+                          }
+                        }
+                      }
+                    },
+                    "last": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "totalPages": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "totalElements": {
+                      "type": "integer",
+                      "example": 2
+                    },
+                    "numberOfElements": {
+                      "type": "integer",
+                      "example": 2
+                    },
+                    "first": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "size": {
+                      "type": "integer",
+                      "example": 10
+                    },
+                    "number": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "sort": {
+                      "type": "object",
+                      "properties": {
+                        "direction": {
+                          "type": "string",
+                          "enum": [
+                            "ASC",
+                            "DESC"
+                          ],
+                          "example": "DESC"
+                        },
+                        "property": {
+                          "type": "string",
+                          "example": "id"
+                        },
+                        "ignoreCase": {
+                          "type": "boolean",
+                          "example": false
+                        },
+                        "nullHandling": {
+                          "type": "string",
+                          "example": "NATIVE"
+                        },
+                        "ascending": {
+                          "type": "boolean",
+                          "example": false
+                        },
+                        "descending": {
+                          "type": "boolean",
+                          "example": true
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "Group empty or not found"
+          },
+          "400": {
+            "description": "Malformed request"
+          },
+          "401": {
+            "description": "Authentication failed"
+          },
+          "500": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    },
+    "/devicegroup/{id}/delegations": {
+      "get": {
+        "tags": [
+          "Delegations"
+        ],
+        "summary": "Retrieve all delegations for a device group",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The unique identifier of the group",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 22
+            }
+          },
+          {
+            "name": "sourceRequest",
+            "in": "query",
+            "description": "The category of the software module from where the request originates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Web"
+            }
+          },
+          {
+            "name": "sourceId",
+            "in": "query",
+            "description": "The unique identifier of software module from where the request originates",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "Swagger Try it out"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "The requester's locale",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "description": "The zero-based page number, for paginated requests. Skip to get the full (unsorted) listing.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": -1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "The number of results per page. Only used in paginated requests.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "The property to be used for sorting results",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "id"
+            }
+          },
+          {
+            "name": "sortDirection",
+            "in": "query",
+            "description": "The direction of sorting",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "desc"
+            }
+          },
+          {
+            "name": "searchKey",
+            "in": "query",
+            "description": "For performing full-text searches.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "accessToken",
+            "in": "query",
+            "description": "An appropriate text through which the requester authenticates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJYQmNYSDJQbHdoeFhXeXlGdmRtdnhZeGVIOTZwQl80ZGZjU3VZQWFUQk9JIn0.eyJqdGkiOiI3MWFjNDkzOS0wM2NiLTRjZTItYjA3Mi0wOGZhN2UxYjdmMzciLCJleHAiOjE1NjAyMzk5MDMsIm5iZiI6MCwiaWF0IjoxNTYwMjM5ODQzLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvYXV0aC9yZWFsbXMvbWFzdGVyIiwic3ViIjoiZDNlYTEzMDYtZjBmOS00YjI1LWI3YzUtZTY0ZGZiZGY5NDllIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiYWRtaW4tY2xpIiwiYXV0aF90aW1lIjowLCJzZXNzaW9uX3N0YXRlIjoiMDE2MmU4YzMtMjViMy00ZmQ5LTg0MTYtZTI4YmQyN2I2MWJkIiwiYWNyIjoiMSIsInNjb3BlIjoiZW1haWwgcHJvZmlsZSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWRtaW4ifQ.MOu-XeCdt6M7ZJiYjQyo_hAtV3xEtmRaL6cxE-YdpsEoirm-QrQztPWFx0R6I7j6gkUuxum59zYSRS9ZPq9T207db7oKTqTEL_9WsrJXG0aCbkmpSL3En3q2zyiCKfbA4YrPYciHJkTF8LFhTgPWaXII7IwiyumDvcyl7wq_qDMJsihfM_Ewu86CrQzNs7UBirb40JiA6DeBipkI46T57E93FhA3lmRw_6IcDVVKxAiy5eQWpFwVJ7-g_jr7LW4AmhI_dSwwnfYI3JViX2V2Jw0AsveCb7sPAApAU3JdA3t2GpdGsjJDrNYaxrtq3yL7wzTQbYWvRzjp1309qK1YKw"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page or a list is returned of device group delegations"
+          },
+          "204": {
+            "description": "Group not found"
+          },
+          "400": {
+            "description": "Malformed request"
+          },
+          "401": {
+            "description": "Authentication failed"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Delegations"
+        ],
+        "summary": "Add a delegation for a device group",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The unique identifier of the group",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 22
+            }
+          },
+          {
+            "name": "sourceRequest",
+            "in": "query",
+            "description": "The category of the software module from where the request originates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Web"
+            }
+          },
+          {
+            "name": "sourceId",
+            "in": "query",
+            "description": "The unique identifier of software module from where the request originates",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "Swagger Try it out"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "The requester's locale",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "accessToken",
+            "in": "query",
+            "description": "An appropriate text through which the requester authenticates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJYQmNYSDJQbHdoeFhXeXlGdmRtdnhZeGVIOTZwQl80ZGZjU3VZQWFUQk9JIn0.eyJqdGkiOiI3MWFjNDkzOS0wM2NiLTRjZTItYjA3Mi0wOGZhN2UxYjdmMzciLCJleHAiOjE1NjAyMzk5MDMsIm5iZiI6MCwiaWF0IjoxNTYwMjM5ODQzLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvYXV0aC9yZWFsbXMvbWFzdGVyIiwic3ViIjoiZDNlYTEzMDYtZjBmOS00YjI1LWI3YzUtZTY0ZGZiZGY5NDllIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiYWRtaW4tY2xpIiwiYXV0aF90aW1lIjowLCJzZXNzaW9uX3N0YXRlIjoiMDE2MmU4YzMtMjViMy00ZmQ5LTg0MTYtZTI4YmQyN2I2MWJkIiwiYWNyIjoiMSIsInNjb3BlIjoiZW1haWwgcHJvZmlsZSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWRtaW4ifQ.MOu-XeCdt6M7ZJiYjQyo_hAtV3xEtmRaL6cxE-YdpsEoirm-QrQztPWFx0R6I7j6gkUuxum59zYSRS9ZPq9T207db7oKTqTEL_9WsrJXG0aCbkmpSL3En3q2zyiCKfbA4YrPYciHJkTF8LFhTgPWaXII7IwiyumDvcyl7wq_qDMJsihfM_Ewu86CrQzNs7UBirb40JiA6DeBipkI46T57E93FhA3lmRw_6IcDVVKxAiy5eQWpFwVJ7-g_jr7LW4AmhI_dSwwnfYI3JViX2V2Jw0AsveCb7sPAApAU3JdA3t2GpdGsjJDrNYaxrtq3yL7wzTQbYWvRzjp1309qK1YKw"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "An appropriate representation of the new delegation",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "elementId",
+                  "elementType",
+                  "usernameDelegated"
+                ],
+                "properties": {
+                  "elementId": {
+                    "type": "integer",
+                    "example": 10
+                  },
+                  "elementType": {
+                    "type": "string",
+                    "enum": [
+                      "MyGroup"
+                    ],
+                    "example": "MyGroup"
+                  },
+                  "usernameDelegated": {
+                    "type": "string",
+                    "example": "mirco2-manager"
+                  }
+                }
+              },
+              "example": "{ \"elementId\": 10, \"elementType\": \"MyGroup\", \"usernameDelegated\": \"mirco2-manager\" }"
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Delegation added"
+          },
+          "204": {
+            "description": "Group not found"
+          },
+          "400": {
+            "description": "Malformed request, it could be a problem with public or private ownership"
+          },
+          "401": {
+            "description": "Authentication failed"
+          }
+        }
+      }
+    },
+    "/devicegroup/{id}/delegations/{delegationId}": {
+      "get": {
+        "tags": [
+          "Delegations"
+        ],
+        "summary": "Get details about a delegation for a device group",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The unique identifier of the group",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 22
+            }
+          },
+          {
+            "name": "delegationId",
+            "in": "path",
+            "description": "The identifier of the device group",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          },
+          {
+            "name": "sourceRequest",
+            "in": "query",
+            "description": "The category of the software module from where the request originates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Web"
+            }
+          },
+          {
+            "name": "sourceId",
+            "in": "query",
+            "description": "The unique identifier of software module from where the request originates",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "Swagger Try it out"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "The requester's locale",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "accessToken",
+            "in": "query",
+            "description": "An appropriate text through which the requester authenticates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJYQmNYSDJQbHdoeFhXeXlGdmRtdnhZeGVIOTZwQl80ZGZjU3VZQWFUQk9JIn0.eyJqdGkiOiI3MWFjNDkzOS0wM2NiLTRjZTItYjA3Mi0wOGZhN2UxYjdmMzciLCJleHAiOjE1NjAyMzk5MDMsIm5iZiI6MCwiaWF0IjoxNTYwMjM5ODQzLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvYXV0aC9yZWFsbXMvbWFzdGVyIiwic3ViIjoiZDNlYTEzMDYtZjBmOS00YjI1LWI3YzUtZTY0ZGZiZGY5NDllIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiYWRtaW4tY2xpIiwiYXV0aF90aW1lIjowLCJzZXNzaW9uX3N0YXRlIjoiMDE2MmU4YzMtMjViMy00ZmQ5LTg0MTYtZTI4YmQyN2I2MWJkIiwiYWNyIjoiMSIsInNjb3BlIjoiZW1haWwgcHJvZmlsZSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWRtaW4ifQ.MOu-XeCdt6M7ZJiYjQyo_hAtV3xEtmRaL6cxE-YdpsEoirm-QrQztPWFx0R6I7j6gkUuxum59zYSRS9ZPq9T207db7oKTqTEL_9WsrJXG0aCbkmpSL3En3q2zyiCKfbA4YrPYciHJkTF8LFhTgPWaXII7IwiyumDvcyl7wq_qDMJsihfM_Ewu86CrQzNs7UBirb40JiA6DeBipkI46T57E93FhA3lmRw_6IcDVVKxAiy5eQWpFwVJ7-g_jr7LW4AmhI_dSwwnfYI3JViX2V2Jw0AsveCb7sPAApAU3JdA3t2GpdGsjJDrNYaxrtq3yL7wzTQbYWvRzjp1309qK1YKw"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Details are returned about the requested delegation"
+          },
+          "204": {
+            "description": "Group not found"
+          },
+          "401": {
+            "description": "Authentication failed"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Delegations"
+        ],
+        "summary": "Overwrite a delegation for a device group",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The unique identifier of the group",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 22
+            }
+          },
+          {
+            "name": "delegationId",
+            "in": "path",
+            "description": "The identifier of the delegation",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          },
+          {
+            "name": "sourceRequest",
+            "in": "query",
+            "description": "The category of the software module from where the request originates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Web"
+            }
+          },
+          {
+            "name": "sourceId",
+            "in": "query",
+            "description": "The unique identifier of software module from where the request originates",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "Swagger Try it out"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "The requester's locale",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "accessToken",
+            "in": "query",
+            "description": "An appropriate text through which the requester authenticates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJYQmNYSDJQbHdoeFhXeXlGdmRtdnhZeGVIOTZwQl80ZGZjU3VZQWFUQk9JIn0.eyJqdGkiOiI3MWFjNDkzOS0wM2NiLTRjZTItYjA3Mi0wOGZhN2UxYjdmMzciLCJleHAiOjE1NjAyMzk5MDMsIm5iZiI6MCwiaWF0IjoxNTYwMjM5ODQzLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvYXV0aC9yZWFsbXMvbWFzdGVyIiwic3ViIjoiZDNlYTEzMDYtZjBmOS00YjI1LWI3YzUtZTY0ZGZiZGY5NDllIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiYWRtaW4tY2xpIiwiYXV0aF90aW1lIjowLCJzZXNzaW9uX3N0YXRlIjoiMDE2MmU4YzMtMjViMy00ZmQ5LTg0MTYtZTI4YmQyN2I2MWJkIiwiYWNyIjoiMSIsInNjb3BlIjoiZW1haWwgcHJvZmlsZSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWRtaW4ifQ.MOu-XeCdt6M7ZJiYjQyo_hAtV3xEtmRaL6cxE-YdpsEoirm-QrQztPWFx0R6I7j6gkUuxum59zYSRS9ZPq9T207db7oKTqTEL_9WsrJXG0aCbkmpSL3En3q2zyiCKfbA4YrPYciHJkTF8LFhTgPWaXII7IwiyumDvcyl7wq_qDMJsihfM_Ewu86CrQzNs7UBirb40JiA6DeBipkI46T57E93FhA3lmRw_6IcDVVKxAiy5eQWpFwVJ7-g_jr7LW4AmhI_dSwwnfYI3JViX2V2Jw0AsveCb7sPAApAU3JdA3t2GpdGsjJDrNYaxrtq3yL7wzTQbYWvRzjp1309qK1YKw"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "elementId": {
+                    "type": "integer",
+                    "example": 22
+                  },
+                  "elementType": {
+                    "type": "string"
+                  },
+                  "usernameDelegated": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Delegation overwritten"
+          },
+          "204": {
+            "description": "Group not found"
+          },
+          "400": {
+            "description": "Malformed request, it could bea problem with public or private ownership."
+          },
+          "401": {
+            "description": "Authentication failed"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Delegations"
+        ],
+        "summary": "Edit a delegation for a device group",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The unique identifier of the group",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 22
+            }
+          },
+          {
+            "name": "delegationId",
+            "in": "path",
+            "description": "The identifier of the delegation",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          },
+          {
+            "name": "sourceRequest",
+            "in": "query",
+            "description": "The category of the software module from where the request originates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Web"
+            }
+          },
+          {
+            "name": "sourceId",
+            "in": "query",
+            "description": "The unique identifier of software module from where the request originates",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "Swagger Try it out"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "The requester's locale",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "accessToken",
+            "in": "query",
+            "description": "An appropriate text through which the requester authenticates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJYQmNYSDJQbHdoeFhXeXlGdmRtdnhZeGVIOTZwQl80ZGZjU3VZQWFUQk9JIn0.eyJqdGkiOiI3MWFjNDkzOS0wM2NiLTRjZTItYjA3Mi0wOGZhN2UxYjdmMzciLCJleHAiOjE1NjAyMzk5MDMsIm5iZiI6MCwiaWF0IjoxNTYwMjM5ODQzLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvYXV0aC9yZWFsbXMvbWFzdGVyIiwic3ViIjoiZDNlYTEzMDYtZjBmOS00YjI1LWI3YzUtZTY0ZGZiZGY5NDllIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiYWRtaW4tY2xpIiwiYXV0aF90aW1lIjowLCJzZXNzaW9uX3N0YXRlIjoiMDE2MmU4YzMtMjViMy00ZmQ5LTg0MTYtZTI4YmQyN2I2MWJkIiwiYWNyIjoiMSIsInNjb3BlIjoiZW1haWwgcHJvZmlsZSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWRtaW4ifQ.MOu-XeCdt6M7ZJiYjQyo_hAtV3xEtmRaL6cxE-YdpsEoirm-QrQztPWFx0R6I7j6gkUuxum59zYSRS9ZPq9T207db7oKTqTEL_9WsrJXG0aCbkmpSL3En3q2zyiCKfbA4YrPYciHJkTF8LFhTgPWaXII7IwiyumDvcyl7wq_qDMJsihfM_Ewu86CrQzNs7UBirb40JiA6DeBipkI46T57E93FhA3lmRw_6IcDVVKxAiy5eQWpFwVJ7-g_jr7LW4AmhI_dSwwnfYI3JViX2V2Jw0AsveCb7sPAApAU3JdA3t2GpdGsjJDrNYaxrtq3yL7wzTQbYWvRzjp1309qK1YKw"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "elementId": {
+                    "type": "string",
+                    "example": 22
+                  },
+                  "elementType": {
+                    "type": "string"
+                  },
+                  "usernameDelegated": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Delegation updated"
+          },
+          "204": {
+            "description": "Group not found"
+          },
+          "400": {
+            "description": "Malformed request, it could be a problem with public or private ownership."
+          },
+          "401": {
+            "description": "Authentication failed"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Delegations"
+        ],
+        "summary": "Delete a delegation for a device group",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The unique identifier of the group",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 22
+            }
+          },
+          {
+            "name": "delegationId",
+            "in": "path",
+            "description": "The identifier of the device group",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          },
+          {
+            "name": "sourceRequest",
+            "in": "query",
+            "description": "The category of the software module from where the request originates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Web"
+            }
+          },
+          {
+            "name": "sourceId",
+            "in": "query",
+            "description": "The unique identifier of software module from where the request originates",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "Swagger Try it out"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "The requester's locale",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "accessToken",
+            "in": "query",
+            "description": "An appropriate text through which the requester authenticates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJYQmNYSDJQbHdoeFhXeXlGdmRtdnhZeGVIOTZwQl80ZGZjU3VZQWFUQk9JIn0.eyJqdGkiOiI3MWFjNDkzOS0wM2NiLTRjZTItYjA3Mi0wOGZhN2UxYjdmMzciLCJleHAiOjE1NjAyMzk5MDMsIm5iZiI6MCwiaWF0IjoxNTYwMjM5ODQzLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvYXV0aC9yZWFsbXMvbWFzdGVyIiwic3ViIjoiZDNlYTEzMDYtZjBmOS00YjI1LWI3YzUtZTY0ZGZiZGY5NDllIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiYWRtaW4tY2xpIiwiYXV0aF90aW1lIjowLCJzZXNzaW9uX3N0YXRlIjoiMDE2MmU4YzMtMjViMy00ZmQ5LTg0MTYtZTI4YmQyN2I2MWJkIiwiYWNyIjoiMSIsInNjb3BlIjoiZW1haWwgcHJvZmlsZSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWRtaW4ifQ.MOu-XeCdt6M7ZJiYjQyo_hAtV3xEtmRaL6cxE-YdpsEoirm-QrQztPWFx0R6I7j6gkUuxum59zYSRS9ZPq9T207db7oKTqTEL_9WsrJXG0aCbkmpSL3En3q2zyiCKfbA4YrPYciHJkTF8LFhTgPWaXII7IwiyumDvcyl7wq_qDMJsihfM_Ewu86CrQzNs7UBirb40JiA6DeBipkI46T57E93FhA3lmRw_6IcDVVKxAiy5eQWpFwVJ7-g_jr7LW4AmhI_dSwwnfYI3JViX2V2Jw0AsveCb7sPAApAU3JdA3t2GpdGsjJDrNYaxrtq3yL7wzTQbYWvRzjp1309qK1YKw"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Delegation deleted"
+          },
+          "204": {
+            "description": "Group not found"
+          },
+          "400": {
+            "description": "Malformed request, it could be a problem with public or private ownership"
+          },
+          "401": {
+            "description": "Authentication failed"
+          }
+        }
+      }
+    },
+    "/groupelement/": {
+      "get": {
+        "tags": [
+          "Other"
+        ],
+        "summary": "Search group(s) by item",
+        "parameters": [
+          {
+            "name": "sourceRequest",
+            "in": "query",
+            "description": "The category of the software module from where the request originates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Web"
+            }
+          },
+          {
+            "name": "sourceId",
+            "in": "query",
+            "description": "The unique identifier of software module from where the request originates",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "Swagger Try it out"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "The requester's locale",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "elementId",
+            "in": "query",
+            "description": "The unique identifier of the item",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Firenze:orionUNIFI:BigExB120"
+            }
+          },
+          {
+            "name": "elementType",
+            "in": "query",
+            "description": "The type of the item",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "IOT Device"
+            }
+          },
+          {
+            "name": "accessToken",
+            "in": "query",
+            "description": "An appropriate text through which the requester authenticates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJYQmNYSDJQbHdoeFhXeXlGdmRtdnhZeGVIOTZwQl80ZGZjU3VZQWFUQk9JIn0.eyJqdGkiOiI3MWFjNDkzOS0wM2NiLTRjZTItYjA3Mi0wOGZhN2UxYjdmMzciLCJleHAiOjE1NjAyMzk5MDMsIm5iZiI6MCwiaWF0IjoxNTYwMjM5ODQzLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvYXV0aC9yZWFsbXMvbWFzdGVyIiwic3ViIjoiZDNlYTEzMDYtZjBmOS00YjI1LWI3YzUtZTY0ZGZiZGY5NDllIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiYWRtaW4tY2xpIiwiYXV0aF90aW1lIjowLCJzZXNzaW9uX3N0YXRlIjoiMDE2MmU4YzMtMjViMy00ZmQ5LTg0MTYtZTI4YmQyN2I2MWJkIiwiYWNyIjoiMSIsInNjb3BlIjoiZW1haWwgcHJvZmlsZSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWRtaW4ifQ.MOu-XeCdt6M7ZJiYjQyo_hAtV3xEtmRaL6cxE-YdpsEoirm-QrQztPWFx0R6I7j6gkUuxum59zYSRS9ZPq9T207db7oKTqTEL_9WsrJXG0aCbkmpSL3En3q2zyiCKfbA4YrPYciHJkTF8LFhTgPWaXII7IwiyumDvcyl7wq_qDMJsihfM_Ewu86CrQzNs7UBirb40JiA6DeBipkI46T57E93FhA3lmRw_6IcDVVKxAiy5eQWpFwVJ7-g_jr7LW4AmhI_dSwwnfYI3JViX2V2Jw0AsveCb7sPAApAU3JdA3t2GpdGsjJDrNYaxrtq3yL7wzTQbYWvRzjp1309qK1YKw"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The list of groups is returned where the item can be found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 19
+                      },
+                      "deviceGroupId": {
+                        "type": "integer",
+                        "example": 10
+                      },
+                      "deviceGroupUrl": {
+                        "type": "string",
+                        "format": "uri",
+                        "example": "http://192.168.0.47:8081/test/datamanager/grp/?id=10"
+                      },
+                      "deviceGroupContact": {
+                        "type": "string",
+                        "example": "mirco-rootadmin"
+                      },
+                      "insertTime": {
+                        "type": "integer",
+                        "example": 1578670725000
+                      },
+                      "elementId": {
+                        "type": "string",
+                        "example": "Firenze:orionUNIFI:BigExB120"
+                      },
+                      "elementType": {
+                        "type": "string",
+                        "example": "IOTID"
+                      },
+                      "elmtTypeLbl": {
+                        "type": "string",
+                        "example": "IOT Device"
+                      },
+                      "username": {
+                        "type": "string",
+                        "example": "snap4city"
+                      },
+                      "elementName": {
+                        "type": "string",
+                        "example": "BigExB120"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed request"
+          },
+          "401": {
+            "description": "Authentication failed"
+          },
+          "500": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    },
+    "/sensors/": {
+      "get": {
+        "tags": [
+          "Other"
+        ],
+        "summary": "Search sensors that can be added to a group",
+        "parameters": [
+          {
+            "name": "pageNum",
+            "in": "query",
+            "description": "The page number, for paginated requests.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "The number of results per page.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "For performing full-text searches.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "query",
+            "description": "The numeric unique identifier of the sensor",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "accessToken",
+            "in": "query",
+            "description": "An appropriate text through which the requester authenticates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJYQmNYSDJQbHdoeFhXeXlGdmRtdnhZeGVIOTZwQl80ZGZjU3VZQWFUQk9JIn0.eyJqdGkiOiI3MWFjNDkzOS0wM2NiLTRjZTItYjA3Mi0wOGZhN2UxYjdmMzciLCJleHAiOjE1NjAyMzk5MDMsIm5iZiI6MCwiaWF0IjoxNTYwMjM5ODQzLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvYXV0aC9yZWFsbXMvbWFzdGVyIiwic3ViIjoiZDNlYTEzMDYtZjBmOS00YjI1LWI3YzUtZTY0ZGZiZGY5NDllIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiYWRtaW4tY2xpIiwiYXV0aF90aW1lIjowLCJzZXNzaW9uX3N0YXRlIjoiMDE2MmU4YzMtMjViMy00ZmQ5LTg0MTYtZTI4YmQyN2I2MWJkIiwiYWNyIjoiMSIsInNjb3BlIjoiZW1haWwgcHJvZmlsZSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWRtaW4ifQ.MOu-XeCdt6M7ZJiYjQyo_hAtV3xEtmRaL6cxE-YdpsEoirm-QrQztPWFx0R6I7j6gkUuxum59zYSRS9ZPq9T207db7oKTqTEL_9WsrJXG0aCbkmpSL3En3q2zyiCKfbA4YrPYciHJkTF8LFhTgPWaXII7IwiyumDvcyl7wq_qDMJsihfM_Ewu86CrQzNs7UBirb40JiA6DeBipkI46T57E93FhA3lmRw_6IcDVVKxAiy5eQWpFwVJ7-g_jr7LW4AmhI_dSwwnfYI3JViX2V2Jw0AsveCb7sPAApAU3JdA3t2GpdGsjJDrNYaxrtq3yL7wzTQbYWvRzjp1309qK1YKw"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The list is returned of sensors that can be added to the group",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "heading": {
+                      "type": "object",
+                      "properties": {
+                        "pageNum": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "pageSize": {
+                          "type": "integer",
+                          "example": 10
+                        }
+                      }
+                    },
+                    "payload": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "example": "121359552"
+                          },
+                          "deviceType": {
+                            "type": "string",
+                            "example": "Air_quality_monitoring_station"
+                          },
+                          "valueName": {
+                            "type": "string",
+                            "example": "PM2.5"
+                          },
+                          "deviceName": {
+                            "type": "string",
+                            "example": "373773207E330100"
+                          },
+                          "deviceId": {
+                            "type": "string",
+                            "example": "http://www.disit.org/km4city/resource/iot/orionFinland/Helsinki/373773207E330100"
+                          },
+                          "deviceOwner": {
+                            "type": "string",
+                            "example": "aqninst"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed"
+          },
+          "500": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    },
+    "/devicegroup/{id}/availElmtTypesToAdd/": {
+      "get": {
+        "tags": [
+          "Other"
+        ],
+        "summary": "List the types of item that can be added to the group",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The unique identifier of the group",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 22
+            }
+          },
+          {
+            "name": "sourceRequest",
+            "in": "query",
+            "description": "The category of the software module from where the request originates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Web"
+            }
+          },
+          {
+            "name": "sourceId",
+            "in": "query",
+            "description": "The unique identifier of software module from where the request originates",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "Swagger Try it out"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "The requester's locale",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "accessToken",
+            "in": "query",
+            "description": "An appropriate text through which the requester authenticates",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJYQmNYSDJQbHdoeFhXeXlGdmRtdnhZeGVIOTZwQl80ZGZjU3VZQWFUQk9JIn0.eyJqdGkiOiI3MWFjNDkzOS0wM2NiLTRjZTItYjA3Mi0wOGZhN2UxYjdmMzciLCJleHAiOjE1NjAyMzk5MDMsIm5iZiI6MCwiaWF0IjoxNTYwMjM5ODQzLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvYXV0aC9yZWFsbXMvbWFzdGVyIiwic3ViIjoiZDNlYTEzMDYtZjBmOS00YjI1LWI3YzUtZTY0ZGZiZGY5NDllIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiYWRtaW4tY2xpIiwiYXV0aF90aW1lIjowLCJzZXNzaW9uX3N0YXRlIjoiMDE2MmU4YzMtMjViMy00ZmQ5LTg0MTYtZTI4YmQyN2I2MWJkIiwiYWNyIjoiMSIsInNjb3BlIjoiZW1haWwgcHJvZmlsZSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWRtaW4ifQ.MOu-XeCdt6M7ZJiYjQyo_hAtV3xEtmRaL6cxE-YdpsEoirm-QrQztPWFx0R6I7j6gkUuxum59zYSRS9ZPq9T207db7oKTqTEL_9WsrJXG0aCbkmpSL3En3q2zyiCKfbA4YrPYciHJkTF8LFhTgPWaXII7IwiyumDvcyl7wq_qDMJsihfM_Ewu86CrQzNs7UBirb40JiA6DeBipkI46T57E93FhA3lmRw_6IcDVVKxAiy5eQWpFwVJ7-g_jr7LW4AmhI_dSwwnfYI3JViX2V2Jw0AsveCb7sPAApAU3JdA3t2GpdGsjJDrNYaxrtq3yL7wzTQbYWvRzjp1309qK1YKw"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The list is returned of the types of item that can be added to the group",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "example": "IOT Device"
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "Group not found"
+          },
+          "401": {
+            "description": "Authentication failed"
+          }
+        }
+      }
+    }
+  }
+}

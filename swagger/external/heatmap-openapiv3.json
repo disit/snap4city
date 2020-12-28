@@ -72,7 +72,7 @@
           "required": true,
           "description": "Specify whether the heatmap data is clustered (1) or not (0)",
           "schema": {
-            "type": "string",
+            "type": "integer",
             "enum": [
               0,
               1
@@ -201,6 +201,57 @@
           }
         }
       }
+    },
+    "/interp.php": {
+      "get": {
+        "summary": "Get the interpolated value of a metric from location",
+        "parameters": [
+          {
+            "name": "latitude",
+            "in": "query",
+            "required": true,
+            "description": "The location's latitude",
+            "example": 43.11,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "longitude",
+            "in": "query",
+            "required": true,
+            "description": "The location's longitude",
+            "example": 11.1,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "dataset",
+            "in": "query",
+            "required": true,
+            "description": "The map's name",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "required": true,
+            "description": "The map's date",
+            "example": "2019-01-01T00:00:00.000Z",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Status 200"
+          }
+        }
+      }
     }
   },
   "servers": [
@@ -274,17 +325,7 @@
             "description": "The metric's name"
           }
         },
-        "example": {
-          "mapName": "map",
-          "metricName": "metric",
-          "latitude": 43.11,
-          "longitude": 11.1,
-          "value": 100,
-          "clustered": 0,
-          "description": "a map test",
-          "days": 0,
-          "date": "2019-01-01T00:00:00Z"
-        }
+        "example": "{\n  \"mapName\": \"map\",\n  \"metricName\": \"metric\",\n  \"latitude\":  43.11,\n  \"longitude\": 11.10,\n  \"value\":   100,\n  \"clustered\": 0,\n  \"description\": \"a map test\",\n  \"days\": 0,\n  \"date\": \"2019-01-01T00:00:00Z\"\n}"
       },
       "DataOutput": {
         "type": "object",

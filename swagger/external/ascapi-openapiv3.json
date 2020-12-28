@@ -7,6 +7,9 @@
   "servers": [
     {
       "url": "https://servicemap.disit.org/WebAppGrafo/api/v1"
+    },
+    {
+      "url": "https://www.disit.org/superservicemap/api/v1/"
     }
   ],
   "paths": {
@@ -67,6 +70,9 @@
             "$ref": "#/components/parameters/realtime"
           },
           {
+            "$ref": "#/components/parameters/requestFrom"
+          },
+          {
             "$ref": "#/components/parameters/valueName"
           },
           {
@@ -79,10 +85,19 @@
             "$ref": "#/components/parameters/value_type"
           },
           {
+            "$ref": "#/components/parameters/healthiness"
+          },
+          {
             "$ref": "#/components/parameters/graphUri"
           },
           {
             "$ref": "#/components/parameters/fullCountParam"
+          },
+          {
+            "$ref": "#/components/parameters/accessToken"
+          },
+          {
+            "$ref": "#/components/parameters/apikey"
           }
         ],
         "responses": {
@@ -215,6 +230,9 @@
           },
           {
             "$ref": "#/components/parameters/uid"
+          },
+          {
+            "$ref": "#/components/parameters/requestFrom"
           }
         ],
         "responses": {
@@ -256,9 +274,7 @@
                     "message": {
                       "type": "string",
                       "enum": [
-                        {
-                          "invalid 'selection' parameter (lat;long[;lat;long] | wkt:... | geo": "...)"
-                        }
+                        "invalid 'selection' parameter (lat;long[;lat;long] | wkt:... | geo: ...)"
                       ],
                       "example": "invalid 'selection' parameter (lat;long[;lat;long] | wkt:... | geo: ...)\n"
                     },
@@ -406,6 +422,9 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "$ref": "#/components/parameters/requestFrom"
           }
         ],
         "responses": {
@@ -539,6 +558,9 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "$ref": "#/components/parameters/requestFrom"
           }
         ],
         "responses": {
@@ -606,6 +628,9 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "$ref": "#/components/parameters/requestFrom"
           }
         ],
         "responses": {
@@ -757,6 +782,9 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "$ref": "#/components/parameters/requestFrom"
           }
         ],
         "responses": {
@@ -904,6 +932,9 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "$ref": "#/components/parameters/requestFrom"
           }
         ],
         "responses": {
@@ -1044,6 +1075,9 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "$ref": "#/components/parameters/requestFrom"
           }
         ],
         "responses": {
@@ -1165,6 +1199,24 @@
         "parameters": [
           {
             "in": "query",
+            "name": "agency",
+            "description": "The agency of interest (optional). The agency can be identified through its URI, or through its name. If not specified, the default agency is used that is configured for the Knowledge Base (e.g. ATAF for Tuscany).\n\n_Example:_ Ataf&Linea\n",
+            "schema": {
+              "type": "string"
+            },
+            "example": "Ataf&Linea"
+          },
+          {
+            "in": "query",
+            "name": "line",
+            "description": "The line of interest (optional). The line can be identified through its URI, or through its name. If not specified, positions of all buses are returned.\n\n_Example:_ http://www.disit.org/km4city/resource/Bus_ataflinea_Route_2348415186\n",
+            "schema": {
+              "type": "string"
+            },
+            "example": "http://www.disit.org/km4city/resource/Bus_ataflinea_Route_2348415186"
+          },
+          {
+            "in": "query",
             "name": "uid",
             "description": "Optional user identifier.\n\n_Example:_ e7c13b5ce309dcddce9f72c810c3f93c61ac1c47d66126127f7a78bd5c2cb8a2\n",
             "schema": {
@@ -1185,6 +1237,9 @@
               "default": "json"
             },
             "example": "json"
+          },
+          {
+            "$ref": "#/components/parameters/requestFrom"
           }
         ],
         "responses": {
@@ -1192,10 +1247,14 @@
             "description": "When format is HTML the API provides web visualization of the current bus positions [[Example]](http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/bus-position/?format=html), while if format is JSON it provides a GeoJSON _FeatureCollection_ with the data of each bus that is currently active [[Example]](http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/bus-position/?format=json). For each bus the following properties are provided:\n  * vehicleNum: the number of vehicle;\n  * line: the line short name;\n  * direction: with first and last stop;\n  * detectionTime: the delay in minutes from the current time and the time the position was acquired.\n",
             "content": {
               "text/html": {
-                "$ref": "#/components/schemas/BusPositionHtmlDocument"
+                "schema": {
+                  "$ref": "#/components/schemas/BusPositionHtmlDocument"
+                }
               },
               "application/json": {
-                "$ref": "#/components/schemas/FeatureCollection"
+                "schema": {
+                  "$ref": "#/components/schemas/FeatureCollection"
+                }
               }
             }
           },
@@ -1272,50 +1331,6 @@
         }
       }
     },
-    "/photo/": {
-      "post": {
-        "tags": [
-          "Feedbacks"
-        ],
-        "summary": "Service Photo API",
-        "description": "The API accepts in POST as a multipart form the serviceUri, the user id and a photo in jpeg or png format. The photo provided is not automatically associated with the serviceUri a moderator will check it and decide.",
-        "parameters": [
-          {
-            "in": "formData",
-            "name": "serviceUri",
-            "description": "URI identifying a service.\n\n_Example:_ http://www.disit.org/km4city/resource/aserviceidentifier\n",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uri"
-            }
-          },
-          {
-            "in": "formData",
-            "name": "uid",
-            "description": "A user identifier associated with the user providing the data.\n\n_Example:_ e7c13b5ce309dcddce9f72c810c3f93c61ac1c47d66126127f7a78bd5c2cb8a2\n",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "formData",
-            "name": "file",
-            "description": "A part named _file_ with the photo to be uploaded, the part should contain the mimetype or the filename.\n\n_Example:_ image/jpeg\n",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The API returns the HTTP code 200 when everything is ok, and the photo has been delivered to the moderator."
-          },
-          "404": {
-            "description": "The API fails using HTTP error code 404 if the serviceURI is not valid, user id is not provided or a part named _file_ is not present and the mimetype of this file cannot be found or if it’s not valid."
-          }
-        }
-      }
-    },
     "/feedback/last/": {
       "get": {
         "tags": [
@@ -1342,6 +1357,9 @@
               "maxLength": 2,
               "default": "en"
             }
+          },
+          {
+            "$ref": "#/components/parameters/requestFrom"
           }
         ],
         "responses": {
@@ -1443,6 +1461,9 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "$ref": "#/components/parameters/requestFrom"
           }
         ],
         "responses": {
@@ -1658,6 +1679,184 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/{organization}/wfs": {
+      "post": {
+        "tags": [
+          "WFS"
+        ],
+        "summary": "WFS server",
+        "description": "It allows to query the service map as if it was a WFS server.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "organization",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "The organization within whose boundaries resources are looked up."
+          }
+        ],
+        "requestBody": {
+          "description": "A WFS-compliant request",
+          "required": true,
+          "content": {
+            "application/xml": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "A WFS-compliant XML response"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "WFS"
+        ],
+        "summary": "WFS server",
+        "description": "It allows to query the service map as if it was a WFS server.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "organization",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "The organization within whose boundaries resources are looked up."
+          },
+          {
+            "in": "query",
+            "name": "request",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "service",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "acceptversions",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "typename",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "outputformat",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "storedquery_id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "startindex",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "count",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "resulttype",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "resolve",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "resolvedepth",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "resolvetimeout",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "version",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "typenames",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "propertyname",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A WFS-compliant XML response"
           }
         }
       }
@@ -3505,6 +3704,38 @@
           ]
         },
         "example": "month"
+      },
+      "requestFrom": {
+        "in": "query",
+        "name": "requestFrom",
+        "description": "The parameter identifies the request's originator for monitoring purposes.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "healthiness": {
+        "in": "query",
+        "name": "healthiness",
+        "description": "The parameter allows to filter results by healthiness",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "accessToken": {
+        "in": "query",
+        "name": "accessToken",
+        "description": "The parameter allows to perform authenticated requests, and therefore retrieve not only public data, but also private data that is owned or delegated to the user associated with the specified access token.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "apikey": {
+        "in": "query",
+        "name": "apikey",
+        "description": "The parameter identifies the request's originator for monitoring/authorization purposes.",
+        "schema": {
+          "type": "string"
+        }
       }
     }
   },

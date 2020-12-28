@@ -1,0 +1,274 @@
+openapi: 3.0.1
+info:
+  title: Snap vs Openmaint API
+  description: The API is used to allow communication between an IotApp node and a process defined in the Cmdbuild Openmiant asset management tool by sending parameters which are sent to the internal REST Webservice of the Openmaint application, allowing interaction with its internal database.
+  version: '1.0'
+servers:
+  - url: http://processloader.snap4city.org/processloader/api
+paths:
+  /openmaint:
+    get:
+      tags:
+        - Manage process
+      summary: get a list of instances or info from an openmaint process.
+      parameters:
+        - name: get_processes
+          description: Get a list of active process instances.
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: process_details
+          description: Get an active process by id. 
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: get_status
+          description: Get a status of process and list of required parameters.
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: creator
+          description: Filter active processes by user.
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: get_plants
+          description: Get a list of plants from openmaint databases.
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: get_components
+          description: Get a list of inventory components from openmaint databases.
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: get_teams
+          description: Get a list of executor teams from openmaint databases.
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Get a list of processes instances.
+          content:
+            application/json:
+              schema:
+                 type: object
+                 properties:
+                    result:
+                       type: string
+                       enum: ["OK"]
+                    code:
+                       type: integer
+                       enum: [200]
+                    content:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                              id: 
+                                type: string
+                                example: "300170"
+                              creator: 
+                                type: string
+                                example: "user_test"
+                              status: 
+                                type: string
+                                example: "Final comments"
+                              description: 
+                                type: string
+                                example: "a loss of liquid was found from one of the system pipes"
+                              event_date: 
+                                type: string
+                                example: "2020-04-01T10:42:50"
+                              plant_code: 
+                                type: integer
+                                example: 300097
+                              plant: 
+                                type: string
+                                example: "hyponatraemia"
+                              components: 
+                                type: string
+                                example: "stainless steel tube"
+                              team_code: 
+                                type: integer
+                                example: 300123
+                              team: 
+                                type: string
+                                example: "Team of plumbers"
+                              team_assignment_date: 
+                                type: string
+                                example: "2020-04-01T11:13:15"
+                              work: 
+                                type: string
+                                example: "The damaged tube has been replaced"
+                              start_working_date: 
+                                type: string
+                                example: "2020-04-01T11:13:15"
+                              test_description:
+                                type: string
+                                example: "Tests
+                                          have been carried out to verify that there are no further leaks"
+                              test_date: 
+                                type: string
+                                example: "2020-04-01T11:13:15"
+                              final_comments: 
+                                type: string
+                                example: "Event successfully executed"
+                              finish_date: 
+                                type: string
+                                example: "2020-04-01T11:13:15"
+        '404':
+          description: Error during APi execution.
+          content:
+            application/json:
+              schema:        
+                type: object
+                properties:
+                  result:
+                    type: string
+                    enum: ["ERROR"]
+                  code:
+                    type: integer
+                    enum: [404]
+                  content:
+                    type: string
+                    enum: ["Error during APi execution"]
+        '500':
+          description: DB connection error.
+          content:
+            application/json:
+              schema:        
+                type: object
+                properties:
+                  result:
+                    type: string
+                    enum: ["ERROR"]
+                  code:
+                    type: integer
+                    enum: [500]
+                  content:
+                    type: string
+                    enum: ["DB connection error"] 
+    post:
+      tags:
+        - Manage process
+      summary: It manages instances of an openmaint process.
+      parameters:
+        - name: new_process
+          description: Create a new process instance.
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: description
+          description: Element “description” present in openmaint process  (mandatory if is also present the parameter edit_process and in new_process).
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: edit_process
+          description: Update parameters of a process instance and advance it.
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name : delete_process
+          description: Delete a process by Id. 
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: necessary_materials
+          description: Element “necessary_materials” present in openmaint process  (mandatory if is also present the parameter edit_process for any process instances).
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: team_code 
+          description: Element “team_code” present in openmaint process (mandatory if is also present the parameter edit_process for any process instances).
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: work_description 
+          description: Element “work_description” present in openmaint process (mandatory if is also present the parameter edit_process for any process instances).
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: test_description 
+          description: Element “test_description” present in openmaint process (mandatory if is also present the parameter edit_process for any process instances).
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: final_comments 
+          description: Element “final_comments” present in openmaint process (mandatory if is also present the parameter edit_process for any process instances).
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: success 
+          description: Element “success” present in openmaint process (mandatory if is also present the parameter edit_process for any process instances).
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+         '200':
+          description: Create a new process instance with a description.
+          content:
+            application/json:
+              schema:        
+                type: object
+                properties:
+                  result:
+                    type: string
+                    enum: ["OK"]
+                  code:
+                    type: integer
+                    enum: [200]
+                  content:
+                    type: string
+                    enum: ["Process Successfully Created"]
+         '404':
+          description: Error during APi execution.
+          content:
+            application/json:
+              schema:        
+                type: object
+                properties:
+                  result:
+                    type: string
+                    enum: ["ERROR"]
+                  code:
+                    type: integer
+                    enum: [404]
+                  content:
+                    type: string
+                    enum: ["Error during APi execution"]
+         '500':
+              description: DB connection error.
+              content:
+                application/json:
+                  schema:        
+                    type: object
+                    properties:
+                      result:
+                        type: string
+                        enum: ["ERROR"]
+                      code:
+                        type: integer
+                        enum: [500]
+                      content:
+                        type: string
+                        enum: ["DB connection error"]
+
