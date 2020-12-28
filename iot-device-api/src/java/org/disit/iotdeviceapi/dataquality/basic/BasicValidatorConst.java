@@ -61,6 +61,7 @@ public final class BasicValidatorConst {
     public static final String CFG_AT_SAME_CARDINALITY_REF = "ref";
     public static final String CFG_AT_SAME_CARDINALITY_LEVEL = "lev";
     public static final String CFG_AT_SAME_CARDINALITY_ID = "id";
+    public static final String CFG_AT_SAME_CARDINALITY_RAW = "raw";
     
     public static final String CFG_AT_ANDOR = "op";
     public static final String CFG_VL_AND = "and";

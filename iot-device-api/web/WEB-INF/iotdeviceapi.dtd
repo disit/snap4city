@@ -1,6 +1,6 @@
-<!ENTITY virtUrl "localhost:1111">
+<!ENTITY virtUrl "jdbc:virtuoso://localhost:1111">
 <!ENTITY virtUsr "dba">
 <!ENTITY virtPwd "dba">
-<!ENTITY ownership "http://192.168.0.10/ownership-api/v1/list">
-<!ENTITY servicemap "https://servicemap.disit.org/WebAppGrafo/api/v1/">
-<!ENTITY keycloak "https://www.snap4city.org/auth/realms/master/protocol/openid-connect/userinfo">
+<!ENTITY ownership "http://localhost/ownership-api/v1/list">
+<!ENTITY servicemap "http://loclahost/ServiceMap/api/v1/">
+<!ENTITY keycloak "http://localhost/auth/realms/master/protocol/openid-connect/userinfo">

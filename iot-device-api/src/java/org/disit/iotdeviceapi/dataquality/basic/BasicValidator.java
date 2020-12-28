@@ -49,7 +49,7 @@ public class BasicValidator extends Validator {
             if(config.hasAttribute(BasicValidatorConst.CFG_AT_ANDOR)) {
                 andOr =  config.getAttribute(BasicValidatorConst.CFG_AT_ANDOR);
             }
-            if(config.hasAttribute(BasicValidatorConst.CFG_AT_ANDOR) && (!(andOr.equals(BasicValidatorConst.CFG_VL_AND) || andOr.equals(BasicValidatorConst.CFG_VL_OR)))) {
+            if(andOr != null) if(config.hasAttribute(BasicValidatorConst.CFG_AT_ANDOR) && (!(andOr.equals(BasicValidatorConst.CFG_VL_AND) || andOr.equals(BasicValidatorConst.CFG_VL_OR)))) {
                 String exMsg = MessageFormat.format("Invalid validation group logic operation: {0}. Expected AND or OR. Validating data: \"{1}\". ValidatOR: \"{2}\". ", 
                     new Object[]{andOr, currentData.getId(), this.id});
                 throw new IotDeviceApiException(exMsg);
@@ -805,21 +805,33 @@ public class BasicValidator extends Validator {
                 Data refData = builtData.get(sameCardinalityRef);
                 Object[] refValue = refData.getValue();
                 if(refValue == null) refValue = new Object[0];
-                if(cardinality != refValue.length) {
+                if(cardinality != refValue.length) {                    
+                    ArrayList<String> dataValuesStrings = new ArrayList<>();
+                    try { 
+                        if(sameCardinalityElement.hasAttribute(BasicValidatorConst.CFG_AT_SAME_CARDINALITY_RAW) && builtData.get(sameCardinalityElement.getAttribute(BasicValidatorConst.CFG_AT_SAME_CARDINALITY_RAW)) != null) {
+                            for(Object o: builtData.get(sameCardinalityElement.getAttribute(BasicValidatorConst.CFG_AT_SAME_CARDINALITY_RAW)).getValue()) dataValuesStrings.add(o.toString());
+                        }
+                        else {
+                            for(Object o: currentData.getValue()) dataValuesStrings.add(o.toString());
+                        }
+                        ArrayList<String> refValuesStrings = new ArrayList<>();
+                        for(Object o: refValue) refValuesStrings.add(o.toString());
+                        dataValuesStrings.removeAll(refValuesStrings);
+                    } catch(Exception e){}
                     if(BasicValidatorConst.CFG_VL_OR.equals(andOr)) {
-                        validationFailuresCounter++;
-                        String msg = MessageFormat.format("One of the data quality checks in an OR validation group failed: \"{0}\" has cardinality {1}, while \"{2}\" has cardinality {3}. ValidatOR: \"{4}\". ValidatION: \"{5}\".", 
-                                new Object[]{currentData.getId(), cardinality, refData.getId(), refValue.length, this.id, validationID});
-                        xlogger.log(BasicValidator.class.getName(), Level.parse(validationLevel), "data quality check failed", msg);
+                        validationFailuresCounter++;                        
+                        String msg = MessageFormat.format("One of the data quality checks in an OR validation group failed: \"{0}\" has cardinality {1}, while \"{2}\" has cardinality {3}. Missing value(s): {4}. ValidatOR: \"{5}\". ValidatION: \"{6}\".", 
+                                new Object[]{currentData.getId(), cardinality, refData.getId(), refValue.length, dataValuesStrings.size() > 0 ? String.join(";",dataValuesStrings) : "Unknown, I'm so sorry...", this.id, validationID});
+                        xlogger.log(BasicValidator.class.getName(), Level.parse(validationLevel), "data quality check failed", msg);                        
                     }
                     else if(Level.SEVERE == Level.parse(validationLevel)) {
-                        String exMsg = MessageFormat.format("Data quality check failed: \"{0}\" has cardinality {1}, while \"{2}\" has cardinality {3}. ValidatOR: \"{4}\". ValidatION: \"{5}\".", 
-                                new Object[]{currentData.getId(), cardinality, refData.getId(), refValue.length, this.id, validationID});
+                        String exMsg = MessageFormat.format("Data quality check failed: \"{0}\" has cardinality {1}, while \"{2}\" has cardinality {3}. Missing value(s): {4}. ValidatOR: \"{5}\". ValidatION: \"{6}\".", 
+                                new Object[]{currentData.getId(), cardinality, refData.getId(), refValue.length, dataValuesStrings.size() > 0 ? String.join(";",dataValuesStrings) : "Unknown, I'm so sorry...", this.id, validationID});
                         throw new IotDeviceApiException(exMsg);
                     }
                     else {
-                        String msg = MessageFormat.format("Data quality check failed: \"{0}\" has cardinality {1}, while \"{2}\" has cardinality {3}. ValidatOR: \"{4}\". ValidatION: \"{5}\".", 
-                                new Object[]{currentData.getId(), cardinality, refData.getId(), refValue.length, this.id, validationID});
+                        String msg = MessageFormat.format("Data quality check failed: \"{0}\" has cardinality {1}, while \"{2}\" has cardinality {3}. Missing value(s): {4}. ValidatOR: \"{5}\". ValidatION: \"{6}\".", 
+                                new Object[]{currentData.getId(), cardinality, refData.getId(), refValue.length, dataValuesStrings.size() > 0 ? String.join(";",dataValuesStrings) : "Unknown, I'm so sorry...", this.id, validationID});
                         xlogger.log(BasicValidator.class.getName(), Level.parse(validationLevel), "data quality check failed", msg);
                     }
                 }

@@ -380,23 +380,28 @@ public class VirtuosoLoader extends Loader {
                         TupleQuery ptq = this.mRepositoryConnection.prepareTupleQuery(QueryLanguage.SPARQL, MessageFormat.format("SELECT * '{' GRAPH {0} '{' {1} ?p ?v '}' '}' ", new Object[]{graph, subject})); 
                         TupleQueryResult ptqr = ptq.evaluate();
                         
-                        if(ptqr.hasNext()) {
-                                
-                            TupleQuery tq = this.mRepositoryConnection.prepareTupleQuery(QueryLanguage.SPARQL, 
-                            MessageFormat.format("DELETE '{' GRAPH {0} '{' {1} '}'  '}' INSERT '{' GRAPH {0} '{' {2} '}' '}' WHERE '{' GRAPH {0} '{' {3} ?p ?v '}' '}' ", 
-                                    new Object[]{graph, delete, insert, subject}));        
-                            tq.evaluate(); 
-                            getXlogger().log(VirtuosoLoader.class.getName(), Level.INFO, "executed query", MessageFormat.format("DELETE '{' GRAPH {0} '{' {1} '}'  '}' INSERT '{' GRAPH {0} '{' {2} '}' '}' WHERE '{' GRAPH {0} '{' {3} ?p ?v '}' '}' ", 
-                                    new Object[]{graph, delete, insert, subject}));
-                        
+                        try { 
+                            if(ptqr.hasNext()) {
+
+                                TupleQuery tq = this.mRepositoryConnection.prepareTupleQuery(QueryLanguage.SPARQL, 
+                                MessageFormat.format("DELETE '{' GRAPH {0} '{' {1} '}'  '}' INSERT '{' GRAPH {0} '{' {2} '}' '}' WHERE '{' GRAPH {0} '{' {3} ?p ?v '}' '}' ", 
+                                        new Object[]{graph, delete, insert, subject}));        
+                                tq.evaluate();                             
+                                getXlogger().log(VirtuosoLoader.class.getName(), Level.INFO, "executed query", MessageFormat.format("DELETE '{' GRAPH {0} '{' {1} '}'  '}' INSERT '{' GRAPH {0} '{' {2} '}' '}' WHERE '{' GRAPH {0} '{' {3} ?p ?v '}' '}' ", 
+                                        new Object[]{graph, delete, insert, subject}));
+
+                            }
+                            else {
+                                TupleQuery tq = this.mRepositoryConnection.prepareTupleQuery(QueryLanguage.SPARQL, 
+                                MessageFormat.format("INSERT '{' GRAPH {0} '{' {1} '}' '}' ", 
+                                        new Object[]{graph, insert}));        
+                                tq.evaluate(); 
+                                getXlogger().log(VirtuosoLoader.class.getName(), Level.INFO, "executed query", MessageFormat.format("INSERT '{' GRAPH {0} '{' {1} '}' '}' ", 
+                                        new Object[]{graph, insert}));
+                            }
                         }
-                        else {
-                            TupleQuery tq = this.mRepositoryConnection.prepareTupleQuery(QueryLanguage.SPARQL, 
-                            MessageFormat.format("INSERT '{' GRAPH {0} '{' {1} '}' '}' ", 
-                                    new Object[]{graph, insert}));        
-                            tq.evaluate(); 
-                            getXlogger().log(VirtuosoLoader.class.getName(), Level.INFO, "executed query", MessageFormat.format("INSERT '{' GRAPH {0} '{' {1} '}' '}' ", 
-                                    new Object[]{graph, insert}));
+                        finally{
+                            ptqr.close();
                         }
                         
                     }

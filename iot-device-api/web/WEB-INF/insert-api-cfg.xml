@@ -300,7 +300,7 @@
                         
                         <validate ref="existing-measure-uris">
                             <pick-validator ref="basic" description="One and only one value type must be specified for each of the device attributes, AND IT MUST MATCH ONE OF THE VALUES CONFIGURED IN THE KNOWLEDGE BASE.">
-                                <same-cardinality id="existing-measure-uris.same-cardinality.attribute-valuename" ref="attribute-valuename" lev="SEVERE"/>
+                                <same-cardinality id="existing-measure-uris.same-cardinality.attribute-valuename" raw="measure-uri" ref="attribute-valuename" lev="SEVERE"/>
                             </pick-validator>
                         </validate>
                         

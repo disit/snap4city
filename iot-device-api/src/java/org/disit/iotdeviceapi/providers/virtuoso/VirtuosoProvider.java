@@ -66,23 +66,32 @@ public class VirtuosoProvider extends Provider{
             }
             repo.initialize();
             conn = repo.getConnection();
-            for(Object query: queries) {
-                getXlogger().log(VirtuosoProvider.class.getName(), Level.INFO, "query", query.toString());
-                TupleQuery tq = conn.prepareTupleQuery(QueryLanguage.SPARQL, query.toString());
-                TupleQueryResult tqr = tq.evaluate();
-                while (tqr.hasNext()) {
-                    BindingSet bs = tqr.next();
-                    Set<String> variables = bs.getBindingNames();
-                    String row = "{\n";
-                    for(String variable: variables) {
-                        row+= "\t\""+variable+"\": \""+bs.getValue(variable).stringValue()+"\",\n";
+            try {
+                for(Object query: queries) {
+                    getXlogger().log(VirtuosoProvider.class.getName(), Level.INFO, "query", query.toString());
+                    TupleQuery tq = conn.prepareTupleQuery(QueryLanguage.SPARQL, query.toString());
+                    TupleQueryResult tqr = tq.evaluate();
+                    try {
+                        while (tqr.hasNext()) {
+                            BindingSet bs = tqr.next();
+                            Set<String> variables = bs.getBindingNames();
+                            String row = "{\n";
+                            for(String variable: variables) {
+                                row+= "\t\""+variable+"\": \""+bs.getValue(variable).stringValue()+"\",\n";
+                            }
+                            row = row.substring(0, row.length()-2).concat("\n");
+                            row+="}";                    
+                            output.add(row);
+                       }
                     }
-                    row = row.substring(0, row.length()-2).concat("\n");
-                    row+="}";                    
-                    output.add(row);
-               }
+                    finally {
+                        tqr.close();
+                    }
+                }
             }
-           conn.close();
+            finally {
+                conn.close();
+            }
            return output.toArray();
 
         }
