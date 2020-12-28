@@ -20,6 +20,7 @@ import org.apache.nifi.components.PropertyDescriptor;
 import org.apache.nifi.components.Validator;
 import org.apache.nifi.processor.util.StandardValidators;
 import org.disit.nifi.processors.enrich_data.enrichment_source.EnrichmentSourceClientService;
+import org.disit.nifi.processors.enrich_data.enrichment_source.EnrichmentSourceUpdaterService;
 
 /**
  * ServicemapClientService interface.
@@ -27,7 +28,8 @@ import org.disit.nifi.processors.enrich_data.enrichment_source.EnrichmentSourceC
  * This interface defines the property descriptors common
  * to all the ServicemapClientService implementations 
  */
-public interface ServicemapClientService extends EnrichmentSourceClientService{
+public interface ServicemapClientService 
+       extends EnrichmentSourceClientService, EnrichmentSourceUpdaterService{
  
 	public static final PropertyDescriptor SERVICEMAP_URL = new PropertyDescriptor
             .Builder().name( "SERVICEMAP_URL" )

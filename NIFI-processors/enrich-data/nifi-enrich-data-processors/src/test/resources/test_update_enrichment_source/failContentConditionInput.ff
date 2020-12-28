@@ -1,0 +1,7 @@
+{
+	"a" : 456 ,
+	"id" : "test-id" ,
+	"location" : {
+	    "coordinates":[19.2 , 16.8]
+	}
+}

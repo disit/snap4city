@@ -33,6 +33,7 @@ import com.github.scribejava.apis.KeycloakApi;
 import com.github.scribejava.core.builder.ServiceBuilder;
 import com.github.scribejava.core.java8.Base64;
 import com.github.scribejava.core.model.OAuth2AccessToken;
+import com.github.scribejava.core.model.OAuth2AccessTokenErrorResponse;
 import com.github.scribejava.core.oauth.OAuth20Service;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -136,14 +137,20 @@ public class ServicemapKeycloakClient extends ServicemapClient{
 	
 	// Methods to cache and manage access tokens
 	public void refreshTokenCache() throws IOException, InterruptedException, ExecutionException {
+		
 		if( !tokenCache.isValid() && !tokenCache.isRefreshValid() ) {
 			// Get a new token
 			OAuth2AccessToken token = service.getAccessTokenPasswordGrant( kc.username , kc.password );
 			tokenCache.cacheToken( token );
 		} else {
 			// Use refresh token
-			OAuth2AccessToken freshToken = service.refreshAccessToken( tokenCache.getToken().getRefreshToken() );
-			tokenCache.cacheToken( freshToken );
+			try {
+				OAuth2AccessToken freshToken = service.refreshAccessToken( tokenCache.getToken().getRefreshToken() );
+				tokenCache.cacheToken( freshToken );
+			} catch( OAuth2AccessTokenErrorResponse err ) {
+				OAuth2AccessToken token = service.getAccessTokenPasswordGrant( kc.username , kc.password );
+				tokenCache.cacheToken( token );
+			}
 		}
 	}
 	

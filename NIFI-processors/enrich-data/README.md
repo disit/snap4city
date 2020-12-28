@@ -1,6 +1,19 @@
 # NIFI-processors / enrich-data
 
-This bundle includes processors and controller services.
+This bundle includes the following Apache NiFi components:  
+
+Processors:
+* EnrichData
+* UpdateEnrichmentSource
+* OwnershipEnrichData
+
+ControllerServices:
+* ServicemapControllerService
+* ServicemapOAuthControllerService
+* OwnershipControllerService
+* OwnershipOAuthControllerService
+* KeycloakTokenProviderControllerService
+
 
 ## Build:
 
@@ -15,7 +28,7 @@ To build the bundle:
 If the build succeed, a `.tar` archive is produced in the folder:
 
 ```
-distribution/target/nifi-enrich-data-bundle-0.0.1-SNAPSHOT.tar
+distribution/target/nifi-enrich-data-bundle-1.9.2.tar
 ```
 
 The archive contains the following directory structure:
@@ -46,9 +59,12 @@ dist/conf/enrich-data.conf
 You can copy this file in a location accessible to NiFi ( Eg: `/srv/nifi/conf` ) and point to that file in the processor configurations.
 
 
-**Note**: alternatively, from `Nifi-1.9` a bundle can be installed by copying the nar archive in the `extension` subfolder of the Nifi installation root ( Eg: `/srv/nifi/extensions` ), **WITHOUT RESTARTING THE NIFI INSTANCE**.
-If you are updating the bundle from a previous version **you still need to restart** the nifi instance(s) to reload the nar archives.
+**Note**: alternatively, from `Nifi-1.9` a bundle can be installed by copying the nar archive in the `extension` subfolder of the Nifi installation root ( Eg: `/srv/nifi/extensions` ), **WITHOUT RESTARTING THE NIFI INSTANCE**.  
+If you are updating the bundle from a previous version **you still need to restart** the nifi instance(s) to reload the nar archives (NiFi cannot detect changes in the nar archives at runtime).
 
+## Additional documentation
+Additional documentation on the processors is provided by the built-in NiFi documentation accessible through `Right click on processor` -> `View usage`.  
+For some processors the properties configurations are explained in details in the page displayed by the `Additional details ...` link in the usage documentation.
 
 ## Dataflow configuration:
 
@@ -58,9 +74,8 @@ An example of standard ingestion flow using such processors:
 
 The behavior of the `EnrichData` processor can be described as following:
 1. Parse the incoming flow files content as JSON.
-2. Identify the `serviceUriPrefix` to use in order to retrieve the enrichment data (more on this later ...).
-3. Perform an HTTP GET request to retrieve the enrichment data.
-4. Merge the flow file content with the enrichment data.
+2. Determine the location of the target resource and retrieve the enrichment data using the configure `Enrichment Source Client Service`.
+4. Enrich the flow file content with the retrieved enrichment data.
 5. Produce the output flow file(s) according to the configured output format.
 
 For example, if the incoming flow file content is:
@@ -112,10 +127,10 @@ the content of the output flow file will be similar to:
 Note that the timestamp contained in the "date_time" attribute is added to every measure in the resulting flow file content (or to every flow file in case of "Split Json Object" output mode). The name of the timestamp attribute is configurable.
 
 ### Enrichment Source Client Service configuration
-We refer to the service which provides the enrichment data as **enrichment source**.  
+We refer to the service which provides the enrichment data as the **enrichment source**.  
 Currently the only enrichment source supported is ServiceMap (eventually with JWT authentication using Keycloak).
 
-To configure the enrichment source for the EnrichData processor you need to create a controller service of type `ServicemapClientService` or `ServicempaKeycloakClientService`.
+To configure the enrichment source for the EnrichData processor you need to create a controller service of type `ServicemapControllerService` or `ServicempaOAuthControllerService`.  
 These controller services provide a confiugured HTTP client to the processor, and the processor uses such client to retrieve the enrichment data from the enrichment source.
 
 The configurations common to both controller service types are:
@@ -128,7 +143,10 @@ The produced url has the following format:
 <Servicemap Url>?serviceUri=<Service Uri prefix>/<DEVICE ID>&<Additional query string>
 ```
 
-The **ServicemapKeycloakClientService** needs additional OpenID authentication parameters:
+The **ServicemapOAuthControllerService** needs **KeycloakControllerService** in order to retrieve the access token to pass to servicemap.
+The KeycloakTokenProviderService can be configured as 'OAuth token provider service' in the ServicempaOAuthControllerService.
+
+In order to configure the **KeycloakTokenProviderService** you need to specify:  
 * **Keycloak URL**: the base url of the Keycloak instance.
 * **Client ID**: the client id.
 * **Client Secret**: the client secret.

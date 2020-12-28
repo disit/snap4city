@@ -1,11 +1,10 @@
 FF-Attributes:
 {
 	path : target
-	filename : 3643898926093.mockFlowFile
+	filename : 23249006823444.mockFlowFile
 	timestampSource : dateObserved
 	_id : 66c9f5c42be2dae0ca8c69baa9023ec1cf0bef866a65acb22af8de4675e84280
-	uuid : 2320d831-59d7-4e76-9dff-a616cc45d4b8
-	deviceId : 123456789
+	uuid : 7abc6b5a-ca8a-4d14-bd8b-dc6e79e8da1e
 }
 
 FF-Content:
@@ -20,7 +19,7 @@ FF-Content:
   "kind": "sensor",
   "latlon": "60.157337,24.91201",
   "serviceUri": "http://serviceuriprefix.org/123456789",
-  "uuid": "923e2ca7-3e90-4c31-95ec-34a44ee9bb2a",
+  "uuid": "16bb9aab-ef5b-4d37-8c69-628622a28783",
   "value_name": "PM10",
   "organization": "MyOrg",
   "deviceName": "123456789",
@@ -35,11 +34,10 @@ FF-Content:
 FF-Attributes:
 {
 	path : target
-	filename : 3643898926093.mockFlowFile
+	filename : 23249006823444.mockFlowFile
 	timestampSource : dateObserved
 	_id : d704c3cbe81866bf9445fad2543501357c1b88174d23265c5ee6bb58b8acfecc
-	uuid : b654cbbc-976c-4440-9c61-d77480687a10
-	deviceId : 123456789
+	uuid : f43008c4-e6a3-49ad-be88-8d39ecefd8ee
 }
 
 FF-Content:
@@ -54,7 +52,7 @@ FF-Content:
   "kind": "sensor",
   "latlon": "60.157337,24.91201",
   "serviceUri": "http://serviceuriprefix.org/123456789",
-  "uuid": "923e2ca7-3e90-4c31-95ec-34a44ee9bb2a",
+  "uuid": "16bb9aab-ef5b-4d37-8c69-628622a28783",
   "value_name": "PM2.5",
   "organization": "MyOrg",
   "deviceName": "123456789",
@@ -69,11 +67,10 @@ FF-Content:
 FF-Attributes:
 {
 	path : target
-	filename : 3643898926093.mockFlowFile
+	filename : 23249006823444.mockFlowFile
 	timestampSource : dateObserved
 	_id : 56c4c867ae525fdd993c5cd87310402ad502ea8da1eb60ed952d3cda4fbf16cb
-	uuid : 7693be84-e884-478e-aff2-5b6e19f2d1d9
-	deviceId : 123456789
+	uuid : 96aada79-1f11-4a7b-a6d9-0ed54996ddf1
 }
 
 FF-Content:
@@ -92,7 +89,7 @@ FF-Content:
   "kind": "sensor",
   "latlon": "60.157337,24.91201",
   "serviceUri": "http://serviceuriprefix.org/123456789",
-  "uuid": "923e2ca7-3e90-4c31-95ec-34a44ee9bb2a",
+  "uuid": "16bb9aab-ef5b-4d37-8c69-628622a28783",
   "value_name": "address",
   "organization": "MyOrg",
   "deviceName": "123456789",
@@ -107,11 +104,10 @@ FF-Content:
 FF-Attributes:
 {
 	path : target
-	filename : 3643898926093.mockFlowFile
+	filename : 23249006823444.mockFlowFile
 	timestampSource : dateObserved
 	_id : a1db3620f072c697487dfd89916a2f90933c8b3b835ad561d37976b0536cc7cd
-	uuid : c3e4a0f2-7f3f-48c1-b9ea-2892b9c4f7a8
-	deviceId : 123456789
+	uuid : d8b78c1d-bafc-4fab-be6a-7908210f3525
 }
 
 FF-Content:
@@ -126,7 +122,7 @@ FF-Content:
   "kind": "sensor",
   "latlon": "60.157337,24.91201",
   "serviceUri": "http://serviceuriprefix.org/123456789",
-  "uuid": "923e2ca7-3e90-4c31-95ec-34a44ee9bb2a",
+  "uuid": "16bb9aab-ef5b-4d37-8c69-628622a28783",
   "value_name": "dateObserved",
   "organization": "MyOrg",
   "deviceName": "123456789",
@@ -141,11 +137,10 @@ FF-Content:
 FF-Attributes:
 {
 	path : target
-	filename : 3643898926093.mockFlowFile
+	filename : 23249006823444.mockFlowFile
 	timestampSource : dateObserved
 	_id : 8dabfdfb3c672261e53b2fc9fbe3a8c35016128c38fe9465acf7581873af12eb
-	uuid : 2dba2e6c-f1cc-4dff-8466-b203b77d61c3
-	deviceId : 123456789
+	uuid : 900f93b8-4afa-4e1d-9e07-ea86a04e78dd
 }
 
 FF-Content:
@@ -166,7 +161,7 @@ FF-Content:
   "kind": "sensor",
   "latlon": "60.157337,24.91201",
   "serviceUri": "http://serviceuriprefix.org/123456789",
-  "uuid": "923e2ca7-3e90-4c31-95ec-34a44ee9bb2a",
+  "uuid": "16bb9aab-ef5b-4d37-8c69-628622a28783",
   "value_name": "location",
   "organization": "MyOrg",
   "deviceName": "123456789",
@@ -181,11 +176,10 @@ FF-Content:
 FF-Attributes:
 {
 	path : target
-	filename : 3643898926093.mockFlowFile
+	filename : 23249006823444.mockFlowFile
 	timestampSource : dateObserved
 	_id : 560f2ec3b0d9fc8d3303570e42f7eb41134d5971a98806f9ff7676aa4ede9100
-	uuid : 7b8ab94c-e7b4-4cb7-a9b4-6c226ad22e1b
-	deviceId : 123456789
+	uuid : 91e5db32-50bb-4eda-9ceb-25aace06b6ac
 }
 
 FF-Content:
@@ -200,7 +194,7 @@ FF-Content:
   "kind": "sensor",
   "latlon": "60.157337,24.91201",
   "serviceUri": "http://serviceuriprefix.org/123456789",
-  "uuid": "923e2ca7-3e90-4c31-95ec-34a44ee9bb2a",
+  "uuid": "16bb9aab-ef5b-4d37-8c69-628622a28783",
   "value_name": "reliability",
   "organization": "MyOrg",
   "deviceName": "123456789",
@@ -215,11 +209,10 @@ FF-Content:
 FF-Attributes:
 {
 	path : target
-	filename : 3643898926093.mockFlowFile
+	filename : 23249006823444.mockFlowFile
 	timestampSource : dateObserved
 	_id : f6d9fced1e92b508bc5fef29c61e93e7821063e5688c24a84b13dca4b131ab81
-	uuid : 852b5034-e705-4bc8-a48f-066c326f9ca9
-	deviceId : 123456789
+	uuid : e112f978-a16a-40ff-b45f-73a595f9cd0d
 }
 
 FF-Content:
@@ -234,7 +227,7 @@ FF-Content:
   "kind": "sensor",
   "latlon": "60.157337,24.91201",
   "serviceUri": "http://serviceuriprefix.org/123456789",
-  "uuid": "923e2ca7-3e90-4c31-95ec-34a44ee9bb2a",
+  "uuid": "16bb9aab-ef5b-4d37-8c69-628622a28783",
   "value_name": "source",
   "organization": "MyOrg",
   "deviceName": "123456789",

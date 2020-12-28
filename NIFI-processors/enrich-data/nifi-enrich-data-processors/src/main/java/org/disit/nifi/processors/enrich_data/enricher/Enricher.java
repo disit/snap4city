@@ -56,7 +56,7 @@ public abstract class Enricher {
 	}
 	
 	public abstract Map<String, String> enrich( String deviceId , JsonObject rootObject , JsonObject enrichmentObject , JsonElement responseRootEl , String timestamp , 
-												Map<String , String> staticProperties );
+												Map<String , JsonElement> staticProperties );
 
 	public void setLeftJoin( boolean isLeftJoin ) {
 		this.isLeftJoin = isLeftJoin;

@@ -19,13 +19,16 @@ package org.disit.nifi.processors.enrich_data;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
@@ -33,7 +36,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import javax.naming.ConfigurationException;
+import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.http.client.HttpResponseException;
+import org.apache.http.conn.HttpHostConnectException;
 import org.apache.nifi.annotation.behavior.ReadsAttribute;
 import org.apache.nifi.annotation.behavior.ReadsAttributes;
 import org.apache.nifi.annotation.behavior.WritesAttribute;
@@ -60,6 +68,7 @@ import org.disit.nifi.processors.enrich_data.enrichment_source.EnrichmentSourceC
 import org.disit.nifi.processors.enrich_data.enrichment_source.EnrichmentSourceClientService;
 import org.disit.nifi.processors.enrich_data.enrichment_source.EnrichmentSourceException;
 import org.disit.nifi.processors.enrich_data.enrichment_source.ServicemapSource;
+import org.disit.nifi.processors.enrich_data.json_processing.JsonProcessingUtils;
 import org.disit.nifi.processors.enrich_data.logging.LoggingUtils;
 import org.disit.nifi.processors.enrich_data.output_producer.ElasticsearchBulkIndexingOutputProducer;
 import org.disit.nifi.processors.enrich_data.output_producer.JsonOutputProducer;
@@ -70,9 +79,10 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 
 @Tags({"snap4city" , "servicemap" , "enrichment","enrich"})
-@CapabilityDescription("This processor enirches data incoming from a broker subscription with informations retrieved from Servicemap." )
+@CapabilityDescription("This processor enirches incoming data from a broker subscription with informations retrieved from Servicemap." )
 @SeeAlso({})
 @ReadsAttributes({@ReadsAttribute(attribute="", description="")})
 @WritesAttributes({ 
@@ -84,6 +94,12 @@ import com.google.gson.JsonParser;
 public class EnrichData extends AbstractProcessor {
 	
 	// Constants
+	public static final String OWNERSHIP_BEHAVIOR_VALUES[] = {
+		"Route to failure on ownership error." , 
+		"Use defaults on ownership error." ,
+		"Use defaults if no controller service configured."
+	};
+	
 	public static final String OUTPUT_FF_CONTENT_FORMAT_VALUES[] = { 
 			"JSON" , 
 			"Elasticsearch bulk indexing compliant" , 
@@ -99,16 +115,68 @@ public class EnrichData extends AbstractProcessor {
 		"[lat , lon]" ,
 		"[lon , lat]"
 	};
+	
+	public static final String LATLON_PRIORITY_VALUES[] = {
+		"Enrichment source response property first." ,
+		"Flow file content object property first."
+	};
+	
+	public static final String INNER_LATLON_GEOJSON = "geoJsonFields";
+	public static final String INNER_LATLON_GEOPOINT = "geoPointFields";
+	public static final List<String> INNER_LATLON_COMPOUND_FIELDS_CONFIGS = Collections.unmodifiableList(
+		Arrays.asList(
+			INNER_LATLON_GEOJSON , 
+			INNER_LATLON_GEOPOINT
+		)
+    );
+	
+	public static final String INNER_LATLON_LATITUDE = "latitudeFields";
+	public static final String INNER_LATLON_LONGITUDE = "longitudeFields";
+	public static final List<String> INNER_LATLON_SINGLE_FIELDS_CONFIGS = Collections.unmodifiableList(
+		Arrays.asList(
+			INNER_LATLON_LATITUDE , 
+			INNER_LATLON_LONGITUDE
+		)
+    );
+	
+	public static final String INNER_LATLON_COMPOUND_FIELD_PATH = "path";
+	public static final String INNER_LATLON_COMPOUND_FIELD_FORMAT = "format";
+	public static final List<String> INNER_LATLON_COMPOUND_FIELD_PROPERTIES = Collections.unmodifiableList( 
+		Arrays.asList( 
+			INNER_LATLON_COMPOUND_FIELD_PATH , 
+			INNER_LATLON_COMPOUND_FIELD_FORMAT	
+		)
+	);
+	
+	
+	
+	public static final List<Integer> RETRIABLE_STATUS_CODES = Collections.unmodifiableList( 
+		Arrays.asList(
+			// Server retriable status codes
+			HttpServletResponse.SC_INTERNAL_SERVER_ERROR ,
+			HttpServletResponse.SC_BAD_GATEWAY ,
+			HttpServletResponse.SC_SERVICE_UNAVAILABLE ,
+			HttpServletResponse.SC_GATEWAY_TIMEOUT ,
+			// Client retriable status codes
+			HttpServletResponse.SC_REQUEST_TIMEOUT
+		)
+	);
 
 	// This set is needed to distinguish between user-defined properties and 
 	// the properties specified by the descriptors.
 	private static final Set<String> staticProperties = new HashSet<>( Arrays.asList(
 			"ENRICHMENT_SOURCE_CLIENT_SERVICE" ,
+			"OWNERSHIP_CLIENT_SERVICE" ,
+			"OWNERSHIP_BEHAVIOR" ,
+	        "DEFAULT_OWNERSHIP_PROPERTIES" ,
+	        "ADDITIONAL_DEFAULT_OWNERSHIP_PROPERTIES" ,
 		  	"DEVICE_ID_NAME" , 
 		  	"DEVICE_ID_NAME_MAPPING" ,
 		  	"DEVICE_ID_VALUE_PREFIX_SUBST" ,
 		  	"ENRICHMENT_RESPONSE_BASE_PATH" ,
+		  	"LATLON_PRIORITY",
 		  	"ENRICHMENT_LAT_LON_PATH" ,
+		  	"INNER_LAT_LON_CONFIG" ,
 		  	"ENRICHMENT_LAT_LON_FORMAT" ,
 		  	"ENRICHMENT_BEHAVIOR" , 
 		  	"TIMESTAMP_FIELD_NAME" ,
@@ -124,14 +192,20 @@ public class EnrichData extends AbstractProcessor {
 		  	"ES_INDEX" , 
 		  	"ES_TYPE" , 
 		  	"NODE_CONFIG_FILE_PATH" , 
-		  	"ATTEMPT_STRING_VALUES_PARSING" ) 
+		  	"ATTEMPT_STRING_VALUES_PARSING" ,
+		  	"ORIGINAL_FLOW_FILE_ATTRIBUTES_AUG" 
+		) 
 	);
 	
 	// File configs
-	private static final List<String> allowedFileConfigs = Arrays.asList( "timestampFromContent.useFallback" );
+	private static final List<String> allowedFileConfigs = Arrays.asList( 
+			"timestampFromContent.useFallback" 
+	);
 	private final int FILE_CONFIGS_USE_FALLBACK = 0;
 	
 	// Property Descriptors
+	
+	// Controller services
 	public static final PropertyDescriptor ENRICHMENT_SOURCE_CLIENT_SERVICE = new PropertyDescriptor
 			.Builder().name( "ENRICHMENT_SOURCE_CLIENT_SERVICE" )
 			.displayName( "Enrichment Source Client Service" )
@@ -140,8 +214,37 @@ public class EnrichData extends AbstractProcessor {
 			.required( true )
 			.addValidator( EnrichmentSourceServiceValidators.STANDARD_ENRICHMENT_SOURCE_VALIDATOR )
 			.build();
+	
+	public static final PropertyDescriptor OWNERSHIP_CLIENT_SERVICE = new PropertyDescriptor
+			.Builder().name( "OWNERSHIP_CLIENT_SERVICE" )
+			.displayName( "Ownership Client Service" )
+			.identifiesControllerService( EnrichmentSourceClientService.class )
+			.description( "The client service to retrieve ownership data." )
+			.required( false )
+			.addValidator( EnrichmentSourceServiceValidators.STANDARD_ENRICHMENT_SOURCE_VALIDATOR )
+			.build();			
 			
-    
+    // Ownership
+	public static final PropertyDescriptor OWNERSHIP_BEHAVIOR = new PropertyDescriptor
+			.Builder().name( "OWNERSHIP_BEHAVIOR" )
+			.displayName("Ownership Behavior" )
+			.description( "Controls the behavior of the ownership enrichment." )
+			.allowableValues( OWNERSHIP_BEHAVIOR_VALUES )
+			.required( true )
+			.defaultValue( OWNERSHIP_BEHAVIOR_VALUES[1] )
+			.build();
+	
+	
+	public static final PropertyDescriptor DEFAULT_OWNERSHIP_PROPERTIES = new PropertyDescriptor
+            .Builder().name( "DEFAULT_OWNERSHIP_PROPERTIES" )
+            .displayName( "Default ownership properties" )
+            .description( "A JsonObject containing the default properties to enrich with, if the ownership service cannot retrieve a valid ownership response." )
+            .required( false )
+            .addValidator( EnrichDataValidators.jsonPropertyValidator(true) )
+            .build();
+	
+	
+	// Device ID
     public static final PropertyDescriptor DEVICE_ID_NAME = new PropertyDescriptor
             .Builder().name( "DEVICE_ID_NAME" )
             .displayName( "Device Id Name" )
@@ -168,6 +271,7 @@ public class EnrichData extends AbstractProcessor {
             .addValidator(Validator.VALID)
             .build();
     
+    // Timestamp
     public static final PropertyDescriptor TIMESTAMP_FIELD_NAME = new PropertyDescriptor
             .Builder().name( "TIMESTAMP_FIELD_NAME" )
             .displayName( "Timestamp field name" )
@@ -203,6 +307,7 @@ public class EnrichData extends AbstractProcessor {
             .addValidator(Validator.VALID)
             .build();
     
+    // Uri prefix form flow file content object property
     public static final PropertyDescriptor URI_PREFIX_FROM_ATTR_NAME = new PropertyDescriptor
             .Builder().name( "URI_PREFIX_FROM_ATTR_NAME" )
             .displayName( "Service uri prefix from attribute name" )
@@ -212,6 +317,7 @@ public class EnrichData extends AbstractProcessor {
             .addValidator(Validator.VALID)
             .build();
     
+    // Value field (flow file content object)
     public static final PropertyDescriptor VALUE_FIELD_NAME = new PropertyDescriptor
     		.Builder().name( "VALUE_FIELD_NAME" )
             .displayName( "Value field name" )
@@ -220,6 +326,7 @@ public class EnrichData extends AbstractProcessor {
             .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
             .build();
     
+    // Enrichment response object
     public static final PropertyDescriptor ENRICHMENT_RESPONSE_BASE_PATH = new PropertyDescriptor
             .Builder().name( "ENRICHMENT_RESPONSE_BASE_PATH" )
             .displayName( "Enrichment Response Base Path" )
@@ -228,22 +335,45 @@ public class EnrichData extends AbstractProcessor {
             .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
             .build();
     
+    // Latitude and longitude
+    public static final PropertyDescriptor LATLON_PRIORITY = new PropertyDescriptor
+    		.Builder().name( "LATLON_PRIORITY" )
+    		.displayName( "Coordinates enrichment priority" )
+    		.description( String.format( 
+    				"Specifies the priority for the coordinates to use. If '%s' is selected the coordinates are picked from a property inside the object contained in the incoming flow files if possible.\n If '%s' is selected instead, the coordinates are picked from the object retrieved from the enrichment source.\nIf the priority cannot be satisfied the processor will fallback on the other option.", 
+    				LATLON_PRIORITY_VALUES[0] , LATLON_PRIORITY_VALUES[1] ) )
+    		.required( true )
+    		.allowableValues( LATLON_PRIORITY_VALUES )
+    		.defaultValue( LATLON_PRIORITY_VALUES[0] )
+    		.addValidator( StandardValidators.NON_EMPTY_EL_VALIDATOR )
+    		.build();
+    		
+    
     public static final PropertyDescriptor ENRICHMENT_LAT_LON_PATH = new PropertyDescriptor
             .Builder().name( "ENRICHMENT_LAT_LON_PATH" )
-            .displayName( "Enrichment latlon Path" )
-            .description( "The path in the enrichment object to get latitude and longitude from. This path must point to a 2-elements array in the enrichment response object containing the latitude and the longitude (Es. 'Service/features/geometry/coordinates'). The latitude and longitude in the array will be concatenated (with a ',' comma) an put in a field named 'latlon' in every enriched object." )
+            .displayName( "Enrichment Response latlon Path" )
+            .description( "The path of the property in the enrichment source response object to get latitude and longitude from. This path must point to a 2-elements array in the enrichment response object containing the latitude and the longitude (Es. 'Service/features/geometry/coordinates'). The latitude and longitude in the array will be concatenated (with a ',' comma) an put in a field named 'latlon' in every enriched object." )
             .required(true)
             .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
             .build();
     
     public static final PropertyDescriptor ENRICHMENT_LAT_LON_FORMAT = new PropertyDescriptor
     		.Builder().name( "ENRICHMENT_LAT_LON_FORMAT" )
-    		.displayName( "Enrichment lat lon format" )
-    		.description( "Specifies the ordering of latitude and longitude in the coordinates array retrieved from Servicemap." )
+    		.displayName( "Enrichment latlon format" )
+    		.description( "Specifies the ordering of latitude and longitude in the coordinates array retrieved from the enrichment source (Ex. Servicemap)." )
     		.required( true )
     		.defaultValue( ENRICHMENT_LAT_LON_FORMAT_VALUES[0] )
     		.allowableValues( ENRICHMENT_LAT_LON_FORMAT_VALUES )
     		.addValidator( StandardValidators.NON_EMPTY_VALIDATOR )
+    		.build();
+    
+    public static final PropertyDescriptor INNER_LAT_LON_CONFIG = new PropertyDescriptor
+    		.Builder().name( "INNER_LAT_LON_CONFIG" )
+    		.displayName( "Latlon from flow file content configuration" )
+    		.description( "The configuration for the latitude and longitude from the flow file content. This configuration must be a special json object. Such object is deeply described in details in the Usage documentation of this processor." )
+    		.required(false)
+    		.defaultValue("")
+    		.addValidator(EnrichDataValidators.innerLatLonPropertyValidator())
     		.build();
     
     public static final PropertyDescriptor ENRICHMENT_BEHAVIOR = new PropertyDescriptor
@@ -256,6 +386,7 @@ public class EnrichData extends AbstractProcessor {
     		.addValidator( StandardValidators.NON_EMPTY_VALIDATOR )
     		.build();
     
+    // Static properties
     public static final PropertyDescriptor SRC_PROPERTY = new PropertyDescriptor
             .Builder().name( "SRC_PROPERTY" )
             .displayName( "src" )
@@ -293,6 +424,7 @@ public class EnrichData extends AbstractProcessor {
             .addValidator( StandardValidators.NON_EMPTY_VALIDATOR )
             .build();
     
+    // Output
     public static final PropertyDescriptor OUTPUT_FF_CONTENT_FORMAT = new PropertyDescriptor
     		.Builder().name( "OUTPUT_FF_CONTENT_FORMAT" )
     		.displayName( "Output flow file content format" )
@@ -329,6 +461,7 @@ public class EnrichData extends AbstractProcessor {
             .addValidator( Validator.VALID )
             .build();
     
+    // Config file
     public static final PropertyDescriptor NODE_CONFIG_FILE_PATH = new PropertyDescriptor
     		.Builder().name( "NODE_CONFIG_FILE_PATH" )
     		.displayName( "Node config file path" )
@@ -336,7 +469,18 @@ public class EnrichData extends AbstractProcessor {
     		.required( true )
     		.addValidator( StandardValidators.FILE_EXISTS_VALIDATOR )
     		.build();
-
+    
+    // Original flow file augmentation
+    public static final PropertyDescriptor ORIGINAL_FLOW_FILE_ATTRIBUTES_AUG = new PropertyDescriptor
+    		.Builder().name( "ORIGINAL_FLOW_FILE_ATTRIBUTES_AUG" )
+    		.displayName( "Original flow file attributes enrichment" )
+    		.description( "This property specifies an enrichment on the flow files routed to the 'original' relationship.\nThe content of such flow files is the same as the incoming ones,\nbut properties retrieved from the enrichment source can be put in these flow files as attributes.\nThe value of this processor's property must specify a valid json object where the property names are the name of the attributes to be inserted in the original flow file, and the values are property paths of the enrichment object whose values will be set as the attribute values.\nFor example the mapping '{\"baz\":\"foo/bar\"}' will add the attribute 'baz' with the value contained in the 'foo/bar' property of the enrichment object.\n Properties which cannot be found inside the enrichment object are skipped." )
+    		.required( false )
+    		.defaultValue( "" )
+    		.addValidator( EnrichDataValidators.jsonPropertyValidator(true) )
+    		.build();
+    		
+    // Relationships
     public static final Relationship SUCCESS_RELATIONSHIP = new Relationship.Builder()
             .name("SUCCESS_RELATIONSHIP")
             .description("The correctly enriched flow files will be routed to this relationship." )
@@ -346,12 +490,27 @@ public class EnrichData extends AbstractProcessor {
             .name("FAILURE_RELATIONSHIP")
             .description("Flow files which cannot be correctly enriched will be routed to this relationship." )
             .build();
+    
+    public static final Relationship ORIGINAL_RELATIONSHIP = new Relationship.Builder()
+            .name("original")
+            .autoTerminateDefault( true )
+            .description("The original incoming flow file is routed to this relationship." )
+            .build();
 
+    public static final Relationship RETRY_RELATIONSHIP = new Relationship.Builder()
+    		.name( "retry" )
+    		.description( "Flow files which cannot be correctly enriched but are considered retriable will be routed to this relationship.\nA flow file is considered retriable if the cause of the failure is an enrichment service unavailability." )
+    		.build();
     
     // PropertyDescriptors and Relationships sets
     private List<PropertyDescriptor> descriptors;
     private Set<Relationship> relationships;
 
+    //Ownership
+    private boolean ownershipWithoutControllerService;
+    private boolean ownershipRouteToFailureOnError;
+    private JsonObject defaultOwnershipProperties;
+    
     // Servicemap configuration properties
     private String serviceUriPrefixAttrName;
     
@@ -367,8 +526,19 @@ public class EnrichData extends AbstractProcessor {
     private String timestampFieldName;
     private String valueFieldName;
     private List<String> enrichmentResponseBasePath;
+    
+    private boolean latlonPriorityInner;
     private List<String> enrichmentLatLonPath;
     private boolean enrichmentLatitudeFirst;
+    
+    //Inner latlon
+//    private JsonObject innerLatlonConfig;
+    private List<CompoundLatlonField> geoJsonFields;
+    private List<CompoundLatlonField> geoPointFields;
+    private List< List<String> > latitudeFields;
+    private List< List<String> > longitudeFields;
+    
+    
     private String srcPropertyValue;
     private String kindPropertyValue;
     private List<String> fieldsToPurge;
@@ -391,10 +561,16 @@ public class EnrichData extends AbstractProcessor {
     private Map< String , List<String> > additionalFieldPaths;
     private Map< String , String > deviceIdValuePrefixSubst;
     
+    // Original flow file augmentation
+    private Map< String , List<String>> originalFFAttributesAugMapping;
+    
     // Controller services and enrichment client
     private EnrichmentSourceClientService enrichmentSourceClientService;
     private EnrichmentSourceClient enrichmentSourceClient;
     private String defaultServiceUriPrefix = null;
+    
+    private EnrichmentSourceClientService ownershipClientService;
+    private EnrichmentSourceClient ownershipClient;
     
     // Logger
     private ComponentLog logger;
@@ -406,6 +582,9 @@ public class EnrichData extends AbstractProcessor {
     protected void init(final ProcessorInitializationContext context) {
         final List<PropertyDescriptor> descriptors = new ArrayList<PropertyDescriptor>();
         descriptors.add( ENRICHMENT_SOURCE_CLIENT_SERVICE );
+        descriptors.add( OWNERSHIP_BEHAVIOR );
+        descriptors.add( OWNERSHIP_CLIENT_SERVICE );
+        descriptors.add( DEFAULT_OWNERSHIP_PROPERTIES );
         descriptors.add( DEVICE_ID_NAME );
         descriptors.add( DEVICE_ID_NAME_MAPPING );
         descriptors.add( DEVICE_ID_VALUE_PREFIX_SUBST );
@@ -415,8 +594,10 @@ public class EnrichData extends AbstractProcessor {
         descriptors.add( URI_PREFIX_FROM_ATTR_NAME );
         descriptors.add( VALUE_FIELD_NAME );
         descriptors.add( ENRICHMENT_RESPONSE_BASE_PATH );
+        descriptors.add( LATLON_PRIORITY );
         descriptors.add( ENRICHMENT_LAT_LON_PATH );
         descriptors.add( ENRICHMENT_LAT_LON_FORMAT );
+        descriptors.add( INNER_LAT_LON_CONFIG );
         descriptors.add( ENRICHMENT_BEHAVIOR );
         descriptors.add( SRC_PROPERTY );
         descriptors.add( KIND_PROPERTY );
@@ -427,11 +608,14 @@ public class EnrichData extends AbstractProcessor {
         descriptors.add( ES_TYPE );
         descriptors.add( NODE_CONFIG_FILE_PATH );
         descriptors.add( ATTEMPT_STRING_VALUES_PARSING );
+        descriptors.add( ORIGINAL_FLOW_FILE_ATTRIBUTES_AUG );
         this.descriptors = Collections.unmodifiableList(descriptors);
 
         final Set<Relationship> relationships = new HashSet<Relationship>();
         relationships.add(SUCCESS_RELATIONSHIP);
         relationships.add(FAILURE_RELATIONSHIP);
+        relationships.add(RETRY_RELATIONSHIP);
+        relationships.add(ORIGINAL_RELATIONSHIP);
         this.relationships = Collections.unmodifiableSet(relationships);
     }
 
@@ -462,7 +646,7 @@ public class EnrichData extends AbstractProcessor {
     }
 
     @OnScheduled
-    public void onScheduled(final ProcessContext context) throws ConfigurationException{
+    public void onScheduled(final ProcessContext context) throws ConfigurationException{    	
     	// Set up processor
     	this.logger = getLogger();
     	
@@ -499,6 +683,47 @@ public class EnrichData extends AbstractProcessor {
     										.getDefaultUriPrefix();
     	}
     	
+    	// Ownership controller service and client
+    	if( context.getProperty( OWNERSHIP_CLIENT_SERVICE ).isSet() ) {
+    		this.ownershipClientService = context.getProperty( OWNERSHIP_CLIENT_SERVICE )
+    											 .asControllerService( EnrichmentSourceClientService.class );
+    		
+    		try {
+				this.ownershipClient = this.ownershipClientService.getClient( context );
+			} catch (InstantiationException e) {
+				String reason = "Unable to obtain Ownership client instance from the controller service.";
+				
+				LoggingUtils.produceErrorObj( reason )
+							.withExceptionInfo( e )
+							.logAsError( logger );
+			}
+    	}else {
+    		this.ownershipClientService = null;
+    		this.ownershipClient = null;
+    	}
+    	
+    	// Ownership behavior
+    	String ownershipBehavior = context.getProperty( OWNERSHIP_BEHAVIOR ).getValue();
+    	this.ownershipRouteToFailureOnError = false;
+    	this.ownershipWithoutControllerService = false;
+    	if( ownershipBehavior.equals( OWNERSHIP_BEHAVIOR_VALUES[0] ) ) {
+    		this.ownershipRouteToFailureOnError = true;
+    		this.ownershipWithoutControllerService = false;
+    	}
+    	if( ownershipBehavior.equals( OWNERSHIP_BEHAVIOR_VALUES[2] ) ) {
+    		this.ownershipWithoutControllerService = true;
+    		this.ownershipRouteToFailureOnError = false;
+    	}
+    	
+    	
+    	// Default ownership properties
+    	String defaultOwnershpVal = context.getProperty( DEFAULT_OWNERSHIP_PROPERTIES ).getValue();
+    	if( defaultOwnershpVal != null && !defaultOwnershpVal.isEmpty() )
+    		this.defaultOwnershipProperties = parser.parse( defaultOwnershpVal )
+    											    .getAsJsonObject();
+    	else this.defaultOwnershipProperties = new JsonObject();
+    		
+    	
     	// Enrichment configs
     	this.deviceIdName = context.getProperty( DEVICE_ID_NAME ).getValue();
     	this.deviceIdNameMapping = context.getProperty( DEVICE_ID_NAME_MAPPING ).getValue();
@@ -520,13 +745,79 @@ public class EnrichData extends AbstractProcessor {
     		  									.stream().map( ( String pathEl ) -> { return pathEl.trim(); } )
     		  									.collect( Collectors.toList() );
     	
+    	// Coordinates 
+    	this.latlonPriorityInner = context.getProperty( LATLON_PRIORITY ).getValue().equals( LATLON_PRIORITY_VALUES[1] );
+    	
     	this.enrichmentLatLonPath = Arrays.asList( context.getProperty( ENRICHMENT_LAT_LON_PATH ).getValue().split( "/" ) )
     									  .stream().map( (String pathEl ) -> { return pathEl.trim(); } )
     									  .collect( Collectors.toList() );
     	
+    	
+    	String innerLatlonConfigVal = context.getProperty( INNER_LAT_LON_CONFIG ).getValue();
+    	JsonObject innerLatlonConfig;
+    	if( innerLatlonConfigVal.isEmpty() ) {
+    		innerLatlonConfig = new JsonObject();
+    	}else {
+    		innerLatlonConfig = parser.parse( innerLatlonConfigVal ).getAsJsonObject();
+    	}
+    	
+    	
+    	
+    	// Check inner priority + inner latlon path
+    	if( this.latlonPriorityInner == true && innerLatlonConfig.size() == 0 ) {
+    		throw new ConfigurationException( String.format( "If the coordinates priority is set to '%s' the '%s' must be specified, but it is configured as empty." , 
+    										  LATLON_PRIORITY_VALUES[1] , INNER_LAT_LON_CONFIG.getDisplayName() ) );
+    	}
+    	
+    	this.geoJsonFields = new ArrayList<>();
+    	this.geoPointFields = new ArrayList<>();
+    	this.latitudeFields = new ArrayList<>();
+    	this.longitudeFields = new ArrayList<>();
+    	
+    	// geo json
+    	if( innerLatlonConfig.has( INNER_LATLON_GEOJSON ) ) {
+    		JsonArray geoJsonFieldsConf = innerLatlonConfig.get( INNER_LATLON_GEOJSON )
+    						 							   .getAsJsonArray();
+    		Iterator<JsonElement> it = geoJsonFieldsConf.iterator();
+    		while( it.hasNext() ) {
+    			JsonObject gfc = it.next().getAsJsonObject();
+    			this.geoJsonFields.add( new CompoundLatlonField( gfc ) );
+    		}
+    	}
+    	
+    	// geo point
+    	if( innerLatlonConfig.has( INNER_LATLON_GEOPOINT ) ) {
+    		JsonArray geoPointFieldsConf = innerLatlonConfig.get( INNER_LATLON_GEOPOINT )
+					   .getAsJsonArray();
+			Iterator<JsonElement> it = geoPointFieldsConf.iterator();
+			while( it.hasNext() ) {
+				JsonObject gfc = it.next().getAsJsonObject();
+				this.geoPointFields.add( new CompoundLatlonField( gfc ) );
+			}
+    	}
+    	
+    	// single fields
+    	if( innerLatlonConfig.has( INNER_LATLON_LATITUDE ) && innerLatlonConfig.has( INNER_LATLON_LONGITUDE ) ) {
+    		JsonArray latitudes = innerLatlonConfig.get( INNER_LATLON_LATITUDE ).getAsJsonArray();
+    		Iterator<JsonElement> it = latitudes.iterator();
+    		while( it.hasNext() ) {
+    			String latFieldPath = it.next().getAsString();
+    			this.latitudeFields.add( JsonProcessingUtils.pathStringToPathList( latFieldPath ) );
+    		}
+    		
+    		JsonArray longitudes = innerLatlonConfig.get( INNER_LATLON_LONGITUDE ).getAsJsonArray();
+    		it = longitudes.iterator();
+    		while( it.hasNext() ) {
+    			String lonFieldPath = it.next().getAsString();
+    			this.longitudeFields.add( JsonProcessingUtils.pathStringToPathList( lonFieldPath ) );
+    		}
+    	}
+    	
+    	
     	// True if [lat , lon] false if [lon , lat]
     	this.enrichmentLatitudeFirst = context.getProperty( ENRICHMENT_LAT_LON_FORMAT ).getValue().equals( ENRICHMENT_LAT_LON_FORMAT_VALUES[0] );
     	
+    	// Static properties
     	this.srcPropertyValue = context.getProperty( SRC_PROPERTY ).getValue();
     	this.kindPropertyValue = context.getProperty( KIND_PROPERTY ).getValue();
     	
@@ -599,7 +890,6 @@ public class EnrichData extends AbstractProcessor {
     	//User defined properties
     	this.additionalFieldPaths = new ConcurrentHashMap<>();
     	context.getAllProperties().forEach( (String k, String v) -> {
-    		System.out.println( k + " " + v );
     		if( !staticProperties.contains( k ) ) {
     			this.additionalFieldPaths.put( k , 
     										   Arrays.asList( v.split("/") ).stream()
@@ -648,6 +938,19 @@ public class EnrichData extends AbstractProcessor {
     		this.enricher.putStaticProperty( "kind" , this.kindPropertyValue );
     	
     	this.enricher.setLeftJoin( this.leftJoin );
+    	
+    	// Original FF augmentation
+    	originalFFAttributesAugMapping =  new HashMap<>();
+    	String augMappingPropVal = context.getProperty( ORIGINAL_FLOW_FILE_ATTRIBUTES_AUG ).getValue();
+    	if( !augMappingPropVal.isEmpty() ) {
+    		JsonObject propObj = parser.parse( augMappingPropVal ).getAsJsonObject();
+    		for( Map.Entry<String , JsonElement> prop : propObj.entrySet() ) {
+    			originalFFAttributesAugMapping.put(
+    				prop.getKey() , 
+    				JsonProcessingUtils.pathStringToPathList( prop.getValue().getAsString() ) 
+    			);
+    		}
+    	}
     }
     
     /**
@@ -699,6 +1002,8 @@ public class EnrichData extends AbstractProcessor {
             return;
         }
         
+//        FlowFile originalFF = session.clone( flowFile );
+        
         // flow file uuid
         String uuid = flowFile.getAttribute( "uuid" );
         
@@ -717,8 +1022,11 @@ public class EnrichData extends AbstractProcessor {
 			LoggingUtils.produceErrorObj( reason , rootEl )
 						.withProperty( "ff-uuid" , uuid )
 						.logAsError( logger );
-			flowFile = session.putAttribute( flowFile , "failure" , reason );
-			session.transfer( flowFile , FAILURE_RELATIONSHIP );
+			// Route to failure
+//			flowFile = session.putAttribute( flowFile , "failure" , reason );
+//			session.transfer( flowFile , FAILURE_RELATIONSHIP );
+			routeToRelationship( flowFile , FAILURE_RELATIONSHIP , session, 
+				new ImmutablePair<String , String>( "failure" , reason ) );
 			return;
         }        
         
@@ -731,13 +1039,17 @@ public class EnrichData extends AbstractProcessor {
 			LoggingUtils.produceErrorObj( reason , rootEl )
 						.withProperty( "ff-uuid" , uuid )
 						.logAsError( logger );
-			flowFile = session.putAttribute( flowFile , "failure" , reason );
-			session.transfer( flowFile , FAILURE_RELATIONSHIP );
+			// Route to failure
+//			flowFile = session.putAttribute( flowFile , "failure" , reason );
+//			session.transfer( flowFile , FAILURE_RELATIONSHIP );
+			routeToRelationship( flowFile , FAILURE_RELATIONSHIP , session, 
+					new ImmutablePair<String,String>( "failure" , reason ) );
 			return;
     	}
     	
     	// Device id
 		String deviceId = getSubstitutedPrefixValue( rootObject.get( this.deviceIdName ).getAsString() );
+		session.putAttribute( flowFile , "deviceId" , deviceId ); // deviceId as flow file attribute
 		
 		// Timestamp handling
 		String timestamp;
@@ -767,6 +1079,7 @@ public class EnrichData extends AbstractProcessor {
 			}
 		} 
     		
+		// Get enrichment data
 		JsonElement responseRootEl;
 		try {
 			if( uriPrefix != null )
@@ -774,17 +1087,87 @@ public class EnrichData extends AbstractProcessor {
 			else
 				responseRootEl = enrichmentSourceClient.getEnrichmentData( deviceId );
 		} catch (EnrichmentSourceException e) {
-			String reason = "EnrichmentSource exception while retrieving enrichment data.";
-			LoggingUtils.produceErrorObj( reason , rootEl )
-						.withExceptionInfo( e )
-						.withProperty( "ff-uuid" , uuid )
-						.logAsError( logger );
+			// EnrichmentSource error handling
+			StringBuilder msg = new StringBuilder( e.getMessage() );
+			Relationship destination;
 			
-			flowFile = session.putAttribute( flowFile , "failure" , e.getMessage() );
-			flowFile = session.putAttribute( flowFile , "deviceId" , deviceId );
-			session.transfer( flowFile , FAILURE_RELATIONSHIP );
+			if( e.getCause() != null && shouldRetry( e.getCause() ) )
+				destination = RETRY_RELATIONSHIP;
+			else
+				destination = FAILURE_RELATIONSHIP;
+			msg.append( " Routing to " ).append( destination.getName() );
+			
+			LoggingUtils.produceErrorObj( msg.toString() , rootEl )
+				.withExceptionInfo( e )
+				.withProperty( "ff-uuid" , uuid )
+				.logAsError( logger );
+			
+			String requestUrl = null;
+			try {
+				if( uriPrefix != null )
+					requestUrl = enrichmentSourceClient.buildRequestUrl( uriPrefix , deviceId );
+				else
+					requestUrl = enrichmentSourceClient.buildRequestUrl( deviceId );
+			} catch( UnsupportedEncodingException ue) { requestUrl = ""; }
+			
+			// Route to destination
+//			flowFile = session.putAttribute( flowFile , "requestUrl" , requestUrl );
+//			flowFile = session.putAttribute( flowFile , "failure" , e.getMessage() );
+//			flowFile = session.putAttribute( flowFile , "failure.cause" , e.getCause().toString() );
+//			flowFile = session.putAttribute( flowFile , "deviceId" , deviceId );
+//			session.transfer( flowFile , destination );
+			routeToRelationship( flowFile , destination , session ,
+				new ImmutablePair<String, String>("requestUrl" , requestUrl) ,
+				new ImmutablePair<String, String>("failure" , e.getMessage()) ,
+				new ImmutablePair<String, String>("failure.cause" , e.getCause().toString()) );
 			return;
 		}
+		
+		//Get ownership data
+		JsonObject ownershipResponseObj = null;
+		if( this.ownershipClient != null ) {
+			try {
+				JsonElement ownershipResponseRootEl = ownershipClient.getEnrichmentData( deviceId );
+				if( !ownershipResponseRootEl.isJsonObject() )
+					throw new EnrichmentSourceException( "The ownership response is not a valid json object." );
+				
+				ownershipResponseObj = ownershipResponseRootEl.getAsJsonObject();
+				
+				// Add defaults if not in ownership service response
+				if( this.defaultOwnershipProperties.entrySet().isEmpty() )
+					for(Map.Entry<String, JsonElement> dProp : this.defaultOwnershipProperties.entrySet() ) {
+						if( !ownershipResponseObj.has( dProp.getKey() ) )
+							ownershipResponseObj.add( dProp.getKey() , dProp.getValue() );
+					}
+			} catch (EnrichmentSourceException ex) {
+				
+				if( !this.ownershipRouteToFailureOnError ) {
+					 // Default ownership properties
+					ownershipResponseObj = this.defaultOwnershipProperties.deepCopy();
+				} else {
+					String reason = "EnrichmentSourceException while retrieving ownership data.";
+					LoggingUtils.produceErrorObj( reason )
+								.withExceptionInfo( ex )
+								.withProperty( "ff-uuid" , uuid )
+								.logAsError( logger );
+					
+					//Route to failure
+//					flowFile = session.putAttribute( flowFile , "failure" , reason );
+//					flowFile = session.putAttribute( flowFile , "failure.cause", ex.toString() );
+//					flowFile = session.putAttribute( flowFile , "deviceId" , deviceId );
+//					session.transfer( flowFile , FAILURE_RELATIONSHIP );
+					routeToRelationship( flowFile , FAILURE_RELATIONSHIP , session ,
+						new ImmutablePair<String , String>( "failure" , reason ) ,
+						new ImmutablePair<String , String>( "failure.cause" , ex.toString()) );
+					return;
+				}
+				
+			}
+		}else {
+			if( this.ownershipWithoutControllerService )
+				ownershipResponseObj = this.defaultOwnershipProperties.deepCopy();
+		}
+		
 		
 		// Enrichment source response processing
 		//
@@ -793,8 +1176,8 @@ public class EnrichData extends AbstractProcessor {
 		JsonObject enrichmentObj;
 		try {
 //			responseRootEl = parser.parse( responseBody );		
-			latlonStr = getLatLonString( this.enrichmentLatLonPath , responseRootEl );
 			enrichmentObj = getEnrichmentObject( enrichmentResponseBasePath , responseRootEl );
+			latlonStr = getLatLonString( this.enrichmentLatLonPath , responseRootEl ); // Coordinates from the enrichment response object, always retrieved
 		} catch( ProcessException ex ) {
 			String reason = "Exception while processing the response from the enrichment source (Servicemap).";
 			LoggingUtils.produceErrorObj( reason , rootEl )
@@ -803,17 +1186,35 @@ public class EnrichData extends AbstractProcessor {
 						.withProperty( "GET_ResponseBody", responseRootEl.toString() )
 						.logAsError( logger );
 			
-			flowFile = session.putAttribute( flowFile , "failure" , reason );
-			flowFile = session.putAttribute( flowFile , "deviceId" , deviceId );
-			session.transfer( flowFile , FAILURE_RELATIONSHIP );
+			// Route to failure
+//			flowFile = session.putAttribute( flowFile , "failure" , reason );
+//			flowFile = session.putAttribute( flowFile , "failure.cause", ex.toString() );
+//			flowFile = session.putAttribute( flowFile , "deviceId" , deviceId );
+//			session.transfer( flowFile , FAILURE_RELATIONSHIP );
+			routeToRelationship( flowFile , FAILURE_RELATIONSHIP , session ,
+				new ImmutablePair<String , String>( "failure" , reason ) ,
+				new ImmutablePair<String , String>( "failure.cause" , ex.toString()) );
 			return;
+		}
+		
+		// Determine cordinates to use 
+		Map<String, JsonElement> additionalProperties = new TreeMap<>();
+		if( this.latlonPriorityInner ) {
+			try {
+				String innerLatLonStr = getInnerLatLon( rootEl );
+				additionalProperties.put( "latlon" , new JsonPrimitive( innerLatLonStr ) );
+			}catch( NoSuchElementException ex ) { // Fallback on the enrichment response coordinates
+				additionalProperties.put( "latlon" , new JsonPrimitive( latlonStr ) );
+			}
+		}else{
+			additionalProperties.put( "latlon" , new JsonPrimitive( latlonStr ) );
 		}
 					
 		// Enrichment
 		//
 		try {
 			// Use configured enricher implementation
-			Map<String, String> additionalProperties = new TreeMap<>();
+//			Map<String, JsonElement> additionalProperties = new TreeMap<>();
 
 			StringBuilder serviceUriPropertyValue = new StringBuilder("");
 			if( uriPrefix != null )
@@ -823,9 +1224,16 @@ public class EnrichData extends AbstractProcessor {
 			serviceUriPropertyValue.append( deviceId );
 				
 			
-			additionalProperties.put( "serviceUri" , serviceUriPropertyValue.toString() );
-			additionalProperties.put( "uuid" , uuid );
-			additionalProperties.put( "latlon" , latlonStr );
+			additionalProperties.put( "serviceUri" , new JsonPrimitive( serviceUriPropertyValue.toString() ) );
+			additionalProperties.put( "uuid" , new JsonPrimitive( uuid ) );
+//			additionalProperties.put( "latlon" , new JsonPrimitive( latlonStr ) );
+
+			// Add ownership properties to the additional (static) properties
+			if( ownershipResponseObj != null ) {
+				ownershipResponseObj.entrySet().forEach( (Map.Entry<String , JsonElement> ownershipProp) -> {
+					additionalProperties.put( ownershipProp.getKey() , ownershipProp.getValue() );
+				});
+			}
 			
 			Map<String , String> additionalFieldsErrors = this.enricher.enrich( deviceId , 
 								  											    rootObject , 
@@ -839,32 +1247,55 @@ public class EnrichData extends AbstractProcessor {
 				throw new ProcessException( "The resulting JsonObject after the enrichment is empty." );
 			}
 			
+			// clone the input ff before producing the output because the output producer removes
+			// the input flow file from the session implicitly
+			FlowFile originalFF = session.clone( flowFile );  
 			List<FlowFile> outList = this.outProducer.produceOutput( rootObject , flowFile , session );
 			
-			//this.outProducer.produceOutput( rootObject , flowFile , session )
 			outList.stream().forEach( (FlowFile ff) -> {
 					
-					// Additional ff attributes 
-//					ff = session.putAttribute( ff , "requestUrl" , requestUrl );
-					ff = session.putAttribute( ff , "deviceId" , deviceId );
-					ff = session.putAttribute( ff , "timestampSource" , this.enricher.getLastTimestampSource() );
-					
-					ff = session.putAllAttributes( ff , additionalFieldsErrors );
-					
-					//Transfer to success
-					session.transfer( ff , SUCCESS_RELATIONSHIP );
-				});
+				// Additional ff attributes 
+//				ff = session.putAttribute( ff , "requestUrl" , requestUrl );
+//				ff = session.putAttribute( ff , "deviceId" , deviceId );
+//				ff = session.putAttribute( ff , "timestampSource" , this.enricher.getLastTimestampSource() );
+				
+				ff = session.putAllAttributes( ff , additionalFieldsErrors );
+				
+				//Route to success
+//					session.transfer( ff , SUCCESS_RELATIONSHIP );
+				routeToRelationship( ff , SUCCESS_RELATIONSHIP , session , 
+					new ImmutablePair<String, String>( "timestampSource" , this.enricher.getLastTimestampSource() ) 
+				);
+			});
+			
+			//Original flow file augmentation
+			for( Map.Entry<String, List<String>> attr : originalFFAttributesAugMapping.entrySet() ) {
+				try {
+					String attrValue = JsonProcessingUtils.getElementByPath( responseRootEl , attr.getValue() )
+							  							  .getAsString();
+					originalFF = session.putAttribute( originalFF , attr.getKey() , attrValue );
+				}catch( ProcessException ex ) {
+					ex.printStackTrace();
+				}
+			}
+			routeToRelationship( originalFF , ORIGINAL_RELATIONSHIP , session );
 			
 		}catch( ProcessException ex ) { // Exceptions during enrichment object retriveal from service response body			
 			String reason = "Exception while enriching data.";
 			LoggingUtils.produceErrorObj( reason , flowFileContent )
 					    .withExceptionInfo( ex )
 					    .withProperty( "ff-uuid" , uuid )
+					    .withProperty( "enrichmentObj" , enrichmentObj.toString() )
 					    .logAsError( logger );
 			
-			flowFile = session.putAttribute( flowFile , "failure" , ex.getMessage() );
-			flowFile = session.putAttribute( flowFile , "deviceId" , deviceId );
-			session.transfer( flowFile , FAILURE_RELATIONSHIP );
+			// Route to failure
+//			flowFile = session.putAttribute( flowFile , "failure" , ex.getMessage() );
+//			flowFile = session.putAttribute( flowFile , "failure.cause" , ex.toString() );
+//			flowFile = session.putAttribute( flowFile , "deviceId" , deviceId );
+//			session.transfer( flowFile , FAILURE_RELATIONSHIP );
+			routeToRelationship( flowFile , FAILURE_RELATIONSHIP , session , 
+				new ImmutablePair<String , String>( "failure" , ex.getMessage()) ,
+				new ImmutablePair<String , String>( "failure.cause" , ex.toString()) );
 		}
     }
     
@@ -872,7 +1303,7 @@ public class EnrichData extends AbstractProcessor {
      * Get the enrichment object from the enrichment service response according to the 
      * base path.
      * 
-     * @param basePath the path from which to pick the enrichment object from
+     * @param basePath the path from which to pick the enrichment object
      * @param responseRootEl response root element
      * @return the enrichment object as a JsonObject
      * @throws ProcessException if the path is invalid for the passed response element.
@@ -880,13 +1311,16 @@ public class EnrichData extends AbstractProcessor {
     
     private JsonObject getEnrichmentObject( List<String> basePath , JsonElement responseRootEl ) throws ProcessException{
     	JsonElement el = responseRootEl;
+    	StringBuilder exploredPath = new StringBuilder(); // logging purpose
     	for( String pathEl : basePath ) {
     		while( el.isJsonArray() ) {
 				el = el.getAsJsonArray();
 				if( ((JsonArray)el).size() > 0 ) {
 					el = ((JsonArray)el).get( 0 );
 				}else {
-					throw new ProcessException( String.format( "Cannot obtain enrichment object. The '%s' field in the enrichment response contains an empty array." , pathEl ) );
+					exploredPath.deleteCharAt(0);
+					throw new ProcessException( String.format( "Cannot obtain enrichment object. The '%s' field in the enrichment response contains an empty array." , 
+															   exploredPath.toString() ) );
 				}
 			}
     		
@@ -897,24 +1331,30 @@ public class EnrichData extends AbstractProcessor {
 	    			if( elObj.has( pathEl ) ) {
 	    				el = elObj.get( pathEl );
 	    			}else {
+	    				exploredPath.deleteCharAt(0);
 	    				throw new ProcessException( String.format( "Cannot obtain enrichment object. The '%s' field in the enrichment service response does not exists. ", 
-								   							        pathEl ) );
+								   							        exploredPath.toString() ) );
 	    			}
-    			}else {
+    			} else {
+    				exploredPath.deleteCharAt(0);
     				throw new ProcessException( String.format( "Cannot obtain enrichment object. The '%s' field in the enrichment service response is empty. ", 
-							   								   pathEl ) );
+							   								   exploredPath.toString() ) );
     			}
     		} else {
-    			throw new ProcessException( String.format( "The %s field in the enrichment service response is not a JsonObject." , pathEl ) );
+    			exploredPath.deleteCharAt(0);
+    			throw new ProcessException( String.format( "The '%s' field in the enrichment service response is not a JsonObject." , 
+    													   exploredPath.toString() ) );
     		}
+    		
+    		exploredPath.append("/").append( pathEl );
     	}
     	
     	if( el.isJsonObject() ) {
-    		
     		return el.getAsJsonObject();
-    		
     	}else {
-    		throw new ProcessException( "The last path field in the enrichment service response is not a JsonObject." );
+    		exploredPath.deleteCharAt(0);
+    		throw new ProcessException( String.format( "The last path field ('%s') in the enrichment service response is not a JsonObject." , 
+    												   exploredPath.toString() ) );
     	}
     }
     
@@ -931,13 +1371,18 @@ public class EnrichData extends AbstractProcessor {
     	JsonElement el = responseRootEl;
     	String latlonStr = "";
     	
+    	StringBuilder exploredPath = new StringBuilder(); // logging purpose
+    	
     	for( String pathEl : latlonPath ) {	
+    		exploredPath.append( "/" ).append( pathEl );
 			while( el.isJsonArray() ) {
 				el = el.getAsJsonArray();
 				if( ((JsonArray)el).size() > 0 ) {
 					el = ((JsonArray) el).get( 0 );
 				}else {
-					throw new ProcessException( String.format( "Cannot obtain [lat,lon]. The '%s' field in the enrichment response contains an empty array." , pathEl ) );
+					exploredPath.deleteCharAt(0);
+					throw new ProcessException( String.format( "Cannot obtain [lat,lon]. The '%s' field in the target object contains an empty array." , 
+															   exploredPath.toString() ) );
 				}
 			}
 			
@@ -948,16 +1393,20 @@ public class EnrichData extends AbstractProcessor {
 					if( elObj.has( pathEl ) ) {
 						el = elObj.get( pathEl );
 					}else {
-						throw new ProcessException( String.format( "Cannot obtain [lat,lon]. The '%s' field (from the latlon path) in the enrichment service response does not exists. ", 
-																   pathEl ) );
+						exploredPath.deleteCharAt(0);
+						throw new ProcessException( String.format( "Cannot obtain [lat,lon]. The '%s' field (from the latlon path) in the target object does not exists. ", 
+																   exploredPath.toString() ) );
 					}
 				} else {
-					throw new ProcessException( String.format( "Cannot obtain [lat,lon]. The '%s' field in the enrichment response object is empty." , 
-															   pathEl ) );
+					exploredPath.deleteCharAt(0);
+					throw new ProcessException( String.format( "Cannot obtain [lat,lon]. The '%s' field in the target object is empty." , 
+															   exploredPath.toString() ) );
 				}
 			}
     	}
 		
+    	exploredPath.deleteCharAt(0);
+    	
 		if( el.isJsonArray() ) { //Last path element, must be a JsonArray in the enrichment response object
 			JsonArray latlonArray = el.getAsJsonArray();
 			
@@ -981,15 +1430,111 @@ public class EnrichData extends AbstractProcessor {
 				
 			} else {
 				throw new ProcessException( String.format( "The latlonPath last field '%s' points to an array, but it's not a 2-elements array." , 
-														   latlonPath.get( latlonPath.size() - 1 ) ) );
+														   exploredPath.toString() ) );
 			}
 			
 		} else {
-			throw new ProcessException( String.format( "The latlonPath last field '%s' does not point to a JsonArray in the enrichment response." , 
-													   latlonPath.get( latlonPath.size() - 1 ) ) );
+			throw new ProcessException( String.format( "The latlonPath last field '%s' does not point to a JsonArray in the target object." , 
+													   exploredPath.toString() ) );
 		}
     	
     	return latlonStr; //If there are some errors an exception is thrown
+    }
+    
+    private String getInnerLatLon( JsonElement rootEl ) throws NoSuchElementException{
+    	String latlon;
+    	// GeoJson fields
+		for( CompoundLatlonField f : this.geoJsonFields ) {
+			try {
+				JsonElement targetField = JsonProcessingUtils.getElementByPath( rootEl , f.getPath() );
+				if( targetField.isJsonArray() ) {
+					JsonArray targetArr = targetField.getAsJsonArray();
+					if( targetArr.size() == 2 ) {
+						
+						// Check content
+						if( Float.isNaN( Float.parseFloat( targetArr.get(0).getAsString() ) ) )
+							throw new NoSuchElementException();
+						if( Float.isNaN( Float.parseFloat( targetArr.get(1).getAsString() ) ) )
+							throw new NoSuchElementException();
+						
+						if( f.isLatitudeFirst() )
+							latlon = targetArr.get(0).getAsString() + "," + targetArr.get(1).getAsString();
+						else
+							latlon = targetArr.get(1).getAsString() + "," + targetArr.get(0).getAsString();
+						return latlon;
+					}
+				}
+			}
+			catch( NoSuchElementException ex ) {}
+			catch( NumberFormatException ex ) {}
+		}
+		
+		//GeoPoint fields
+		for( CompoundLatlonField f : this.geoPointFields ) {
+			try {
+				JsonElement targetField = JsonProcessingUtils.getElementByPath( rootEl , f.getPath() );
+				if( targetField.isJsonPrimitive() ) {
+					String targetVal = targetField.getAsString();
+					List<String> targetList = Arrays.asList( targetVal.split(",") ).stream()
+													.map( s -> s.trim() )
+													.collect( Collectors.toList() );
+					
+					// Check content
+					if( Float.isNaN( Float.parseFloat( targetList.get(0) ) ) )
+						throw new NoSuchElementException();
+					if( Float.isNaN( Float.parseFloat( targetList.get(1) ) ) )
+						throw new NoSuchElementException();
+					
+					
+					if( f.isLatitudeFirst() )
+						latlon = targetList.get(0) + "," + targetList.get(1);
+					else
+						latlon = targetList.get(1) + "," + targetList.get(0);
+					return latlon;
+				}
+			}
+			catch( NoSuchElementException ex ) { }
+			catch( NumberFormatException ex ) { }
+		}
+		
+		// Distinct fields
+		String lat = "";
+		String lon = "";
+		for( List<String> latPath : this.latitudeFields ) {
+			try {
+				JsonElement targetField = JsonProcessingUtils.getElementByPath( rootEl , latPath );
+				if( targetField.isJsonPrimitive() ) {
+					lat = targetField.getAsString();
+				}
+				// Check content
+				if( Float.isNaN( Float.parseFloat( lat ) ) )
+					lat = "";				
+			} 
+			catch( NoSuchElementException ex ) { }
+			catch( NumberFormatException ex ) { lat = ""; }
+		}
+		
+		for( List<String> lonPath : this.longitudeFields ) {
+			try {
+				JsonElement targetField = JsonProcessingUtils.getElementByPath( rootEl , lonPath );
+				if( targetField.isJsonPrimitive() ) {
+					lon = targetField.getAsString();
+				}
+				
+				// Check content
+				if( Float.isNaN( Float.parseFloat(lon) ) )
+					lon = "";
+			}
+			catch( NoSuchElementException ex ) { }
+			catch( NumberFormatException ex ) { lon = ""; }
+		}
+		
+		if( !lat.isEmpty() && !lon.isEmpty() ) {
+			latlon = lat + "," + lon;
+			return latlon;
+		}
+		
+		throw new NoSuchElementException( "Cannot retrieve coordinates from the flow file content" );
     }
     
     /**
@@ -1009,5 +1554,81 @@ public class EnrichData extends AbstractProcessor {
     	}
     	
     	return deviceId;
+    }
+    
+    // Implements retry policies
+    private boolean shouldRetry( Throwable cause ) {
+    	
+    	if( cause instanceof HttpHostConnectException )
+    		return true;
+    	
+    	if( cause instanceof HttpResponseException ) {
+    		HttpResponseException httpEx = (HttpResponseException) cause;
+    		if( RETRIABLE_STATUS_CODES.contains( httpEx.getStatusCode() ) ) {
+    			return true;
+    		}
+    	}
+    	
+    	return false;
+    }
+    
+    /**
+     * Routes flow files to the failure relationship.
+     * 
+     * @param flowFile the flow file to be routed to the failure relationship.
+     * @param session the process session.
+     * @param reason the failure reason.
+     * @param additionalAttributes additional key-value pairs wich will be added as attributes to the flow file routed to failure.
+     */
+    private void routeToRelationship( FlowFile flowFile , Relationship rel , ProcessSession session ,
+    							 	  Pair<String , String>... additionalAttributes ) {
+    	
+		for( Pair<String , String> attr : additionalAttributes ) {
+			flowFile = session.putAttribute( flowFile , attr.getKey() , attr.getValue() );
+		}
+		session.transfer( flowFile , rel );
+    }
+    
+    /**
+     * Utility class to manage inner latlon configurations.
+     */
+    private class CompoundLatlonField {
+    	private List<String> path;
+    	private boolean latitudeFirst;
+    	
+    	private void determineFormat( String format ) {
+    		List<String> formatList = 
+	    		Arrays.asList( format.split(",") ).stream()
+	    			  .map( (String s) -> { return s.trim(); } )
+	    			  .collect( Collectors.toList() );
+    		if( formatList.get(0).equals( "lat" ) ) {
+    			this.latitudeFirst = true;
+    		}else{
+    			this.latitudeFirst = false;
+    		}
+    	}
+    	
+    	public CompoundLatlonField( List<String> path , String format ) {
+    		this.path = path;
+    		determineFormat( format );
+    	}
+    	
+    	public CompoundLatlonField( String path , String format ) {
+    		this( JsonProcessingUtils.pathStringToPathList(path) , 
+    			  format );
+    	}
+    	
+    	public CompoundLatlonField( JsonObject conf ) {
+    		this( conf.get(INNER_LATLON_COMPOUND_FIELD_PATH).getAsString()  , 
+    			  conf.get(INNER_LATLON_COMPOUND_FIELD_FORMAT).getAsString() );
+    	}
+    	
+    	public List<String> getPath(){
+    		return Collections.unmodifiableList( this.path );
+    	}
+    	
+    	public boolean isLatitudeFirst() {
+    		return this.latitudeFirst;
+    	}
     }
 }

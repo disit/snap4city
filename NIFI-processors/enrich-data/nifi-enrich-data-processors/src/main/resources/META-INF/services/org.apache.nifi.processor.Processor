@@ -13,3 +13,5 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>. 
 org.disit.nifi.processors.enrich_data.EnrichData
+org.disit.nifi.processors.enrich_data.utility_processors.OwnershipEnrichData
+org.disit.nifi.processors.enrich_data.utility_processors.UpdateEnrichmentSource

@@ -13,8 +13,7 @@
   GNU Affero General Public License for more details.
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>. 
--->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+--><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -35,10 +34,19 @@
     </properties>
 
     <modules>
-        <module>nifi-enrichment-source-client-service-api</module>
+    	<!-- <module>keycloak-token-provider</module> -->
+<!--     	<module>nifi-ownership-client-service-api</module>
+    	<module>nifi-ownership-client-service-api-nar</module> -->
+    	<!-- <module>nifi-oauth-token-provider-service-api</module>
+    	<module>nifi-oauth-token-provider-service-api-nar</module> -->
+    	<module>nifi-enrichment-source-client-service-api</module>
         <module>nifi-enrichment-source-client-service-api-nar</module>
+    	<module>nifi-oauth-token-provider-service</module>
+    	<module>nifi-oauth-token-provider-service-nar</module>
         <module>nifi-servicemap-client-services</module>
         <module>nifi-servicemap-client-services-nar</module>
+        <module>nifi-ownership-client-service</module>
+    	<module>nifi-ownership-client-service-nar</module>
         <module>nifi-enrich-data-processors</module>
         <module>nifi-enrich-data-nar</module>
         <module>distribution</module>
@@ -71,7 +79,7 @@
     									</goals>
     								</pluginExecutionFilter>
     								<action>
-    									<ignore></ignore>
+    									<ignore/>
     								</action>
     							</pluginExecution>
     						</pluginExecutions>

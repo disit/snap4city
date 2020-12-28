@@ -20,6 +20,7 @@ services:
         "spring.orionbroker_endpoint": "http://orion:1026"
         "spring.elapsingcache.minutes": "10"
         "cors.origins.accepted": "http://test"
+        "spring.prefix_serviceuri": "http://www.disit.org/km4city/resource/iot"
         "spring.organization": "<Organization>"
         "spring.context_broker_name": "<ContextBrokerName>"
         "connection.timeout": "60000"

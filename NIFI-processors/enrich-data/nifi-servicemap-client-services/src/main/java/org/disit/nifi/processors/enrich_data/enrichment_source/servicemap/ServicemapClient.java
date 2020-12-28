@@ -151,7 +151,7 @@ public class ServicemapClient implements EnrichmentSourceClient, ServicemapSourc
 	}
 
 	@Override
-	public JsonElement getEnrichmentData(String deviceId, String uriPrefix) throws EnrichmentSourceException {
+	public JsonElement getEnrichmentData(String deviceId, String uriPrefix) throws EnrichmentSourceException{
 		
 		String requestUrl;
 		try {
@@ -177,6 +177,7 @@ public class ServicemapClient implements EnrichmentSourceClient, ServicemapSourc
 		return parser.parse( responseBody );
 	}
 	
+	// moved to HttpBaseClient class
 	@Override
 	public void close() throws EnrichmentSourceException {
 		try {
@@ -190,7 +191,7 @@ public class ServicemapClient implements EnrichmentSourceClient, ServicemapSourc
 	/**
 	 * Build the request url from an uri prefix and device id.
 	 */
-	protected String buildRequestUrl( String uriPrefix , String deviceId ) throws UnsupportedEncodingException {
+	public String buildRequestUrl( String uriPrefix , String deviceId ) throws UnsupportedEncodingException {
 		StringBuilder reqUrlBuilder = new StringBuilder( this.servicemapUrl );
 		reqUrlBuilder.append( "?serviceUri=" )
 					 .append( URLEncoder.encode( uriPrefix + deviceId , StandardCharsets.UTF_8.name() ) )
@@ -202,7 +203,7 @@ public class ServicemapClient implements EnrichmentSourceClient, ServicemapSourc
 	/**
 	 * Build the request url from a device id using the default uri prefix.
 	 */
-	protected String buildRequestUrl( String deviceId ) throws UnsupportedEncodingException{
+	public String buildRequestUrl( String deviceId ) throws UnsupportedEncodingException{
 		return buildRequestUrl( this.defaultUriPrefix , deviceId );
 	}
 

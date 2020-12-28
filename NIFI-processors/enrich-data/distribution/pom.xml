@@ -35,6 +35,18 @@
     		<version>${project.parent.version}</version>
     	</dependency>
     	
+    	<!-- <dependency>
+    		<groupId>org.disit.nifi.processors.enrich_data</groupId>
+    		<artifactId>nifi-oauth-token-provider-service-api</artifactId>
+    		<version>${project.parent.version}</version>
+    	</dependency> -->
+    	
+    	<dependency>
+    		<groupId>org.disit.nifi.processors.enrich_data</groupId>
+    		<artifactId>nifi-oauth-token-provider-service</artifactId>
+    		<version>${project.parent.version}</version>
+    	</dependency>
+    	
     	<dependency>
     		<groupId>org.disit.nifi.processors.enrich_data</groupId>
     		<artifactId>nifi-enrichment-source-client-service-api</artifactId>
@@ -46,6 +58,13 @@
     		<artifactId>nifi-servicemap-client-services</artifactId>
     		<version>${project.parent.version}</version>
     	</dependency>
+    	
+    	<dependency>
+    		<groupId>org.disit.nifi.processors.enrich_data</groupId>
+    		<artifactId>nifi-ownership-client-service</artifactId>
+    		<version>${project.parent.version}</version>
+    	</dependency>
+    	
     </dependencies>
 
     <build>

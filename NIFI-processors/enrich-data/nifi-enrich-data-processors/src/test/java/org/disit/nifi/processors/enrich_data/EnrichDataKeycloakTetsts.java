@@ -29,8 +29,12 @@ import org.apache.nifi.reporting.InitializationException;
 import org.apache.nifi.util.MockFlowFile;
 import org.apache.nifi.util.TestRunner;
 import org.apache.nifi.util.TestRunners;
+import org.disit.nifi.processors.enrich_data.enrichment_source.servicemap.ServicemapClientService;
+import org.disit.nifi.processors.enrich_data.enrichment_source.servicemap.ServicemapControllerService;
 import org.disit.nifi.processors.enrich_data.enrichment_source.servicemap.keycloak.ServicemapKeycloakClientService;
 import org.disit.nifi.processors.enrich_data.enrichment_source.servicemap.keycloak.ServicemapKeycloakControllerService;
+import org.disit.nifi.processors.enrich_data.enrichment_source.servicemap.oauth.ServicemapOAuthControllerService;
+import org.disit.nifi.processors.enrich_data.oauth.keycloak.KeycloakTokenProviderControllerService;
 import org.disit.nifi.processors.enrich_data.test.api_mock.ServicemapMockHandler;
 import org.disit.nifi.processors.enrich_data.test.api_mock.SimpleProtectedAPIServer;
 import org.junit.After;
@@ -41,31 +45,44 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-public class EnrichDataKeycloakTetsts {
 
-	/**
-	 * NOTE: Those tests needs a keycloak instance to run.
-	 */
+/**
+ * IMPORTANT: these unit tests need a runnig keycloak instance in order to be performed.
+ */
+public class EnrichDataKeycloakTetsts {
 	
 	private TestRunner testRunner;
 	private JsonParser parser;
 	
 	private static final String serviceUriPrefix = "http://serviceuriprefix.org";
-	private ServicemapKeycloakControllerService servicemapKeycloakControllerService;
+	private static final String additionalQueryString = "realtime=false";
 	
 	private int servicemapMockPort = 8090;
 	private String servicemapMockEndpoint = "/servicemap";
 	private String servicemapUrl = "http://localhost:" + servicemapMockPort + servicemapMockEndpoint;
     
-    private String keycloakUrl = ">>> KEYCLOAK URL <<<";
-    private String clientId = ">>> CLIENT ID <<<";
-    private String clientSecret = ">>> CLIENT SECRET<<<";
-    private String realm = ">>> REALM <<<";
-    private String username = ">>> USERNAME <<<";
-    private String password = ">>> PASSWORD <<<";
+	// NOTE: configure for a valid running keycloak instance
+	
+//    private String keycloakUrl = ">>> KEYCLOAK URL <<<";
+//    private String clientId = ">>> CLIENT ID <<<";
+//    private String clientSecret = ">>> CLIENT SECRET<<<";
+//    private String realm = ">>> REALM <<<";
+//    private String username = ">>> USERNAME <<<";
+//    private String password = ">>> PASSWORD <<<";
+	final String clientId = "nifi-node";
+	final String clientSecret = "127ee466-6255-4336-bf93-bb9d652a7011";
+	final String keycloakUrl = "http://192.168.1.50:8080";
+	final String realm="nifi";
+	final String username = "nifi-node-1";
+	final String password = "password";
 	
     private SimpleProtectedAPIServer srv;
     private ServicemapMockHandler servicemap;
+    
+//    private ServicemapKeycloakControllerService servicemapKeycloakControllerService;
+    
+    private ServicemapOAuthControllerService servicemapService;
+    private KeycloakTokenProviderControllerService keycloakService;
     
 	@Before
 	public void init() throws Exception {
@@ -96,39 +113,74 @@ public class EnrichDataKeycloakTetsts {
         testRunner.setProperty( "deviceName" , "Service/features/properties/name" );
         testRunner.setProperty( "organization" , "Service/features/properties/organization" );
         
-        setupServicemapKeycloakControllerService();
+        // LEGACY
+//        setupServicemapKeycloakControllerService();
+        
+        setupKeycloakTokenProviderControllerService();
+        setupServicemapControllerService();
         
         srv = new SimpleProtectedAPIServer( servicemapMockPort );
         srv.setVerbose( true );
         servicemap = new ServicemapMockHandler();
         servicemap.setVerbose( false );
-        srv.addProtectedHandler( servicemap , servicemapMockEndpoint , clientId, clientSecret, keycloakUrl , realm);
+        srv.addProtectedHandler( 
+        	servicemap , 
+        	servicemapMockEndpoint , 
+        	clientId, 
+        	clientSecret, 
+        	keycloakUrl , 
+        	realm
+        );
         
         srv.start();
 	}
 	
-	/**
-     * Setup a ServicemapKeycloakControllerService
-     * @throws InitializationException
-     */
-    public void setupServicemapKeycloakControllerService() throws InitializationException {
-    	servicemapKeycloakControllerService = new ServicemapKeycloakControllerService();
-        testRunner.addControllerService( "ServicemapKeycloakControllerService" , servicemapKeycloakControllerService );
-        testRunner.setProperty( servicemapKeycloakControllerService , ServicemapKeycloakClientService.SERVICEMAP_URL , this.servicemapUrl );
-        testRunner.setProperty( servicemapKeycloakControllerService , ServicemapKeycloakClientService.SERVICE_URI_PREFIX , EnrichDataKeycloakTetsts.serviceUriPrefix );
-        testRunner.setProperty( servicemapKeycloakControllerService , ServicemapKeycloakClientService.ADDITIONAL_QUERY_STRING , "realtime=false" );
-        testRunner.setProperty( servicemapKeycloakControllerService , ServicemapKeycloakClientService.KEYCLOAK_URL ,this.keycloakUrl );
-        testRunner.setProperty( servicemapKeycloakControllerService , ServicemapKeycloakClientService.CLIENT_ID , this.clientId );
-        testRunner.setProperty( servicemapKeycloakControllerService , ServicemapKeycloakClientService.CLIENT_SECRET , this.clientSecret );
-        testRunner.setProperty( servicemapKeycloakControllerService , ServicemapKeycloakClientService.REALM , this.realm );
-        testRunner.setProperty( servicemapKeycloakControllerService , ServicemapKeycloakClientService.USERNAME , this.username );
-        testRunner.setProperty( servicemapKeycloakControllerService , ServicemapKeycloakClientService.PASSWORD , this.password );
-        testRunner.assertValid( servicemapKeycloakControllerService );
-        testRunner.enableControllerService( servicemapKeycloakControllerService );
-        testRunner.setProperty( EnrichData.ENRICHMENT_SOURCE_CLIENT_SERVICE , "ServicemapKeycloakControllerService" );
+	
+	
+	 // LEGACY
+//    public void setupServicemapKeycloakControllerService() throws InitializationException {
+//    	servicemapKeycloakControllerService = new ServicemapKeycloakControllerService();
+//        testRunner.addControllerService( "ServicemapKeycloakControllerService" , servicemapKeycloakControllerService );
+//        testRunner.setProperty( servicemapKeycloakControllerService , ServicemapKeycloakClientService.SERVICEMAP_URL , this.servicemapUrl );
+//        testRunner.setProperty( servicemapKeycloakControllerService , ServicemapKeycloakClientService.SERVICE_URI_PREFIX , EnrichDataKeycloakTetsts.serviceUriPrefix );
+//        testRunner.setProperty( servicemapKeycloakControllerService , ServicemapKeycloakClientService.ADDITIONAL_QUERY_STRING , "realtime=false" );
+//        testRunner.setProperty( servicemapKeycloakControllerService , ServicemapKeycloakClientService.KEYCLOAK_URL ,this.keycloakUrl );
+//        testRunner.setProperty( servicemapKeycloakControllerService , ServicemapKeycloakClientService.CLIENT_ID , this.clientId );
+//        testRunner.setProperty( servicemapKeycloakControllerService , ServicemapKeycloakClientService.CLIENT_SECRET , this.clientSecret );
+//        testRunner.setProperty( servicemapKeycloakControllerService , ServicemapKeycloakClientService.REALM , this.realm );
+//        testRunner.setProperty( servicemapKeycloakControllerService , ServicemapKeycloakClientService.USERNAME , this.username );
+//        testRunner.setProperty( servicemapKeycloakControllerService , ServicemapKeycloakClientService.PASSWORD , this.password );
+//        testRunner.assertValid( servicemapKeycloakControllerService );
+//        testRunner.enableControllerService( servicemapKeycloakControllerService );
+//        testRunner.setProperty( EnrichData.ENRICHMENT_SOURCE_CLIENT_SERVICE , "ServicemapKeycloakControllerService" );
+//    }
+    
+    public void setupServicemapControllerService() throws InitializationException{
+		servicemapService = new ServicemapOAuthControllerService();
+		testRunner.addControllerService( "ServicemapControllerService" , servicemapService );
+		testRunner.setProperty( servicemapService , ServicemapClientService.SERVICEMAP_URL , this.servicemapUrl );
+		testRunner.setProperty( servicemapService , ServicemapClientService.SERVICE_URI_PREFIX , serviceUriPrefix );
+		testRunner.setProperty( servicemapService , ServicemapClientService.ADDITIONAL_QUERY_STRING , additionalQueryString );
+		testRunner.setProperty( servicemapService , ServicemapOAuthControllerService.OAUTH_TOKEN_PROVIDER_SERVICE , "KeycloakControllerService" );
+		testRunner.assertValid( servicemapService );
+		testRunner.enableControllerService( servicemapService );
+		testRunner.setProperty( EnrichData.ENRICHMENT_SOURCE_CLIENT_SERVICE , "ServicemapControllerService" );
     }
     
-//    @Test
+    public void setupKeycloakTokenProviderControllerService() throws InitializationException{
+    	keycloakService = new KeycloakTokenProviderControllerService();
+    	testRunner.addControllerService( "KeycloakControllerService" , keycloakService );
+    	testRunner.setProperty( keycloakService , KeycloakTokenProviderControllerService.KEYCLOAK_URL , keycloakUrl );
+    	testRunner.setProperty( keycloakService , KeycloakTokenProviderControllerService.CLIENT_ID , clientId );
+    	testRunner.setProperty( keycloakService , KeycloakTokenProviderControllerService.CLIENT_SECRET , clientSecret );
+    	testRunner.setProperty( keycloakService , KeycloakTokenProviderControllerService.REALM , realm );
+    	testRunner.setProperty( keycloakService , KeycloakTokenProviderControllerService.USERNAME , username );
+    	testRunner.setProperty( keycloakService , KeycloakTokenProviderControllerService.PASSWORD , password );
+    	testRunner.assertValid( keycloakService );
+    	testRunner.enableControllerService( keycloakService );
+    }
+    
+    @Test
     public void testJsonOutput() throws UnsupportedEncodingException, IOException {
     	System.out.println( "**** TEST JSON OUTPUT (Keycloak) ***" );
     	
@@ -137,8 +189,9 @@ public class EnrichDataKeycloakTetsts {
     	mockFromFileTest( "src/test/resources/mock_in_ff/testOutputs.ff" , 
     					  "src/test/resources/mock_servicemap_response/testOutputs.resp" );
     	
-    	testRunner.assertAllFlowFilesTransferred( EnrichData.SUCCESS_RELATIONSHIP );
+//    	testRunner.assertAllFlowFilesTransferred( EnrichData.SUCCESS_RELATIONSHIP );
     	testRunner.assertTransferCount( EnrichData.SUCCESS_RELATIONSHIP , 1 );
+    	testRunner.assertTransferCount( EnrichData.ORIGINAL_RELATIONSHIP , 1 );
     	
     	JsonObject resultReferenceObj = 
     			TestUtils.mockJsonObjFromFile( Paths.get( "src/test/resources/reference_results/testOutputs_jsonOut.ref" ) , parser );
@@ -164,7 +217,7 @@ public class EnrichDataKeycloakTetsts {
     	System.out.println( "**** END TEST JSON OUTPUT (Keycloak)***" );
     }
     
-    // @Test
+//     @Test
     public void testTokenRefresh() throws UnsupportedEncodingException, IOException, InterruptedException {
     	System.out.println( "**** TEST TOKEN REFRESH (Keycloak) ***" );
     	
@@ -183,8 +236,9 @@ public class EnrichDataKeycloakTetsts {
 					  		  "src/test/resources/mock_servicemap_response/testOutputs.resp" , 
 					  		  nFlowFilesPerTest );
 		
-			testRunner.assertAllFlowFilesTransferred( EnrichData.SUCCESS_RELATIONSHIP );
+//			testRunner.assertAllFlowFilesTransferred( EnrichData.SUCCESS_RELATIONSHIP );
 	    	testRunner.assertTransferCount( EnrichData.SUCCESS_RELATIONSHIP , nFlowFilesPerTest );
+//	    	testRunner.assertTransferCount( EnrichData.ORIGINAL_RELATIONSHIP , 1 );
 	    	
 	    	List<MockFlowFile> outFFList = testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP );
 	    	MockFlowFile outFF = outFFList.get( 0 );

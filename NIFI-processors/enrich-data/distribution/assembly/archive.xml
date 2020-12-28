@@ -33,6 +33,22 @@
        </includes>
      </fileSet>
      
+     <!-- <fileSet>
+       <outputDirectory>dist/extensions</outputDirectory>
+       <directory>../nifi-oauth-token-provider-service-api-nar/target/</directory>
+       <includes>
+       	<include>*.nar</include>
+       </includes>
+     </fileSet> -->
+     
+     <fileSet>
+       <outputDirectory>dist/extensions</outputDirectory>
+       <directory>../nifi-oauth-token-provider-service-nar/target/</directory>
+       <includes>
+       	<include>*.nar</include>
+       </includes>
+     </fileSet>
+     
      <fileSet>
        <outputDirectory>dist/extensions</outputDirectory>
        <directory>../nifi-enrichment-source-client-service-api-nar/target/</directory>
@@ -44,6 +60,14 @@
      <fileSet>
        <outputDirectory>dist/extensions</outputDirectory>
        <directory>../nifi-servicemap-client-services-nar/target/</directory>
+       <includes>
+       	<include>*.nar</include>
+       </includes>
+     </fileSet>
+     
+     <fileSet>
+       <outputDirectory>dist/extensions</outputDirectory>
+       <directory>../nifi-ownership-client-service-nar/target/</directory>
        <includes>
        	<include>*.nar</include>
        </includes>

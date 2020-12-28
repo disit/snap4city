@@ -49,6 +49,14 @@
     	<scope>provided</scope>
     </dependency>
     
+   	<dependency>
+		<groupId>org.disit.nifi.processors.enrich_data</groupId>
+        <artifactId>nifi-oauth-token-provider-service</artifactId>
+        <version>${project.parent.version}</version>
+        <scope>provided</scope>        
+    </dependency>
+    
+    
     <!-- https://mvnrepository.com/artifact/com.github.scribejava/scribejava-apis -->
 	<dependency>
 	    <groupId>com.github.scribejava</groupId>

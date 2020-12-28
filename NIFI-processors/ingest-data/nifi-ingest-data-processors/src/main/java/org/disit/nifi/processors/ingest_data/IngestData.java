@@ -1,22 +1,17 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 /**
- * @author Panconi Christian ( panconi.christian@gmail.com )
+ *  Nifi IngestData processor
+ *  
+ *  Copyright (C) 2020 DISIT Lab http://www.disit.org - University of Florence
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>. 
  */
 package org.disit.nifi.processors.ingest_data;
 
@@ -52,11 +47,16 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.naming.ConfigurationException;
 
 @Tags({"ingestion"})
 
@@ -109,6 +109,32 @@ public class IngestData extends AbstractProcessor {
     		.addValidator( StandardValidators.NON_EMPTY_EL_VALIDATOR )
     		.build();
     		
+    public static final PropertyDescriptor PREFIX_ATTRIBUTES = new PropertyDescriptor
+    		.Builder().name( "PREFIX_ATTRIBUTES" )
+    		.displayName( "Prefix attributes" )
+    		.description( "A comma-separated list of flow-file attributes to be used to build a prefix for the fields specified by the 'Prepend prefix to' property.\n" + 
+    					  "The prefix is built using the ordering specified in this property and the attribute-values are separated using the value of the 'Prefix separator' property.\n" +
+    					  "The prefixing operation is performed if the source flow-file contains at least one of the specified attributes, missing attributes will lead to an empty part in the prefix.\n" +
+    					  "If the source flow-file does not contain any of the specified attributes the prefixing operation will not be performed." )
+    		.required( false )
+    		.addValidator( Validator.VALID )
+    		.build();
+    
+    public static final PropertyDescriptor PREFIX_SEPARATOR = new PropertyDescriptor
+    		.Builder().name( "PREFIX_SEPARATOR" )
+    		.displayName( "Prefix separator" )
+    		.description( "A string to use as separator for the attribute values." )
+    		.required( false )
+    		.addValidator( Validator.VALID )
+    		.build();
+    
+    public static final PropertyDescriptor PREPEND_PREFIX_TO = new PropertyDescriptor
+    		.Builder().name( "PREPEND_PREFIX_TO" )
+    		.displayName( "Prepend prefix to" )
+    		.description( "A comma-separated list of fields contained in the JSON object whose value will be augmented with the prefix." )
+    		.required( false )
+    		.addValidator( Validator.VALID )
+    		.build();
 
     public static final Relationship SUCCESS_RELATIONSHIP = new Relationship.Builder()
             .name( "SUCCESS_RELATIONSHIP" )
@@ -134,6 +160,11 @@ public class IngestData extends AbstractProcessor {
     private String timestampPath;
     private String dataFieldName;
     
+    private List<String> prefixAttributes;
+    private String prefixSeparator;
+    private Set<String> fieldsToPrefix;
+    private boolean performPrefix;
+    
     @Override
     protected void init(final ProcessorInitializationContext context) {
     	// property descriptors
@@ -142,6 +173,9 @@ public class IngestData extends AbstractProcessor {
         descriptors.add( TIMESTAMP_FIELD_PATH );
         descriptors.add( OUTPUT_TIMESTAMP_FIELD_NAME );
         descriptors.add( DATA_FIELD_NAME );
+        descriptors.add( PREFIX_ATTRIBUTES );
+        descriptors.add( PREFIX_SEPARATOR );
+        descriptors.add( PREPEND_PREFIX_TO );
         this.descriptors = Collections.unmodifiableList(descriptors);
 
         // relationships
@@ -176,13 +210,13 @@ public class IngestData extends AbstractProcessor {
     							    		 	   "If the output flow file contains multiple data chunks, the attribute " + 
     							    		 	   "will be added to every chunk." )
     							     .dynamic( true )
-    							     .expressionLanguageSupported( true )
+//    							     .expressionLanguageSupported( true )
     							     .required( false )
     							     .build();
     }
 
     @OnScheduled
-    public void onScheduled(final ProcessContext context) {
+    public void onScheduled(final ProcessContext context) throws ConfigurationException {
     	//Set up processor 
     	this.gson = new Gson();
     	this.logger = getLogger();
@@ -202,6 +236,60 @@ public class IngestData extends AbstractProcessor {
     	
     	dataFieldName = context.getProperty( DATA_FIELD_NAME ).getValue(); // get 'Data field name' value
     	
+    	
+    	// Prefix properties
+    	prefixAttributes = new ArrayList<>();
+    	if( context.getProperty( PREFIX_ATTRIBUTES ).isSet() ) {
+    		String[] prefixAttributeNames = context.getProperty( PREFIX_ATTRIBUTES ).getValue().split( "," );
+    		for( int i = 0 ; i < prefixAttributeNames.length ; i++ ) {
+    			String attribute = prefixAttributeNames[i].trim();
+    			if( !attribute.isEmpty() )
+    				prefixAttributes.add( attribute );
+    		}
+    	}
+    	
+    	if( context.getProperty( PREFIX_SEPARATOR ).isSet() ) {
+    		prefixSeparator = context.getProperty( PREFIX_SEPARATOR ).getValue();
+    	} else {
+    		prefixSeparator = "";
+    	}
+    	
+    	fieldsToPrefix = new HashSet<>();
+    	if( context.getProperty( PREPEND_PREFIX_TO ).isSet() ) {
+    		fieldsToPrefix = Arrays.asList( context.getProperty( PREPEND_PREFIX_TO ).getValue().split( "," ) )
+    			  .stream().map( (String fieldName) -> {
+    				  return fieldName.trim();
+    			  })
+    			  .filter( (String fieldName) -> {
+    				  return !fieldName.isEmpty();
+    			  })
+    			  .collect( Collectors.toSet() );
+    	}
+
+    	// Prefix properties validation
+    	boolean prefixMisconfig = false;
+    	String reason = "Misconfiguration: '%s' is correctly set, but '%s' evaluates to an empty list. They must be both correctly set or both not set at all.";
+    	if( !prefixAttributes.isEmpty() && fieldsToPrefix.isEmpty() ) {
+    		reason = String.format( reason , PREFIX_ATTRIBUTES.getDisplayName() , 
+    									     PREPEND_PREFIX_TO.getDisplayName() );
+    		prefixMisconfig = true;
+    	}
+    	
+    	if( prefixAttributes.isEmpty() && !fieldsToPrefix.isEmpty() ) {
+    		reason = String.format( reason , PREPEND_PREFIX_TO.getDisplayName() , 
+    										 PREFIX_ATTRIBUTES.getDisplayName() );
+    		prefixMisconfig = true;
+    	}
+    	
+    	if( prefixMisconfig ) {
+    		throw new ConfigurationException( reason );
+    	}
+    	
+    	if( prefixAttributes.isEmpty() && fieldsToPrefix.isEmpty() ) {
+    		performPrefix = false;
+    	} else {
+    		performPrefix = true;
+    	}
     }
 
     @Override
@@ -260,6 +348,17 @@ public class IngestData extends AbstractProcessor {
         		}
         		
         		dataFieldObject.addProperty( outTimestampName , timestamp );
+        		
+        		String prefixReport;
+        		if( performPrefix ) {
+        			prefixReport = performPrefixing( dataFieldObject , flowFile.getAttributes() );
+        			
+        			if( prefixReport.isEmpty() )
+        				prefixReport = "<Empty prefix>";
+        		} else {
+        			prefixReport = "<No prefix set>";
+        		}
+        		
         		String newDataFieldContent = dataFieldObject.toString(); 	
         		
         		// Write to flow file content
@@ -269,6 +368,8 @@ public class IngestData extends AbstractProcessor {
 						out.write( newDataFieldContent.getBytes( StandardCharsets.UTF_8 ) );
 					}
 				} );
+        		
+        		flowFile = session.putAttribute( flowFile , "prefix" , prefixReport );
         		
         		session.transfer( flowFile , SUCCESS_RELATIONSHIP );
         		
@@ -344,4 +445,41 @@ public class IngestData extends AbstractProcessor {
     	//current.remove( timestampTokens[timestampTokens.length - 1] );
     	return timestamp;
     }
+    
+    private String performPrefixing( JsonObject dataObject , Map<String , String> ffAttributes ) {
+    	String prefix = buildPrefix( ffAttributes );
+    	
+    	if( !prefix.isEmpty() ) {
+	    	for( String fieldName : fieldsToPrefix ) {
+	    		if( dataObject.has( fieldName ) ) {
+	    			dataObject.addProperty( 
+	    				fieldName , 
+	    				prefix.concat( dataObject.get( fieldName ).getAsString() ) 
+	    			);
+	    		}
+	    	}
+    	}
+    	
+    	return prefix;
+    }
+    
+    private String buildPrefix( Map<String,String> ffAttributes ) {
+    	StringBuilder prefixBuilder = new StringBuilder();
+    	
+    	int attributesFound = 0;
+    	for( int i=0 ; i < prefixAttributes.size() ; i++ ) {
+    		String attributeName = prefixAttributes.get(i);
+    		if( ffAttributes.containsKey( attributeName ) ) {
+    			prefixBuilder.append( ffAttributes.get( attributeName ) );
+    			attributesFound ++;
+    		}
+    		prefixBuilder.append( prefixSeparator );
+    	}
+    	
+    	if( attributesFound > 0 )
+    		return prefixBuilder.toString();
+    	else
+    		return "";
+    }
+    
 }

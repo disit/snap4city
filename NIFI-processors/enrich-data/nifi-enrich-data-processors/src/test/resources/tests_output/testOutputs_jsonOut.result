@@ -1,9 +1,9 @@
 FF-Attributes:
 {
 	path : target
-	filename : 4318756055017.mockFlowFile
+	filename : 15441473019721.mockFlowFile
 	timestampSource : dateObserved
-	uuid : 19b3366e-a9ae-4624-a222-eddc74cb95d2
+	uuid : 4c2a3e0d-20ca-4e1e-8909-9aca99604237
 	deviceId : 123456789
 }
 
@@ -20,7 +20,7 @@ FF-Content:
     "kind": "sensor",
     "latlon": "60.157337,24.91201",
     "serviceUri": "http://serviceuriprefix.org/123456789",
-    "uuid": "19b3366e-a9ae-4624-a222-eddc74cb95d2",
+    "uuid": "4c2a3e0d-20ca-4e1e-8909-9aca99604237",
     "value_name": "PM10",
     "organization": "MyOrg",
     "deviceName": "123456789",
@@ -43,7 +43,7 @@ FF-Content:
     "kind": "sensor",
     "latlon": "60.157337,24.91201",
     "serviceUri": "http://serviceuriprefix.org/123456789",
-    "uuid": "19b3366e-a9ae-4624-a222-eddc74cb95d2",
+    "uuid": "4c2a3e0d-20ca-4e1e-8909-9aca99604237",
     "value_name": "PM2.5",
     "organization": "MyOrg",
     "deviceName": "123456789",
@@ -70,7 +70,7 @@ FF-Content:
     "kind": "sensor",
     "latlon": "60.157337,24.91201",
     "serviceUri": "http://serviceuriprefix.org/123456789",
-    "uuid": "19b3366e-a9ae-4624-a222-eddc74cb95d2",
+    "uuid": "4c2a3e0d-20ca-4e1e-8909-9aca99604237",
     "value_name": "address",
     "organization": "MyOrg",
     "deviceName": "123456789",
@@ -93,7 +93,7 @@ FF-Content:
     "kind": "sensor",
     "latlon": "60.157337,24.91201",
     "serviceUri": "http://serviceuriprefix.org/123456789",
-    "uuid": "19b3366e-a9ae-4624-a222-eddc74cb95d2",
+    "uuid": "4c2a3e0d-20ca-4e1e-8909-9aca99604237",
     "value_name": "dateObserved",
     "organization": "MyOrg",
     "deviceName": "123456789",
@@ -122,7 +122,7 @@ FF-Content:
     "kind": "sensor",
     "latlon": "60.157337,24.91201",
     "serviceUri": "http://serviceuriprefix.org/123456789",
-    "uuid": "19b3366e-a9ae-4624-a222-eddc74cb95d2",
+    "uuid": "4c2a3e0d-20ca-4e1e-8909-9aca99604237",
     "value_name": "location",
     "organization": "MyOrg",
     "deviceName": "123456789",
@@ -145,7 +145,7 @@ FF-Content:
     "kind": "sensor",
     "latlon": "60.157337,24.91201",
     "serviceUri": "http://serviceuriprefix.org/123456789",
-    "uuid": "19b3366e-a9ae-4624-a222-eddc74cb95d2",
+    "uuid": "4c2a3e0d-20ca-4e1e-8909-9aca99604237",
     "value_name": "reliability",
     "organization": "MyOrg",
     "deviceName": "123456789",
@@ -168,7 +168,7 @@ FF-Content:
     "kind": "sensor",
     "latlon": "60.157337,24.91201",
     "serviceUri": "http://serviceuriprefix.org/123456789",
-    "uuid": "19b3366e-a9ae-4624-a222-eddc74cb95d2",
+    "uuid": "4c2a3e0d-20ca-4e1e-8909-9aca99604237",
     "value_name": "source",
     "organization": "MyOrg",
     "deviceName": "123456789",

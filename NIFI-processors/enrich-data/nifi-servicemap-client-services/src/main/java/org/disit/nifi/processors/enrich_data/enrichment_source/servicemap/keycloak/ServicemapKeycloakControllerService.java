@@ -25,6 +25,7 @@ import org.apache.nifi.annotation.lifecycle.OnStopped;
 import org.apache.nifi.components.PropertyDescriptor;
 import org.apache.nifi.controller.ConfigurationContext;
 import org.apache.nifi.processor.ProcessContext;
+import org.apache.nifi.reporting.InitializationException;
 import org.disit.nifi.processors.enrich_data.enrichment_source.EnrichmentSourceClient;
 import org.disit.nifi.processors.enrich_data.enrichment_source.servicemap.ServicemapConfigs;
 import org.disit.nifi.processors.enrich_data.enrichment_source.servicemap.ServicemapControllerService;
@@ -52,7 +53,7 @@ public class ServicemapKeycloakControllerService extends ServicemapControllerSer
 	
 	@Override
 	@OnEnabled
-	public void onEnable( final ConfigurationContext context ) {
+	public void onEnable( final ConfigurationContext context ) throws InitializationException {
 		super.onEnable( context );
 		
 		kc = new KeycloakConfigs();

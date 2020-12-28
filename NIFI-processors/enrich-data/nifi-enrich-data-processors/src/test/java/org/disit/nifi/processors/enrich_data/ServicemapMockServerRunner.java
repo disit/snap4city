@@ -1,0 +1,45 @@
+/**
+ *  Nifi EnrichData processor
+ *  
+ *  Copyright (C) 2020 DISIT Lab http://www.disit.org - University of Florence
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+ */
+
+package org.disit.nifi.processors.enrich_data;
+
+import org.disit.nifi.processors.enrich_data.test.api_mock.ServicemapMockHandler;
+import org.disit.nifi.processors.enrich_data.test.api_mock.SimpleProtectedAPIServer;
+
+import com.google.gson.JsonElement;
+
+public class ServicemapMockServerRunner {
+	
+	public static void main( String[] args ) throws Exception {
+		
+		int mockServicemapPort = 8090;
+	    String mockServicemapEndpoint = "/servicemap";
+	    String servicemapUrl = "http://localhost:" + mockServicemapPort + mockServicemapEndpoint;
+	    
+	    SimpleProtectedAPIServer srv;
+	    ServicemapMockHandler servicemap;
+		
+		srv = new SimpleProtectedAPIServer( mockServicemapPort );
+        servicemap = new ServicemapMockHandler();
+        servicemap.addEndpoint( "/move" , (JsonElement reqBody) -> {
+        	System.out.println( "Callback" );
+        });
+        srv.addHandler( servicemap , mockServicemapEndpoint );
+        
+        
+        srv.start();
+	}
+}

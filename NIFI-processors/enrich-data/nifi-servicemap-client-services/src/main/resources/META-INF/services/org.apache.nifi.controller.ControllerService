@@ -1,4 +1,3 @@
-
 #  Nifi EnrichData processor
 #  
 #  Copyright (C) 2020 DISIT Lab http://www.disit.org - University of Florence
@@ -14,3 +13,4 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>. 
 org.disit.nifi.processors.enrich_data.enrichment_source.servicemap.ServicemapControllerService
 org.disit.nifi.processors.enrich_data.enrichment_source.servicemap.keycloak.ServicemapKeycloakControllerService
+org.disit.nifi.processors.enrich_data.enrichment_source.servicemap.oauth.ServicemapOAuthControllerService

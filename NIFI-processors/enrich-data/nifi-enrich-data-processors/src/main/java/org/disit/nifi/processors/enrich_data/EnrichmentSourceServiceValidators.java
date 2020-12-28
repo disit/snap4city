@@ -47,5 +47,24 @@ public class EnrichmentSourceServiceValidators {
 			return builder.build();
 		}
 	};
+	
+	public static final Validator ENRICHMENT_SOURCE_VALIDATOR = new Validator() {
+		@Override
+		public ValidationResult validate(String subject, String input, ValidationContext context) {
+			ValidationResult.Builder builder = new ValidationResult.Builder();
+			
+			try {
+				context.getProperty( EnrichData.ENRICHMENT_SOURCE_CLIENT_SERVICE )
+					   .asControllerService( EnrichmentSourceClientService.class );
+				builder.subject( subject ).explanation( "Valid EnrichmentSourceClientService" )
+					   .valid( true );
+			} catch( IllegalArgumentException e ) {
+				builder.subject( subject ).explanation( "Invalid EnrichmentSourceClientService" )
+					   .valid( false );
+			}
+			
+			return builder.build();
+		}
+	};
 
 }

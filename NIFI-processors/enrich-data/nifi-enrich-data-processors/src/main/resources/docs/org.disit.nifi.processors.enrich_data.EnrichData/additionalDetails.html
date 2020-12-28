@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>EnrichData</title>
+		<link rel="stylesheet" href="../../../../../css/component-usage.css" type="text/css" />	
+	</head>
+	
+	<body>
+	
+		<h2>Configuration details</h2>
+		
+		<h3>Coordinates from flow file content</h3>
+		The property 'Latlon from flow file content' allow the processor to enrich the incoming data (i.e. adding the 'latlon' field ) using coordinates
+		contained directly in the flow file content.
+		<br/>
+		There are 3 supported ways for parsing the coordinates:
+		<ul>
+			<li>from a <b>geo:json</b> field: the coordinates are contained in a 2-element json array</li>
+			<li>from a <b>geo:point</b> field: the coordinate are contained in a string, concatenated by a comma</li>
+			<li><b>using the value from two different fields: </b> one for the latitude and one for the longitude</li>
+		</ul>
+		
+		The processor allows for multiple specification for the coordinate fields and checks them sequentially, the first
+		valid specification found inside the flow file content is used as the 'latlon' field in the enrichment phase.
+		The order in which the specifications are checked is:
+		<ol>
+			<li>geo:json fields</li>
+			<li>geo:point fields</li>
+			<li>2 distinct fields</li>
+		</ol>
+		<br/><br/>
+		The value of the 'Latlon from flow file content' property must be a json object.<br/> 
+		The following keys are allowed for the configuration:
+		<ul>
+			<li><b>geoJsonFields</b></li>
+			<li><b>geoPointFields</b></li>
+			<li><b>latitudeFields</b></li>
+			<li><b>longitudeFields</b></li>
+		</ul>     
+		<b>Note:</b> The 'latitudeFields' and 'longitudeFields' must be both specified or both not present.
+		<br/>
+		Every value must be an array, the content of the arrays depends on the field.<br/>
+		For the 'geoJsonFields' and 'geoPointFields' the array should contain json objects of the following type:
+		<pre>
+{
+	"path":"..."
+	"format":"..."
+}
+		</pre>
+		the 'path' attribute specifies the path (forward slash syntax) inside the json contained in the flow file, the 'format' attribute
+		could be either "lat,lon" or "lon,lat" and specifies the order in which the coordinates should be considered in the target 
+		2-elements array or string (containing two comma-separated values).
+		<br/><br/>
+		For the 'latitudeFields' and 'longitudeFields' the array must contain a list of strings representing the path of the target latitude/longitude fields.
+		
+		<h4>Configuration examples</h4>
+		Single type of coordinates:
+		
+		<b>geo:json</b>
+		<pre>
+{
+	"geoJsonFields":[
+		{
+			"path":"location/coordinates" ,
+			"format":"lon,lat"
+		},
+		{
+			"path":"location/position/coordinates" ,
+			"format":"lat,lon"
+		}
+	]
+}
+		</pre>
+		will match, for example, the following flow file content:
+		<pre>
+{
+	...
+	"location":{ 
+		"coordinates" : [12.3456 , 98.7654 ]
+	}
+	...
+}
+		</pre>
+		or
+		<pre>
+{
+	...
+	"location":{
+		"position":{ 
+			"coordinates" : [12.3456 , 98.7654 ]
+		}
+	}
+	...
+}
+		</pre>
+		<br/><br/>
+		<b>geo:point</b>
+		<pre>
+{
+	"geoPointFields":[
+		{
+			"path":"position/coordinates" ,
+			"format":"lon,lat"
+		},
+		{
+			"path":"coordinates" ,
+			"format":"lat,lon"
+		}
+	]
+}
+		</pre>
+		will match, for example, the following flow file content:
+		<pre>
+{
+	...
+	"position" : {
+		"coordinates" : "12.3456,98.7654"
+	}
+	...
+}
+		</pre>
+		or
+		<pre>
+{
+	...
+	"coordinates" : "12.3456,98.7654"
+	...
+}
+		</pre>
+		<br/><br/>
+		<b>distinct fields</b>
+		<pre>
+{
+	"latitudeFields":[ "location/coordinates/latitude" , "position/coordinates/latitude" ] ,
+	"longitudeFields":[ "location/coordinates/longitude" , "position/coordinates/longitude" , "longitude"  ] ,
+}
+		</pre>
+		will match, for example, the following flow file content:
+		<pre>
+{
+	...
+	"location" : {
+		"coordinates" : {
+			"latitude" : 12.3456
+		}
+	},
+	"location" : {
+		"coordinates" : {
+			"longitude" : 98.7654
+		}
+	},
+	...
+}
+		</pre>
+		or
+		<pre>
+{
+	...
+	"position" : {
+		"coordinates" : {
+			"latitude" : 12.3456
+		}
+	},
+	"longitude":98.7654
+	...
+}
+		</pre> 
+		<br/><br/>
+		
+		Multiple types of coordinates specified (the order in which they are checked has been described above):
+		<pre>
+{
+	"geoJsonFields":[
+		{
+			"path":"location/coordinates" ,
+			"format":"lon,lat"
+		},
+		{
+			"path":"location/position/coordinates" ,
+			"format":"lat,lon"
+		}
+	],
+	"geoPointFields":[
+		{
+			"path":"position/coordinates" ,
+			"format":"lon,lat"
+		},
+		{
+			"path":"coordinates" ,
+			"format":"lat,lon"
+		}
+	],
+	"latitudeFields":[ "location/coordinates/latitude" , "position/coordinates/latitude" ] ,
+	"longitudeFields":[ "location/coordinates/longitude" , "position/coordinates/longitude" , "longitude"  ] ,
+}
+		</pre>
+		
+	</body>
+</html>

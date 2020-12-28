@@ -40,7 +40,7 @@ public class OnePhaseEnricher extends Enricher{
 	
 	@Override
 	public Map<String, String> enrich( String deviceId, JsonObject rootObject, JsonObject enrichmentObj,
-									   JsonElement responseRootEl, String timestamp, Map<String , String> additionalProperties) {
+									   JsonElement responseRootEl, String timestamp, Map<String , JsonElement> additionalProperties) {
 		// Enrich with data from servicemap
 		Set<String> rootKeySet = rootObject.entrySet().stream()
 									   .map( ( Map.Entry<String , JsonElement> e ) -> { 
@@ -106,10 +106,9 @@ public class OnePhaseEnricher extends Enricher{
 				
 				// Additional properties
 				additionalProperties.entrySet().stream().forEach( 
-					(Map.Entry<String , String> property) -> {
+					(Map.Entry<String , JsonElement> property) -> {
 						
-						rootObjMember.addProperty( property.getKey() , property.getValue() );
-						
+						rootObjMember.add( property.getKey() , property.getValue() );
 					}
 				);
 				

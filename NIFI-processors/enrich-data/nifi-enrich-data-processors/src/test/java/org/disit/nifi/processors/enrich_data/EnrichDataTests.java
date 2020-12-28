@@ -23,12 +23,17 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.nifi.components.PropertyDescriptor;
+import org.apache.nifi.components.ValidationContext;
+import org.apache.nifi.components.ValidationResult;
 import org.apache.nifi.reporting.InitializationException;
 import org.apache.nifi.util.MockFlowFile;
+import org.apache.nifi.util.MockProcessContext;
+import org.apache.nifi.util.MockValidationContext;
 import org.apache.nifi.util.TestRunner;
 import org.apache.nifi.util.TestRunners;
 import org.disit.nifi.processors.enrich_data.enrichment_source.servicemap.ServicemapClientService;
@@ -62,6 +67,11 @@ public class EnrichDataTests {
     private SimpleProtectedAPIServer srv;
     private ServicemapMockHandler servicemap;
     
+    private List<PropertyDescriptor> controllerServicesDescriptors = Arrays.asList( 
+    	EnrichData.ENRICHMENT_SOURCE_CLIENT_SERVICE ,
+    	EnrichData.OWNERSHIP_CLIENT_SERVICE
+    );
+    
     // Init method
     @Before
     public void init() throws Exception {
@@ -83,6 +93,7 @@ public class EnrichDataTests {
         testRunner.setProperty( EnrichData.TIMESTAMP_FROM_CONTENT_PROPERTY_VALUE , "timestamp" );
         testRunner.setProperty( EnrichData.VALUE_FIELD_NAME , "value" );
         testRunner.setProperty( EnrichData.ENRICHMENT_RESPONSE_BASE_PATH , "Service/features/properties/realtimeAttributes" );
+        testRunner.setProperty( EnrichData.LATLON_PRIORITY , EnrichData.LATLON_PRIORITY_VALUES[0] );
         testRunner.setProperty( EnrichData.ENRICHMENT_LAT_LON_PATH , "Service/features/geometry/coordinates" );
         testRunner.setProperty( EnrichData.ENRICHMENT_LAT_LON_FORMAT , "[lon , lat]" );
         testRunner.setProperty( EnrichData.ENRICHMENT_BEHAVIOR , EnrichData.ENRICHMENT_BEHAVIOR_VALUES[0] );
@@ -91,14 +102,16 @@ public class EnrichDataTests {
         testRunner.setProperty( EnrichData.PURGE_FIELDS , "type,metadata,value_bounds,different_values,attr_type" );
         testRunner.setProperty( EnrichData.OUTPUT_FF_CONTENT_FORMAT , EnrichData.OUTPUT_FF_CONTENT_FORMAT_VALUES[0] );
         testRunner.setProperty( EnrichData.HASHED_ID_FIELDS , "serviceUri,value_name,date_time" );
-        testRunner.setProperty( EnrichData.NODE_CONFIG_FILE_PATH , "src/test/resources/enrich-data.conf" );
+        testRunner.setProperty( EnrichData.NODE_CONFIG_FILE_PATH , "src/test/resources/enrich-data.conf" ); 
         
         testRunner.setProperty( "deviceName" , "Service/features/properties/name" );
         testRunner.setProperty( "organization" , "Service/features/properties/organization" );
         
-        
         setupServicemapControllerService();
         
+        validateProcessorProperties();
+        
+        // Mock external services (Servicemap)
         srv = new SimpleProtectedAPIServer( mockServicemapPort );
         servicemap = new ServicemapMockHandler();
         srv.addHandler( servicemap , mockServicemapEndpoint );
@@ -122,17 +135,38 @@ public class EnrichDataTests {
     }
     
     
+    private void validateProcessorProperties() {
+    	System.out.println( "Validating processor properties ..." );
+    	ValidationContext validationContext = new MockValidationContext(  
+    		new MockProcessContext( testRunner.getProcessor() )
+    	);
+    	for( PropertyDescriptor p : testRunner.getProcessor().getPropertyDescriptors() ) {
+    		String v = testRunner.getProcessContext().getProperty( p ).getValue();
+    		if( !controllerServicesDescriptors.contains( p ) ) { // Do not validate controller services
+	    		ValidationResult r = p.validate( v , validationContext );
+	    		assertEquals( true , r.isValid() );
+    		}
+    	}
+    	System.out.println( "VALID processor properties." );
+    }
+    
+    private ValidationResult getValidationResult( PropertyDescriptor p ) {
+    	ValidationContext validationContext = new MockValidationContext(  
+    		new MockProcessContext( testRunner.getProcessor() )
+    	);
+    	return p.validate( testRunner.getProcessContext().getProperty( p ).getValue() , 
+    			           validationContext );
+    }
+    
     // Tests
     //-------------------------------------------------------------------------------------
-    
-    
     
     /**
      * Test for the Json Object output format
      * @throws UnsupportedEncodingException
      * @throws IOException
      */
-    //@Test
+//    @Test
     public void testJsonOutput() throws UnsupportedEncodingException, IOException {
     	System.out.println( "**** TEST JSON OUTPUT ***" );
     	
@@ -141,8 +175,9 @@ public class EnrichDataTests {
     	mockFromFileTest( "src/test/resources/mock_in_ff/testOutputs.ff" , 
     					  "src/test/resources/mock_servicemap_response/testOutputs.resp" );
     	
-    	testRunner.assertAllFlowFilesTransferred( EnrichData.SUCCESS_RELATIONSHIP );
+//    	testRunner.assertAllFlowFilesTransferred( EnrichData.SUCCESS_RELATIONSHIP );
     	testRunner.assertTransferCount( EnrichData.SUCCESS_RELATIONSHIP , 1 );
+    	testRunner.assertTransferCount( EnrichData.ORIGINAL_RELATIONSHIP , 1 );
     	
     	JsonObject resultReferenceObj = 
     			TestUtils.mockJsonObjFromFile( Paths.get( "src/test/resources/reference_results/testOutputs_jsonOut.ref" ) , jsonParser );
@@ -159,11 +194,19 @@ public class EnrichDataTests {
     	});
     	
     	String outFFStr = TestUtils.prettyOutFF( outFF , jsonParser );
-    	Files.write( Paths.get( "src/test/resources/tests_output/testOutputs_jsonOut.result" ) , 
-				 	 outFFStr.getBytes() );
-    	System.out.println( outFFStr );
-    	
     	assertEquals( outFFContent.toString() , resultReferenceObj.toString() );
+    	
+    	System.out.println( outFFStr );
+    	// Save results to file 
+//    	Files.write( Paths.get( "src/test/resources/tests_output/testOutputs_jsonOut.result" ) , 
+//				 	 outFFStr.getBytes() );
+    	
+    	System.out.println( "---------- ROUTED to 'original': " );
+    	List<MockFlowFile> originalFFList = testRunner.getFlowFilesForRelationship( EnrichData.ORIGINAL_RELATIONSHIP );
+    	
+    	originalFFList.stream().forEach( (MockFlowFile ff) -> {
+    		System.out.println( TestUtils.prettyOutFF( ff , jsonParser ) );
+    	});
     	
     	System.out.println( "**** END TEST JSON OUTPUT ***" );
     }
@@ -173,7 +216,7 @@ public class EnrichDataTests {
      * @throws UnsupportedEncodingException
      * @throws IOException
      */
-    // @Test
+//     @Test
     public void testEsBulkCompliantOutput() throws UnsupportedEncodingException , IOException {
     	System.out.println( "**** TEST ES BULK COMPLIANT OUTPUT ***" );
     	
@@ -184,7 +227,7 @@ public class EnrichDataTests {
     	mockFromFileTest( "src/test/resources/mock_in_ff/testOutputs.ff" , 
 				  		  "src/test/resources/mock_servicemap_response/testOutputs.resp" );
     	
-    	testRunner.assertAllFlowFilesTransferred( EnrichData.SUCCESS_RELATIONSHIP );
+//    	testRunner.assertAllFlowFilesTransferred( EnrichData.SUCCESS_RELATIONSHIP );
     	testRunner.assertTransferCount( EnrichData.SUCCESS_RELATIONSHIP , 1 );
     								  
     	List<MockFlowFile> outFFList = testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP );
@@ -202,16 +245,13 @@ public class EnrichDataTests {
 									  .reduce( (s1 , s2) -> { return s1 + s2; } )
 									  .get();
     	
-//    	System.out.println( new String( outFF.toByteArray() ) );
-//    	System.out.println( resultReference );
-    	
     	String outFFStr = TestUtils.notPrettyOutFF( outFF );
-    	Files.write( Paths.get( "src/test/resources/tests_output/testOutputs_esBulk.result" ) , 
- 			    				outFFStr.getBytes() );
-    	
     	outFF.assertContentEquals( resultReference );
     	
     	System.out.println( outFFStr );
+    	// Save test results to file
+//    	Files.write( Paths.get( "src/test/resources/tests_output/testOutputs_esBulk.result" ) , 
+// 			    				outFFStr.getBytes() );
     	
     	System.out.println( "**** END TEST ES BULK COMPLIANT OUTPUT ***" );
     }
@@ -221,7 +261,7 @@ public class EnrichDataTests {
      * @throws UnsupportedEncodingException
      * @throws IOException
      */
-    @Test
+//    @Test
     public void testSplitJsonOutput() throws UnsupportedEncodingException , IOException {
     	System.out.println( "**** TEST SPLIT JSON OUTPUT ***" );
     	
@@ -230,11 +270,8 @@ public class EnrichDataTests {
     	String uuid = mockFromFileTest( "src/test/resources/mock_in_ff/testOutputs.ff" , 
 		  		  		  				"src/test/resources/mock_servicemap_response/testOutputs.resp" );
     	
-//    	String uuid = mockFromFileTest( "src/test/resources/mock_in_ff/testSensor.ff" , 
-//	  									"src/test/resources/mock_servicemap_response/testSensor.resp" );
-    	
     	//testRunner.assertAllFlowFilesTransferred( EnrichData.SUCCESS_RELATIONSHIP );
-    	//testRunner.assertTransferCount( EnrichData.SUCCESS_RELATIONSHIP , 7 );
+    	testRunner.assertTransferCount( EnrichData.SUCCESS_RELATIONSHIP , 7 );
     	
     	List<MockFlowFile> outFFList = testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP );
     	
@@ -242,14 +279,6 @@ public class EnrichDataTests {
     	outFFList.stream().forEach( mockFF -> { 
     		outputBuilder.append( TestUtils.prettyOutFF( mockFF , jsonParser ) )
     						 .append("\n");
-    		
-//    		JsonObject content = jsonParser.parse( new String( mockFF.toByteArray() ) ).getAsJsonObject();
-//    		String dateTime = content.get( "date_time" ).getAsString();
-//    		String valueName = content.get( "value_name" ).getAsString();
-//    		String serviceUri = content.get( "serviceUri" ).getAsString();
-//    		
-//    		String hexHash = DigestUtils.sha256Hex( valueName + serviceUri + dateTime );
-//    		System.out.println( hexHash );
     	} );
     	
     	System.out.println( outputBuilder.toString() );
@@ -267,14 +296,7 @@ public class EnrichDataTests {
     		outFFList.get(i).assertContentEquals( ff.toString() );
     	}
     	
-//    	StringBuilder outputBuilder = new StringBuilder();
-//    	outFFList.stream().forEach( mockFF -> { 
-//    		outputBuilder.append( prettyOutFF( mockFF ) )
-//    						 .append("\n");
-//    	} );
-//    	
-//    	System.out.println( outputBuilder.toString() );
-//    	
+    	// Save test results to file
 //    	Files.write( Paths.get( "src/test/resources/tests_output/01_splitJson.result" ) , 
 // 			    	 outputBuilder.toString().getBytes() );
     	
@@ -292,7 +314,7 @@ public class EnrichDataTests {
      * @throws UnsupportedEncodingException
      * @throws IOException
      */
-    // @Test
+//     @Test
     public void testEmptyOutObject() throws UnsupportedEncodingException , IOException {
     	System.out.println( "**** TEST EMPTY OUT OBJECT ***" );
     	
@@ -324,7 +346,7 @@ public class EnrichDataTests {
     	System.out.println( "FAILURE_RELATIONSHIP flow files: " );
     	System.out.println( outputBuilderFailure.toString() );
     	
-    	System.out.println( "**** TEST EMPTY OUT OBJECT ***" );
+    	System.out.println( "**** END TEST EMPTY OUT OBJECT ***" );
     }
     
     /**
@@ -333,7 +355,7 @@ public class EnrichDataTests {
      * @throws UnsupportedEncodingException
      * @throws IOException
      */
-    // @Test
+//     @Test
     public void testArrayValue() throws UnsupportedEncodingException , IOException {
     	System.out.println( "**** TEST ARRAY VALUE ***" );
     	
@@ -343,7 +365,7 @@ public class EnrichDataTests {
     	String uuid = mockFromFileTest( "src/test/resources/mock_in_ff/testArrayValue.ff" , 
 		  		  		  				"src/test/resources/mock_servicemap_response/testArrayValue.resp" );
     	
-    	testRunner.assertAllFlowFilesTransferred( EnrichData.SUCCESS_RELATIONSHIP );
+//    	testRunner.assertAllFlowFilesTransferred( EnrichData.SUCCESS_RELATIONSHIP );
     	testRunner.assertTransferCount( EnrichData.SUCCESS_RELATIONSHIP , 8 );
     	
     	List<MockFlowFile> outFFList = testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP );
@@ -368,6 +390,8 @@ public class EnrichDataTests {
     		
     		outFFList.get(i).assertContentEquals( ff.toString() );
     	}    	
+    	
+    	System.out.println( "**** END TEST ARRAY VALUE ***" );
     }
     	
     /**
@@ -376,7 +400,7 @@ public class EnrichDataTests {
      * @throws UnsupportedEncodingException
      * @throws IOException
      */
-    // @Test
+//     @Test
     public void testStringValueParsing() throws UnsupportedEncodingException , IOException{
     	System.out.println( "**** TEST VALUES PARSING ***" );
     	
@@ -387,7 +411,7 @@ public class EnrichDataTests {
     	mockFromFileTest( "src/test/resources/mock_in_ff/testParseStringValue.ff" , 
     					  "src/test/resources/mock_servicemap_response/testOutputs.resp" );
     	
-    	testRunner.assertAllFlowFilesTransferred( EnrichData.SUCCESS_RELATIONSHIP );
+//    	testRunner.assertAllFlowFilesTransferred( EnrichData.SUCCESS_RELATIONSHIP );
     	testRunner.assertTransferCount( EnrichData.SUCCESS_RELATIONSHIP , 1 );
     	
     	JsonObject resultReferenceObj = TestUtils.mockJsonObjFromFile( 
@@ -397,7 +421,7 @@ public class EnrichDataTests {
     	
     	JsonObject outFFContent = jsonParser.parse( new String( outFF.toByteArray() ) )
     										.getAsJsonObject();	
-    	String uuid = outFF.getAttribute( "uuid" );
+    	String uuid = outFF.getAttribute( "uuinew ImmutablePair( \"1\" , 10 ) ,d" );
     	
     	resultReferenceObj.entrySet().stream().forEach( (Map.Entry<String , JsonElement> member) -> {
     		resultReferenceObj.get( member.getKey() ).getAsJsonObject()
@@ -416,7 +440,7 @@ public class EnrichDataTests {
     
     
     
-    // @Test
+//    @Test
     public void testExceptions() {
     	System.out.println( "**** TEST EXCEPTIONS ***" );
     	
@@ -431,6 +455,335 @@ public class EnrichDataTests {
 		}
     	
     }
+    
+    /**
+     * Test for coordinates from the incoming flow file content object.
+     * 
+     * @throws UnsupportedEncodingException
+     * @throws IOException
+     */
+//    @Test
+    public void testInnerLatLonGeoJson() throws UnsupportedEncodingException , IOException {
+    	System.out.println( "**** TEST INNER LAT LON geo:json ***" );
+    	
+    	testRunner.setProperty( EnrichData.OUTPUT_FF_CONTENT_FORMAT , EnrichData.OUTPUT_FF_CONTENT_FORMAT_VALUES[2] );
+    	testRunner.setProperty( EnrichData.LATLON_PRIORITY , EnrichData.LATLON_PRIORITY_VALUES[1] ); // Priority inner
+    	// Set all options to test, but only the geoJsonFields is present in the input flow file
+    	testRunner.setProperty( EnrichData.INNER_LAT_LON_CONFIG , 
+    		"{"+
+    		   "\"geoJsonFields\":[" +
+    				"{ \"path\":\"location/value/coordinates\" , \"format\":\"lon , lat\" }" +
+    		   "]," + 
+    		   "\"geoPointFields\":[" + 
+    		   		"{\"path\":\"location/value/coordinates\" , \"format\":\"lon , lat\"}" +
+    		   "]," +
+    		   "\"latitudeFields\":[ \"latitude/value\" ]," +
+    		   "\"longitudeFields\":[ \"longitude/value\" ]" +
+    		"}" 
+    	);
+    	
+    	ValidationResult r = getValidationResult( EnrichData.INNER_LAT_LON_CONFIG );
+    	System.out.println( "Inner latlon validation" );
+    	System.out.println( "Valid: " + r.isValid() );
+    	System.out.println( "Input: " + r.getSubject() );
+    	System.out.println( "Input: " + r.getInput() );
+    	System.out.println( "Explanation: " + r.getExplanation() );
+    	
+    	validateProcessorProperties();
+    	
+    	String uuid = mockFromFileTest( "src/test/resources/mock_in_ff/testInnerLatLonGeoJson.ff" , 
+		  		  		  				"src/test/resources/mock_servicemap_response/testOutputs.resp" );
+    	
+    	List<MockFlowFile> outFFList = testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP );
+    	
+    	StringBuilder outputBuilder = new StringBuilder();
+    	outFFList.stream().forEach( mockFF -> { 
+    		outputBuilder.append( TestUtils.prettyOutFF( mockFF , jsonParser ) )
+    						 .append("\n");
+    	} );
+    	
+    	System.out.println( outputBuilder.toString() );
+    	
+    	JsonArray resposeReferenceArr = 
+    			TestUtils.mockJsonArrayFromFile( Paths.get( "src/test/resources/reference_results/testInnerLatLonGeoJson.ref" ) , jsonParser );
+    	for( int i = 0 ; i < resposeReferenceArr.size() ; i++ ) {
+    		
+    		JsonObject ff = resposeReferenceArr.get(i).getAsJsonObject();
+    		ff.addProperty( "uuid" , uuid );
+    		
+    		outFFList.get(i).assertContentEquals( ff.toString() );
+    	}
+    	
+    	System.out.println( "**** END TEST INNER LAT LON ***" );
+    }
+    
+    /**
+     * Test for coordinates from the incoming flow file content object.
+     * 
+     * @throws UnsupportedEncodingException
+     * @throws IOException
+     */
+//    @Test
+    public void testInnerLatLonGeoPoint() throws UnsupportedEncodingException , IOException {
+    	System.out.println( "**** TEST INNER LAT LON geo:point ***" );
+    	
+    	testRunner.setProperty( EnrichData.OUTPUT_FF_CONTENT_FORMAT , EnrichData.OUTPUT_FF_CONTENT_FORMAT_VALUES[2] );
+    	testRunner.setProperty( EnrichData.LATLON_PRIORITY , EnrichData.LATLON_PRIORITY_VALUES[1] ); // Priority inner
+    	// Set all options to test, but only the geoPointFields is present in the input flow file
+    	testRunner.setProperty( EnrichData.INNER_LAT_LON_CONFIG , 
+    		"{"+
+    		   "\"geoJsonFields\":[" +
+    				"{ \"path\":\"location/value/coordinates\" , \"format\":\"lon , lat\" }" +
+    		   "]," + 
+    		   "\"geoPointFields\":[" + 
+    		   		"{\"path\":\"location/value/coordinates\" , \"format\":\"lon , lat\"}" +
+    		   "]," +
+    		   "\"latitudeFields\":[ \"latitude/value\" ]," +
+    		   "\"longitudeFields\":[ \"longitude/value\" ]" +
+    		"}" 
+    	);
+    	
+//    	ValidationResult r = getValidationResult( EnrichData.INNER_LAT_LON_CONFIG );
+//    	System.out.println( "Inner latlon validation" );
+//    	System.out.println( "Valid: " + r.isValid() );
+//    	System.out.println( "Input: " + r.getSubject() );
+//    	System.out.println( "Input: " + r.getInput() );
+//    	System.out.println( "Explanation: " + r.getExplanation() );
+    	
+    	validateProcessorProperties();
+    	
+    	String uuid = mockFromFileTest( "src/test/resources/mock_in_ff/testInnerLatLonGeoPoint.ff" , 
+		  		  		  				"src/test/resources/mock_servicemap_response/testOutputs.resp" );
+    	
+    	List<MockFlowFile> outFFList = testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP );
+    	
+    	StringBuilder outputBuilder = new StringBuilder();
+    	outFFList.stream().forEach( mockFF -> { 
+    		outputBuilder.append( TestUtils.prettyOutFF( mockFF , jsonParser ) )
+    						 .append("\n");
+    	} );
+    	
+    	System.out.println( outputBuilder.toString() );
+    	
+    	Files.write( Paths.get( "src/test/resources/tests_output/testInnerLatLon.result" ) , 
+ 			    	 outputBuilder.toString().getBytes() );
+    	
+    	JsonArray resposeReferenceArr = 
+    			TestUtils.mockJsonArrayFromFile( Paths.get( "src/test/resources/reference_results/testInnerLatLonGeoPoint.ref" ) , jsonParser );
+    	for( int i = 0 ; i < resposeReferenceArr.size() ; i++ ) {
+    		
+    		JsonObject ff = resposeReferenceArr.get(i).getAsJsonObject();
+    		ff.addProperty( "uuid" , uuid );
+    		
+    		outFFList.get(i).assertContentEquals( ff.toString() );
+    	}
+    	
+    	System.out.println( "**** END TEST INNER LAT LON ***" );
+    }
+    
+    /**
+     * Test for coordinates from the incoming flow file content object.
+     * 
+     * @throws UnsupportedEncodingException
+     * @throws IOException
+     */
+//    @Test
+    public void testInnerLatLonDistinctFields() throws UnsupportedEncodingException , IOException {
+    	System.out.println( "**** TEST INNER LAT LON distinct fields***" );
+    	
+    	testRunner.setProperty( EnrichData.OUTPUT_FF_CONTENT_FORMAT , EnrichData.OUTPUT_FF_CONTENT_FORMAT_VALUES[2] );
+    	testRunner.setProperty( EnrichData.LATLON_PRIORITY , EnrichData.LATLON_PRIORITY_VALUES[1] ); // Priority inner
+    	// Set all options to test, but only the latitudeFields and longitudeFields are present in the input flow file
+    	testRunner.setProperty( EnrichData.INNER_LAT_LON_CONFIG , 
+    		"{"+
+    		   "\"geoJsonFields\":[" +
+    				"{ \"path\":\"location/value/coordinates\" , \"format\":\"lon , lat\" }" +
+    		   "]," + 
+    		   "\"geoPointFields\":[" + 
+    		   		"{\"path\":\"location/value/coordinates\" , \"format\":\"lon , lat\"}" +
+    		   "]," +
+    		   "\"latitudeFields\":[ \"latitude/value\" ]," +
+    		   "\"longitudeFields\":[ \"longitude/value\" ]" +
+    		"}" 
+    	);
+    	
+    	ValidationResult r = getValidationResult( EnrichData.INNER_LAT_LON_CONFIG );
+    	System.out.println( "Inner latlon validation" );
+    	System.out.println( "Valid: " + r.isValid() );
+    	System.out.println( "Input: " + r.getSubject() );
+    	System.out.println( "Input: " + r.getInput() );
+    	System.out.println( "Explanation: " + r.getExplanation() );
+    	
+    	validateProcessorProperties();
+    	
+    	String uuid = mockFromFileTest( "src/test/resources/mock_in_ff/testInnerLatLonDistinctFields.ff" , 
+		  		  		  				"src/test/resources/mock_servicemap_response/testOutputs.resp" );
+    	
+//    	String uuid = mockFromFileTest( "src/test/resources/mock_in_ff/testInnerLatLonError.ff" , 
+//	  									"src/test/resources/mock_servicemap_response/testOutputs.resp" );
+    	
+    	List<MockFlowFile> outFFList = testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP );
+    	
+    	StringBuilder outputBuilder = new StringBuilder();
+    	outFFList.stream().forEach( mockFF -> { 
+    		outputBuilder.append( TestUtils.prettyOutFF( mockFF , jsonParser ) )
+    						 .append("\n");
+    	} );
+    	
+    	System.out.println( outputBuilder.toString() );
+    	
+    	JsonArray resposeReferenceArr = 
+    			TestUtils.mockJsonArrayFromFile( Paths.get( "src/test/resources/reference_results/testInnerLatLonDistinctFields.ref" ) , jsonParser );
+    	for( int i = 0 ; i < resposeReferenceArr.size() ; i++ ) {
+    		
+    		JsonObject ff = resposeReferenceArr.get(i).getAsJsonObject();
+    		ff.addProperty( "uuid" , uuid );
+    		
+    		outFFList.get(i).assertContentEquals( ff.toString() );
+    	}
+    	
+    	System.out.println( "**** END TEST INNER LAT LON ***" );
+    }
+    
+//    @Test
+    public void testInnerLatLonMissing() throws UnsupportedEncodingException , IOException {
+    	System.out.println( "**** TEST INNER LAT LON failure ***" );
+    	
+    	testRunner.setProperty( EnrichData.OUTPUT_FF_CONTENT_FORMAT , EnrichData.OUTPUT_FF_CONTENT_FORMAT_VALUES[2] );
+    	testRunner.setProperty( EnrichData.LATLON_PRIORITY , EnrichData.LATLON_PRIORITY_VALUES[1] ); // Priority inner
+    	// Set all options to test, but only the latitudeFields and longitudeFields are present in the input flow file
+    	testRunner.setProperty( EnrichData.INNER_LAT_LON_CONFIG , 
+    		"{"+
+    		   "\"geoJsonFields\":[" +
+    				"{ \"path\":\"location/value/coordinates\" , \"format\":\"lon , lat\" }" +
+    		   "]," + 
+    		   "\"geoPointFields\":[" + 
+    		   		"{\"path\":\"location/value/coordinates\" , \"format\":\"lon , lat\"}" +
+    		   "]," +
+    		   "\"latitudeFields\":[ \"latitude/value\" ]," +
+    		   "\"longitudeFields\":[ \"longitude/value\" ]" +
+    		"}" 
+    	);
+    	
+    	ValidationResult r = getValidationResult( EnrichData.INNER_LAT_LON_CONFIG );
+    	System.out.println( "Inner latlon validation" );
+    	System.out.println( "Valid: " + r.isValid() );
+    	System.out.println( "Input: " + r.getSubject() );
+    	System.out.println( "Input: " + r.getInput() );
+    	System.out.println( "Explanation: " + r.getExplanation() );
+    	
+    	validateProcessorProperties();
+    	
+    	String uuid = mockFromFileTest( "src/test/resources/mock_in_ff/testInnerLatLonError.ff" , 
+	  									"src/test/resources/mock_servicemap_response/testOutputs.resp" );
+    	
+    	List<MockFlowFile> outFFList = testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP );
+    	
+    	StringBuilder outputBuilder = new StringBuilder();
+    	outFFList.stream().forEach( mockFF -> { 
+    		outputBuilder.append( TestUtils.prettyOutFF( mockFF , jsonParser ) )
+    						 .append("\n");
+    	} );
+    	
+    	System.out.println( outputBuilder.toString() );
+    	
+//    	JsonArray resposeReferenceArr = 
+//    			TestUtils.mockJsonArrayFromFile( Paths.get( "src/test/resources/reference_results/testOutputs_splitJson.ref" ) , jsonParser );
+//    	for( int i = 0 ; i < resposeReferenceArr.size() ; i++ ) {
+//    		
+//    		JsonObject ff = resposeReferenceArr.get(i).getAsJsonObject();
+//    		ff.addProperty( "uuid" , uuid );
+//    		
+//    		outFFList.get(i).assertContentEquals( ff.toString() );
+//    	}
+    	
+    	System.out.println( "**** END TEST INNER LAT LON failure ***" );
+    }
+    
+    @Test
+    public void testInnerLatLonNotParsable() throws UnsupportedEncodingException , IOException {
+    	System.out.println( "**** TEST INNER LAT LON not parsable failure ***" );
+    	
+    	testRunner.setProperty( EnrichData.OUTPUT_FF_CONTENT_FORMAT , EnrichData.OUTPUT_FF_CONTENT_FORMAT_VALUES[2] );
+    	testRunner.setProperty( EnrichData.LATLON_PRIORITY , EnrichData.LATLON_PRIORITY_VALUES[1] ); // Priority inner
+    	// Set all options to test, but only the latitudeFields and longitudeFields are present in the input flow file
+    	testRunner.setProperty( EnrichData.INNER_LAT_LON_CONFIG , 
+    		"{"+
+    		   "\"geoJsonFields\":[" +
+    				"{ \"path\":\"location/value/coordinates\" , \"format\":\"lon , lat\" }" +
+    		   "]," + 
+    		   "\"geoPointFields\":[" + 
+    		   		"{\"path\":\"location/value/coordinates\" , \"format\":\"lon , lat\"}" +
+    		   "]," +
+    		   "\"latitudeFields\":[ \"latitude/value\" ]," +
+    		   "\"longitudeFields\":[ \"longitude/value\" ]" +
+    		"}" 
+    	);
+    	
+    	ValidationResult r = getValidationResult( EnrichData.INNER_LAT_LON_CONFIG );
+    	System.out.println( "Inner latlon validation" );
+    	System.out.println( "Valid: " + r.isValid() );
+    	System.out.println( "Input: " + r.getSubject() );
+    	System.out.println( "Input: " + r.getInput() );
+    	System.out.println( "Explanation: " + r.getExplanation() );
+    	
+    	validateProcessorProperties();
+    	
+    	String uuid = mockFromFileTest( "src/test/resources/mock_in_ff/testInnerLatLonErrorNotParsable.ff" , 
+	  									"src/test/resources/mock_servicemap_response/testOutputs.resp" );
+    	
+    	List<MockFlowFile> outFFList = testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP );
+    	
+    	StringBuilder outputBuilder = new StringBuilder();
+    	outFFList.stream().forEach( mockFF -> { 
+    		outputBuilder.append( TestUtils.prettyOutFF( mockFF , jsonParser ) )
+    						 .append("\n");
+    	} );
+    	
+    	System.out.println( outputBuilder.toString() );
+    	
+//    	JsonArray resposeReferenceArr = 
+//    			TestUtils.mockJsonArrayFromFile( Paths.get( "src/test/resources/reference_results/testOutputs_splitJson.ref" ) , jsonParser );
+//    	for( int i = 0 ; i < resposeReferenceArr.size() ; i++ ) {
+//    		
+//    		JsonObject ff = resposeReferenceArr.get(i).getAsJsonObject();
+//    		ff.addProperty( "uuid" , uuid );
+//    		
+//    		outFFList.get(i).assertContentEquals( ff.toString() );
+//    	}
+    	
+    	System.out.println( "**** END TEST INNER LAT LON not parsable failure ***" );
+    }
+    
+//    @Test
+    public void testOriginalFFAugmentation() throws UnsupportedEncodingException, IOException {
+    	System.out.println( "**** TEST ORIGINAL FLOW FILE AUGMENTATION***" );
+    	
+    	testRunner.setProperty( EnrichData.OUTPUT_FF_CONTENT_FORMAT , EnrichData.OUTPUT_FF_CONTENT_FORMAT_VALUES[0] );
+    	testRunner.setProperty( EnrichData.ORIGINAL_FLOW_FILE_ATTRIBUTES_AUG ,
+    							"{\"format\":\"Service/features/properties/format\"}" );
+    	
+    	validateProcessorProperties();
+    	
+    	mockFromFileTest( "src/test/resources/mock_in_ff/testOutputs.ff" , 
+    					  "src/test/resources/mock_servicemap_response/testOutputs.resp" );
+    	
+//    	testRunner.assertAllFlowFilesTransferred( EnrichData.SUCCESS_RELATIONSHIP );
+    	testRunner.assertTransferCount( EnrichData.SUCCESS_RELATIONSHIP , 1 );
+    	testRunner.assertTransferCount( EnrichData.ORIGINAL_RELATIONSHIP , 1 );
+    	
+    	System.out.println( "---------- ROUTED to 'original': " );
+    	List<MockFlowFile> originalFFList = testRunner.getFlowFilesForRelationship( EnrichData.ORIGINAL_RELATIONSHIP );
+    	
+    	originalFFList.stream().forEach( (MockFlowFile ff) -> {
+    		ff.assertAttributeExists( "format" );
+    		ff.assertAttributeEquals( "format" , "json" );
+    		System.out.println( TestUtils.prettyOutFF( ff , jsonParser ) );
+    	});
+    	
+    	System.out.println( "**** END TEST ORIGINAL FLOW FILE AUGMENTATION ***" );
+    }
+    
     
     /**
      * Mock flow file content from a file
@@ -486,16 +839,6 @@ public class EnrichDataTests {
         
         return uuid;
     }
-    
-    //@Test
-    public void testHash() {
-    	String toHash = "I'm a string to be hashed by a beautiful algorithm";
-    	String sha256Hex = DigestUtils.sha256Hex( toHash );
-    	
-    	System.out.println( sha256Hex );
-    }
-    
-    
     
     @After
     public void tearDown() throws Exception {

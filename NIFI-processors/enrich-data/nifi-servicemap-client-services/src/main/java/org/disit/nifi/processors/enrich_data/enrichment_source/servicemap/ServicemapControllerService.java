@@ -26,12 +26,14 @@ import org.apache.nifi.components.PropertyDescriptor;
 import org.apache.nifi.controller.AbstractControllerService;
 import org.apache.nifi.controller.ConfigurationContext;
 import org.apache.nifi.processor.ProcessContext;
+import org.apache.nifi.reporting.InitializationException;
 import org.disit.nifi.processors.enrich_data.enrichment_source.EnrichmentSourceClient;
+import org.disit.nifi.processors.enrich_data.enrichment_source.EnrichmentSourceUpdater;
 
 /**
  * Provides a ServicemapClient to the processor.
  */
-public class ServicemapControllerService extends AbstractControllerService implements ServicemapClientService{
+public class ServicemapControllerService extends AbstractControllerService implements ServicemapClientService {
 
 	protected static List<PropertyDescriptor> descriptors = new ArrayList<>();
 	
@@ -45,13 +47,15 @@ public class ServicemapControllerService extends AbstractControllerService imple
 	protected String serviceUriPrefix;
 	protected String additionalQueryString;
 	
+	protected ServicemapConfigs servicemapConfigs;
+	
 	@Override
     protected List<PropertyDescriptor> getSupportedPropertyDescriptors(){
 		return descriptors;
 	}
 	
 	@OnEnabled
-	public void onEnable(final ConfigurationContext context) {
+	public void onEnable(final ConfigurationContext context) throws InitializationException {
 		configBaseProperties( context );
 	}
 	
@@ -64,6 +68,12 @@ public class ServicemapControllerService extends AbstractControllerService imple
 		this.additionalQueryString = context.getProperty( ADDITIONAL_QUERY_STRING ).getValue();
 		if( !this.additionalQueryString.isEmpty() && !this.additionalQueryString.startsWith("&") )
 			this.additionalQueryString = String.format( "&%s" , this.additionalQueryString );
+		
+		servicemapConfigs = new ServicemapConfigs( 
+			this.servicemapUrl ,
+			this.serviceUriPrefix , 
+			this.additionalQueryString
+		);
 	}
 	
 	@OnDisabled
@@ -74,19 +84,42 @@ public class ServicemapControllerService extends AbstractControllerService imple
 		// TODO needed ?
 	}
 
+	/**
+	 * Provides a parallel client capable of retrieving data from servicemap throught 
+	 * an HTTP GET request.
+	 */
 	@Override
 	public EnrichmentSourceClient getClient( ProcessContext context ) throws InstantiationException {
-		ServicemapClient client;
+//		ServicemapClient client;
+		EnrichmentSourceClient client;
 		if( context == null ) {
-			client = new ServicemapClient( servicemapUrl , serviceUriPrefix );
+//			client = new ServicemapClient( servicemapUrl , serviceUriPrefix );
+			client = new ServicemapHttpClient( this.servicemapConfigs );
 		}else {
-			client = new ServicemapClient( servicemapUrl , serviceUriPrefix , context );
+//			client = new ServicemapClient( servicemapUrl , serviceUriPrefix , context );
+			client = new ServicemapHttpClient( this.servicemapConfigs , context );
 		}
 		
-		if( !additionalQueryString.isEmpty() )
-			client.setAdditionalQueryString( additionalQueryString );
+//		if( !additionalQueryString.isEmpty() )
+//			client.setAdditionalQueryString( additionalQueryString );
 		
 		return client;
+	}
+	
+	/**
+	 * Provides a parallel client capable of retrieving data from servicemap throught 
+	 * an HTTP POST request.
+	 */
+	@Override 
+	public EnrichmentSourceUpdater getUpdaterClient( String endpoint , ProcessContext context  ) throws InstantiationException{
+		ServicemapHttpUpdater updaterClient;
+		if( context == null ) {
+			updaterClient = new ServicemapHttpUpdater( endpoint , this.servicemapConfigs );
+		}else {
+			updaterClient = new ServicemapHttpUpdater( endpoint , this.servicemapConfigs , context );
+		}
+		
+		return updaterClient;
 	}
 	
 }

@@ -1,0 +1,238 @@
+FF-Attributes:
+{
+	path : target
+	filename : 1711976967201.mockFlowFile
+	timestampSource : dateObserved
+	_id : 66c9f5c42be2dae0ca8c69baa9023ec1cf0bef866a65acb22af8de4675e84280
+	uuid : a791cdc4-7249-4157-b312-8abd7cd2cdfb
+}
+
+FF-Content:
+{
+  "value": 18.4,
+  "value_type": "PM10_concentration",
+  "data_type": "float",
+  "value_refresh_rate": "300",
+  "value_unit": "ppm",
+  "sensorId": "123456789",
+  "src": "IOT",
+  "kind": "sensor",
+  "latlon": "60.1000,24.8000",
+  "serviceUri": "http://serviceuriprefix.org/123456789",
+  "uuid": "9408072e-65a7-4298-8c02-8cfb0e6151b9",
+  "value_name": "PM10",
+  "organization": "MyOrg",
+  "deviceName": "123456789",
+  "date_time": "2019-06-06T15:46:54.930Z",
+  "date_time10min": "2019-06-06T15:50:00.000Z",
+  "date_time10sec": "2019-06-06T15:46:50.000Z",
+  "date_time1d": "2019-06-06T00:00:00.000Z",
+  "date_time1h": "2019-06-06T15:00:00.000Z",
+  "date_time1min": "2019-06-06T15:46:00.000Z",
+  "date_time1sec": "2019-06-06T15:46:54.000Z"
+}
+FF-Attributes:
+{
+	path : target
+	filename : 1711976967201.mockFlowFile
+	timestampSource : dateObserved
+	_id : d704c3cbe81866bf9445fad2543501357c1b88174d23265c5ee6bb58b8acfecc
+	uuid : 96ca9ab6-131d-4cdb-a395-04dd7446f9cf
+}
+
+FF-Content:
+{
+  "value": 6,
+  "value_type": "PM2.5_concentration",
+  "data_type": "float",
+  "value_refresh_rate": "300",
+  "value_unit": "ppm",
+  "sensorId": "123456789",
+  "src": "IOT",
+  "kind": "sensor",
+  "latlon": "60.1000,24.8000",
+  "serviceUri": "http://serviceuriprefix.org/123456789",
+  "uuid": "9408072e-65a7-4298-8c02-8cfb0e6151b9",
+  "value_name": "PM2.5",
+  "organization": "MyOrg",
+  "deviceName": "123456789",
+  "date_time": "2019-06-06T15:46:54.930Z",
+  "date_time10min": "2019-06-06T15:50:00.000Z",
+  "date_time10sec": "2019-06-06T15:46:50.000Z",
+  "date_time1d": "2019-06-06T00:00:00.000Z",
+  "date_time1h": "2019-06-06T15:00:00.000Z",
+  "date_time1min": "2019-06-06T15:46:00.000Z",
+  "date_time1sec": "2019-06-06T15:46:54.000Z"
+}
+FF-Attributes:
+{
+	path : target
+	filename : 1711976967201.mockFlowFile
+	timestampSource : dateObserved
+	_id : 56c4c867ae525fdd993c5cd87310402ad502ea8da1eb60ed952d3cda4fbf16cb
+	uuid : ae5b82dc-c450-4110-b94b-4967bee49275
+}
+
+FF-Content:
+{
+  "value_type": "latitude_longitude",
+  "data_type": "string",
+  "value_refresh_rate": "300",
+  "value_unit": "#",
+  "value_obj": {
+    "addressCountry": "",
+    "addressLocality": "",
+    "streetAddress": ""
+  },
+  "sensorId": "123456789",
+  "src": "IOT",
+  "kind": "sensor",
+  "latlon": "60.1000,24.8000",
+  "serviceUri": "http://serviceuriprefix.org/123456789",
+  "uuid": "9408072e-65a7-4298-8c02-8cfb0e6151b9",
+  "value_name": "address",
+  "organization": "MyOrg",
+  "deviceName": "123456789",
+  "date_time": "2019-06-06T15:46:54.930Z",
+  "date_time10min": "2019-06-06T15:50:00.000Z",
+  "date_time10sec": "2019-06-06T15:46:50.000Z",
+  "date_time1d": "2019-06-06T00:00:00.000Z",
+  "date_time1h": "2019-06-06T15:00:00.000Z",
+  "date_time1min": "2019-06-06T15:46:00.000Z",
+  "date_time1sec": "2019-06-06T15:46:54.000Z"
+}
+FF-Attributes:
+{
+	path : target
+	filename : 1711976967201.mockFlowFile
+	timestampSource : dateObserved
+	_id : a1db3620f072c697487dfd89916a2f90933c8b3b835ad561d37976b0536cc7cd
+	uuid : d944003e-8342-44a2-838c-fe5866e4014f
+}
+
+FF-Content:
+{
+  "value_type": "timestamp",
+  "data_type": "string",
+  "value_refresh_rate": "300",
+  "value_unit": "s",
+  "value_str": "2019-06-06T15:46:54.930000+00:00",
+  "sensorId": "123456789",
+  "src": "IOT",
+  "kind": "sensor",
+  "latlon": "60.1000,24.8000",
+  "serviceUri": "http://serviceuriprefix.org/123456789",
+  "uuid": "9408072e-65a7-4298-8c02-8cfb0e6151b9",
+  "value_name": "dateObserved",
+  "organization": "MyOrg",
+  "deviceName": "123456789",
+  "date_time": "2019-06-06T15:46:54.930Z",
+  "date_time10min": "2019-06-06T15:50:00.000Z",
+  "date_time10sec": "2019-06-06T15:46:50.000Z",
+  "date_time1d": "2019-06-06T00:00:00.000Z",
+  "date_time1h": "2019-06-06T15:00:00.000Z",
+  "date_time1min": "2019-06-06T15:46:00.000Z",
+  "date_time1sec": "2019-06-06T15:46:54.000Z"
+}
+FF-Attributes:
+{
+	path : target
+	filename : 1711976967201.mockFlowFile
+	timestampSource : dateObserved
+	_id : 8dabfdfb3c672261e53b2fc9fbe3a8c35016128c38fe9465acf7581873af12eb
+	uuid : eb9ebed9-3eff-4b15-827b-d4404b83c929
+}
+
+FF-Content:
+{
+  "value_type": "latitude_longitude",
+  "data_type": "string",
+  "value_refresh_rate": "300",
+  "value_unit": "#",
+  "value_obj": {
+    "type": "Point",
+    "coordinates": "24.8000,60.1000"
+  },
+  "sensorId": "123456789",
+  "src": "IOT",
+  "kind": "sensor",
+  "latlon": "60.1000,24.8000",
+  "serviceUri": "http://serviceuriprefix.org/123456789",
+  "uuid": "9408072e-65a7-4298-8c02-8cfb0e6151b9",
+  "value_name": "location",
+  "organization": "MyOrg",
+  "deviceName": "123456789",
+  "date_time": "2019-06-06T15:46:54.930Z",
+  "date_time10min": "2019-06-06T15:50:00.000Z",
+  "date_time10sec": "2019-06-06T15:46:50.000Z",
+  "date_time1d": "2019-06-06T00:00:00.000Z",
+  "date_time1h": "2019-06-06T15:00:00.000Z",
+  "date_time1min": "2019-06-06T15:46:00.000Z",
+  "date_time1sec": "2019-06-06T15:46:54.000Z"
+}
+FF-Attributes:
+{
+	path : target
+	filename : 1711976967201.mockFlowFile
+	timestampSource : dateObserved
+	_id : 560f2ec3b0d9fc8d3303570e42f7eb41134d5971a98806f9ff7676aa4ede9100
+	uuid : 220044fd-c060-497d-be49-6e9c3e787b84
+}
+
+FF-Content:
+{
+  "value": 0.5,
+  "value_type": "status",
+  "data_type": "float",
+  "value_refresh_rate": "300",
+  "value_unit": "#",
+  "sensorId": "123456789",
+  "src": "IOT",
+  "kind": "sensor",
+  "latlon": "60.1000,24.8000",
+  "serviceUri": "http://serviceuriprefix.org/123456789",
+  "uuid": "9408072e-65a7-4298-8c02-8cfb0e6151b9",
+  "value_name": "reliability",
+  "organization": "MyOrg",
+  "deviceName": "123456789",
+  "date_time": "2019-06-06T15:46:54.930Z",
+  "date_time10min": "2019-06-06T15:50:00.000Z",
+  "date_time10sec": "2019-06-06T15:46:50.000Z",
+  "date_time1d": "2019-06-06T00:00:00.000Z",
+  "date_time1h": "2019-06-06T15:00:00.000Z",
+  "date_time1min": "2019-06-06T15:46:00.000Z",
+  "date_time1sec": "2019-06-06T15:46:54.000Z"
+}
+FF-Attributes:
+{
+	path : target
+	filename : 1711976967201.mockFlowFile
+	timestampSource : dateObserved
+	_id : f6d9fced1e92b508bc5fef29c61e93e7821063e5688c24a84b13dca4b131ab81
+	uuid : 89aab171-1fd3-45da-a681-d2021efef597
+}
+
+FF-Content:
+{
+  "value_type": "status",
+  "data_type": "string",
+  "value_refresh_rate": "300",
+  "value_unit": "#",
+  "value_str": "https://source.com/source",
+  "sensorId": "123456789",
+  "src": "IOT",
+  "kind": "sensor",
+  "latlon": "60.1000,24.8000",
+  "serviceUri": "http://serviceuriprefix.org/123456789",
+  "uuid": "9408072e-65a7-4298-8c02-8cfb0e6151b9",
+  "value_name": "source",
+  "organization": "MyOrg",
+  "deviceName": "123456789",
+  "date_time": "2019-06-06T15:46:54.930Z",
+  "date_time10min": "2019-06-06T15:50:00.000Z",
+  "date_time10sec": "2019-06-06T15:46:50.000Z",
+  "date_time1d": "2019-06-06T00:00:00.000Z",
+  "date_time1h": "2019-06-06T15:00:00.000Z",
+  "date_time1min": "2019-06-06T15:46:00.000Z",
+  "date_time1sec": "2019-06-06T15:46:54.000Z"
+}

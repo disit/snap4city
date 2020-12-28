@@ -16,6 +16,8 @@
 
 package org.disit.nifi.processors.enrich_data.enrichment_source;
 
+import java.io.UnsupportedEncodingException;
+
 import com.google.gson.JsonElement;
 
 /**
@@ -31,4 +33,8 @@ public interface EnrichmentSourceClient {
 	public JsonElement getEnrichmentData( String arg1 , String arg2 ) throws EnrichmentSourceException;
 	
 	public void close() throws EnrichmentSourceException;
+	
+	public String buildRequestUrl( String arg1 , String arg2 ) throws UnsupportedEncodingException;
+	
+	public String buildRequestUrl( String arg ) throws UnsupportedEncodingException;
 }
