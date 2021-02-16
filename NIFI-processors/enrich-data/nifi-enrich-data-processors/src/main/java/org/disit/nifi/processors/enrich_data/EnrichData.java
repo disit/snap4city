@@ -37,6 +37,7 @@ import java.util.stream.Collectors;
 
 import javax.naming.ConfigurationException;
 import javax.servlet.http.HttpServletResponse;
+import javax.sound.midi.MidiDevice.Info;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -70,6 +71,7 @@ import org.disit.nifi.processors.enrich_data.enrichment_source.EnrichmentSourceE
 import org.disit.nifi.processors.enrich_data.enrichment_source.ServicemapSource;
 import org.disit.nifi.processors.enrich_data.json_processing.JsonProcessingUtils;
 import org.disit.nifi.processors.enrich_data.logging.LoggingUtils;
+import org.disit.nifi.processors.enrich_data.logging.LoggingUtils.LoggableObject;
 import org.disit.nifi.processors.enrich_data.output_producer.ElasticsearchBulkIndexingOutputProducer;
 import org.disit.nifi.processors.enrich_data.output_producer.JsonOutputProducer;
 import org.disit.nifi.processors.enrich_data.output_producer.OutputProducer;
@@ -311,7 +313,7 @@ public class EnrichData extends AbstractProcessor {
     public static final PropertyDescriptor URI_PREFIX_FROM_ATTR_NAME = new PropertyDescriptor
             .Builder().name( "URI_PREFIX_FROM_ATTR_NAME" )
             .displayName( "Service uri prefix from attribute name" )
-            .description( "If this property is set the processor first looks for an attribute with the specified name in the input flow file, to parse the service uri prefix from. Otherwise it uses the configured 'Service Uri Prefix' in the processor's configurations." )
+            .description( "If this property is set the processor first looks for an attribute with the specified name in the input flow file to parse the service uri prefix from. Otherwise it uses the configured 'Enrichment Source Client Service'." )
             .required(false)
             .defaultValue("")
             .addValidator(Validator.VALID)
@@ -1087,20 +1089,28 @@ public class EnrichData extends AbstractProcessor {
 			else
 				responseRootEl = enrichmentSourceClient.getEnrichmentData( deviceId );
 		} catch (EnrichmentSourceException e) {
-			// EnrichmentSource error handling
+			// EnrichmentSource ERROR handling
 			StringBuilder msg = new StringBuilder( e.getMessage() );
 			Relationship destination;
+			List<Pair<String,String>> errorAttributes = new ArrayList<>();
 			
+			// Determine if retriable
 			if( e.getCause() != null && shouldRetry( e.getCause() ) )
 				destination = RETRY_RELATIONSHIP;
 			else
 				destination = FAILURE_RELATIONSHIP;
 			msg.append( " Routing to " ).append( destination.getName() );
 			
-			LoggingUtils.produceErrorObj( msg.toString() , rootEl )
+			LoggableObject errorObj  = LoggingUtils.produceErrorObj( msg.toString() , rootEl )
 				.withExceptionInfo( e )
-				.withProperty( "ff-uuid" , uuid )
-				.logAsError( logger );
+				.withProperty( "ff-uuid" , uuid );
+			e.getInfos().entrySet().stream().forEach( (Map.Entry<String , String> info) -> {
+				errorObj.withProperty( info.getKey() , info.getValue() );
+				errorAttributes.add( new ImmutablePair<String, String>( 
+					"failure."+info.getKey() , info.getValue() ) 
+				);
+			});
+			errorObj.logAsError( logger );
 			
 			String requestUrl = null;
 			try {
@@ -1111,15 +1121,10 @@ public class EnrichData extends AbstractProcessor {
 			} catch( UnsupportedEncodingException ue) { requestUrl = ""; }
 			
 			// Route to destination
-//			flowFile = session.putAttribute( flowFile , "requestUrl" , requestUrl );
-//			flowFile = session.putAttribute( flowFile , "failure" , e.getMessage() );
-//			flowFile = session.putAttribute( flowFile , "failure.cause" , e.getCause().toString() );
-//			flowFile = session.putAttribute( flowFile , "deviceId" , deviceId );
-//			session.transfer( flowFile , destination );
-			routeToRelationship( flowFile , destination , session ,
-				new ImmutablePair<String, String>("requestUrl" , requestUrl) ,
-				new ImmutablePair<String, String>("failure" , e.getMessage()) ,
-				new ImmutablePair<String, String>("failure.cause" , e.getCause().toString()) );
+			errorAttributes.add( new ImmutablePair<String, String>("requestUrl" , requestUrl) );
+			errorAttributes.add( new ImmutablePair<String, String>("failure" , e.getMessage()) );
+			errorAttributes.add( new ImmutablePair<String, String>("failure.cause" , e.getCause().toString()) );
+			routeToRelationship( flowFile , destination , session , errorAttributes );
 			return;
 		}
 		
@@ -1588,6 +1593,15 @@ public class EnrichData extends AbstractProcessor {
 		}
 		session.transfer( flowFile , rel );
     }
+    
+    private void routeToRelationship( FlowFile flowFile , Relationship rel , ProcessSession session ,
+    	List<Pair<String , String>> additionalAttributes ) {
+
+		for( Pair<String , String> attr : additionalAttributes ) {
+			flowFile = session.putAttribute( flowFile , attr.getKey() , attr.getValue() );
+		}
+		session.transfer( flowFile , rel );
+	}
     
     /**
      * Utility class to manage inner latlon configurations.

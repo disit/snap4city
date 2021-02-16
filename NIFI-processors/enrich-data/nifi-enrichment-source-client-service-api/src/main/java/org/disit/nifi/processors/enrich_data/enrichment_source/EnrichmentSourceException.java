@@ -16,16 +16,34 @@
 
 package org.disit.nifi.processors.enrich_data.enrichment_source;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 public class EnrichmentSourceException extends Exception{
 
 	private static final long serialVersionUID = 1L;
+	private Map<String , String> additionalInfo;
 
 	public EnrichmentSourceException( String message ) {
 		super( message );
+		this.additionalInfo = new HashMap<>();
 	}
 	
 	public EnrichmentSourceException( String message, Throwable cause ) {
 		super( message , cause );
+		this.additionalInfo = new HashMap<>();
 	}
 	
+	public void addInfo( String key , String value ) {
+		this.additionalInfo.put( key , value );
+	}
+	
+	public void removeInfo( String key ) {
+		this.additionalInfo.remove( key );
+	}
+	
+	public Map<String , String> getInfos(){
+		return Collections.unmodifiableMap( this.additionalInfo );
+	}
 }

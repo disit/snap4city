@@ -113,10 +113,10 @@ public class FailuresTests {
 		testRunner.setProperty( EnrichData.ENRICHMENT_SOURCE_CLIENT_SERVICE , "ServicemapControllerService" );
     }
     
-	@Test
 	/**
 	 * Enrichment service server error test 
 	 */
+    @Test
 	public void test500Error() throws Exception{
 		
 		String failureDeviceId = "error500test";
@@ -155,7 +155,7 @@ public class FailuresTests {
 	/**
 	 * Enrichment source unavailable test (connection error)
 	 */
-	@Test
+//	@Test
 	public void testEnrichmentServiceConnectionError() throws Exception {
 		srv.close();
 		
@@ -227,7 +227,7 @@ public class FailuresTests {
 	/**
 	 * Response processing error test.
 	 */
-	@Test
+//	@Test
 	public void testEnrichmentResponseProcessingError() {
 		String failureDeviceId = "errorResponseProcessingTest";
 		servicemap.addError( 

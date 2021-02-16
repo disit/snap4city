@@ -16,10 +16,13 @@
 
 package org.disit.nifi.processors.enrich_data.enrichment_source.servicemap.oauth;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.nifi.processor.ProcessContext;
@@ -65,8 +68,8 @@ public class ServicemapHttpOAuthClient extends ServicemapHttpClient {
 	}
 	
 	private JsonElement fetchEnrichmentData( String requestUrl ) throws EnrichmentSourceException {
+		// Get the access token
 		OAuth2AccessToken token;
-		
 		try {
 			token = tokenProvider.getToken();
 		}catch( OAuthTokenProviderException e ) {
@@ -76,25 +79,46 @@ public class ServicemapHttpOAuthClient extends ServicemapHttpClient {
 			);
 		}
 		
+		// Perform request
 		HttpGet get = new HttpGet( requestUrl );
 		get.addHeader( "Authorization" , "Bearer " + token.getAccessToken() );
-		
 		HttpResponse servicemapResponse = executeRequest( get );
+		
+		// Process response body 
 		String responseBody;
+		ByteArrayOutputStream contentStream = new ByteArrayOutputStream();
 		try {
+			if( servicemapResponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK && 
+				servicemapResponse.getEntity() != null ) {
+					// Copy the response content for logging if any
+					try{
+						IOUtils.copy( servicemapResponse.getEntity().getContent() , contentStream );
+					}catch( IOException ex ) {
+						throw new EnrichmentSourceException(
+							String.format( "%s while handling the Servicemap response body." , ex.getClass().getName() ) ,
+							ex
+						);
+					}
+			}
 			responseBody = responseHandler.handleResponse( servicemapResponse );
 		}catch( ClientProtocolException e ) {
-			throw new EnrichmentSourceException( 
-					String.format( "%s while handling Servicemap response body.", e.getClass().getName() ) ,
-					e
-				);
+			// HTTP protocol error
+			EnrichmentSourceException newEx = new EnrichmentSourceException(
+				String.format( "%s while handling the Servicemap response body." , e.getClass().getName() ), 
+				e
+			);
+			if( servicemapResponse.getEntity() != null ) {
+				String errorResponse = new String( contentStream.toByteArray() ).trim();
+				newEx.addInfo( "Servicemap_response" , errorResponse );
+			}
+			throw newEx;
 		}catch( IOException e ) {
+			// Problem or aborted connection case
 			throw new EnrichmentSourceException( 
 				String.format( "%s while handling Servicemap response body.", e.getClass().getName() ) ,
 				e
 			);
 		}
-		
 		return this.parser.parse( responseBody );
 	}
 	
