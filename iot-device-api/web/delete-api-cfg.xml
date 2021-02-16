@@ -217,10 +217,11 @@
                 <!-- string -->
 
                 <data id="resources-list-query-string" type="string" builder="template" loader="volatile">                    
-                    <template>select ?s ?p ?v '{' graph &lt;{0}&gt; '{' &lt;{1}&gt; a ?c . filter(str(?c) = "http://www.disit.org/km4city/schema#IoTSensor" || str(?c) = "http://www.w3.org/ns/sosa/Sensor" ||  str(?c) = "http://www.disit.org/km4city/schema#IoTActuator" || str(?c) = "http://www.disit.org/km4city/schema#MobileSensor" ) . ?s ?p ?v . filter(contains(str(?s),"{2}")) . filter(datatype(?v) = &lt;http://www.w3.org/2001/XMLSchema#string&gt; )  '}' '}'</template>
+                    <template>select ?s ?p ?v '{' graph &lt;{0}&gt; '{' &lt;{1}&gt; a ?c . filter(str(?c) = "http://www.disit.org/km4city/schema#IoTSensor" || str(?c) = "http://www.w3.org/ns/sosa/Sensor" ||  str(?c) = "http://www.disit.org/km4city/schema#IoTActuator" || str(?c) = "http://www.disit.org/km4city/schema#MobileSensor" ) . ?s ?p ?v . filter(?s = &lt;{2}&gt; || strStarts(str(?s),"{3}/")) . filter(datatype(?v) = &lt;http://www.w3.org/2001/XMLSchema#string&gt; )  '}' '}'</template>
                     <param index="0" value="graph-uri"/>
                     <param index="1" value="service-uri"/>
                     <param index="2" value="service-uri"/>
+                    <param index="3" value="service-uri"/>
                 </data>
                 
                 <data id="resources-list-result-string" type="string" builder="lookup" loader="volatile">
@@ -253,10 +254,11 @@
                 <!-- float -->
                 
                 <data id="resources-list-query-float" type="string" builder="template" loader="volatile">                    
-                    <template>select ?s ?p ?v '{' graph &lt;{0}&gt; '{' &lt;{1}&gt; a ?c . filter(str(?c) = "http://www.disit.org/km4city/schema#IoTSensor" || str(?c) = "http://www.w3.org/ns/sosa/Sensor" || str(?c) = "http://www.disit.org/km4city/schema#IoTActuator" || str(?c) = "http://www.disit.org/km4city/schema#MobileSensor" ) . ?s ?p ?v . filter(contains(str(?s),"{2}")) . filter(datatype(?v) = &lt;http://www.w3.org/2001/XMLSchema#float&gt; )  '}' '}'</template>
+                    <template>select ?s ?p ?v '{' graph &lt;{0}&gt; '{' &lt;{1}&gt; a ?c . filter(str(?c) = "http://www.disit.org/km4city/schema#IoTSensor" || str(?c) = "http://www.w3.org/ns/sosa/Sensor" || str(?c) = "http://www.disit.org/km4city/schema#IoTActuator" || str(?c) = "http://www.disit.org/km4city/schema#MobileSensor" ) . ?s ?p ?v . filter(?s = &lt;{2}&gt; || strStarts(str(?s),"{3}/")) . filter(datatype(?v) = &lt;http://www.w3.org/2001/XMLSchema#float&gt; )  '}' '}'</template>
                     <param index="0" value="graph-uri"/>
                     <param index="1" value="service-uri"/>
                     <param index="2" value="service-uri"/>
+                    <param index="3" value="service-uri"/>
                 </data>
                 
                 <data id="resources-list-result-float" type="string" builder="lookup" loader="volatile">
@@ -289,10 +291,11 @@
                 <!-- integer -->
                 
                 <data id="resources-list-query-int" type="string" builder="template" loader="volatile">                    
-                    <template>select ?s ?p ?v '{' graph &lt;{0}&gt; '{' &lt;{1}&gt; a ?c . filter(str(?c) = "http://www.disit.org/km4city/schema#IoTSensor" || str(?c) = "http://www.w3.org/ns/sosa/Sensor" || str(?c) = "http://www.disit.org/km4city/schema#IoTActuator" || str(?c) = "http://www.disit.org/km4city/schema#MobileSensor" ) . ?s ?p ?v . filter(contains(str(?s),"{2}")) . filter(datatype(?v) = &lt;http://www.w3.org/2001/XMLSchema#integer&gt; )  '}' '}'</template>
+                    <template>select ?s ?p ?v '{' graph &lt;{0}&gt; '{' &lt;{1}&gt; a ?c . filter(str(?c) = "http://www.disit.org/km4city/schema#IoTSensor" || str(?c) = "http://www.w3.org/ns/sosa/Sensor" || str(?c) = "http://www.disit.org/km4city/schema#IoTActuator" || str(?c) = "http://www.disit.org/km4city/schema#MobileSensor" ) . ?s ?p ?v . filter(?s = &lt;{2}&gt; || strStarts(str(?s),"{3}/")) . filter(datatype(?v) = &lt;http://www.w3.org/2001/XMLSchema#integer&gt; )  '}' '}'</template>
                     <param index="0" value="graph-uri"/>
                     <param index="1" value="service-uri"/>
                     <param index="2" value="service-uri"/>
+                    <param index="3" value="service-uri"/>
                 </data>
                 
                 <data id="resources-list-result-int" type="string" builder="lookup" loader="volatile">
@@ -325,10 +328,11 @@
                 <!-- boolean -->
                 
                 <data id="resources-list-query-boolean" type="string" builder="template" loader="volatile">                    
-                    <template>select ?s ?p ?v '{' graph &lt;{0}&gt; '{' &lt;{1}&gt; a ?c . filter(str(?c) = "http://www.disit.org/km4city/schema#IoTSensor" || str(?c) = "http://www.w3.org/ns/sosa/Sensor" || str(?c) = "http://www.disit.org/km4city/schema#IoTActuator" || str(?c) = "http://www.disit.org/km4city/schema#MobileSensor" ) . ?s ?p ?v . filter(contains(str(?s),"{2}")) . filter(datatype(?v) = &lt;http://www.w3.org/2001/XMLSchema#boolean&gt; )  '}' '}'</template>
+                    <template>select ?s ?p ?v '{' graph &lt;{0}&gt; '{' &lt;{1}&gt; a ?c . filter(str(?c) = "http://www.disit.org/km4city/schema#IoTSensor" || str(?c) = "http://www.w3.org/ns/sosa/Sensor" || str(?c) = "http://www.disit.org/km4city/schema#IoTActuator" || str(?c) = "http://www.disit.org/km4city/schema#MobileSensor" ) . ?s ?p ?v . filter(?s = &lt;{2}&gt; || strStarts(str(?s),"{3}/")) . filter(datatype(?v) = &lt;http://www.w3.org/2001/XMLSchema#boolean&gt; )  '}' '}'</template>
                     <param index="0" value="graph-uri"/>
                     <param index="1" value="service-uri"/>
                     <param index="2" value="service-uri"/>
+                    <param index="3" value="service-uri"/>
                 </data>
                 
                 <data id="resources-list-result-boolean" type="string" builder="lookup" loader="volatile">
@@ -361,10 +365,11 @@
                 <!-- uri -->
                 
                 <data id="resources-list-query-uri" type="string" builder="template" loader="volatile">                    
-                    <template>select ?s ?p ?v '{' graph &lt;{0}&gt; '{' &lt;{1}&gt; a ?c . filter(str(?c) = "http://www.disit.org/km4city/schema#IoTSensor" || str(?c) = "http://www.w3.org/ns/sosa/Sensor" || str(?c) = "http://www.disit.org/km4city/schema#IoTActuator" || str(?c) = "http://www.disit.org/km4city/schema#MobileSensor" ) . ?s ?p ?v . filter(contains(str(?s),"{2}")) . filter(isURI(?v))  '}' '}'</template>
+                    <template>select ?s ?p ?v '{' graph &lt;{0}&gt; '{' &lt;{1}&gt; a ?c . filter(str(?c) = "http://www.disit.org/km4city/schema#IoTSensor" || str(?c) = "http://www.w3.org/ns/sosa/Sensor" || str(?c) = "http://www.disit.org/km4city/schema#IoTActuator" || str(?c) = "http://www.disit.org/km4city/schema#MobileSensor" ) . ?s ?p ?v . filter(?s = &lt;{2}&gt; || strStarts(str(?s),"{3}/")) . filter(isURI(?v))  '}' '}'</template>
                     <param index="0" value="graph-uri"/>
                     <param index="1" value="service-uri"/>
                     <param index="2" value="service-uri"/>
+                    <param index="3" value="service-uri"/>
                 </data>
                 
                 <data id="resources-list-result-uri" type="string" builder="lookup" loader="volatile">
