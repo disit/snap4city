@@ -86,13 +86,18 @@ function new_plumber($aid, $uname, $aname, $image, $r_file, $health) {
   }
 }
 
-function new_python($aid, $uname, $aname, $image, $py_file, $health) {
+function new_python($aid, $uname, $aname, $image, $py_file, $ext, $health) {
   include '../config.php';
   
-  //prepare the /data dir for nodered
+  //prepare the /data dir for python
   $out = array();
   $ret = null;
-  exec($python_script.' '.$aid.' '.$py_file,$out,$ret);
+  $cmd = $python_script.' '.$aid.' '.$py_file.' '.$ext.' 2>&1';
+  $r = exec($cmd, $out, $ret);
+  /*echo $cmd."\n";
+  var_dump($r);
+  var_dump($out);
+  var_dump($ret);*/
   
   $result=new_marathon_python_container($marathon_url, $image, $aid, $uname, $health);
   if($result && !isset($result['error'])) {

@@ -128,7 +128,30 @@ switch ($op) {
       } else {
         if($_SERVER['REQUEST_METHOD']=='POST') {
           if(isset($_FILES['PY_file']) && is_uploaded_file($_FILES['PY_file']['tmp_name'])) {
-            $r_file = $_FILES['PY_file']['tmp_name'];
+            $file = $_FILES['PY_file']['tmp_name'];
+            $filename = $_FILES['PY_file']['name'];
+            $allowed = array('py', 'zip');
+            $ext = pathinfo($filename, PATHINFO_EXTENSION);
+            if (!in_array($ext, $allowed)) {
+              header("HTTP/1.1 400 BAD REQUEST");
+              echo "{\"error\":\"not a py or zip file\"}";
+              return;
+            }
+            if($ext == 'zip') {
+              $zip = new ZipArchive;
+              if ($zip->open($file) !== TRUE) {
+                header("HTTP/1.1 400 BAD REQUEST");
+                echo "{\"error\":\"not a valid zip file\"}";
+                return;
+              }
+              if($zip->locateName("daScript.py")===false) {
+                $zip->close();
+                header("HTTP/1.1 400 BAD REQUEST");
+                echo "{\"error\":\"zip missing daStript.py file\"}";
+                return;
+              }
+              $zip->close();
+            }
             $image = $python_img;
             //$aid = $plumber_id_prefix . random_str($app_id_length);
             $health = NULL;
@@ -145,7 +168,7 @@ switch ($op) {
                 $app=$r['result'];
                 $app['error'] = 'failed register '.$app['error'];
             } else {
-              $r= new_python($aid, $uname, $name, $image, $r_file, $health);
+              $r= new_python($aid, $uname, $name, $image, $file, $ext, $health);
               if(isset($r['error'])) {
                 $app = $r;
               }

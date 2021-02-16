@@ -16,6 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
 $logDir = '/tmp';
+
 $db_host = "localhost";
 $database = "snap4cityapps";
 $db_user = "user";
@@ -28,23 +29,40 @@ $disces_em_pwd = "password";
 
 $ownership_api_url = "http://localhost/ownership-api";
 $nodered_script = "/home/user/add-nodered.sh";
-$plumber_script = "/home/ubuntu/add-plumber.sh";
+$plumber_script = "/home/user/add-plumber.sh";
+$portia_script = "/home/user/add-portia.sh";
+$python_script = "/home/user/add-python.sh";
+
 $app_id_length = 5;
 
 $nrapp_id_prefix = "nr";
 $plumber_id_prefix = "pl";
+$portia_id_prefix = "pt";
+$python_id_prefix = "py";
+
 $marathon_url = "http://localhost:8080";
 
-$sso_userinfo_endpoint = 'https://www.snap4city.org/auth/realms/master/protocol/openid-connect/userinfo';
+$sso_userinfo_endpoint = 'http://localhost/auth/realms/master/protocol/openid-connect/userinfo';
+$apps_base_url = "http://localhost";
 
 $nodered_cpu = 0.085;
 $nodered_mem = 140;
 $plumber_cpu = 0.085;
 $plumber_mem = 500;
+$python_cpu = 0.085;
+$python_mem = 500;
+$portia_cpu = 0.085;
+$portia_mem = 200;
+$portia_crawler_cpu = 0.085;
+$portia_crawler_mem = 200;
 
-$nodered_basic_img = 'snap4city-nodered-basic:v25';
-$nodered_adv_img = 'snap4city-nodered-adv:v20';
-$plumber_img = 'trestletech/plumber';
+// update images if needed, see https://hub.docker.com/u/disitlab
+$nodered_basic_img = 'disitlab/snap4city-nodered-v1.1.3-basic:v12';
+$nodered_adv_img = 'disitlab/snap4city-nodered-v1.1.3-adv:v4';
+$plumber_img = 'disitlab/snap4city-plumber:v8';
+$python_img = 'disitlab/snap4city-da-python3:v1';
+$portia_img = 'disitlab/snap4city-portia:v2.1';
+$portia_crawler_img = 'disitlab/snap4city-portia:v2.1';
 
 $appHealthChecksMaxConsecutiveFailures = 4;
 $appHealthChecksGracePeriodSeconds = 240;
