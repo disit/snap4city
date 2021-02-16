@@ -31,6 +31,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.unifi.disit.datamanager.datamodel.ldap.LDAPUserDAO;
+import javax.persistence.criteria.Expression;
 
 @Repository
 @Transactional(readOnly = true)
@@ -277,8 +278,10 @@ public class DataDAOImpl implements DataDAOCustom {
 		List<Predicate> predicates = new ArrayList<>();
 		if (from != null)
 			predicates.add(cb.greaterThan(dataRoot.get("dataTime"), from));
-		if (to != null)
-			predicates.add(cb.lessThan(dataRoot.get("dataTime"), to));
+		if (to != null) {
+			Expression<Date> selectcase = cb.selectCase().when((Expression)dataRoot.get("dataTimeEnd").isNotNull(), (Expression)dataRoot.get("dataTimeEnd")).otherwise((Expression)dataRoot.get("dataTime"));
+			predicates.add(cb.lessThan(selectcase, to));
+        }
 		if (variableName != null)
 			predicates.add(cb.equal(dataRoot.get("variableName"), variableName));
 		if (motivation != null)

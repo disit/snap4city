@@ -38,6 +38,8 @@ public class Data implements Comparable<Data> {
 	private String username;
 	@Column(name = "data_time")
 	private Date dataTime;
+    @Column(name = "data_time_end")
+    private Date dataTimeEnd;
 	@Column(name = "insert_time")
 	private Date insertTime;
 	@Column(name = "delete_time")
@@ -60,10 +62,11 @@ public class Data implements Comparable<Data> {
 		super();
 	}
 
-	public Data(String username, Date dataTime, Date insertTime, Date deleteTime, Date elapseTime, String appName, String appId, String motivation, String variableName, String variableValue, String variableUnit) {
+	public Data(String username, Date dataTime, Date dataTimeEnd, Date insertTime, Date deleteTime, Date elapseTime, String appName, String appId, String motivation, String variableName, String variableValue, String variableUnit) {
 		super();
 		this.username = username;
 		this.dataTime = dataTime;
+        this.dataTimeEnd = dataTimeEnd;
 		this.insertTime = insertTime;
 		this.deleteTime = deleteTime;
 		this.elapseTime = elapseTime;
@@ -75,11 +78,12 @@ public class Data implements Comparable<Data> {
 		this.variableUnit = variableUnit;
 	}
 
-	public Data(Long id, String username, Date dataTime, Date insertTime, Date deleteTime, Date elapseTime, String appName, String appId, String motivation, String variableName, String variableValue, String variableUnit) {
+	public Data(Long id, String username, Date dataTime, Date dataTimeEnd, Date insertTime, Date deleteTime, Date elapseTime, String appName, String appId, String motivation, String variableName, String variableValue, String variableUnit) {
 		super();
 		this.id = id;
 		this.username = username;
 		this.dataTime = dataTime;
+        this.dataTimeEnd = dataTimeEnd;
 		this.insertTime = insertTime;
 		this.deleteTime = deleteTime;
 		this.elapseTime = elapseTime;
@@ -187,9 +191,17 @@ public class Data implements Comparable<Data> {
 		this.variableUnit = variableUnit;
 	}
 
+    public Date getDataTimeEnd() {
+        return this.dataTimeEnd;
+    }
+
+    public void setDataTimeEnd(Date dataTimeEnd) {
+        this.dataTimeEnd = dataTimeEnd;
+    }
+
 	@Override
 	public String toString() {
-		return "Data [id=" + id + ", username=" + username + ", dataTime=" + dataTime + ", insertTime=" + insertTime + ", deleteTime=" + deleteTime + ", elapseTime=" + elapseTime + ", appName=" + appName + ", appId=" + appId
+		return "Data [id=" + id + ", username=" + username + ", dataTime=" + dataTime + ", dataTimeEnd=" + this.dataTimeEnd + ", insertTime=" + insertTime + ", deleteTime=" + deleteTime + ", elapseTime=" + elapseTime + ", appName=" + appName + ", appId=" + appId
 				+ ", motivation=" + motivation + ", variableName=" + variableName + ", variableValue=" + variableValue + ", variableUnit=" + variableUnit + "]";
 	}
 

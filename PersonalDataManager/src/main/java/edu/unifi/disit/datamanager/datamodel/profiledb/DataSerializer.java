@@ -42,7 +42,8 @@ public class DataSerializer extends StdSerializer<Data> {
 			jgen.writeStringField("username", value.getUsername());
 		if (value.getDataTime() != null)
 			jgen.writeNumberField("dataTime", value.getDataTime().getTime());
-
+        if (value.getDataTimeEnd() != null)
+            jgen.writeNumberField("dataTimeEnd", value.getDataTimeEnd().getTime()); 
 		if (value.getAppName() != null)
 			jgen.writeStringField("APPName", value.getAppName());
 		if (value.getAppId() != null)

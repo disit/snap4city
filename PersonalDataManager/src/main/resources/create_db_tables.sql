@@ -48,6 +48,7 @@ CREATE TABLE `profiledb`.`data` (
   `variable_name` varchar(255) DEFAULT NULL,
   `variable_value` varchar(255) DEFAULT NULL,
   `variable_unit` varchar(255) DEFAULT NULL,
+  `data_time_end` DATETIME NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;
 

@@ -40,6 +40,7 @@ public class DataDeserializer extends StdDeserializer<Data> {
 		Long idValue = null;
 		String usernameValue = null;
 		Date dataTimeValue = null;
+        Date dataTimeEndValue = null;
 		// String appNameValue = null;
 		String appIdValue = null;
 		String motivationValue = null;
@@ -55,6 +56,8 @@ public class DataDeserializer extends StdDeserializer<Data> {
 			usernameValue = node.get("username").asText();
 		if (node.get("dataTime") != null)
 			dataTimeValue = new Date(node.get("dataTime").asLong());
+        if (node.get("dataTimeEnd") != null)
+        	dataTimeEndValue = new Date(node.get("dataTimeEnd").asLong()); 
 
 		// if (node.get("APPName") != null)
 		// uidValue = node.get("APPName").asText();
@@ -72,7 +75,7 @@ public class DataDeserializer extends StdDeserializer<Data> {
 		// if (node.get("uidName") != null) // transient
 		// uidNameValue = node.get("uidName").asText();
 
-		return new Data(idValue, usernameValue, dataTimeValue, null, null, null, null, appIdValue, motivationValue, variableNameValue, variableValueValue, variableUnitValue);
+		return new Data(idValue, usernameValue, dataTimeValue, dataTimeEndValue, null, null, null, null, appIdValue, motivationValue, variableNameValue, variableValueValue, variableUnitValue);
 		// d.setUidName(uidNameValue); // transient
 
 	}
