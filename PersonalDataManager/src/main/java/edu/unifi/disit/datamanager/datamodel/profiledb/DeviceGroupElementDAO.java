@@ -29,7 +29,7 @@ public interface DeviceGroupElementDAO extends JpaRepository<DeviceGroupElement,
 	// see DeviceGroupElement.java
 	List<DeviceGroupElement> findByUsernameAndElementIdAndElementTypeAndDeleteTimeIsNull(String username, String elementId, String elementType);
 
-	@Cacheable("deviceGroupElementByDeviceGroupId")
+	// @Cacheable("deviceGroupElementByDeviceGroupId")
 	List<DeviceGroupElement> findByDeviceGroupIdAndDeleteTimeIsNull(Long grpId);
 
 	List<DeviceGroupElement> findByElementIdAndElementTypeAndDeleteTimeIsNull(String elementId, String elementType);

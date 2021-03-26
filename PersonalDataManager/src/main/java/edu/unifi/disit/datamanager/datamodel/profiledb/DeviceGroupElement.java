@@ -71,15 +71,15 @@ public class DeviceGroupElement implements Serializable {
 	// @Transient TODO , make this field transient, so it is not included in tehe SELECT query towards the DB
 	// moreover, remove the findByUsernameAndElementIdAndElementTypeAndDeleteTimeIsNull in DAO
 	// see DeviceGroupElementDAO.java
-	@Formula("( select o.username from devicegroup g, ownership o where g.id = device_group_id and o.elementId = elementId and o.elementType = elementType union select o.username from devicegroup g, kpidata o where g.id = device_group_id and o.id = elementId and 'MyKPI' = elementType )")
+	@Formula("( select o.username from devicegroup g, ownership o where g.id = device_group_id and o.elementId = elementId and o.elementType = elementType union select o.username from devicegroup g, kpidata o where g.id = device_group_id and o.id = elementId and elementType in ('MyKPI','MyData','MyPOI','KPI') )")
 	private String username;
 
-	@Transient
-	@Formula("( select o.elementName from devicegroup g, ownership o where g.id = device_group_id and o.elementId = elementId and o.elementType = elementType union select o.value_name from devicegroup g, kpidata o where g.id = device_group_id and o.id = elementId and 'MyKPI' = elementType )")
+	//@Transient
+	@Formula("( select o.elementName from devicegroup g, ownership o where g.id = device_group_id and o.elementId = elementId and o.elementType = elementType union select o.value_name from devicegroup g, kpidata o where g.id = device_group_id and o.id = elementId and elementType in ('MyKPI','MyData','MyPOI','KPI') )")
 	private String elementName;
 
-	@Transient
-	@Formula("(select case when elementType = 'IOTID' then 'IOT Device' when elementType = 'AppID' then 'IOT App' when elementType = 'DAAppID' then 'Data Analytics' when elementType = 'BrokerID' then 'IOT Broker' when elementType = 'PortiaID' then 'Web Scraping' when elementType = 'ModelID' then 'IOT Device Model' when elementType = 'HeatmapID' then 'Heatmap' when elementType = 'ServiceGraphID' then 'Service Graph' when elementType = 'DashboardID' then 'Dashboard' when elementType = 'ServiceURI' then 'Service URI' else elementType end )")
+	//@Transient
+	@Formula("(select case when elementType = 'IOTID' then 'IOT Device' when elementType = 'AppID' then 'IOT App' when elementType = 'DAAppID' then 'Data Analytics' when elementType = 'BrokerID' then 'IOT Broker' when elementType = 'PortiaID' then 'Web Scraping' when elementType = 'ModelID' then 'IOT Device Model' when elementType = 'HeatmapID' then 'Heatmap' when elementType = 'ServiceGraphID' then 'Service Graph' when elementType = 'DashboardID' then 'Dashboard' when elementType = 'ServiceURI' then 'Service URI' when elementType = 'SynopticID' then 'Synoptic' when elementType = 'SynopticTmplID' then 'Synoptic Template' when elementType = 'DataTableID' then 'Data Table' else elementType end )")
 	private String elmtTypeLbl;
 
 	// default with nothing

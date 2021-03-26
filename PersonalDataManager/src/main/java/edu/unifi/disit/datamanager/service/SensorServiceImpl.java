@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 
 //import org.apache.logging.log4j.LogManager;
 //import org.apache.logging.log4j.Logger;
@@ -38,7 +39,7 @@ public class SensorServiceImpl implements ISensorService {
         String pPageSize = pageSize != null ? pageSize : "10";
         String pSearch = search != null ? search : "";
         String pId = id != null ? id : "0";
-		URL url = new URL(baseurl + "?accessToken=" + accessToken + "&pageNum=" + pPageNum + "&pageSize=" + pPageSize + "&search=" + pSearch + "&id=" + pId);
+		URL url = new URL(baseurl + "?accessToken=" + URLEncoder.encode(accessToken, "UTF-8") + "&pageNum=" + URLEncoder.encode(pPageNum, "UTF-8") + "&pageSize=" + URLEncoder.encode(pPageSize, "UTF-8") + "&search=" + URLEncoder.encode(pSearch, "UTF-8") + "&id=" + URLEncoder.encode(pId, "UTF-8"));
         URLConnection c = url.openConnection();
         BufferedReader in = new BufferedReader(new InputStreamReader(c.getInputStream()));
         String response = "";

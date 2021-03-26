@@ -89,18 +89,18 @@ public class DeviceGroupElementSerializer extends StdSerializer<DeviceGroupEleme
                         jgen.writeStringField("username", "-- Public --");
                     }
                     else if("Sensor".equals(grp.getElementType()) && !credentialService.isRoot(Locale.getDefault())) {
-                        jgen.writeStringField("username", "-- Unknown --");
+                        jgen.writeStringField("username", "-- Not Available --");
                     }
                 }
                 catch(Exception e) {
-                    jgen.writeStringField("username", "-- Unknown --");
+                    jgen.writeStringField("username", "-- Not Available --");
                 }
                 
                 if (grp.getElementName() != null && !grp.getElementName().isEmpty()) {
                     jgen.writeStringField("elementName", grp.getElementName());
 		}
                 else {
-                    jgen.writeStringField("elementName", "-- Not Found --");
+                    jgen.writeStringField("elementName", grp.getElementId());
                 }
                 
 		jgen.writeEndObject();

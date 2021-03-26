@@ -25,7 +25,7 @@ public interface OwnershipDAO extends JpaRepository<Ownership, Long> {
 
 	List<Ownership> findByDeletedIsNull();
 
-	@Cacheable(value = "OWNERSHIPfindByElementIdAndDeletedIsNull")
+	//@Cacheable(value = "OWNERSHIPfindByElementIdAndDeletedIsNull") 
 	List<Ownership> findByElementIdAndDeletedIsNull(String containerId);
 
 	List<Ownership> findByElementIdAndElementTypeAndDeletedIsNull(String elementId, String elementType);

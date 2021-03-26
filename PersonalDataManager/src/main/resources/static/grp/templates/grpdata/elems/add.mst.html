@@ -3,7 +3,7 @@
         <input type="hidden" name="elementType" value="{{elementType}}">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Add {{elementType}}s to this group</h5>
+                <h5 class="modal-title">Add {{elementTypeLabel}}s to this group</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -19,7 +19,7 @@
                     <li class="list-group-item newel">
                         <div class="row">
                             <!-- {{#isHeatmap}} --><div class="col-sm-8"><input class="newelchkbox" onchange="GrpElementTabler.updAddNewElmtBtnLbl();" type="checkbox" id="add{{username}}{{elementType}}{{elementId}}{{valueName}}" name="add{{username}}{{elementType}}{{elementId}}{{valueName}}" data-username="{{username}}" data-elementType="{{elementType}}" data-elementId="{{elementId}}" data-surrogateKey="{{id}}" style="margin-right:0.5rem;">{{elementId}} ({{username}})</div><!-- {{/isHeatmap}} -->
-                            <!-- {{#isNotHeatmap}} --><div class="col-sm-8"><input class="newelchkbox" onchange="GrpElementTabler.updAddNewElmtBtnLbl();" type="checkbox" id="add{{username}}{{elementType}}{{elementId}}{{valueName}}" name="add{{username}}{{elementType}}{{elementId}}{{valueName}}" data-username="{{username}}" data-elementType="{{elementType}}" data-elementId="{{elementId}}" data-surrogateKey="{{id}}" style="margin-right:0.5rem;">{{elementName}}{{valueName}} ({{username}})</div><!-- {{/isNotHeatmap}} -->
+                            <!-- {{#isNotHeatmap}} --><div class="col-sm-8"><input class="newelchkbox" onchange="GrpElementTabler.updAddNewElmtBtnLbl();" type="checkbox" id="add{{username}}{{elementType}}{{elementId}}{{valueName}}" name="add{{username}}{{elementType}}{{elementId}}{{valueName}}" data-username="{{username}}" data-elementType="{{elementType}}" data-elementId="{{elementId}}" data-surrogateKey="{{id}}" style="margin-right:0.5rem;">{{elementName}}{{valueName}}<!-- {{#username}} --> ({{username}})<!-- {{/username}} --></div><!-- {{/isNotHeatmap}} -->
                         </div>
                     </li>
                     <!-- {{/availItems}} -->

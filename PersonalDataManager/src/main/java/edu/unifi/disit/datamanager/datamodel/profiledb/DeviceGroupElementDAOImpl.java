@@ -90,10 +90,10 @@ public class DeviceGroupElementDAOImpl implements DeviceGroupElementDAOCustom {
 
 		if (searchKey != null) {
 			List<Predicate> filterPredicates = new ArrayList<>();
-			filterPredicates.add(cb.like(dataRoot.<String>get("elementId"), "%" + searchKey + "%"));
-			filterPredicates.add(cb.like(dataRoot.<String>get("elementType"), "%" + searchKey + "%"));
-                        filterPredicates.add(cb.like(dataRoot.<String>get("elementName"), "%" + searchKey + "%"));
-                        filterPredicates.add(cb.like(dataRoot.<String>get("username"), "%" + searchKey + "%"));
+			filterPredicates.add(cb.like(dataRoot.<String>get("elementId"), "%" + searchKey.replaceAll(" ", "%") + "%"));
+			filterPredicates.add(cb.like(dataRoot.<String>get("elmtTypeLbl"), "%" + searchKey.replaceAll(" ", "%") + "%"));
+                        filterPredicates.add(cb.like(dataRoot.<String>get("elementName"), "%" + searchKey.replaceAll(" ", "%") + "%"));
+                        filterPredicates.add(cb.like(dataRoot.<String>get("username"), "%" + searchKey.replaceAll(" ", "%") + "%"));
 			commonPredicates.add(cb.or(filterPredicates.toArray(new Predicate[filterPredicates.size()])));
 		}
 

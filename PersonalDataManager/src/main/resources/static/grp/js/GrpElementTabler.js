@@ -109,12 +109,16 @@ var GrpElementTabler = {
         setTimeout(function(){            
             $('#genericModal').modal('hide');
             console.log(_response);
-            var elementType = _response[0].elementType;
-            if(elementType == null) elementType = "MyKPI";            
+            var elementType = _response[0].highLevelType;
+            if(!elementType) elementType = _response[0].elementType;
+            if(!elementType) elementType = "MyKPI";    
+            var elementTypeLabel = _response[0].elmtTypeLbl4Grps;
+            if(!elementTypeLabel) elementTypeLabel = elementType;
             ViewManager.render({
                 "elementType": elementType,
-                "isHeatmap": (elementType == "HeatmapID"),
-                "isNotHeatmap": (elementType != "HeatmapID"),
+                "elementTypeLabel": elementTypeLabel,
+                "isHeatmap": (elementType == "HeatmapID" || elementType == "DataTableID"),
+                "isNotHeatmap": (elementType != "HeatmapID" && elementType != "DataTableID"),
                 "availItems": _response
             }, "#genericModal", "templates/grpdata/elems/add.mst.html");
             $('#genericModal').modal('show');
@@ -128,14 +132,10 @@ var GrpElementTabler = {
             });
         },1000);
     },
-    preselectMembers: function(_response) {
-        console.log("selecting and disabling the following:");
-        _response.forEach(function(element){
-            console.log(element);
-            console.log("#add"+$.escapeSelector((element.username && element.elementType != "Sensor"?element.username:"")+(element.elementType?element.elementType:"")+(element.elementType == "MyKPI" ? element.elementName : element.elementId)));
-            console.log("occurrences: "+$("#add"+$.escapeSelector((element.username?element.username:"")+(element.elementType?element.elementType:"")+(element.elementType == "MyKPI" ? element.elementName : element.elementId))).length);
-            $("#add"+$.escapeSelector((element.username && element.elementType != "Sensor"?element.username:"")+(element.elementType?element.elementType:"")+(element.elementType == "MyKPI" ? element.elementName : element.elementId))).prop('checked',true);
-            $("#add"+$.escapeSelector((element.username && element.elementType != "Sensor"?element.username:"")+(element.elementType?element.elementType:"")+(element.elementType == "MyKPI" ? element.elementName : element.elementId))).prop('disabled',true);
+    preselectMembers: function(_response) {        
+        _response.forEach(function(element){                       
+            $("#add"+$.escapeSelector((element.username && element.elementType != "Sensor"?element.username:"")+(element.elementType?element.elementType:"")+(["MyKPI","MyData","MyPOI","KPI"].indexOf(element.elementType) > -1 ? element.elementName : element.elementId))).prop('checked',true);
+            $("#add"+$.escapeSelector((element.username && element.elementType != "Sensor"?element.username:"")+(element.elementType?element.elementType:"")+(["MyKPI","MyData","MyPOI","KPI"].indexOf(element.elementType) > -1 ? element.elementName : element.elementId))).prop('disabled',true);
         });
     },
     renderTable: function (grpId, forceReadonly = false) {        

@@ -50,7 +50,7 @@ public class Ownership {
 	@Column(name = "elementDetails")
 	@Type(type = "text")
 	private String elementDetails;
-        @Formula("(select case when elementType = 'IOTID' then 'IOT Device' when elementType = 'AppID' then 'IOT App' when elementType = 'DAAppID' then 'Data Analytics' when elementType = 'BrokerID' then 'IOT Broker' when elementType = 'PortiaID' then 'Web Scraping' when elementType = 'ModelID' then 'IOT Device Model' when elementType = 'HeatmapID' then 'Heatmap' when elementType = 'ServiceGraphID' then 'Service Graph' when elementType = 'DashboardID' then 'Dashboard' when elementType = 'ServiceURI' then 'Service URI' else elementType end )")
+        @Formula("(select case when elementType = 'IOTID' then 'IOT Device' when elementType = 'AppID' then 'IOT App' when elementType = 'DAAppID' then 'Data Analytics' when elementType = 'BrokerID' then 'IOT Broker' when elementType = 'PortiaID' then 'Web Scraping' when elementType = 'ModelID' then 'IOT Device Model' when elementType = 'HeatmapID' then 'Heatmap' when elementType = 'ServiceGraphID' then 'Service Graph' when elementType = 'DashboardID' then 'Dashboard' when elementType = 'ServiceURI' then 'Service URI' when elementType = 'SynopticID' then 'Synoptic' when elementType = 'SynopticTmplID' then 'Synoptic Template' when elementType = 'DataTableID' then 'Data Table' else elementType end )")
         private String elmtTypeLbl4Grps;
 
 	public Ownership() {

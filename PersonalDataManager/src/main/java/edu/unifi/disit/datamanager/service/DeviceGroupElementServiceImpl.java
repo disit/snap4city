@@ -49,6 +49,7 @@ import edu.unifi.disit.datamanager.datamodel.profiledb.Ownership;
 import edu.unifi.disit.datamanager.datamodel.profiledb.OwnershipDAO;
 import edu.unifi.disit.datamanager.datamodel.sensors.Sensor;
 import edu.unifi.disit.datamanager.exception.CredentialsException;
+import java.util.Arrays;
 
 @Service
 public class DeviceGroupElementServiceImpl implements IDeviceGroupElementService {
@@ -89,23 +90,25 @@ public class DeviceGroupElementServiceImpl implements IDeviceGroupElementService
 	public Page<DeviceGroupElement> findByDeviceGroupId(Long grpId, PageRequest pageRequest)
 			throws CredentialsException, IOException {
 		logger.debug("findByDeviceGroupId INVOKED on grpId {}", grpId);
-		List<DeviceGroupElement> elmts = deviceGroupElementRepository.findByDeviceGroupIdAndDeleteTimeIsNull(grpId);
+		Page<DeviceGroupElement> elmts = deviceGroupElementRepository.findByDeviceGroupIdAndDeleteTimeIsNull(grpId,pageRequest);
 		Iterator<DeviceGroupElement> it = elmts.iterator();
 		String sensorsToFix = "";
 		while (it.hasNext()) {
 			DeviceGroupElement elmt = it.next();
-			if ("MyKPI".equals(elmt.getElementType())) {
-				if (kpiDataRepo.findById(Long.valueOf(elmt.getElementId())).orElse(new KPIData())
-						.getDeleteTime() != null)
-					it.remove();
-			} else if (!"Sensor".equals(elmt.getElementType())) {
-				if (ownershipRepo.findByElementIdAndDeletedIsNull(elmt.getElementId()).get(0).getDeleted() != null)
-					it.remove();
-			} else {
-				if (!sensorsToFix.isEmpty())
-					sensorsToFix += ","; //
-				sensorsToFix += elmt.getElementId(); //
-			}
+			try {
+                            if (Arrays.asList("MyKPI", "MyData", "MyPOI").contains(elmt.getElementType())) {
+                                    if (kpiDataRepo.findById(Long.valueOf(elmt.getElementId())).orElse(new KPIData())
+                                                    .getDeleteTime() != null)
+                                            it.remove();
+                            } else if (!"Sensor".equals(elmt.getElementType())) {
+                                    if (ownershipRepo.findByElementIdAndDeletedIsNull(elmt.getElementId()).get(0).getDeleted() != null)
+                                            it.remove();
+                            } else {
+                                    if (!sensorsToFix.isEmpty())
+                                            sensorsToFix += ","; //
+                                    sensorsToFix += elmt.getElementId(); //
+                            }
+                        } catch(Exception e) { e.printStackTrace(System.out); }
 		}
 		if (!sensorsToFix.isEmpty()) {
 			HashMap<String, Sensor> sensors = getSensors(sensorsToFix); //
@@ -124,7 +127,7 @@ public class DeviceGroupElementServiceImpl implements IDeviceGroupElementService
 				}
 			}
 		}
-		return new PageImpl<>(elmts, pageRequest, elmts.size());
+		return elmts; //return new PageImpl<>(elmts, pageRequest, elmts.size());                
 	}
 
 	@Override
@@ -135,18 +138,21 @@ public class DeviceGroupElementServiceImpl implements IDeviceGroupElementService
 		String sensorsToFix = "";
 		while (it.hasNext()) {
 			DeviceGroupElement elmt = it.next();
-			if ("MyKPI".equals(elmt.getElementType())) {
-				if (kpiDataRepo.findById(Long.valueOf(elmt.getElementId())).orElse(new KPIData())
-						.getDeleteTime() != null)
-					it.remove();
-			} else if (!"Sensor".equals(elmt.getElementType())) {
-				if (ownershipRepo.findByElementIdAndDeletedIsNull(elmt.getElementId()).get(0).getDeleted() != null)
-					it.remove();
-			} else {
-				if (!sensorsToFix.isEmpty())
-					sensorsToFix += ","; //
-				sensorsToFix += elmt.getElementId(); //
-			}
+			try {
+                            if (Arrays.asList("MyKPI", "MyData", "MyPOI").contains(elmt.getElementType())) {
+                                    if (kpiDataRepo.findById(Long.valueOf(elmt.getElementId())).orElse(new KPIData())
+                                                    .getDeleteTime() != null)
+                                            it.remove();
+                            } else if (!"Sensor".equals(elmt.getElementType())) {
+                                    if (ownershipRepo.findByElementIdAndDeletedIsNull(elmt.getElementId()).get(0).getDeleted() != null)
+                                            it.remove();
+                            } else {
+                                    if (!sensorsToFix.isEmpty())
+                                            sensorsToFix += ","; //
+                                    sensorsToFix += elmt.getElementId(); //
+                            }
+                        }
+                        catch(Exception e) { e.printStackTrace(System.out); }
 		}
 		if (!sensorsToFix.isEmpty()) {
 			HashMap<String, Sensor> sensors = getSensors(sensorsToFix); //
@@ -324,16 +330,18 @@ public class DeviceGroupElementServiceImpl implements IDeviceGroupElementService
 		Iterator<DeviceGroupElement> it = elmts.iterator();
 		while (it.hasNext()) {
 			DeviceGroupElement elmt = it.next();
-			if ("MyKPI".equals(elmt.getElementType())) {
-				if (kpiDataRepo.findById(Long.valueOf(elmt.getElementId())).orElse(new KPIData())
-						.getDeleteTime() != null)
-					it.remove();
-			} else if (!"Sensor".equals(elmt.getElementType())) {
-				if (ownershipRepo.findByElementIdAndDeletedIsNull(elmt.getElementId()).get(0).getDeleted() != null)
-					it.remove();
-			} else {
-				it.remove();
-			}
+			try {
+                            if (Arrays.asList("MyKPI", "MyData", "MyPOI").contains(elmt.getElementType())) {
+                                    if (kpiDataRepo.findById(Long.valueOf(elmt.getElementId())).orElse(new KPIData())
+                                                    .getDeleteTime() != null)
+                                            it.remove();
+                            } else if (!"Sensor".equals(elmt.getElementType())) {
+                                    if (ownershipRepo.findByElementIdAndDeletedIsNull(elmt.getElementId()).get(0).getDeleted() != null)
+                                            it.remove();
+                            } else {
+                                    it.remove();
+                            }
+                        } catch(Exception e) { e.printStackTrace(System.out); }
 		}
 		String sensorsToChk = "";
 		List<DeviceGroupElement> forSensors = deviceGroupElementRepository
@@ -364,7 +372,11 @@ public class DeviceGroupElementServiceImpl implements IDeviceGroupElementService
 				}
 			}
 		}
-		return new PageImpl<>(elmts, pageRequest, elmts.size());
+		//return new PageImpl<>(elmts, pageRequest, elmts.size());
+                int start = pageRequest.getPageNumber()*pageRequest.getPageSize();
+                int end = (start + pageRequest.getPageSize()) > elmts.size() ? elmts.size() : (start + pageRequest.getPageSize());
+                Page<DeviceGroupElement> pages = new PageImpl<>(elmts.subList(start, end), pageRequest, elmts.size());
+                return pages; 
 	}
 
 	@Override
@@ -375,16 +387,18 @@ public class DeviceGroupElementServiceImpl implements IDeviceGroupElementService
 		Iterator<DeviceGroupElement> it = elmts.iterator();
 		while (it.hasNext()) {
 			DeviceGroupElement elmt = it.next();
-			if ("MyKPI".equals(elmt.getElementType())) {
-				if (kpiDataRepo.findById(Long.valueOf(elmt.getElementId())).orElse(new KPIData())
-						.getDeleteTime() != null)
-					it.remove();
-			} else if (!"Sensor".equals(elmt.getElementType())) {
-				if (ownershipRepo.findByElementIdAndDeletedIsNull(elmt.getElementId()).get(0).getDeleted() != null)
-					it.remove();
-			} else {
-				it.remove();
-			}
+			try { 
+                            if (Arrays.asList("MyKPI", "MyData", "MyPOI").contains(elmt.getElementType())) {
+                                    if (kpiDataRepo.findById(Long.valueOf(elmt.getElementId())).orElse(new KPIData())
+                                                    .getDeleteTime() != null)
+                                            it.remove();
+                            } else if (!"Sensor".equals(elmt.getElementType())) {
+                                    if (ownershipRepo.findByElementIdAndDeletedIsNull(elmt.getElementId()).get(0).getDeleted() != null)
+                                            it.remove();
+                            } else {
+                                    it.remove();
+                            }
+                        } catch(Exception e) { e.printStackTrace(System.out); }
 		}
 		String sensorsToChk = "";
 		List<DeviceGroupElement> forSensors = deviceGroupElementRepository
