@@ -12,6 +12,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package edu.unifi.disit.orionbrokerfilter.controller.rest;
 
+import java.nio.charset.Charset;
+import javax.annotation.PostConstruct;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -46,6 +49,13 @@ public class OrionController {
 
 	@Autowired
 	RestTemplate restTemplate;
+
+        @PostConstruct
+        private void init() {
+                logger.debug("TEST converter size: "+restTemplate.getMessageConverters().size());
+                restTemplate.getMessageConverters()
+                      .add(0, new StringHttpMessageConverter(Charset.forName("UTF-8")));
+       }
 
 	@RequestMapping(value = "/api/test", method = RequestMethod.GET)
 	public ResponseEntity<String> engagerTest() {
@@ -180,7 +190,7 @@ public class OrionController {
 		logger.info("Proxying request to {} on {}", uriComponents.toString(), payload);
 
 		HttpEntity<String> entity = (payload != null) ? new HttpEntity<>(payload, headers) : new HttpEntity<>(headers);
-
+                
 		try {
 			ResponseEntity<String> response = restTemplate.exchange(uriComponents.toUri(), method, entity, String.class);
 			logger.debug(response);
