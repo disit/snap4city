@@ -196,8 +196,8 @@ public class OrionController {
 			logger.debug(response);
 			return response;
 		} catch (HttpClientErrorException e) {
-			logger.error("Trouble in proxyRequest: ", e);
-			return new ResponseEntity<String>(e.getMessage(), e.getStatusCode());
+			logger.error("Trouble in proxyRequest: \nresponse:"+e.getResponseBodyAsString(), e);
+			return new ResponseEntity<String>(e.getResponseBodyAsString(), e.getStatusCode());
 		} catch (Exception e) {
 			logger.error("BIG Trouble in proxyRequest: ", e);
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
