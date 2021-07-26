@@ -16,18 +16,16 @@
 
 package org.disit.nifi.processors.enrich_data.ownership;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.nifi.processor.ProcessContext;
 import org.disit.nifi.processors.enrich_data.enrichment_source.EnrichmentSourceException;
 import org.disit.nifi.processors.enrich_data.enrichment_source.http.HttpEnrichmentSourceClient;
@@ -122,12 +120,43 @@ public class OwnershipHttpClient extends HttpEnrichmentSourceClient{
 	protected JsonObject processResponseBody( HttpResponse response ) throws EnrichmentSourceException{
 		String responseBody;
 		
+		ByteArrayOutputStream contentStream = new ByteArrayOutputStream();
+		
 		try {
+			
+			if( response.getStatusLine().getStatusCode() != HttpStatus.SC_OK ) {
+				if( response.getEntity() != null ) {
+					try {
+						IOUtils.copy( response.getEntity().getContent() , contentStream );
+					}catch( IOException e ) {
+						throw new EnrichmentSourceException(
+							String.format( "%s while handling the Ownership response body." , e.getClass().getName() ) ,
+							e
+						);
+					}
+				}
+			}
 			responseBody = responseHandler.handleResponse( response );
 		} catch (ClientProtocolException e) {
-			throw new EnrichmentSourceException( "ClientProtocolException while processing response body." , e );
+			// HTTP protocol error
+			EnrichmentSourceException newEx = new EnrichmentSourceException(
+				String.format( "%s while handling the Ownership response body." , e.getClass().getName() ) , 
+				e
+			);
+			if( response.getEntity() != null ) {
+				String errorResponse = new String( contentStream.toByteArray() ).trim();
+				newEx.addInfo( "Ownership_response" , errorResponse );
+			}
+
+			throw newEx;
+//			throw new EnrichmentSourceException( "ClientProtocolException while processing response body." , e );
 		} catch (IOException e) {
-			throw new EnrichmentSourceException( "IOException while processing response body." , e );
+			// Problem or aborted connection
+			throw new EnrichmentSourceException(
+				String.format( "%s while handling the Ownership response body." , e.getClass().getName() ) ,
+				e
+			);
+//			throw new EnrichmentSourceException( "IOException while processing response body." , e );
 		}
 		
 		JsonElement ownershipResponse = parser.parse( responseBody );

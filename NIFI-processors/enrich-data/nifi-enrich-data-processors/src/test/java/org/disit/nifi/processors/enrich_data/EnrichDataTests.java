@@ -23,6 +23,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -166,7 +167,7 @@ public class EnrichDataTests {
      * @throws UnsupportedEncodingException
      * @throws IOException
      */
-//    @Test
+    @Test
     public void testJsonOutput() throws UnsupportedEncodingException, IOException {
     	System.out.println( "**** TEST JSON OUTPUT ***" );
     	
@@ -194,7 +195,7 @@ public class EnrichDataTests {
     	});
     	
     	String outFFStr = TestUtils.prettyOutFF( outFF , jsonParser );
-    	assertEquals( outFFContent.toString() , resultReferenceObj.toString() );
+    	assertEquals( resultReferenceObj.toString() , outFFContent.toString() );
     	
     	System.out.println( outFFStr );
     	// Save results to file 
@@ -216,7 +217,7 @@ public class EnrichDataTests {
      * @throws UnsupportedEncodingException
      * @throws IOException
      */
-//     @Test
+     @Test
     public void testEsBulkCompliantOutput() throws UnsupportedEncodingException , IOException {
     	System.out.println( "**** TEST ES BULK COMPLIANT OUTPUT ***" );
     	
@@ -261,7 +262,7 @@ public class EnrichDataTests {
      * @throws UnsupportedEncodingException
      * @throws IOException
      */
-//    @Test
+    @Test
     public void testSplitJsonOutput() throws UnsupportedEncodingException , IOException {
     	System.out.println( "**** TEST SPLIT JSON OUTPUT ***" );
     	
@@ -271,7 +272,7 @@ public class EnrichDataTests {
 		  		  		  				"src/test/resources/mock_servicemap_response/testOutputs.resp" );
     	
     	//testRunner.assertAllFlowFilesTransferred( EnrichData.SUCCESS_RELATIONSHIP );
-    	testRunner.assertTransferCount( EnrichData.SUCCESS_RELATIONSHIP , 7 );
+    	testRunner.assertTransferCount( EnrichData.SUCCESS_RELATIONSHIP , 8 );
     	
     	List<MockFlowFile> outFFList = testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP );
     	
@@ -314,7 +315,7 @@ public class EnrichDataTests {
      * @throws UnsupportedEncodingException
      * @throws IOException
      */
-//     @Test
+    @Test
     public void testEmptyOutObject() throws UnsupportedEncodingException , IOException {
     	System.out.println( "**** TEST EMPTY OUT OBJECT ***" );
     	
@@ -355,7 +356,7 @@ public class EnrichDataTests {
      * @throws UnsupportedEncodingException
      * @throws IOException
      */
-//     @Test
+    @Test
     public void testArrayValue() throws UnsupportedEncodingException , IOException {
     	System.out.println( "**** TEST ARRAY VALUE ***" );
     	
@@ -400,7 +401,7 @@ public class EnrichDataTests {
      * @throws UnsupportedEncodingException
      * @throws IOException
      */
-//     @Test
+     @Test
     public void testStringValueParsing() throws UnsupportedEncodingException , IOException{
     	System.out.println( "**** TEST VALUES PARSING ***" );
     	
@@ -421,7 +422,7 @@ public class EnrichDataTests {
     	
     	JsonObject outFFContent = jsonParser.parse( new String( outFF.toByteArray() ) )
     										.getAsJsonObject();	
-    	String uuid = outFF.getAttribute( "uuinew ImmutablePair( \"1\" , 10 ) ,d" );
+    	String uuid = outFF.getAttribute( "uuid" );
     	
     	resultReferenceObj.entrySet().stream().forEach( (Map.Entry<String , JsonElement> member) -> {
     		resultReferenceObj.get( member.getKey() ).getAsJsonObject()
@@ -433,7 +434,7 @@ public class EnrichDataTests {
 				 	 outFFStr.getBytes() );
     	System.out.println( outFFStr );
     	
-    	assertEquals( outFFContent.toString() , resultReferenceObj.toString() );
+    	assertEquals( resultReferenceObj.toString() , outFFContent.toString() );
     	
     	System.out.println( "*** END TEST VALUE PARSING ***" );
     }
@@ -462,7 +463,7 @@ public class EnrichDataTests {
      * @throws UnsupportedEncodingException
      * @throws IOException
      */
-//    @Test
+    @Test
     public void testInnerLatLonGeoJson() throws UnsupportedEncodingException , IOException {
     	System.out.println( "**** TEST INNER LAT LON geo:json ***" );
     	
@@ -523,7 +524,7 @@ public class EnrichDataTests {
      * @throws UnsupportedEncodingException
      * @throws IOException
      */
-//    @Test
+    @Test
     public void testInnerLatLonGeoPoint() throws UnsupportedEncodingException , IOException {
     	System.out.println( "**** TEST INNER LAT LON geo:point ***" );
     	
@@ -587,7 +588,7 @@ public class EnrichDataTests {
      * @throws UnsupportedEncodingException
      * @throws IOException
      */
-//    @Test
+    @Test
     public void testInnerLatLonDistinctFields() throws UnsupportedEncodingException , IOException {
     	System.out.println( "**** TEST INNER LAT LON distinct fields***" );
     	
@@ -645,7 +646,7 @@ public class EnrichDataTests {
     	System.out.println( "**** END TEST INNER LAT LON ***" );
     }
     
-//    @Test
+    @Test
     public void testInnerLatLonMissing() throws UnsupportedEncodingException , IOException {
     	System.out.println( "**** TEST INNER LAT LON failure ***" );
     	
@@ -755,13 +756,13 @@ public class EnrichDataTests {
     	System.out.println( "**** END TEST INNER LAT LON not parsable failure ***" );
     }
     
-//    @Test
+    @Test
     public void testOriginalFFAugmentation() throws UnsupportedEncodingException, IOException {
     	System.out.println( "**** TEST ORIGINAL FLOW FILE AUGMENTATION***" );
     	
     	testRunner.setProperty( EnrichData.OUTPUT_FF_CONTENT_FORMAT , EnrichData.OUTPUT_FF_CONTENT_FORMAT_VALUES[0] );
     	testRunner.setProperty( EnrichData.ORIGINAL_FLOW_FILE_ATTRIBUTES_AUG ,
-    							"{\"format\":\"Service/features/properties/format\"}" );
+    							"{\"format\":\"Service/features/properties/format\",\"err\":\"Service/not/present\"}" );
     	
     	validateProcessorProperties();
     	
@@ -783,7 +784,6 @@ public class EnrichDataTests {
     	
     	System.out.println( "**** END TEST ORIGINAL FLOW FILE AUGMENTATION ***" );
     }
-    
     
     /**
      * Mock flow file content from a file

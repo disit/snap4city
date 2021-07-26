@@ -21,6 +21,7 @@
     <artifactId>enrich-data</artifactId>
     <version>1.9.2</version>
   </parent>
+  
   <artifactId>nifi-servicemap-client-services</artifactId>
   <packaging>jar</packaging>
   
@@ -40,7 +41,8 @@
 	    <groupId>org.apache.httpcomponents</groupId>
 	    <artifactId>httpclient</artifactId>
 	    <version>${httpclient.version}</version>
-	</dependency>
+	    <!-- <scope>provided</scope> -->
+	</dependency> 
 	
 	<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
 	<dependency>

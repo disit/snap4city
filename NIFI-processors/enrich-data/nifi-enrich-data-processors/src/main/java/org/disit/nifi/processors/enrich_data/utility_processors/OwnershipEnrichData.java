@@ -20,6 +20,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -114,8 +115,17 @@ public class OwnershipEnrichData extends AbstractProcessor {
             .displayName( "Additional default ownership properties." )
             .description( "A JsonObject containing the default properties to enrich with, wich are inserted if not present in the ownership response (or in the default ownership properties)." )
             .required( false )
-            .addValidator(Validator.VALID)
+            .defaultValue( "" )
+            .addValidator( Validator.VALID )
             .build();
+	
+	public static final PropertyDescriptor PURGE_EXISTING_PROPERTIES = new PropertyDescriptor
+			.Builder().name( "PURGE_EXISTING_PROPERTIES" )
+			.displayName( "Purge existing properties" )
+			.description( "A comma separated list of properties to purge from the json object contained in the flow file, before enriching with the ownership properties." )
+			.required( false )
+			.addValidator( Validator.VALID )
+			.build();
 	
 	// Relationships 
     public static final Relationship SUCCESS_RELATIONSHIP = new Relationship.Builder()
@@ -151,6 +161,7 @@ public class OwnershipEnrichData extends AbstractProcessor {
     private boolean useDefaults;
     private JsonObject defaultOwnershipProperties;
     private JsonObject additionalDefaultOwnershipProperties;
+    private List<String> propertiesToPurge;
     
     @Override
     protected void init( ProcessorInitializationContext context ) {
@@ -160,6 +171,7 @@ public class OwnershipEnrichData extends AbstractProcessor {
     	descs.add( USE_DEFAULTS_ON_OWNERSHIP_SERVICE_ERROR );
     	descs.add( DEFAULT_OWNERSHIP_PROPERTIES );
     	descs.add( ADDITIONAL_DEFAULT_OWNERSHIP_PROPERTIES );
+    	descs.add( PURGE_EXISTING_PROPERTIES ); 
     	this.descriptors = Collections.unmodifiableList( descs );
     	
     	final Set<Relationship> rels = new HashSet<>();
@@ -244,6 +256,16 @@ public class OwnershipEnrichData extends AbstractProcessor {
     		throw new ConfigurationException( String.format( "JsonParseException while parsing '%s' property value: %s" , 
 											ADDITIONAL_DEFAULT_OWNERSHIP_PROPERTIES.getName() , e.getMessage() ) );
     	}
+	    
+	    propertiesToPurge = new ArrayList<>();
+	    if( !context.getProperty( PURGE_EXISTING_PROPERTIES ).getValue().isEmpty() ) {
+	    	String propertiesToPurgeValue = context.getProperty( PURGE_EXISTING_PROPERTIES ).getValue();
+	    	Arrays.asList( propertiesToPurgeValue.trim().split( "," ) ).stream().forEach( (String prop)->{
+	    		String trimmedProp = prop.trim();
+	    		if( !trimmedProp.isEmpty() )
+	    			propertiesToPurge.add( trimmedProp );
+	    	});
+	    }
     }
     
 	@Override
@@ -279,6 +301,15 @@ public class OwnershipEnrichData extends AbstractProcessor {
     	
     	String deviceId = rootObject.get( this.deviceIdName )
     								.getAsString();
+    	
+    	// Purge properties if specified
+    	if( !propertiesToPurge.isEmpty() ) {
+    		for( String prop : propertiesToPurge ) {
+    			if( rootObject.has( prop ) ){
+    				rootObject.remove( prop );
+    			}
+    		}
+    	}
     	
     	// Get ownership data
     	JsonObject ownershipResponseObject;

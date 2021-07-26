@@ -79,9 +79,12 @@ import org.disit.nifi.processors.enrich_data.output_producer.SplitObjectOutputPr
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSyntaxException;
 
 @Tags({"snap4city" , "servicemap" , "enrichment","enrich"})
 @CapabilityDescription("This processor enirches incoming data from a broker subscription with informations retrieved from Servicemap." )
@@ -212,7 +215,7 @@ public class EnrichData extends AbstractProcessor {
 			.Builder().name( "ENRICHMENT_SOURCE_CLIENT_SERVICE" )
 			.displayName( "Enrichment Source Client Service" )
 			.identifiesControllerService( EnrichmentSourceClientService.class )
-			.description( "The client service which identifies the enrichment source to fetch enrichment data from." )
+			.description( "The client service which identifies an enrichment source. This source will be used to enrich the incoming flow files content." )
 			.required( true )
 			.addValidator( EnrichmentSourceServiceValidators.STANDARD_ENRICHMENT_SOURCE_VALIDATOR )
 			.build();
@@ -221,7 +224,7 @@ public class EnrichData extends AbstractProcessor {
 			.Builder().name( "OWNERSHIP_CLIENT_SERVICE" )
 			.displayName( "Ownership Client Service" )
 			.identifiesControllerService( EnrichmentSourceClientService.class )
-			.description( "The client service to retrieve ownership data." )
+			.description( "The client service which identifies the ownership source. This source will be used to enrich the incoming flow file content with informations about the ownership of the data." )
 			.required( false )
 			.addValidator( EnrichmentSourceServiceValidators.STANDARD_ENRICHMENT_SOURCE_VALIDATOR )
 			.build();			
@@ -230,7 +233,7 @@ public class EnrichData extends AbstractProcessor {
 	public static final PropertyDescriptor OWNERSHIP_BEHAVIOR = new PropertyDescriptor
 			.Builder().name( "OWNERSHIP_BEHAVIOR" )
 			.displayName("Ownership Behavior" )
-			.description( "Controls the behavior of the ownership enrichment." )
+			.description( "Controls the behavior of the ownership enrichment. 'Route to failure on ownership error' will route the flow file to failure in case of error while retrieving the ownership data, 'Use defaults on ownership error' will use the configure default ownership properties instead. By default, if there is no 'Ownership Client Service' configured the ownership enrichment is skipped, by setting this property to 'Use defaults if no controller service configured' the default ownership data is always being added to the output flow files." )
 			.allowableValues( OWNERSHIP_BEHAVIOR_VALUES )
 			.required( true )
 			.defaultValue( OWNERSHIP_BEHAVIOR_VALUES[1] )
@@ -240,7 +243,7 @@ public class EnrichData extends AbstractProcessor {
 	public static final PropertyDescriptor DEFAULT_OWNERSHIP_PROPERTIES = new PropertyDescriptor
             .Builder().name( "DEFAULT_OWNERSHIP_PROPERTIES" )
             .displayName( "Default ownership properties" )
-            .description( "A JsonObject containing the default properties to enrich with, if the ownership service cannot retrieve a valid ownership response." )
+            .description( "A JsonObject containing the default properties to enrich with, if the ownership service cannot retrieve a valid ownership response or if the 'Ownership Behavior' is set to 'Use defaults if no controller service configured'." )
             .required( false )
             .addValidator( EnrichDataValidators.jsonPropertyValidator(true) )
             .build();
@@ -250,7 +253,7 @@ public class EnrichData extends AbstractProcessor {
     public static final PropertyDescriptor DEVICE_ID_NAME = new PropertyDescriptor
             .Builder().name( "DEVICE_ID_NAME" )
             .displayName( "Device Id Name" )
-            .description( "The name of the JSON field containing the device id. The value of such field will be concatenated to the 'Service URI Prefix' to obtain the full Service URI to pass to Servicemap." )
+            .description( "The name of the JSON field containing the device id. The value of such field will be concatenated to the 'Service URI Prefix' to obtain the full URI to query the enrichment source." )
             .required(true)
             .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
             .build();
@@ -267,7 +270,7 @@ public class EnrichData extends AbstractProcessor {
     public static final PropertyDescriptor DEVICE_ID_VALUE_PREFIX_SUBST = new PropertyDescriptor
             .Builder().name( "DEVICE_ID_VALUE_PREFIX_SUBST" )
             .displayName( "Device Id value prefix substitution" )
-            .description( "This property allows to substitute a prefix in the id value with another specified by the user. The value of this property must contains a JsonObject with the desired mappings. (Ex: {\"TA120-\":\"TA120_\"}" )
+            .description( "This property allows to substitute a prefix in the id value with another specified by the user. The value of this property must contains a JsonObject with the desired mappings. (Ex: {\"TA120-\":\"TA120_\"})" )
             .required(false)
             .defaultValue("")
             .addValidator(Validator.VALID)
@@ -504,6 +507,54 @@ public class EnrichData extends AbstractProcessor {
     		.description( "Flow files which cannot be correctly enriched but are considered retriable will be routed to this relationship.\nA flow file is considered retriable if the cause of the failure is an enrichment service unavailability." )
     		.build();
     
+    private static List<PropertyDescriptor> propertyDescriptors;
+    private static Set<Relationship> processorRelationships;
+    static {
+    	propertyDescriptors = Collections.unmodifiableList( Arrays.asList( 
+			ENRICHMENT_SOURCE_CLIENT_SERVICE , 	    // Enrichment sources
+	        OWNERSHIP_BEHAVIOR , 					// Enrichment sources
+	        OWNERSHIP_CLIENT_SERVICE , 				// Enrichment sources
+	        DEFAULT_OWNERSHIP_PROPERTIES , 			// Enrichment sources
+	        DEVICE_ID_NAME ,						// Fields
+	        DEVICE_ID_NAME_MAPPING ,				// Fields
+	        DEVICE_ID_VALUE_PREFIX_SUBST ,			// Fields
+	        TIMESTAMP_FIELD_NAME , 					// Timestamp
+	        TIMESTAMP_FROM_CONTENT_PROPERTY_NAME , 	// Timestamp
+	        TIMESTAMP_FROM_CONTENT_PROPERTY_VALUE , // Timestamp
+	        URI_PREFIX_FROM_ATTR_NAME ,				// Fields
+	        VALUE_FIELD_NAME ,						// Fields
+	        ENRICHMENT_RESPONSE_BASE_PATH ,			// Enrichment sources
+	        LATLON_PRIORITY ,						// Coordinates
+	        ENRICHMENT_LAT_LON_PATH ,				// Coordinates
+	        ENRICHMENT_LAT_LON_FORMAT ,				// Coordinates
+	        INNER_LAT_LON_CONFIG ,					// Coordinates
+	        ENRICHMENT_BEHAVIOR ,					// Enrichment sources
+	        SRC_PROPERTY ,							// Other
+	        KIND_PROPERTY ,							// Other
+	        PURGE_FIELDS ,							// Fields
+	        OUTPUT_FF_CONTENT_FORMAT ,				// Output
+	        HASHED_ID_FIELDS ,						// Output
+	        ES_INDEX ,								// Output
+	        ES_TYPE ,								// Output
+	        NODE_CONFIG_FILE_PATH ,					// Other
+	        ATTEMPT_STRING_VALUES_PARSING ,			// Fields
+	        ORIGINAL_FLOW_FILE_ATTRIBUTES_AUG 		// Output
+    	) );
+    	
+    	final Set<Relationship> rels = new HashSet<>();
+    	rels.add( SUCCESS_RELATIONSHIP );
+    	rels.add( RETRY_RELATIONSHIP );
+    	rels.add( ORIGINAL_RELATIONSHIP );
+    	rels.add( FAILURE_RELATIONSHIP );
+    	processorRelationships = Collections.unmodifiableSet( rels );
+    }
+    
+    // Static method to retrieve the static property descriptors
+    public static final List<PropertyDescriptor> getStaticDescriptors(){
+    	return propertyDescriptors;
+    }
+    
+    
     // PropertyDescriptors and Relationships sets
     private List<PropertyDescriptor> descriptors;
     private Set<Relationship> relationships;
@@ -623,13 +674,21 @@ public class EnrichData extends AbstractProcessor {
 
     @Override
     public Set<Relationship> getRelationships() {
-        return this.relationships;
+//        return this.relationships;
+        return processorRelationships;
     }
 
     @Override
     public final List<PropertyDescriptor> getSupportedPropertyDescriptors() {
-        return descriptors;
+//        return descriptors;
+        return propertyDescriptors;
     }
+    
+    
+    public static String DYNAMIC_PROPERTIES_DESCRIPTION = 
+    		"A dynamic property attribute specifies a field of the enrichment response object to be added to every enriched object.\nThe field will be named as the property name and the value is picked according to the property value which must be a valid path in the enrichment response object.\n" +
+	 	    "The field pointed by the specified path must contains a primitive type." + 
+	    	"Example: 'Service/properties/organization'";
     
     /**
      * This method provides the dynamic attributes descriptor.
@@ -639,9 +698,7 @@ public class EnrichData extends AbstractProcessor {
     	
     	return new PropertyDescriptor.Builder().name( propertyDescriptorName )
     							     .addValidator( StandardValidators.NON_EMPTY_VALIDATOR )
-    							     .description( "A dynamic property attribute specifies a field of the enrichment response object to be added to every enriched object.\nThe field will be named as the property name and the value is picked according to the property value which must be a valid path in the enrichment response object.\n" +
-    							    		 	   "The field pointed by the specified path must contains a primitive type." + 
-    							    		 	   "Example: 'Service/properties/organization'" )
+    							     .description( DYNAMIC_PROPERTIES_DESCRIPTION )
     							     .dynamic( true )
     							     .required( false )
     							     .build();
@@ -958,6 +1015,8 @@ public class EnrichData extends AbstractProcessor {
     /**
      * Loads the configurations from the node configuration file.
      * 
+     * TODO: allows for skipping node file configs. Currently it throws an IOException if the file does not exists.
+     * 
      * @param context the processor context.
      * @throws ConfigurationException in case of IOException during file operations.
      */
@@ -1015,7 +1074,19 @@ public class EnrichData extends AbstractProcessor {
         String flowFileContent = contentBytes.toString();
         
         // Content parsing
-        JsonElement rootEl = parser.parse( flowFileContent );
+//        JsonElement rootEl = parser.parse( flowFileContent );
+        JsonElement rootEl;
+        try {
+        	rootEl = parser.parse( flowFileContent );
+        }catch( JsonParseException e ) {
+        	String reason = "The flow file content is not parsable as Json.";
+        	LoggingUtils.produceErrorObj( reason )
+        				.withProperty( "ff-uuid" , uuid )
+        				.logAsError( logger );
+        	routeToRelationship( flowFile , FAILURE_RELATIONSHIP , session ,
+        		new ImmutablePair<String , String>( "failure" , reason ) );
+        	return; 
+        }
         
         // Base validation
         //
@@ -1151,16 +1222,11 @@ public class EnrichData extends AbstractProcessor {
 					ownershipResponseObj = this.defaultOwnershipProperties.deepCopy();
 				} else {
 					String reason = "EnrichmentSourceException while retrieving ownership data.";
-					LoggingUtils.produceErrorObj( reason )
+					LoggingUtils.produceErrorObj( reason , rootEl )
 								.withExceptionInfo( ex )
 								.withProperty( "ff-uuid" , uuid )
 								.logAsError( logger );
 					
-					//Route to failure
-//					flowFile = session.putAttribute( flowFile , "failure" , reason );
-//					flowFile = session.putAttribute( flowFile , "failure.cause", ex.toString() );
-//					flowFile = session.putAttribute( flowFile , "deviceId" , deviceId );
-//					session.transfer( flowFile , FAILURE_RELATIONSHIP );
 					routeToRelationship( flowFile , FAILURE_RELATIONSHIP , session ,
 						new ImmutablePair<String , String>( "failure" , reason ) ,
 						new ImmutablePair<String , String>( "failure.cause" , ex.toString()) );
@@ -1279,6 +1345,15 @@ public class EnrichData extends AbstractProcessor {
 					String attrValue = JsonProcessingUtils.getElementByPath( responseRootEl , attr.getValue() )
 							  							  .getAsString();
 					originalFF = session.putAttribute( originalFF , attr.getKey() , attrValue );
+				}catch( NoSuchElementException ex ) {
+					String attrPath = attr.getValue().stream()
+							              .reduce( "" , (s1 , s2 ) -> { return s1 + "/" + s2; } );
+					LoggingUtils.produceErrorObj( String.format( "Cannot perform enrichment on the original flow file. The '%s' property is missing from the enrichment source response. SKIPPING ENRICHMENT FOR THE PROPERTY '%s'." , 
+												  attrPath , attr.getKey() ) )
+								.withExceptionInfo( ex )
+								.withProperty( "ff-uuid" , uuid )
+								.withProperty( "EnrichmentSource_response" , responseRootEl.toString() )
+								.logAsWarning( logger );
 				}catch( ProcessException ex ) {
 					ex.printStackTrace();
 				}
@@ -1318,6 +1393,8 @@ public class EnrichData extends AbstractProcessor {
     	JsonElement el = responseRootEl;
     	StringBuilder exploredPath = new StringBuilder(); // logging purpose
     	for( String pathEl : basePath ) {
+    		exploredPath.append("/").append( pathEl );
+    		
     		while( el.isJsonArray() ) {
 				el = el.getAsJsonArray();
 				if( ((JsonArray)el).size() > 0 ) {
@@ -1350,8 +1427,6 @@ public class EnrichData extends AbstractProcessor {
     			throw new ProcessException( String.format( "The '%s' field in the enrichment service response is not a JsonObject." , 
     													   exploredPath.toString() ) );
     		}
-    		
-    		exploredPath.append("/").append( pathEl );
     	}
     	
     	if( el.isJsonObject() ) {
@@ -1380,6 +1455,7 @@ public class EnrichData extends AbstractProcessor {
     	
     	for( String pathEl : latlonPath ) {	
     		exploredPath.append( "/" ).append( pathEl );
+    		
 			while( el.isJsonArray() ) {
 				el = el.getAsJsonArray();
 				if( ((JsonArray)el).size() > 0 ) {

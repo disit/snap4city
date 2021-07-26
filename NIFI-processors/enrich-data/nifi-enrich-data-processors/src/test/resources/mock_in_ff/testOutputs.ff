@@ -1,6 +1,13 @@
 {  
    "id":"123456789",
    "type":"AirQualityObserved",
+   "BooleanTestAttr":{
+      "type":"Boolean",
+      "value":true,
+      "metadata":{
+      
+      }
+   },
    "PM10":{  
       "type":"Number",
       "value":18.4,

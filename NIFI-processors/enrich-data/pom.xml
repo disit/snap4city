@@ -13,7 +13,8 @@
   GNU Affero General Public License for more details.
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>. 
---><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+-->
+	<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -49,8 +50,35 @@
     	<module>nifi-ownership-client-service-nar</module>
         <module>nifi-enrich-data-processors</module>
         <module>nifi-enrich-data-nar</module>
+        <module>nifi-enrich-data-ui</module>
         <module>distribution</module>
     </modules>
+    
+    <!-- <dependencyManagement>
+   		<dependencies>
+   			<dependency>
+   				<groupId>org.disit.nifi.processors.enrich_data</groupId>
+   				<artifactId>nifi-enrich-data-processors</artifactId>
+   				<version>${project.version}</version>
+   			</dependency>
+   		
+	    	<dependency>
+	    		<groupId>org.disit.nifi.processors.enrich_data</groupId>
+	    		<artifactId>nifi-enrich-data-ui</artifactId>
+	    		<version>${project.version}</version>
+	    		<type>war</type>
+	    	</dependency>
+    	</dependencies>
+    </dependencyManagement> -->
+    
+   	<!-- <dependencies>
+    	<dependency>
+		    <groupId>org.apache.httpcomponents</groupId>
+		    <artifactId>httpclient</artifactId>
+		    <version>${httpclient.version}</version>
+		    <scope>provided</scope>
+		</dependency>
+	</dependencies> -->
 
     <build>
     	<pluginManagement>

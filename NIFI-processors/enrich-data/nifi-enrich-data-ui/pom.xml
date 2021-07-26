@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- 
+ Copyright (C) 2020 DISIT Lab http://www.disit.org - University of Florence
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Affero General Public License as
+ published by the Free Software Foundation, either version 3 of the
+ License, or (at your option) any later version.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Affero General Public License for more details.
+ You should have received a copy of the GNU Affero General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	
+	<parent>
+		<groupId>org.disit.nifi.processors.enrich_data</groupId>
+		<artifactId>enrich-data</artifactId>
+		<version>1.9.2</version>
+	</parent>
+	
+	<artifactId>nifi-enrich-data-ui</artifactId>
+	
+	<packaging>war</packaging>
+	
+	<properties>
+		<nifi.version>1.9.2</nifi.version>
+		<node.version>v8.10.0</node.version>
+		<jersey.version>2.26</jersey.version>
+		<jackson.version>2.9.7</jackson.version>
+		<maven.javadoc.skip>true</maven.javadoc.skip>
+		<source.skip>true</source.skip>
+		<frontend.dependency.configs>${basedir}/src/main/frontend</frontend.dependency.configs>
+		<frontend.working.dir>${project.build.directory}/frontend-working-directory</frontend.working.dir>
+		<frontend.assets>${project.build.directory}/${project.build.finalName}/assets</frontend.assets>
+	</properties>
+	
+	<!-- Dependecies -->
+	<dependencies>
+		<!-- NiFi dependencies -->
+		<dependency>
+			<groupId>org.apache.nifi</groupId>
+			<artifactId>nifi-api</artifactId>
+			<version>${nifi.version}</version>
+			<!-- <scope>provided</scope> -->
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.nifi</groupId>
+            <artifactId>nifi-framework-api</artifactId>
+            <version>${nifi.version}</version>
+            <!-- <scope>provided</scope> -->
+		</dependency>
+		
+		<dependency>
+            <groupId>org.apache.nifi</groupId>
+            <artifactId>nifi-utils</artifactId>
+            <version>${nifi.version}</version>
+            <!-- <scope>provided</scope> -->
+        </dependency>
+        
+        <dependency>
+        	<groupId>org.apache.nifi</groupId>
+        	<artifactId>nifi-nar-utils</artifactId>
+        	<version>${project.parent.version}</version>
+        	<!-- <scope>provided</scope> -->
+        </dependency>
+        
+        <dependency>
+            <groupId>org.apache.nifi</groupId>
+            <artifactId>nifi-custom-ui-utilities</artifactId>
+            <version>${nifi.version}</version>
+            <!-- <scope>provided</scope> -->
+        </dependency>
+        
+        <dependency>
+            <groupId>org.apache.nifi</groupId>
+            <artifactId>nifi-processor-utils</artifactId>
+            <version>1.9.2</version>
+            <!-- <scope>provided</scope> -->
+        </dependency>
+        
+        <dependency>
+        	<groupId>org.apache.nifi</groupId>
+        	<artifactId>nifi-mock</artifactId>
+        	<!-- <version>${nifi.version}</version> -->
+        	<scope>compile</scope>
+        </dependency>
+        
+        <!-- EnrichData dependencies -->
+        <dependency>
+        	<groupId>org.disit.nifi.processors.enrich_data</groupId>
+        	<artifactId>nifi-enrich-data-processors</artifactId>
+        	<version>${parent.version}</version>
+        	<scope>provided</scope>
+        </dependency>
+        
+        <dependency>
+        	<groupId>org.disit.nifi.processors.enrich_data</groupId>
+        	<artifactId>nifi-enrichment-source-client-service-api</artifactId>
+        	<version>${parent.version}</version>
+        	<scope>provided</scope> 
+        </dependency>
+        
+        <dependency>
+        	<groupId>org.disit.nifi.processors.enrich_data</groupId>
+        	<artifactId>nifi-oauth-token-provider-service</artifactId>
+        	<version>${parent.version}</version>
+       		<!-- <scope>provided</scope> -->
+        </dependency>
+        
+        <dependency>
+        	<groupId>org.disit.nifi.processors.enrich_data</groupId>
+        	<artifactId>nifi-ownership-client-service</artifactId>
+        	<version>${parent.version}</version>
+        	<!-- <scope>provided</scope> -->
+        </dependency>
+        
+        <dependency>
+        	<groupId>org.disit.nifi.processors.enrich_data</groupId>
+        	<artifactId>nifi-servicemap-client-services</artifactId>
+        	<version>${parent.version}</version>
+        	<!-- <scope>provided</scope> -->
+        </dependency>
+        
+        <!-- Other dependencies -->
+        <dependency>
+        	<groupId>uk.org.lidalia</groupId>
+        	<artifactId>sysout-over-slf4j</artifactId>
+        	<version>1.0.2</version>
+        </dependency>
+        
+        <!-- <dependency>
+        	<groupId>org.apache.httpcomponents</groupId>
+        	<artifactId>httpclient</artifactId>
+        	<version>${httpclient.version}</version>
+        </dependency> -->
+        
+        <dependency>
+    		<groupId>com.google.code.gson</groupId>
+    		<artifactId>gson</artifactId>
+    		<version>${gson.version}</version>
+    		<!-- <scope>compile</scope> -->
+    		<scope>provided</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
+        
+        <dependency>
+            <groupId>javax.servlet.jsp</groupId>
+            <artifactId>javax.servlet.jsp-api</artifactId>
+            <version>2.3.1</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>javax.el</groupId>
+            <artifactId>javax.el-api</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>javax.servlet.jsp.jstl</groupId>
+            <artifactId>javax.servlet.jsp.jstl-api</artifactId>
+            <version>1.2.1</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <!-- <version>3.1.0</version> -->
+            <scope>provided</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+            <version>2.1</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.glassfish.jersey.containers</groupId>
+            <artifactId>jersey-container-servlet-core</artifactId>
+            <version>${jersey.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-json-jackson</artifactId>
+            <version>${jersey.version}</version>
+        </dependency>
+        
+        <dependency>
+        	<groupId>com.fasterxml.jackson.core</groupId>
+        	<artifactId>jackson-annotations</artifactId>
+        	<version>${jackson.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-jaxb-annotations</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.glassfish.jersey.inject</groupId>
+            <artifactId>jersey-hk2</artifactId>
+            <version>${jersey.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.8.1</version>
+        </dependency>
+	</dependencies>
+	
+	<!-- Build -->
+	<build>
+		<plugins> 
+			<plugin><!-- mavn-resources-plugin -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<executions>
+					<!-- Copy client side dependencies -->
+					<execution>
+						<id>copy-client-side-deps</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${frontend.assets}</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${frontend.working.dir}/node_modules</directory>
+									<filtering>false</filtering>
+									<includes>
+										<include>**/*</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					
+					<!-- Copy package.json -->
+					<execution>
+						<id>copy-package-json</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${frontend.working.dir}</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${frontend.dependency.configs}</directory>
+									<filtering>false</filtering>
+									<includes>
+										<include>package.json</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					
+					<!-- Copy enrich-data.conf -->
+					<execution>
+						<id>copy-enrich-data-conf-file</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>src/main/resources</outputDirectory>
+							<overwrite>true</overwrite>
+							<resources>
+								<resource>
+									<directory>src/main/resources</directory>
+									<includes>
+										<include>*.conf</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					
+				</executions>
+			</plugin>
+			
+			<plugin><!-- frontend-maven-plugin -->
+				<groupId>com.github.eirslett</groupId>
+				<artifactId>frontend-maven-plugin</artifactId>
+				<version>1.4</version>
+				<configuration>
+					<installDirectory>${frontend.working.dir}</installDirectory>
+				</configuration>
+				<executions>
+					<execution>
+						<id>install-node-and-npm</id>
+						<goals>
+							<goal>install-node-and-npm</goal>
+						</goals>
+						<phase>generate-resources</phase>
+						<configuration>
+							<nodeVersion>${node.version}</nodeVersion>
+						</configuration>
+					</execution>
+					<execution>
+						<id>npm install</id>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<configuration>
+							<arguments>--cache-min Infinity install</arguments>
+							<workingDirectory>${frontend.working.dir}</workingDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			
+			<plugin><!-- Maven War plugin -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<configuration>
+					<webResources>
+						<resource>
+							<directory>src/main/webapp/META-INF</directory>
+							<targetPath>META-INF</targetPath>
+							<includes>
+								<include>nifi-processor-configuration</include>
+							</includes>
+							<filtering>true</filtering>
+						</resource>
+					</webResources>
+				</configuration>
+			</plugin>
+			
+			<plugin><!-- Apache rat plugin -->
+				<groupId>org.apache.rat</groupId>
+				<artifactId>apache-rat-plugin</artifactId>
+				<configuration>
+					<excludes combine.children="append">
+						<exclude>src/main/frontend/package.json</exclude>
+						<exclude>src/main/webapp/css/main.css</exclude>
+						<!-- <exclude>src/main/webapp/js/js-beautify/*</exclude> -->
+					</excludes>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

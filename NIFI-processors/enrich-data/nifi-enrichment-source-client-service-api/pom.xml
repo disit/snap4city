@@ -46,6 +46,7 @@
 	    <groupId>org.apache.httpcomponents</groupId>
 	    <artifactId>httpclient</artifactId>
 	    <version>${httpclient.version}</version>
+	    <!-- <scope>provided</scope> -->
 	</dependency>
 	
     <dependency>

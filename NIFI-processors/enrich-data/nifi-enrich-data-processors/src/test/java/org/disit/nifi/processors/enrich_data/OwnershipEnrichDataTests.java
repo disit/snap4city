@@ -65,6 +65,7 @@ public class OwnershipEnrichDataTests {
     	testRunner = TestRunners.newTestRunner( OwnershipEnrichData.class );
     	testRunner.setProperty( OwnershipEnrichData.DEVICE_ID_NAME , "deviceName" );
     	testRunner.setProperty( OwnershipEnrichData.USE_DEFAULTS_ON_OWNERSHIP_SERVICE_ERROR , "true" );
+//    	testRunner.setProperty( OwnershipEnrichData.USE_DEFAULTS_ON_OWNERSHIP_SERVICE_ERROR , "false" );
     	testRunner.setProperty( OwnershipEnrichData.DEFAULT_OWNERSHIP_PROPERTIES , "{\"username\":\"123456\"}" );
     	testRunner.setProperty( OwnershipEnrichData.ADDITIONAL_DEFAULT_OWNERSHIP_PROPERTIES , "{\"delegations\":[]}" );
     	

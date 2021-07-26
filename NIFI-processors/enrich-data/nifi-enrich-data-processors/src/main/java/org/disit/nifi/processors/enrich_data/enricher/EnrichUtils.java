@@ -189,6 +189,8 @@ public final class EnrichUtils {
      *  - "_arr" suffix for arrays
      *  - "_arr_obj" suffix for arrays of objects
      *  
+     * Boolean values are converted to string values with the "_str" suffix.
+     *  
      * If the value type is numeric the field is left untouched;
      *  
      * @param rootObjMember the JsonObject on which the mapping is performed
@@ -202,7 +204,6 @@ public final class EnrichUtils {
 			if( valueEl.isJsonPrimitive() ) { // Check if "value" contains a primitive JSON type
 				
 				if( valueEl.getAsJsonPrimitive().isString() ) { // Value contains a string
-					
 					if( parseNumericStrings ) { // Try numeric string parsing
 						tryParseStringValues( rootObjMember , valueEl , valueFieldName );
 					} else { // Map directly to string value
@@ -211,6 +212,14 @@ public final class EnrichUtils {
 						rootObjMember.remove( valueFieldName );
 					}
 				}
+				
+				// Map boolean values to string values
+				if( valueEl.getAsJsonPrimitive().isBoolean() ) {
+					rootObjMember.addProperty( valueFieldName.concat( "_str" ) , 
+							                   valueEl.getAsString() );
+					rootObjMember.remove( valueFieldName );
+				}
+				
 				// If the value is a number the "value" attribute is left untouch
 				
 			} else { // Non-primitive value types

@@ -1,5 +1,26 @@
 [
 {
+  "data_type":"boolean",
+  "value_unit":"",
+  "value_str":"true",
+  "sensorId":"123456789",
+  "src":"IOT",
+  "kind":"sensor",
+  "latlon":"60.157337,24.91201",
+  "serviceUri":"http://serviceuriprefix.org/123456789",
+  "uuid":"b297dd9d-aa41-4e6f-8a99-f3734aca0fdb",
+  "value_name":"BooleanTestAttr",
+  "organization":"MyOrg",
+  "deviceName":"123456789",
+  "date_time":"2019-06-06T15:46:54.930Z",
+  "date_time10min":"2019-06-06T15:50:00.000Z",
+  "date_time10sec":"2019-06-06T15:46:50.000Z",
+  "date_time1d":"2019-06-06T00:00:00.000Z",
+  "date_time1h":"2019-06-06T15:00:00.000Z",
+  "date_time1min":"2019-06-06T15:46:00.000Z",
+  "date_time1sec":"2019-06-06T15:46:54.000Z"
+},
+{
   "value": 18.4,
   "value_type": "PM10_concentration",
   "data_type": "float",
