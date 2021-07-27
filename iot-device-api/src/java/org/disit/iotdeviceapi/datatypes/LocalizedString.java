@@ -13,15 +13,10 @@
 
    You should have received a copy of the GNU Affero General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
-package org.disit.iotdeviceapi.dataquality.security;
+package org.disit.iotdeviceapi.datatypes;
 
 /**
  * 
  * @author Mirco Soderi @ DISIT DINFO UNIFI (mirco.soderi at unifi dot it)
  */
-public final class ValidateTokenConst {
-    public static final String CFG_EL_ENDPOINT = "endpoint";
-    public static final String CFG_AT_REF = "ref";
-    public static final String CFG_EL_AUTHORIZATION = "authorization";
-    public static final String CFG_EL_ROLES = "roles";
-}
+public class LocalizedString extends StringWrapper {}

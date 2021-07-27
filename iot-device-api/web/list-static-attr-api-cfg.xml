@@ -17,7 +17,9 @@
    You should have received a copy of the GNU Affero General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
-   
+
+<!DOCTYPE api-cfg SYSTEM "iotdeviceapi.dtd">
+
 <api-cfg xmlns="http://www.disit.org/ServiceMap/api/v1/iot">
 
 	<admin>
@@ -37,13 +39,13 @@
 	</admin>
 
 	<repos>
-		<repo id="virtuoso">
-			<param key="virtuosoEndpoint" value="localhost:1111"/>
-			<param key="virtuosoUser" value="dba"/>
-			<param key="virtuosoPwd" value="dba"/>
-			<param key="virtuosoTimeout" value="600"/>
-			<param key="virtuosoDeleteInsert" value="subject"/>
-		</repo>
+                <repo id="virtuoso">
+                    <param key="virtuosoEndpoint" value="&virtUrl;"/>
+                    <param key="virtuosoUser" value="&virtUsr;"/>
+                    <param key="virtuosoPwd" value="&virtPwd;"/>
+                    <param key="virtuosoTimeout" value="600"/>
+                    <param key="virtuosoDeleteInsert" value="subject"/>
+                </repo>
 	</repos>
         
 	<providers>
@@ -66,6 +68,24 @@
 	</datatypes>
 
 	<loaders/>
+        
+        <data-quality>
+	
+		<validators>
+			<validator id="basic" class="org.disit.iotdeviceapi.dataquality.basic.BasicValidator"/>
+		</validators>
+		
+		<validations>
+                    
+                        <validate ref="authorization">
+                            <pick-validator ref="basic" description="Must authenticate. Send HTTP header Authorization: Bearer [token].">
+                                    <min-cardinality id="authorization.min-cardinality" lev="SEVERE">1</min-cardinality>
+                                    <max-cardinality id="authorization.max-cardinality" lev="SEVERE">1</max-cardinality>
+                            </pick-validator>
+                        </validate>  
+                </validations>
+                
+        </data-quality>
 	
 	<process>
 		
@@ -76,6 +96,13 @@
 				<query>{raw}</query>
 			</lookup>
 		</data>
+                
+                <validate ref="authorization">
+                    <pick-validator ref="basic" description="Must authenticate. Send HTTP header Authorization: Bearer [token].">
+                            <min-cardinality id="authorization.min-cardinality" lev="SEVERE">1</min-cardinality>
+                            <max-cardinality id="authorization.max-cardinality" lev="SEVERE">1</max-cardinality>
+                    </pick-validator>
+                </validate>  
 		
                 <data id="kind" type="string" builder="jsonp" loader="volatile">
 			<source ref="request-body"/>
@@ -194,6 +221,7 @@
 								(km4c:maintenanceUrl "Maintenance url" xsd:string)
 								(schema:url "Use url" xsd:string)
 								(foaf:name "Name" UNDEF)
+                                (km4c:isMobile "Is Mobile" xsd:string)                                                              
 							'}'
 							optional '{' ?uri rdfs:label ?label FILTER(LANG(?label)="en")'}'
 							optional '{' ?uri rdfs:range ?type filter(?type!=rdfs:Literal)'}' . 

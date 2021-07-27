@@ -46,16 +46,27 @@ public class UrlWrapper extends DataType {
     @Override
     public UrlWrapper fromString(String str) {
         try {
-            String input = str;
-            String scheme = input.substring(0,input.indexOf("//"));
-            input = input.substring(scheme.length());
-            String[] inputArray = input.split("/");
-            String[] outputArray = new String[inputArray.length];
-            for(int i = 0; i < inputArray.length; i++) {
-                outputArray[i] = URLEncoder.encode(inputArray[i], "UTF-8");
+            URI uri;
+            try {
+                String input = str;
+                String scheme = input.substring(0,input.indexOf("//"));
+                input = input.substring(scheme.length());
+                String[] inputArray = input.split("/");
+                String[] outputArray = new String[inputArray.length];
+                for(int i = 0; i < inputArray.length; i++) {
+                    outputArray[i] = URLEncoder.encode(inputArray[i], "UTF-8");
+                }
+                String output = String.join("/", outputArray);
+                uri = new URI(scheme.concat(output.replace("%23","#")));
             }
-            String output = String.join("/", outputArray);
-            URI uri = new URI(scheme.concat(output.replace("%23","#")));
+            catch(Exception ie) {                
+                if(str.startsWith("urn:")) {
+                    uri = URI.create(str);
+                }
+                else {
+                    throw ie;
+                }
+            }            
             UrlWrapper myUri = new UrlWrapper();
             myUri.setValue(uri);
             return myUri;

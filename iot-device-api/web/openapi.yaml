@@ -8,6 +8,8 @@ servers:
     url: http://www.disit.org/ServiceMap/api/v1/iot
   - description: Local
     url: http://localhost:8080/iotdeviceapi
+security:
+  - bearerAuth: []    
 paths:
   /insert:
     post:
@@ -64,12 +66,13 @@ paths:
                 type: string
                 format: uri
                 example: http://www.disit.org/km4city/resource/iot/orionUNIFI/TrafficLight_229_widgetOnOffButton2932
-  /disable:
+                
+  /move:
     post:
-      tags: [Device Attributes]
-      summary: For disabling a device attribute.
+      tags: [Mobile]
+      summary: For updating the GPS coordinates of the device
       requestBody:
-        description: A JSON object with a single property, named _uri_, that indicates the attribute that has to be disabled.
+        description: The URI of the device, and its new GPS coordinates.
         required: true
         content:
           application/json; charset=utf-8:
@@ -77,129 +80,231 @@ paths:
               type: object
               required:
                 - uri
+                - latitude
+                - longitude
               properties:
                 uri:
                   type: string
                   format: uri
-                  example: http://www.disit.org/km4city/resource/iot/orionUNIFI/TrafficLight_229_widgetOnOffButton2932/light
+                  example: http://www.disit.org/km4city/resource/iot/orionUNIFI/TrafficLight_229_widgetOnOffButton2932       
+                latitude:
+                  type: number
+                  format: float
+                  example: 43.769562
+                longitude:
+                  type: number
+                  format: float
+                  example: 11.255814
       responses:
         200:
-          description: The response body contains in plain text the URI of the disabled attribute, or it is empty if something goes wrong. In the latter case, a _Warning_ header is added where a description of the problem can be found.
-          headers:
-            Warning:
-              description: The possible error message
-              required: false
-              schema: 
-                type: string
-                example: 'Validation failed for data: uri-exists.'
+          description: DONE, written in plain text.
           content:
             text/plain:
               schema:
                 type: string
-                format: uri
-                example: http://www.disit.org/km4city/resource/iot/orionUNIFI/TrafficLight_229_widgetOnOffButton2932/light
-  /enable:
+                example: DONE                
+                
+  /list-static-attr:
     post:
-      tags: [Device Attributes]
-      summary: For enabling a device attribute that had been disabled.
+      tags: [Static Attributes]
+      summary: It provides the list of the static attributes that are applicable for a given class (subnature) of devices.
       requestBody:
-        description: A JSON object with a single property, named _uri_, that indicates the attribute that has to be enabled.
+        description: The subnature URI or name must be provided in the property _subnature_ (the subnature name corresponds to the last part of the URI, delimited by a sharp), _or_ a full JSON representation of a device must be provided including the property _attributes_ whose value is an array of objects each having a set of properties and in particular the _value_type_ that is the only relevant for the purpose of identifying the applicable static attributes, since from the value types it is possible to determine the subnature, and from the subnature we can finally determine the applicable static attributes.
         required: true
         content:
           application/json; charset=utf-8:
             schema:
               type: object
-              required:
-                - uri
               properties:
-                uri:
+                subnature:
+                  description: The URI of the class (subnature) of interest, or its name, corresponding to the last part of the URI, delimited by a sharp.
                   type: string
-                  format: uri
-                  example: http://www.disit.org/km4city/resource/iot/orionUNIFI/TrafficLight_229_widgetOnOffButton2932/light
+                  example: http://www.disit.org/km4city/schema#Noise_level_sensor 
+                attributes:
+                  description: A JSON array whose items describe what the device detects. The emphasis here is only on the value_type property of those items, that is the only one that is relevant to the purpose of identifying the applicable static attributes.
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - value_type
+                    properties:
+                      value_type: 
+                        description: A text string where a high-level indication can be found of the type of detections that the attribute represents, that is aimed at enabling searches of all devices that detect the same thing in different locations. A list of the allowed values for value_type has been defined, but it cannot be found in the configuration documents. Instead, the list of the allowed values can be found in the destination Knowledge Base, shaped as a set of SSN Property instances.
+                        type: string
+                        example: temperature
       responses:
         200:
-          description: The response body contains in plain text the URI of the enabled attribute, or it is empty if something goes wrong. In the latter case, a _Warning_ header is added where a description of the problem can be found.
-          headers:
-            Warning:
-              description: The possible error message
-              required: false
-              schema: 
-                type: string
-                example: 'Validation failed for data: uri-exists.'
+          description: An array of objects, each describing a static attribute that can be applied to those devices that have the given subnature.
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
-                format: uri
-                example: http://www.disit.org/km4city/resource/iot/orionUNIFI/TrafficLight_229_widgetOnOffButton2932/light
-  /make-private:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    label:
+                      description: A human-readable label for the static attribute
+                      type: string
+                      example: Maximum capacity
+                    type:
+                      description: The expected type of data for the value of the static attribute, represented as an XML Schema data type URI
+                      type: string
+                      format: uri
+                      example: http://www.w3.org/2001/XMLSchema#string
+                    uri:
+                      description: The URI of the RDF resource that represents the static attribute in KB
+                      type: string
+                      format: uri
+                      example: http://www.disit.org/km4city/schema#minCapacity
+    get:
+      tags: [Static Attributes]
+      summary: It provides the list of the static attributes that are applicable for a given class (subnature) of devices.
+      parameters:
+        - in: query
+          name: subnature
+          schema: 
+            type: string
+          required: true
+          description: The subnature URI or name (that corresponds to the last part of the URI, delimited by a sharp).
+          example: http://www.disit.org/km4city/schema#Noise_level_sensor
+      responses:
+        200:
+          description: An array of objects, each describing a static attribute that can be applied to those devices that have the given subnature.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    label:
+                      description: A human-readable label for the static attribute
+                      type: string
+                      example: Maximum capacity
+                    type:
+                      description: The expected type of data for the value of the static attribute, represented as an XML Schema data type URI
+                      type: string
+                      format: uri
+                      example: http://www.w3.org/2001/XMLSchema#string
+                    uri:
+                      description: The URI of the RDF resource that represents the static attribute in KB
+                      type: string
+                      format: uri
+                      example: http://www.disit.org/km4city/schema#minCapacity
+
+  /insert-static-attr:
     post:
-      tags: [Registry]
-      summary: For marking a device as a private device.
+      tags: [Static Attributes]
+      summary: It adds a new RDF resource representing a new static attribute in the KB, so that it can be next applied to the newly created devices (that have the appropriate subnature).
       requestBody:
-        description: A JSON object with a single property, named _uri_, that indicates the Service URI of the device that has to be marked as private.
+        description: A JSON object representing the new static attribute.
         required: true
         content:
           application/json; charset=utf-8:
             schema:
               type: object
-              required:
-                - uri
               properties:
-                uri:
+                graph:
+                  description: The URI of the graph where the resource that represents the new static attribute will be created
                   type: string
-                  format: uri
-                  example: http://www.disit.org/km4city/resource/iot/orionUNIFI/TrafficLight_229_widgetOnOffButton2932
+                  format: URI
+                  example: http://www.disit.org/km4city/resource/addedStaticAttrs 
+                subnature:
+                  description: The URI of the subnature to which the new static attribute applies
+                  type: string
+                  format: URI
+                  example: http://www.disit.org/km4city/schema#Noise_level_sensors
+                attribute:
+                  description: The URI of the new static attribute
+                  type: string
+                  format: URI
+                  example: http://www.disit.org/km4city/schema#maxCapacity
+                range:
+                  description: The URI of the XML Schema data type that corresponds to the type of data that is expected for the value of the static attribute
+                  type: string
+                  format: URI
+                  example: http://www.w3.org/2001/XMLSchema#string
+                label:
+                  description: A multi-language name/label for the new static attribute
+                  type: array
+                  items: 
+                    type: object
+                    properties: 
+                      text:
+                        description: The name of the new static attribute
+                        type: string
+                        example: Max capacity                   
+                      lang:
+                        description: The language in which the name is written
+                        type: string
+                        example: en
       responses:
         200:
-          description: The response body contains in plain text the Service URI of the device that has been marked as private, or it is empty if something goes wrong. In the latter case, a _Warning_ header is added where a description of the problem can be found.
-          headers:
-            Warning:
-              description: The possible error message
-              required: false
-              schema: 
-                type: string
-                example: 'Validation failed for data: uri-exists.'
+          description: The URI of the newly created static attribute. It is the same that the requester has provided through the _attribute_ property.
           content:
             text/plain:
               schema:
                 type: string
                 format: uri
-                example: http://www.disit.org/km4city/resource/iot/orionUNIFI/TrafficLight_229_widgetOnOffButton2932
-  /make-public:
+                example: http://www.disit.org/km4city/schema#maxCapacity
+                
+  /delete-static-attr:
     post:
-      tags: [Registry]
-      summary: For marking a device as a public device.
+      tags: [Static Attributes]
+      summary: It deletes a static attribute. After this, it will not be possible to apply the static attribute to the newly created devices, and for those that already have it applied, it will not be anymore explicitly represented its meaning in the KB. This operation only can be requested by a (very carefull) Root Admin.
       requestBody:
-        description: A JSON object with a single property, named _uri_, that indicates the Service URI of the device that has to be marked as public.
+        description: A full JSON representation of the static attribute to be deleted.
         required: true
         content:
           application/json; charset=utf-8:
             schema:
               type: object
-              required:
-                - uri
               properties:
-                uri:
+                graph:
+                  description: The URI of the graph where the resource locates that represents the static attribute to be deleted
                   type: string
-                  format: uri
-                  example: http://www.disit.org/km4city/resource/iot/orionUNIFI/TrafficLight_229_widgetOnOffButton2932
+                  format: URI
+                  example: http://www.disit.org/km4city/resource/addedStaticAttrs 
+                subnature:
+                  description: The URI of the subnature to which the static attribute to be deleted applies
+                  type: string
+                  format: URI
+                  example: http://www.disit.org/km4city/schema#Noise_level_sensors
+                attribute:
+                  description: The URI of the static attribute to be deleted
+                  type: string
+                  format: URI
+                  example: http://www.disit.org/km4city/schema#maxCapacity
+                range:
+                  description: The URI of the XML Schema data type that corresponds to the type of data that is expected for the value of the static attribute to be deleted
+                  type: string
+                  format: URI
+                  example: http://www.w3.org/2001/XMLSchema#string
+                label:
+                  description: The multi-language name/label of the static attribute to be deleted
+                  type: array
+                  items: 
+                    type: object
+                    properties: 
+                      text:
+                        description: The name of the static attribute
+                        type: string
+                        example: Max capacity                   
+                      lang:
+                        description: The language in which the name is written
+                        type: string
+                        example: en
       responses:
         200:
-          description: The response body contains in plain text the Service URI of the device that has been marked as public, or it is empty if something goes wrong. In the latter case, a _Warning_ header is added where a description of the problem can be found.
-          headers:
-            Warning:
-              description: The possible error message
-              required: false
-              schema: 
-                type: string
-                example: 'Validation failed for data: uri-exists.'
+          description: The URI of the deleted static attribute. It is the same that the requester has provided through the _attribute_ property.
           content:
             text/plain:
               schema:
                 type: string
-                format: uri
-                example: http://www.disit.org/km4city/resource/iot/orionUNIFI/TrafficLight_229_widgetOnOffButton2932
+                format: uri        
+                example: http://www.disit.org/km4city/schema#maxCapacity
+                      
+
 components:
   schemas:
     device:
@@ -215,6 +320,10 @@ components:
           description: A free text string where a unique identifier for the device can be found.
           type: string
           example: ARDUINO_ST_4201
+        organization:
+          description: The organization that is responsible for the device.
+          type: string
+          example: Firenze
         type:
           description: A free text string that synthetically describes what the device measures, e.g. whether it is a temperature sensor, a traffic sensor, a presence detector, or what else.
           type: string
@@ -336,8 +445,6 @@ components:
               - data_type
               - value_type
               - value_unit
-              - value_refresh_rate
-              - healthiness_criteria
             properties:
               value_name:
                 description: A free text string that briefly indicates what type of detection the attribute represents, e.g. tempXX, humXX, thievesInLivingRoom.
@@ -360,11 +467,6 @@ components:
                 type: integer
                 format: int32
                 example: 60
-              healthiness_criteria:
-                description: 'A text string that indicates how it is possible to determine if the device is correctly producing output values as a result of the detections of the type that is represented by the device attribute. The allowed values are: refresh_rate (there is a problem if the expected refresh rate is not respected), different_values (there is a problem if the device produces in output the same value for more than consecutive_detections detections), or within_bounds (there is a problem if the output value does not fall within an interval that is described through the value_bounds property).'
-                type: string
-                enum: [refresh_rate, different_values, within_bounds]
-                example: refresh_rate
               different_values:
                 description: An integer number, see the _healthiness_criteria_ for details about its semantic.
                 type: integer
@@ -379,7 +481,10 @@ components:
                   It indicates if the device attribute has to be disabled, and therefore hidden in the user views, excluded from indexing, and so on. If missing, the status of the device attribute is left unaltered. _Remark: unaltered_ is not the same as _enabled_.
                 type: boolean
                 example: false
-                
+  securitySchemes:
+    bearerAuth:           
+      type: http
+      scheme: bearer                
 externalDocs:
   description: Extended PDF documentation (313k)
   url: https://servicemap.disit.org/WebAppGrafo/api/v1/iot/doc.pdf
