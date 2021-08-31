@@ -15,32 +15,6 @@
  */
 package org.disit.nifi.processors.ingest_data;
 
-import org.apache.nifi.components.PropertyDescriptor;
-import org.apache.nifi.components.Validator;
-import org.apache.nifi.flowfile.FlowFile;
-import org.apache.nifi.logging.ComponentLog;
-import org.apache.nifi.annotation.behavior.ReadsAttribute;
-import org.apache.nifi.annotation.behavior.ReadsAttributes;
-import org.apache.nifi.annotation.behavior.WritesAttribute;
-import org.apache.nifi.annotation.behavior.WritesAttributes;
-import org.apache.nifi.annotation.lifecycle.OnScheduled;
-import org.apache.nifi.annotation.documentation.CapabilityDescription;
-import org.apache.nifi.annotation.documentation.SeeAlso;
-import org.apache.nifi.annotation.documentation.Tags;
-import org.apache.nifi.processor.exception.ProcessException;
-import org.apache.nifi.processor.io.OutputStreamCallback;
-import org.apache.nifi.processor.AbstractProcessor;
-import org.apache.nifi.processor.ProcessContext;
-import org.apache.nifi.processor.ProcessSession;
-import org.apache.nifi.processor.ProcessorInitializationContext;
-import org.apache.nifi.processor.Relationship;
-import org.apache.nifi.processor.util.StandardValidators;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -49,6 +23,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +32,35 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.naming.ConfigurationException;
+
+import org.apache.nifi.annotation.behavior.ReadsAttribute;
+import org.apache.nifi.annotation.behavior.ReadsAttributes;
+import org.apache.nifi.annotation.behavior.WritesAttribute;
+import org.apache.nifi.annotation.behavior.WritesAttributes;
+import org.apache.nifi.annotation.documentation.CapabilityDescription;
+import org.apache.nifi.annotation.documentation.SeeAlso;
+import org.apache.nifi.annotation.documentation.Tags;
+import org.apache.nifi.annotation.lifecycle.OnScheduled;
+import org.apache.nifi.components.PropertyDescriptor;
+import org.apache.nifi.components.PropertyValue;
+import org.apache.nifi.components.Validator;
+import org.apache.nifi.expression.ExpressionLanguageScope;
+import org.apache.nifi.flowfile.FlowFile;
+import org.apache.nifi.logging.ComponentLog;
+import org.apache.nifi.processor.AbstractProcessor;
+import org.apache.nifi.processor.ProcessContext;
+import org.apache.nifi.processor.ProcessSession;
+import org.apache.nifi.processor.ProcessorInitializationContext;
+import org.apache.nifi.processor.Relationship;
+import org.apache.nifi.processor.exception.ProcessException;
+import org.apache.nifi.processor.io.OutputStreamCallback;
+import org.apache.nifi.processor.util.StandardValidators;
+import org.disit.nifi.processors.ingest_data.logging.LoggingUtils;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 @Tags({"ingestion"})
 
@@ -109,23 +113,40 @@ public class IngestData extends AbstractProcessor {
     		.addValidator( StandardValidators.NON_EMPTY_EL_VALIDATOR )
     		.build();
     		
-    public static final PropertyDescriptor PREFIX_ATTRIBUTES = new PropertyDescriptor
-    		.Builder().name( "PREFIX_ATTRIBUTES" )
-    		.displayName( "Prefix attributes" )
-    		.description( "A comma-separated list of flow-file attributes to be used to build a prefix for the fields specified by the 'Prepend prefix to' property.\n" + 
-    					  "The prefix is built using the ordering specified in this property and the attribute-values are separated using the value of the 'Prefix separator' property.\n" +
-    					  "The prefixing operation is performed if the source flow-file contains at least one of the specified attributes, missing attributes will lead to an empty part in the prefix.\n" +
-    					  "If the source flow-file does not contain any of the specified attributes the prefixing operation will not be performed." )
+    public static final PropertyDescriptor EXTRACT_FIELDS_AS_ATTRIBUTES = new PropertyDescriptor
+    		.Builder().name( "EXTRACT_FIELDS_AS_ATTRIBUTES" )
+    		.displayName( "Extract fields as attributes" )
+    		.description( "A comma separated list of fields contained in the in incoming flow file content to be extracted as flow file attributes." )
     		.required( false )
     		.addValidator( Validator.VALID )
     		.build();
     
-    public static final PropertyDescriptor PREFIX_SEPARATOR = new PropertyDescriptor
-    		.Builder().name( "PREFIX_SEPARATOR" )
-    		.displayName( "Prefix separator" )
-    		.description( "A string to use as separator for the attribute values." )
+//    public static final PropertyDescriptor PREFIX_ATTRIBUTES = new PropertyDescriptor
+//    		.Builder().name( "PREFIX_ATTRIBUTES" )
+//    		.displayName( "Prefix attributes" )
+//    		.description( "A comma-separated list of flow-file attributes to be used to build a prefix for the fields specified by the 'Prepend prefix to' property.\n" + 
+//    					  "The prefix is built using the ordering specified in this property and the attribute-values are separated using the value of the 'Prefix separator' property.\n" +
+//    					  "The prefixing operation is performed if the source flow-file contains at least one of the specified attributes, missing attributes will lead to an empty part in the prefix.\n" +
+//    					  "If the source flow-file does not contain any of the specified attributes the prefixing operation will not be performed." )
+//    		.required( false )
+//    		.addValidator( Validator.VALID )
+//    		.build();
+//    
+//    public static final PropertyDescriptor PREFIX_SEPARATOR = new PropertyDescriptor
+//    		.Builder().name( "PREFIX_SEPARATOR" )
+//    		.displayName( "Prefix separator" )
+//    		.description( "A string to use as separator for the attribute values." )
+//    		.required( false )
+//    		.addValidator( Validator.VALID )
+//    		.build();
+    
+    public static final PropertyDescriptor PREFIX = new PropertyDescriptor
+    		.Builder().name( "PREFIX" )
+    		.displayName( "Prefix" )
+    		.description( "Specify a prefix for the target fields (specified by prepend prefix to). The flow file attributes are supported using the Nifi Expression Language." )
     		.required( false )
     		.addValidator( Validator.VALID )
+    		.expressionLanguageSupported( ExpressionLanguageScope.FLOWFILE_ATTRIBUTES )
     		.build();
     
     public static final PropertyDescriptor PREPEND_PREFIX_TO = new PropertyDescriptor
@@ -159,6 +180,7 @@ public class IngestData extends AbstractProcessor {
     private String outTimestampName;
     private String timestampPath;
     private String dataFieldName;
+    private List<List<String>> fieldsToExtract;
     
     private List<String> prefixAttributes;
     private String prefixSeparator;
@@ -173,11 +195,13 @@ public class IngestData extends AbstractProcessor {
         descriptors.add( TIMESTAMP_FIELD_PATH );
         descriptors.add( OUTPUT_TIMESTAMP_FIELD_NAME );
         descriptors.add( DATA_FIELD_NAME );
-        descriptors.add( PREFIX_ATTRIBUTES );
-        descriptors.add( PREFIX_SEPARATOR );
+        descriptors.add( EXTRACT_FIELDS_AS_ATTRIBUTES );
+//        descriptors.add( PREFIX_ATTRIBUTES );
+//        descriptors.add( PREFIX_SEPARATOR );
+        descriptors.add( PREFIX );
         descriptors.add( PREPEND_PREFIX_TO );
         this.descriptors = Collections.unmodifiableList(descriptors);
-
+        
         // relationships
         final Set<Relationship> relationships = new HashSet<Relationship>();
         relationships.add( SUCCESS_RELATIONSHIP );
@@ -205,8 +229,8 @@ public class IngestData extends AbstractProcessor {
     	
     	return new PropertyDescriptor.Builder().name( propertyDescriptorName )
     							     .addValidator( StandardValidators.NON_EMPTY_VALIDATOR )
-    							     .description( "A dynamic property attribute specifies an attribute to be added " + 
-    							    		 	   "to the output flow file content with the specified value.\n" + 
+    							     .description( "A dynamic property specifies an field to be added " + 
+    							    		 	   "to the output flow file content with the specified name and value.\n" + 
     							    		 	   "If the output flow file contains multiple data chunks, the attribute " + 
     							    		 	   "will be added to every chunk." )
     							     .dynamic( true )
@@ -237,22 +261,34 @@ public class IngestData extends AbstractProcessor {
     	dataFieldName = context.getProperty( DATA_FIELD_NAME ).getValue(); // get 'Data field name' value
     	
     	
-    	// Prefix properties
-    	prefixAttributes = new ArrayList<>();
-    	if( context.getProperty( PREFIX_ATTRIBUTES ).isSet() ) {
-    		String[] prefixAttributeNames = context.getProperty( PREFIX_ATTRIBUTES ).getValue().split( "," );
-    		for( int i = 0 ; i < prefixAttributeNames.length ; i++ ) {
-    			String attribute = prefixAttributeNames[i].trim();
-    			if( !attribute.isEmpty() )
-    				prefixAttributes.add( attribute );
-    		}
+    	// Extract fields as attributes
+    	this.fieldsToExtract = new ArrayList<>();
+    	if( context.getProperty( EXTRACT_FIELDS_AS_ATTRIBUTES ).isSet() ) {
+    		Arrays.asList( context.getProperty( EXTRACT_FIELDS_AS_ATTRIBUTES ).getValue().split( "," ) )
+    			  .stream().map( (String fieldPath) -> {
+    				  return Arrays.asList( fieldPath.trim().split("/") );
+    			  })
+    			  .forEach( (List<String> fieldPathList) -> {
+    				  fieldsToExtract.add( fieldPathList );
+    			  });
     	}
     	
-    	if( context.getProperty( PREFIX_SEPARATOR ).isSet() ) {
-    		prefixSeparator = context.getProperty( PREFIX_SEPARATOR ).getValue();
-    	} else {
-    		prefixSeparator = "";
-    	}
+    	// Prefix properties
+//    	prefixAttributes = new ArrayList<>();
+//    	if( context.getProperty( PREFIX_ATTRIBUTES ).isSet() ) {
+//    		String[] prefixAttributeNames = context.getProperty( PREFIX_ATTRIBUTES ).getValue().split( "," );
+//    		for( int i = 0 ; i < prefixAttributeNames.length ; i++ ) {
+//    			String attribute = prefixAttributeNames[i].trim();
+//    			if( !attribute.isEmpty() )
+//    				prefixAttributes.add( attribute );
+//    		}
+//    	}
+//    	
+//    	if( context.getProperty( PREFIX_SEPARATOR ).isSet() ) {
+//    		prefixSeparator = context.getProperty( PREFIX_SEPARATOR ).getValue();
+//    	} else {
+//    		prefixSeparator = "";
+//    	}
     	
     	fieldsToPrefix = new HashSet<>();
     	if( context.getProperty( PREPEND_PREFIX_TO ).isSet() ) {
@@ -267,29 +303,60 @@ public class IngestData extends AbstractProcessor {
     	}
 
     	// Prefix properties validation
+//    	boolean prefixMisconfig = false;
+//    	String reason = "Misconfiguration: '%s' is correctly set, but '%s' evaluates to an empty list. They must be both correctly set or both not set at all.";
+//    	if( !prefixAttributes.isEmpty() && fieldsToPrefix.isEmpty() ) {
+//    		reason = String.format( reason , PREFIX_ATTRIBUTES.getDisplayName() , 
+//    									     PREPEND_PREFIX_TO.getDisplayName() );
+//    		prefixMisconfig = true;
+//    	}
+//    	
+//    	if( prefixAttributes.isEmpty() && !fieldsToPrefix.isEmpty() ) {
+//    		reason = String.format( reason , PREPEND_PREFIX_TO.getDisplayName() , 
+//    										 PREFIX_ATTRIBUTES.getDisplayName() );
+//    		prefixMisconfig = true;
+//    	}
+//    	
+//    	if( prefixMisconfig ) {
+//    		throw new ConfigurationException( reason );
+//    	}
+//    	
+//    	if( prefixAttributes.isEmpty() && fieldsToPrefix.isEmpty() ) {
+//    		performPrefix = false;
+//    	} else {
+//    		performPrefix = true;
+//    	}
+    	
+    	// Prefix
+    	// Check for misconfigurations
     	boolean prefixMisconfig = false;
-    	String reason = "Misconfiguration: '%s' is correctly set, but '%s' evaluates to an empty list. They must be both correctly set or both not set at all.";
-    	if( !prefixAttributes.isEmpty() && fieldsToPrefix.isEmpty() ) {
-    		reason = String.format( reason , PREFIX_ATTRIBUTES.getDisplayName() , 
-    									     PREPEND_PREFIX_TO.getDisplayName() );
+    	String misconfReason = "Misconfiguration: '%s' is correctly set, but ";
+    	if( context.getProperty(PREFIX).isSet() && fieldsToPrefix.isEmpty() ) {
+    		misconfReason = String.format( 
+    							new StringBuilder( misconfReason ).append( "'%s' evaluates to an empty list. Specify '%s' property or unset '%s'." )
+    								.toString()
+    							, PREFIX.getDisplayName() , PREPEND_PREFIX_TO.getDisplayName() , 
+    							  PREPEND_PREFIX_TO.getDisplayName() , PREFIX.getDisplayName() );
+    		prefixMisconfig = true;
+    	}
+    	if( !context.getProperty(PREFIX).isSet() && !fieldsToPrefix.isEmpty() ) {
+    		misconfReason = String.format( 
+					new StringBuilder( misconfReason ).append( "'%s' is not set. Specify '%s' property or unset '%s'." )
+						.toString()
+					, PREPEND_PREFIX_TO.getDisplayName() , PREFIX.getDisplayName() , 
+					  PREFIX.getDisplayName() , PREPEND_PREFIX_TO.getDisplayName() );
     		prefixMisconfig = true;
     	}
     	
-    	if( prefixAttributes.isEmpty() && !fieldsToPrefix.isEmpty() ) {
-    		reason = String.format( reason , PREPEND_PREFIX_TO.getDisplayName() , 
-    										 PREFIX_ATTRIBUTES.getDisplayName() );
-    		prefixMisconfig = true;
+    	if( prefixMisconfig ) { // Throws misconfiguration exception
+    		throw new ConfigurationException( misconfReason );
     	}
     	
-    	if( prefixMisconfig ) {
-    		throw new ConfigurationException( reason );
-    	}
-    	
-    	if( prefixAttributes.isEmpty() && fieldsToPrefix.isEmpty() ) {
-    		performPrefix = false;
-    	} else {
+    	// Determin wether to perform prefixing
+    	if( context.getProperty(PREFIX).isSet() && !fieldsToPrefix.isEmpty() )
     		performPrefix = true;
-    	}
+		else
+			performPrefix = false;
     }
 
     @Override
@@ -305,10 +372,15 @@ public class IngestData extends AbstractProcessor {
         session.exportTo( flowFile , contentBytes );
         String flowFileContent = contentBytes.toString();
         
+        // Extracted attributes
+        Map<String , String> extractedAttributes;
+        
         JsonElement rootEl = parser.parse( flowFileContent );
         if( rootEl.isJsonObject() ) { // check if the root element (whole flow file content) is a valid JsonObject
-        	
         	JsonObject rootObj = rootEl.getAsJsonObject();
+        	
+        	extractedAttributes = extractFields( fieldsToExtract , rootObj );
+        	
         	if( rootObj.has( dataFieldName ) ) { // check if the root element contains a field named as the dataFieldName content
         		JsonElement dataFieldElement = rootObj.get( dataFieldName );
         		JsonObject dataFieldObject;
@@ -320,14 +392,20 @@ public class IngestData extends AbstractProcessor {
         					if( dataFieldElement.getAsJsonArray().get(0).isJsonObject() ) // check if the first element is a json object
         						dataFieldObject = dataFieldElement.getAsJsonArray().get(0).getAsJsonObject();
         					else {
-        						logger.error( String.format( "The first element of the data array is not a JsonObject, routing to failure. Data content: %s", 
-        												     dataFieldElement.toString() ) );
+//        						logger.error( String.format( "The first element of the data array is not a JsonObject, routing to failure. Data content: %s", 
+//        												     dataFieldElement.toString() ) );
+        						LoggingUtils.produceErrorObj( "The first element of the data array is not a JsonObject, routing to failure." , 
+        								                      dataFieldElement )
+        									.logAsError( logger );
         						session.transfer( flowFile , FAILURE_RELATIONSHIP );
         						return;
         					}
         			else { // the data field content does not contain an array or a json object routing to fauilure.
-        				logger.error( String.format( "The data field content does not contain an array or a json object, routing to fauilure. Data content: %s" , 
-        										     dataFieldElement.toString() ) );
+//        				logger.error( String.format( "The data field content does not contain an array or a json object, routing to fauilure. Data content: %s" , 
+//        										     dataFieldElement.toString() ) );
+        				LoggingUtils.produceErrorObj( "The data field content does not contain an array or a json object, routing to fauilure." , 
+        						                      dataFieldElement )
+        							.logAsError( logger );
         				session.transfer( flowFile , FAILURE_RELATIONSHIP );
         				return;
         			}
@@ -349,9 +427,12 @@ public class IngestData extends AbstractProcessor {
         		
         		dataFieldObject.addProperty( outTimestampName , timestamp );
         		
+        		// Prefix
         		String prefixReport;
         		if( performPrefix ) {
-        			prefixReport = performPrefixing( dataFieldObject , flowFile.getAttributes() );
+//        			prefixReport = performPrefixing( dataFieldObject , flowFile.getAttributes() );
+        			prefixReport = performPrefixing( dataFieldObject , context.getProperty(PREFIX) , flowFile );
+        			context.getProperty(PREFIX);
         			
         			if( prefixReport.isEmpty() )
         				prefixReport = "<Empty prefix>";
@@ -370,13 +451,16 @@ public class IngestData extends AbstractProcessor {
 				} );
         		
         		flowFile = session.putAttribute( flowFile , "prefix" , prefixReport );
+        		flowFile = session.putAllAttributes( flowFile , extractedAttributes );
         		
         		session.transfer( flowFile , SUCCESS_RELATIONSHIP );
         		
         	} else { // the flow file JSON content does not contain a field named as dataFieldName content
-        		
-        		logger.error( String.format( "Flow file %s does not contain '%s' specified as 'Data field name'. Routing to failure | f-f content: %s" ,
-        									 flowFile.getAttribute( "uuid" ) , dataFieldName , flowFileContent ) );
+//        		logger.error( String.format( "Flow file %s does not contain '%s' specified as 'Data field name'. Routing to failure | f-f content: %s" ,
+//        									 flowFile.getAttribute( "uuid" ) , dataFieldName , flowFileContent ) );
+        		LoggingUtils.produceErrorObj( String.format( "Flow file does not contain '%s' specified as 'Data field name'. Routing to failure." , dataFieldName ) , 
+        									  flowFileContent )
+        					.logAsError( logger );
         		flowFile = session.putAttribute( flowFile , "failure" , String.format( "The JSON object in f-f content does not contain the '%s' member specified as 'Data field name'." , 
         																	dataFieldName ) );
         		session.transfer( flowFile , FAILURE_RELATIONSHIP );
@@ -385,12 +469,72 @@ public class IngestData extends AbstractProcessor {
      
         	
         } else { // the flow file content is not a JsonObject
-        	logger.error( String.format( "Flow file %s does not contain a valid JsonObject , routing to FAILURE_RELATIONSHIP | f-f content : %s" , 
-        								 flowFile.getAttribute( "uuid" ) , flowFileContent ) );
+//        	logger.error( String.format( "Flow file %s does not contain a valid JsonObject , routing to FAILURE_RELATIONSHIP | f-f content : %s" , 
+//        								 flowFile.getAttribute( "uuid" ) , flowFileContent ) );
+        	LoggingUtils.produceErrorObj( "Flow file does not contain a valid JsonObject , routing to failure." , 
+        			                      flowFileContent )
+        				.logAsError( logger );
         	flowFile = session.putAttribute( flowFile , "failure" , "Does not contain a valid JSON object." );
         	session.transfer( flowFile , FAILURE_RELATIONSHIP );
         }
         
+    }
+    
+    private Map<String , String> extractFields( List<List<String>> fieldPaths , JsonObject ffContent ){
+    	Map<String , String> extractedFields = new HashMap<>();
+    	for( List<String> fieldPath : fieldPaths ) {
+    		JsonElement cur = ffContent;
+    		String lastExplored = "";
+    		boolean error = false;
+    		for( String pathToken : fieldPath ) {
+    			if( cur.isJsonArray() ) {
+    				if( cur.getAsJsonArray().size() > 0 ) {
+    					cur = cur.getAsJsonArray().get(0);
+    				} else {
+    					LoggingUtils
+    						.produceErrorObj( String.format( "Cannot extract the attribute from %s because the field '%s' is an empty JSON array." , 
+    										                 fieldPath.toString() , lastExplored ) )
+    						.logAsError( logger );
+    					error = true;
+    					break;
+    				}
+    			}
+    			
+    			if( cur.isJsonObject() ) { 
+    				if( cur.getAsJsonObject().has( pathToken ) ) {
+    					cur = cur.getAsJsonObject().get( pathToken );
+    				}else {
+    					LoggingUtils
+    						.produceErrorObj( String.format( "Cannot extract the attribute from %s because the path field '%s' does not exists in the flow file content." , 
+    														 fieldPath.toString() , pathToken ) )
+    						.logAsError( logger );
+    					error = true;
+    					break;
+    				}
+    			}else {
+    				LoggingUtils
+    					.produceErrorObj( String.format( "Cannot extract the attribute from %s because the path field '%s' is not a JSON object." , 
+    													 fieldPath.toString() , lastExplored ) )
+    					.logAsError( logger );
+    				error = true;
+    				break;
+    			}
+    			lastExplored = pathToken;
+    		}
+    		
+    		if( !error ) {
+    			if( cur.isJsonPrimitive() ) {
+    				extractedFields.put( fieldPath.get( fieldPath.size() - 1 ) , cur.getAsString() );
+    			} else {
+	    			LoggingUtils
+	    				.produceErrorObj( String.format( "Cannot extract the attribute from %s because the last path field '%s' value is not a JSON primitive type." , 
+	    												 fieldPath.toString() , fieldPath.get( fieldPath.size() - 1 ) ) )
+	    				.logAsError( logger );
+    			}
+    		}
+		}
+    	
+    	return extractedFields;
     }
     
     
@@ -458,6 +602,38 @@ public class IngestData extends AbstractProcessor {
 	    			);
 	    		}
 	    	}
+    	}
+    	
+    	return prefix;
+    }
+    
+    private String performPrefixing( JsonObject dataObject , PropertyValue prefixProperty , FlowFile flowFile )  {
+    	String prefix = "";
+		if( prefixProperty.isExpressionLanguagePresent() ) {
+			try {
+				prefix = prefixProperty.evaluateAttributeExpressions( flowFile ).getValue();
+	    	}catch( ProcessException ex ) { 
+	    		// Skip prefix if cannot evaluate the expression against ff attributes
+	    		JsonObject attributesObj = new JsonObject();
+	    		flowFile.getAttributes().forEach( (String k, String v) -> { attributesObj.addProperty(k,v); });
+	    		LoggingUtils.produceErrorObj( "Process exception while evaluating the prefix expression '%s' against the flow file attributes. SKIPPING prefix operation. " )
+	    					.withProperty( "flowfile.attributes" , attributesObj.toString() )
+	    					.withExceptionInfo( ex )
+	    					.logAsWarning( logger );
+	    	}
+		}else {
+			prefix = prefixProperty.getValue();
+		}
+    	
+    	if( !prefix.isEmpty() ) {
+    		for( String fieldName : fieldsToPrefix ) {
+    			if( dataObject.has( fieldName ) ) {
+    				dataObject.addProperty( 
+						fieldName , 
+						prefix.concat( dataObject.get( fieldName ).getAsString() ) 
+    				);
+    			}
+    		}
     	}
     	
     	return prefix;

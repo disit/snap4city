@@ -1,3 +1,17 @@
+/** 
+ *  Copyright (C) 2020 DISIT Lab http://www.disit.org - University of Florence
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+ */
+
 package org.disit.nifi.processors.enrich_data.test.api_mock;
 
 import java.io.IOException;
@@ -23,11 +37,13 @@ public class JsonResourceMockHandler extends AbstractHandler{
 	private Map<String , JsonElement> resources;
 	private JsonParser parser;
 	private String identifierParameterName;
+	private String handlerName;
 	
-	public JsonResourceMockHandler( String identifierParameterName ) {
+	public JsonResourceMockHandler( String identifierParameterName , String handlerName ) {
 		this.resources = new HashMap<>();
 		this.parser = new JsonParser();
 		this.identifierParameterName = identifierParameterName;
+		this.handlerName = handlerName;
 	}
 	
 	public Map<String , JsonElement> getResources(){
@@ -45,8 +61,10 @@ public class JsonResourceMockHandler extends AbstractHandler{
 	public void handle(String target, Request base, HttpServletRequest request, HttpServletResponse response)
 			throws IOException, ServletException {
 		
-		System.out.println( "------ Handler ------" );
-		System.out.println( "OWNERSHIP GET TARGET: " + target );
+		System.out.println( String.format( "------ %s ------" , this.handlerName) );
+		System.out.println( "TARGET: " + target );
+		System.out.println( "Request URL: " + request.getRequestURL() );
+		System.out.println( "Request URI: " + request.getRequestURI() );
 		
 		response.setContentType( "application/json" );
 		
@@ -58,7 +76,7 @@ public class JsonResourceMockHandler extends AbstractHandler{
 		}
 		
 		Map<String,String[]> params = request.getParameterMap();
-		System.out.println( "OWNERSHIP GET PARAMETERS: " + params.toString() );
+		System.out.println( "PARAMETERS: " + params.toString() );
 		
 		Enumeration<String> headerNames = request.getHeaderNames();
 		Map<String , String> headersMap = new HashMap<>();
@@ -68,7 +86,7 @@ public class JsonResourceMockHandler extends AbstractHandler{
 			headersMap.put( headerName , headerValue );
 		}
 		
-		System.out.println( "OWNERSHIP GET HEADERS: " + headersMap.toString() );
+		System.out.println( "HEADERS: " + headersMap.toString() );
 		
 		if( !params.containsKey( this.identifierParameterName ) ) {
 			response.setStatus( HttpServletResponse.SC_BAD_REQUEST );

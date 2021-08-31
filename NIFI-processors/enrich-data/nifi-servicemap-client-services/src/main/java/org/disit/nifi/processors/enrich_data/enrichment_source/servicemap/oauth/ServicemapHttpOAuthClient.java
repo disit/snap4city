@@ -48,7 +48,7 @@ public class ServicemapHttpOAuthClient extends ServicemapHttpClient {
 	}
 	
 	@Override
-	public JsonElement getEnrichmentData( String elementId, String elementIdPrefix ) throws EnrichmentSourceException{
+	public JsonElement getEnrichmentData( String elementIdPrefix , String elementId ) throws EnrichmentSourceException{
 		String requestUrl;
 		try {
 			requestUrl = buildRequestUrl( elementIdPrefix , elementId );

@@ -34,7 +34,7 @@ import org.disit.nifi.processors.enrich_data.enrichment_source.EnrichmentSourceU
  * Provides a ServicemapClient to the processor.
  */
 public class ServicemapControllerService extends AbstractControllerService implements ServicemapClientService {
-
+	
 	protected static List<PropertyDescriptor> descriptors = new ArrayList<>();
 	
 	static {
@@ -60,12 +60,23 @@ public class ServicemapControllerService extends AbstractControllerService imple
 	}
 	
 	protected void configBaseProperties( ConfigurationContext context ) {
-		this.servicemapUrl = context.getProperty( SERVICEMAP_URL ).getValue();
-		this.serviceUriPrefix = context.getProperty( SERVICE_URI_PREFIX ).getValue();
+//		this.servicemapUrl = context.getProperty( SERVICEMAP_URL ).getValue();
+		this.servicemapUrl = context.getProperty(SERVICEMAP_URL)
+								    .evaluateAttributeExpressions()
+								    .getValue();
+		
+//		this.serviceUriPrefix = context.getProperty( SERVICE_URI_PREFIX ).getValue();
+		this.serviceUriPrefix = context.getProperty( SERVICE_URI_PREFIX )
+			    .evaluateAttributeExpressions()
+			    .getValue();
+		
 		if( !this.serviceUriPrefix.endsWith( "/" ) )
 			this.serviceUriPrefix = this.serviceUriPrefix.concat( "/" );
 		
-		this.additionalQueryString = context.getProperty( ADDITIONAL_QUERY_STRING ).getValue();
+//		this.additionalQueryString = context.getProperty( ADDITIONAL_QUERY_STRING ).getValue();
+		this.additionalQueryString = context.getProperty( ADDITIONAL_QUERY_STRING )
+											.evaluateAttributeExpressions()
+											.getValue();
 		if( !this.additionalQueryString.isEmpty() && !this.additionalQueryString.startsWith("&") )
 			this.additionalQueryString = String.format( "&%s" , this.additionalQueryString );
 		

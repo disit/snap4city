@@ -56,7 +56,7 @@ public abstract class HttpBaseClient{
 		} catch (ClientProtocolException e) {
 			throw new EnrichmentSourceException( "ClientProtocolException while performing the HTTP request to the enrichment source." , e );
 		} catch (IOException e) {
-			throw new EnrichmentSourceException( "IOException while performing the HTTP request to the enrichment source." , e );
+			throw new EnrichmentSourceException( "IOException while performing the request to the HTTP source." , e );
 		}
 	}
 	

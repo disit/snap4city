@@ -1,6 +1,4 @@
-/**
- *  Nifi EnrichData processor
- *  
+/** 
  *  Copyright (C) 2020 DISIT Lab http://www.disit.org - University of Florence
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,11 +12,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>. 
  */
 
-package org.disit.nifi.processors.enrich_data;
+package org.disit.nifi.processors.enrich_data.test;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Map;
 
 import org.apache.nifi.util.MockFlowFile;
 
@@ -51,7 +51,6 @@ public class TestUtils {
 		return parser.parse( content ).getAsJsonObject();
     }
     
-    
     public static JsonArray mockJsonArrayFromFile( Path path , JsonParser parser ) throws IOException{
     	
     	String content = Files.lines( path )
@@ -69,6 +68,26 @@ public class TestUtils {
     	
     	return parser.parse( content );
     	
+    }
+    
+    public static JsonElement prepareExpectedResult( String resultContentFile , MockFlowFile ff , JsonParser parser ) throws IOException {
+    	JsonElement expectedResult = mockJsonElementFromFile( Paths.get( resultContentFile ) , parser );
+    	String uuid = ff.getAttribute( "uuid" );
+    	if( expectedResult.isJsonArray() ) {
+    		JsonArray er = expectedResult.getAsJsonArray();
+    		for( int i=0 ; i < er.size() ; i++ ) {
+    			er.get( i ).getAsJsonObject().addProperty( "uuid" , uuid );
+    		}
+    	}
+    	
+    	if( expectedResult.isJsonObject() ) {
+    		JsonObject er = expectedResult.getAsJsonObject();
+    		er.entrySet().stream().forEach( (Map.Entry<String , JsonElement> entry) -> {
+    			entry.getValue().getAsJsonObject().addProperty( "uuid" , uuid );
+    		});
+    	}
+    	
+    	return expectedResult;
     }
     
     public static String prettyOutFF( MockFlowFile outFF , JsonParser jsonParser ) {

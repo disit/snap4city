@@ -86,11 +86,25 @@
             <version>${project.parent.version}</version>
             <scope>test</scope>
         </dependency>
+        
+        <dependency>
+        	<groupId>org.disit.nifi.processors.enrich_data</groupId>
+        	<artifactId>nifi-resource-locator-services</artifactId>
+        	<version>${project.parent.version}</version>
+        	<scope>test</scope>
+        </dependency>
 		
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 		    <artifactId>jetty-server</artifactId>
 		    <scope>test</scope>
+		</dependency>
+		
+		<dependency>
+		 	<groupId>com.tngtech.keycloakmock</groupId>
+		  	<artifactId>mock-junit</artifactId>
+		  	<version>0.8.0</version>
+		  	<scope>test</scope>
 		</dependency>
 		
 		<dependency>

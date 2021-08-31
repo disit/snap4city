@@ -18,6 +18,7 @@ package org.disit.nifi.processors.enrich_data.enrichment_source.servicemap;
 
 import org.apache.nifi.components.PropertyDescriptor;
 import org.apache.nifi.components.Validator;
+import org.apache.nifi.expression.ExpressionLanguageScope;
 import org.apache.nifi.processor.util.StandardValidators;
 import org.disit.nifi.processors.enrich_data.enrichment_source.EnrichmentSourceClientService;
 import org.disit.nifi.processors.enrich_data.enrichment_source.EnrichmentSourceUpdaterService;
@@ -36,6 +37,7 @@ public interface ServicemapClientService
             .displayName("ServiceMap URL")
             .description( "The URL of the Servicemap instance to connect to." )
             .required(true)
+            .expressionLanguageSupported( ExpressionLanguageScope.VARIABLE_REGISTRY )
             .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
             .build();
 	
@@ -44,6 +46,7 @@ public interface ServicemapClientService
             .displayName("Service Uri Prefix")
             .description("The service uri prefix. The value of this property will be concatenated to the device id, and used as argument for the 'serviceUri' paramenter for the request to servicemap." )
             .required(true)
+            .expressionLanguageSupported( ExpressionLanguageScope.VARIABLE_REGISTRY )
             .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
             .build();
 	
@@ -52,6 +55,7 @@ public interface ServicemapClientService
             .displayName("Additional query string")
             .description( "The query string for the servicemap request. This allows to specify additional parameters to add to the query string along with the 'serviceUri' (which is automatically inserted).\nExample: realtime=false." )
             .required(false)
+            .expressionLanguageSupported( ExpressionLanguageScope.VARIABLE_REGISTRY )
             .defaultValue( "" )
             .addValidator(Validator.VALID)
             .build();

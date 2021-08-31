@@ -126,6 +126,11 @@ public class LoggingUtils {
 			return this;
 		}
 		
+		public LoggableObject setReason( String reason ) {
+			errorObj.addProperty( "reason" , reason );
+			return this;
+		}
+		
 		/* Logging Methods (chain terminal methods)*/
 		public void logAsError( ComponentLog logger ) {
 			logger.error( this.errorObj.toString() );

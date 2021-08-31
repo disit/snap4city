@@ -25,6 +25,7 @@ import org.apache.nifi.annotation.lifecycle.OnEnabled;
 import org.apache.nifi.components.PropertyDescriptor;
 import org.apache.nifi.controller.AbstractControllerService;
 import org.apache.nifi.controller.ConfigurationContext;
+import org.apache.nifi.expression.ExpressionLanguageScope;
 import org.apache.nifi.processor.util.StandardValidators;
 import org.apache.nifi.reporting.InitializationException;
 import org.disit.nifi.processors.enrich_data.oauth.OAuthTokenProvider;
@@ -37,6 +38,7 @@ public class KeycloakTokenProviderControllerService extends AbstractControllerSe
 			.displayName( "Keycloak Url" )
 			.description( "The Keycloak base url." )
 			.required( true )
+			.expressionLanguageSupported( ExpressionLanguageScope.VARIABLE_REGISTRY )
 			.addValidator( StandardValidators.NON_EMPTY_VALIDATOR )
 			.build();
 	
@@ -108,7 +110,10 @@ public class KeycloakTokenProviderControllerService extends AbstractControllerSe
 
     @OnEnabled
     public void onEnabled(final ConfigurationContext context) throws InitializationException {
-    	keycloakUrl = context.getProperty( KEYCLOAK_URL ).getValue();
+//    	keycloakUrl = context.getProperty( KEYCLOAK_URL ).getValue();
+    	keycloakUrl = context.getProperty( KEYCLOAK_URL )
+    						 .evaluateAttributeExpressions()
+    						 .getValue();
 		clientId = context.getProperty( CLIENT_ID ).getValue();
 		clientSecret = context.getProperty( CLIENT_SECRET ).getValue();
 		username = context.getProperty( USERNAME ).getValue();

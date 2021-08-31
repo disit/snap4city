@@ -88,6 +88,14 @@ public class SimpleProtectedAPIServer {
 //		server.join();
 	}
 	
+	public boolean isRunning() {
+		return server.isRunning();
+	}
+	
+	public void stop() throws Exception {
+		server.stop();
+	}
+	
 	public void close() throws Exception {
 		server.stop();
 		server.destroy();

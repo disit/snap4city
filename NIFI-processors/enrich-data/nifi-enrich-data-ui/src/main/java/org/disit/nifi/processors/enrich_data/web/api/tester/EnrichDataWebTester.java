@@ -15,49 +15,29 @@ package org.disit.nifi.processors.enrich_data.web.api.tester;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.naming.ConfigurationException;
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.nifi.web.ComponentDetails;
-import org.apache.nifi.web.NiFiWebConfigurationContext;
-import org.disit.nifi.processors.enrich_data.EnrichData;
-import org.disit.nifi.processors.enrich_data.enrichment_source.EnrichmentSourceClientService;
-import org.disit.nifi.processors.enrich_data.enrichment_source.servicemap.oauth.ServicemapOAuthControllerService;
-import org.disit.nifi.processors.enrich_data.oauth.OAuthTokenProviderService;
-import org.disit.nifi.processors.enrich_data.web.api.ProcessorWebUtils;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.nifi.components.PropertyDescriptor;
-import org.apache.nifi.components.ValidationResult;
 import org.apache.nifi.controller.ControllerService;
-import org.apache.nifi.flowfile.FlowFile;
 import org.apache.nifi.nar.NarClassLoader;
-import org.apache.nifi.nar.NarClassLoaders;
 import org.apache.nifi.processor.Relationship;
 import org.apache.nifi.reporting.InitializationException;
+import org.apache.nifi.util.LogMessage;
+import org.apache.nifi.util.MockFlowFile;
 import org.apache.nifi.util.TestRunner;
 import org.apache.nifi.util.TestRunners;
+import org.disit.nifi.processors.enrich_data.EnrichData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J;
-
-import org.apache.nifi.util.StandardProcessorTestRunner;
-import org.apache.nifi.util.LogMessage;
-import org.apache.nifi.util.MockFlowFile;
-import org.apache.nifi.util.MockProcessContext;
 
 public class EnrichDataWebTester {
 
@@ -68,13 +48,14 @@ public class EnrichDataWebTester {
 	
 	private TestRunner testRunner;
 	
-	public EnrichDataWebTester( String processorId , String groupId , JsonObject propertiesConfig ) {
+	public EnrichDataWebTester( String processorId , String groupId , 
+								JsonObject propertiesConfig , Map<String , String> registryVariables) {
 		
 		this.processorId = processorId;
 		this.groupId = groupId;
 	 
 		try {
-			configureTestRunner( propertiesConfig );
+			configureTestRunner( propertiesConfig , registryVariables );
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IOException
 				| InitializationException e) {
 			logger.error( ExceptionUtils.getStackTrace(e) );
@@ -92,9 +73,22 @@ public class EnrichDataWebTester {
 	 * @throws IllegalAccessException
 	 * @throws InitializationException
 	 */
-	private void configureTestRunner( JsonObject processorPropertiesConfig ) throws IOException , ClassNotFoundException, InstantiationException, IllegalAccessException, InitializationException{
+	private void configureTestRunner( JsonObject processorPropertiesConfig , Map<String , String> registryVariables ) throws IOException , ClassNotFoundException, InstantiationException, IllegalAccessException, InitializationException{
 		
 		this.testRunner = TestRunners.newTestRunner( EnrichData.class );
+		
+		// Mimic env variables on test runner
+		// Do this and registry variables before setting anything in the test runner!
+		System.getenv().forEach( (String name, String value) -> { 
+			this.testRunner.setVariable( name , value );
+		});
+		
+		// Mimic registry variable on test runner
+		if( registryVariables != null ) {
+			registryVariables.forEach( (String name , String value )->{
+				this.testRunner.setVariable( name , value );
+			});
+		}
 		
 		// Enrichment source client service
 		String enrichmentSourceId = registerControllerService( 
@@ -103,6 +97,19 @@ public class EnrichDataWebTester {
 		);
 		this.testRunner.enableControllerService( this.testRunner.getControllerService( enrichmentSourceId ) );
 		this.testRunner.setProperty(EnrichData.ENRICHMENT_SOURCE_CLIENT_SERVICE.getName() , enrichmentSourceId);
+		
+		// Enrichment resource locator service
+		if( processorPropertiesConfig.has( EnrichData.ENRICHMENT_RESOURCE_LOCATOR_SERVICE.getName() ) && 
+			!processorPropertiesConfig.get( EnrichData.ENRICHMENT_RESOURCE_LOCATOR_SERVICE.getName() ).isJsonNull() &&
+			processorPropertiesConfig.get( EnrichData.ENRICHMENT_RESOURCE_LOCATOR_SERVICE.getName() ).isJsonObject() ) {
+			
+			String resourceLocatorId = registerControllerService( 
+				processorPropertiesConfig.get( EnrichData.ENRICHMENT_RESOURCE_LOCATOR_SERVICE.getName() ).getAsJsonObject() ,
+				EnrichData.ENRICHMENT_RESOURCE_LOCATOR_SERVICE.getControllerServiceDefinition() 
+			);
+			this.testRunner.enableControllerService( this.testRunner.getControllerService( resourceLocatorId ) );
+			this.testRunner.setProperty( EnrichData.ENRICHMENT_RESOURCE_LOCATOR_SERVICE , resourceLocatorId );
+		}
 		
 		// Ownership client service
 		if( processorPropertiesConfig.has( EnrichData.OWNERSHIP_CLIENT_SERVICE.getName() ) && 
@@ -120,7 +127,8 @@ public class EnrichDataWebTester {
 		// Non-controller service properties
 		for( String pName : processorPropertiesConfig.keySet() ) {
 			if( !pName.equals( EnrichData.ENRICHMENT_SOURCE_CLIENT_SERVICE.getName() ) && 
-				!pName.equals( EnrichData.OWNERSHIP_CLIENT_SERVICE.getName() )	) {
+				!pName.equals( EnrichData.OWNERSHIP_CLIENT_SERVICE.getName() ) &&
+				!pName.equals( EnrichData.ENRICHMENT_RESOURCE_LOCATOR_SERVICE.getName() ) ) {
 				
 				if( !processorPropertiesConfig.get(pName).isJsonNull() )
 					this.testRunner.setProperty( pName , processorPropertiesConfig.get(pName).getAsString() );
@@ -129,7 +137,7 @@ public class EnrichDataWebTester {
 		
 		this.testRunner.assertValid();
 		
-		EnrichData processor = (EnrichData)this.testRunner.getProcessor();
+		//EnrichData processor = (EnrichData)this.testRunner.getProcessor();
 	}
 	
 	/*

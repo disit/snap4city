@@ -74,6 +74,14 @@
      </fileSet>
      
      <fileSet>
+       <outputDirectory>dist/extensions</outputDirectory>
+       <directory>../nifi-resource-locator-services-nar/target/</directory>
+       <includes>
+       	<include>*.nar</include>
+       </includes>
+     </fileSet>
+     
+     <fileSet>
        <outputDirectory>dist/conf</outputDirectory>
        <directory>../nifi-enrich-data-processors/src/test/resources</directory>
        <includes>

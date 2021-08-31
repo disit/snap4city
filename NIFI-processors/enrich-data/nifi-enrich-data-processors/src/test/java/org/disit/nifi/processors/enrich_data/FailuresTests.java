@@ -31,6 +31,7 @@ import org.apache.nifi.util.TestRunner;
 import org.apache.nifi.util.TestRunners;
 import org.disit.nifi.processors.enrich_data.enrichment_source.servicemap.ServicemapClientService;
 import org.disit.nifi.processors.enrich_data.enrichment_source.servicemap.ServicemapControllerService;
+import org.disit.nifi.processors.enrich_data.test.TestUtils;
 import org.disit.nifi.processors.enrich_data.test.api_mock.ServicemapMockHandler;
 import org.disit.nifi.processors.enrich_data.test.api_mock.SimpleProtectedAPIServer;
 import org.junit.After;

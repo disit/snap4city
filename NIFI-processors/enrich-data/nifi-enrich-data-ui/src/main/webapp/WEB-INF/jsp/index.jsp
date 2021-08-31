@@ -24,6 +24,11 @@
     <link rel="stylesheet" type="text/css" href="../nifi/assets/font-awesome/css/font-awesome.min.css" />
     <link rel="stylesheet" type="text/css" href="../nifi/css/common-ui.css" />
     
+    <!-- NIFI modules -->
+    <script type="text/javascript" src="../nifi/js/nf/nf-namespace.js"></script>
+    <script type="text/javascript" src="../nifi/js/nf/nf-storage.js"></script>
+    
+    
     <!-- Bootstrap -->
     <link rel="stylesheet" type="text/css" href="assets/bootstrap/dist/css/bootstrap.min.css" />
     <script src="assets/bootstrap/dist/js/bootstrap.bundle.js"></script>

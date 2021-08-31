@@ -19,6 +19,7 @@ package org.disit.nifi.processors.enrich_data.test.api_mock;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -158,11 +159,21 @@ public class ServicemapMockHandler extends AbstractHandler{
 	private void handleEndpoint( String target , Request base , HttpServletRequest request, HttpServletResponse response)
 			throws IOException, ServletException {
 		
-		System.out.println( "Handling an Endpoint");
+		System.out.println( "------ Servicemap Mock Handler ------" );
+		System.out.println( "Handling a Resouce");
 		System.out.println( "Target: " + target );
 		System.out.println( "Base: " + base.toString() );
+		System.out.println( "Parameters: " + request.getParameterMap().toString() );
 		System.out.println( "RequestURL: " + request.getRequestURL() );
 		System.out.println( "requestURI: " + request.getRequestURI() );
+		Enumeration<String> headerNames = request.getHeaderNames();
+		Map<String , String> headersMap = new HashMap<>();
+		while( headerNames.hasMoreElements() ) {
+			String name = headerNames.nextElement();
+			String value = request.getHeader( name );
+			headersMap.put( name , value );
+		}
+		System.out.println( "Headers: " + headersMap.toString() );
 		
 		if( errorEndpoints.containsKey( target ) ) {
 			errorEndpoints.get( target ).handle( target , base , request , response );
@@ -183,11 +194,21 @@ public class ServicemapMockHandler extends AbstractHandler{
 	private void handleResource( String target , Request base , HttpServletRequest request, HttpServletResponse response)
 			throws IOException, ServletException {
 		
+		System.out.println( "------ Servicemap Mock Handler ------" );
 		System.out.println( "Handling a Resouce");
 		System.out.println( "Target: " + target );
 		System.out.println( "Base: " + base.toString() );
+		System.out.println( "Parameters: " + request.getParameterMap().toString() );
 		System.out.println( "RequestURL: " + request.getRequestURL() );
 		System.out.println( "requestURI: " + request.getRequestURI() );
+		Enumeration<String> headerNames = request.getHeaderNames();
+		Map<String , String> headersMap = new HashMap<>();
+		while( headerNames.hasMoreElements() ) {
+			String name = headerNames.nextElement();
+			String value = request.getHeader( name );
+			headersMap.put( name , value );
+		}
+		System.out.println( "Headers: " + headersMap.toString() );
 		
 		
 		response.setContentType( "application/json" );
