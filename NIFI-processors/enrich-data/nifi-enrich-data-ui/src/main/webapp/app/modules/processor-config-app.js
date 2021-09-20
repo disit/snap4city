@@ -55,6 +55,8 @@ export class ProcessorConfigApp {
 			groupsConfig: null,
 			ui: null
 		};
+		
+		ProcessorServices.setup();
 	}
 	
 	// Configure a configuration group. The specified group properties 
@@ -140,31 +142,42 @@ export class ProcessorConfigApp {
 							app.view.ui.testingUI.clearTestOutput();
 							app.view.ui.testingUI.testOutputLoader.show();
 							
-							ProcessorServices.remoteTest(
-								app.processorDetails.id ,
-								app.processGroupId , 
-								testConfigs 
+							ProcessorServices.getGroupVariableRegistry(
+								app.processGroupId
 							).done( function(response){
-								app.view.ui.testingUI.showTestOutput( 
-									response.output , 
-									response.logs 
-								);
-							}).fail( function( jqXHR , statusText , errorThrown ){
-								var error;
-								try{
-									error = JSON.parse( jqXHR.statusText );
-									error = '<pre style="white-space: pre-wrap;">' + 
-												JSON.stringify( error , null , 2 ) + 
-											'<pre>';
-								}catch( e ){
-									error = jqXHR.statusText;
+								var variables = {}
+								if( response.hasOwnProperty('component') && response['component'].hasOwnProperty('variables') ){
+									variables = response['component']['variables'];
 								}
+								testConfigs['variableRegistry'] = variables;
 								
-								app.view.ui.testingUI.testOutputLoader.hide();
-								app.view.ui.modal
-									.setTitle( "Error: " +  jqXHR.status )
-									.setContent( $('<span>' + error + '</span>') )
-									.show();
+								ProcessorServices.remoteTest(
+									app.processorDetails.id ,
+									app.processGroupId , 
+									testConfigs 
+								).done( function(response){
+									app.view.ui.testingUI.showTestOutput( 
+										response.output , 
+										response.logs 
+									);
+								}).fail( function( jqXHR , statusText , errorThrown ){
+									var error;
+									try{
+										error = JSON.parse( jqXHR.statusText );
+										error = '<pre style="white-space: pre-wrap;">' + 
+													JSON.stringify( error , null , 2 ) + 
+												'<pre>';
+									}catch( e ){
+										error = jqXHR.statusText;
+									}
+									
+									app.view.ui.testingUI.testOutputLoader.hide();
+									app.view.ui.modal
+										.setTitle( "Error: " +  jqXHR.status )
+										.setContent( $('<span>' + error + '</span>') )
+										.show();
+								});
+								
 							});
 						});
 						

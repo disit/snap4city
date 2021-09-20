@@ -30,26 +30,20 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.nifi.components.PropertyDescriptor;
-import org.apache.nifi.controller.ControllerService;
-import org.apache.nifi.reporting.InitializationException;
-import org.apache.nifi.util.TestRunner;
-import org.apache.nifi.util.TestRunners;
 import org.apache.nifi.web.ComponentDescriptor;
 import org.apache.nifi.web.ComponentDetails;
 import org.apache.nifi.web.NiFiWebConfigurationContext;
 import org.apache.nifi.web.NiFiWebConfigurationRequestContext;
+import org.disit.nifi.processors.enrich_data.EnrichData;
+import org.disit.nifi.processors.enrich_data.web.api.tester.EnrichDataWebTester;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 //import org.test.custom_ui.test_processor.TestProcessor;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
-
-import org.disit.nifi.processors.enrich_data.EnrichData;
-import org.disit.nifi.processors.enrich_data.web.api.tester.EnrichDataWebTester;
 
 /**
  * EnrichData web service resource.
@@ -105,8 +99,20 @@ public class ProcessorResource extends AbstractStandardResource {
 			
 			// Instance the web tester
 			try {
+				
+				Map<String,String> registryVariables = new HashMap<>();
+				if( testConfigs.has("variableRegistry") && testConfigs.get("variableRegistry").isJsonObject() ) {
+					JsonObject variableRegistryObj = testConfigs.get("variableRegistry")
+																.getAsJsonObject();
+					variableRegistryObj.keySet().forEach( (String name) -> {
+						registryVariables.put( name , variableRegistryObj.get(name).getAsString() );
+					});
+				}
+				
 				EnrichDataWebTester webTester = new EnrichDataWebTester(
-					processorId , groupId , testConfigs.get("properties").getAsJsonObject() 
+					processorId , groupId , 
+					testConfigs.get("properties").getAsJsonObject() ,
+					registryVariables
 				);
 				
 				// Collect ff attributes

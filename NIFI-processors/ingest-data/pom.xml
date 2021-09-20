@@ -24,6 +24,7 @@
 
     <groupId>org.disit.nifi.processors</groupId>
     <artifactId>ingest-data</artifactId>
+    <!-- Version -->
     <version>1.9.2</version>
     <packaging>pom</packaging>
     

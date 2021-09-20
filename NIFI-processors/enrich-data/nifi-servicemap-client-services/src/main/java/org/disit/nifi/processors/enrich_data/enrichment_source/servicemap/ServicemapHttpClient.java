@@ -165,6 +165,9 @@ public class ServicemapHttpClient extends HttpBaseClient
 
 	@Override
 	public String buildRequestUrl(String uriPrefix, String deviceId) throws UnsupportedEncodingException {
+		if( !uriPrefix.endsWith("/") )
+			uriPrefix = uriPrefix.concat("/");
+		
 		StringBuilder reqUrlBuilder = new StringBuilder( configs.servicemapUrl )
 			.append( "?serviceUri=" )
 			.append( URLEncoder.encode( uriPrefix + deviceId , StandardCharsets.UTF_8.name() ) )

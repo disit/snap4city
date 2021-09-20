@@ -70,6 +70,9 @@ import org.disit.nifi.processors.enrich_data.enrichment_source.EnrichmentSourceC
 import org.disit.nifi.processors.enrich_data.enrichment_source.EnrichmentSourceException;
 import org.disit.nifi.processors.enrich_data.enrichment_source.ServicemapSource;
 import org.disit.nifi.processors.enrich_data.json_processing.JsonProcessingUtils;
+import org.disit.nifi.processors.enrich_data.locators.EnrichmentResourceLocator;
+import org.disit.nifi.processors.enrich_data.locators.EnrichmentResourceLocatorException;
+import org.disit.nifi.processors.enrich_data.locators.EnrichmentResourceLocatorService;
 import org.disit.nifi.processors.enrich_data.logging.LoggingUtils;
 import org.disit.nifi.processors.enrich_data.logging.LoggingUtils.LoggableObject;
 import org.disit.nifi.processors.enrich_data.output_producer.ElasticsearchBulkIndexingOutputProducer;
@@ -171,6 +174,7 @@ public class EnrichData extends AbstractProcessor {
 	// the properties specified by the descriptors.
 	private static final Set<String> staticProperties = new HashSet<>( Arrays.asList(
 			"ENRICHMENT_SOURCE_CLIENT_SERVICE" ,
+			"ENRICHMENT_RESOURCE_LOCATOR_SERVICE" ,
 			"OWNERSHIP_CLIENT_SERVICE" ,
 			"OWNERSHIP_BEHAVIOR" ,
 	        "DEFAULT_OWNERSHIP_PROPERTIES" ,
@@ -187,7 +191,7 @@ public class EnrichData extends AbstractProcessor {
 		  	"TIMESTAMP_FIELD_NAME" ,
 		  	"TIMESTAMP_FROM_CONTENT_PROPERTY_NAME" ,
 		  	"TIMESTAMP_FROM_CONTENT_PROPERTY_VALUE" ,
-		  	"URI_PREFIX_FROM_ATTR_NAME" ,
+//		  	"URI_PREFIX_FROM_ATTR_NAME" ,
 		  	"VALUE_FIELD_NAME" ,  
 		  	"SRC_PROPERTY" , 
 		  	"KIND_PROPERTY", 
@@ -218,6 +222,15 @@ public class EnrichData extends AbstractProcessor {
 			.description( "The client service which identifies an enrichment source. This source will be used to enrich the incoming flow files content." )
 			.required( true )
 			.addValidator( EnrichmentSourceServiceValidators.STANDARD_ENRICHMENT_SOURCE_VALIDATOR )
+			.build();
+	
+	public static final PropertyDescriptor ENRICHMENT_RESOURCE_LOCATOR_SERVICE = new PropertyDescriptor
+			.Builder().name( "ENRICHMENT_RESOURCE_LOCATOR_SERVICE" )
+			.displayName( "Enrichment Resource Locator Service" )
+			.identifiesControllerService( EnrichmentResourceLocatorService.class )
+			.description( "The client service which identifies the resource locator service. The locator service will be used to retrieve the serviceUriPrefix in order to make requests to the enrichment source. If the resource locator cannot retrieve the serviceUriPrefix, the requests are made using the prefix configured in the enrichment source service." )
+			.required( false )
+			.addValidator( Validator.VALID )
 			.build();
 	
 	public static final PropertyDescriptor OWNERSHIP_CLIENT_SERVICE = new PropertyDescriptor
@@ -313,14 +326,14 @@ public class EnrichData extends AbstractProcessor {
             .build();
     
     // Uri prefix form flow file content object property
-    public static final PropertyDescriptor URI_PREFIX_FROM_ATTR_NAME = new PropertyDescriptor
-            .Builder().name( "URI_PREFIX_FROM_ATTR_NAME" )
-            .displayName( "Service uri prefix from attribute name" )
-            .description( "If this property is set the processor first looks for an attribute with the specified name in the input flow file to parse the service uri prefix from. Otherwise it uses the configured 'Enrichment Source Client Service'." )
-            .required(false)
-            .defaultValue("")
-            .addValidator(Validator.VALID)
-            .build();
+//    public static final PropertyDescriptor URI_PREFIX_FROM_ATTR_NAME = new PropertyDescriptor
+//            .Builder().name( "URI_PREFIX_FROM_ATTR_NAME" )
+//            .displayName( "Service uri prefix from attribute name" )
+//            .description( "If this property is set the processor first looks for an attribute with the specified name in the input flow file to parse the service uri prefix from. Otherwise it uses the configured 'Enrichment Source Client Service'." )
+//            .required(false)
+//            .defaultValue("")
+//            .addValidator(Validator.VALID)
+//            .build();
     
     // Value field (flow file content object)
     public static final PropertyDescriptor VALUE_FIELD_NAME = new PropertyDescriptor
@@ -512,6 +525,7 @@ public class EnrichData extends AbstractProcessor {
     static {
     	propertyDescriptors = Collections.unmodifiableList( Arrays.asList( 
 			ENRICHMENT_SOURCE_CLIENT_SERVICE , 	    // Enrichment sources
+			ENRICHMENT_RESOURCE_LOCATOR_SERVICE , 	// Enrichment sources
 	        OWNERSHIP_BEHAVIOR , 					// Enrichment sources
 	        OWNERSHIP_CLIENT_SERVICE , 				// Enrichment sources
 	        DEFAULT_OWNERSHIP_PROPERTIES , 			// Enrichment sources
@@ -521,7 +535,7 @@ public class EnrichData extends AbstractProcessor {
 	        TIMESTAMP_FIELD_NAME , 					// Timestamp
 	        TIMESTAMP_FROM_CONTENT_PROPERTY_NAME , 	// Timestamp
 	        TIMESTAMP_FROM_CONTENT_PROPERTY_VALUE , // Timestamp
-	        URI_PREFIX_FROM_ATTR_NAME ,				// Fields
+//	        URI_PREFIX_FROM_ATTR_NAME ,				// Fields
 	        VALUE_FIELD_NAME ,						// Fields
 	        ENRICHMENT_RESPONSE_BASE_PATH ,			// Enrichment sources
 	        LATLON_PRIORITY ,						// Coordinates
@@ -622,6 +636,9 @@ public class EnrichData extends AbstractProcessor {
     private EnrichmentSourceClient enrichmentSourceClient;
     private String defaultServiceUriPrefix = null;
     
+    private EnrichmentResourceLocatorService enrichmentResourceLocatorService;
+    private EnrichmentResourceLocator enrichmentResourceLocator;
+    
     private EnrichmentSourceClientService ownershipClientService;
     private EnrichmentSourceClient ownershipClient;
     
@@ -635,6 +652,7 @@ public class EnrichData extends AbstractProcessor {
     protected void init(final ProcessorInitializationContext context) {
         final List<PropertyDescriptor> descriptors = new ArrayList<PropertyDescriptor>();
         descriptors.add( ENRICHMENT_SOURCE_CLIENT_SERVICE );
+        descriptors.add( ENRICHMENT_RESOURCE_LOCATOR_SERVICE );
         descriptors.add( OWNERSHIP_BEHAVIOR );
         descriptors.add( OWNERSHIP_CLIENT_SERVICE );
         descriptors.add( DEFAULT_OWNERSHIP_PROPERTIES );
@@ -644,7 +662,7 @@ public class EnrichData extends AbstractProcessor {
         descriptors.add( TIMESTAMP_FIELD_NAME );
         descriptors.add( TIMESTAMP_FROM_CONTENT_PROPERTY_NAME );
         descriptors.add( TIMESTAMP_FROM_CONTENT_PROPERTY_VALUE );
-        descriptors.add( URI_PREFIX_FROM_ATTR_NAME );
+//        descriptors.add( URI_PREFIX_FROM_ATTR_NAME );
         descriptors.add( VALUE_FIELD_NAME );
         descriptors.add( ENRICHMENT_RESPONSE_BASE_PATH );
         descriptors.add( LATLON_PRIORITY );
@@ -740,6 +758,18 @@ public class EnrichData extends AbstractProcessor {
     	if( this.enrichmentSourceClient instanceof ServicemapSource ) {
     		this.defaultServiceUriPrefix = ( (ServicemapSource) this.enrichmentSourceClient )
     										.getDefaultUriPrefix();
+    	}
+    	
+    	// Enrichment resource locator
+    	if( context.getProperty( ENRICHMENT_RESOURCE_LOCATOR_SERVICE ).isSet() ) {
+    		this.enrichmentResourceLocatorService = context.getProperty( ENRICHMENT_RESOURCE_LOCATOR_SERVICE )
+    													   .asControllerService( EnrichmentResourceLocatorService.class );
+    		
+    		
+			this.enrichmentResourceLocator = enrichmentResourceLocatorService.getResourceLocator(context);
+    	}else {
+    		this.enrichmentResourceLocatorService = null;
+    		this.enrichmentResourceLocator = null;
     	}
     	
     	// Ownership controller service and client
@@ -904,7 +934,7 @@ public class EnrichData extends AbstractProcessor {
     		this.timestampFromContent = false;
     	
     	// Service URI from content
-    	this.serviceUriPrefixAttrName = context.getProperty( URI_PREFIX_FROM_ATTR_NAME ).getValue();
+//    	this.serviceUriPrefixAttrName = context.getProperty( URI_PREFIX_FROM_ATTR_NAME ).getValue();
 
     	// Output configs
     	//
@@ -1139,24 +1169,64 @@ public class EnrichData extends AbstractProcessor {
 			timestamp = rootObject.get( this.timestampFieldName ).getAsString();
 		}
 		
-		// Service uri prefix from attributes handling
+		// SERVICE URI PREFIX
+		// -----
 		String uriPrefix = null;
-		if( !this.serviceUriPrefixAttrName.isEmpty() ) {
-			// If the input ff does not contain such attribute the getAttribute() returns null
-			uriPrefix = flowFile.getAttribute( this.serviceUriPrefixAttrName );
-			
-			if( uriPrefix != null ) {
-				if( !uriPrefix.endsWith( "/" ) ) {
-					uriPrefix = uriPrefix.concat( "/" );
+		if( this.enrichmentResourceLocator != null ) {
+			try {
+				uriPrefix = enrichmentResourceLocator.getResourceLocation( flowFile );
+			} catch (EnrichmentResourceLocatorException e) {
+				StringBuilder msg = new StringBuilder( e.getMessage() );
+				List<Pair<String,String>> errorAttributes = new ArrayList<>();
+				LoggableObject errorObj = LoggingUtils.produceErrorObj( msg.toString() , rootEl )
+					.withExceptionInfo( e )
+					.withProperty( "ff-uuid" , uuid );
+				e.getAllAdditionalInfos().entrySet().stream().forEach( (Map.Entry<String , String> info) -> {
+					errorObj.withProperty( info.getKey() , info.getValue() );
+					errorAttributes.add( new ImmutablePair<String, String>( 
+						"failure."+info.getKey() , info.getValue() ) 
+					);
+				});
+				
+				// Determine if the failure from the resource locator is retriable
+				if( e.getCause() != null && shouldRetry( e.getCause() ) ) {
+					String locatorRequestUrl; 
+					try {
+						locatorRequestUrl = enrichmentResourceLocator.buildRequestUrl( flowFile );
+					} catch( EnrichmentResourceLocatorException ex ) { locatorRequestUrl = ""; }
+					errorAttributes.add( new ImmutablePair<String , String>( 
+						"locatorRequestUrl" , locatorRequestUrl ) );
+					errorAttributes.add( new ImmutablePair<String , String>( "failure" , msg.toString() ) );
+					errorAttributes.add( new ImmutablePair<String , String>( "failure.cause" , e.getCause().toString() ) );
+					routeToRelationship( flowFile , RETRY_RELATIONSHIP , session, errorAttributes);
+					
+					msg.append( String.format( " Routing to %s" , RETRY_RELATIONSHIP.getName() ) );
+					errorObj.setReason( msg.toString() );
+					errorObj.logAsError( logger );
+					return;
 				}
+				
+				msg.append( " The enrichment data will be retrieved using the service uri prefix configured in the Enrichment Source." );
+				errorObj.setReason( msg.toString() );
+				errorObj.logAsError( logger );
 			}
-		} 
-    		
+		}
+		
+		
+		// Service uri prefix from attributes handling
+//		if( uriPrefix == null ) {
+//			if( !this.serviceUriPrefixAttrName.isEmpty() ) {
+//				// If the input ff does not contain such attribute the getAttribute() returns null
+//				uriPrefix = flowFile.getAttribute( this.serviceUriPrefixAttrName );
+//			}
+//		}
+		// -----
+		
 		// Get enrichment data
 		JsonElement responseRootEl;
 		try {
 			if( uriPrefix != null )
-				responseRootEl = enrichmentSourceClient.getEnrichmentData( deviceId , uriPrefix );
+				responseRootEl = enrichmentSourceClient.getEnrichmentData( uriPrefix , deviceId );
 			else
 				responseRootEl = enrichmentSourceClient.getEnrichmentData( deviceId );
 		} catch (EnrichmentSourceException e) {
@@ -1239,7 +1309,6 @@ public class EnrichData extends AbstractProcessor {
 				ownershipResponseObj = this.defaultOwnershipProperties.deepCopy();
 		}
 		
-		
 		// Enrichment source response processing
 		//
 //		JsonElement responseRootEl;
@@ -1292,6 +1361,8 @@ public class EnrichData extends AbstractProcessor {
 				serviceUriPropertyValue.append( uriPrefix );
 			else if( this.defaultServiceUriPrefix != null )
 				serviceUriPropertyValue.append( this.defaultServiceUriPrefix );
+			if( !serviceUriPropertyValue.toString().endsWith("/") )
+				serviceUriPropertyValue.append( "/" );
 			serviceUriPropertyValue.append( deviceId );
 				
 			

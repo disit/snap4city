@@ -30,6 +30,7 @@ import org.apache.nifi.components.ValidationResult;
 import org.apache.nifi.components.Validator;
 import org.apache.nifi.controller.AbstractControllerService;
 import org.apache.nifi.controller.ConfigurationContext;
+import org.apache.nifi.expression.ExpressionLanguageScope;
 import org.apache.nifi.processor.ProcessContext;
 import org.apache.nifi.processor.util.StandardValidators;
 import org.apache.nifi.reporting.InitializationException;
@@ -54,6 +55,7 @@ public class OwnershipControllerService extends AbstractControllerService implem
             .displayName("Ownership API Url")
             .description("The endpoint to contact to get the ownership data.")
             .required(true)
+            .expressionLanguageSupported( ExpressionLanguageScope.VARIABLE_REGISTRY )
             .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
             .build();
     
@@ -171,7 +173,10 @@ public class OwnershipControllerService extends AbstractControllerService implem
 
     @OnEnabled
     public void onEnabled(final ConfigurationContext context) throws InitializationException {
-    	String ownershipApiUrl = context.getProperty( OWNERSHIP_API_URL ).getValue();
+//    	String ownershipApiUrl = context.getProperty( OWNERSHIP_API_URL ).getValue();
+    	String ownershipApiUrl = context.getProperty( OWNERSHIP_API_URL )
+    									.evaluateAttributeExpressions()
+    									.getValue();
     	String elementIdPrefix = context.getProperty( ELEMENT_ID_PREFIX ).getValue();
     	String elementIdName = context.getProperty( ELEMENT_ID_NAME ).getValue();
     	

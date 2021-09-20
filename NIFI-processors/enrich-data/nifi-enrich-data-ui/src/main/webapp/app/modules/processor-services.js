@@ -14,6 +14,35 @@
 export class ProcessorServices {
 	
 	/**
+	 * Setup method.
+	 */
+	static setup(){
+		// Add authentication header to requests if a token is found
+		var authToken = ProcessorServices.getAuthenticationToken();
+		if( authToken != null ){
+			$.ajaxSetup({
+				"headers" : { 'Authorization' : 'Bearer ' + authToken }
+			});
+		}
+	}
+	
+	/**
+	 * Retrieves the authentication token from the nf.Storage module if any,
+	 * or null if there are no access tokens in the NiFi storage.
+	 */
+	static getAuthenticationToken(){
+		if( typeof nf !== typeof undefined && nf != null ){
+			var token = null;
+			if( nf.Storage.hasItem('jwt') ){
+				token = nf.Storage.getItem('jwt')
+			}
+			return token;
+		}else{
+			throw "'nf' object undefined or null, check the '../nifi/js/nf/nifi-namespace.js' import."
+		}
+	}
+	
+	/**
 	 * Retrieve processor details from the custom endpoint.
 	 * 
 	 * GET api/enrich-data/details?processorId=<PROCESSOR ID>
@@ -45,6 +74,18 @@ export class ProcessorServices {
 	 */
 	static getControllerServices( processGroupId ){
 		return $.get( '../nifi-api/flow/process-groups/' + processGroupId + '/controller-services' );
+	}
+	
+	/**
+	 * Retrieve the variables defined in the VariableRegistry for the process group with the 
+	 * supplied id.
+	 * 
+	 * GET nifi-api/process-groups/<PROCESS GROUP ID>
+	 * 
+	 * @return a jQuery.ajax object containing the GET request.
+	 */
+	static getGroupVariableRegistry( processGroupId ){
+		return $.get( '../nifi-api/process-groups/' + processGroupId );
 	}
 	
 	/**

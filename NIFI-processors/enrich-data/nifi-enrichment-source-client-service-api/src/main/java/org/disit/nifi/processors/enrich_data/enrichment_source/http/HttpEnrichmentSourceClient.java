@@ -28,47 +28,59 @@ import org.apache.nifi.processor.ProcessContext;
 import org.disit.nifi.processors.enrich_data.enrichment_source.EnrichmentSourceClient;
 import org.disit.nifi.processors.enrich_data.enrichment_source.EnrichmentSourceException;
 
-public abstract class HttpEnrichmentSourceClient implements EnrichmentSourceClient{
-
-	//Http client
-	protected PoolingHttpClientConnectionManager connectionManager;
-	protected CloseableHttpClient httpClient;
-//	protected ResponseHandler<String> responseHandler;
+public abstract class HttpEnrichmentSourceClient extends HttpBaseClient implements EnrichmentSourceClient {
 	
-	protected HttpEnrichmentSourceClient( int maxPerRoute , int maxTotal ){
-		connectionManager = new PoolingHttpClientConnectionManager();
-		connectionManager.setDefaultMaxPerRoute( maxPerRoute );
-		connectionManager.setMaxTotal( maxTotal );
-		
-		httpClient = HttpClients.custom()
-							    .setConnectionManager( connectionManager )
-							    .build();
-//		responseHandler = new BasicResponseHandler();
+	protected HttpEnrichmentSourceClient( int maxPerRoute , int maxTotal ) {
+		super( maxPerRoute , maxTotal );
 	}
 	
-	protected HttpEnrichmentSourceClient( ProcessContext context ){
+	protected HttpEnrichmentSourceClient( ProcessContext context ) {
 		this( context.getMaxConcurrentTasks() , context.getMaxConcurrentTasks() );
 	}
-	
-	protected HttpResponse executeRequest( HttpUriRequest request ) throws EnrichmentSourceException{
-		try {
-			HttpResponse response = httpClient.execute( request );
-			return response;
-		} catch (ClientProtocolException e) {
-			throw new EnrichmentSourceException( "ClientProtocolException while retrieving data from HTTP source." , e );
-		} catch (IOException e) {
-			throw new EnrichmentSourceException( "IOException while retrieving data from HTTP source." , e );
-		}
-	}
-	
-	@Override
-	public void close() throws EnrichmentSourceException{
-		try {
-			this.httpClient.close();
-		} catch (IOException e) {
-			throw new EnrichmentSourceException( "IOException while closing http client." , e ); 
-		} finally {
-			this.connectionManager.close();
-		}
-	}
+
 }
+
+//public abstract class HttpEnrichmentSourceClient implements EnrichmentSourceClient{
+//
+//	//Http client
+//	protected PoolingHttpClientConnectionManager connectionManager;
+//	protected CloseableHttpClient httpClient;
+////	protected ResponseHandler<String> responseHandler;
+//	
+//	protected HttpEnrichmentSourceClient( int maxPerRoute , int maxTotal ){
+//		connectionManager = new PoolingHttpClientConnectionManager();
+//		connectionManager.setDefaultMaxPerRoute( maxPerRoute );
+//		connectionManager.setMaxTotal( maxTotal );
+//		
+//		httpClient = HttpClients.custom()
+//							    .setConnectionManager( connectionManager )
+//							    .build();
+////		responseHandler = new BasicResponseHandler();
+//	}
+//	
+//	protected HttpEnrichmentSourceClient( ProcessContext context ){
+//		this( context.getMaxConcurrentTasks() , context.getMaxConcurrentTasks() );
+//	}
+//	
+//	protected HttpResponse executeRequest( HttpUriRequest request ) throws EnrichmentSourceException{
+//		try {
+//			HttpResponse response = httpClient.execute( request );
+//			return response;
+//		} catch (ClientProtocolException e) {
+//			throw new EnrichmentSourceException( "ClientProtocolException while retrieving data from HTTP source." , e );
+//		} catch (IOException e) {
+//			throw new EnrichmentSourceException( "IOException while retrieving data from HTTP source." , e );
+//		}
+//	}
+//	
+//	@Override
+//	public void close() throws EnrichmentSourceException{
+//		try {
+//			this.httpClient.close();
+//		} catch (IOException e) {
+//			throw new EnrichmentSourceException( "IOException while closing http client." , e ); 
+//		} finally {
+//			this.connectionManager.close();
+//		}
+//	}
+//}
