@@ -24,29 +24,33 @@ import org.disit.nifi.processors.enrich_data.locators.iotdirectory.oauth.IOTDire
 import org.disit.nifi.processors.enrich_data.oauth.OAuthTokenProviderService;
 import org.disit.nifi.processors.enrich_data.oauth.keycloak.KeycloakTokenProviderControllerService;
 import org.disit.nifi.processors.enrich_data.test.api_mock.JsonResourceMockHandler;
+import org.disit.nifi.processors.enrich_data.test.api_mock.KeycloakMockHandler;
 import org.disit.nifi.processors.enrich_data.test.locator.EnrichDataLocatorTests;
 import org.junit.BeforeClass;
 
 import com.google.common.collect.ImmutableMap;
 
+/**
+ * Unit tests for the EnrichData processor using:
+ * 	Servicemap 		
+ *  iotdirectory 	<- OAUTH
+ */
 public class EnrichDataOAuthLocatorTests extends EnrichDataLocatorTests{
 	
-	// NOTE: configure for a valid running keycloak instance
-	
-//  private String keycloakUrl = ">>> KEYCLOAK URL <<<";
-//  private String clientId = ">>> CLIENT ID <<<";
-//  private String clientSecret = ">>> CLIENT SECRET<<<";
-//  private String realm = ">>> REALM <<<";
-//  private String username = ">>> USERNAME <<<";
-//  private String password = ">>> PASSWORD <<<";
+	// Keycloak configs
 	protected final static String clientId = "nifi-node";
-	protected final static String clientSecret = "127ee466-6255-4336-bf93-bb9d652a7011";
-	protected final static String keycloakUrl = "http://192.168.1.50:8080";
+	protected final static String clientSecret = "nifi-node-secret";
+	protected final static String mockKeycloakEndpoint = "/keycloak";
+	protected final static String keycloakUrl = "http://localhost:" + 
+												mockServicemapPort + 
+												mockKeycloakEndpoint;
 	protected final static String realm="nifi";
 	protected final static String username = "nifi-node-1";
 	protected final static String password = "password";
 	
+	// Services
 	protected OAuthTokenProviderService keycloakService;
+	protected static KeycloakMockHandler keycloak;
 	
 	public void setupKeycloakControllerService() throws InitializationException {
 		String csName = "KeycloakTokenProviderControllerService";
@@ -98,6 +102,11 @@ public class EnrichDataOAuthLocatorTests extends EnrichDataLocatorTests{
 	}
 	
 	protected static void setupOAuthIOTDirectoryMock() throws IOException{
+		keycloak = new KeycloakMockHandler( realm , mockServicemapPort );
+		keycloak.addClient( clientId , clientSecret );
+		keycloak.addUser( clientId , username , password );
+		srv.addHandler( keycloak , mockKeycloakEndpoint );
+		
 		iotDirectory = new JsonResourceMockHandler( subIdReqName , "IOTDirectory Mock Handler" );
 		srv.addProtectedHandler( iotDirectory , iotDirectoryEndpoint , 
 			clientId , clientSecret , 

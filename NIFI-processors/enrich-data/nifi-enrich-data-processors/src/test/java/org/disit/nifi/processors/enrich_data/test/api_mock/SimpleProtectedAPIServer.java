@@ -45,6 +45,10 @@ import com.github.scribejava.core.oauth.OAuth20Service;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+/**
+ * A simple Jetty-based server which supports protected APIs
+ * throught OAuth2/Open-ID access tokens. 
+ */
 public class SimpleProtectedAPIServer {
 
 	private Server server;
@@ -144,6 +148,23 @@ public class SimpleProtectedAPIServer {
 			return map;
 		}
 		
+		private Response verifyAccessToken( String accessToken ) throws InterruptedException, ExecutionException, IOException {
+			
+			OAuth2AccessToken token = new OAuth2AccessToken( accessToken );
+			
+			final OAuthRequest oaReq = new OAuthRequest( Verb.GET , this.userinfoUrl );
+//			oaReq.addHeader( "Authorization" , "Bearer " + accessToken );
+			service.signRequest( token , oaReq );
+			
+			if( verbose ) {
+				System.out.println( "Verification request: " + oaReq.toString() );
+				System.out.println( "Verification request headers: " + oaReq.getHeaders().toString() );
+//				System.out.println( "Verification request OAuth parameters: " + oaRequest.getOauthParameters().toString() );
+			}
+			
+			return service.execute( oaReq );
+		}
+		
 		@Override
 		public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
 				throws IOException, ServletException {
@@ -165,21 +186,9 @@ public class SimpleProtectedAPIServer {
 			}
 			
 			String accessTokenStr = authHeaderValue.substring( 7 , authHeaderValue.length() );
-			OAuth2AccessToken token = new OAuth2AccessToken( accessTokenStr );
-			
-			final OAuthRequest oaRequest = new OAuthRequest( Verb.GET , this.userinfoUrl );
-//			service.signRequest( token , oaRequest );
-			oaRequest.addHeader( "Authorization" , "Bearer " + accessTokenStr );
-			
-			if( verbose ) {
-				System.out.println( "Verification request: " + oaRequest.toString() );
-				System.out.println( "Verification request headers: " + oaRequest.getHeaders().toString() );
-//				System.out.println( "Verification request OAuth parameters: " + oaRequest.getOauthParameters().toString() );
-			}
 			
 			JsonObject rObj;
-			try( Response oaResponse = service.execute( oaRequest ) ) {
-				
+			try( Response oaResponse = verifyAccessToken( accessTokenStr ) ) {
 				rObj = new JsonObject();
 				rObj.addProperty( "verified-access-token", accessTokenStr );
 				rObj.addProperty( "keycloak-response-code" , oaResponse.getCode() );

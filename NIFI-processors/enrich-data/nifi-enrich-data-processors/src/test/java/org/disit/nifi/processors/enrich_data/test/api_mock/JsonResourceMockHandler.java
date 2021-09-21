@@ -32,6 +32,9 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
+/**
+ * Handler to mock json resources
+ */
 public class JsonResourceMockHandler extends AbstractHandler{
 
 	private Map<String , JsonElement> resources;
@@ -60,7 +63,6 @@ public class JsonResourceMockHandler extends AbstractHandler{
 	@Override
 	public void handle(String target, Request base, HttpServletRequest request, HttpServletResponse response)
 			throws IOException, ServletException {
-		
 		System.out.println( String.format( "------ %s ------" , this.handlerName) );
 		System.out.println( "TARGET: " + target );
 		System.out.println( "Request URL: " + request.getRequestURL() );

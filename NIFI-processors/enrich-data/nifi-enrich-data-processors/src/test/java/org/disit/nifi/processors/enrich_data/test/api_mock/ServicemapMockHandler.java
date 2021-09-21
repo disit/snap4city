@@ -39,6 +39,9 @@ import com.google.gson.JsonParser;
 
 import groovyjarjarasm.asm.commons.Method;
 
+/**
+ * Handler to mock Servicemap.
+ */
 public class ServicemapMockHandler extends AbstractHandler{
 
 	

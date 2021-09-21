@@ -94,6 +94,7 @@ public class ServicemapHttpClient extends HttpBaseClient
 	@Override
 	public JsonElement getEnrichmentData(String deviceId) throws EnrichmentSourceException {
 		String requestUrl;
+		
 		try {
 			requestUrl = buildRequestUrl( deviceId );
 		}catch( UnsupportedEncodingException e ) {
@@ -109,6 +110,7 @@ public class ServicemapHttpClient extends HttpBaseClient
 	@Override
 	public JsonElement getEnrichmentData(String deviceId, String uriPrefix) throws EnrichmentSourceException {
 		String requestUrl;
+		
 		try {
 			requestUrl = buildRequestUrl( deviceId , uriPrefix );
 		}catch( UnsupportedEncodingException e ) {

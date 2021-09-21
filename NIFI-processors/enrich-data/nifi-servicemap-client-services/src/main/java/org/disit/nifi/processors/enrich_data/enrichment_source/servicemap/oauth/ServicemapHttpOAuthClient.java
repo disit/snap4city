@@ -50,6 +50,7 @@ public class ServicemapHttpOAuthClient extends ServicemapHttpClient {
 	@Override
 	public JsonElement getEnrichmentData( String elementIdPrefix , String elementId ) throws EnrichmentSourceException{
 		String requestUrl;
+		
 		try {
 			requestUrl = buildRequestUrl( elementIdPrefix , elementId );
 		}catch( UnsupportedEncodingException e ) {
@@ -64,7 +65,7 @@ public class ServicemapHttpOAuthClient extends ServicemapHttpClient {
 	
 	@Override
 	public JsonElement getEnrichmentData( String elementId ) throws EnrichmentSourceException {
-		return getEnrichmentData( elementId , configs.defaultUriPrefix );
+		return getEnrichmentData( configs.defaultUriPrefix , elementId );
 	}
 	
 	private JsonElement fetchEnrichmentData( String requestUrl ) throws EnrichmentSourceException {

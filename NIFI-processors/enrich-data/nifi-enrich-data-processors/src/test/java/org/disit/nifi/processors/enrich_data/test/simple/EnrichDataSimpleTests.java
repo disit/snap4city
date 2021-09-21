@@ -34,41 +34,19 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+/**
+ * Unit tests for the EnrichData processor using:
+ * 	Servicemap
+ */
 public class EnrichDataSimpleTests extends EnrichDataTestBase{
-	
-//	protected Map<String , String> ffAttributes = null;
-	
-//	@BeforeClass
-//	public static void startServices() throws Exception {
-//		srv.start();
-//	}
-	
-//	protected void configureFFAttributes( Map<String , String> attributes ) {
-//		this.ffAttributes = ImmutableMap.copyOf( attributes );
-//	}
-//	
-//	protected void clearConfiguredAttributes() {
-//		if( ffAttributes != null )
-//			ffAttributes = null;
-//	}
-//	
-//	protected MockFlowFile enqueueFlowFile( String path ) throws IOException {
-//		MockFlowFile inputFF;
-//		if( this.ffAttributes != null && !this.ffAttributes.isEmpty() )
-//			inputFF = testRunner.enqueue( Paths.get( path ) , this.ffAttributes );
-//		else
-//			inputFF = testRunner.enqueue( Paths.get( path ) );
-//		return inputFF;
-//	}
 	
 	@Test
 	public void testJsonOutput() throws IOException {
-		System.out.println( "######## " + testName() + " ########" );
+		System.out.println( "\n######## " + testName() + " ########" );
 		addServicemapResource( "id" , serviceUriPrefix , 
 			"src/test/resources/mock_in_ff/testOutputs.ff" , 
 			"src/test/resources/mock_servicemap_response/testOutputs.resp" );
 		
-//		clearConfiguredAttributes();
 		MockFlowFile inputFF = enqueueFlowFile( "src/test/resources/mock_in_ff/testOutputs.ff" );
 		
 		JsonElement expectedResult = TestUtils.prepareExpectedResult( 
@@ -89,12 +67,11 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 	
 	@Test
 	public void testSplitJsonOutput() throws IOException {
-		System.out.println( "######## " + testName() + " ########" );
+		System.out.println( "\n######## " + testName() + " ########" );
 		addServicemapResource( "id" , serviceUriPrefix , 
 			"src/test/resources/mock_in_ff/testOutputs.ff" , 
 			"src/test/resources/mock_servicemap_response/testOutputs.resp" );
 		
-//		clearConfiguredAttributes();
 		MockFlowFile inputFF = enqueueFlowFile( "src/test/resources/mock_in_ff/testOutputs.ff" );
 		
 		JsonArray expectedResult = TestUtils.prepareExpectedResult( 
@@ -118,12 +95,11 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 	
 	@Test
 	public void testEmptyOutObj() throws IOException {
-		System.out.println( "######## " + testName() + " ########" );
+		System.out.println( "\n######## " + testName() + " ########" );
 		addServicemapResource( "id" , serviceUriPrefix , 
 			"src/test/resources/mock_in_ff/testEmptyOutObj.ff" , 
 			"src/test/resources/mock_servicemap_response/testEmptyOutObj.resp" );
 		
-//		clearConfiguredAttributes();
 		MockFlowFile inputFF = enqueueFlowFile( "src/test/resources/mock_in_ff/testEmptyOutObj.ff" );
 		
 		testRunner.setProperty( EnrichData.OUTPUT_FF_CONTENT_FORMAT , EnrichData.OUTPUT_FF_CONTENT_FORMAT_VALUES[0] ); // Json Object
@@ -137,12 +113,11 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 	
 	@Test
 	public void testArrayValue() throws IOException {
-		System.out.println( "######## " + testName() + " ########" );
+		System.out.println( "\n######## " + testName() + " ########" );
 		addServicemapResource( "id" , serviceUriPrefix , 
 			"src/test/resources/mock_in_ff/testArrayValue.ff" , 
 			"src/test/resources/mock_servicemap_response/testArrayValue.resp" );
 		
-//		clearConfiguredAttributes();
 		MockFlowFile inputFF = enqueueFlowFile( "src/test/resources/mock_in_ff/testArrayValue.ff" );
 		
 		testRunner.setProperty( EnrichData.OUTPUT_FF_CONTENT_FORMAT , EnrichData.OUTPUT_FF_CONTENT_FORMAT_VALUES[2] ); // Split JSON
@@ -164,12 +139,11 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 	
 	@Test
 	public void testStringValueParsing() throws IOException{
-		System.out.println( "######## " + testName() + " ########" );
+		System.out.println( "\n######## " + testName() + " ########" );
 		addServicemapResource( "id" , serviceUriPrefix , 
 			"src/test/resources/mock_in_ff/testParseStringValue.ff" , 
 			"src/test/resources/mock_servicemap_response/testOutputs.resp" );
 		
-//		clearConfiguredAttributes();
 		MockFlowFile inputFF = enqueueFlowFile( "src/test/resources/mock_in_ff/testParseStringValue.ff" );
 		
 		testRunner.setProperty( EnrichData.OUTPUT_FF_CONTENT_FORMAT , EnrichData.OUTPUT_FF_CONTENT_FORMAT_VALUES[0] ); // JSON Object
@@ -195,7 +169,6 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 									int expectedSuccessFFCount ) throws IOException {
 		addServicemapResource( "id" , serviceUriPrefix , inputFlowFilePath , responseFilePath );
 			
-//		clearConfiguredAttributes();
 		MockFlowFile inputFF = enqueueFlowFile( inputFlowFilePath );
 		
 		testRunner.setProperty( EnrichData.OUTPUT_FF_CONTENT_FORMAT , EnrichData.OUTPUT_FF_CONTENT_FORMAT_VALUES[2] ); // Split Json
@@ -224,7 +197,7 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 	
 	@Test
 	public void testInnerLatLonGeoJson() throws IOException {
-		System.out.println( "######## " + testName() + " ########" );
+		System.out.println( "\n######## " + testName() + " ########" );
 		testInnerLatLon(
 			"src/test/resources/mock_in_ff/testInnerLatLonGeoJson.ff" ,
 			"src/test/resources/mock_servicemap_response/testOutputs.resp" ,
@@ -245,7 +218,7 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 	
 	@Test
 	public void testInnerLatLonGeoPoint() throws IOException {
-		System.out.println( "######## " + testName() + " ########" );
+		System.out.println( "\n######## " + testName() + " ########" );
 		testInnerLatLon(
 			"src/test/resources/mock_in_ff/testInnerLatLonGeoPoint.ff" ,
 			"src/test/resources/mock_servicemap_response/testOutputs.resp" ,
@@ -266,7 +239,7 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 	
 	@Test
 	public void testInnerLatLonGeoDistinctFields() throws IOException {
-		System.out.println( "######## " + testName() + " ########" );
+		System.out.println( "\n######## " + testName() + " ########" );
 		testInnerLatLon(
 			"src/test/resources/mock_in_ff/testInnerLatLonDistinctFields.ff" ,
 			"src/test/resources/mock_servicemap_response/testOutputs.resp" ,
@@ -287,7 +260,8 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 	
 	@Test
 	public void testInnerLatLonMissing() throws IOException {
-		System.out.println( "######## " + testName() + " ########" );
+		System.out.println( ""
+				+ "\n######## " + testName() + " ########" );
 		testInnerLatLon(
 			"src/test/resources/mock_in_ff/testInnerLatLonMissing.ff" ,
 			"src/test/resources/mock_servicemap_response/testOutputs.resp" ,
@@ -308,7 +282,7 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 	
 	@Test
 	public void testInnerLatLonNotParsable() throws IOException {
-		System.out.println( "######## " + testName() + " ########" );
+		System.out.println( "\n######## " + testName() + " ########" );
 		testInnerLatLon(
 			"src/test/resources/mock_in_ff/testInnerLatLonErrorNotParsable.ff" ,
 			"src/test/resources/mock_servicemap_response/testOutputs.resp" ,
@@ -330,7 +304,7 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 	// -------- Original FF augmentation tests --------
 	@Test
 	public void testOriginalFFAugmentation() throws IOException {
-		System.out.println( "######## " + testName() + " ########" );
+		System.out.println( "\n######## " + testName() + " ########" );
 		addServicemapResource( "id" , serviceUriPrefix , 
 			"src/test/resources/mock_in_ff/testOutputs.ff" , 
 			"src/test/resources/mock_servicemap_response/testOutputs.resp" );
@@ -344,7 +318,6 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
     	ValidationResult vr = getValidationResult( EnrichData.ORIGINAL_FLOW_FILE_ATTRIBUTES_AUG );
     	System.out.println("Validation of '" + EnrichData.ORIGINAL_FLOW_FILE_ATTRIBUTES_AUG.getDisplayName() + "':\n\t" + vr.toString() );
     	
-//    	clearConfiguredAttributes();
     	enqueueFlowFile( "src/test/resources/mock_in_ff/testOutputs.ff" );
     	
     	testRunner.run();

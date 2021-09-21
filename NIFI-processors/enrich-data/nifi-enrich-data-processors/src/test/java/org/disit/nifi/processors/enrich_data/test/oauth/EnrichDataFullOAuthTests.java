@@ -37,6 +37,7 @@ import org.disit.nifi.processors.enrich_data.ownership.oauth.OwnershipOAuthContr
 import org.disit.nifi.processors.enrich_data.test.EnrichDataTestBase;
 import org.disit.nifi.processors.enrich_data.test.TestUtils;
 import org.disit.nifi.processors.enrich_data.test.api_mock.JsonResourceMockHandler;
+import org.disit.nifi.processors.enrich_data.test.api_mock.KeycloakMockHandler;
 import org.disit.nifi.processors.enrich_data.test.api_mock.ServicemapMockHandler;
 import org.disit.nifi.processors.enrich_data.test.api_mock.SimpleProtectedAPIServer;
 import org.junit.BeforeClass;
@@ -46,19 +47,22 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+
+/**
+ * Unit tests for the EnrichData processor using:
+ * 	Servicemap 		<- OAUTH
+ *  Ownership  		<- OAUTH
+ *  iotdirectory 	<- OAUTH
+ */
 public class EnrichDataFullOAuthTests extends EnrichDataTestBase{
-	
-	// NOTE: configure for a valid running keycloak instance
-	
-//  private String keycloakUrl = ">>> KEYCLOAK URL <<<";
-//  private String clientId = ">>> CLIENT ID <<<";
-//  private String clientSecret = ">>> CLIENT SECRET<<<";
-//  private String realm = ">>> REALM <<<";
-//  private String username = ">>> USERNAME <<<";
-//  private String password = ">>> PASSWORD <<<";
+
+	// Keycloak configs
 	protected final static String clientId = "nifi-node";
-	protected final static String clientSecret = "127ee466-6255-4336-bf93-bb9d652a7011";
-	protected final static String keycloakUrl = "http://192.168.1.50:8080";
+	protected final static String clientSecret = "nifi-node-secret";
+	protected final static String mockKeycloakEndpoint = "/keycloak";
+	protected final static String keycloakUrl = "http://localhost:" + 
+												mockServicemapPort + 
+												mockKeycloakEndpoint;
 	protected final static String realm="nifi";
 	protected final static String username = "nifi-node-1";
 	protected final static String password = "password";
@@ -91,6 +95,7 @@ public class EnrichDataFullOAuthTests extends EnrichDataTestBase{
 	// Services
 	protected static JsonResourceMockHandler iotDirectory;
 	protected static JsonResourceMockHandler ownership;
+	protected static KeycloakMockHandler keycloak;
 	
 	public void setupServicemapOAuthControllerService() throws InitializationException {
 		servicemapService = new ServicemapOAuthControllerService();
@@ -199,6 +204,12 @@ public class EnrichDataFullOAuthTests extends EnrichDataTestBase{
 	
 	protected static void setupServicesMock() {
 		srv = new SimpleProtectedAPIServer( mockServicemapPort );
+		//Keycloak
+		keycloak = new KeycloakMockHandler( realm , mockServicemapPort );
+		keycloak.addClient( clientId , clientSecret );
+		keycloak.addUser( clientId , username , password );
+		srv.addHandler( keycloak , mockKeycloakEndpoint );
+		
 		// Servicemap
 		servicemap = new ServicemapMockHandler();
 		srv.addProtectedHandler( servicemap , 

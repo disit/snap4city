@@ -52,7 +52,6 @@ public class OwnershipHttpOAuthClient extends OwnershipHttpClient{
 		}else {
 			this.tokenMode = TOKEN_AS_QUERY_STRING_PARAMETER;
 		}
-		
 	}
 	
 	@Override

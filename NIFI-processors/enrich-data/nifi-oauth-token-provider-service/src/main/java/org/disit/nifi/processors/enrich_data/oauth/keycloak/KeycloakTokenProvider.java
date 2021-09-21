@@ -101,7 +101,6 @@ public class KeycloakTokenProvider implements OAuthTokenProvider {
 	}
 	
 	public void refreshTokenCache() throws IOException, InterruptedException, ExecutionException {
-		
 		if( !tokenCache.isValid() && !tokenCache.isRefreshValid() ) {
 			// Get a new token
 			OAuth2AccessToken token = service.getAccessTokenPasswordGrant( kc.username , kc.password );
@@ -112,6 +111,7 @@ public class KeycloakTokenProvider implements OAuthTokenProvider {
 				OAuth2AccessToken freshToken = service.refreshAccessToken( tokenCache.getToken().getRefreshToken() );
 				tokenCache.cacheToken( freshToken );
 			} catch( OAuth2AccessTokenErrorResponse err ) {
+				// Or get a new token if an error occurred while refreshing
 				OAuth2AccessToken token = service.getAccessTokenPasswordGrant( kc.username , kc.password );
 				tokenCache.cacheToken( token );
 			}
@@ -148,6 +148,7 @@ public class KeycloakTokenProvider implements OAuthTokenProvider {
 		}
 		
 		public JsonObject decodeTokenPayload( String tokenStr ) {
+//			System.out.println( tokenStr );
 			String[] tokenParts = tokenStr.split( "\\." );
 			String payload = new String( Base64.getDecoder().decode( tokenParts[1] ) );
 			JsonObject payloadObj = KeycloakTokenProvider.this.parser

@@ -46,6 +46,11 @@ import static com.tngtech.keycloakmock.api.TokenConfig.aTokenConfig;
 
 import static com.tngtech.keycloakmock.api.ServerConfig.aServerConfig;
 
+/**
+ * Unit tests for the EnrichData processor using:
+ * 	Servicemap
+ *  iotdirectory 
+ */
 public class EnrichDataLocatorTests extends EnrichDataSimpleTests {
 	
 	// IOTDirectoryLocator configs

@@ -21,29 +21,32 @@ import org.disit.nifi.processors.enrich_data.enrichment_source.servicemap.Servic
 import org.disit.nifi.processors.enrich_data.enrichment_source.servicemap.oauth.ServicemapOAuthControllerService;
 import org.disit.nifi.processors.enrich_data.oauth.OAuthTokenProviderService;
 import org.disit.nifi.processors.enrich_data.oauth.keycloak.KeycloakTokenProviderControllerService;
+import org.disit.nifi.processors.enrich_data.test.api_mock.KeycloakMockHandler;
 import org.disit.nifi.processors.enrich_data.test.api_mock.ServicemapMockHandler;
 import org.disit.nifi.processors.enrich_data.test.api_mock.SimpleProtectedAPIServer;
 import org.disit.nifi.processors.enrich_data.test.simple.EnrichDataSimpleTests;
 import org.junit.BeforeClass;
 
+/**
+ * Unit tests for the EnrichData processor using:
+ * 	Servicemap 		<- OAUTH
+ */
 public class EnrichDataOAuthTests extends EnrichDataSimpleTests {
 	
-	// NOTE: configure for a valid running keycloak instance
-	
-//  private String keycloakUrl = ">>> KEYCLOAK URL <<<";
-//  private String clientId = ">>> CLIENT ID <<<";
-//  private String clientSecret = ">>> CLIENT SECRET<<<";
-//  private String realm = ">>> REALM <<<";
-//  private String username = ">>> USERNAME <<<";
-//  private String password = ">>> PASSWORD <<<";
+	// Keycloak configs
 	protected final static String clientId = "nifi-node";
-	protected final static String clientSecret = "127ee466-6255-4336-bf93-bb9d652a7011";
-	protected final static String keycloakUrl = "http://192.168.1.50:8080";
+	protected final static String clientSecret = "nifi-node-secret";
+	protected final static String mockKeycloakEndpoint = "/keycloak";
+	protected final static String keycloakUrl = "http://localhost:" + 
+												mockServicemapPort + 
+												mockKeycloakEndpoint;
 	protected final static String realm="nifi";
 	protected final static String username = "nifi-node-1";
 	protected final static String password = "password";
 	
+	// Services
 	protected OAuthTokenProviderService keycloakService;
+	protected static KeycloakMockHandler keycloak;
 	
 	public void setupServicemapOAuthControllerService() throws InitializationException {
 		servicemapService = new ServicemapOAuthControllerService();
@@ -80,6 +83,12 @@ public class EnrichDataOAuthTests extends EnrichDataSimpleTests {
 	
 	protected static void setupOAuthServicemapMock( boolean startServer ) throws Exception {
 		srv = new SimpleProtectedAPIServer( mockServicemapPort );
+		
+		keycloak = new KeycloakMockHandler( realm , mockServicemapPort );
+		keycloak.addClient( clientId , clientSecret );
+		keycloak.addUser( clientId , username , password );
+		srv.addHandler( keycloak , mockKeycloakEndpoint );
+		
 		servicemap = new ServicemapMockHandler();
 		srv.addProtectedHandler( servicemap , 
 			mockServicemapEndpoint , 

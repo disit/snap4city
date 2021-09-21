@@ -59,6 +59,8 @@ import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 
+// TODO: Refactor
+
 public class UpdateEnrichmentSourceTests {
 
 	private TestRunner testRunner;

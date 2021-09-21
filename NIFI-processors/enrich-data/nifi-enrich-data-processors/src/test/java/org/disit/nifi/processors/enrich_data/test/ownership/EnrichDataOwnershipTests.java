@@ -26,12 +26,18 @@ import org.disit.nifi.processors.enrich_data.ownership.OwnershipControllerServic
 import org.disit.nifi.processors.enrich_data.test.EnrichDataTestBase;
 import org.disit.nifi.processors.enrich_data.test.TestUtils;
 import org.disit.nifi.processors.enrich_data.test.api_mock.JsonResourceMockHandler;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+/**
+ * Unit tests for the EnrichData processor using:
+ * 	Servicemap 		<- OAUTH
+ *  Ownership
+ */
 public class EnrichDataOwnershipTests extends EnrichDataTestBase{
 	
 	protected static final String mockOwnershipEndpoint = "/ownership";

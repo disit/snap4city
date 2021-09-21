@@ -8,11 +8,17 @@ Processors:
 * OwnershipEnrichData
 
 ControllerServices:
-* ServicemapControllerService
-* ServicemapOAuthControllerService
-* OwnershipControllerService
-* OwnershipOAuthControllerService
-* KeycloakTokenProviderControllerService
+* Servicemap:
+	* ServicemapControllerService
+	* ServicemapOAuthControllerService
+* Ownership:
+	* OwnershipControllerService
+	* OwnershipOAuthControllerService
+* Keyclaok/OAuth:
+	* KeycloakTokenProviderControllerService
+* IOTDirectory:
+	* IOTDirectoryLocatorControllerService
+	* IOTDirectoryOAuthLocatorControllerService
 
 
 ## Build:
