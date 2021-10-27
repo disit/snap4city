@@ -45,7 +45,10 @@ public class ConfigurationServiceImpl implements IConfigurationService {
 	@Value("${elasticsearch.kibanahost}")
 	private String elasticSearchHosts;
 
-	@Override
+	@Value("${elasticsearch.kibanaDashboardUrl}")
+	private String kibanaDashboardUrl;
+
+        @Override
 	public HashMap<String, String> getConfiguration(String version, Locale lang) {
 		HashMap<String, String> config = new HashMap<>();
 		if (version.equals("v1")) {
@@ -57,6 +60,7 @@ public class ConfigurationServiceImpl implements IConfigurationService {
 			config.put("grp.Authentication.clientId", grpAuthenticationClientId);
 			config.put("ldap.basicdn", springLdapBasicDn);
 			config.put("elasticsearch.hosts", elasticSearchHosts);
+			config.put("kibana.dashboardUrl", kibanaDashboardUrl);
 		}
 		return config;
 	}

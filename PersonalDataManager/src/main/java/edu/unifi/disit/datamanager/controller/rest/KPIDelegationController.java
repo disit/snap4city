@@ -13,6 +13,7 @@
    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA. */
 package edu.unifi.disit.datamanager.controller.rest;
 
+import edu.unifi.disit.datamanager.RequestHelper;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.util.Date;
@@ -106,8 +107,8 @@ public class KPIDelegationController {
 
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.VALUE,
-						request.getRequestURI() + "?" + request.getQueryString(), WRONG_KPI_DATA, null,
-						request.getRemoteAddr());
+						RequestHelper.getUrl(request), WRONG_KPI_DATA, null,
+						RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
@@ -123,8 +124,8 @@ public class KPIDelegationController {
 
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.DELEGATION,
-						request.getRequestURI() + "?" + request.getQueryString(), NO_DATA_FOUND, null,
-						request.getRemoteAddr());
+						RequestHelper.getUrl(request), NO_DATA_FOUND, null,
+						RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else {
@@ -140,8 +141,8 @@ public class KPIDelegationController {
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.DELEGATION,
-					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d,
-					request.getRemoteAddr());
+					RequestHelper.getUrl(request), d.getMessage(), d,
+					RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
@@ -165,8 +166,8 @@ public class KPIDelegationController {
 				logger.warn(WRONG_KPI_DATA);
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION,
-						request.getRequestURI() + "?" + request.getQueryString(), WRONG_KPI_DATA, null,
-						request.getRemoteAddr());
+						RequestHelper.getUrl(request), WRONG_KPI_DATA, null,
+						RequestHelper.getClientIpAddr(request));
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
 					&& !Boolean.TRUE.equals(accessService
@@ -194,8 +195,8 @@ public class KPIDelegationController {
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION,
-					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d,
-					request.getRemoteAddr());
+					RequestHelper.getUrl(request), d.getMessage(), d,
+					RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
@@ -220,8 +221,8 @@ public class KPIDelegationController {
 				logger.warn(WRONG_KPI_DATA);
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION,
-						request.getRequestURI() + "?" + request.getQueryString(), WRONG_KPI_DATA, null,
-						request.getRemoteAddr());
+						RequestHelper.getUrl(request), WRONG_KPI_DATA, null,
+						RequestHelper.getClientIpAddr(request));
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
 					&& !Boolean.TRUE.equals(accessService
@@ -235,8 +236,8 @@ public class KPIDelegationController {
 
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION,
-						request.getRequestURI() + "?" + request.getQueryString(), NO_DATA_FOUND, null,
-						request.getRemoteAddr());
+						RequestHelper.getUrl(request), NO_DATA_FOUND, null,
+						RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
@@ -261,8 +262,8 @@ public class KPIDelegationController {
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION,
-					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d,
-					request.getRemoteAddr());
+					RequestHelper.getUrl(request), d.getMessage(), d,
+					RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
@@ -287,8 +288,8 @@ public class KPIDelegationController {
 				logger.warn(WRONG_KPI_DATA);
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION,
-						request.getRequestURI() + "?" + request.getQueryString(), WRONG_KPI_DATA, null,
-						request.getRemoteAddr());
+						RequestHelper.getUrl(request), WRONG_KPI_DATA, null,
+						RequestHelper.getClientIpAddr(request));
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
 					&& !Boolean.TRUE.equals(accessService
@@ -302,8 +303,8 @@ public class KPIDelegationController {
 
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION,
-						request.getRequestURI() + "?" + request.getQueryString(), NO_DATA_FOUND, null,
-						request.getRemoteAddr());
+						RequestHelper.getUrl(request), NO_DATA_FOUND, null,
+						RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
@@ -341,8 +342,8 @@ public class KPIDelegationController {
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION,
-					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d,
-					request.getRemoteAddr());
+					RequestHelper.getUrl(request), d.getMessage(), d,
+					RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
@@ -366,8 +367,8 @@ public class KPIDelegationController {
 				logger.warn(WRONG_KPI_DATA);
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, kpiId, ActivityAccessType.DELETE, KPIActivityDomainType.DELEGATION,
-						request.getRequestURI() + "?" + request.getQueryString(), WRONG_KPI_DATA, null,
-						request.getRemoteAddr());
+						RequestHelper.getUrl(request), WRONG_KPI_DATA, null,
+						RequestHelper.getClientIpAddr(request));
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
 					&& !Boolean.TRUE.equals(accessService
@@ -381,8 +382,8 @@ public class KPIDelegationController {
 
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, kpiId, ActivityAccessType.DELETE, KPIActivityDomainType.DELEGATION,
-						request.getRequestURI() + "?" + request.getQueryString(), NO_DATA_FOUND, null,
-						request.getRemoteAddr());
+						RequestHelper.getUrl(request), NO_DATA_FOUND, null,
+						RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
@@ -398,8 +399,8 @@ public class KPIDelegationController {
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, kpiId, ActivityAccessType.DELETE, KPIActivityDomainType.VALUE,
-					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d,
-					request.getRemoteAddr());
+					RequestHelper.getUrl(request), d.getMessage(), d,
+					RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
@@ -427,8 +428,8 @@ public class KPIDelegationController {
 				logger.warn(WRONG_KPI_DATA);
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.DELEGATION,
-						request.getRequestURI() + "?" + request.getQueryString(), WRONG_KPI_DATA, null,
-						request.getRemoteAddr());
+						RequestHelper.getUrl(request), WRONG_KPI_DATA, null,
+						RequestHelper.getClientIpAddr(request));
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
 					&& !Boolean.TRUE.equals(accessService
@@ -452,8 +453,8 @@ public class KPIDelegationController {
 
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.DELEGATION,
-						request.getRequestURI() + "?" + request.getQueryString(), "No delegation data found", null,
-						request.getRemoteAddr());
+						RequestHelper.getUrl(request), "No delegation data found", null,
+						RequestHelper.getClientIpAddr(request));
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (pageKpiDelegation != null) {
 				logger.info("Returning KpiDelegationPage ");
@@ -475,8 +476,8 @@ public class KPIDelegationController {
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.DELEGATION,
-					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d,
-					request.getRemoteAddr());
+					RequestHelper.getUrl(request), d.getMessage(), d,
+					RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (IllegalArgumentException | NoSuchMessageException d) {
@@ -484,8 +485,8 @@ public class KPIDelegationController {
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.VALUE,
-					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d,
-					request.getRemoteAddr());
+					RequestHelper.getUrl(request), d.getMessage(), d,
+					RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		}
@@ -514,8 +515,8 @@ public class KPIDelegationController {
 				logger.warn(WRONG_KPI_DATA);
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.DELEGATION,
-						request.getRequestURI() + "?" + request.getQueryString(), WRONG_KPI_DATA, null,
-						request.getRemoteAddr());
+						RequestHelper.getUrl(request), WRONG_KPI_DATA, null,
+						RequestHelper.getClientIpAddr(request));
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
 					&& !Boolean.TRUE.equals(accessService
@@ -543,8 +544,8 @@ public class KPIDelegationController {
 
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.DELEGATION,
-						request.getRequestURI() + "?" + request.getQueryString(), "No delegation data found", null,
-						request.getRemoteAddr());
+						RequestHelper.getUrl(request), "No delegation data found", null,
+						RequestHelper.getClientIpAddr(request));
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (pageKpiDelegation != null) {
 				logger.info("Returning KpiDelegationPage ");
@@ -566,8 +567,8 @@ public class KPIDelegationController {
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.DELEGATION,
-					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d,
-					request.getRemoteAddr());
+					RequestHelper.getUrl(request), d.getMessage(), d,
+					RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (IllegalArgumentException | NoSuchMessageException d) {
@@ -575,8 +576,8 @@ public class KPIDelegationController {
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.VALUE,
-					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d,
-					request.getRemoteAddr());
+					RequestHelper.getUrl(request), d.getMessage(), d,
+					RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		}

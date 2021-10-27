@@ -13,6 +13,7 @@
    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA. */
 package edu.unifi.disit.datamanager.controller.rest;
 
+import edu.unifi.disit.datamanager.RequestHelper;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -95,7 +96,7 @@ public class POIDataController {
 						sourceRequest, id, ActivityAccessType.READ, KPIActivityDomainType.POI,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"No data found", null, request.getRemoteAddr());
+						"No data found", null, RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else {
@@ -157,7 +158,7 @@ public class POIDataController {
 						sourceRequest, id, ActivityAccessType.READ, KPIActivityDomainType.POI,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"No data found", null, request.getRemoteAddr());
+						"No data found", null, RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else {
@@ -233,7 +234,7 @@ public class POIDataController {
 					sourceRequest, null, ActivityAccessType.WRITE, KPIActivityDomainType.DATA,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
@@ -281,7 +282,7 @@ public class POIDataController {
 					sourceRequest, null, ActivityAccessType.WRITE, KPIActivityDomainType.DATA,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (DelegationNotValidException d) {
@@ -291,7 +292,7 @@ public class POIDataController {
 					sourceRequest, null, ActivityAccessType.WRITE, KPIActivityDomainType.DATA,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					"Problem with public or private ownership", d, request.getRemoteAddr());
+					"Problem with public or private ownership", d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		}
@@ -326,7 +327,7 @@ public class POIDataController {
 						sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.POI,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"No data found", null, request.getRemoteAddr());
+						"No data found", null, RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else {
@@ -378,7 +379,7 @@ public class POIDataController {
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.POI,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (IllegalArgumentException | LDAPException | CloneNotSupportedException d) {
@@ -388,7 +389,7 @@ public class POIDataController {
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.POI,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		}
@@ -420,7 +421,7 @@ public class POIDataController {
 						sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.POI,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"No data found", null, request.getRemoteAddr());
+						"No data found", null, RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else {
@@ -472,7 +473,7 @@ public class POIDataController {
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.POI,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (IllegalArgumentException | LDAPException | CloneNotSupportedException d) {
@@ -482,7 +483,7 @@ public class POIDataController {
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.POI,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		}
@@ -514,7 +515,7 @@ public class POIDataController {
 						sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.POI,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"No data found", null, request.getRemoteAddr());
+						"No data found", null, RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else {
@@ -566,7 +567,7 @@ public class POIDataController {
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.POI,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (IllegalArgumentException | LDAPException | CloneNotSupportedException d) {
@@ -576,7 +577,7 @@ public class POIDataController {
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.POI,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		}
@@ -629,7 +630,7 @@ public class POIDataController {
 						sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.POI,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"No data found", null, request.getRemoteAddr());
+						"No data found", null, RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else {
@@ -668,7 +669,7 @@ public class POIDataController {
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.POI,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (IllegalArgumentException d) {
@@ -678,7 +679,7 @@ public class POIDataController {
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.POI,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		}

@@ -368,7 +368,8 @@ var KPIDataTabler = {
     },
 
     openKPIKibanaLink: function (_kpiId) {
-        window.open(Utility.elasticMasterHost + "/app/kibana?security_tenant=global#/dashboard/599a6130-a487-11e8-8bc3-45d0f77fbb1b?_a=(filters:!(),query:(language:lucene,query:'deviceName:" + _kpiId + "'))");
+        window.open(Utility.kibanaDashboardUrl.replace("KPI_ID",_kpiId));
+        //window.open(Utility.elasticMasterHost + "/app/kibana?security_tenant=global#/dashboard/599a6130-a487-11e8-8bc3-45d0f77fbb1b?_a=(filters:!(),query:(language:lucene,query:'deviceName:" + _kpiId + "'))");
     },
 
     getCurrentKPIData: function (_kpiId) {

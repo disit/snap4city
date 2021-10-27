@@ -13,6 +13,7 @@
    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA. */
 package edu.unifi.disit.datamanager.controller.rest;
 
+import edu.unifi.disit.datamanager.RequestHelper;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -106,7 +107,7 @@ public class GrpElementsController {
 						sourceRequest, grpId, ActivityAccessType.READ, KPIActivityDomainType.GROUPELEMENT,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"Wrong Device Group Data", null, request.getRemoteAddr());
+						"Wrong Device Group Data", null, RequestHelper.getClientIpAddr(request));
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!grpData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
 					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(grpId), ElementType.MYGROUP.toString(), lang).getResult())) {
@@ -136,7 +137,7 @@ public class GrpElementsController {
 						sourceRequest, grpId, ActivityAccessType.READ, KPIActivityDomainType.GROUPELEMENT,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"No elements found", null, request.getRemoteAddr());
+						"No elements found", null, RequestHelper.getClientIpAddr(request));
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (pageElement != null) {
 				logger.info("Returning GrpElementPage ");
@@ -160,7 +161,7 @@ public class GrpElementsController {
 					sourceRequest, grpId, ActivityAccessType.READ, KPIActivityDomainType.GROUPELEMENT,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (IllegalArgumentException | NoSuchMessageException d) {
@@ -170,7 +171,7 @@ public class GrpElementsController {
 					sourceRequest, grpId, ActivityAccessType.READ, KPIActivityDomainType.GROUPELEMENT,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		} catch (Exception d) {
@@ -180,7 +181,7 @@ public class GrpElementsController {
 					sourceRequest, grpId, ActivityAccessType.DELETE, KPIActivityDomainType.GROUPELEMENT,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((Object) d.getMessage());
 		}
@@ -207,7 +208,7 @@ public class GrpElementsController {
 						sourceRequest, grpId, ActivityAccessType.DELETE, KPIActivityDomainType.GROUPELEMENT,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"Wrong Device Group Data", null, request.getRemoteAddr());
+						"Wrong Device Group Data", null, RequestHelper.getClientIpAddr(request));
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!grpData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
 					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(grpId), ElementType.MYGROUP.toString(), lang).getResult())) {
@@ -223,7 +224,7 @@ public class GrpElementsController {
 						sourceRequest, grpId, ActivityAccessType.DELETE, KPIActivityDomainType.GROUPELEMENT,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"No elements found", null, request.getRemoteAddr());
+						"No elements found", null, RequestHelper.getClientIpAddr(request));
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else {
 
@@ -247,7 +248,7 @@ public class GrpElementsController {
 					sourceRequest, grpId, ActivityAccessType.DELETE, KPIActivityDomainType.GROUPELEMENT,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (IllegalArgumentException | NoSuchMessageException d) {
@@ -257,7 +258,7 @@ public class GrpElementsController {
 					sourceRequest, grpId, ActivityAccessType.DELETE, KPIActivityDomainType.GROUPELEMENT,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		} catch (Exception d) {
@@ -267,7 +268,7 @@ public class GrpElementsController {
 					sourceRequest, grpId, ActivityAccessType.DELETE, KPIActivityDomainType.GROUPELEMENT,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((Object) d.getMessage());
 		}
@@ -286,8 +287,8 @@ public class GrpElementsController {
 
                 kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, grpId, ActivityAccessType.READ, KPIActivityDomainType.GROUPELMTTYPES,
-						request.getRequestURI() + "?" + request.getQueryString(),
-						"Wrong Device Group Data", null, request.getRemoteAddr());
+						RequestHelper.getUrl(request),
+						"Wrong Device Group Data", null, RequestHelper.getClientIpAddr(request));
 
                 Set<String> elementTypes = null;
 			// DeviceGroup grpData =
@@ -309,7 +310,7 @@ public class GrpElementsController {
 					sourceRequest, grpId, ActivityAccessType.READ, KPIActivityDomainType.GROUPELMTTYPES,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (Exception e) {
@@ -332,8 +333,8 @@ public class GrpElementsController {
 
                 kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
                         sourceRequest, grpId, ActivityAccessType.READ, KPIActivityDomainType.METADATA,
-                        request.getRequestURI() + "?" + request.getQueryString(),
-                        "Wrong Device Group Data", null, request.getRemoteAddr());
+                        RequestHelper.getUrl(request),
+                        "Wrong Device Group Data", null, RequestHelper.getClientIpAddr(request));
 
                 Set<Object> items = null;
 			// DeviceGroup grpData =
@@ -355,7 +356,7 @@ public class GrpElementsController {
 					sourceRequest, grpId, ActivityAccessType.READ, KPIActivityDomainType.GROUPELMTTYPES,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (Exception e) {
@@ -389,8 +390,8 @@ public class GrpElementsController {
 				logger.warn("Wrong Device Group Data");
 				kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 						sourceRequest, grpId, ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION,
-						request.getRequestURI() + "?" + request.getQueryString(),
-						"Wrong Device Group Data", null, request.getRemoteAddr());
+						RequestHelper.getUrl(request),
+						"Wrong Device Group Data", null, RequestHelper.getClientIpAddr(request));
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
 					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(grpId), ElementType.MYGROUP.toString(), lang).getResult())) {
@@ -411,8 +412,8 @@ public class GrpElementsController {
 
 			kpiActivityService.saveActivityViolationFromUsername(credentialService.getLoggedUsername(lang),
 					sourceRequest, grpId, ActivityAccessType.WRITE, KPIActivityDomainType.GROUPELEMENT,
-					request.getRequestURI() + "?" + request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					RequestHelper.getUrl(request),
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (IOException d) {
@@ -422,7 +423,7 @@ public class GrpElementsController {
 					sourceRequest, null, ActivityAccessType.WRITE, KPIActivityDomainType.GROUPELEMENT,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((Object) d.getMessage());
 		}
@@ -448,7 +449,7 @@ public class GrpElementsController {
 						sourceRequest, grpId, ActivityAccessType.DELETE, KPIActivityDomainType.GROUPELEMENT,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"Wrong Device Group Data", null, request.getRemoteAddr());
+						"Wrong Device Group Data", null, RequestHelper.getClientIpAddr(request));
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
 					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(grpId), ElementType.MYGROUP.toString(), lang).getResult())) {
@@ -463,7 +464,7 @@ public class GrpElementsController {
 						sourceRequest, grpId, ActivityAccessType.DELETE, KPIActivityDomainType.GROUPELEMENT,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"No data found", null, request.getRemoteAddr());
+						"No data found", null, RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
@@ -483,7 +484,7 @@ public class GrpElementsController {
 					sourceRequest, grpId, ActivityAccessType.DELETE, KPIActivityDomainType.GROUPELEMENT,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (Exception d) {
@@ -493,7 +494,7 @@ public class GrpElementsController {
 					sourceRequest, grpId, ActivityAccessType.DELETE, KPIActivityDomainType.GROUPELEMENT,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((Object) d.getMessage());
 		}
@@ -522,7 +523,7 @@ public class GrpElementsController {
 						sourceRequest, grpId, ActivityAccessType.READ, KPIActivityDomainType.GROUPELEMENT,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"Wrong Device Group Data", null, request.getRemoteAddr());
+						"Wrong Device Group Data", null, RequestHelper.getClientIpAddr(request));
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} /*
 				 * else if (!grpData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang)) && !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(grpId), lang).getResult())) { throw new
@@ -558,7 +559,7 @@ public class GrpElementsController {
 						sourceRequest, grpId, ActivityAccessType.READ, KPIActivityDomainType.GROUPELEMENT,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"No elements found", null, request.getRemoteAddr());
+						"No elements found", null, RequestHelper.getClientIpAddr(request));
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (pageElement != null) {
 				logger.info("Returning GrpElementPage ");
@@ -582,7 +583,7 @@ public class GrpElementsController {
 					sourceRequest, grpId, ActivityAccessType.READ, KPIActivityDomainType.GROUPELEMENT,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (IllegalArgumentException | NoSuchMessageException d) {
@@ -592,7 +593,7 @@ public class GrpElementsController {
 					sourceRequest, grpId, ActivityAccessType.READ, KPIActivityDomainType.GROUPELEMENT,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		} catch (Exception d) {
@@ -602,7 +603,7 @@ public class GrpElementsController {
 					sourceRequest, grpId, ActivityAccessType.DELETE, KPIActivityDomainType.GROUPELEMENT,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((Object) d.getMessage());
 		}

@@ -12,6 +12,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package edu.unifi.disit.datamanager.controller.rest;
 
+import edu.unifi.disit.datamanager.RequestHelper;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -126,7 +127,7 @@ public class PublicController {
 			logger.error("Delegation not found", d);
 
 			activityService.saveActivityViolationFromUsername("PUBLIC", sourceRequest, variableName, motivation, ActivityAccessType.READ,
-					request.getContextPath() + "?" + request.getQueryString(), d.getMessage(), d, request.getRemoteAddr());
+					RequestHelper.getUrl(request), d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 
@@ -134,7 +135,7 @@ public class PublicController {
 			logger.error("Parsing error ", e);
 
 			activityService.saveActivityViolationFromUsername("PUBLIC", sourceRequest, variableName, motivation, ActivityAccessType.READ,
-					request.getContextPath() + "?" + request.getQueryString(), e.getMessage(), e, request.getRemoteAddr());
+					RequestHelper.getUrl(request), e.getMessage(), e, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) e.getMessage());
 		}

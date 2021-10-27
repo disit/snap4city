@@ -13,6 +13,7 @@
    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA. */
 package edu.unifi.disit.datamanager.controller.rest;
 
+import edu.unifi.disit.datamanager.RequestHelper;
 import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.List;
@@ -103,7 +104,7 @@ public class KPIDataController {
 						sourceRequest, id, ActivityAccessType.READ, KPIActivityDomainType.DATA,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						NO_DATA_FOUND, null, request.getRemoteAddr());
+						NO_DATA_FOUND, null, RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else {
@@ -126,7 +127,7 @@ public class KPIDataController {
 					sourceRequest, id, ActivityAccessType.READ, KPIActivityDomainType.DATA,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
@@ -153,7 +154,7 @@ public class KPIDataController {
 						ActivityAccessType.READ, KPIActivityDomainType.DATA,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						NO_DATA_FOUND, null, request.getRemoteAddr());
+						NO_DATA_FOUND, null, RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else {
@@ -175,7 +176,7 @@ public class KPIDataController {
 					KPIActivityDomainType.DATA,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
@@ -218,7 +219,7 @@ public class KPIDataController {
 					sourceRequest, null, ActivityAccessType.WRITE, KPIActivityDomainType.DATA,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (DelegationNotValidException d) {
@@ -228,7 +229,7 @@ public class KPIDataController {
 					sourceRequest, null, ActivityAccessType.WRITE, KPIActivityDomainType.DATA,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					OWNERSHIP_PROBLEM, d, request.getRemoteAddr());
+					OWNERSHIP_PROBLEM, d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		}
@@ -255,7 +256,7 @@ public class KPIDataController {
 						sourceRequest, id, ActivityAccessType.WRITE, KPIActivityDomainType.DATA,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						NO_DATA_FOUND, null, request.getRemoteAddr());
+						NO_DATA_FOUND, null, RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
@@ -299,7 +300,7 @@ public class KPIDataController {
 					sourceRequest, id, ActivityAccessType.WRITE, KPIActivityDomainType.DATA,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (DelegationNotValidException d) {
@@ -309,7 +310,7 @@ public class KPIDataController {
 					sourceRequest, null, ActivityAccessType.WRITE, KPIActivityDomainType.DATA,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					OWNERSHIP_PROBLEM, d, request.getRemoteAddr());
+					OWNERSHIP_PROBLEM, d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		}
@@ -334,7 +335,7 @@ public class KPIDataController {
 						sourceRequest, id, ActivityAccessType.WRITE, KPIActivityDomainType.DATA,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						NO_DATA_FOUND, null, request.getRemoteAddr());
+						NO_DATA_FOUND, null, RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
@@ -400,7 +401,7 @@ public class KPIDataController {
 					sourceRequest, id, ActivityAccessType.WRITE, KPIActivityDomainType.DATA,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (DelegationNotValidException d) {
@@ -410,7 +411,7 @@ public class KPIDataController {
 					sourceRequest, null, ActivityAccessType.WRITE, KPIActivityDomainType.DATA,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					OWNERSHIP_PROBLEM, d, request.getRemoteAddr());
+					OWNERSHIP_PROBLEM, d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		}
@@ -435,7 +436,7 @@ public class KPIDataController {
 						sourceRequest, id, ActivityAccessType.DELETE, KPIActivityDomainType.DATA,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						NO_DATA_FOUND, null, request.getRemoteAddr());
+						NO_DATA_FOUND, null, RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else {
@@ -465,7 +466,7 @@ public class KPIDataController {
 					sourceRequest, id, ActivityAccessType.DELETE, KPIActivityDomainType.DATA,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
@@ -525,7 +526,7 @@ public class KPIDataController {
 						sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.DATA,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"No public data found", null, request.getRemoteAddr());
+						"No public data found", null, RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (pageKpiData != null) {
@@ -550,7 +551,7 @@ public class KPIDataController {
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.DATA,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (IllegalArgumentException | LDAPException |CloneNotSupportedException d) {
@@ -560,7 +561,7 @@ public class KPIDataController {
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.DATA,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		}
@@ -610,7 +611,7 @@ public class KPIDataController {
 						ActivityAccessType.READ, KPIActivityDomainType.DATA,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"No public data found", null, request.getRemoteAddr());
+						"No public data found", null, RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (pageKpiData != null) {
@@ -635,7 +636,7 @@ public class KPIDataController {
 					KPIActivityDomainType.DATA,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (IllegalArgumentException | LDAPException |CloneNotSupportedException d) {
@@ -645,7 +646,7 @@ public class KPIDataController {
 					KPIActivityDomainType.DATA,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		}
@@ -693,7 +694,7 @@ public class KPIDataController {
 						sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.DATA,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"No organization data found", null, request.getRemoteAddr());
+						"No organization data found", null, RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (pageKpiData != null) {
@@ -718,7 +719,7 @@ public class KPIDataController {
 					KPIActivityDomainType.DATA,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (IllegalArgumentException | LDAPException | CloneNotSupportedException d) {
@@ -728,7 +729,7 @@ public class KPIDataController {
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.DATA,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		}
@@ -775,7 +776,7 @@ public class KPIDataController {
 						sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.DATA,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"No delegated data found", null, request.getRemoteAddr());
+						"No delegated data found", null, RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (pageKpiData != null) {
@@ -800,7 +801,7 @@ public class KPIDataController {
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.DATA,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (IllegalArgumentException | LDAPException |CloneNotSupportedException d) {
@@ -810,7 +811,7 @@ public class KPIDataController {
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.DATA,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		} 
@@ -906,7 +907,7 @@ public class KPIDataController {
 						sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.DATA,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						NO_DATA_FOUND, null, request.getRemoteAddr());
+						NO_DATA_FOUND, null, RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (pageKpiData != null) {
@@ -932,7 +933,7 @@ public class KPIDataController {
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.DATA,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (IllegalArgumentException d) {
@@ -942,7 +943,7 @@ public class KPIDataController {
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.DATA,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		}

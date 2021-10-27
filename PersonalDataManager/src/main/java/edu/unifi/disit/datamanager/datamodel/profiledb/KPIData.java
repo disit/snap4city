@@ -28,8 +28,12 @@ import org.springframework.format.annotation.DateTimeFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import edu.unifi.disit.datamanager.config.ConfigIndexBean;
 
 import edu.unifi.disit.datamanager.datamodel.dto.KPIDataDTO;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 
 @JsonSerialize(using = KPIDataSerializer.class)
 @JsonDeserialize(using = KPIDataDeserializer.class)
@@ -38,8 +42,12 @@ import edu.unifi.disit.datamanager.datamodel.dto.KPIDataDTO;
 @Table(name = "kpidata")
 public class KPIData implements Comparable<KPIData>, Serializable {
 
-	private static final long serialVersionUID = 1877829622537559204L;
+  	private static final Logger logger = LogManager.getLogger();
 
+	private static final long serialVersionUID = 1877829622537559204L;
+	private static final String MYSQL = "MySQL";
+	private static final String ELASTICSEARCH = "ElasticSearch";
+               
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
@@ -483,7 +491,19 @@ public class KPIData implements Comparable<KPIData>, Serializable {
 		this.dbValuesLink = dbValuesLink;
 	}
 
-	@Override
+        public boolean saveOnMySql() {
+          logger.debug("defaultSaveON "+ConfigIndexBean.getKpiDefaultSaveOn()+" dbValesType "+this.dbValuesType);
+          return ((this.dbValuesType == null || this.dbValuesType.equals("")) && MYSQL.equalsIgnoreCase(ConfigIndexBean.getKpiDefaultSaveOn()))  
+					|| (this.dbValuesType != null && this.dbValuesType.contains(MYSQL));
+        }
+        
+        public boolean saveOnElasticSearch() {
+          logger.debug("defaultSaveON "+ConfigIndexBean.getKpiDefaultSaveOn()+" dbValesType "+this.dbValuesType);
+          return ((this.dbValuesType == null || this.dbValuesType.equals("")) && ELASTICSEARCH.equalsIgnoreCase(ConfigIndexBean.getKpiDefaultSaveOn()))  
+					|| (this.dbValuesType != null && this.dbValuesType.contains(ELASTICSEARCH));
+        }
+
+        @Override
 	public String toString() {
 		return "KPIData [id=" + id + ", highLevelType=" + highLevelType + ", nature=" + nature + ", subNature="
 				+ subNature + ", valueName=" + valueName + ", valueType=" + valueType + ", dataType=" + dataType

@@ -12,6 +12,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package edu.unifi.disit.datamanager.controller.rest;
 
+import edu.unifi.disit.datamanager.RequestHelper;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -124,15 +125,15 @@ public class AppsController {
 		} catch (DelegationNotFoundException | NoSuchMessageException | DataNotValidException d) {
 			logger.error("Delegation not found", d);
 
-			activityService.saveActivityViolationFromAppId(appId, sourceRequest, variableName, motivation, ActivityAccessType.READ, request.getContextPath() + "?" + request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+			activityService.saveActivityViolationFromAppId(appId, sourceRequest, variableName, motivation, ActivityAccessType.READ, RequestHelper.getUrl(request),
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
 
 			activityService.saveActivityViolation(appId, SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), null, null, null, ActivityAccessType.READ,
-					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d, request.getRemoteAddr());
+					RequestHelper.getUrl(request), d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
@@ -168,15 +169,15 @@ public class AppsController {
 		} catch (DataNotValidException d) {
 			logger.error("Data not valid", d);
 
-			activityService.saveActivityViolationFromAppId(appId, sourceRequest, null, null, ActivityAccessType.WRITE, request.getContextPath() + "?" + request.getQueryString(), d.getMessage(),
-					d, request.getRemoteAddr());
+			activityService.saveActivityViolationFromAppId(appId, sourceRequest, null, null, ActivityAccessType.WRITE, RequestHelper.getUrl(request), d.getMessage(),
+					d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
 
 			activityService.saveActivityViolation(appId, SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), null, null, null, ActivityAccessType.WRITE,
-					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d, request.getRemoteAddr());
+					RequestHelper.getUrl(request), d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
@@ -271,7 +272,7 @@ public class AppsController {
 			logger.warn("Rights exception", d);
 
 			activityService.saveActivityViolation(appId, SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), null, null, null, ActivityAccessType.READ,
-					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d, request.getRemoteAddr());
+					RequestHelper.getUrl(request), d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
@@ -377,8 +378,8 @@ public class AppsController {
 		} catch (DelegationNotValidException d) {
 			logger.error("Delegation not found", d);
 
-			activityService.saveActivityViolationFromAppId(appId, sourceRequest, variableName, motivation, ActivityAccessType.READ, request.getContextPath() + "?" + request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+			activityService.saveActivityViolationFromAppId(appId, sourceRequest, variableName, motivation, ActivityAccessType.READ, RequestHelper.getUrl(request),
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		} catch (LDAPException le) {
@@ -389,7 +390,7 @@ public class AppsController {
 			logger.warn("Rights exception", d);
 
 			activityService.saveActivityViolation(appId, SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), null, null, null, ActivityAccessType.READ,
-					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d, request.getRemoteAddr());
+					RequestHelper.getUrl(request), d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
@@ -440,7 +441,7 @@ public class AppsController {
 			logger.warn("Rights exception", d);
 
 			activityService.saveActivityViolation(appId, SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), null, null, null, ActivityAccessType.DELETE,
-					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d, request.getRemoteAddr());
+					RequestHelper.getUrl(request), d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
@@ -491,7 +492,7 @@ public class AppsController {
 			logger.warn("Rights exception", d);
 
 			activityService.saveActivityViolationFromUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), null, null, null, ActivityAccessType.READ,
-					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d, request.getRemoteAddr());
+					RequestHelper.getUrl(request), d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}

@@ -13,6 +13,7 @@
    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA. */
 package edu.unifi.disit.datamanager.controller.rest;
 
+import edu.unifi.disit.datamanager.RequestHelper;
 import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.List;
@@ -111,7 +112,7 @@ public class DeviceGroupController {
 					sourceRequest, null, ActivityAccessType.WRITE, KPIActivityDomainType.GROUP,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (DelegationNotValidException d) {
@@ -121,7 +122,7 @@ public class DeviceGroupController {
 					sourceRequest, null, ActivityAccessType.WRITE, KPIActivityDomainType.GROUP,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					"Problem with public or private ownership", d, request.getRemoteAddr());
+					"Problem with public or private ownership", d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		}
@@ -216,7 +217,7 @@ public class DeviceGroupController {
 						sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.GROUP,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"No data found", null, request.getRemoteAddr());
+						"No data found", null, RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (pageDeviceGroups != null) {
@@ -242,7 +243,7 @@ public class DeviceGroupController {
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.GROUP,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (IllegalArgumentException d) {
@@ -252,7 +253,7 @@ public class DeviceGroupController {
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.GROUP,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		} catch (IOException d) {
@@ -262,7 +263,7 @@ public class DeviceGroupController {
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.GROUP,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((Object) d.getMessage());
 		}
@@ -323,7 +324,7 @@ public class DeviceGroupController {
 						sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.GROUP,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"No public data found", null, request.getRemoteAddr());
+						"No public data found", null, RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (pageKpiData != null) {
@@ -348,7 +349,7 @@ public class DeviceGroupController {
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.GROUP,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (IllegalArgumentException d) {
@@ -358,7 +359,7 @@ public class DeviceGroupController {
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.GROUP,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		} catch (IOException d) {
@@ -368,7 +369,7 @@ public class DeviceGroupController {
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.GROUP,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((Object) d.getMessage());
 		}
@@ -418,7 +419,7 @@ public class DeviceGroupController {
 						ActivityAccessType.READ, KPIActivityDomainType.GROUP,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"No public data found", null, request.getRemoteAddr());
+						"No public data found", null, RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (pageKpiData != null) {
@@ -443,7 +444,7 @@ public class DeviceGroupController {
 					KPIActivityDomainType.GROUP,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (IllegalArgumentException d) {
@@ -453,7 +454,7 @@ public class DeviceGroupController {
 					KPIActivityDomainType.GROUP,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		} catch (IOException d) {
@@ -463,7 +464,7 @@ public class DeviceGroupController {
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.GROUP,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((Object) d.getMessage());
 		}
@@ -511,7 +512,7 @@ public class DeviceGroupController {
 						sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.GROUP,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"No organization data found", null, request.getRemoteAddr());
+						"No organization data found", null, RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (pageKpiData != null) {
@@ -536,7 +537,7 @@ public class DeviceGroupController {
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.GROUP,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		} catch (IOException d) {
@@ -546,7 +547,7 @@ public class DeviceGroupController {
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.GROUP,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((Object) d.getMessage());
 		} catch (CredentialsException d) {
@@ -556,7 +557,7 @@ public class DeviceGroupController {
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.GROUP,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage()); 
                 }
@@ -603,7 +604,7 @@ public class DeviceGroupController {
 						sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.GROUP,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"No delegated data found", null, request.getRemoteAddr());
+						"No delegated data found", null, RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (pageKpiData != null) {
@@ -628,7 +629,7 @@ public class DeviceGroupController {
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.GROUP,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (IllegalArgumentException d) {
@@ -638,7 +639,7 @@ public class DeviceGroupController {
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.GROUP,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		} catch (IOException d) {
@@ -648,7 +649,7 @@ public class DeviceGroupController {
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.GROUP,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((Object) d.getMessage());
 		}
@@ -679,7 +680,7 @@ public class DeviceGroupController {
 						sourceRequest, id, ActivityAccessType.WRITE, KPIActivityDomainType.GROUP,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"No data found", null, request.getRemoteAddr());
+						"No data found", null, RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
@@ -744,7 +745,7 @@ public class DeviceGroupController {
 					sourceRequest, id, ActivityAccessType.WRITE, KPIActivityDomainType.GROUP,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (DelegationNotValidException d) {
@@ -754,7 +755,7 @@ public class DeviceGroupController {
 					sourceRequest, null, ActivityAccessType.WRITE, KPIActivityDomainType.GROUP,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					"Problem with public or private ownership", d, request.getRemoteAddr());
+					"Problem with public or private ownership", d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		} catch (IOException d) {
@@ -764,7 +765,7 @@ public class DeviceGroupController {
 					sourceRequest, null, ActivityAccessType.WRITE, KPIActivityDomainType.GROUP,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((Object) d.getMessage());
 		}
@@ -790,7 +791,7 @@ public class DeviceGroupController {
 						sourceRequest, id, ActivityAccessType.READ, KPIActivityDomainType.GROUP,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"No data found", null, request.getRemoteAddr());
+						"No data found", null, RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else {
@@ -813,7 +814,7 @@ public class DeviceGroupController {
 					sourceRequest, id, ActivityAccessType.READ, KPIActivityDomainType.GROUP,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (IOException d) {
@@ -823,7 +824,7 @@ public class DeviceGroupController {
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.GROUP,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((Object) d.getMessage());
 		}
@@ -848,7 +849,7 @@ public class DeviceGroupController {
 						sourceRequest, id, ActivityAccessType.DELETE, KPIActivityDomainType.GROUP,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"No data found", null, request.getRemoteAddr());
+						"No data found", null, RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
@@ -869,7 +870,7 @@ public class DeviceGroupController {
 					sourceRequest, id, ActivityAccessType.DELETE, KPIActivityDomainType.GROUP,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (IOException d) {
@@ -879,7 +880,7 @@ public class DeviceGroupController {
 					sourceRequest, null, ActivityAccessType.DELETE, KPIActivityDomainType.GROUP,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((Object) d.getMessage());
 		}
@@ -903,7 +904,7 @@ public class DeviceGroupController {
 						ActivityAccessType.READ, KPIActivityDomainType.GROUP,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"No data found", null, request.getRemoteAddr());
+						"No data found", null, RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else {
@@ -925,7 +926,7 @@ public class DeviceGroupController {
 					KPIActivityDomainType.GROUP,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (IOException d) {
@@ -935,7 +936,7 @@ public class DeviceGroupController {
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.GROUP,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((Object) d.getMessage());
 		}

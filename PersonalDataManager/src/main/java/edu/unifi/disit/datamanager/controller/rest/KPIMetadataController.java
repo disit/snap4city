@@ -13,6 +13,7 @@
    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA. */
 package edu.unifi.disit.datamanager.controller.rest;
 
+import edu.unifi.disit.datamanager.RequestHelper;
 import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.List;
@@ -94,7 +95,7 @@ public class KPIMetadataController {
 						sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.METADATA,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"Wrong KPI Data", null, request.getRemoteAddr());
+						"Wrong KPI Data", null, RequestHelper.getClientIpAddr(request));
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername()
 					.equalsIgnoreCase(credentialService.getLoggedUsername(lang))
@@ -111,7 +112,7 @@ public class KPIMetadataController {
 						sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.METADATA,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"No data found", null, request.getRemoteAddr());
+						"No data found", null, RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else {
@@ -129,7 +130,7 @@ public class KPIMetadataController {
 					sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.METADATA,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
 	}
@@ -154,7 +155,7 @@ public class KPIMetadataController {
 						ActivityAccessType.READ, KPIActivityDomainType.METADATA,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"Wrong KPI Data", null, request.getRemoteAddr());
+						"Wrong KPI Data", null, RequestHelper.getClientIpAddr(request));
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (kpiData.getOwnership().equals("private") || !kpiData.getOwnership().equals("public")) {
 				throw new CredentialsException();
@@ -169,7 +170,7 @@ public class KPIMetadataController {
 						ActivityAccessType.READ, KPIActivityDomainType.METADATA,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"No data found", null, request.getRemoteAddr());
+						"No data found", null, RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else {
@@ -187,7 +188,7 @@ public class KPIMetadataController {
 					ActivityAccessType.READ, KPIActivityDomainType.METADATA,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
 	}
@@ -214,7 +215,7 @@ public class KPIMetadataController {
 						sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.METADATA,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"Wrong KPI Data", null, request.getRemoteAddr());
+						"Wrong KPI Data", null, RequestHelper.getClientIpAddr(request));
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername()
 					.equalsIgnoreCase(credentialService.getLoggedUsername(lang))
@@ -237,7 +238,7 @@ public class KPIMetadataController {
 					sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.METADATA,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
@@ -265,7 +266,7 @@ public class KPIMetadataController {
 						sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.METADATA,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"Wrong KPI Data", null, request.getRemoteAddr());
+						"Wrong KPI Data", null, RequestHelper.getClientIpAddr(request));
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername()
 					.equalsIgnoreCase(credentialService.getLoggedUsername(lang))
@@ -281,7 +282,7 @@ public class KPIMetadataController {
 						sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.METADATA,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"No data found", null, request.getRemoteAddr());
+						"No data found", null, RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
@@ -300,7 +301,7 @@ public class KPIMetadataController {
 					sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.METADATA,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
@@ -327,7 +328,7 @@ public class KPIMetadataController {
 						sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.METADATA,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"Wrong KPI Data", null, request.getRemoteAddr());
+						"Wrong KPI Data", null, RequestHelper.getClientIpAddr(request));
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername()
 					.equalsIgnoreCase(credentialService.getLoggedUsername(lang))
@@ -343,7 +344,7 @@ public class KPIMetadataController {
 						sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.METADATA,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"No data found", null, request.getRemoteAddr());
+						"No data found", null, RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
@@ -376,7 +377,7 @@ public class KPIMetadataController {
 					sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.METADATA,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
@@ -403,7 +404,7 @@ public class KPIMetadataController {
 						sourceRequest, kpiId, ActivityAccessType.DELETE, KPIActivityDomainType.METADATA,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"Wrong KPI Data", null, request.getRemoteAddr());
+						"Wrong KPI Data", null, RequestHelper.getClientIpAddr(request));
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername()
 					.equalsIgnoreCase(credentialService.getLoggedUsername(lang))
@@ -419,7 +420,7 @@ public class KPIMetadataController {
 						sourceRequest, kpiId, ActivityAccessType.DELETE, KPIActivityDomainType.METADATA,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"No data found", null, request.getRemoteAddr());
+						"No data found", null, RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
@@ -438,7 +439,7 @@ public class KPIMetadataController {
 					sourceRequest, kpiId, ActivityAccessType.DELETE, KPIActivityDomainType.METADATA,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
@@ -470,7 +471,7 @@ public class KPIMetadataController {
 						sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.METADATA,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"Wrong KPI Data", null, request.getRemoteAddr());
+						"Wrong KPI Data", null, RequestHelper.getClientIpAddr(request));
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername()
 					.equalsIgnoreCase(credentialService.getLoggedUsername(lang))
@@ -503,7 +504,7 @@ public class KPIMetadataController {
 						sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.METADATA,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"No metadata data found", null, request.getRemoteAddr());
+						"No metadata data found", null, RequestHelper.getClientIpAddr(request));
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (pageKpiMetadata != null) {
 				logger.info("Returning KpiVMetadataPage ");
@@ -527,7 +528,7 @@ public class KPIMetadataController {
 					sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.METADATA,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (IllegalArgumentException | NoSuchMessageException d) {
@@ -537,7 +538,7 @@ public class KPIMetadataController {
 					sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.METADATA,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		}
@@ -569,7 +570,7 @@ public class KPIMetadataController {
 						ActivityAccessType.READ, KPIActivityDomainType.METADATA,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"Wrong KPI Data", null, request.getRemoteAddr());
+						"Wrong KPI Data", null, RequestHelper.getClientIpAddr(request));
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (kpiData.getOwnership().equals("private") || !kpiData.getOwnership().equals("public")) {
 				throw new CredentialsException();
@@ -600,7 +601,7 @@ public class KPIMetadataController {
 						ActivityAccessType.READ, KPIActivityDomainType.METADATA,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"No metadata data found", null, request.getRemoteAddr());
+						"No metadata data found", null, RequestHelper.getClientIpAddr(request));
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (pageKpiMetadata != null) {
 				logger.info("Returning KpiVMetadataPage ");
@@ -624,7 +625,7 @@ public class KPIMetadataController {
 					ActivityAccessType.READ, KPIActivityDomainType.METADATA,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (IllegalArgumentException | NoSuchMessageException d) {
@@ -634,7 +635,7 @@ public class KPIMetadataController {
 					ActivityAccessType.READ, KPIActivityDomainType.METADATA,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		}

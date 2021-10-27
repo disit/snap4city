@@ -13,6 +13,7 @@
    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA. */
 package edu.unifi.disit.datamanager.controller.rest;
 
+import edu.unifi.disit.datamanager.RequestHelper;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.util.Date;
@@ -103,7 +104,7 @@ public class GrpDelegationController {
 						sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.VALUE,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"Wrong Device Group Data", null, request.getRemoteAddr());
+						"Wrong Device Group Data", null, RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
@@ -120,7 +121,7 @@ public class GrpDelegationController {
 						sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.DELEGATION,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"No data found", null, request.getRemoteAddr());
+						"No data found", null, RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else {
@@ -138,7 +139,7 @@ public class GrpDelegationController {
 					sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.DELEGATION,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (IOException d) {
@@ -148,7 +149,7 @@ public class GrpDelegationController {
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.DELEGATION,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((Object) d.getMessage());
 		}
@@ -174,7 +175,7 @@ public class GrpDelegationController {
 						sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"Wrong Device Group Data", null, request.getRemoteAddr());
+						"Wrong Device Group Data", null, RequestHelper.getClientIpAddr(request));
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
 					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), ElementType.MYGROUP.toString(), lang).getResult())) {
@@ -202,7 +203,7 @@ public class GrpDelegationController {
 					sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (IOException d) {
@@ -212,7 +213,7 @@ public class GrpDelegationController {
 					sourceRequest, null, ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((Object) d.getMessage());
 		}
@@ -239,7 +240,7 @@ public class GrpDelegationController {
 						sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"Wrong Device Group Data", null, request.getRemoteAddr());
+						"Wrong Device Group Data", null, RequestHelper.getClientIpAddr(request));
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
 					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), ElementType.MYGROUP.toString(), lang).getResult())) {
@@ -254,7 +255,7 @@ public class GrpDelegationController {
 						sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"No data found", null, request.getRemoteAddr());
+						"No data found", null, RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
@@ -280,7 +281,7 @@ public class GrpDelegationController {
 					sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (IOException d) {
@@ -290,7 +291,7 @@ public class GrpDelegationController {
 					sourceRequest, null, ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((Object) d.getMessage());
 		}
@@ -317,7 +318,7 @@ public class GrpDelegationController {
 						sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"Wrong Device Group Data", null, request.getRemoteAddr());
+						"Wrong Device Group Data", null, RequestHelper.getClientIpAddr(request));
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
 					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), ElementType.MYGROUP.toString(), lang).getResult())) {
@@ -332,7 +333,7 @@ public class GrpDelegationController {
 						sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"No data found", null, request.getRemoteAddr());
+						"No data found", null, RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
@@ -371,7 +372,7 @@ public class GrpDelegationController {
 					sourceRequest, kpiId, ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (IOException d) {
@@ -381,7 +382,7 @@ public class GrpDelegationController {
 					sourceRequest, null, ActivityAccessType.WRITE, KPIActivityDomainType.DELEGATION,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((Object) d.getMessage());
 		}
@@ -407,7 +408,7 @@ public class GrpDelegationController {
 						sourceRequest, kpiId, ActivityAccessType.DELETE, KPIActivityDomainType.DELEGATION,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"Wrong Device Group Data", null, request.getRemoteAddr());
+						"Wrong Device Group Data", null, RequestHelper.getClientIpAddr(request));
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
 					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), ElementType.MYGROUP.toString(), lang).getResult())) {
@@ -422,7 +423,7 @@ public class GrpDelegationController {
 						sourceRequest, kpiId, ActivityAccessType.DELETE, KPIActivityDomainType.DELEGATION,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"No data found", null, request.getRemoteAddr());
+						"No data found", null, RequestHelper.getClientIpAddr(request));
 
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
@@ -440,7 +441,7 @@ public class GrpDelegationController {
 					sourceRequest, kpiId, ActivityAccessType.DELETE, KPIActivityDomainType.VALUE,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (IOException d) {
@@ -450,7 +451,7 @@ public class GrpDelegationController {
 					sourceRequest, null, ActivityAccessType.DELETE, KPIActivityDomainType.DELEGATION,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((Object) d.getMessage());
 		}
@@ -481,7 +482,7 @@ public class GrpDelegationController {
 						sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.DELEGATION,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"Wrong Device Group Data", null, request.getRemoteAddr());
+						"Wrong Device Group Data", null, RequestHelper.getClientIpAddr(request));
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (!kpiData.getUsername().equalsIgnoreCase(credentialService.getLoggedUsername(lang))
 					&& !Boolean.TRUE.equals(accessService.checkAccessFromApp(Long.toString(kpiId), ElementType.MYGROUP.toString(), lang).getResult())) {
@@ -513,7 +514,7 @@ public class GrpDelegationController {
 						sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.DELEGATION,
 						request.getRequestURI() + "?"
 								+ request.getQueryString(),
-						"No delegation data found", null, request.getRemoteAddr());
+						"No delegation data found", null, RequestHelper.getClientIpAddr(request));
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (pageKpiDelegation != null) {
 				logger.info("Returning GrpDelegationPage ");
@@ -537,7 +538,7 @@ public class GrpDelegationController {
 					sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.DELEGATION,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (IllegalArgumentException | NoSuchMessageException d) {
@@ -547,7 +548,7 @@ public class GrpDelegationController {
 					sourceRequest, kpiId, ActivityAccessType.READ, KPIActivityDomainType.VALUE,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		} catch (IOException d) {
@@ -557,7 +558,7 @@ public class GrpDelegationController {
 					sourceRequest, null, ActivityAccessType.READ, KPIActivityDomainType.DELEGATION,
 					request.getRequestURI() + "?"
 							+ request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((Object) d.getMessage());
 		}

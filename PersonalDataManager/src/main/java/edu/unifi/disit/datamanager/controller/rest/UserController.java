@@ -12,6 +12,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package edu.unifi.disit.datamanager.controller.rest;
 
+import edu.unifi.disit.datamanager.RequestHelper;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -124,21 +125,21 @@ public class UserController {
 			logger.error("Delegation not found", d);
 
 			activityService.saveActivityViolationFromUsername(username, sourceRequest, variableName, motivation, ActivityAccessType.READ,
-					request.getContextPath() + "?" + request.getQueryString(), d.getMessage(), d, request.getRemoteAddr());
+					RequestHelper.getUrl(request), d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
 
 			activityService.saveActivityViolationFromUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), null, null, null, ActivityAccessType.READ,
-					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d, request.getRemoteAddr());
+					RequestHelper.getUrl(request), d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		} catch (ParseException e) {
 			logger.error("Parsing error ", e);
 
 			activityService.saveActivityViolationFromUsername(username, sourceRequest, variableName, motivation, ActivityAccessType.READ,
-					request.getContextPath() + "?" + request.getQueryString(), e.getMessage(), e, request.getRemoteAddr());
+					RequestHelper.getUrl(request), e.getMessage(), e, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) e.getMessage());
 		}
@@ -170,15 +171,15 @@ public class UserController {
 		} catch (DataNotValidException d) {
 			logger.error("Data not valid", d);
 
-			activityService.saveActivityViolationFromUsername(username, sourceRequest, null, null, ActivityAccessType.READ, request.getContextPath() + "?" + request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+			activityService.saveActivityViolationFromUsername(username, sourceRequest, null, null, ActivityAccessType.READ, RequestHelper.getUrl(request),
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
 
 			activityService.saveActivityViolationFromUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), null, null, null, ActivityAccessType.WRITE,
-					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d, request.getRemoteAddr());
+					RequestHelper.getUrl(request), d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
@@ -256,7 +257,7 @@ public class UserController {
 			logger.warn("Rights exception", d);
 
 			activityService.saveActivityViolationFromUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), null, null, null, ActivityAccessType.READ,
-					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d, request.getRemoteAddr());
+					RequestHelper.getUrl(request), d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
@@ -343,7 +344,7 @@ public class UserController {
 			logger.warn("Rights exception", d);
 
 			activityService.saveActivityViolationFromUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), null, null, null, ActivityAccessType.READ,
-					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d, request.getRemoteAddr());
+					RequestHelper.getUrl(request), d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
@@ -402,7 +403,7 @@ public class UserController {
 			logger.warn("Rights exception", d);
 
 			activityService.saveActivityViolationFromUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), null, null, null, ActivityAccessType.READ,
-					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d, request.getRemoteAddr());
+					RequestHelper.getUrl(request), d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
@@ -435,14 +436,14 @@ public class UserController {
 			logger.error("Delegation not valid ", de);
 
 			activityService.saveActivityViolationFromUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), null, null, null, ActivityAccessType.WRITE,
-					request.getRequestURI() + "?" + request.getQueryString(), de.getMessage(), de, request.getRemoteAddr());
+					RequestHelper.getUrl(request), de.getMessage(), de, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) de.getMessage());
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
 
 			activityService.saveActivityViolationFromUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), null, null, null, ActivityAccessType.WRITE,
-					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d, request.getRemoteAddr());
+					RequestHelper.getUrl(request), d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
@@ -476,14 +477,14 @@ public class UserController {
 			logger.error("Delegation not valid ", de);
 
 			activityService.saveActivityViolationFromUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), null, null, null, ActivityAccessType.WRITE,
-					request.getRequestURI() + "?" + request.getQueryString(), de.getMessage(), de, request.getRemoteAddr());
+					RequestHelper.getUrl(request), de.getMessage(), de, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) de.getMessage());
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
 
 			activityService.saveActivityViolationFromUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), null, null, null, ActivityAccessType.WRITE,
-					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d, request.getRemoteAddr());
+					RequestHelper.getUrl(request), d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
@@ -516,14 +517,14 @@ public class UserController {
 			logger.error("Delegation not valid ", de);
 
 			activityService.saveActivityViolationFromUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), null, null, null, ActivityAccessType.DELETE,
-					request.getRequestURI() + "?" + request.getQueryString(), de.getMessage(), de, request.getRemoteAddr());
+					RequestHelper.getUrl(request), de.getMessage(), de, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) de.getMessage());
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
 
 			activityService.saveActivityViolationFromUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), null, null, null, ActivityAccessType.DELETE,
-					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d, request.getRemoteAddr());
+					RequestHelper.getUrl(request), d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
@@ -590,15 +591,15 @@ public class UserController {
 		} catch (DataNotValidException d) {
 			logger.error("Data not valid", d);
 
-			activityService.saveActivityViolationFromUsername(username, sourceRequest, null, null, ActivityAccessType.DELETE, request.getContextPath() + "?" + request.getQueryString(),
-					d.getMessage(), d, request.getRemoteAddr());
+			activityService.saveActivityViolationFromUsername(username, sourceRequest, null, null, ActivityAccessType.DELETE, RequestHelper.getUrl(request),
+					d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((Object) d.getMessage());
 		} catch (CredentialsException d) {
 			logger.warn("Rights exception", d);
 
 			activityService.saveActivityViolationFromUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), null, null, null, ActivityAccessType.DELETE,
-					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d, request.getRemoteAddr());
+					RequestHelper.getUrl(request), d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}

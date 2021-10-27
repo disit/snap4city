@@ -187,7 +187,7 @@ public class POIDataSerializer extends StdSerializer<POIData> {
 			jgen.writeEndObject();
 
 			if (poiData.getKpidata().getSubNature() != null && poiData.getKpidata().getNature() != null) {
-				jgen.writeStringField("serviceType",
+				jgen.writeStringField("serviceType", 
 						poiData.getKpidata().getNature() + "_" + poiData.getKpidata().getSubNature());
 			}
 

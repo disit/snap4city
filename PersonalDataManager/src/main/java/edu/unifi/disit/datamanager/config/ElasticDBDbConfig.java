@@ -12,6 +12,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package edu.unifi.disit.datamanager.config;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyManagementException;
@@ -21,6 +24,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.Arrays;
+import java.util.logging.Level;
 
 import javax.net.ssl.SSLContext;
 
@@ -28,6 +32,7 @@ import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.ssl.SSLContexts;
 import org.apache.logging.log4j.LogManager;
@@ -71,7 +76,13 @@ public class ElasticDBDbConfig {
 	@Value("${elasticsearch.keystorepass}")
 	private String keystorePass;
 
-	@Value("${elasticsearch.keypass}")
+       	@Value("${elasticsearch.truststorefile}")
+	private String truststoreFile;
+
+	@Value("${elasticsearch.truststorepass}")
+	private String truststorePass;
+
+        @Value("${elasticsearch.keypass}")
 	private String keypass;
 
 	@Value("${elasticsearch.username}")
@@ -87,21 +98,39 @@ public class ElasticDBDbConfig {
 		credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(esUsername, esPassword));
 
 		try {
-
-			final SSLContext sslContext = SSLContexts.custom().loadKeyMaterial(readStore(), keypass.toCharArray())
+			SSLContext sslContext;
+                        KeyStore ks;
+                        
+                        if(truststoreFile != null && !truststoreFile.trim().isEmpty()) {
+                                try {
+                                    sslContext = SSLContexts.custom().loadTrustMaterial(new File(truststoreFile), truststorePass.toCharArray())
 					.build();
-			RestClientBuilder builder = null;
+                                } catch(IOException | CertificateException e) {
+                                     logger.warn("Truststore "+truststoreFile+" problem", e);
+                                     sslContext = null;
+                                }
+                        } else if((ks = readKeyStore(keystoreFile, keystoretype, keystorePass)) != null) {
+                                sslContext = SSLContexts.custom().loadKeyMaterial(ks, keypass.toCharArray())
+					.build();
+                        } else if(esProtocol.equals("https")) {
+                                sslContext = SSLContext.getDefault();
+                        } else {
+                                sslContext = null;
+                        }
+                        
+                        final SSLContext sslCtx = sslContext;
+			RestClientBuilder builder;
 			if (!esUsername.equals("") && !esPassword.equals("")) {
 				builder = RestClient
 						.builder(Arrays.stream(esHosts).map(e -> new HttpHost(e, esPort, esProtocol))
 								.toArray(HttpHost[]::new))
 						.setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder
-								.setDefaultCredentialsProvider(credentialsProvider).setSSLContext(sslContext));
+								.setDefaultCredentialsProvider(credentialsProvider).setSSLContext(sslCtx));
 			} else {
 				builder = RestClient
 						.builder(Arrays.stream(esHosts).map(e -> new HttpHost(e, esPort, esProtocol))
 								.toArray(HttpHost[]::new))
-						.setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder.setSSLContext(sslContext));
+						.setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder.setSSLContext(sslCtx));
 			}
 
 			return new RestHighLevelClient(builder);
@@ -117,14 +146,22 @@ public class ElasticDBDbConfig {
 		return new ElasticsearchRestTemplate(elasticsearchClient());
 	}
 
-	private KeyStore readStore() {
-		try (InputStream keyStoreStream = this.getClass().getResourceAsStream(keystoreFile)) {
-			KeyStore keyStore = KeyStore.getInstance(keystoretype); // or "PKCS12"
-			keyStore.load(keyStoreStream, keystorePass.toCharArray());
+	private KeyStore readKeyStore(String ksFile, String ksType, String ksPass) {
+                if(ksFile == null || ksFile.isEmpty())
+                  return null;
+                try (InputStream keyStoreStream = new FileInputStream(ksFile)) {
+			KeyStore keyStore = KeyStore.getInstance(ksType); // or "PKCS12"
+			keyStore.load(keyStoreStream, ksPass.toCharArray());
 			return keyStore;
-		} catch (IOException | KeyStoreException | NoSuchAlgorithmException | CertificateException e) {
-			logger.warn("Certificates Problem", e);
-		}
+                } catch (IOException | KeyStoreException | NoSuchAlgorithmException | CertificateException e) {
+                        try (InputStream keyStoreStream = this.getClass().getResourceAsStream(ksFile)) {
+                                KeyStore keyStore = KeyStore.getInstance(ksType); // or "PKCS12"
+                                keyStore.load(keyStoreStream, ksPass.toCharArray());
+                                return keyStore;
+                        } catch (IOException | KeyStoreException | NoSuchAlgorithmException | CertificateException ee) {
+                                logger.warn("Certificates Problem", ee);
+                        }
+                }
 		return null;
 	}
 

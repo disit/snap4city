@@ -9,10 +9,11 @@ var Configuration = {
                 APIClient.url = location.protocol + "//" + location.hostname + (location.port != "" ? ":" + location.port : "") + location.pathname  + "api/v1/";
                 Authentication.url = _response["Authentication.url"];
                 Authentication.clientId = _response["kpi.Authentication.clientId"];
-	            EditModalManager.dictionaryUrl = _response["Dictionary.url"];
+	        EditModalManager.dictionaryUrl = _response["Dictionary.url"];
                 EditModalManager.organizationList = JSON.parse(_response["organization.list"]); 
                 EditModalManager.orgInfoUrl = _response["orgInfo.url"];                  
-				Utility.elasticMasterHost = _response["elasticsearch.hosts"];
+		Utility.elasticMasterHost = _response["elasticsearch.hosts"];
+                Utility.kibanaDashboardUrl = _response["kibana.dashboardUrl"];
                 Utility.ldapBasicDn = _response["ldap.basicdn"];
             },
             error: function (_error) {

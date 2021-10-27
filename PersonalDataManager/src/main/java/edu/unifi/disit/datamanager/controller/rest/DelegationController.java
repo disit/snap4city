@@ -12,6 +12,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package edu.unifi.disit.datamanager.controller.rest;
 
+import edu.unifi.disit.datamanager.RequestHelper;
 import java.util.List;
 import java.util.Locale;
 
@@ -78,7 +79,7 @@ public class DelegationController {
 			logger.warn("Rights exception", d);
 
 			activityService.saveActivityViolationFromUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), sourceRequest, null, null, ActivityAccessType.READ,
-					request.getRequestURI() + "?" + request.getQueryString(), d.getMessage(), d, request.getRemoteAddr());
+					RequestHelper.getUrl(request), d.getMessage(), d, RequestHelper.getClientIpAddr(request));
 
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body((Object) d.getMessage());
 		}
