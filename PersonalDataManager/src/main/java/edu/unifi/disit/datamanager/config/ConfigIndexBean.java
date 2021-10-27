@@ -6,12 +6,14 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ConfigIndexBean {
  
-    private static String indexName;
- 
-    @Value("${elasticsearch.indexname}")
-    private void setIndexNameStatic(String name){
-    	ConfigIndexBean.indexName = name;
-    }
+        private static String indexName;
+        private static String kpiDefaultSaveOn;
+
+        @Value("${elasticsearch.indexname}")
+        private void setIndexNameStatic(String name){
+            ConfigIndexBean.indexName = name;
+        }
+        
 	public static final String getIndexName() {
 		return indexName;
 	}
@@ -20,5 +22,17 @@ public class ConfigIndexBean {
 		ConfigIndexBean.indexName = indexName;
 	}
 	
+        @Value("${config.kpi.defaultsaveon}")
+        private void setKpiDefaultSaveOnStatic(String name){
+            ConfigIndexBean.kpiDefaultSaveOn = name;
+        }
+        
+	public static final String getKpiDefaultSaveOn() {
+		return kpiDefaultSaveOn;
+	}
+
+	public static void setKpiDefaultSaveOn(String kpiDefaultSaveOn) {
+		ConfigIndexBean.kpiDefaultSaveOn = kpiDefaultSaveOn;
+	}
 	
 }
