@@ -340,7 +340,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 				throw new CredentialsNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
 			}
 		} catch (VerificationException e) {
-			logger.warn("Verification failed");
+			logger.warn("Verification failed", e);
 			throw new CredentialsNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
 		}
 
@@ -469,64 +469,70 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 	private CheckCredential retrieveCachedOwnership(String elementId, String elementType, String username, String accessToken, Locale lang) throws CredentialsNotValidException {
 
 		// retrieve cached credentials for Ownership
-		ArrayList<CheckCredential> ownerships = cachedOwnership.get(elementId);
-		CheckCredential o = null;
+                CheckCredential o = null;
+                ArrayList<CheckCredential> ownerships;
+                synchronized(cachedOwnership) {
+                        ownerships = cachedOwnership.get(elementId);
 
-		if (ownerships == null) {
-			logger.debug("ownership not found in cache");
-			ownerships = new ArrayList<CheckCredential>();
-		} else {
-			// retrieve ownership for current username
-			o = ownerships.stream().filter(x -> username.equals(x.getUsername()) && elementType.equals(x.getElementType())).findAny().orElse(null);
-			logger.debug("ownership found in cache: {}", o);
+                        if (ownerships == null) {
+                                logger.debug("ownership not found in cache");
+                                ownerships = new ArrayList<CheckCredential>();
+                        } else {
+                                // retrieve ownership for current username
+                                o = ownerships.stream().filter(x -> username.equals(x.getUsername()) && elementType.equals(x.getElementType())).findAny().orElse(null);
+                                logger.debug("ownership found in cache: {}", o);
 
-			if ((o != null) && (o.isElapsed())) {
-				logger.debug("ownership removed from cache since not valid anymore");
-				ownerships.remove(o);
-				cachedOwnership.put(elementId, ownerships);
-				o = null;
-			}
-		}
+                                if ((o != null) && (o.isElapsed())) {
+                                        logger.debug("ownership removed from cache since not valid anymore");
+                                        ownerships.remove(o);
+                                        cachedOwnership.put(elementId, ownerships);
+                                        o = null;
+                                }
+                        }
 
-		// if ownership not found or invalidated, retrieve new credentials for ownership
-		if (o == null) {
-			logger.debug("retrieving credentials for ownership");
-			o = getOwnershipCC(accessToken, elementId, elementType, username, lang);
-			ownerships.add(o);
-			cachedOwnership.put(elementId, ownerships);
-		}
+                        // if ownership not found or invalidated, retrieve new credentials for ownership
+                        if (o == null) {
+                                logger.debug("retrieving credentials for ownership");
+                                o = getOwnershipCC(accessToken, elementId, elementType, username, lang);
+                                ownerships.add(o);
+                                cachedOwnership.put(elementId, ownerships);
+                        }
+                }
 
 		return o;
 	}
 
 	private CheckCredential retrieveCachedDelegation(String elementId, String elementType, String username, String accessToken, Locale lang) throws CredentialsNotValidException, UnsupportedEncodingException {
+                CheckCredential d = null;
+                ArrayList<CheckCredential> delegations;
 
-		// retrieve all cached credentials for Delegation
-		ArrayList<CheckCredential> delegations = cachedDelegation.get(elementId);
-		CheckCredential d = null;
+                synchronized(cachedDelegation) {
+                    // retrieve all cached credentials for Delegation
+                    delegations = cachedDelegation.get(elementId);
 
-		if (delegations == null) {
-			logger.debug("delegation not found in cache");
-			delegations = new ArrayList<CheckCredential>();
-		} else {
-			// retrieve delegation for current username
-			d = delegations.stream().filter(x -> username.equals(x.getUsername()) && elementType.equals(x.getElementType())).findAny().orElse(null);
-			logger.debug("delegation found in cache: {}", d);
-			if ((d != null) && (d.isElapsed())) {
-				logger.debug("d removed from cache since not valid anymore");
-				delegations.remove(d);
-				cachedDelegation.put(elementId, delegations);
-				d = null;
-			}
-		}
+                    if (delegations == null) {
+                            logger.debug("delegation not found in cache");
+                            delegations = new ArrayList<CheckCredential>();
+                    } else {
+                            // retrieve delegation for current username
+                            d = delegations.stream().filter(x -> username.equals(x.getUsername()) && elementType.equals(x.getElementType())).findAny().orElse(null);
+                            logger.debug("delegation found in cache: {}", d);
+                            if ((d != null) && (d.isElapsed())) {
+                                    logger.debug("d removed from cache since not valid anymore");
+                                    delegations.remove(d);
+                                    cachedDelegation.put(elementId, delegations);
+                                    d = null;
+                            }
+                    }
 
-		// if delegation not found or invalidated, retrieve new credentials for delegation
-		if (d == null) {
-			logger.debug("retrieving credentials for delegation");
-			d = getDelegationCC(accessToken, elementId, elementType, username, lang);
-			delegations.add(d);
-			cachedDelegation.put(elementId, delegations);
-		}
+                    // if delegation not found or invalidated, retrieve new credentials for delegation
+                    if (d == null) {
+                            logger.debug("retrieving credentials for delegation");
+                            d = getDelegationCC(accessToken, elementId, elementType, username, lang);
+                            delegations.add(d);
+                            cachedDelegation.put(elementId, delegations);
+                    }
+                }
 
 		return d;
 	}
