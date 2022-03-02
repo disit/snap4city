@@ -17,7 +17,7 @@ services:
       - ./db/snap4bim.sql:/docker-entrypoint-initdb.d/0_init.sql
     restart: unless-stopped
   bimserver:
-    image: disitlab/bimserver:1.5.182
+    image: mybimserver:1.5.182
     user: root
     ports:
       - 8080:8080
