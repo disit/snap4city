@@ -1,0 +1,4204 @@
+div.loadingDivIframe
+{
+    display: none;
+    width: 100%;
+    float: left;
+    font-size: 13px;
+}
+
+div.loadingTextDiv
+{
+    width: 100%; 
+    height: 50%;
+    font-family: Verdana, sans-serif;
+    font-size: 18px;
+    display: flex; 
+    align-items: flex-end; 
+    justify-content: center; 
+    text-align: center;
+}
+
+div.loadingIconDiv
+{
+    width: 100%; 
+    height: 50%; 
+    display: flex; 
+    align-items: flex-start; 
+    justify-content: center; 
+    text-align: center;
+}
+
+div.loadingIconDivIframe
+{
+    width: 100%; 
+    height: 50%; 
+    display: flex; 
+    align-items: flex-start; 
+    justify-content: center; 
+    text-align: center;
+    font-size: 56px;
+}
+
+div.loadingDiv, div.noDataAlert, div.loadErrorAlert
+{
+    float: left;
+    width: 100%;
+    height: 100%;
+    display: none;
+}
+
+div.loadErrorAlertText, div.noDataAlertText
+{
+    width: 100%;
+    height: 50%;
+    float: left;
+    font-family: Verdana, sans-serif;
+    text-align: center; 
+    font-size: 18px; 
+    display: flex;
+    align-items: flex-end; 
+    justify-content: center;
+    text-align: center;
+    padding-bottom: 2%;
+}
+
+div.loadErrorAlertIcon, div.noDataAlertIcon
+{
+    width: 100%;
+    height: 50%;
+    float: left;
+    font-family: Verdana, sans-serif;
+    text-align: center; 
+    display: flex;
+    align-items: flex-start; 
+    justify-content: center;
+    text-align: center;
+}
+
+div.loadErrorAlertIcon i.fa-warning, div.noDataAlertIcon i.fa-times
+{
+    font-size: 56px; 
+}
+
+div.widgetButton
+{
+   font-family: Verdana; 
+   box-shadow: 1px 1px 2px black;
+}
+
+div.widgetButton:hover
+{
+   cursor: pointer;
+}
+
+div.widgetButtonTextContainer
+{
+    width: 100%;
+    float: left;
+    font-weight: bold;
+}
+
+div.widgetButtonBackground
+{
+    width: 100%;
+    float: left;
+}
+
+div.widgetSeparator
+{
+    background-color: transparent;
+}
+
+.fa-plus:hover, .fa-close:hover
+{
+    cursor: pointer;
+}
+
+.notVisible
+{
+   display: none;
+}
+
+.bold
+{
+   font-weight: bold;
+}
+
+.chartContainer
+{
+    width: 100%;
+    height: 100%;
+    margin: 0 auto;
+}
+
+.chartContainerPie
+{
+    width: 100%;
+    height: 86%;
+    margin: 0 auto;
+}
+
+.legendContainer1
+{
+    width: 100%;
+    height: 7%;
+    margin: 0 auto;
+    display: -webkit-flex;
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+    -webkit-flex-wrap: wrap;
+    flex-wrap: wrap;
+}
+
+.legendContainer2
+{
+    width: 100%;
+    height: 7%;
+    margin: 0 auto;
+    display: -webkit-flex;
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+    -webkit-flex-wrap: wrap;
+    flex-wrap: wrap;
+}
+
+.legendSingleContainer
+{
+    margin-left: 5px;
+}
+
+.legendColorContainer
+{
+    border-radius: 10px; width: 10px; height: 10px;
+    margin-right: 3px;
+    float: left;
+}
+
+.legendLabelContainer
+{
+    font-family: Verdana;
+    font-size: 11px;
+    font-weight: bold; 
+    font-style: italic; 
+    height: 10px;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    float: left;
+}
+
+.legendInfoContainer
+{
+    height: 100%;
+    float: left;
+    margin-right: 5px;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+}
+
+.zIndexHigh
+{
+    z-index: 99999999;
+}
+
+.handPointer
+{
+    cursor: pointer;
+}
+
+.tableStyle
+{
+    width: 100%;
+    float: left;
+    border: 1px solid black;
+    border-collapse: collapse;
+    /*Per avere colonne tutte della stessa larghezza*/
+    table-layout: fixed;
+    font-family: Verdana, sans-serif;
+    font-weight: bold;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+}
+
+.tableStyle tr
+{
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+
+.tableStyle th
+{
+    border: 1px solid black;
+    border-collapse: collapse;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.tableStyle td
+{
+    border: 1px solid black;
+    border-collapse: collapse;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.psPopupTable
+{
+    width: 100%;
+    height: 85%;
+    float: left;
+    border: 1px solid #dddddd;
+    border-collapse: collapse;
+    /*Per avere colonne tutte della stessa larghezza*/
+    table-layout: fixed;
+    /*font-family: Verdana, sans-serif;*/
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+    margin-top: 10px;
+}
+
+.psPopupTable tr
+{
+    border: 1px solid #eeeeee;
+    border-collapse: collapse;
+    height: 15px;
+}
+
+.psPopupTable th
+{
+    border: 1px solid #eeeeee;
+    font-weight: bold;
+    border-collapse: collapse;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.psPopupTable td
+{
+    border: 1px solid #eeeeee;
+    border-collapse: collapse;
+    text-align: center;
+    vertical-align: middle;
+    padding-top: 0px;
+    padding-bottom: 0px;
+}
+
+.popupLastUpdateContainer
+{
+    width: 100%;
+}
+
+.psTable
+{
+    width: 100%;
+    height: 100%;
+    float: left;
+    border: 1px solid #dddddd;
+    border-collapse: collapse;
+    /*Per avere colonne tutte della stessa larghezza*/
+    table-layout: fixed;
+    font-family: Montserrat, sans-serif;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+}
+
+.psTable tr
+{
+    border: 1px solid #dddddd;
+    border-collapse: collapse;
+}
+
+.psTable th
+{
+    border: 1px solid #dddddd;
+    font-weight: bold;
+    border-collapse: collapse;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.psTable td
+{
+    border: 1px solid #dddddd;
+    border-collapse: collapse;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.buttonsContainer
+{
+    width: 50px;
+    height: 100%;
+    float: left;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+}
+
+div.singleBtnContainer
+{
+   width: 25px;
+   height: 100%;
+   float: left;
+   display: flex; 
+   align-items: center; 
+   justify-content: center;
+   text-align: center;
+}
+
+.countdownContainer
+{
+    width: 25px;
+    height: 100%;
+    float: left;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    text-align: center;
+}
+
+.infoButtonContainer
+{
+    float: left;
+    width: 25px;
+    height: 100%;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    text-align: center;
+}
+
+.mapButtonContainer
+{
+   float: left;
+   width: 25px;
+   height: 100%;
+   display: none; 
+   align-items: center; 
+   justify-content: center;
+}
+
+.mapButton
+{
+   color: #337ab7;
+}
+
+#FIRENZE
+{
+    width: 100%;
+    height: 100%;
+}
+
+div.buttonTxtContainer
+{
+    display: flex;
+    align-items: center; 
+    justify-content: center;
+    text-align: center;
+    float: left;
+    border-radius: inherit;
+    line-height: 1.25;
+    font-weight: bold;
+    width: 100%;
+    -o-transition: color 300ms, text-shadow 300ms, background-color 300ms;
+    -moz-transition: color 300ms, text-shadow 300ms, background-color 300ms;
+    -webkit-transition: color 300ms, text-shadow 300ms, background-color 300ms;
+    -ms-transition: color 300ms, text-shadow 300ms, background-color 300ms;
+    transition: color 300ms, text-shadow 300ms, background-color 300ms;
+}
+
+.previsione-giorno
+{
+    height: 100%;
+    width: 20%;
+    float: left;
+    text-align: center;
+    font-family: Verdana, Arial, sans-serif;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+}
+
+.giorno
+{
+    width: 100%;
+    display: block;
+    text-align: center; 
+    font-weight: bold;
+    font-size: 12px;   
+}
+
+.descrizione-meteo
+{
+    width: 100%;
+    display: block;
+    text-align: center; 
+}
+
+.temperature
+{
+    display: block;
+    width: 100%;
+}
+
+.min
+{
+   display: inline;
+}
+
+.max
+{
+   display: inline;
+}
+
+.pcGeneralDiv
+{
+   overflow-y: auto;
+   overflow-x: auto;
+   word-wrap: break-word;
+   text-align: center;
+   width: 100%;
+   height: 100%;
+}
+
+.pcGeneralDiv img
+{
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.pcGeneralDiv #Zones
+{
+    margin-bottom: 10px;
+}
+
+.pcGeneralDiv #Risks
+{
+    width: 100%;
+    height: auto;
+}
+
+.pcGeneralDiv #Risks table
+{
+    width: 100%;
+    border: 1px solid black;
+    margin-bottom: 10px;
+}
+
+.pcGeneralDiv #Risks tr
+{
+    width: 100%;
+    height: auto;
+}
+
+.pcGeneralDiv #Risks th
+{
+    width: 33.33%;
+    height: auto;
+    white-space: nowrap;
+    text-align: center;
+    border: 1px solid black;
+}
+
+.pcGeneralDiv #Risks td
+{
+    width: 33.33%;
+    height: auto;
+    white-space: normal;
+    text-align: center;
+    border: 1px solid black;
+}
+
+.pcGeneralDiv img
+{
+    max-width: 100%;
+    height: auto;
+}
+
+.pcGeneralDiv a
+{
+    display: block;
+}
+
+.pcGeneralDiv span
+{
+    display: block;
+}
+
+.pcMeteoDiv
+{
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.meteoPcLegendaRow
+{
+    width: 100%;
+    height: 12.5%;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+}
+
+.pcLegendaContainer
+{
+    width: 100%;
+    height: 100%;
+    float: left;
+}
+
+.pcLegendaElement
+{
+    height: 100%;
+    width: 25%;
+    float: left;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+}
+
+.pcLegendaElementMarginRight
+{
+    /*margin-right: 10px;*/
+}
+
+.pcLegendaNessuno
+{
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, #E2FF8C, #99CC00);
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    font-variant: small-caps;
+    font-weight: bold;
+    font-family: Verdana, Arial, sans-serif;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+}
+
+.pcLegendaBasso
+{
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, #FAFAAF, #FFFF00);
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    font-variant: small-caps;
+    font-weight: bold;
+    font-family: Verdana, Arial, sans-serif;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+}
+
+.pcLegendaMedio
+{
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, #FFD382, #FFA500);
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    font-variant: small-caps;
+    font-weight: bold;
+    font-family: Verdana, Arial, sans-serif;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+}
+
+.pcLegendaAlto
+{
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, #FF7878, #FF0000);
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    font-variant: small-caps;
+    font-weight: bold;
+    font-family: Verdana, Arial, sans-serif;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+}
+
+.meteoPcRow
+{
+    width: 100%;
+}
+
+.meteoPcDesc
+{
+    height: 100%;
+    float: left;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    font-family: Verdana, Arial, sans-serif;
+    font-variant: small-caps;
+    font-weight: bold;
+}
+
+.meteoPcIcon
+{
+    height: 100%;
+    float: left;
+}
+
+@keyframes alarm {
+    0% {
+        background-color: transparent;
+    }
+    
+    30% {
+        background-color: transparent;
+    }
+    
+    50% {
+        background-color: #ff6666;
+    }
+    
+    70% {
+        background-color: transparent;
+    }
+    
+    100% {
+        background-color: transparent;
+    }
+}
+
+@keyframes alarmYellow {
+    0% {
+        background-color: transparent;
+    }
+    
+    30% {
+        background-color: transparent;
+    }
+    
+    50% {
+        background-color: #FFFF00;
+    }
+    
+    70% {
+        background-color: transparent;
+    }
+    
+    100% {
+        background-color: transparent;
+    }
+}
+
+@keyframes alarmOrange {
+    0% {
+        background-color: transparent;
+    }
+    
+    30% {
+        background-color: transparent;
+    }
+    
+    50% {
+        background-color: #FFA500;
+    }
+    
+    70% {
+        background-color: transparent;
+    }
+    
+    100% {
+        background-color: transparent;
+    }
+}
+
+.alarmDivGc
+{
+    width: 100%;
+    height: 100%;
+    background-color: transparent;   
+}
+
+.alarmDivGcActive
+{
+    width: 100%;
+    height: 100%;
+    animation: alarm 4s ease infinite; 
+}
+
+.alarmDiv
+{
+    width: 100%;
+    height: 25px;
+    background-color: transparent;
+}
+
+.alarmDivActive
+{
+    width: 100%;
+    height: 25px;
+    background-color: red;
+    animation: alarm 4s ease infinite; 
+}
+
+.alarmDivPc
+{
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+}
+
+.alarmDivPcActiveYellow
+{
+    width: 100%;
+    height: 100%;
+    background-color: #FFFF00;
+    animation: alarmYellow 4s ease infinite; 
+}
+
+.alarmDivPcActiveOrange
+{
+    width: 100%;
+    height: 100%;
+    background-color: #FFA500;
+    animation: alarmOrange 4s ease infinite; 
+}
+
+.alarmDivPcActiveRed
+{
+    width: 100%;
+    height: 100%;
+    background-color: #FF0000;
+    animation: alarm 4s ease infinite; 
+}
+
+div.mapDiv, div.gisMapDiv
+{
+    width: 100%;
+    height: 100%;
+    display: none;
+}
+
+.iframeWrapper
+{
+    position: absolute;
+    width: 100%;
+}
+
+.iframeZoomControls
+{
+    position: absolute;
+    z-index: 99999999;
+    width: 100px;
+    height: 60px;
+    display: none;
+    background-color: #337ab7;
+    opacity: 0.5;
+}
+
+.iframeZoomControls:hover
+{
+    opacity: 1;
+}
+
+.iframeZoomControls i:first-of-type
+{
+    margin-right: 5px;
+}
+
+.iframeZoomControls i:hover
+{
+    color: yellow;
+}
+
+.zoomControlsRow
+{
+    width: 100%;
+    height: 33.3333%;
+}
+
+.zoomControlsLabelDiv
+{
+    width: 55%;
+    height: 100%;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    text-align: center;
+    font-size: 14px;
+    font-family: Verdana, sans-serif;
+    font-weight: bold;
+    font-variant: small-caps;
+    color: white;
+    float: left;
+}
+
+.zoomControlsButtonsDiv
+{
+    width: 45%;
+    height: 100%;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    text-align: center;
+    font-size: 18px;
+    float: left;
+}
+
+
+.zoomDisplay
+{
+    background-color: transparent;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate3d(-50%, -50%, 0);
+    width: 100px;
+    height: 100px;
+    z-index: 1;
+    display: flex;
+    align-items: center; 
+    justify-content: center;
+    text-align: center;
+    font-size: 32px;
+    font-family: Verdana, sans-serif;
+    font-weight: bold;
+    font-variant: small-caps;
+    visibility: hidden;
+}
+
+
+.iFrame
+{
+    position: absolute;
+    top:0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    border: none !important;
+}
+
+.twitterMainContent
+{
+    float:left; 
+    width: 100%; 
+    height: 100%;
+}
+
+.twitterContent
+{
+    float:left; 
+    color: black;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+    font-variant: small-caps;
+    font-weight: bold;
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    text-align: center;
+}
+
+.twitterTabsContainer
+{
+    width: 100%;
+    height: 23px;
+    float: left;
+    display: none;
+}
+
+.twitterTabs
+{
+    font-family: Verdana, Arial, sans-serif;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+    font-weight: bold;
+    font-variant: small-caps;
+    font-size: 12px;
+}
+
+.vigilanceIcon
+{
+    float: left;
+    color: black;
+    font-size: 22px;
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    text-align: center;
+}
+
+.twitterRow .turchese
+{
+    background: #39ceae;
+}
+
+.twitterRow .azzurroGrad
+{
+    background: #1B95E0;
+    background: -webkit-linear-gradient(left top, #1B95E0, #8ecbf1); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient(bottom right, #1B95E0, #8ecbf1); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient(bottom right, #1B95E0, #8ecbf1); /* For Firefox 3.6 to 15 */
+    background: linear-gradient(to bottom right, #1B95E0, #8ecbf1); /* Standard syntax */
+}
+
+.twitterRow .turcheseGrad
+{
+    background: #39ceae;
+    background: -webkit-linear-gradient(left top, #39ceae, #adebdd); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient(bottom right, #39ceae, #adebdd); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient(bottom right, #39ceae, #adebdd); /* For Firefox 3.6 to 15 */
+    background: linear-gradient(to bottom right, #39ceae, #adebdd); /* Standard syntax */
+}
+
+.vigilanceIcon a, .twitterContent a, .twitterContent a:link, .twitterContent a:visited, .twitterContent a:active
+{
+    color: black;
+    text-decoration: none;
+}
+
+.vigilanceIcon a:hover, .twitterContent a:hover
+{
+    color: white;
+    text-decoration: none;
+}
+
+.altriEventiTitle
+{
+   background: #d9d9d9;
+   background: -webkit-linear-gradient(#d9d9d9, #ffffff); 
+   background: -o-linear-gradient(#d9d9d9, #ffffff); 
+   background: -moz-linear-gradient(#d9d9d9, #ffffff);
+   background: linear-gradient(#d9d9d9, #ffffff); 
+}
+
+.altriEventi
+{
+   background: #d9d9d9;
+   background: -webkit-linear-gradient(right, #d9d9d9, #ffffff); 
+   background: -o-linear-gradient(right, #d9d9d9, #ffffff); 
+   background: -moz-linear-gradient(right, #d9d9d9, #ffffff);
+   background: linear-gradient(to right, #d9d9d9, #ffffff); 
+}
+
+.apertureStraordinarieTitle
+{
+   background: #ffdb4d;
+   background: -webkit-linear-gradient(#ffdb4d, #fff0b3); 
+   background: -o-linear-gradient(#ffdb4d, #fff0b3); 
+   background: -moz-linear-gradient(#ffdb4d, #fff0b3);
+   background: linear-gradient(#ffdb4d, #fff0b3); 
+}
+
+.apertureStraordinarie
+{
+   background: #ffdb4d;
+   background: -webkit-linear-gradient(right, #ffdb4d, #fff0b3); 
+   background: -o-linear-gradient(right, #ffdb4d, #fff0b3); 
+   background: -moz-linear-gradient(right, #ffdb4d, #fff0b3);
+   background: linear-gradient(to right, #ffdb4d, #fff0b3); 
+}
+
+.estateFiorentinaTitle
+{
+   background: #00b300;
+   background: -webkit-linear-gradient(#00b300, #b3ffb3); 
+   background: -o-linear-gradient(#00b300, #b3ffb3); 
+   background: -moz-linear-gradient(#00b300, #b3ffb3);
+   background: linear-gradient(#00b300, #b3ffb3);
+}
+
+.estateFiorentina
+{
+   background: #00b300;
+   background: -webkit-linear-gradient(right, #00b300, #b3ffb3); 
+   background: -o-linear-gradient(right, #00b300, #b3ffb3); 
+   background: -moz-linear-gradient(right, #00b300, #b3ffb3);
+   background: linear-gradient(to right, #00b300, #b3ffb3); 
+}
+
+.fiereTitle
+{
+   background: #ff80d5;
+   background: -webkit-linear-gradient(#ff80d5, #ffe6f7); 
+   background: -o-linear-gradient(#ff66cc, #ffe6f7); 
+   background: -moz-linear-gradient(#ff66cc, #ffe6f7);
+   background: linear-gradient(#ff66cc, #ffe6f7);
+}
+
+.fiere
+{
+   background: #ff80d5;
+   background: -webkit-linear-gradient(right, #ff80d5, #ffe6f7); 
+   background: -o-linear-gradient(right, #ff80d5, #ffe6f7); 
+   background: -moz-linear-gradient(right, #ff80d5, #ffe6f7);
+   background: linear-gradient(to right, #ff80d5, #ffe6f7); 
+}
+
+.filmTitle
+{
+   background: #ffad33;
+   background: -webkit-linear-gradient(#ffad33, #ffe0b3); 
+   background: -o-linear-gradient(#ffad33, #ffe0b3); 
+   background: -moz-linear-gradient(#ffad33, #ffe0b3);
+   background: linear-gradient(#ffad33, #ffe0b3); 
+}
+
+.film
+{
+   background: #ffad33;
+   background: -webkit-linear-gradient(right, #ffad33, #ffe0b3); 
+   background: -o-linear-gradient(right, #ffad33, #ffe0b3); 
+   background: -moz-linear-gradient(right, #ffad33, #ffe0b3);
+   background: linear-gradient(to right, #ffad33, #ffe0b3); 
+}
+
+.mostreTitle
+{
+   background: #66d9ff;
+   background: -webkit-linear-gradient(#66d9ff, #b3ecff); 
+   background: -o-linear-gradient(#66d9ff, #b3ecff); 
+   background: -moz-linear-gradient(#66d9ff, #b3ecff);
+   background: linear-gradient(#66d9ff, #b3ecff);
+}
+
+.mostre
+{
+   background: #66d9ff;
+   background: -webkit-linear-gradient(right, #66d9ff, #b3ecff); 
+   background: -o-linear-gradient(right, #66d9ff, #b3ecff); 
+   background: -moz-linear-gradient(right, #66d9ff, #b3ecff);
+   background: linear-gradient(to right, #66d9ff, #b3ecff); 
+}
+
+.musicaClassicaTitle
+{
+   background: #ff6699;
+   background: -webkit-linear-gradient(#ff6699, #ffb3cc); 
+   background: -o-linear-gradient(#ff6699, #ffb3cc); 
+   background: -moz-linear-gradient(#ff6699, #ffb3cc);
+   background: linear-gradient(#ff6699, #ffb3cc); 
+}
+
+.musicaClassica
+{
+   background: #ff6699;
+   background: -webkit-linear-gradient(right, #ff6699, #ffb3cc); 
+   background: -o-linear-gradient(right, #ff6699, #ffb3cc); 
+   background: -moz-linear-gradient(right, #ff6699, #ffb3cc);
+   background: linear-gradient(to right, #ff6699, #ffb3cc); 
+}
+
+.musicaRockTitle
+{
+   background: #bab3ff;
+   background: -webkit-linear-gradient(#bab3ff, #e8e6ff); 
+   background: -o-linear-gradient(#bab3ff, #e8e6ff); 
+   background: -moz-linear-gradient(#bab3ff, #e8e6ff); 
+   background: linear-gradient(#bab3ff, #e8e6ff);
+}
+
+.musicaRock
+{
+   background: #bab3ff;
+   background: -webkit-linear-gradient(right, #bab3ff, #e8e6ff); 
+   background: -o-linear-gradient(right, #bab3ff, #e8e6ff); 
+   background: -moz-linear-gradient(right, #bab3ff, #e8e6ff); 
+   background: linear-gradient(to right, #bab3ff, #e8e6ff);
+}
+
+.newsTitle
+{
+   background: #ff794d;
+   background: -webkit-linear-gradient(#ff794d, #ffc6b3); 
+   background: -o-linear-gradient(#ff794d, #ffc6b3); 
+   background: -moz-linear-gradient(#ff794d, #ffc6b3);
+   background: linear-gradient(#ff794d, #ffc6b3); 
+}
+
+.news
+{
+   background: #ff794d;
+   background: -webkit-linear-gradient(right, #ff794d, #ffc6b3); 
+   background: -o-linear-gradient(right, #ff794d, #ffc6b3); 
+   background: -moz-linear-gradient(right, #ff794d, #ffc6b3);
+   background: linear-gradient(to right, #ff794d, #ffc6b3); 
+}
+
+.convegniTitle
+{
+   background: #ffb3ff;
+   background: -webkit-linear-gradient(#ffb3ff, #ffe6ff); 
+   background: -o-linear-gradient(#ffb3ff, #ffe6ff); 
+   background: -moz-linear-gradient(#ffb3ff, #ffe6ff);
+   background: linear-gradient(#ffb3ff, #ffe6ff);
+}
+
+.convegni
+{
+   background: #ffb3ff;
+   background: -webkit-linear-gradient(right, #ffb3ff, #ffe6ff); 
+   background: -o-linear-gradient(right, #ffb3ff, #ffe6ff); 
+   background: -moz-linear-gradient(right, #ffb3ff, #ffe6ff);
+   background: linear-gradient(to right, #ffb3ff, #ffe6ff); 
+}
+
+.incontriLetterariTitle
+{
+   background: #80dfff;
+   background: -webkit-linear-gradient(#80dfff, #b3ecff); 
+   background: -o-linear-gradient(#80dfff, #b3ecff); 
+   background: -moz-linear-gradient(#80dfff, #b3ecff);
+   background: linear-gradient(#80dfff, #b3ecff);
+}
+
+.incontriLetterari
+{
+   background: #80dfff;
+   background: -webkit-linear-gradient(right, #80dfff, #b3ecff); 
+   background: -o-linear-gradient(right, #80dfff, #b3ecff); 
+   background: -moz-linear-gradient(right, #80dfff, #b3ecff);
+   background: linear-gradient(to right, #80dfff, #b3ecff); 
+}
+
+.sportTitle
+{
+   background: #ff8080;
+   background: -webkit-linear-gradient(#ff8080, #ffb3b3); 
+   background: -o-linear-gradient(#ff8080, #ffb3b3); 
+   background: -moz-linear-gradient(#ff8080, #ffb3b3);
+   background: linear-gradient(#ff8080, #ffb3b3); 
+}
+
+.sport
+{
+   background: #ff8080;
+   background: -webkit-linear-gradient(right, #ff8080, #ffb3b3); 
+   background: -o-linear-gradient(right, #ff8080, #ffb3b3); 
+   background: -moz-linear-gradient(right, #ff8080, #ffb3b3);
+   background: linear-gradient(to right, #ff8080, #ffb3b3); 
+}
+
+.teatroTitle
+{
+   background: #d9b38c;
+   background: -webkit-linear-gradient(#d9b38c, #f2e6d9); 
+   background: -o-linear-gradient(#d9b38c, #f2e6d9); 
+   background: -moz-linear-gradient(#d9b38c, #f2e6d9);
+   background: linear-gradient(#d9b38c, #f2e6d9); 
+}
+
+.teatro
+{
+   background: #d9b38c;
+   background: -webkit-linear-gradient(right, #d9b38c, #f2e6d9); 
+   background: -o-linear-gradient(right, #d9b38c, #f2e6d9); 
+   background: -moz-linear-gradient(right, #d9b38c, #f2e6d9);
+   background: linear-gradient(to right, #d9b38c, #f2e6d9); 
+}
+
+.tradizioniPopolariTitle
+{
+   background: #e6e6e6;
+   background: -webkit-linear-gradient(#e6e6e6, #ffffff); 
+   background: -o-linear-gradient(#e6e6e6, #ffffff); 
+   background: -moz-linear-gradient(#e6e6e6, #ffffff);
+   background: linear-gradient(#e6e6e6, #ffffff); 
+}
+
+.tradizioniPopolari
+{
+   background: #e6e6e6;
+   background: -webkit-linear-gradient(right, #e6e6e6, #ffffff); 
+   background: -o-linear-gradient(right, #e6e6e6, #ffffff); 
+   background: -moz-linear-gradient(right, #e6e6e6, #ffffff);
+   background: linear-gradient(to right, #e6e6e6, #ffffff); 
+}
+
+.walkingTitle
+{
+   background: #66cc66;
+   background: -webkit-linear-gradient(#66cc66, #b3e6b3); 
+   background: -o-linear-gradient(#66cc66, #b3e6b3); 
+   background: -moz-linear-gradient(#66cc66, #b3e6b3);
+   background: linear-gradient(#66cc66, #b3e6b3); 
+}
+
+.walking
+{
+   background: #66cc66;
+   background: -webkit-linear-gradient(right, #66cc66, #b3e6b3); 
+   background: -o-linear-gradient(right, #66cc66, #b3e6b3); 
+   background: -moz-linear-gradient(right, #66cc66, #b3e6b3);
+   background: linear-gradient(to right, #66cc66, #b3e6b3); 
+}
+
+.eventIcon
+{
+    float: left;
+    height: 100%;
+}
+
+span.recreativeEventPinShowMsg, span.recreativeEventPinHideMsg
+{
+   display: none;
+   font-size: 12px;
+   font-variant: small-caps;
+   font-weight: bold;
+   text-shadow: 1px 1px 2px black; 
+}
+
+/*.eventIconUp
+{
+    width: 100%;
+    height: 60%;
+    float: left;
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    text-align: center;
+}
+
+.eventIconUp i
+{
+   font-size: 18px;
+}
+
+.eventIconUp img
+{
+    object-fit: contain;
+    width: 100%;
+    height: 100%;
+}
+
+.eventIconDown
+{
+    width: 100%;
+    height: 40%;
+    float: left;
+    display: flex; 
+    align-items: flex-start; 
+    justify-content: center; 
+    text-align: center;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+    font-weight: bold;
+    font-style: italic;
+    font-variant: small-caps;
+}
+
+.eventIconDown i
+{
+    font-size: 14px;
+}*/
+
+.eventTitle
+{
+   float: left;
+   width: 100%;
+   height: 100%;
+   white-space: normal;
+   overflow: hidden;
+}
+
+p.eventTitlePar
+{
+   display: block;
+   width: 100%;
+   height: auto;
+   max-height: 100%;
+   text-align: center;
+   word-wrap: break-word;
+   overflow: hidden;
+   color: black;
+   font-weight: bold;
+   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+   text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+   text-transform: uppercase;
+}
+
+p.recreativeEventTitlePar
+{
+   display: block;
+   width: 100%;
+   height: auto;
+   max-height: 100%;
+   text-align: center;
+   word-wrap: break-word;
+   overflow: hidden;
+   color: black;
+   /*font-family: "Coolwonder";*/
+   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+   text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+   font-weight: bold;
+}
+
+.recreativeEventMapTitle
+{
+   color: black;
+   font-weight: bold;
+   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+   /*font-family: "Coolwonder";*/
+   /*text-shadow: 1px 1px 1px rgba(0,0,0,0.25);*/
+   text-transform: uppercase; 
+   font-size: 14px;
+   text-align: center;
+}
+
+.recreativeEventMapSubTitle
+{
+    color: black;
+    font-weight: bold;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    /*font-family: "Coolwonder";*/
+    /*text-shadow: 1px 1px 1px rgba(0,0,0,0.25);*/
+    text-transform: uppercase;
+    font-size: 12px;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.recreativeEventMapBtnContainer
+{
+    text-align: center;
+}
+
+.recreativeEventMapDataContainer
+{
+    margin-top: 10px;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    /*font-family: "Coolwonder";*/
+    font-size: 12px;
+    height: 175px;
+    overflow-y: auto;
+}
+
+.recreativeEventMapDescContainer, .recreativeEventMapTimingContainer, .recreativeEventMapContactsContainer
+{
+    display: none;
+}
+
+.recreativeEventMapBtn
+{
+    border: none;
+    color: black;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+    text-transform: uppercase; 
+    font-size: 11px;
+    margin-right: 6px;
+}
+
+.recreativeEventMapBtnActive
+{
+    font-weight: bold;
+}
+
+
+.recreativeEventMapSubtitle
+{
+    display: none;
+    font-size: 12px;
+    font-weight: normal;
+}
+
+div.tooltip-inner
+{
+   max-width: 500px;
+   font-family: Verdana;
+}
+
+.eventDataContainer
+{
+   float: left;
+   width: 100%;
+   /*height: 70%;*/
+   height: 40%;
+}
+
+.eventDataRightContainer
+{
+    float: left;
+    width: 80%;
+    height: 100%;
+}
+
+.eventTime 
+{
+    float: left;
+    width: 100%;
+    height: 40%;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    text-align: center;
+    padding-left: 5px;
+    font-style: italic;
+    background-color: transparent;
+}
+
+/*.eventAddress
+{
+    float: left;
+    width: 100%;
+    height: 60%;
+    margin-top: 0px;
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    text-align: center;
+    margin-bottom: 0px;
+    padding-left: 3px;
+    background-color: transparent;
+}*/
+
+.onMapSignal
+{
+   font-weight: bold;
+   display: none;
+   animation: onMapSignalAnimation 1.5s ease infinite;
+}
+
+.onMapPinAnimated
+{
+   animation: onMapSignalAnimation 1.5s ease infinite;
+}
+
+@keyframes onMapSignalAnimation 
+{
+   0% 
+   {
+       color: #000000;
+   }
+
+   30% 
+   {
+       color: #000000;
+   }
+
+   50% 
+   {
+       color: #FFFFFF;
+   }
+
+   70% 
+   {
+       color: #000000;
+   }
+
+   100% 
+   {
+       color: #000000;
+   }
+}
+
+.content
+{
+    float:left; 
+    width: 100%; 
+    display: none;
+}
+
+.meteoContent
+{
+    float:left; 
+    width: 100%;
+}
+
+.pcLogosContainer
+{
+    float: left; 
+    width: 100%;
+    height: 25px;
+}
+
+.pcInfoContainer
+{
+    width: 21%;
+    height: 100%; 
+    float: left;
+    display: flex; 
+    align-items: center; 
+    justify-content: flex-start; 
+    text-align: center;
+}
+
+.logoPc
+{
+    position: relative;
+    height: 100%;
+    width: 58%;
+    float: left;
+    display: flex; 
+    justify-content: center;
+    align-items: center;
+}
+
+.logoPc img
+{
+    display: block;
+    position: absolute;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.pcCountdownContainer
+{
+    width: 21%; 
+    height: 100%; 
+    float: left;
+    display: flex; 
+    align-items: center; 
+    justify-content: flex-end; 
+    text-align: right;
+}
+
+.pcCountdown
+{
+    display: inline-flex;
+    border-color: #337AB7;
+    border-style: solid;
+    border-radius: 5px;
+    border-width: 1px;
+}
+
+.iconsModifyPcWidget
+{
+    float: left; 
+    display: none;
+    height: 100%;
+    width: 21%;
+}
+
+.elementLink2
+{
+    color: black;
+    text-decoration: none;
+}
+
+.elementLink2:link
+{
+    color: black;
+    text-decoration: none;
+}
+
+.elementLink2:visited
+{
+    color: black;
+    text-decoration: none;
+}
+
+.elementLink2:hover
+{
+    color: black;
+    text-decoration: none;
+}
+
+.elementLink2:active
+{
+    color: black;
+    text-decoration: none;
+}
+
+.eventLink, .eventLink:link, .eventLink:visited, .eventLink:active
+{
+    color: black;
+    text-decoration: none;
+}
+
+.eventLink:hover
+{
+    /*color: white;*/
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.bar_content
+{
+    text-align:center;
+    margin: 0 auto;
+}
+
+.smartDS
+{
+    text-align:center;
+    margin: 0 auto;
+}
+
+.column_content
+{
+    text-align:center;
+    margin: 0 auto;
+}
+
+#park_free_value
+{
+    background-color: #FFFF00; 
+}
+
+.atafService
+{
+    width: 100%; 
+    height: 100%;
+}
+
+.desc
+{
+    font-size:14px;
+    font-weight: bold;
+    height: 25px;
+    float: left;
+}
+
+.genContentDesc
+{
+    font-size:14px;
+    font-weight: bold;
+    height: 100%;
+    float: left;
+}
+
+.desc .desc_text{
+    overflow: hidden ;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    float: left;
+    /*Effetto fade in caso di allarme*/
+    -webkit-transition: background 1.8s ease-in-out;
+    -ms-transition:     background 1.8s ease-in-out;
+    transition:         background 1.8s ease-in-out;
+}
+
+.measure_td_value_central{
+   text-align: center;
+   font-weight: bold;    
+   line-height:38px;
+   font-size: 24px;
+}
+
+.sceSingleContainer
+{
+    float:left;
+    width: 33.3333%;
+    height: 100%;
+}
+
+.sceDesc
+{
+    height: 20%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    font-size: 70%;
+    font-weight: bold;
+    font-variant: small-caps;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    font-family: Verdana, Arial, sans-serif;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.35); 
+}
+
+.sceValueCpu
+{
+    height: 80%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.sceValueRoundContainer
+{
+    height: 80%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+}
+
+.sceValueRoundDiv
+{
+    font-weight: bold;
+    font-family: Verdana, Arial, sans-serif;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.35); 
+    border-radius: 50%;
+    text-align: center;
+    background: #80ccff;
+    background: -webkit-linear-gradient(#80ccff, #ccebff); 
+    background: -o-linear-gradient(#80ccff, #ccebff); 
+    background: -moz-linear-gradient(#80ccff, #ccebff); 
+    background: linear-gradient(to top, #80ccff, #ccebff);
+}
+
+.sceValueDesc
+{
+    padding: 0;
+    margin: 0;
+    position: relative;
+    top: 25%;
+}
+
+.sceDescP
+{ 
+    padding: 0px 0px 0px 0px;
+    margin: 0px 0px 0px 0px;
+    font-weight: bold;
+    font-variant: small-caps;
+}
+
+.sceValue
+{
+    padding: 0px 0px 0px 0px;
+    margin: 0px 0px 0px 0px;
+    position: relative;
+    top: 25%;
+    /*border-style: solid;
+    border-color: red;
+    border-width: 1px;*/
+}
+
+.sceValueP
+{
+    padding: 0px 0px 0px 0px;
+    margin: 0px 0px 0px 0px;
+    font-weight: bold;
+}
+
+.atafStateIntro
+{
+    font-weight: bold;
+    font-variant: small-caps;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    text-align: center;
+}
+
+.atafStateRideTitle
+{
+    float: left;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 46%;
+    height: 100%;
+    font-weight: bold;
+    font-variant: small-caps;
+}
+
+.atafLinesContainer
+{
+    width: 75%;
+    border-radius: 15px;
+    background: #80ccff;
+    background: -webkit-linear-gradient(#80ccff, #ccebff); 
+    background: -o-linear-gradient(#80ccff, #ccebff); 
+    background: -moz-linear-gradient(#80ccff, #ccebff); 
+    background: linear-gradient(to top, #80ccff, #ccebff);
+}
+
+.atafUtility
+{
+    width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;
+}
+
+.atafMiddleDiv
+{
+    width: 100%;
+    height: 22%;
+}
+
+.atafLineSingleContainer
+{
+    float: left;
+    width: 33.3333%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    background-image: url('../img/busBlackMod2.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: auto 70%;
+    color: #000000;
+    font-family: Verdana, Arial, sans-serif;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.35); 
+    font-size: 26px;
+}
+
+.atafValueContainer
+{
+    float:left;
+    width: 33.3333%;
+    height: 100%;
+    font-size: 100%;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.nav_ul
+{
+    /*NON RIMUOVERE!!!*/
+}
+
+.nav_ul li a
+{
+    width: 100%;
+    height: 100%;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    font-weight: bold;
+    font-variant: small-caps;
+}
+
+.atafValueRoundContainer
+{
+    font-weight: bold;
+    border-radius: 50%;
+    font-family: Verdana, Arial, sans-serif;
+    background: #80ccff;
+    background: -webkit-linear-gradient(#80ccff, #ccebff); 
+    background: -o-linear-gradient(#80ccff, #ccebff); 
+    background: -moz-linear-gradient(#80ccff, #ccebff); 
+    background: linear-gradient(to top, #80ccff, #ccebff);
+}
+
+.atafDesc
+{
+    padding: 0;
+    margin: 0;
+    text-align: center;
+    /*border-style: solid;
+    border-color: #05B2D2;
+    border-width: 1px;*/
+}
+
+.atafDescP
+{
+    font-size: 45%;
+    padding: 0px 0px 0px 0px;
+    margin: 0px 0px 0px 0px;
+    font-weight: bold;
+    font-variant: small-caps;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.35);
+}
+
+.atafValue
+{
+    padding: 0px 0px 0px 0px;
+    margin: 0px 0px 0px 0px;
+    text-align: center;
+    /*border-style: solid;
+    border-color: red;
+    border-width: 1px;*/
+}
+
+.atafValueP
+{
+    padding: 0px 0px 0px 0px;
+    margin: 0px 0px 0px 0px;
+    font-size: 90%;
+    font-weight: bold;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.35);
+}
+
+.line{
+    
+    display:inline;
+    padding:2px;
+    margin: 5px;
+    border-radius: 10px; 
+   -moz-border-radius: 10px; /* firefox */
+   -webkit-border-radius: 5px;
+}
+
+atafLastUpdateWrapper
+{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.atafLastUpdateContent
+{
+    width: 70%;
+    height: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-variant: small-caps;
+    font-family: Verdana, Arial, sans-serif;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.35);  
+    text-align: center;
+    border-radius: 15px; 
+   -moz-border-radius: 15px; /* firefox */
+   -webkit-border-radius: 10px;
+    background: #80ccff;
+    background: -webkit-linear-gradient(#80ccff, #ccebff); 
+    background: -o-linear-gradient(#80ccff, #ccebff); 
+    background: -moz-linear-gradient(#80ccff, #ccebff); 
+    background: linear-gradient(to top, #80ccff, #ccebff);
+}
+
+.atafTab
+{
+    font-family: Verdana, Arial, sans-serif;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.35);
+    font-size: 12px;
+}
+
+.value
+{
+    font-size: 25px; 
+    font-weight: bold; 
+    margin-top: 15px;
+    line-height: 100px;
+    width: 145px;
+}
+
+.singleContentUtility
+{
+    display: none;
+    float: left;
+    font-size: 60px;
+    width: 100%;
+    font-family: Verdana, Arial, sans-serif;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.35); 
+}
+
+.singleContentValue
+{
+    font-weight: bold; 
+    width: 100%;
+    float: left;
+    align-items: flex-end;
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    overflow: hidden ;
+    text-overflow: ellipsis;
+}
+
+.singleContentUdm
+{
+    font-weight: bold; 
+    width: 100%;
+    float: left;
+    text-align: center; 
+    display: flex;
+    align-items: flex-start; 
+    justify-content: center;
+}
+
+.nomeJob
+{
+    width: 100%;
+    height: 22.5%;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+    font-weight: bold;
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.statoJobContainerOk
+{
+    width: 90%;
+    height: 100%;
+    font-variant: small-caps;
+    border-radius: 15px; 
+   -moz-border-radius: 15px; /* firefox */
+   -webkit-border-radius: 10px;
+    background: #00cc00;
+    background: -webkit-linear-gradient(#00cc00, #66ff66); 
+    background: -o-linear-gradient(#00cc00, #66ff66); 
+    background: -moz-linear-gradient(#00cc00, #66ff66); 
+    background: linear-gradient(to top, #00cc00, #66ff66);
+}
+
+.statoJobContainerRunning
+{
+    width: 90%;
+    height: 70%;
+    font-variant: small-caps;
+    border-radius: 15px; 
+   -moz-border-radius: 15px; /* firefox */
+   -webkit-border-radius: 10px;
+    background: #ffcc00;
+    background: -webkit-linear-gradient(#ffcc00, #fff0b3); 
+    background: -o-linear-gradient(#ffcc00, #fff0b3); 
+    background: -moz-linear-gradient(#ffcc00, #fff0b3); 
+    background: linear-gradient(to top, #ffcc00, #fff0b3);
+    /*border-style: solid;
+    border-color: blueviolet;
+    border-width: 3px;*/
+}
+
+.statoJobContainerKo
+{
+    width: 90%;
+    height: 70%;
+    font-variant: small-caps;
+    border-radius: 15px; 
+   -moz-border-radius: 15px; /* firefox */
+   -webkit-border-radius: 10px;
+    background: #ff0000;
+    background: -webkit-linear-gradient(#ff0000, #ff6666); 
+    background: -o-linear-gradient(#ff0000, #ff6666); 
+    background: -moz-linear-gradient(#ff0000, #ff6666); 
+    background: linear-gradient(to top, #ff0000, #ff6666);
+    /*border-style: solid;
+    border-color: blueviolet;
+    border-width: 3px;*/
+}
+
+.statoJobIcona
+{
+    width: 100%;
+    height: 60%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+}
+
+.statoJob
+{
+    width: 100%;
+    height: 20%;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.35);
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.dataJob
+{
+    width: 100%;
+    height: 20%;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.row_data_line
+{
+    margin-left: 0px;
+    margin-right: 0px;
+    font-family: Verdana, Arial, sans-serif;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.35);
+    text-align: center;
+    width: 100%;
+}
+
+.rowWhiteBackground
+{
+    width: 100%;
+    height: 100%;
+    float: left; 
+    background-color: white;
+}
+
+.row_data_desc
+{
+    white-space: nowrap; 
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 70%;
+    height: 100%;
+    font-weight: bold;
+    float: left;
+}
+
+.row_data_value
+{
+    text-align: center;
+    width: 30%;
+    height: 100%;
+    float: left;
+    white-space: nowrap; 
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: bold;
+}
+
+.pcContainer
+{
+    /*overflow: auto;*/
+    overflow: hidden;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.35);
+    font-family: Verdana, Arial, sans-serif;
+}
+
+.button
+{
+    width: 100%; 
+    white-space: normal; 
+    padding: 3px; margin: 0; 
+    font-weight: bold;
+}
+
+.event_data
+{
+    overflow: auto;
+} 
+
+.list_event
+{
+    list-style-type: circle;
+}
+
+.list_event li
+{
+    margin-top: 5px;
+}
+
+.map
+{
+    width: 100%;
+    height: 100%;
+}
+
+.source_button
+{
+   float: left;
+   margin-left: 0px;
+   margin-right: 2px;
+   font-size: 22px !important;
+}
+
+.countdown
+{
+    float: right; 
+    margin-right: 1px;
+    padding: 0px 2px;
+    border-color: #337AB7;
+    display: inline-flex;
+    border-style: solid;
+    border-radius: 5px;
+    border-width: 1px;
+    margin-top: 2px;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.15);
+}
+
+.icons-modify-widget
+{
+    float: right; 
+    display: none;
+    height: 25px;
+}
+
+.modifyWidgetGenContent
+{
+    float: left;
+    display: none;
+    height: 100%;
+    /*border-style: solid;
+    border-color: green;
+    border-width: 2px;*/
+}
+
+.close_popup
+{
+    float: right;
+}
+
+.table-widget{
+    float: left;
+    background-color: #FFFFFF;
+    width: 100%;
+    font-size: 28px;
+    /*border-style: solid;
+    border-color: red;
+    border-width: 1px;*/
+}
+
+.ataf-table-widget
+{
+    display: none;
+    float: left;
+    background-color: #FFFFFF;
+    width: 100%;
+    font-size: 28px;
+    padding: 0px 0px 0px 0px;
+    margin: 0px 0px 0px 0px;
+    /*border-style: solid;
+    border-color: red;
+    border-width: 1px;*/
+}
+
+#iframe_ataf{
+    margin: 5px;
+    background-color: #eeeeee;
+}
+
+#iframe_ataf span
+{
+    display: block; 
+    font-weight: bold;
+}
+
+.measure_td
+{
+    float:left;
+    width: 33.3333333%;
+    height: 100%;
+    text-align: center;
+    padding-bottom: 0px;
+    /*border-style: solid;
+    border-color: #05B2D2;
+    border-width: 1px;*/
+}
+
+.measure_td_desc{
+    font-size: 16px;
+    font-weight: bold;
+    font-variant: small-caps;
+    height: 23%
+}
+
+.value_ram
+{
+    border-radius: 50%;
+    width: 85px;
+    height: 85px;
+    position: absolute;
+    top: 33%;
+    left: 50%;
+    transform: translate(-50%, 0%);
+    background: #80ccff; /* Browser che non supportano gradienti */
+    background: -webkit-linear-gradient(#80ccff, #ccebff); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient(#80ccff, #ccebff); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient(#80ccff, #ccebff); /* For Firefox 3.6 to 15 */
+    background: linear-gradient(to top, #80ccff, #ccebff);  
+}
+
+.value_ram_medium
+{
+    border-radius: 50%;
+    width: 115px;
+    height: 115px;
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, 0%);
+    background: #80ccff; /* Browser che non supportano gradienti */
+    background: -webkit-linear-gradient(#80ccff, #ccebff); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient(#80ccff, #ccebff); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient(#80ccff, #ccebff); /* For Firefox 3.6 to 15 */
+    background: linear-gradient(to top, #80ccff, #ccebff);  
+}
+
+.value_ram_big
+{
+    border-radius: 50%;
+    width: 145px;
+    height: 145px;
+    position: absolute;
+    top: 25%;
+    left: 50%;
+    transform: translate(-50%, 0%);
+    background: #80ccff; /* Browser che non supportano gradienti */
+    background: -webkit-linear-gradient(#80ccff, #ccebff); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient(#80ccff, #ccebff); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient(#80ccff, #ccebff); /* For Firefox 3.6 to 15 */
+    background: linear-gradient(to top, #80ccff, #ccebff);  
+}
+
+.jobs
+{
+    border-radius: 50%;
+    position: absolute;
+    width: 85px;
+    height: 85px;
+    transform: translate(10%, 0%);
+    background: #80ccff; /* Browser che non supportano gradienti */
+    background: -webkit-linear-gradient(#80ccff, #ccebff); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient(#80ccff, #ccebff); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient(#80ccff, #ccebff); /* For Firefox 3.6 to 15 */
+    background: linear-gradient(to top, #80ccff, #ccebff);  
+}
+
+.jobs_medium
+{
+    border-radius: 50%;
+    position: absolute;
+    width: 115px;
+    height: 115px;
+    transform: translate(5%, 5%);
+    background: #80ccff; /* Browser che non supportano gradienti */
+    background: -webkit-linear-gradient(#80ccff, #ccebff); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient(#80ccff, #ccebff); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient(#80ccff, #ccebff); /* For Firefox 3.6 to 15 */
+    background: linear-gradient(to top, #80ccff, #ccebff);  
+}
+
+.jobs_big
+{
+    border-radius: 50%;
+    position: absolute;
+    width: 145px;
+    height: 145px;
+    transform: translate(3%, 5%);
+    background: #80ccff; /* Browser che non supportano gradienti */
+    background: -webkit-linear-gradient(#80ccff, #ccebff); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient(#80ccff, #ccebff); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient(#80ccff, #ccebff); /* For Firefox 3.6 to 15 */
+    background: linear-gradient(to top, #80ccff, #ccebff);  
+}
+
+.measure_td_desc_alr
+{
+    font-weight:bold;
+    background-color: #FF0000;
+}
+
+.measure_td_value
+{
+    font-size: 20px;
+}
+
+.ram
+{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.ramValue
+{
+    margin-top: 20px;
+    margin-bottom: 0px;
+    font-size: 26px;
+    font-weight: bold;
+}
+
+.ramValueMedium
+{
+    margin-top: 20px;
+    margin-bottom: 0px;
+    font-size: 34px;
+    font-weight: bold;
+}
+
+.ramValueBig
+{
+    margin-top: 20px;
+    margin-bottom: 0px;
+    font-size: 40px;
+    font-weight: bold;
+}
+
+.ramUdm
+{
+    font-size: 10px;
+    font-weight: bold;
+}
+
+.ramUdmMedium
+{
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.ramUdmBig
+{
+    font-size: 14px;
+    font-weight: bold;
+}
+
+
+.jobsValue
+{
+    margin-top: 21px;
+    margin-bottom: 0px;
+    font-size: 26px;
+    font-weight: bold;
+}
+
+.jobsValueMedium
+{
+    margin-top: 29px;
+    margin-bottom: 0px;
+    font-size: 34px;
+    font-weight: bold;
+}
+
+.jobsValueBig
+{
+    margin-top: 39px;
+    margin-bottom: 0px;
+    font-size: 40px;
+    font-weight: bold;
+}
+
+.jobsUdm
+{
+    font-size: 10px;
+    font-weight: bold;
+}
+
+.jobsUdmMedium
+{
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.jobsUdmBig
+{
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.content_desc
+{
+    font-size: 14px;
+    font-weight:bold;
+    float: left;
+}
+
+.measure_ataf_ride
+{
+    margin-top: 20px;
+    float:left;
+    width:140px;
+    text-align:center;
+    line-height:25px;
+    font-size: 18px;
+}
+
+.measure_ataf_ride_desc
+{
+    font-weight:bold;
+}
+
+
+
+#ataf_content_desc
+{
+    font-size: 14px;
+    font-weight:bold;
+}
+
+#twitter_t
+{
+    background-color:#FFFFFF; 
+    float:right; 
+    height:25px; 
+    margin-left:0 auto; 
+    text-align: center; 
+    font-size:22px
+}
+
+#twitter_ret
+{
+    background-color:#FFFFFF; 
+    float:right; 
+    height:25px; 
+    margin-left:0 auto; 
+    text-align: center; 
+    font-size:22px
+}
+
+.dialog-widget{
+    display: none;
+    position: absolute;
+    top: 10px;
+    left: 5px;
+    border: 1px solid #363636;
+    z-index: 10000;
+    background-color: #FFFFFF;
+    text-align: left;
+    box-shadow: 2px 2px 10px #363636;
+    border-radius: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
+    
+}
+
+.meteoMaxContainer
+{
+    width: 600px;
+    height: 154px;
+    /*border-style: solid;
+    border-width: 1px;
+    border-color: black;*/
+}
+
+.meteo
+{
+    /*height:115px; */
+    /*border-style: solid;
+    border-width: 1px;
+    border-color: black;*/
+}
+
+.aggiornamento{
+   padding-top: 4px;
+   font-size: 8px; 
+   padding-bottom: 4px;
+   padding-left: 28px;
+}
+
+.backgroundRed
+{
+    background-color: yellow;
+}
+
+.backgroundBlink
+{
+      -webkit-transition: background 0.5s ease-in-out;
+      -ms-transition:     background 0.5s ease-in-out;
+      transition:         background 0.5s ease-in-out;
+}
+
+/*Animazioni allarme First Aid*/
+.alarmFirstAidLblActiveRed
+{
+    background-color: red;
+    animation: firstAidLblAlrRed 3s ease infinite; 
+}
+
+@keyframes firstAidLblAlrRed 
+{
+   0% 
+   {
+       background-color: #FF0000;
+   }
+
+   30% 
+   {
+       background-color: #FF0000;
+   }
+
+   50% 
+   {
+       background-color: transparent;
+   }
+
+   70% 
+   {
+       background-color: #FF0000;
+   }
+
+   100% 
+   {
+       background-color: #FF0000;
+   }
+}
+
+.alarmFirstAidCellActiveRed
+{
+    background-color: red;
+    animation: firstAidCellAlrRed 3s ease infinite; 
+}
+
+@keyframes firstAidCellAlrRed 
+{
+   0% 
+   {
+       background-color: #ffb3b3;
+   }
+
+   30% 
+   {
+       background-color: #ffb3b3;
+   }
+
+   50% 
+   {
+       background-color: transparent;
+   }
+
+   70% 
+   {
+       background-color: #ffb3b3;
+   }
+
+   100% 
+   {
+       background-color: #ffb3b3;
+   }
+}
+
+.alarmFirstAidLblActiveYellow
+{
+    animation: firstAidLblAlrYellow 3s ease infinite; 
+}
+
+@keyframes firstAidLblAlrYellow 
+{
+   0% 
+   {
+       background-color: #ffff00;
+   }
+
+   30% 
+   {
+       background-color: #ffff00;
+   }
+
+   50% 
+   {
+       background-color: transparent;
+   }
+
+   70% 
+   {
+       background-color: #ffff00;
+   }
+
+   100% 
+   {
+       background-color: #ffff00;
+   }
+}
+
+.alarmFirstAidCellActiveYellow
+{
+    background-color: red;
+    animation: firstAidCellAlrYellow 3s ease infinite; 
+}
+
+@keyframes firstAidCellAlrYellow
+{
+   0% 
+   {
+       background-color: #ffff99;
+   }
+
+   30% 
+   {
+       background-color: #ffff99;
+   }
+
+   50% 
+   {
+       background-color: transparent;
+   }
+
+   70% 
+   {
+       background-color: #ffff99;
+   }
+
+   100% 
+   {
+       background-color: #ffff99;
+   }
+}
+
+.alarmFirstAidLblActiveGreen
+{
+    animation: firstAidLblAlrGreen 3s ease infinite; 
+}
+
+@keyframes firstAidLblAlrGreen 
+{
+   0% 
+   {
+       background-color: #66ff33;
+   }
+
+   30% 
+   {
+       background-color: #66ff33;
+   }
+
+   50% 
+   {
+       background-color: transparent;
+   }
+
+   70% 
+   {
+       background-color: #66ff33;
+   }
+
+   100% 
+   {
+       background-color: #66ff33;
+   }
+}
+
+.alarmFirstAidCellActiveGreen
+{
+    animation: firstAidCellAlrGreen 3s ease infinite; 
+}
+
+@keyframes firstAidCellAlrGreen
+{
+   0% 
+   {
+       background-color: #d9ffcc;
+   }
+
+   30% 
+   {
+       background-color: #d9ffcc;
+   }
+
+   50% 
+   {
+       background-color: transparent;
+   }
+
+   70% 
+   {
+       background-color: #d9ffcc;
+   }
+
+   100% 
+   {
+       background-color: #d9ffcc;
+   }
+}
+
+.alarmFirstAidLblActiveBlue
+{
+    animation: firstAidLblAlrBlue 3s ease infinite; 
+}
+
+@keyframes firstAidLblAlrBlue
+{
+   0% 
+   {
+       background-color: #66ccff;
+   }
+
+   30% 
+   {
+       background-color: #66ccff;
+   }
+
+   50% 
+   {
+       background-color: transparent;
+   }
+
+   70% 
+   {
+       background-color: #66ccff;
+   }
+
+   100% 
+   {
+       background-color: #66ccff;
+   }
+}
+
+.alarmFirstAidCellActiveBlue
+{
+    animation: firstAidCellAlrBlue 3s ease infinite; 
+}
+
+@keyframes firstAidCellAlrBlue
+{
+   0% 
+   {
+       background-color: #cceeff;
+   }
+
+   30% 
+   {
+       background-color: #cceeff;
+   }
+
+   50% 
+   {
+       background-color: transparent;
+   }
+
+   70% 
+   {
+       background-color: #cceeff;
+   }
+
+   100% 
+   {
+       background-color: #cceeff;
+   }
+}
+
+.alarmFirstAidLblActiveWhite
+{
+    animation: firstAidLblAlrWhite 3s ease infinite; 
+}
+
+@keyframes firstAidLblAlrWhite
+{
+   0% 
+   {
+       background-color: #eeeeee;
+   }
+
+   30% 
+   {
+       background-color: #eeeeee;
+   }
+
+   50% 
+   {
+       background-color: transparent;
+   }
+
+   70% 
+   {
+       background-color: #eeeeee;
+   }
+
+   100% 
+   {
+       background-color: #eeeeee;
+   }
+}
+
+.alarmFirstAidCellActiveWhite
+{
+    animation: firstAidCellAlrWhite 3s ease infinite; 
+}
+
+@keyframes firstAidCellAlrWhite
+{
+   0% 
+   {
+       background-color: #f2f2f2;
+   }
+
+   30% 
+   {
+       background-color: #f2f2f2;
+   }
+
+   50% 
+   {
+       background-color: transparent;
+   }
+
+   70% 
+   {
+       background-color: #f2f2f2;
+   }
+
+   100% 
+   {
+       background-color: #f2f2f2;
+   }
+}
+
+.trafficEventsButtonsContainer
+{
+   width: 100%;
+   height: 12%;
+}
+
+.trafficEventsButtonContainer
+{
+    width: 12.5%;
+    height: 100%;
+    padding-bottom: 0px;
+    float: left;
+    background: #33ccff;
+    background: -webkit-linear-gradient(right, #33ccff, #ccf2ff); 
+    background: -o-linear-gradient(right, #33ccff, #ccf2ff); 
+    background: -moz-linear-gradient(right, #33ccff, #ccf2ff);
+    background: linear-gradient(to right, #33ccff, #ccf2ff); 
+}
+
+.trafficEventsButtonIcon
+{
+    width: 100%;
+    height: 75%;
+    float: left;
+}
+
+.trafficEventsButtonIcon img
+{
+    object-fit: contain;
+    width: 85%;
+    height: 85%;
+}
+
+.trafficEventsButtonIndicator
+{
+    width: 100%;
+    height: 25%;
+    float: left;
+    font-variant: small-caps;
+}
+
+.trafficEventsSearchFilterContainer
+{
+   display: none; 
+   width: 100%;
+}
+
+.trafficEventsRollerContainer
+{
+   display: none; 
+   width: 100%;
+   height: 88%;
+   overflow-y: auto;
+   overflow-x: hidden;
+}
+
+.trafficEventIcon
+{
+    float: left;
+    width: 12.5%;
+    height: 100%;
+}
+
+.trafficEventIcon img
+{
+    object-fit: contain;
+    width: 90%;
+    height: 90%;
+}
+
+.otherTrafficEventTitle
+{
+   background: #33ccff;
+   background: -webkit-linear-gradient(#33ccff, #ccf2ff); 
+   background: -o-linear-gradient(#33ccff, #ccf2ff); 
+   background: -moz-linear-gradient(#33ccff, #ccf2ff);
+   background: linear-gradient(#33ccff, #ccf2ff);
+}
+
+.otherTrafficEvent
+{
+   background: #33ccff;
+   background: -webkit-linear-gradient(right, #33ccff, #ccf2ff); 
+   background: -o-linear-gradient(right, #33ccff, #ccf2ff); 
+   background: -moz-linear-gradient(right, #33ccff, #ccf2ff);
+   background: linear-gradient(to right, #33ccff, #ccf2ff); 
+}
+
+.incidentTitle
+{
+   background: #ff6666;
+   background: -webkit-linear-gradient(#ff6666, #ffcccc); 
+   background: -o-linear-gradient(#ff6666, #ffcccc); 
+   background: -moz-linear-gradient(#ff6666, #ffcccc);
+   background: linear-gradient(#ff6666, #ffcccc); 
+}
+
+.incident
+{
+   background: #ff6666;
+   background: -webkit-linear-gradient(right, #ff6666, #ffcccc); 
+   background: -o-linear-gradient(right, #ff6666, #ffcccc); 
+   background: -moz-linear-gradient(right, #ff6666, #ffcccc);
+   background: linear-gradient(to right, #ff6666, #ffcccc); 
+}
+.slipperyTitle
+{
+   background: #ffcc00;
+   background: -webkit-linear-gradient(#ffcc00, #fff0b3); 
+   background: -o-linear-gradient(#ffcc00, #fff0b3); 
+   background: -moz-linear-gradient(#ffcc00, #fff0b3);
+   background: linear-gradient(#ffcc00, #fff0b3); 
+}
+
+.slippery
+{
+   background: #ffcc00;
+   background: -webkit-linear-gradient(right, #ffcc00, #fff0b3); 
+   background: -o-linear-gradient(right, #ffcc00, #fff0b3); 
+   background: -moz-linear-gradient(right, #ffcc00, #fff0b3);
+   background: linear-gradient(to right, #ffcc00, #fff0b3); 
+}
+
+.highSeverityTitle
+{
+   background: #ff6666;
+   background: -webkit-linear-gradient(#ff6666, #ffcccc); 
+   background: -o-linear-gradient(#ff6666, #ffcccc); 
+   background: -moz-linear-gradient(#ff6666, #ffcccc);
+   background: linear-gradient(#ff6666, #ffcccc); 
+}
+
+.highSeverity
+{
+   background: #ff6666;
+   background: -webkit-linear-gradient(right, #ff6666, #ffcccc); 
+   background: -o-linear-gradient(right, #ff6666, #ffcccc); 
+   background: -moz-linear-gradient(right, #ff6666, #ffcccc);
+   background: linear-gradient(to right, #ff6666, #ffcccc); 
+}
+
+.medSeverityTitle
+{
+   background: #ff9900;
+   background: -webkit-linear-gradient(#ff9900, #ffe0b3); 
+   background: -o-linear-gradient(#ff9900, #ffe0b3); 
+   background: -moz-linear-gradient(#ff9900, #ffe0b3);
+   background: linear-gradient(#ff9900, #ffe0b3); 
+}
+
+.medSeverity
+{
+   background: #ff9900;
+   background: -webkit-linear-gradient(right, #ff9900, #ffe0b3); 
+   background: -o-linear-gradient(right, #ff9900, #ffe0b3); 
+   background: -moz-linear-gradient(right, #ff9900, #ffe0b3);
+   background: linear-gradient(to right, #ff9900, #ffe0b3);
+}
+
+.lowSeverityTitle
+{
+   background: #ffcc00;
+   background: -webkit-linear-gradient(#ffcc00, #fff0b3); 
+   background: -o-linear-gradient(#ffcc00, #fff0b3); 
+   background: -moz-linear-gradient(#ffcc00, #fff0b3);
+   background: linear-gradient(#ffcc00, #fff0b3); 
+}
+
+.lowSeverity
+{
+   background: #ffdb4d;
+   background: -webkit-linear-gradient(right, #ffdb4d, #fff5cc); 
+   background: -o-linear-gradient(right, #ffdb4d, #fff5cc); 
+   background: -moz-linear-gradient(right, #ffdb4d, #fff5cc);
+   background: linear-gradient(to right, #ffdb4d, #fff5cc);  
+}
+
+.operatorEventWhiteTitle
+{
+   background: #ffffff;
+   background: -webkit-linear-gradient(#f2f2f2, #ffffff); 
+   background: -o-linear-gradient(#f2f2f2, #ffffff); 
+   background: -moz-linear-gradient(#f2f2f2, #ffffff);
+   background: linear-gradient(#f2f2f2, #ffffff); 
+}
+
+.operatorEventWhite
+{
+   background: #ffdb4d;
+   background: -webkit-linear-gradient(right, #f2f2f2, #ffffff); 
+   background: -o-linear-gradient(right, #f2f2f2, #ffffff); 
+   background: -moz-linear-gradient(right, #f2f2f2, #ffffff);
+   background: linear-gradient(to right, #f2f2f2, #ffffff);  
+}
+
+.operatorEventBlueTitle
+{
+   background: #66ccff;
+   background: -webkit-linear-gradient(#66ccff, #b3e6ff); 
+   background: -o-linear-gradient(#66ccff, #b3e6ff); 
+   background: -moz-linear-gradient(#66ccff, #b3e6ff);
+   background: linear-gradient(#66ccff, #b3e6ff); 
+}
+
+.operatorEventBlue
+{
+   background: #66ccff;
+   background: -webkit-linear-gradient(right, #66ccff, #b3e6ff); 
+   background: -o-linear-gradient(right, #66ccff, #b3e6ff); 
+   background: -moz-linear-gradient(right, #66ccff, #b3e6ff);
+   background: linear-gradient(to right, #66ccff, #b3e6ff);  
+}
+
+.operatorEventGreenTitle
+{
+   background: #66ff33;
+   background: -webkit-linear-gradient(#66ff33, #9fff80); 
+   background: -o-linear-gradient(#66ff33, #9fff80); 
+   background: -moz-linear-gradient(#66ff33, #9fff80);
+   background: linear-gradient(#66ff33, #9fff80); 
+}
+
+.operatorEventGreen
+{
+   background: #66ff33;
+   background: -webkit-linear-gradient(right, #66ff33, #9fff80); 
+   background: -o-linear-gradient(right, #66ff33, #9fff80); 
+   background: -moz-linear-gradient(right, #66ff33, #9fff80);
+   background: linear-gradient(to right, #66ff33, #9fff80);  
+}
+
+.operatorEventYellowTitle
+{
+   background: #ffcc00;
+   background: -webkit-linear-gradient(#ffcc00, #ffe066); 
+   background: -o-linear-gradient(#ffcc00, #ffe066); 
+   background: -moz-linear-gradient(#ffcc00, #ffe066);
+   background: linear-gradient(#ffcc00, #ffe066); 
+}
+
+.operatorEventYellow
+{
+   background: #ffcc00;
+   background: -webkit-linear-gradient(right, #ffcc00, #ffe066); 
+   background: -o-linear-gradient(right, #ffcc00, #ffe066); 
+   background: -moz-linear-gradient(right, #ffcc00, #ffe066);
+   background: linear-gradient(to right, #ffcc00, #ffe066);  
+}
+
+.operatorEventRedTitle
+{
+   background: #ff6666;
+   background: -webkit-linear-gradient(#ff6666, #ffcccc); 
+   background: -o-linear-gradient(#ff6666, #ffcccc); 
+   background: -moz-linear-gradient(#ff6666, #ffcccc);
+   background: linear-gradient(#ff6666, #ffcccc); 
+}
+
+.operatorEventRed
+{
+   background: #ff6666;
+   background: -webkit-linear-gradient(right, #ff6666, #ffcccc); 
+   background: -o-linear-gradient(right, #ff6666, #ffcccc); 
+   background: -moz-linear-gradient(right, #ff6666, #ffcccc);
+   background: linear-gradient(to right, #ff6666, #ffcccc);  
+}
+
+
+
+
+.roadWorksTitle
+{
+   background: #ffcc00;
+   background: -webkit-linear-gradient(#ffcc00, #fff0b3); 
+   background: -o-linear-gradient(#ffcc00, #fff0b3); 
+   background: -moz-linear-gradient(#ffcc00, #fff0b3);
+   background: linear-gradient(#ffcc00, #fff0b3); 
+}
+
+.roadWorks
+{
+   background: #ffcc00;
+   background: -webkit-linear-gradient(right, #ffcc00, #fff0b3); 
+   background: -o-linear-gradient(right, #ffcc00, #fff0b3); 
+   background: -moz-linear-gradient(right, #ffcc00, #fff0b3);
+   background: linear-gradient(to right, #ffcc00, #fff0b3); 
+}
+
+.trafficEventDataContainer
+{
+   float: left;
+   width: 100%;
+   height: 70%;
+}
+
+/*.trafficEventDateTimeContainer
+{
+   float: left;
+   width: 75%;
+   height: 100%;
+}*/
+
+.trafficEventDateContainer, .trafficEventTimeContainer
+{
+   float: left;
+   width: 40%;
+   height: 50%;
+   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+   text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+   font-variant: small-caps;
+}
+
+.trafficEventSeverityContainer
+{
+   float: left;
+   width: 20%;
+   height: 50%;
+   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+   text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+   font-variant: small-caps;
+}
+
+.trafficEventMiddleContainer
+{
+   float: left;
+   width: 75%;
+   height: 100%;
+}
+
+.trafficEventSubTypeContainer
+{
+   float: left;
+   width: 100%;
+   height: 50%;
+   font-weight: bold;
+   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+   text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+   font-variant: small-caps;
+   white-space: nowrap; 
+   overflow: hidden;
+   text-overflow: ellipsis; 
+   line-height: 25px;
+   text-align: center;
+   vertical-align: middle;
+}
+
+/*.trafficEventDate 
+{
+    float: left;
+    width: 100%;
+    height: 35%;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    text-align: center;
+    padding-left: 5px;
+}
+
+.trafficEventTime 
+{
+    float: left;
+    width: 100%;
+    height: 65%;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    text-align: center;
+    padding-left: 5px;
+    font-family: Verdana;
+    font-style: italic;
+}*/
+
+.trafficEventMapPtr
+{
+    float: left;
+    width: 12.5%;
+    height: 100%;
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+.trafficEventPinContainer
+{
+   float: left;
+   width: 100%;
+   height: 80%;
+   margin-top: 0px;
+   margin-bottom: 0px;
+   padding-bottom: 5px;
+   display: flex; 
+   align-items: flex-end; 
+   justify-content: center; 
+   text-align: center;
+}
+
+.trafficEventPinMsgContainer
+{
+   float: left;
+   width: 100%;
+   height: 20%;
+   margin-top: 0px;
+   margin-bottom: 0px;
+   padding-bottom: 10px;
+   display: flex; 
+   align-items: center; 
+   justify-content: center; 
+   text-align: center;
+   font-variant: small-caps;
+   font-weight: bold;
+}
+
+.trafficEventLink, .trafficEventLink:link, .trafficEventLink:visited, .trafficEventLink:active
+{
+   color: black;
+   text-decoration: none;
+}
+
+.trafficEventLink:hover
+{
+   color: white;
+   text-decoration: none;
+   cursor: pointer;
+}
+
+.onMapTrafficEventPinAnimated
+{
+   animation: onMapSignalAnimation 1.5s ease infinite;
+}
+
+/*.leafletPin
+{
+   width: 36px; height: 36px; 
+   transform: translate(-50%, -100%);
+}*/
+
+.leafletPin
+{
+   width: 36px; 
+   height: 36px; 
+}
+
+.mapPopupTitle
+{
+   display: block;
+   font-size: 15px;
+   font-weight: bold;
+   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+   text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+   text-align: center;
+}
+
+.mapPopupLine
+{
+   display: block;
+   font-size: 14px;
+   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+   text-shadow: 1px 1px 1px rgba(0,0,0,0.15);
+   text-align: center;
+}
+
+.operatorEventLabelContainer
+{
+    float: left;
+    width: 100%;
+    height: 35%;
+    font-weight: bold;
+}
+
+.operatorEventDataContainer
+{
+    float: left;
+    width: 100%;
+    height: 65%;
+    font-variant: normal;
+    text-transform: uppercase;
+}
+
+.operatorEventPeopleContainer
+{
+   float: left;
+   width: 43.75%;
+   height: 100%;
+   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+   text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+   font-variant: small-caps;
+}
+
+.operatorEventOperatorContainer
+{
+   float: left;
+   width: 43.75%;
+   height: 100%;
+   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+   text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+   font-variant: small-caps;
+}
+
+
+.alarmSeverityContainer
+{
+   float: left;
+   width: 100%;
+   height: 50%;
+   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+   text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+   font-variant: small-caps;
+}
+
+.alarmDateContainer, .alarmTimeContainer
+{
+   float: left;
+   width: 50%;
+   height: 50%;
+   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+   text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+   font-variant: small-caps;
+}
+
+.planDetailsContainer
+{
+   float: left;
+   width: 75%;
+   height: 100%;
+}
+
+.planPathNumberContainer
+{
+   float: left;
+   width: 35%;
+   height: 50%;
+   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+   text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+   font-variant: small-caps;
+}
+
+.planDateContainer
+{
+   float: left;
+   width: 65%;
+   height: 50%;
+   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+   text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+   font-variant: small-caps;
+}
+
+.planStatusContainer
+{
+   float: left;
+   width: 100%;
+   height: 50%;
+   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+   text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+   font-variant: small-caps;
+}
+
+.planDecisionContainer
+{
+   float: left;
+   width: 100%;
+   height: 80%;
+   margin-top: 0px;
+   margin-bottom: 0px;
+   padding-bottom: 5px;
+   display: flex; 
+   align-items: flex-end; 
+   justify-content: center; 
+   text-align: center;
+}
+
+.planDecisionLink, .planDecisionLink:link, .planDecisionLink:visited, .planDecisionLink:active
+{
+   color: black;
+   text-decoration: none;
+}
+
+.decisionPinMsgContainer
+{
+   float: left;
+   width: 100%;
+   height: 20%;
+   margin-top: 0px;
+   margin-bottom: 0px;
+   padding-bottom: 10px;
+   display: flex; 
+   align-items: center; 
+   justify-content: center; 
+   text-align: center;
+   font-variant: small-caps;
+   font-weight: bold;
+}
+
+.planDecisionLink img
+{
+   object-fit: contain;
+   width: 60%;
+   height: 60%;
+}
+
+.planProposedTitle
+{
+   background: #ffcc00;
+   background: -webkit-linear-gradient(#ffcc00, #fff0b3); 
+   background: -o-linear-gradient(#ffcc00, #fff0b3); 
+   background: -moz-linear-gradient(#ffcc00, #fff0b3);
+   background: linear-gradient(#ffcc00, #fff0b3);  
+}
+
+.planProposed
+{
+   background: #ffdb4d;
+   background: -webkit-linear-gradient(right, #ffdb4d, #fff5cc); 
+   background: -o-linear-gradient(right, #ffdb4d, #fff5cc); 
+   background: -moz-linear-gradient(right, #ffdb4d, #fff5cc);
+   background: linear-gradient(to right, #ffdb4d, #fff5cc);    
+}
+
+
+.planProgressTitle
+{
+   background: #ff9900;
+   background: -webkit-linear-gradient(#ff9900, #ffe0b3); 
+   background: -o-linear-gradient(#ff9900, #ffe0b3); 
+   background: -moz-linear-gradient(#ff9900, #ffe0b3);
+   background: linear-gradient(#ff9900, #ffe0b3);
+}
+
+.planProgress
+{
+   background: #ff9900;
+   background: -webkit-linear-gradient(right, #ff9900, #ffe0b3); 
+   background: -o-linear-gradient(right, #ff9900, #ffe0b3); 
+   background: -moz-linear-gradient(right, #ff9900, #ffe0b3);
+   background: linear-gradient(to right, #ff9900, #ffe0b3); 
+}
+
+.planApprovedTitle
+{
+   background: #80ff80;
+   background: -webkit-linear-gradient(#80ff80, #ccffcc); 
+   background: -o-linear-gradient(#80ff80, #ccffcc); 
+   background: -moz-linear-gradient(#80ff80, #ccffcc);
+   background: linear-gradient(#80ff80, #ccffcc);
+}
+
+.planApproved
+{
+   background: #80ff80;
+   background: -webkit-linear-gradient(right, #80ff80, #ccffcc); 
+   background: -o-linear-gradient(right, #80ff80, #ccffcc); 
+   background: -moz-linear-gradient(right, #80ff80, #ccffcc);
+   background: linear-gradient(to right, #80ff80, #ccffcc);  
+}
+
+.planRejectedTitle
+{
+   background: #ff6666;
+   background: -webkit-linear-gradient(#ff6666, #ffcccc); 
+   background: -o-linear-gradient(#ff6666, #ffcccc); 
+   background: -moz-linear-gradient(#ff6666, #ffcccc);
+   background: linear-gradient(#ff6666, #ffcccc); 
+}
+
+.planRejected
+{
+   background: #ff6666;
+   background: -webkit-linear-gradient(right, #ff6666, #ffcccc); 
+   background: -o-linear-gradient(right, #ff6666, #ffcccc); 
+   background: -moz-linear-gradient(right, #ff6666, #ffcccc);
+   background: linear-gradient(to right, #ff6666, #ffcccc); 
+}
+
+.planClosedTitle
+{
+   background: #e6e6e6;
+   background: -webkit-linear-gradient(#e6e6e6, #ffffff); 
+   background: -o-linear-gradient(#e6e6e6, #ffffff); 
+   background: -moz-linear-gradient(#e6e6e6, #ffffff);
+   background: linear-gradient(#e6e6e6, #ffffff); 
+}
+
+.planClosed
+{
+   background: #e6e6e6;
+   background: -webkit-linear-gradient(right, #e6e6e6, #ffffff); 
+   background: -o-linear-gradient(right, #e6e6e6, #ffffff); 
+   background: -moz-linear-gradient(right, #e6e6e6, #ffffff);
+   background: linear-gradient(to right, #e6e6e6, #ffffff); 
+}
+
+.resourceDateContainer, .resourceTimeContainer
+{
+   float: left;
+   width: 37.5%;
+   height: 100%;
+   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+   text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+   font-variant: small-caps;
+}
+
+.networkNameContainer
+{
+   float: left;
+   width: 100%;
+   height: 50%;
+   /*font-weight: bold;*/
+   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+   text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+   font-variant: small-caps;
+}
+
+.networkValueContainer
+{
+   float: left;
+   width: 100%;
+   height: 50%;
+   font-weight: bold;
+   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+   text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+   font-variant: small-caps;
+}
+
+.unclassifiedNodeTitle
+{
+   background: #d9d9d9;
+   background: -webkit-linear-gradient(#d9d9d9, #ffffff); 
+   background: -o-linear-gradient(#d9d9d9, #ffffff); 
+   background: -moz-linear-gradient(#d9d9d9, #ffffff);
+   background: linear-gradient(#d9d9d9, #ffffff);
+}
+
+.unclassifiedNode
+{
+   background: #d9d9d9;
+   background: -webkit-linear-gradient(right, #d9d9d9, #ffffff); 
+   background: -o-linear-gradient(right, #d9d9d9, #ffffff); 
+   background: -moz-linear-gradient(right, #d9d9d9, #ffffff);
+   background: linear-gradient(to right, #d9d9d9, #ffffff);   
+}
+
+.defaultMapDiv
+{
+   width: 100%;
+   height: 100%;
+   display: none;
+}
+
+.defaultMapPic
+{
+   width: 100%;
+   height: 100%;
+   display: none;
+   background-image: url("../img/mapPic.PNG");
+   background-size: 100% 100%;
+   background-repeat: no-repeat;
+   background-position: center center;
+}
+
+.clockDate, .clockTime
+{
+   width: 100%;
+   height: 50%;
+   padding-bottom: 2.5%;
+   display: flex;
+   align-items: flex-end; 
+   justify-content: center;
+   text-align: center;
+}
+
+.clockTime
+{
+   width: 100%;
+   height: 50%;
+   padding-top: 2.5%;
+   display: flex;
+   align-items: flex-start; 
+   justify-content: center;
+   text-align: center;
+}
+
+div.gisRollerContainer
+{
+   width: 100%;
+   height: 100%;
+   overflow-y: hidden;
+}
+
+div.gisMapPtrContainer
+{
+    float: left;
+    height: 100%;
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+div.gisQueryDescContainer
+{
+    float: left;
+    height: 100%;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    white-space: normal;
+    overflow: hidden;
+}
+
+span.gisQueryDescPar
+{
+   text-align: center;
+   word-wrap: break-word;
+   overflow: hidden;
+   font-family: Montserrat, sans-serif;
+}
+
+div.gisPinContainer
+{
+   float: left;
+   width: 100%;
+   /*height: 80%;*/
+   height: 100%;
+   margin-top: 0px;
+   margin-bottom: 0px;
+   padding-bottom: 0px;
+   display: flex; 
+   /*align-items: flex-end; */
+   align-items: center;
+   justify-content: center; 
+   text-align: center;
+}
+
+span.gisPinShowMsg, span.gisPinHideMsg, span.gisPinNoQueryMsg, span.gisPinNoMapsMsg
+{
+   display: none;
+   /*font-size: 14px;*/
+   font-variant: small-caps;
+   font-weight: bold;
+   text-shadow: 2px 2px 4px black;
+}
+
+.gisPinLink, .gisPinLink:link, .gisPinLink:visited, .gisPinLink:active
+{
+   color: black;
+   text-decoration: none;
+   display: flex;
+   align-items: center;
+   justify-content: center; 
+   text-align: center;
+   width: 100%;
+   height: 100%;
+}
+
+.gisPinLink:hover
+{
+   color: white;
+   text-decoration: none;
+   cursor: pointer;
+}
+
+i.gisLoadingIcon, i.gisLoadErrorIcon
+{
+    display: none;
+}
+
+div.gisMapLoadingDiv
+{
+    width: 200px;
+    height: 100px;
+    position: absolute;
+    opacity: 0;
+    z-index: 9999;
+    -webkit-transition: opacity 0.35s, top 0.2s; /* Safari */
+    transition: opacity 0.35s, top 0.175s;
+    display: none;
+}
+
+p.gisMapLoadingDivTextPar
+{
+   display: block;
+   width: 100%;
+   height: auto;
+   max-height: 100%;
+   text-align: center;
+   white-space: normal;
+   word-wrap: break-word;
+   overflow: hidden;
+   font-size: 16px;
+   font-variant: small-caps;
+}
+
+.leaflet-popup-content-wrapper, .leaflet-popup-content
+ {
+   -webkit-border-radius: 0 !important;
+   -moz-border-radius: 0 !important;
+    border-radius: 0 !important;
+    font-family: "Verdana", Arial, sans-serif;
+ }
+ 
+ .leaflet-popup-content p
+ {
+     font-size: 12px;
+     line-height: 175%;
+ }
+ 
+ h3.gisPopupTitle
+ {
+    font-size: 15px;
+    font-weight: bold;
+ }
+ 
+ table.gisPopupGeneralDataTable
+ {
+     border: none;
+     width: 70%;
+     margin-left: auto;
+     margin-right: auto;
+     border: 1px solid lightgrey;
+     border-collapse: collapse;
+ }
+ 
+ table.gisPopupGeneralDataTable th, table.gisPopupGeneralDataTable td
+ {
+    padding-left: 5px;
+    padding-right: 5px;
+    text-align: left;
+    border: 1px solid lightgrey;
+ }
+ 
+ table.gisPopupGeneralDataTable td
+ {
+    font-weight: normal;
+ }
+ 
+ table.gisPopupGeneralDataTable button.btn-sm
+ {
+    line-height: 1.0;
+ }
+ 
+ table.gisPopupTable
+ {
+     border: none;
+     width: 100%;
+     margin-left: auto;
+     margin-right: auto;
+     margin-top: 10px;
+ }
+ 
+ table.gisPopupTable th, table.gisPopupTable td
+ {
+    padding-left: 3px;
+    padding-right: 3px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    text-align: center;
+ }
+ 
+ table.gisPopupTable td
+ {
+    font-weight: normal;
+ }
+ 
+ table.gisPopupTable button.btn-sm
+ {
+    width: 50px; 
+    line-height: 1.0;
+    padding: 2px 2px;
+ }
+ 
+ i.gisDriverPin
+ {
+     color: #337ab7;
+     font-size: 22px;
+     display: none;
+ }
+ 
+ i.gisDriverPin:hover
+ {
+    cursor: pointer; 
+ }
+ 
+ div.meteoTodayContainer, div.meteoTodayLeftContainer, div.meteoTodayRightContainer, div.meteoOtherDaysContainer
+ {
+     float: left;
+     background-color: transparent;
+ }
+ 
+ div.meteoCityContainer, div.meteoDateContainer, div.meteoDescContainer, div.meteoLammaContainer, div.meteoIconContainer, div.meteoTempContainer
+ {
+     background-color: transparent;
+ }
+ 
+ div.meteoDateContainer
+ {
+     font-family: "Roboto-Medium";
+     /*font-size: 24px;*/
+     display: flex;
+     align-items: center; 
+     justify-content: flex-start;
+     text-align: center;
+ }
+ 
+ div.meteoDateContainerCentered
+ {
+     font-family: "Roboto-Medium";
+     /*font-size: 24px;*/
+     display: flex;
+     align-items: center; 
+     justify-content: center;
+     text-align: center;
+ }
+ 
+ div.meteoCityContainer
+ {
+     font-family: "Roboto-Bold";
+     /*font-size: 28px;*/
+     display: flex;
+     align-items: center; 
+     justify-content: flex-start;
+     text-align: center;
+ }
+ 
+ div.meteoCityContainerCentered
+ {
+     font-family: "Roboto-Bold";
+     /*font-size: 28px;*/
+     display: flex;
+     align-items: center; 
+     justify-content: center;
+     text-align: center;
+ }
+ 
+ div.meteoDescContainer
+ {
+     font-family: "Roboto-Medium";
+     /*font-size: 22px;*/
+     display: flex;
+     align-items: center; 
+     justify-content: flex-start;
+     text-align: center;
+ }
+ 
+ div.meteoDescContainerCentered
+ {
+     font-family: "Roboto-Medium";
+     /*font-size: 22px;*/
+     display: flex;
+     align-items: center; 
+     justify-content: center;
+     text-align: center;
+ }
+ 
+  div.meteoLammaContainer
+ {
+     font-family: "Roboto-Medium";
+     /*font-size: 22px;*/
+     display: flex;
+     align-items: center; 
+     justify-content: center;
+     text-align: center;
+ }
+ 
+ div.meteoTempContainer
+ {
+     font-family: "Roboto-Medium";
+     /*font-size: 22px;*/
+     display: flex;
+     align-items: center; 
+     justify-content: center;
+     text-align: center;
+ }
+ 
+ div.meteoTempContainerCentered
+ {
+     font-family: "Roboto-Medium";
+     /*font-size: 22px;*/
+     display: flex;
+     align-items: center; 
+     justify-content: center;
+     text-align: center;
+ }
+ 
+ a.lammaLink:hover, a.lammaLink:active, a:lammaLink:link, a:lammaLink:target, a:lammaLink:valid, a:lammaLink:visited
+ {
+     text-decoration: none;
+ }
+ 
+ div.meteoOtherDaysCellNoShadow
+ {
+    background: transparent; 
+ }
+ 
+ div.meteoOtherDaysCell
+ {
+    background: rgba(0, 0, 0, 0.1); /* For browsers that do not support gradients */
+    background: -webkit-linear-gradient(left top, rgba(0, 0, 0, 0.1) , rgba(255, 255, 255, 0.0)); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient(bottom right, rgba(0, 0, 0, 0.1) , rgba(255, 255, 255, 0.0)); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient(bottom right, rgba(0, 0, 0, 0.1) , rgba(255, 255, 255, 0.0)); /* For Firefox 3.6 to 15 */
+    background: linear-gradient(to bottom right, rgba(0, 0, 0, 0.1) , rgba(255, 255, 255, 0.0)); /* Standard syntax */
+ }
+ 
+ div.meteoOtherDaysCellDarkerH
+ {
+    background: rgba(0, 0, 0, 0.3); /* For browsers that do not support gradients */
+    background: -webkit-linear-gradient(left top, rgba(0, 0, 0, 0.3) , rgba(255, 255, 255, 0.2)); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient(bottom right, rgba(0, 0, 0, 0.3) , rgba(255, 255, 255, 0.2)); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient(bottom right, rgba(0, 0, 0, 0.3) , rgba(255, 255, 255, 0.2)); /* For Firefox 3.6 to 15 */
+    background: linear-gradient(to bottom right, rgba(0, 0, 0, 0.3) , rgba(255, 255, 255, 0.2)); /* Standard syntax */
+ }
+ 
+ div.meteoOtherDaysCellDarkerV
+ {
+    background: rgba(0, 0, 0, 0.3); /* For browsers that do not support gradients */
+    background: -webkit-linear-gradient(/*left*/ top, rgba(0, 0, 0, 0.3) , rgba(255, 255, 255, 0.2)); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient(bottom /*right*/, rgba(0, 0, 0, 0.3) , rgba(255, 255, 255, 0.2)); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient(bottom /*right*/, rgba(0, 0, 0, 0.3) , rgba(255, 255, 255, 0.2)); /* For Firefox 3.6 to 15 */
+    background: linear-gradient(to bottom /*right*/, rgba(0, 0, 0, 0.3) , rgba(255, 255, 255, 0.2)); /* Standard syntax */
+ }
+ 
+ div.otherDayDateContainer
+ {
+     background-color: transparent;
+     font-family: "Roboto-Medium";
+     /*font-size: 12px;*/
+     display: flex;
+     align-items: center; 
+     justify-content: center;
+     text-align: center;
+ }
+ 
+ div.otherDayTempContainer
+ {
+     background-color: transparent;
+     font-family: "Roboto-Medium";
+     /*font-size: 12px;*/
+     display: flex;
+     align-items: center; 
+     justify-content: center;
+     text-align: center;
+ }
+ 
+ div.otherDayDescContainer
+ {
+     background-color: transparent;
+     font-family: "Roboto-Medium";
+     /*font-size: 12px;*/
+     display: flex;
+     align-items: center; 
+     justify-content: center;
+     text-align: center;
+ }
+ 
+ i.gisPinIcon
+ {
+     display: none;
+ }
+ 
+ div.gisPinCustomIcon
+ {
+     display: none;
+     width: 100%;
+     height: 100%;
+ }
+ 
+ div.gisPinCustomIconUp
+ {
+     display: block;
+     width: 100%;
+     height: 100%;    
+ }
+ 
+ div.gisPinCustomIconDown
+ {
+     display: none;
+     width: 100%;
+     margin: 0;
+     padding: 0;
+ }
+ 
+ div.gisPinCustomIconDown i
+ {
+     /*display: block;*/
+     /*width: auto;
+     height: auto;*/
+     color: #00cc00;
+     margin: 0;
+     padding: 0;
+ }
+
+.serverName
+{
+    width: 100%;
+    height: 25%;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.35);
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #000000;
+    font-variant: small-caps;
+}
+
+.serverTestResultIcon
+{
+    width: 100%;
+    height: 35%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+}
+
+.serverTestResponseMsg
+{
+    width: 100%;
+    height: 22.5%;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.35);
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #000000;
+    font-variant: small-caps;
+}
+
+.serverTestDate
+{
+    width: 100%;
+    height: 17.5%;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #000000;
+    font-variant: small-caps;
+}
+
+ .serverStatusContainerOk
+{
+    width: 95%;
+    height: 95%;
+    border-radius: 15px; 
+   -moz-border-radius: 15px; /* firefox */
+   -webkit-border-radius: 10px;
+    background: #00cc00;
+    background: -webkit-linear-gradient(#00cc00, #66ff66); 
+    background: -o-linear-gradient(#00cc00, #66ff66); 
+    background: -moz-linear-gradient(#00cc00, #66ff66); 
+    background: linear-gradient(to top, #00cc00, #66ff66);
+}
+.serverStatusContainerNotFound
+{
+    width: 95%;
+    height: 95%;
+    border-radius: 15px; 
+   -moz-border-radius: 15px; /* firefox */
+   -webkit-border-radius: 10px;
+    background: #ffcc00;
+    background: -webkit-linear-gradient(#ffcc00, #fff0b3); 
+    background: -o-linear-gradient(#ffcc00, #fff0b3); 
+    background: -moz-linear-gradient(#ffcc00, #fff0b3); 
+    background: linear-gradient(to top, #ffcc00, #fff0b3);
+ 
+}
+
+.serverStatusContainerKo
+{
+    width: 95%;
+    height: 95%;
+    border-radius: 15px; 
+   -moz-border-radius: 15px; /* firefox */
+   -webkit-border-radius: 10px;
+    background: #ff0000;
+    background: -webkit-linear-gradient(#ff0000, #ff6666); 
+    background: -o-linear-gradient(#ff0000, #ff6666); 
+    background: -moz-linear-gradient(#ff0000, #ff6666); 
+    background: linear-gradient(to top, #ff0000, #ff6666);
+}
+
+/*.resizeHandle
+{
+    width: 10%;
+    height: 10%;
+    position: absolute;
+    top: 90%;
+    left: 90%;
+    transform: translate(-10%, -10%);
+    z-index: 999999 !important;
+    background-color: red;
+}*/

@@ -1,0 +1,39 @@
+version: "3"
+services:
+  snap4bim-db:
+    image: mariadb
+#    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      TZ: "Europe/Rome"
+      MYSQL_ALLOW_EMPTY_PASSWORD: "no"
+      MYSQL_ROOT_PASSWORD: "rootpwd"
+      MYSQL_USER: 'user'
+      MYSQL_PASSWORD: 'password'
+      MYSQL_DATABASE: 'snap4bim'
+    ports:
+      - "3306:3306"
+    volumes:
+      - snap4bim-db:/var/lib/mysql
+      - ./db/snap4bim.sql:/docker-entrypoint-initdb.d/0_init.sql
+    restart: unless-stopped
+  bimserver:
+    image: disitlab/bimserver:1.5.182
+    user: root
+    ports:
+      - 8080:8080
+#    environment:
+#      JAVA_OPTS: "-Xmx30g"
+    volumes:
+      - bimserver-db:/usr/local/bimserver/home
+    restart: unless-stopped
+  snap4bim:
+    image: node:12
+    volumes:
+      - ./bim_viewer:/bim_viewer
+    command: node /bim_viewer/app.js
+    ports:
+      - "8081:8081"
+    restart: unless-stopped
+volumes:
+  snap4bim-db:
+  bimserver-db:

@@ -1,0 +1,20 @@
+CREATE TABLE `pins` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `poid` int NOT NULL,
+  `project_name` varchar(45) NOT NULL,
+  `pin_reference_object_id` int NOT NULL,
+  `pin_title` varchar(45) NOT NULL,
+  `pin_description` varchar(255) DEFAULT NULL,
+  `x` varchar(45) NOT NULL,
+  `y` varchar(45) NOT NULL,
+  `z` varchar(45) NOT NULL,
+  `date` datetime NOT NULL,
+  `nature` varchar(255) DEFAULT NULL,
+  `subnature` varchar(255) DEFAULT NULL,
+  `action` varchar(255) DEFAULT NULL,
+  `service_uri` varchar(255) NOT NULL,
+  `icon` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  UNIQUE KEY `idx_pins_pin_title` (`pin_title`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 

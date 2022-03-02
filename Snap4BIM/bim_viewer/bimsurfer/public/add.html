@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<title>BIMsurfer View</title>
+
+	<link href="./css/apps.css" type="text/css" rel="stylesheet" />
+	<link href="./css/widgets.css" type="text/css" rel="stylesheet" />
+
+	<!-- Bootstrap -->
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
+		integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0"
+		crossorigin="anonymous"></script>
+
+	<!--Highcharts CDN-->
+	<!--<script src="https://code.highcharts.com/highcharts.src.js"></script>-->
+
+	<!--MomentJS-->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"
+		integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ=="
+		crossorigin="anonymous"></script>
+	<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone.min.js" integrity="sha512-jkvef+BAlqJubZdUhcyvaE84uD9XOoLR3e5GGX7YW7y8ywt0rwcGmTQHoxSMRzrJA3+Jh2T8Uy6f8TLU3WQhpQ==" crossorigin="anonymous"></script>-->
+	<script
+		src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data-10-year-range.js"
+		integrity="sha512-Zy6GmgJpPiVngCfEP3NZcAH5CdPuHg2RtF1w3jUln677wOsQPmZEVbdI9x6SraTrawfNFeE98YfFA/jAcJ1kVg=="
+		crossorigin="anonymous"></script>
+
+</head>
+
+<body>
+	<div id="viewer">
+
+		<div id="projects-tree-viewer" style="display: none;">
+			<div class="row">
+				<h3>BIMServer projects</h3>
+				<div id="projects"></div>
+			</div>
+		</div>
+
+		<div id="project-viewer" style="display: none; width: 100%; height: 100%;">
+			<div id="canvasWrapper">
+				<canvas id="canvas" class="full"></canvas>
+			</div>
+
+			<div id="progressbar">
+				<div id="progress"></div>
+			</div>
+		</div>
+
+		<!-- Here add the other overlays -->
+
+	</div>
+
+	<div id="main-data-window">
+
+
+		<div id="r-overlay" class="overlay" style="visibility: hidden;">
+			<div id="project-pin-form" class="container mt-3">
+				<h4>Pin data:</h4><br>
+				<form id="add-pin">
+					<div class="mb-3">
+						<div class="input-group input-group-sm mb-3">
+							<label for="pin-title" class="input-group-text">Pin title:</label>
+							<input type="text" name="title" id="pin-title" class="form-control">
+						</div>
+
+						<div class="input-group input-group-sm mb-3">
+							<label for="ref-project" class="input-group-text">Reference project:</label>
+							<input type="text" name="reference-project" id="ref-project" class="form-control" disabled>
+						</div>
+
+						<div class="input-group input-group-sm mb-3">
+							<label for="pin-id" class="input-group-text">Id:</label>
+							<input type="text" name="pin-id" id="pin-id" class="form-control" disabled>
+						</div>
+
+						<div class="input-group input-group-sm mb-3">
+							<label for="pin-description" class="input-group-text">Pin description:</label>
+							<textarea name="description" rows="2" cols="20" id="pin-description"
+								class="form-control"></textarea>
+						</div>
+
+						<div class="input-group input-group-sm mb-3">
+							<label for="service-uri" class="input-group-text">serviceURI:</label>
+							<input type="text" name="service-uri" id="service-uri" class="form-control">
+						</div>
+
+						<div class="input-group input-group-sm mb-3">
+							<label for="nature" class="input-group-text">Nature:</label>
+							<input type="text" name="nature" id="nature" class="form-control" disabled>
+						</div>
+
+						<div class="input-group input-group-sm mb-3">
+							<label for="subnature" class="input-group-text">Subnature:</label>
+							<input type="text" name="subnature" id="subnature" class="form-control" disabled>
+						</div>
+
+						<div class="input-group input-group-sm mb-3">
+							<label for="action" class="input-group-text">Actions:</label>
+							<input type="text" name="action" id="action" class="form-control" disabled>
+						</div>
+
+						<div class="input-group input-group-sm mb-3">
+							<label for="pin-icon" class="input-group-text">Pin icon:</label>
+							<input type="text" name="pin-icon" id="pin-icon" class="form-control" disabled>
+						</div>
+
+						<div id="select-point-3d" class="card">
+							<div class="card-header">
+								<label for="select-pin-form" class="form-label">Click Pick and then select a point
+									on the 3d
+									object</label>
+								<button id="select-pin-form" type="button" class="btn btn-primary">Pick</button>
+							</div>
+
+							<div class="card-body">
+								<div class="input-group input-group-sm mb-3">
+									<label for="pin-object-id" class="input-group-text">Selected object id:</label>
+									<input type="number" name="selected_object_id" id="pin-object-id"
+										class="form-control" disabled>
+								</div>
+
+								<div class="input-group input-group-sm mb-3">
+									<label for="pin-x" class="input-group-text">X:</label>
+									<input type="number" name="coord_x" id="pin-x" class="form-control" disabled>
+								</div>
+
+								<div class="input-group input-group-sm mb-3">
+									<label for="pin-y" class="input-group-text">Y:</label>
+									<input type="number" name="coord_y" id="pin-y" class="form-control" disabled>
+								</div>
+
+								<div class="input-group input-group-sm mb-3">
+									<label for="pin-z" class="input-group-text">Z:</label>
+									<input type="number" name="coord_z" id="pin-z" class="form-control" disabled>
+								</div>
+							</div>
+						</div>
+
+					</div>
+					<div class="row align-items-center mb-3">
+						<div id="form-group-buttons" class="btn-group" role="group">
+							<button id="submit-pin-form" class="btn btn-success" type="button">Submit</button>
+							<button id="cancel-pin-form" class="btn btn-danger" type="button">Cancel</button>
+							<button id="reset-fields-button" class="btn btn-warning" type="button">Reset
+								fields</button>
+						</div>
+					</div>
+
+					<div class="row align-items-center mb-3">
+						<label id="query-result" class="alert" role="alert"></label>
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<div id="l-overlay" class="overlay" style="visibility: hidden;">
+			<div class="container h-100">
+
+				<div class="row mb-3 h-15" id="project-header-info">
+					<div class="card">
+						<div id="project-details" class=""></div>
+					</div>
+				</div>
+
+				<div id="project-pins" class="row h-35"></div>
+
+				<div id="project-commands" class="row h-10 justify-content-end mb-3  mt-1 text-end">
+					<div class="col-4">
+						<button id="add-new-pin" class="btn btn-primary btn-sm">New pin</button>
+					</div>
+				</div>
+
+				<div id="tree-container" class="row flex-grow-1">
+					<div class="projecttree" class="row mb-3">
+						<b>Project tree:</b>
+						<div class="tree"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+		<div id="data-chart-visualizer" class="timetrend-charts" style="display: none;">
+			<div id="last-value-container">
+				<div id="last-value-title">Last Value</div>
+				<div id="last-value">No data</div>
+			</div>
+			<div id="time-trend-container">
+				<div id="time-trend-title">Time Trend Chart</div>
+				<div id="time-trend">
+					<div id="time-trend-chart"></div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+</body>
+
+<script src="https://code.highcharts.com/highcharts.src.js"></script>
+<script type="module" src="add.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+
+</html>
