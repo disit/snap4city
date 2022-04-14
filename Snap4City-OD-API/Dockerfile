@@ -7,4 +7,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY py .
 
-CMD [ "python", "./od-insert.py" ]
+CMD [ "python", "-u", "./od-insert.py" ]
