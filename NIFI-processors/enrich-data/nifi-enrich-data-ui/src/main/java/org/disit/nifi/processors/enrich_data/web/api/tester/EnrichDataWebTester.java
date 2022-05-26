@@ -183,8 +183,9 @@ public class EnrichDataWebTester {
 					this.testRunner.enableControllerService( this.testRunner.getControllerService( nestedCsId ) );
 				}
 				this.testRunner.setProperty( csInstance , pName , nestedCsId );	
-			}else {
-				this.testRunner.setProperty( csInstance , pName , pVal.getAsString() );
+			} else {
+				if( !pVal.isJsonNull() )
+					this.testRunner.setProperty( csInstance , pName , pVal.getAsString() );
 			}
 		}
 		

@@ -1,0 +1,30 @@
+{
+     "status": "{\"status\": \"Ok - get info CB \"}",
+     "msg": "response from the query about context broker, given id_sub ",
+     "content": {
+         "name": "orionBroker-NAME",
+         "protocol": "ngsi",
+         "ip": "192.168.1.47",
+         "port": "1031",
+         "uri": null,
+         "login": "",
+         "password": "",
+         "latitude": "0.0",
+         "longitude": "0.0",
+         "created": "2020-08-10 10:16:50",
+         "accesslink": "access.broker.org",
+         "accessport": "443",
+         "sha": "",
+         "organization": "Organization",
+         "apikey": null,
+         "visibility": "private",
+         "version": "v1",
+         "path": "",
+         "kind": "internal",
+         "subscription_id": "subid_1",
+         "urlnificallback": "http://nifi.instance:1045/ingestngsi",
+         "serviceUriPrefix": "http://serviceuriprefix.org"
+     },
+     "log": "\\n response from the query about context broker, given id_subArray",
+     "error_msg": ""
+}

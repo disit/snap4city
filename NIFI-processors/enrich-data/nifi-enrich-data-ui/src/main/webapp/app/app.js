@@ -84,7 +84,8 @@ app.configureGroup( "Enrichment sources" ,
 		"HASHED_ID_FIELDS" ,
 		"ORIGINAL_FLOW_FILE_ATTRIBUTES_AUG" ,
 		"ES_INDEX" ,
-		"ES_TYPE" , 
+		"ES_TYPE" ,
+		"DEVICE_STATE_OUTPUT_FORMAT"
 	]
 )
 .configureJsonProperty( "ORIGINAL_FLOW_FILE_ATTRIBUTES_AUG" )

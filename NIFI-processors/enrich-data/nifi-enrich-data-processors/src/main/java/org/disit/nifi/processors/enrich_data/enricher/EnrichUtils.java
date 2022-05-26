@@ -22,6 +22,7 @@ import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.util.AbstractMap;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -96,8 +97,10 @@ public final class EnrichUtils {
     		if( candidateObject.has( valueFieldName ) )	
     			timestampStr = candidateObject.get( valueFieldName ).getAsString();
     		
-    		if( candidateObject.has( valueFieldName.concat( "_str" ) ) )
-    			timestampStr = candidateObject.get( valueFieldName.concat( "_str" ) ).getAsString();
+//    		if( candidateObject.has( valueFieldName.concat( "_str" ) ) )
+//    			timestampStr = candidateObject.get( valueFieldName.concat( "_str" ) ).getAsString();
+			if( candidateObject.has( valueFieldName.concat( Enricher.VALUE_NAME_STR_SUFFIX ) ) )
+    			timestampStr = candidateObject.get( valueFieldName.concat( Enricher.VALUE_NAME_STR_SUFFIX ) ).getAsString();
     		
     		if( !timestampStr.isEmpty() ) {
 				try {
@@ -155,24 +158,34 @@ public final class EnrichUtils {
 		
 		// Generate timestamp with truncations and approximations
 		dateTimes.put( timestampFieldName , dateTime.format( timestampFormatter ) ); //Original timestamp
-		dateTimes.put( "date_time1sec" , dateTime.truncatedTo( ChronoUnit.SECONDS ).format( timestampFormatter ) );
-		dateTimes.put( "date_time1min" , dateTime.truncatedTo( ChronoUnit.MINUTES ).format( timestampFormatter ) );
-		dateTimes.put( "date_time1h" , dateTime.truncatedTo( ChronoUnit.HOURS ).format( timestampFormatter ) );
-		dateTimes.put( "date_time1d" , dateTime.truncatedTo( ChronoUnit.DAYS ).format( timestampFormatter ) );
+		dateTimes.put( timestampFieldName + "1sec" , dateTime.truncatedTo( ChronoUnit.SECONDS ).format( timestampFormatter ) );
+		dateTimes.put( timestampFieldName + "1min" , dateTime.truncatedTo( ChronoUnit.MINUTES ).format( timestampFormatter ) );
+		dateTimes.put( timestampFieldName + "1h" , dateTime.truncatedTo( ChronoUnit.HOURS ).format( timestampFormatter ) );
+		dateTimes.put( timestampFieldName + "1d" , dateTime.truncatedTo( ChronoUnit.DAYS ).format( timestampFormatter ) );
 		
 		if( seconds10th < 59 )
-			dateTimes.put( "date_time10sec" , dateTime.truncatedTo( ChronoUnit.SECONDS ).withSecond( seconds10th ).format( timestampFormatter ) );
+			dateTimes.put( timestampFieldName + "10sec" , dateTime.truncatedTo( ChronoUnit.SECONDS ).withSecond( seconds10th ).format( timestampFormatter ) );
 		else
-			dateTimes.put( "date_time10sec" , dateTime.plusMinutes(1).truncatedTo( ChronoUnit.SECONDS ).withSecond( 0 ).format( timestampFormatter ) );
+			dateTimes.put( timestampFieldName + "10sec" , dateTime.plusMinutes(1).truncatedTo( ChronoUnit.SECONDS ).withSecond( 0 ).format( timestampFormatter ) );
 		
 		if( minutes10th < 59 )
-			dateTimes.put( "date_time10min" , dateTime.truncatedTo( ChronoUnit.MINUTES ).withMinute( minutes10th ).format( timestampFormatter ) );
+			dateTimes.put( timestampFieldName + "10min" , dateTime.truncatedTo( ChronoUnit.MINUTES ).withMinute( minutes10th ).format( timestampFormatter ) );
 		else
-			dateTimes.put( "date_time10min" , dateTime.plusHours(1).truncatedTo( ChronoUnit.MINUTES ).withMinute( 0 ).format( timestampFormatter ) );
+			dateTimes.put( timestampFieldName + "10min" , dateTime.plusHours(1).truncatedTo( ChronoUnit.MINUTES ).withMinute( 0 ).format( timestampFormatter ) );
 
 		return dateTimes;
     }
     
+    public static List<String> getTruncatedDateTimeFieldNames( String timestampFieldName ){
+     	return Arrays.asList(
+     		timestampFieldName + "1sec" ,
+     		timestampFieldName + "1min" ,
+     		timestampFieldName + "1h" ,
+     		timestampFieldName + "1d" ,
+     		timestampFieldName + "10sec" ,
+     		timestampFieldName + "10min" 
+     	);
+    }
     
     /**
      * Perform the mapping of the field specified by valueFieldName
@@ -207,16 +220,20 @@ public final class EnrichUtils {
 					if( parseNumericStrings ) { // Try numeric string parsing
 						tryParseStringValues( rootObjMember , valueEl , valueFieldName );
 					} else { // Map directly to string value
-						rootObjMember.addProperty( valueFieldName.concat( "_str" ) , 
-								   				   valueEl.getAsString() );
+//						rootObjMember.addProperty( valueFieldName.concat( "_str" ) , valueEl.getAsString() );
+						rootObjMember.addProperty( 
+							valueFieldName.concat( Enricher.VALUE_NAME_STR_SUFFIX ) , 
+							valueEl.getAsString() );
 						rootObjMember.remove( valueFieldName );
 					}
 				}
 				
 				// Map boolean values to string values
 				if( valueEl.getAsJsonPrimitive().isBoolean() ) {
-					rootObjMember.addProperty( valueFieldName.concat( "_str" ) , 
-							                   valueEl.getAsString() );
+//					rootObjMember.addProperty( valueFieldName.concat( "_str" ) , valueEl.getAsString() );
+					rootObjMember.addProperty( 
+						valueFieldName.concat( Enricher.VALUE_NAME_STR_SUFFIX ) , 
+						valueEl.getAsString() );
 					rootObjMember.remove( valueFieldName );
 				}
 				
@@ -255,8 +272,10 @@ public final class EnrichUtils {
 			rootObjMember.remove( valueFieldName );
 			rootObjMember.addProperty( valueFieldName , parsedValue );
 		} else {
-			rootObjMember.addProperty( valueFieldName.concat( "_str" ) , 
-					   				   valueEl.getAsString() );
+//			rootObjMember.addProperty( valueFieldName.concat( "_str" ) , valueEl.getAsString() );
+			rootObjMember.addProperty( 
+				valueFieldName.concat( Enricher.VALUE_NAME_STR_SUFFIX ) , 
+				valueEl.getAsString() );
 			rootObjMember.remove( valueFieldName );
 		}
     }
@@ -266,8 +285,10 @@ public final class EnrichUtils {
      */
     private static void mapNonPrimitiveValue( JsonObject rootObjMember , String valueFieldName , JsonElement valueEl ) {
     	if( valueEl.isJsonObject() ) { // Check if "value" contains a JsonObject
-			rootObjMember.add( valueFieldName.concat( "_obj" ) , 
-							   valueEl.getAsJsonObject() );
+//			rootObjMember.add( valueFieldName.concat( "_obj" ) , valueEl.getAsJsonObject() );
+    		rootObjMember.add( 
+    			valueFieldName.concat( Enricher.VALUE_NAME_OBJ_SUFFIX ) , 
+    			valueEl.getAsJsonObject() );
 			rootObjMember.remove( valueFieldName );
 		} else {
 			
@@ -282,8 +303,10 @@ public final class EnrichUtils {
 				}
 				
 				if( primitiveTypesArray ) { // Array of primitve types
-					rootObjMember.add( valueFieldName.concat( "_arr" ) , 
-									   valueEl.getAsJsonArray() );
+//					rootObjMember.add( valueFieldName.concat( "_arr" ) , valueEl.getAsJsonArray() );
+					rootObjMember.add( 
+						valueFieldName.concat( Enricher.VALUE_NAME_ARR_SUFFIX ) , 
+						valueEl.getAsJsonArray() );
 					rootObjMember.remove( valueFieldName );
 				} else { // Array of JsonObjects
 					JsonArray valueArrObj = new JsonArray();
@@ -291,7 +314,10 @@ public final class EnrichUtils {
 						valueArrObj.add( e.getAsJsonObject() );
 					});
 					
-					rootObjMember.add( valueFieldName.concat( "_arr_obj" ) , valueArrObj );
+//					rootObjMember.add( valueFieldName.concat( "_arr_obj" ) , valueArrObj );
+					rootObjMember.add( 
+						valueFieldName.concat( Enricher.VALUE_NAME_ARR_OBJ_SUFFIX ) , 
+						valueArrObj );
 				}
 				rootObjMember.remove( valueFieldName );
 			}

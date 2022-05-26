@@ -1,13 +1,28 @@
 # NIFI-processors / enrich-data
 
+Apache NiFi target version: `1.9.2`.  
+(The components provided by this bundle may not work on other Apache NiFi versions or the installation procedures described in this documentation may not be valid.)
+
+## Index
+* [Build](#build)   
+* [Installation](#installation)  
+	* [Fresh installation](#fresh-installation)
+		* [The node configuration file](#the-node-configuration-file)  
+	* [Upgrade from a previous bundle version](#upgrade-from-a-previous-bundle-version)  
+* [Additional documentation](#additional-documentation)
+* [Dataflow configuration](#dataflow-configuration)
+* [Enrichment Source Client Service configuration](#enrichment-source-client-service-configuration)
+* [Output](#output)
+* [Custom EnrichData UI](#custom-enrich-data-ui)
+
 This bundle includes the following Apache NiFi components:  
 
-Processors:
+**Processors**:
 * EnrichData
 * UpdateEnrichmentSource
 * OwnershipEnrichData
 
-ControllerServices:
+**ControllerServices**:
 * Servicemap:
 	* ServicemapControllerService
 	* ServicemapOAuthControllerService
@@ -23,54 +38,94 @@ ControllerServices:
 
 ## Build:
 
-The bundle must be built using maven.
+The bundle must be built using [Apache Maven](https://maven.apache.org/).
 
 To build the bundle:
-* `cd` into the bundle top level folder `/enrich-data` ).
+1. `cd` into the bundle top level folder `/enrich-data` ).
 
-* Then `mvn clean package -DskipTests`  
-  **Note**: `-DskipTests` skip the unit tests execution
+2. Then `mvn clean package` to start the build.  
+  **Note**: If you wish to skip the unit tests execution during the build process use:
 
-If the build succeed, a `.tar` archive is produced in the folder:
+	```
+	mvn clean package -DskipTests
+	```
+
+If the build succeeds, a `.tar` archive containing the bundle is produced in:
 
 ```
 distribution/target/nifi-enrich-data-bundle-1.9.2.tar
 ```
 
-The archive contains the following directory structure:
+The content of the archive will be:
 
 ```
-  dist
-    |-- extensions
-    |-- conf
+nifi-enrich-data-bundle-1.9.2
+├── nifi
+│   ├── conf
+│   │   └── enrich-data.conf
+│   └── extensions
+│       ├── nifi-enrich-data-nar-1.9.2.nar
+│       ├── nifi-enrichment-source-client-service-api-nar-1.9.2.nar
+│       ├── nifi-oauth-token-provider-service-nar-1.9.2.nar
+│       ├── nifi-ownership-client-service-nar-1.9.2.nar
+│       ├── nifi-resource-locator-services-nar-1.9.2.nar
+│       └── nifi-servicemap-client-services-nar-1.9.2.nar
+└── test-tools
+	└── test-server
+			├── bin
+			│   └── test_server.sh
+			├── conf
+			│   ├── conf.yml
+			│   ├── iotdirectory
+			│   │   └── subid_1.json
+			│   ├── ownership
+			│   │   └── sensor1_ownership.json
+			│   └── servicemap
+			│       └── sensor1.json
+			└── lib
+					└── test-tools.jar
 ```
 
-The `extensions` folder contains the nar archives.  
-The `conf` folder contains configuration files.
+* The `nifi` folder contains the files to be copied in NiFi to install the bundle (`.nar` archives and configuration files).  
+* The `test-tools` folder contains utilities to perform tests, for example mocking the services external to NiFi on which the EnrichData processor relies (Servicemap, Ownership, IOTDirectory).
 
 ## Installation:
 
-To install the bundle copy all the nar archives contained in `dist/extensions` to the
-`lib` subfolder of your NiFi installation root (Eg: `/srv/nifi/lib` ), then restart the NiFi instance with:
+### Fresh Installation
+
+To install the bundle for the **first time** on a NiFi instance copy all the `.nar` archives from `nifi-enrich-data-bundle-1.9.2/nifi/extensions` to the folder configured as:
+```
+nifi.nar.library.autoload.directory
+```
+in the `nifi.properties` file of the target instance.  
+By default `<NiFi Home>/extensions`.
+
+Such directory is scanned by NiFi every 30s for new .nars which will be unpacked and loaded.  
+This applies only to new libraries, **already loaded libraries will not be reloaded**.
+
+To see the bundle processors and controller services listed a **refresh of the browser window** may be required.
+
+#### The node configuration file
+Due to the fact that the processor's configurations are cluster-wide, to add different configurations for every single node a file has been predisposed.  
+The path of such file can be configured in the `EnrichData` processor in the `Node config file path` property, and it must be accessible by the NiFi instances.  
+A template for the configuration file can be found in:
 
 ```
-/srv/nifi/nifi.sh restart
+nifi-enrich-data-bundle-1.9.2/nifi/conf/enrich-data.conf
 ```
+You can copy this file in a location accessible to NiFi ( Eg: `<NiFi Home>/conf` ) and point to that file in the processor configurations.
 
-**Note**: for the `EnrichData` processor to work, actually, a node configuration file must exists and it's path must be configured in the processor's configuration. A template of such configuration file can be found in:
+### Upgrade from a previous bundle version
 
-```
-dist/conf/enrich-data.conf
-```
-You can copy this file in a location accessible to NiFi ( Eg: `/srv/nifi/conf` ) and point to that file in the processor configurations.
+If the `.nar` archives of the `enrich-data-bundle` are already present in the NiFi autoload directory (`<NiFi Home>/extensions` by default) you need to replace the old .nars with the new ones as described in the Fresh Installation steps, but **a NiFi restart is required**.
 
-
-**Note**: alternatively, from `Nifi-1.9` a bundle can be installed by copying the nar archive in the `extension` subfolder of the Nifi installation root ( Eg: `/srv/nifi/extensions` ), **WITHOUT RESTARTING THE NIFI INSTANCE**.  
-If you are updating the bundle from a previous version **you still need to restart** the nifi instance(s) to reload the nar archives (NiFi cannot detect changes in the nar archives at runtime).
+**NOTE**: if the target NiFi is clustered make sure to update the bundle on every node and restart every node.
 
 ## Additional documentation
 Additional documentation on the processors is provided by the built-in NiFi documentation accessible through `Right click on processor` -> `View usage`.  
-For some processors the properties configurations are explained in details in the page displayed by the `Additional details ...` link in the usage documentation.
+For the `EnrichData` processor some properties e explained in details in the page displayed by the `Additional details ...` link in the usage documentation.
+
+![Additional details](doc/img/additional_details.png)
 
 ## Dataflow configuration:
 
@@ -165,7 +220,7 @@ The client will retrieve the JWT from the Keycloak instance using the provided c
 Authorization: Bearer <JWT_BASE64_CONTENT>
 ```
 
-### Output
+## Output
 The output mode is configurable by the property **"Output flow file content format"**, there are 3 available modes:
 * **JSON** : for each incoming flow file produces an output flow file containing the enriched object (with all measures) in it's content.
 
@@ -173,26 +228,30 @@ The output mode is configurable by the property **"Output flow file content form
 
 * **Elasticsearch bulk indexing compliant"** : for each incoming flow file produces an output flow file with the content ready to be passed to an Elasticsearch Bulk indexing operation.  If using this output mode, you need to configure the properties **"ES index"** and **"ES type"**.
 
-### Individual node config
+## Custom EnrichData UI
 
-Due to the fact that the processor's configurations are cluster-wide, to add different configurations for every single node a file has been predisposed.  
-**This file must exists and be accessible to the Nifi instance on every cluster's node.**  
-The file path must be specified in the **"Node config file path"** property.
+![Enrich Data Configuration UI gif](doc/img/gifs/EnrichData_UI_1.gif)
 
-Current supported options:
-* **timestampFromContent.useFallback**
+The `EnrichData` processor provides a custom GUI to configure the processor and perform enrichment tests without directly running the processor.
+The custom GUI is accessible through `Right click on processor` -> `Configure` -> `Properties tab` -> `Advanced` (button at the bottom left corner):
 
-Example:
-```
-# In case of timestamp picked from the flow file content after the enrichment
-# this property tells to the processor if the fallback must be used or not, in case
-# there's no valid field in the flow file from which to pick the timestamp.
-# The fallback consists in using the value of the timestamp field (before the enrichment step)
-# specified by 'Timestamp field name' in the processor configurations.
-#
-# default value: true
-timestampFromContent.useFallback = true
-```
+![Advanced configs](doc/img/enrich_data_advanced.png)
 
-### References
+The custom user interface has a `Configuration mode` which allows to configure the processor properties (like the standard Properties tab), but it groups related properties under different tabs and provides an enhanced JSON editor for the JSON properties.
+
+The other mode is the `Test mode` which allows to run enrichment tests with the current processor configurations.
+
+To switch between `Configuration` and `Test` mode use the toggle button in the bottom-left corner of the custom user interface.
+
+#### Configuration UI
+![Enrich Data Configuration UI](doc/img/enrich_data_configuration_ui.png)
+#### Testing UI:
+
+![Enrich Data Test UI](doc/img/enrich_data_test_ui.png)
+
+The left part of the testing ui allows to set the input for the test, while the right part shows the test outputs.
+
+![Enrich Data Test UI gif](doc/img/gifs/EnrichData_UI_test.gif)
+
+## References
 The processor's configurations properties are all fully explained in the embedded NiFi processor's usage documentation accessible through the `View usage` option by right clicking on the processor in the Nifi web UI.

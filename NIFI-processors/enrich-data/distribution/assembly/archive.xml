@@ -26,7 +26,7 @@
   
   <fileSets>
      <fileSet>
-       <outputDirectory>dist/extensions</outputDirectory>
+       <outputDirectory>${bundle.name}/nifi/extensions</outputDirectory>
        <directory>../nifi-enrich-data-nar/target/</directory>
        <includes>
        	<include>*.nar</include>
@@ -42,7 +42,7 @@
      </fileSet> -->
      
      <fileSet>
-       <outputDirectory>dist/extensions</outputDirectory>
+       <outputDirectory>${bundle.name}/nifi/extensions</outputDirectory>
        <directory>../nifi-oauth-token-provider-service-nar/target/</directory>
        <includes>
        	<include>*.nar</include>
@@ -50,7 +50,7 @@
      </fileSet>
      
      <fileSet>
-       <outputDirectory>dist/extensions</outputDirectory>
+       <outputDirectory>${bundle.name}/nifi/extensions</outputDirectory>
        <directory>../nifi-enrichment-source-client-service-api-nar/target/</directory>
        <includes>
        	<include>*.nar</include>
@@ -58,7 +58,7 @@
      </fileSet>
      
      <fileSet>
-       <outputDirectory>dist/extensions</outputDirectory>
+       <outputDirectory>${bundle.name}/nifi/extensions</outputDirectory>
        <directory>../nifi-servicemap-client-services-nar/target/</directory>
        <includes>
        	<include>*.nar</include>
@@ -66,7 +66,7 @@
      </fileSet>
      
      <fileSet>
-       <outputDirectory>dist/extensions</outputDirectory>
+       <outputDirectory>${bundle.name}/nifi/extensions</outputDirectory>
        <directory>../nifi-ownership-client-service-nar/target/</directory>
        <includes>
        	<include>*.nar</include>
@@ -74,7 +74,7 @@
      </fileSet>
      
      <fileSet>
-       <outputDirectory>dist/extensions</outputDirectory>
+       <outputDirectory>${bundle.name}/nifi/extensions</outputDirectory>
        <directory>../nifi-resource-locator-services-nar/target/</directory>
        <includes>
        	<include>*.nar</include>
@@ -82,12 +82,21 @@
      </fileSet>
      
      <fileSet>
-       <outputDirectory>dist/conf</outputDirectory>
+       <outputDirectory>${bundle.name}/nifi/conf</outputDirectory>
        <directory>../nifi-enrich-data-processors/src/test/resources</directory>
        <includes>
        	<include>enrich-data.conf</include>
        </includes>
      </fileSet>
+     
+     <fileSet>
+     	<outputDirectory>${bundle.name}/test-tools</outputDirectory>
+     	<directory>../test-tools/target/test-tools</directory>
+     	<includes>
+     		<include>**/*</include>
+     	</includes>
+     </fileSet>
+     
   </fileSets>
   
 </assembly>

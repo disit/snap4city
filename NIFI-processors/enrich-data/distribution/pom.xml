@@ -68,9 +68,9 @@
     </dependencies>
 
     <build>
-    	<!-- Assembly -->
-    	<finalName>nifi-enrich-data-bundle-${project.parent.version}</finalName>
+    	<finalName>${bundle.name}</finalName>
     	<plugins>
+    		<!-- Assembly -->
    			<plugin>
    				<groupId>org.apache.maven.plugins</groupId>
    				<artifactId>maven-assembly-plugin</artifactId>

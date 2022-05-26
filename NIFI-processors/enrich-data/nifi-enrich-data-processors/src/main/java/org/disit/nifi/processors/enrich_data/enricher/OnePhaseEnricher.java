@@ -92,7 +92,7 @@ public class OnePhaseEnricher extends Enricher{
 				if( !this.deviceIdNameMapping.isEmpty() ) {
 					rootObjMember.addProperty( this.deviceIdNameMapping , deviceId );
 				} else {
-					rootObjMember.addProperty( "id" , deviceId );
+					rootObjMember.addProperty( Enricher.DEFAULT_DEVICE_ID_PROPERTY_NAME , deviceId );
 				}
 				
 				// Static properties
@@ -112,7 +112,7 @@ public class OnePhaseEnricher extends Enricher{
 					}
 				);
 				
-				rootObjMember.addProperty( "value_name" , member );
+				rootObjMember.addProperty( Enricher.DEFAULT_VALUE_NAME_PROPERTY_NAME , member );
 				
 				// Enrich the member with truncated timestamps (including original)
 				timestamps.entrySet().forEach( timestampEntry -> { 

@@ -258,7 +258,7 @@ public class OwnershipEnrichData extends AbstractProcessor {
     	}
 	    
 	    propertiesToPurge = new ArrayList<>();
-	    if( !context.getProperty( PURGE_EXISTING_PROPERTIES ).getValue().isEmpty() ) {
+	    if( context.getProperty( PURGE_EXISTING_PROPERTIES).isSet() && !context.getProperty( PURGE_EXISTING_PROPERTIES ).getValue().isEmpty() ) {
 	    	String propertiesToPurgeValue = context.getProperty( PURGE_EXISTING_PROPERTIES ).getValue();
 	    	Arrays.asList( propertiesToPurgeValue.trim().split( "," ) ).stream().forEach( (String prop)->{
 	    		String trimmedProp = prop.trim();

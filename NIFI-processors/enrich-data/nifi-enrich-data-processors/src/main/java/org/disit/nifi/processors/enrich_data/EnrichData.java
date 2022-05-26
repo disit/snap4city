@@ -19,6 +19,7 @@ package org.disit.nifi.processors.enrich_data;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,10 +62,12 @@ import org.apache.nifi.processor.ProcessSession;
 import org.apache.nifi.processor.ProcessorInitializationContext;
 import org.apache.nifi.processor.Relationship;
 import org.apache.nifi.processor.exception.ProcessException;
+import org.apache.nifi.processor.io.OutputStreamCallback;
 import org.apache.nifi.processor.util.StandardValidators;
 import org.disit.nifi.processors.enrich_data.enricher.Enricher;
 import org.disit.nifi.processors.enrich_data.enricher.OnePhaseEnricher;
 import org.disit.nifi.processors.enrich_data.enricher.TwoPhaseEnricher;
+import org.disit.nifi.processors.enrich_data.enricher.converter.DeviceStateConverter;
 import org.disit.nifi.processors.enrich_data.enrichment_source.EnrichmentSourceClient;
 import org.disit.nifi.processors.enrich_data.enrichment_source.EnrichmentSourceClientService;
 import org.disit.nifi.processors.enrich_data.enrichment_source.EnrichmentSourceException;
@@ -80,6 +83,7 @@ import org.disit.nifi.processors.enrich_data.output_producer.JsonOutputProducer;
 import org.disit.nifi.processors.enrich_data.output_producer.OutputProducer;
 import org.disit.nifi.processors.enrich_data.output_producer.SplitObjectOutputProducer;
 
+import com.google.common.net.MediaType;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
@@ -94,10 +98,10 @@ import com.google.gson.JsonSyntaxException;
 @SeeAlso({})
 @ReadsAttributes({@ReadsAttribute(attribute="", description="")})
 @WritesAttributes({ 
-					@WritesAttribute(attribute="requestUrl", description="The URL used by the processor for the request to Servicemap.") ,
-					@WritesAttribute(attribute="deviceId", description="The parsed deviceId.") , 
-					@WritesAttribute(attribute="timestampSource", description="Track from where the timestamp is picked from.")
-				  })
+	@WritesAttribute(attribute="requestUrl", description="The URL used by the processor for the request to Servicemap.") ,
+	@WritesAttribute(attribute="deviceId", description="The parsed deviceId.") , 
+	@WritesAttribute(attribute="timestampSource", description="Track from where the timestamp is picked from.")
+})
 
 public class EnrichData extends AbstractProcessor {
 	
@@ -157,6 +161,13 @@ public class EnrichData extends AbstractProcessor {
 	);
 	
 	
+	public static final Set<String> DEVICE_STATE_OUTPUT_FORMAT_VALUES = Collections.unmodifiableSet(
+		new HashSet<>( Arrays.asList( 
+			DeviceStateConverter.OutputMode.MINIMAL.toString() ,
+			DeviceStateConverter.OutputMode.FULL.toString()
+		) )
+	);
+	
 	
 	public static final List<Integer> RETRIABLE_STATUS_CODES = Collections.unmodifiableList( 
 		Arrays.asList(
@@ -202,13 +213,14 @@ public class EnrichData extends AbstractProcessor {
 		  	"ES_TYPE" , 
 		  	"NODE_CONFIG_FILE_PATH" , 
 		  	"ATTEMPT_STRING_VALUES_PARSING" ,
-		  	"ORIGINAL_FLOW_FILE_ATTRIBUTES_AUG" 
+		  	"ORIGINAL_FLOW_FILE_ATTRIBUTES_AUG" ,
+		  	"DEVICE_STATE_OUTPUT_FORMAT"
 		) 
 	);
 	
 	// File configs
 	private static final List<String> allowedFileConfigs = Arrays.asList( 
-			"timestampFromContent.useFallback" 
+		"timestampFromContent.useFallback" 
 	);
 	private final int FILE_CONFIGS_USE_FALLBACK = 0;
 	
@@ -483,9 +495,12 @@ public class EnrichData extends AbstractProcessor {
     public static final PropertyDescriptor NODE_CONFIG_FILE_PATH = new PropertyDescriptor
     		.Builder().name( "NODE_CONFIG_FILE_PATH" )
     		.displayName( "Node config file path" )
-    		.description( "A file used to specify additional configurations for the processor. In case of clustered NiFi the processor configurations are the same on all the nodes, this file allows to specify some configurations specific for each node (and thus must be configured on all the cluster nodes). This is a REQUIRED property, even if empty THIS FILE MUST EXISTS." )
-    		.required( true )
-    		.addValidator( StandardValidators.FILE_EXISTS_VALIDATOR )
+    		.description( "A file used to specify additional configurations for the processor. In case of clustered NiFi the processor configurations are the same on all nodes, this file allows to specify some configurations for the nodes individually." )
+//    		.required( true )
+    		.required( false )
+//    		.addValidator( StandardValidators.FILE_EXISTS_VALIDATOR )
+    		.addValidator( Validator.VALID )
+    		.defaultValue( "" )
     		.build();
     
     // Original flow file augmentation
@@ -497,6 +512,19 @@ public class EnrichData extends AbstractProcessor {
     		.defaultValue( "" )
     		.addValidator( EnrichDataValidators.jsonPropertyValidator(true) )
     		.build();
+    
+    // Device state configs
+    // output mode
+    public static final PropertyDescriptor DEVICE_STATE_OUPUT_FORMAT = new PropertyDescriptor
+    		.Builder().name( "DEVICE_STATE_OUTPUT_FORMAT" )
+    		.displayName( "Device state output format" )
+    		.description( "This property specifies the output format for the content of the flow files routed to the 'Device state' relationship. MINIMAL will output measures objects with their value field only (specified by 'Value field name' and with the appropriate suffix depending on the detected data type). FULL will preserve all the fields contained in every measure object." )
+    		.required( false )
+    		.allowableValues( DEVICE_STATE_OUTPUT_FORMAT_VALUES )
+    		.defaultValue( DeviceStateConverter.OutputMode.MINIMAL.toString() )
+    		.addValidator( StandardValidators.NON_EMPTY_VALIDATOR )
+    		.build();
+    		
     		
     // Relationships
     public static final Relationship SUCCESS_RELATIONSHIP = new Relationship.Builder()
@@ -518,6 +546,12 @@ public class EnrichData extends AbstractProcessor {
     public static final Relationship RETRY_RELATIONSHIP = new Relationship.Builder()
     		.name( "retry" )
     		.description( "Flow files which cannot be correctly enriched but are considered retriable will be routed to this relationship.\nA flow file is considered retriable if the cause of the failure is an enrichment service unavailability." )
+    		.build();
+    
+    public static final Relationship DEVICE_STATE_RELATIONSHIP = new Relationship.Builder()
+    		.name( "device state" )
+    		.autoTerminateDefault( true )
+    		.description( "If this relationship is not auto-terminated, the processor will also produce flow file containing the enriched data in a format suitable to represent the sensor state. Such flow files will be routed to this relationship." )
     		.build();
     
     private static List<PropertyDescriptor> propertyDescriptors;
@@ -552,7 +586,8 @@ public class EnrichData extends AbstractProcessor {
 	        ES_TYPE ,								// Output
 	        NODE_CONFIG_FILE_PATH ,					// Other
 	        ATTEMPT_STRING_VALUES_PARSING ,			// Fields
-	        ORIGINAL_FLOW_FILE_ATTRIBUTES_AUG 		// Output
+	        ORIGINAL_FLOW_FILE_ATTRIBUTES_AUG ,		// Output
+	        DEVICE_STATE_OUPUT_FORMAT				// Output
     	) );
     	
     	final Set<Relationship> rels = new HashSet<>();
@@ -560,6 +595,7 @@ public class EnrichData extends AbstractProcessor {
     	rels.add( RETRY_RELATIONSHIP );
     	rels.add( ORIGINAL_RELATIONSHIP );
     	rels.add( FAILURE_RELATIONSHIP );
+    	rels.add( DEVICE_STATE_RELATIONSHIP );
     	processorRelationships = Collections.unmodifiableSet( rels );
     }
     
@@ -616,6 +652,12 @@ public class EnrichData extends AbstractProcessor {
     
     // Enricher
     private Enricher enricher;
+    
+    // Converter
+    private DeviceStateConverter deviceStateConverter;
+    // Determined by the check on the auto-termination of the 
+    // DEVICE_STATE relationship
+    private boolean outputDeviceState; 
     
     // Output properties
     private String esIndex;
@@ -680,6 +722,7 @@ public class EnrichData extends AbstractProcessor {
         descriptors.add( NODE_CONFIG_FILE_PATH );
         descriptors.add( ATTEMPT_STRING_VALUES_PARSING );
         descriptors.add( ORIGINAL_FLOW_FILE_ATTRIBUTES_AUG );
+        descriptors.add( DEVICE_STATE_OUPUT_FORMAT );
         this.descriptors = Collections.unmodifiableList(descriptors);
 
         final Set<Relationship> relationships = new HashSet<Relationship>();
@@ -687,6 +730,7 @@ public class EnrichData extends AbstractProcessor {
         relationships.add(FAILURE_RELATIONSHIP);
         relationships.add(RETRY_RELATIONSHIP);
         relationships.add(ORIGINAL_RELATIONSHIP);
+        relationships.add(DEVICE_STATE_RELATIONSHIP);
         this.relationships = Collections.unmodifiableSet(relationships);
     }
 
@@ -1028,6 +1072,23 @@ public class EnrichData extends AbstractProcessor {
     	
     	this.enricher.setLeftJoin( this.leftJoin );
     	
+    	// DeviceState
+    	// determine the device state output mode
+    	System.out.println( "DEVICE_STATE_OUTPUT_FORMAT: " + context.getProperty( DEVICE_STATE_OUPUT_FORMAT ).getValue() );
+    	DeviceStateConverter.OutputMode deviceStateOutputMode = DeviceStateConverter.OutputMode.valueOf( 
+    		context.getProperty( DEVICE_STATE_OUPUT_FORMAT ).getValue() );
+    	
+    	
+    	// output the device state only if the dedicated relationship
+    	// is connected to another component, in order to skip the
+    	// device state operations when the relation is auto-terminated.
+    	if( context.hasConnection( DEVICE_STATE_RELATIONSHIP ) ) {
+    		this.outputDeviceState = true;
+    		this.deviceStateConverter = new DeviceStateConverter( enricher , deviceStateOutputMode );
+    	}else {
+    		this.outputDeviceState = false;
+    	}
+    	
     	// Original FF augmentation
     	originalFFAttributesAugMapping =  new HashMap<>();
     	String augMappingPropVal = context.getProperty( ORIGINAL_FLOW_FILE_ATTRIBUTES_AUG ).getValue();
@@ -1055,18 +1116,24 @@ public class EnrichData extends AbstractProcessor {
     	Properties props = new Properties();
     	String filePath = context.getProperty( NODE_CONFIG_FILE_PATH ).getValue();
     	
-    	try( FileInputStream in = new FileInputStream( filePath ) ){
-    		props.load( in );
-    	} catch ( IOException ex ) {
-    		throw new ConfigurationException( String.format( "IOException while parsing file '%s': %s" , filePath , ex.getMessage() ) );
+    	if( filePath != null && !filePath.isEmpty() ) {
+    		try( FileInputStream in = new FileInputStream( filePath ) ){
+        		props.load( in );
+        		
+        		allowedFileConfigs.stream().forEach( (String conf) -> { 
+            		String val = props.getProperty( conf );
+            		if( val != null ) {
+            			setConfigFromFile( conf , val );
+            		}
+            	});
+        	} catch ( IOException ex ) {
+//        		throw new ConfigurationException( String.format( "IOException while parsing file '%s': %s" , filePath , ex.getMessage() ) );
+//        		logger.info( "The specified 'Node config file path property' does not point to a valid configuration file. Using default configurations." );
+        		LoggingUtils.produceErrorObj( "The specified 'Node config file path property' does not point to a valid configuration file. Using default configurations." )
+        			.withExceptionInfo( ex )
+        			.logAsWarning( logger );
+        	}
     	}
-    	
-    	allowedFileConfigs.stream().forEach( (String conf) -> { 
-    		String val = props.getProperty( conf );
-    		if( val != null ) {
-    			setConfigFromFile( conf , val );
-    		}
-    	});
     }
     
     /**
@@ -1088,6 +1155,7 @@ public class EnrichData extends AbstractProcessor {
      */
     @Override
     public void onTrigger(final ProcessContext context, final ProcessSession session) throws ProcessException{
+    	
         FlowFile flowFile = session.get();
         if ( flowFile == null ) {
             return;
@@ -1384,10 +1452,13 @@ public class EnrichData extends AbstractProcessor {
 								  											    timestamp ,
 								  											    additionalProperties );
 			//----
+				
 			
 			if( rootObject.size() == 0 ) {
 				throw new ProcessException( "The resulting JsonObject after the enrichment is empty." );
 			}
+			
+			// Output producer ops 
 			
 			// clone the input ff before producing the output because the output producer removes
 			// the input flow file from the session implicitly
@@ -1409,6 +1480,28 @@ public class EnrichData extends AbstractProcessor {
 					new ImmutablePair<String, String>( "timestampSource" , this.enricher.getLastTimestampSource() ) 
 				);
 			});
+			
+			// Device State
+			if( outputDeviceState ) {
+				JsonElement deviceState = deviceStateConverter.convert( rootObject , additionalProperties );
+				
+				FlowFile deviceStateFF = session.clone( originalFF );
+				deviceStateFF = session.putAllAttributes( deviceStateFF , additionalFieldsErrors );
+				// Write flow file content 
+				deviceStateFF = session.write( deviceStateFF , new OutputStreamCallback() {
+					@Override
+					public void process(OutputStream out) throws IOException {
+						out.write( deviceState.toString().getBytes() );
+					}
+				});				
+				deviceStateFF = session.putAttribute( deviceStateFF , 
+						"serviceUri" , deviceState.getAsJsonObject().get("serviceUri").getAsString() );
+				deviceStateFF = session.putAttribute( deviceStateFF , 
+						"mime.type" , MediaType.JSON_UTF_8.toString() );
+
+				routeToRelationship( deviceStateFF , DEVICE_STATE_RELATIONSHIP , session , 
+					new ImmutablePair<String , String>( "timestampSource" , this.enricher.getLastTimestampSource() ) );
+			}
 			
 			//Original flow file augmentation
 			for( Map.Entry<String, List<String>> attr : originalFFAttributesAugMapping.entrySet() ) {

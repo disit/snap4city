@@ -127,7 +127,7 @@ public class TwoPhaseEnricher extends Enricher {
 				if( !this.deviceIdNameMapping.isEmpty() ) {
 					rootObjMember.addProperty( this.deviceIdNameMapping , deviceId );
 				} else {
-					rootObjMember.addProperty( "id" , deviceId );
+					rootObjMember.addProperty( Enricher.DEFAULT_DEVICE_ID_PROPERTY_NAME , deviceId );
 				}
 				
 				// Static properties
@@ -147,7 +147,7 @@ public class TwoPhaseEnricher extends Enricher {
 				);
 				
 				// Value name
-				rootObjMember.addProperty( "value_name" , member );
+				rootObjMember.addProperty( Enricher.DEFAULT_VALUE_NAME_PROPERTY_NAME , member );
 				
 				//Add additional fields to the rootObjMember
 				this.additionalFieldPaths.forEach( (String name , List<String> path) -> { 

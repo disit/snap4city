@@ -27,6 +27,8 @@ public class EnrichmentResourceLocatorException extends Exception {
 	}
 	
 	public Map<String , String> getAllAdditionalInfos() {
+		if( this.additionalInfos == null )
+			this.additionalInfos = new HashMap<>();
 		return Collections.unmodifiableMap( this.additionalInfos );
 	}
 

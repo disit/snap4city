@@ -20,31 +20,18 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.nifi.reporting.InitializationException;
-import org.apache.nifi.util.MockFlowFile;
 import org.disit.nifi.processors.enrich_data.EnrichData;
 import org.disit.nifi.processors.enrich_data.locators.iotdirectory.IOTDirectoryLocatorControllerService;
-import org.disit.nifi.processors.enrich_data.test.EnrichDataTestBase;
 import org.disit.nifi.processors.enrich_data.test.TestUtils;
 import org.disit.nifi.processors.enrich_data.test.api_mock.JsonResourceMockHandler;
 import org.disit.nifi.processors.enrich_data.test.simple.EnrichDataSimpleTests;
-import org.eclipse.jetty.io.ssl.ALPNProcessor.Server;
 import org.junit.BeforeClass;
-import org.junit.Test;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-
-import com.tngtech.keycloakmock.api.KeycloakMock;
-import com.tngtech.keycloakmock.api.TokenConfig;
-import com.tngtech.keycloakmock.junit.KeycloakMockRule;
-import static com.tngtech.keycloakmock.api.TokenConfig.aTokenConfig;
-
-
-import static com.tngtech.keycloakmock.api.ServerConfig.aServerConfig;
 
 /**
  * Unit tests for the EnrichData processor using:

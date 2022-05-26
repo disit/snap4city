@@ -26,6 +26,7 @@ import org.apache.nifi.flowfile.FlowFile;
 import org.apache.nifi.processor.ProcessSession;
 import org.apache.nifi.processor.io.OutputStreamCallback;
 
+import com.google.common.net.MediaType;
 import com.google.gson.JsonObject;
 
 /**
@@ -49,6 +50,7 @@ public class JsonOutputProducer implements OutputProducer {
 			}
 		});
 		 
+		inFlowFile = session.putAttribute( inFlowFile , "mime.type" , MediaType.JSON_UTF_8.toString() );
 		outputList.add( inFlowFile );
 		return outputList;
  	}

@@ -18,14 +18,24 @@
 package org.disit.nifi.processors.enrich_data.enricher;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 public abstract class Enricher {
+	
+	public final static String DEFAULT_DEVICE_ID_PROPERTY_NAME = "id";
+	public final static String DEFAULT_VALUE_NAME_PROPERTY_NAME = "value_name";
+	
+	public final static String VALUE_NAME_STR_SUFFIX = "_str";
+	public final static String VALUE_NAME_OBJ_SUFFIX = "_obj";
+	public final static String VALUE_NAME_ARR_SUFFIX = "_arr";
+	public final static String VALUE_NAME_ARR_OBJ_SUFFIX = "_arr_obj";
 	
 	protected String valueFieldName;
 	protected String timestampFieldName;
@@ -70,12 +80,38 @@ public abstract class Enricher {
 		this.additionalStaticProperties.remove( name );
 	}
 	
+	public String getValueFieldName() {
+		return valueFieldName;
+	}
+	
+	public String getTimestampFieldName() {
+		return timestampFieldName;
+	}
+	
+	public String getDeviceIdNameMapping() {
+		return deviceIdNameMapping;
+	}
+	
 	public Map<String , String> getStaticProperties(){
 		return Collections.unmodifiableMap( additionalStaticProperties  );
 	}
 	
+	public Map<String , List<String>> getAdditionalFieldPaths(){
+		return Collections.unmodifiableMap( additionalFieldPaths );
+	}
+	
 	public String getLastTimestampSource() {
 		return this.lastTimestampSource;
+	}
+	
+	public Set<String> getAllValueFieldNames(){
+		Set<String> names = new HashSet<>();
+		names.add( getValueFieldName() );
+		names.add( getValueFieldName().concat( VALUE_NAME_STR_SUFFIX ) );
+		names.add( getValueFieldName().concat( VALUE_NAME_OBJ_SUFFIX ) );
+		names.add( getValueFieldName().concat( VALUE_NAME_ARR_SUFFIX ) );
+		names.add( getValueFieldName().concat( VALUE_NAME_ARR_OBJ_SUFFIX ) );
+		return names;
 	}
 	
 	public void throwEmptyObjectException()  {

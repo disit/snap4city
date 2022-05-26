@@ -90,6 +90,18 @@ public class TestUtils {
     	return expectedResult;
     }
     
+    public static JsonElement prepareExpectedDeviceState( String resultContentFile , MockFlowFile ff , JsonParser parser ) throws IOException{
+    	JsonElement expectedState = mockJsonElementFromFile( Paths.get( resultContentFile ) , parser );
+    	String uuid = ff.getAttribute("uuid");
+    	
+    	if( expectedState.isJsonObject() ) {
+    		JsonObject es = expectedState.getAsJsonObject();
+    		es.addProperty( "uuid" , uuid );
+    	}
+    	
+    	return expectedState;
+    }
+    
     public static String prettyOutFF( MockFlowFile outFF , JsonParser jsonParser ) {
         
     	Gson gson = new GsonBuilder().setPrettyPrinting().create();

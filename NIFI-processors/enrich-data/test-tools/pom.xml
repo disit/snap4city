@@ -1,0 +1,105 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.disit.nifi.processors.enrich_data</groupId>
+    <artifactId>enrich-data</artifactId>
+    <version>1.9.2</version>
+  </parent>
+  
+  <artifactId>test-tools</artifactId>
+  <packaging>pom</packaging>
+  
+  <dependencies>
+  	<dependency>
+   		<groupId>org.disit.nifi.processors.enrich_data</groupId>
+   		<artifactId>nifi-enrich-data-processors</artifactId>
+   		<version>${project.parent.version}</version>
+   	</dependency>
+   	
+   	<!--  Keycloack mock -->
+   	<dependency>
+		<groupId>com.tngtech.keycloakmock</groupId>
+		<artifactId>mock</artifactId>
+	  	<version>0.9.0</version> 
+	</dependency>
+	
+	<!-- SnakeYAML -->
+	<dependency>
+	    <groupId>org.yaml</groupId>
+	    <artifactId>snakeyaml</artifactId>
+	    <version>1.29</version>
+	</dependency>
+	
+	<!-- Jetty -->
+	<dependency>
+		<groupId>org.eclipse.jetty</groupId>
+	    <artifactId>jetty-server</artifactId>
+	</dependency>
+  </dependencies>
+  
+  <build>
+  
+  	<finalName>test-tools</finalName>
+  	
+  	<plugins><!-- Plugins -->
+  		<plugin>
+  			<groupId>org.apache.maven.plugins</groupId>
+  			<artifactId>maven-assembly-plugin</artifactId>
+  			<version>3.2.0</version>
+  			
+  			<!-- <configuration>
+  				<appendAssemblyId>false</appendAssemblyId>
+  				<descriptors>
+  					<descriptor>assembly/test-tools.xml</descriptor>
+  				</descriptors>
+  			</configuration> -->
+  			
+  			<executions>
+  			
+  				<execution>
+  					<id>make-test-server-jar</id>
+  					<phase>package</phase>
+  					<goals>
+  						<goal>single</goal>
+  					</goals>
+  					<configuration>
+  						<outputDirectory>${project.build.directory}/jars</outputDirectory>
+  						<appendAssemblyId>false</appendAssemblyId>
+		  				<descriptors>
+		  					<descriptor>assembly/test-tools.xml</descriptor>
+		  				</descriptors>
+  						<archive>
+  							<manifest>
+  								<mainClass>
+  									org.disit.nifi.processors.enrich_data.test.tools.external_services_test_server.TestServer
+  								</mainClass>
+  							</manifest>
+  						</archive>
+  					</configuration>
+  				</execution>
+  				
+  				<execution>
+  					<id>pack-test-tools</id>
+  					<phase>package</phase>
+  					
+  					<goals>
+  						<goal>single</goal>
+  					</goals>
+  					
+  					<configuration>
+  						<appendAssemblyId>false</appendAssemblyId>
+  						<descriptors>
+  							<descriptor>assembly/pack.xml</descriptor>
+  						</descriptors>
+  						
+  					</configuration>
+  				</execution>
+  				
+  			</executions>
+  			
+  		</plugin>
+  	</plugins>
+  	
+  </build>
+  
+</project>

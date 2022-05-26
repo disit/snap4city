@@ -30,6 +30,12 @@ public interface EnrichmentSourceClient {
 
 	public JsonElement getEnrichmentData( String arg ) throws EnrichmentSourceException;
 	
+	/**
+	 * @param arg1 prefix
+	 * @param arg2 id
+	 * @return
+	 * @throws EnrichmentSourceException
+	 */
 	public JsonElement getEnrichmentData( String arg1 , String arg2 ) throws EnrichmentSourceException;
 	
 	public void close() throws EnrichmentSourceException;

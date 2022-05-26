@@ -29,6 +29,7 @@ import org.apache.nifi.flowfile.FlowFile;
 import org.apache.nifi.processor.ProcessSession;
 import org.apache.nifi.processor.io.OutputStreamCallback;
 
+import com.google.common.net.MediaType;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 /**
@@ -70,12 +71,11 @@ public class SplitObjectOutputProducer implements OutputProducer {
 				ff = session.putAttribute( ff , "_id" , id );
 			}
 			
+			ff = session.putAttribute( ff , "mime.type" , MediaType.JSON_UTF_8.toString() );
 			outputList.add( ff );
-			
 		});
 		
 		session.remove( inFlowFile );
-		
 		return outputList;
 	}
 	
