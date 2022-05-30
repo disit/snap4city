@@ -25,8 +25,11 @@ import io
 import pyutm
 import mgrs
 import yaml
+import os
+import ast
 
-with open(r'config.yaml') as file:
+script_dir = os.path.dirname(os.path.realpath(__file__))
+with open(os.path.join(script_dir,'config.yaml'), 'r') as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 
 app = Flask(__name__)
@@ -304,6 +307,100 @@ def buildOD_geom(x_orig, y_orig, x_dest, y_dest):
                 
     return results
 
+
+# 2022/04/21 new function to get geometry UID from italy_epgs4326 dataset using zone ID 
+#            (i.e., region, province, municipality, ACE, section, POI).
+#           Note: 
+#               - to select a region, only region code is required
+#               - to select a province, region and province codes are required
+#               - to select a municipality, region, province, and municipality codes are required
+#               - to select a ACE, region, province, municipality, and ACE codes are required
+#               - to select a POI, only poi ID is required
+def getGeometryCodesItaly(content,direction):
+    result = []
+    try:
+        connection = psgConnect(config)
+        cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        
+        '''
+            SELECT idx1, COALESCE(public.italy_epgs4326.uid, -1) AS comm_id
+            FROM (VALUES ('EnelX-1','15'), ('EnelX-2','15'), ('EnelX-3','15')) idxs(idx1,idx2)
+            LEFT JOIN public.italy_epgs4326 ON idxs.idx1=italy_epgs4326.poi_id AND idxs.idx2=italy_epgs4326.cod_prov
+        '''
+        keys = [k for k in content.keys()]
+        numval = len(content[keys[0]])
+        tuples = [('(' + str(n) + ', \'') for n in range(numval)] # n is used as index in the VALUES
+        valid = False
+        if direction + '_region_id' in keys:
+            for i in range(numval):
+                tuples[i] = tuples[i] + 'IT_R' + content[direction + '_region_id'][i]
+                valid = True
+        if direction + '_province_id' in keys:
+            for i in range(numval):
+                tuples[i] = tuples[i] + '_P' + content[direction + '_province_id'][i]
+        if direction + '_municipality_id' in keys:
+            for i in range(numval):
+                tuples[i] = tuples[i] + '_C' + content[direction + '_municipality_id'][i]
+        if direction + '_ACE_id' in keys:
+            for i in range(numval):
+                tuples[i] = tuples[i] + '_ACE' + content[direction + '_ACE_id'][i]
+        if direction + '_section_id' in keys:
+            for i in range(numval):
+                tuples[i] = tuples[i] + '_S' + content[direction + '_section_id'][i]
+        if direction + '_poi_id' in keys:
+            for i in range(numval):
+                tuples[i] = tuples[i] + 'POI_' + content[direction + '_poi_id'][i]
+                valid = True
+        for i in range(numval):
+            tuples[i] = tuples[i] + '\')'
+
+        query = '''
+            SELECT idxs.text_uid, COALESCE(public.italy_epgs4326.uid, -1) AS comm_id 
+            FROM (VALUES '''
+        for s in tuples:
+            query = query + s + ','
+        query = query[:-1] + ''') 
+            AS idxs(rid, text_uid) 
+            LEFT JOIN public.italy_epgs4326 
+            ON idxs.text_uid=public.italy_epgs4326.text_uid 
+            ORDER BY idxs.rid;'''
+
+        if valid:
+            # fetch results
+            cursor.execute(query)
+            results = cursor.fetchall()
+        
+            for row in results:
+                result.append(row['comm_id'])
+
+    except (Exception, psycopg2.Error) as error:
+        print("Error while fetching data from PostgreSQL", error)
+
+    finally:
+        # closing database connection
+        if(connection):
+            cursor.close()
+            connection.close()
+        return result
+
+# 2022/04/21 new function to build OD matrix from geometries using 
+#            the new 'italy_epgs4325' table
+def buildOD_geom_italy(content):
+    print("DEBUG: in buildOD_geom_italy")
+    
+
+    o = getGeometryCodesItaly(content,'orig')
+    d = getGeometryCodesItaly(content,'dest')    
+
+    results = []
+    for i in range(len(o)):
+        results.append({'orig_commune': o[i], 
+                        'dest_commune': d[i], 
+                        'value': 1})
+    # print(results)
+    return results
+
+
 # build OD matrix from geometries with precision (m)
 # https://stackoverflow.com/questions/56520616/is-it-possible-from-dataframe-transform-to-matrix
 # return OD matrix with origin and destination centroids
@@ -389,16 +486,37 @@ class ODCompressed(Resource):
                            content['x_dest'], 
                            content['y_dest'], 
                            content['precision'])
-        
+
+# 2022/04/21 modified to accept request that will use the new table 'italy_epgs4326'.
+#            To maintain retrocompatibility, if content contains 'x_orig', 'y_orig',
+#            'x_dest', and 'y_dest', the previous function 'buildOD_geom' (working with
+#            gadm36 table) is called, otherwise the new function 'buildOD_geom_italy'
+#            is called. Note that the new function do not use 'x_orig', etc. 
 class ODCompressedCommunes(Resource):
     def post(self):
+        print('[buildcommunes]::Processing POST request')
         # decompress data
         content = np.load(io.BytesIO(request.get_data()))
-                           
-        return buildOD_geom(content['x_orig'], 
-                            content['y_orig'], 
-                            content['x_dest'], 
-                            content['y_dest'])
+        # print(content)
+        keys = [k for k in content.keys()]
+        # print(keys)
+
+        if(
+            'x_orig' in keys and 'y_orig' in keys and
+            'x_dest' in keys and 'y_dest' in keys
+        ):
+            return buildOD_geom(content['x_orig'], 
+                                content['y_orig'], 
+                                content['x_dest'], 
+                                content['y_dest'])
+        else:
+            if(isinstance(content[keys[0]], (bytes, bytearray))):
+                c2 = dict.fromkeys(keys, [])
+                for k in keys:
+                    tmp = ast.literal_eval(content[k].decode())
+                    c2[k] = tmp
+                content = c2
+            return buildOD_geom_italy(content)
             
 api.add_resource(OD, '/build')
 api.add_resource(ODCompressed, '/buildcompressed')
@@ -415,4 +533,6 @@ if __name__ == '__main__':
     when running Flask, use waitress instead to serve
     https://stackoverflow.com/questions/51025893/flask-at-first-run-do-not-use-the-development-server-in-a-production-environmen
     '''
+    # print(config)
+    print("[BUILD-OD API] Accepting connections on port 3000")
     serve(app, host='0.0.0.0', port=3000)

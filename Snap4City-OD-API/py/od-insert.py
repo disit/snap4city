@@ -29,7 +29,7 @@ CREATE TABLE public.od_data (
     x_dest numeric NULL,
     y_dest numeric NULL,
     "precision" int8 NULL,
-    value numeric NULL,
+    value numeric NULL,                         # MODIFIED TO text TO ACCEPT JSON DATA
     orig_geom geometry(POLYGON, 4326) NULL,
     dest_geom geometry(POLYGON, 4326) NULL,
     from_date timestamp(0) NULL,
@@ -49,7 +49,8 @@ CREATE TABLE public.od_metadata (
     kind varchar NULL,
     "mode" varchar NULL,
     transport varchar NULL,
-    purpose varchar NULL
+    purpose varchar NULL,
+    source text NULL                            # ADDED NEW FILED TO SPECIFY SOURCE GEOM TABLE
 );
 CREATE UNIQUE INDEX od_metadata_od_id_idx ON public.od_metadata USING btree (od_id);
 
@@ -111,8 +112,10 @@ from shapely.ops import transform
 import psycopg2
 import psycopg2.extras
 import yaml
+import os
 
-with open(r'config.yaml') as file:
+script_dir = os.path.dirname(os.path.realpath(__file__))
+with open(os.path.join(script_dir,'config.yaml'), 'r') as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 
 app = Flask(__name__)
@@ -438,7 +441,9 @@ def insertOD_MGRS(od_id, x_orig, y_orig, x_dest, y_dest, from_date, to_date, pre
         return result
 
 # insert OD data (Communes) into PostgreSQL
-def insertOD_Communes(od_id, orig_communes, dest_communes, from_date, to_date, values, value_type, value_unit, description, organization, kind, mode, transport, purpose):
+# >>>>>>>>>> modified to handle insertion of data from the new table 'italy_epgs4326':
+#            - in od_metadata added new column 'source' to specify the table to which UID refers  
+def insertOD_Communes(od_id, orig_communes, dest_communes, from_date, to_date, values, value_type, value_unit, description, organization, kind, mode, transport, purpose, source):
     result = False
     # calculate OD's id (SHA1 of x_orig + y_orig + x_dest + y_dest + precision + from_date + to_date)
     #od_id = str(x_orig) + str(y_orig) + str(x_dest) + str(y_dest) + str(precision) + from_date + to_date
@@ -447,7 +452,7 @@ def insertOD_Communes(od_id, orig_communes, dest_communes, from_date, to_date, v
         tuples_data = []
         tuples_metadata = []
         connection = psgConnect(config)
-        
+
         #insert_data = '''
         #INSERT INTO public.od_data (od_id, x_orig, y_orig, x_dest, y_dest, value, 
         #precision, from_date, to_date, orig_geom, dest_geom) 
@@ -466,12 +471,12 @@ def insertOD_Communes(od_id, orig_communes, dest_communes, from_date, to_date, v
 
         insert_metadata = '''
         INSERT INTO public.od_metadata (od_id, 
-        value_type, value_unit, description, organization, kind, mode, transport, purpose) 
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        value_type, value_unit, description, organization, kind, mode, transport, purpose, source) 
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         ON CONFLICT(od_id)
         DO UPDATE SET od_id = %s, 
         value_type = %s, value_unit = %s, description = %s, organization = %s, 
-        kind = %s, mode = %s, transport = %s, purpose = %s
+        kind = %s, mode = %s, transport = %s, purpose = %s, source = %s
         '''
                 
         # get the cursor
@@ -485,8 +490,8 @@ def insertOD_Communes(od_id, orig_communes, dest_communes, from_date, to_date, v
             tuples_data.append(tuple(t))
             
             # prepare metadata
-            t = [od_id, value_type, value_unit, description, organization, kind, mode, transport, purpose,
-                od_id, value_type, value_unit, description, organization, kind, mode, transport, purpose]
+            t = [od_id, value_type, value_unit, description, organization, kind, mode, transport, purpose, source,
+                 od_id, value_type, value_unit, description, organization, kind, mode, transport, purpose, source]
             
             # append metadata as tuple
             tuples_metadata.append(tuple(t))
@@ -559,11 +564,16 @@ class OD_MGRS(Resource):
                             content['value_unit'], content['description'], content['organization'],
                             content['kind'], content['mode'], content['transport'], content['purpose'])
 
+# 2022/04/21 modified to accept the new 'source' parameter. To keep retrocompatibility
+#            the function check if 'source' is in 'content', and if missing 'gadm36' is
+#            selected as default.
 class OD_Communes(Resource):
     def post(self):
         # parse arguments
         content = request.get_json()
-        
+        if('source' not in content):
+            content['source'] = ''
+
         if ('od_id' in content and
             'orig_communes' in content and 
             'dest_communes' in content and
@@ -578,11 +588,12 @@ class OD_Communes(Resource):
             'mode' in content and
             'transport' in content and
             'purpose' in content and
+            'source' in content and
             len(content['orig_communes']) > 0):
             return insertOD_Communes(content['od_id'], content['orig_communes'], content['dest_communes'],
                             content['from_date'], content['to_date'], content['values'], content['value_type'], 
                             content['value_unit'], content['description'], content['organization'],
-                            content['kind'], content['mode'], content['transport'], content['purpose'])
+                            content['kind'], content['mode'], content['transport'], content['purpose'], content['source'])
         
 api.add_resource(OD_MGRS, '/insert')
 api.add_resource(OD_Communes, '/insertcommunes')
@@ -599,5 +610,5 @@ if __name__ == '__main__':
     https://stackoverflow.com/questions/51025893/flask-at-first-run-do-not-use-the-development-server-in-a-production-environmen
     '''
     print(config)
-    print("accepting connections on port 3100")
+    print("[OD-INSERT API] Accepting connections on port 3100")
     serve(app, host='0.0.0.0', port=3100)

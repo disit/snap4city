@@ -36,8 +36,11 @@ import pyutm
 import mysql.connector
 import json
 import yaml
+import os
+import math
 
-with open(r'config.yaml') as file:
+script_dir = os.path.dirname(os.path.realpath(__file__))
+with open(os.path.join(script_dir,'config.yaml'), 'r') as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 
 app = Flask(__name__)
@@ -50,6 +53,8 @@ parser.add_argument('precision', type=str, required=True)
 parser.add_argument('from_date', type=str, required=True)
 parser.add_argument('organization', type=str, required=True)
 parser.add_argument('inflow', type=str, required=True)
+parser.add_argument('od_id', type=str, required=False) # new field (2022/04/21)
+parser.add_argument('perc', type=str, required=False) # new field (2022/05/13)
 
 parser_mgrs_polygon = reqparse.RequestParser()
 parser_mgrs_polygon.add_argument('longitude', type=str, required=True)
@@ -59,9 +64,29 @@ parser_mgrs_polygon.add_argument('precision', type=str, required=True)
 parser_polygon = reqparse.RequestParser()
 parser_polygon.add_argument('longitude', type=str, required=True)
 parser_polygon.add_argument('latitude', type=str, required=True)
+parser_polygon.add_argument('type', type=str, required=True) # new field (2022/04/21)
+parser_polygon.add_argument('organization', type=str, required=True) # new field (2022/04/21)
 
 parser_color = reqparse.RequestParser()
 parser_color.add_argument('metric_name', type=str, required=True)
+
+# new parser to get statistics for a given poligon ID stored in a given OD matrix 
+parser_get_stats = reqparse.RequestParser()
+parser_get_stats.add_argument('od_id', type=str, required=True)
+parser_get_stats.add_argument('poly_id', type=str, required=True)
+parser_get_stats.add_argument('from_date', type=str, required=True)
+parser_get_stats.add_argument('invalid_id', type=str, required=True)
+parser_get_stats.add_argument('invalid_label', type=str, required=True)
+
+# new parser to retrieve all the polygon shapes included into the visible map
+parser_get_all_polygons  = reqparse.RequestParser()
+parser_get_all_polygons.add_argument('latitude_ne', type=str, required=True)
+parser_get_all_polygons.add_argument('longitude_ne', type=str, required=True)
+parser_get_all_polygons.add_argument('latitude_sw', type=str, required=True)
+parser_get_all_polygons.add_argument('longitude_sw', type=str, required=True)
+parser_get_all_polygons.add_argument('type', type=str, required=True)
+parser_get_all_polygons.add_argument('organization', type=str, required=True)
+
 
 def psgConnect(conf):
     conn = psycopg2.connect(user=conf['user_psg'],
@@ -467,6 +492,9 @@ def getMGRSflows(lon, lat, precision, from_date, organization, inFlow):
         AND ST_AsText(dest_geom) <> ST_AsText(orig_geom)
         '''
         
+        # print(query)
+        # print([from_date, organization, precision])
+
         # fetch results as dataframe
         df = pd.read_sql_query(query, connection, 
                                params={'from_date': from_date, 
@@ -509,12 +537,14 @@ def getMGRSflows(lon, lat, precision, from_date, organization, inFlow):
             
             # append feature to features' array
             features.append(feature)
+
+            # print(feature)
             
         # create features' collection from features array
         feature_collection = FeatureCollection(features)
 
     except (Exception, psycopg2.Error) as error:
-        print("Error while fetching data from PostgreSQL", error)
+        print("[getMGRSflows] Error while fetching data from PostgreSQL", error)
 
     finally:
         # closing database connection
@@ -523,8 +553,22 @@ def getMGRSflows(lon, lat, precision, from_date, organization, inFlow):
             connection.close()
         return feature_collection
 
+
+def is_json(myjson):
+    if(myjson[0] in {'{', '['} and myjson[-1] in {'}', ']'} ):
+        try:
+            json.loads(myjson)
+        except ValueError as e:
+            return False
+        return True
+    else:
+        return False
+
 # get inflows/outflows
-def getFlows(lon, lat, precision, from_date, organization, inFlow):
+# >>>>>>>>>> modified function to handle the new source parameted in od_metadata table,
+#            used to select the table to be used to retrieve the geometry data
+def getFlows(lon, lat, precision, from_date, organization, inFlow, od_id, get_perc):
+
     feature_collection = []
     result = None
     try:
@@ -532,72 +576,257 @@ def getFlows(lon, lat, precision, from_date, organization, inFlow):
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         query = ''
         df = None
-        
-        query = '''
-        SELECT a.od_id, value, c.geom AS orig_commune, c.uid AS orig_id, d.geom AS dest_commune, d.uid AS dest_id, from_date, to_date
-        FROM public.od_data a
-        LEFT JOIN
-        public.gadm36 c
-        ON a.orig_commune = c.uid
-        LEFT JOIN
-        public.gadm36 d
-        ON a.dest_commune = d.uid
-        LEFT JOIN public.od_metadata e
-        ON a.od_id = e.od_id
-        WHERE ST_CONTAINS(''' + ('c.geom' if inFlow != 'True' else 'd.geom') + ''', 
-        ST_GEOMFROMEWKT('SRID=4326;POINT(''' + lon + ' ' + lat + ''')'))
-        AND from_date = %(from_date)s
-        AND organization = %(organization)s
-        AND ST_AsText(d.geom) <> ST_AsText(c.geom)
-        '''
-        
-        # fetch results as dataframe
-        df = pd.read_sql_query(query, connection, 
-                               params={'from_date': from_date, 
-                                       'organization': organization})
-            
-        # get dictionary of flows grouped by od_id
-        #od_id_flows = df.groupby(['od_id'])['value'].agg('sum').to_dict()
-        
-        # get total sum of values
-        total = df['value'].sum()
-        
-        # remove duplicates rows by od_id, keeping the last
-        #df = df.drop_duplicates(subset='od_id', keep='last')
-        
-        features = []
 
-        for index, row in df.iterrows():
-            # get MGRS corners (lat-lon tuples array) of origin and destination
-            #sw, nw, se, ne, reference = getMGRScorners(row['lon'], 
-            #                                           row['lat'], 
-            #                                           precision)
+        if(od_id != ''):
+            query = '''
+                    SELECT od_id, source
+                    FROM public.od_metadata
+                    WHERE od_id = %(od_id)s  
+                '''
+            df = pd.read_sql_query(query, connection, params={'od_id': od_id})
+
+            if(len(df['source']) != 1):
+                raise Exception("Unable to retrieve source table for od_id: %s" % od_id)
+            source = df['source'][0]
+        else:
+            source = ''
+
+
+        # initial query to assess the geom table to use. If 'od_id' is empty,
+        # then the defauls 'gadm36' table is selected
+        if(not(source) or source == '' or source == 'gadm36'): 
+            source = 'gadm36'
+            # get query
+            query = '''
+            SELECT a.od_id, value, c.geom AS orig_commune, c.uid AS orig_id, d.geom AS dest_commune, d.uid AS dest_id, from_date, to_date
+            FROM public.od_data a
+            LEFT JOIN
+            public.''' + source + ''' c
+            ON a.orig_commune = c.uid
+            LEFT JOIN
+            public.''' + source + ''' d
+            ON a.dest_commune = d.uid
+            LEFT JOIN public.od_metadata e
+            ON a.od_id = e.od_id
+            WHERE ST_CONTAINS(''' + ('c.geom' if inFlow != 'True' else 'd.geom') + ''', 
+            ST_GEOMFROMEWKT('SRID=4326;POINT(''' + lon + ' ' + lat + ''')'))
+            AND from_date = %(from_date)s
+            AND organization = %(organization)s
+            AND ST_AsText(d.geom) <> ST_AsText(c.geom)
+            '''
             
-            # get polygon (lon-lat tuples' array)
-            #polygon = [[(sw[1], sw[0]), 
-            #           (nw[1], nw[0]), 
-            #           (ne[1], ne[0]), 
-            #           (se[1], se[0]),
-            #           (sw[1], sw[0])]]
+            # print(query)
+
+            # fetch results as dataframe
+            df = pd.read_sql_query(query, connection, 
+                                params={'from_date': from_date, 
+                                        'organization': organization})
+                
+            # get dictionary of flows grouped by od_id
+            #od_id_flows = df.groupby(['od_id'])['value'].agg('sum').to_dict()
             
-            # get flow (%)
-            #perc = od_id_flows[row['od_id']] / total
-            perc = int(row['value']) / total
+            # get total sum of values
+            # total = df['value'].sum()
+
+            if(is_json(df.at[0,'value'])):
+                data0 = json.loads(df.at[0,'value'])
+                keys = list(data0.keys())
+                values = np.zeros((df.shape[0], len(keys)), dtype=float)                
+                for index, row in df.iterrows():
+                    data = json.loads(row['value'])
+                    for k in range(len(keys)):
+                        # print(data[keys[k]])
+                        values[index,k] = data[keys[k]]
+                # print(values)
+                total = np.sum(values, axis=0).tolist()
+                # print(total)
+                # print(keys)
+            else:
+                df['value'] = df['value'].astype(float)
+                total = df['value'].sum()
             
-            # build geojson feature
-            polygon = wkb.loads(row['dest_commune'], hex=True) if inFlow != 'True' else wkb.loads(row['orig_commune'], hex=True)
-            feature = Feature(geometry=shapely.wkt.loads(polygon.wkt),
-                              id = row['dest_id'] if inFlow != 'True' else row['orig_id'],
-                              properties={'name': row['dest_id'] if inFlow != 'True' else row['orig_id'], 'density': perc})
+            # remove duplicates rows by od_id, keeping the last
+            #df = df.drop_duplicates(subset='od_id', keep='last')
+
+            # inspected polygon
+            # name0 = df.at[0,'dest_name'] if inFlow == 'True' else df.at[0,'orig_name']
+            # geom0 = df.at[0,'dest_commune'] if inFlow == 'True' else df.at[0,'orig_commune']
             
-            # append feature to features' array
-            features.append(feature)
+            features = []
+
+            for index, row in df.iterrows():
+                if(isinstance(total, list)):
+                    data = json.loads(row['value'])
+                    perc = {}
+                    for t in range(len(total)):
+                        if(total[t] <= 1): # i valori salvati sono già percentuali. nulla da fare
+                            perc_ = float(data[keys[t]])
+                        else: # i valori salvati sono assoluti
+                            if(get_perc == 'True'): # posso calcolare le percentuali, se get_perc = True
+                                # print('is true')
+                                perc_ = float(data[keys[t]])/ total[t]
+                            else: # o mandare i valori assoluti
+                                # print('is false')
+                                perc_ = float(data[keys[t]])
+                        perc[keys[t]] = perc_
+                    # print(perc)
+                    json_object = json.dumps(perc, indent = 4) 
+                    # print(json_object)
+                else:
+                    if(total <= 1):
+                        perc = float(row['value'])
+                    else: 
+                        if(get_perc == 'True'):
+                            perc = int(row['value']) / total
+                        else:
+                            perc = int(row['value']) 
+                # build geojson feature
+                polygon = wkb.loads(row['dest_commune'], hex=True) if inFlow != 'True' else wkb.loads(row['orig_commune'], hex=True)
+                feature = Feature(geometry=shapely.wkt.loads(polygon.wkt),
+                                id = row['dest_id'] if inFlow != 'True' else row['orig_id'],
+                                properties={
+                                    'name': row['dest_id'] if inFlow != 'True' else row['orig_id'], 
+                                    'txt_name': '', 
+                                    'density': perc
+                                })
+                # print(feature)
+                
+                # append feature to features' array
+                features.append(feature)
+
+            # create features' collection from features array
+            feature_collection = FeatureCollection(features)
+
+        else:  # new code using the source parameter
             
-        # create features' collection from features array
-        feature_collection = FeatureCollection(features)
+            query = '''
+            SELECT 
+                a.od_id, value, 
+                c.geom AS orig_commune, c.uid AS orig_id, c.name AS orig_name,
+                d.geom AS dest_commune, d.uid AS dest_id, d.name AS dest_name,
+                from_date, to_date
+            FROM public.od_data a
+            LEFT JOIN
+            public.''' + source + ''' c
+            ON a.orig_commune = c.uid
+            LEFT JOIN
+            public.''' + source + ''' d
+            ON a.dest_commune = d.uid
+            LEFT JOIN public.od_metadata e
+            ON a.od_id = e.od_id
+            WHERE ST_CONTAINS(''' + ('c.geom' if inFlow != 'True' else 'd.geom') + ''', 
+            ST_GEOMFROMEWKT('SRID=4326;POINT(''' + lon + ' ' + lat + ''')'))
+            AND from_date = %(from_date)s
+            AND organization = %(organization)s
+            AND a.od_id = %(od_id)s
+            '''
+            # AND ST_AsText(d.geom) <> ST_AsText(c.geom)
+            # '''
+
+            # print(query)
+            # print(from_date)
+            # print(organization)
+            # print(od_id)
+            
+            # fetch results as dataframe
+            df = pd.read_sql_query(query, connection, 
+                                params={'from_date': from_date, 
+                                        'organization': organization,
+                                        'od_id': od_id})
+                
+            
+            
+            # get total sum of values            
+            if(is_json(df.at[0,'value'])):
+                data0 = json.loads(df.at[0,'value'])
+                keys = list(data0.keys())
+                values = np.zeros((df.shape[0], len(keys)), dtype=float)                
+                for index, row in df.iterrows():
+                    data = json.loads(row['value'])
+                    for k in range(len(keys)):
+                        # print(data[keys[k]])
+                        values[index,k] = data[keys[k]]
+                # print(values)
+                total = np.sum(values, axis=0).tolist()
+                # print(total)
+                # print(keys)
+            else:
+                df['value'] = df['value'].astype(float)
+                total = df['value'].sum()
+            
+            # remove duplicates rows by od_id, keeping the last
+            #df = df.drop_duplicates(subset='od_id', keep='last')
+
+            # inspected polygon
+            # name0 = df.at[0,'dest_name'] if inFlow == 'True' else df.at[0,'orig_name']
+            # geom0 = df.at[0,'dest_commune'] if inFlow == 'True' else df.at[0,'orig_commune']
+            
+            features = []
+
+            for index, row in df.iterrows():
+                # get MGRS corners (lat-lon tuples array) of origin and destination
+                #sw, nw, se, ne, reference = getMGRScorners(row['lon'], 
+                #                                           row['lat'], 
+                #                                           precision)
+                
+                # get polygon (lon-lat tuples' array)
+                #polygon = [[(sw[1], sw[0]), 
+                #           (nw[1], nw[0]), 
+                #           (ne[1], ne[0]), 
+                #           (se[1], se[0]),
+                #           (sw[1], sw[0])]]
+                
+                # get flow (%)
+                #perc = od_id_flows[row['od_id']] / total
+
+                if(isinstance(total, list)):
+                    data = json.loads(row['value'])
+                    perc = {}
+                    for t in range(len(total)):
+                        if(total[t] <= 1): # i valori salvati sono già percentuali. nulla da fare
+                            perc_ = float(data[keys[t]])
+                        else: # i valori salvati sono assoluti
+                            if(get_perc == 'True'): # posso calcolare le percentuali, se get_perc = True
+                                # print('is true')
+                                perc_ = float(data[keys[t]])/ total[t]
+                            else: # o mandare i valori assoluti
+                                # print('is false')
+                                perc_ = float(data[keys[t]])
+                        perc[keys[t]] = perc_
+                    # print(perc)
+                    json_object = json.dumps(perc, indent = 4) 
+                    # print(json_object)
+                else:
+                    if(total <= 1):
+                        perc = float(row['value'])
+                    else: 
+                        if(get_perc == 'True'):
+                            perc = int(row['value']) / total
+                        else:
+                            perc = int(row['value']) 
+                # build geojson feature
+                
+                # print([name0, row['dest_name'], row['orig_name']])
+
+
+                polygon = wkb.loads(row['dest_commune'], hex=True) if inFlow != 'True' else wkb.loads(row['orig_commune'], hex=True)
+                feature = Feature(geometry=shapely.wkt.loads(polygon.wkt),
+                                id = row['dest_id'] if inFlow != 'True' else row['orig_id'],
+                                properties={
+                                    'name': row['dest_id'] if inFlow != 'True' else row['orig_id'], 
+                                    'txt_name': row['dest_name'] if inFlow != 'True' else row['orig_name'], 
+                                    'density': perc
+                                })
+                # print(feature)
+                
+                # append feature to features' array
+                features.append(feature)
+                
+            # create features' collection from features array
+            feature_collection = FeatureCollection(features)
 
     except (Exception, psycopg2.Error) as error:
-        print("Error while fetching data from PostgreSQL", error)
+        print("[GET FLOW] Error while fetching data from PostgreSQL", error)
 
     finally:
         # closing database connection
@@ -640,34 +869,100 @@ def getMGRSPolygon(lon, lat, precision):
     return pol
 
 # get polygon array of coordinates [[lat1, lon1], [lat2, lon2], [lat3, lon3]..., [latn, lonn]]
-def getPolygon(lon, lat):
+# 2022/04/21 modified function that use the new parameter 'type': if empty the legacy 
+#            behavior is used, otherwise 'type' is used to select the type of area 
+#            where seach for the point(lat, lon). The 'type' can be {'region', 
+#            'province', 'municipalty', 'ace', 'section', 'poi'} and work only for 
+#            query in the new 'italy_epgs4326' table
+def getPolygon(lon, lat, type, organization):
     pol = []
     try:
         connection = psgConnect(config)
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         
-        query = '''
-        SELECT geom FROM public.gadm36
-        WHERE ST_Intersects(geom, ST_GeomFromText('POINT(%s %s)', 4326))
-        ''' % (lon, lat)
-        
+        if(type==''):
+            query = '''
+            SELECT uid, geom FROM public.gadm36
+            WHERE ST_Intersects(geom, ST_GeomFromText('POINT(%s %s)', 4326))
+            ''' % (lon, lat)
+        else:
+            query = '''
+            SELECT * FROM public.italy_epgs4326
+            WHERE ST_Intersects(geom, ST_GeomFromText('POINT(%s %s)', 4326)) AND
+            ''' % (lon, lat)
+            if type == 'region':
+                query = query + 'cod_reg<>\'NULL\' AND ' + \
+                                'cod_prov=\'NULL\' AND ' + \
+                                'cod_com=\'NULL\'  AND ' + \
+                                'cod_ace=\'NULL\'  AND ' + \
+                                'cod_sez=\'NULL\'  AND ' + \
+                                'poi_id=\'NULL\''
+            elif type == 'province':
+                query = query + 'cod_reg<>\'NULL\' AND ' + \
+                                'cod_prov<>\'NULL\' AND ' + \
+                                'cod_com=\'NULL\'  AND ' + \
+                                'cod_ace=\'NULL\'  AND ' + \
+                                'cod_sez=\'NULL\'  AND ' + \
+                                'poi_id=\'NULL\'' 
+            elif type == 'municipality':
+                query = query + 'cod_reg<>\'NULL\' AND ' + \
+                                'cod_prov<>\'NULL\' AND ' + \
+                                'cod_com<>\'NULL\'  AND ' + \
+                                'cod_ace=\'NULL\'  AND ' + \
+                                'cod_sez=\'NULL\'  AND ' + \
+                                'poi_id=\'NULL\''   
+            elif type == 'ace':
+                query = query + 'cod_reg<>\'NULL\' AND ' + \
+                                'cod_prov<>\'NULL\' AND ' + \
+                                'cod_com<>\'NULL\'  AND ' + \
+                                'cod_ace<>\'NULL\'  AND ' + \
+                                'cod_sez=\'NULL\'  AND ' + \
+                                'poi_id=\'NULL\''  
+            elif type == 'section':
+                query = query + 'cod_reg<>\'NULL\' AND ' + \
+                                'cod_prov<>\'NULL\' AND ' + \
+                                'cod_com<>\'NULL\'  AND ' + \
+                                'cod_ace<>\'NULL\'  AND ' + \
+                                'cod_sez<>\'NULL\'  AND ' + \
+                                'poi_id=\'NULL\''  
+            elif type == 'poi':
+                # query = query + 'poi_id<>\'NULL\''    
+                query = query + 'poi_id LIKE \'%' + organization + '%\''       
+        # print(query)
         # fetch results
         cursor.execute(query)
         results = cursor.fetchall()
         
+        features = []
         for row in results:
+            # MODIFIED 2022-05-05: get same behavior of get flow
+            #     to support multi-polygons
+            try:
+                txt_name = row['name']
+            except:
+                txt_name = ''
             polygon = wkb.loads(row['geom'], hex=True)
-            # flip polygon coordinates
-            # this will return coordinates in (lat, lon) order
-            polygon = transform(lambda x, y: (y, x), polygon).wkt
+            feature = Feature(geometry=shapely.wkt.loads(polygon.wkt),
+                            id = row['uid'],
+                            properties={
+                                'name': row['uid'], 
+                                'txt_name': txt_name
+                            })
+            features.append(feature)
+        pol = FeatureCollection(features)
+            # ORIGINAL CODE (2022-05-05)
+            # polygon = wkb.loads(row['geom'], hex=True)
+            # # flip polygon coordinates
+            # # this will return coordinates in (lat, lon) order
+            # polygon = transform(lambda x, y: (y, x), polygon).wkt
         
-            # build polygon array 
-            for i in polygon.split('(((')[1].split('))')[0].split(','):
-                lat_lon = i.strip().split(' ')
-                pol.append([float(lat_lon[0]), float(lat_lon[1])])
+            # # build polygon array 
+            # for i in polygon.split('(((')[1].split('))')[0].split(','):
+            #     lat_lon = i.strip().split(' ')
+            #     pol.append([float(lat_lon[0]), float(lat_lon[1])])
 
     except (Exception, psycopg2.Error) as error:
-        print("Error while fetching data from PostgreSQL", error)
+        print("[GET POLYGON] Error while fetching data from PostgreSQL", error)
 
     finally:
         # closing database connection
@@ -738,11 +1033,272 @@ def getColorMap(metric_name):
     
     return df[['min', 'max', 'hex']].to_numpy().tolist()
 
+
+# New function to get statistics stored in a OD matrix (i.e., od_id) for a given polygon (i.e., dest_id)
+# - invalid_id is used to identify dest_id not previsously defined (e.g., -9999)
+# - invalid_label is used to fill the txt name filed of the response for invalid_id found
+# NOTE: at this moment, it only works if italy_epgs4326 table is used as source for the OD storing the statistics!!!
+def getPolygonStatistics(od_id, dest_id, from_date, invalid_id, invalid_label):
+    feature_collection = []
+    result = None
+    try:
+        connection = psgConnect(config)
+        cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        query = ''
+        df = None
+        
+        query = '''
+            SELECT od_id, source
+            FROM public.od_metadata
+            WHERE od_id = %(od_id)s  
+        '''
+        df = pd.read_sql_query(query, connection, params={'od_id': od_id})
+        if(len(df['source']) != 1):
+            raise Exception("Unable to retrieve source table for od_id: %s" % od_id)
+        source = df['source'][0]
+
+        # get query
+        query = '''
+        SELECT 
+            od_id, orig_commune, dest_commune, value, from_date, to_date
+        FROM public.od_data
+        WHERE dest_commune = \'''' + str(dest_id) + '''\'
+        AND from_date = \'''' + from_date + '''\'
+        AND od_id = \'''' + od_id + '''\''''
+
+        # print(query)
+        
+        # fetch results as dataframe
+        df = pd.read_sql_query(query, connection)
+        # print(df)
+
+        # print(invalid_id)
+        valid_orig_id = []
+        invalid_orig_id = []
+        valid_orig_id_values = []
+        invalid_orig_id_values = []
+        valid_orig_id_date = []
+        invalid_orig_id_date = []
+        for index, row in df.iterrows():
+            if str(row['orig_commune']) == str(invalid_id):
+                invalid_orig_id.append(row['orig_commune'])
+                invalid_orig_id_values.append(row['value'])
+                invalid_orig_id_date.append(str(row['from_date']))
+            else:
+                valid_orig_id.append(row['orig_commune'])
+                valid_orig_id_values.append(row['value'])
+                valid_orig_id_date.append(str(row['from_date']))
+        
+        # print(valid_orig_id)
+        # print(invalid_orig_id)
+        
+        # print(valid_orig_id_date)
+        # print(invalid_orig_id_date)
+
+        query2= '''
+            SELECT ids.orig_id, s.uid, s.name, s.cod_reg, s.cod_prov, s.cod_com, s.cod_ace, s.cod_sez, s.poi_id 
+            FROM (VALUES '''
+
+        for i, id in enumerate(valid_orig_id):
+            query2 = query2 + '(' + str(i) + ',' + str(id) + '),'
+
+        query2 = query2[:-1] + ''') 
+            AS ids(rid, orig_id) 
+            LEFT JOIN public.''' + source + ''' AS s 
+            ON ids.orig_id=s.uid 
+            ORDER BY ids.rid;'''
+
+        # print(query2)
+
+        df = pd.read_sql_query(query2, connection)
+
+        # print(df)
+                
+        features = []
+
+        for index, row in df.iterrows():            
+            feature = Feature(
+                            id = row['orig_id'],
+                            properties={
+                                'id': row['orig_id'], 
+                                'orig': row['uid'], 
+                                'txt_name': row['name'], 
+                                'date': valid_orig_id_date[index],
+                                'density': valid_orig_id_values[index],
+                                'cod_reg': row['cod_reg'],
+                                'cod_prov': row['cod_prov'],
+                                'cod_com': row['cod_com'],
+                                'cod_ace': row['cod_ace'],
+                                'cod_sez': row['cod_sez'],
+                                'poi_id': row['poi_id']
+                            })
+            features.append(feature)
+
+        for index, val in enumerate(invalid_orig_id_values):
+            
+            feature = Feature(
+                            id = int(invalid_id),
+                            properties={
+                                'id': int(invalid_id), 
+                                'orig': int(invalid_id), 
+                                'txt_name': invalid_label,
+                                'date': invalid_orig_id_date[index], 
+                                'density': val,
+                                'cod_reg': '',
+                                'cod_prov': '',
+                                'cod_com': '',
+                                'cod_ace': '',
+                                'cod_sez': '',
+                                'poi_id': ''
+                            })
+            features.append(feature)
+            
+        # print(features)
+        # create features' collection from features array
+        feature_collection = FeatureCollection(features)
+        # print(feature_collection)
+
+    except (Exception, psycopg2.Error) as error:
+        print("[GET POLYGON STATS] Error while fetching data from PostgreSQL", error)
+
+    finally:
+        # closing database connection
+        if(connection):
+            cursor.close()
+            connection.close()
+        return feature_collection
+
+# New function to retrieve all polygon shapes included in the map bounding box (< latitude_ne, longitude_ne, latitude_sw, longitude_sw >)
+# NOTE: at this moment it only works for polygon shapes stored into the italy_epgs4326!!!
+def getAllPoly(latitude_ne, longitude_ne, latitude_sw, longitude_sw, type, organization):
+
+    feature_collection = []
+    result = None
+    try:
+        connection = psgConnect(config)
+        cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        query = ''
+        df = None
+
+        if(type == 'poi' or type == 'ace' or type == 'municipality' or type == 'province' or type == 'region'):
+            source = 'italy_epgs4326'
+        elif(type == 'communes'):
+            source = 'gadm36' 
+        else:
+            source = 'mgrs' 
+
+        #   p0 ------ p1
+        #    |         |
+        #   p3 ------ p2
+        x1 = longitude_ne
+        y1 = latitude_ne
+        x3 = longitude_sw
+        y3 = latitude_sw
+        x0 = x3
+        y0 = y1
+        x2 = x1
+        y2 = y3
+        aoi = "" + \
+            "ST_GeomFromEWKT(" + \
+            "'SRID=4326;POLYGON((" + \
+            str(x0) + " " + str(y0) + "," + \
+            str(x1) + " " + str(y1) + "," + \
+            str(x2) + " " + str(y2) + "," + \
+            str(x3) + " " + str(y3) + "," + \
+            str(x0) + " " + str(y0) + "))'" + \
+            ")"
+
+        # get query
+        if(source == 'italy_epgs4326'):
+            query = '''
+            SELECT 
+                uid, text_uid, name, geom
+            FROM public.''' + source + '''
+            WHERE 
+                ST_Intersects(geom, ''' + aoi + ''') AND
+            '''
+            if type == 'region':
+                query = query + 'cod_reg<>\'NULL\' AND ' + \
+                                'cod_prov=\'NULL\' AND ' + \
+                                'cod_com=\'NULL\'  AND ' + \
+                                'cod_ace=\'NULL\'  AND ' + \
+                                'cod_sez=\'NULL\'  AND ' + \
+                                'poi_id=\'NULL\''
+            elif type == 'province':
+                query = query + 'cod_reg<>\'NULL\' AND ' + \
+                                'cod_prov<>\'NULL\' AND ' + \
+                                'cod_com=\'NULL\'  AND ' + \
+                                'cod_ace=\'NULL\'  AND ' + \
+                                'cod_sez=\'NULL\'  AND ' + \
+                                'poi_id=\'NULL\'' 
+            elif type == 'municipality':
+                query = query + 'cod_reg<>\'NULL\' AND ' + \
+                                'cod_prov<>\'NULL\' AND ' + \
+                                'cod_com<>\'NULL\'  AND ' + \
+                                'cod_ace=\'NULL\'  AND ' + \
+                                'cod_sez=\'NULL\'  AND ' + \
+                                'poi_id=\'NULL\''   
+            elif type == 'ace':
+                query = query + 'cod_reg<>\'NULL\' AND ' + \
+                                'cod_prov<>\'NULL\' AND ' + \
+                                'cod_com<>\'NULL\'  AND ' + \
+                                'cod_ace<>\'NULL\'  AND ' + \
+                                'cod_sez=\'NULL\'  AND ' + \
+                                'poi_id=\'NULL\''  
+            elif type == 'section':
+                query = query + 'cod_reg<>\'NULL\' AND ' + \
+                                'cod_prov<>\'NULL\' AND ' + \
+                                'cod_com<>\'NULL\'  AND ' + \
+                                'cod_ace<>\'NULL\'  AND ' + \
+                                'cod_sez<>\'NULL\'  AND ' + \
+                                'poi_id=\'NULL\''  
+            elif type == 'poi':  
+                query = query + 'poi_id LIKE \'%' + organization + '%\''
+            # print(query)
+            
+            # fetch results as dataframe
+            df = pd.read_sql_query(query, connection)
+            # print(df)            
+                    
+            features = []
+
+            for index, row in df.iterrows():            
+                polygon = wkb.loads(row['geom'], hex=True)
+                feature = Feature(geometry=shapely.wkt.loads(polygon.wkt),
+                                id = row['uid'],
+                                properties={
+                                    'name': row['uid'], 
+                                    'txt_name': row['name']
+                                })
+                features.append(feature)
+    
+            # print(features)
+            # create features' collection from features array
+            feature_collection = FeatureCollection(features)
+            # print(feature_collection)
+        else:
+            feature_collection = [] # TODO implement for gadm and msgr
+
+    except (Exception, psycopg2.Error) as error:
+        print("[GET POLYGON STATS] Error while fetching data from PostgreSQL", error)
+
+    finally:
+        # closing database connection
+        if(connection):
+            cursor.close()
+            connection.close()
+        return feature_collection
+
+
+
+
+########################################################################################################################################################
+
 class ODMGRS(Resource):
     def get(self):
         # parse arguments
         args = parser.parse_args()
-        
+
         longitude = args['longitude']
         latitude = args['latitude']
         precision = args['precision']
@@ -751,11 +1307,15 @@ class ODMGRS(Resource):
         inFlow = args['inflow']
         
         return getMGRSflows(longitude, latitude, precision, from_date, organization, inFlow)
-    
+
+# >>>>>>>>>> modified to handle the new optional parameter 'od_id'. If missing it is 
+#            set to an empty string and the legacy functionality is kept.
+#            Similar behaviour is imlemented for the additional new parameter 'perc'
 class OD(Resource):
     def get(self):
         # parse arguments
         args = parser.parse_args()
+        # print(args)
         
         longitude = args['longitude']
         latitude = args['latitude']
@@ -763,8 +1323,16 @@ class OD(Resource):
         from_date = args['from_date']
         organization = args['organization']
         inFlow = args['inflow']
+        if(args['od_id']):
+            od_id = args['od_id']
+        else:
+            od_id = ''
+        if(args['perc']):
+            perc = args['perc']
+        else:
+            perc = 'True'
         
-        return getFlows(longitude, latitude, precision, from_date, organization, inFlow)
+        return getFlows(longitude, latitude, precision, from_date, organization, inFlow, od_id, perc)
     
 class GetMGRSPolygon(Resource):
     def get(self):
@@ -787,7 +1355,8 @@ class GetMGRSPolygonCenter(Resource):
         precision = args['precision']
         
         return getMGRSpolygonShapelyCenter(longitude, latitude, precision)
-    
+
+# 2022/04/21 modified to handle the new parameters 'type' and 'organization'. 
 class GetPolygon(Resource):
     def get(self):
         # parse arguments
@@ -795,8 +1364,10 @@ class GetPolygon(Resource):
         
         longitude = args['longitude']
         latitude = args['latitude']
+        type = args['type']
+        organization = args['organization']
         
-        return getPolygon(longitude, latitude)
+        return getPolygon(longitude, latitude, type, organization)
     
 class Color(Resource):
     def get(self):
@@ -805,6 +1376,29 @@ class Color(Resource):
         metric_name = args['metric_name']
         
         return getColorMap(metric_name)
+
+class GetPolyStats(Resource):
+    def get(self):
+        # parse arguments
+        args = parser_get_stats.parse_args()
+        od_id = args['od_id']
+        dest_id = args['poly_id']
+        from_date = args['from_date']
+        invalid_id = args['invalid_id']
+        invalid_label = args['invalid_label']        
+        return getPolygonStatistics(od_id, dest_id, from_date, invalid_id, invalid_label)
+
+class GetAllPolygons(Resource):
+    def get(self):
+        args = parser_get_all_polygons.parse_args()
+        latitude_ne = args['latitude_ne']
+        longitude_ne = args['longitude_ne']
+        latitude_sw = args['latitude_sw']
+        longitude_sw = args['longitude_sw']
+        type = args['type']
+        organization = args['organization']
+        return getAllPoly(latitude_ne, longitude_ne, latitude_sw, longitude_sw, type, organization)
+
         
 api.add_resource(OD, '/get')
 api.add_resource(ODMGRS, '/get_mgrs')
@@ -812,6 +1406,8 @@ api.add_resource(GetMGRSPolygon, '/mgrs_polygon')
 api.add_resource(GetMGRSPolygonCenter, '/mgrs_polygon_center')
 api.add_resource(GetPolygon, '/polygon')
 api.add_resource(Color, '/color')
+api.add_resource(GetPolyStats, '/get_stats')
+api.add_resource(GetAllPolygons, '/get_all_polygons')
 
 # enable CORS
 CORS(app, resources={r'/*': {'origins': '*'}})
@@ -824,4 +1420,6 @@ if __name__ == '__main__':
     when running Flask, use waitress instead to serve
     https://stackoverflow.com/questions/51025893/flask-at-first-run-do-not-use-the-development-server-in-a-production-environmen
     '''
+    print('OD-API_GET :: Listening on port 3200')
     serve(app, host='0.0.0.0', port=3200)
+    
