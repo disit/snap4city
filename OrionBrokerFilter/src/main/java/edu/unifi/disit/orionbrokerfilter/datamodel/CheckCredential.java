@@ -16,6 +16,7 @@ public class CheckCredential extends DelegationPublic {
 
 	String username;
 	Boolean result = false;
+	String kind;
 
 	public CheckCredential(Integer minutesElapsingCache) {
 		super(minutesElapsingCache);
@@ -26,6 +27,15 @@ public class CheckCredential extends DelegationPublic {
 
 		this.username = username;
 		this.result = result;
+		this.kind = "READ_ACCESS";
+	}
+
+	public CheckCredential(String elementType, String username, Boolean result, Integer minutesElapsingCache, String kind) {
+		super(elementType, minutesElapsingCache);
+
+		this.username = username;
+		this.result = result;
+		this.kind = ("READ_ACCESS".equals(kind) || "READ_WRITE".equals(kind) || "MODIFY".equals(kind)) ? kind : "READ_ACCESS";
 	}
 
 	public String getUsername() {
@@ -44,9 +54,17 @@ public class CheckCredential extends DelegationPublic {
 		this.result = result;
 	}
 
+	public String getKind() {
+		return kind;
+	}
+
+	public void setKind(String kind) {
+		this.kind = kind;
+	}
+
 	@Override
 	public String toString() {
-		return "CheckCredential [username=" + username + ", result=" + result + ", elementType=" + elementType + ", elapsingDate=" + elapsingDate + "]";
+		return "CheckCredential [username=" + username + ", result=" + result + ", elementType=" + elementType + ", elapsingDate=" + elapsingDate + ", kind=" + kind + "]";
 	}
 
 }

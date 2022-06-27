@@ -548,31 +548,40 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 			logger.debug("Got ownership");
 			return;
 		} else {
+			String sensorUri = (sensorName == null) ? elementId : prefixServiceUri + "/" + contextBrokerName + "/" + organization + "/" + elementId.substring(elementId.lastIndexOf(":") + 1) + "/" + sensorName;
+			CheckCredential d = retrieveCachedDelegation(sensorUri, elementType, requestUsername, accessToken, lang);
+			boolean canWriteByDelegation = (d.getResult() && (d.getKind().equals("READ_WRITE") || d.getKind().equals("MODIFY")));
 
 			if (isWriteQuery(queryType, req, version, lang)) {
-				logger.debug("Write OPERATION, not got ownership");
-				throw new CredentialsNotValidException(messages.getMessage("login.ko.credentialsnotvalid", null, lang));
-
-			} else {
-				logger.debug("Read OPERATION, not got ownership");
-				String sensorUri = (sensorName == null) ? elementId : prefixServiceUri + "/" + contextBrokerName + "/" + organization + "/" + elementId.substring(elementId.lastIndexOf(":") + 1) + "/" + sensorName;
-
-				// if the sensorUri is public and not elapsed, authorize
-				DelegationPublic dp = cachedDelegationPublic.get(sensorUri);
-				if ((dp != null) && (elementType.equalsIgnoreCase(dp.getElementType())))
-					if (cachedDelegationPublic.get(sensorUri).isElapsed())// if elapsed remove and continue
-						cachedDelegationPublic.remove(sensorUri);
-					else {
-						logger.debug("Read OPERATION on public, passed");
-						return;
-					}
-
-				CheckCredential d = retrieveCachedDelegation(sensorUri, elementType, requestUsername, accessToken, lang);
-				if ((d != null) && (d.getResult())) {
-					logger.debug("Got delegation");
+				if (canWriteByDelegation) {
+					logger.debug("Write OPERATION, got delegation");
+					return;
 				} else {
-					logger.debug("NOT Got delegation");
+					logger.debug("Write OPERATION, not got ownership");
 					throw new CredentialsNotValidException(messages.getMessage("login.ko.credentialsnotvalid", null, lang));
+				}
+			} else {
+				if ((d != null) && (d.getResult())) {
+					logger.debug("Read OPERATION, got delegation");
+					return;
+				} else {
+					logger.debug("Read OPERATION, not got ownership");
+					// if the sensorUri is public and not elapsed, authorize
+					DelegationPublic dp = cachedDelegationPublic.get(sensorUri);
+					if ((dp != null) && (elementType.equalsIgnoreCase(dp.getElementType())))
+						if (cachedDelegationPublic.get(sensorUri).isElapsed())// if elapsed remove and continue
+							cachedDelegationPublic.remove(sensorUri);
+						else {
+							logger.debug("Read OPERATION on public, passed");
+							return;
+						}
+
+					if ((d != null) && (d.getResult())) {
+						logger.debug("Got delegation");
+					} else {
+						logger.debug("NOT Got delegation");
+						throw new CredentialsNotValidException(messages.getMessage("login.ko.credentialsnotvalid", null, lang));
+					}
 				}
 			}
 		}
@@ -592,7 +601,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 					return;
 				} else {
 					logger.debug("The owner credential are NOT valid");
-					throw new CredentialsNotValidException(messages.getMessage("login.ko.credentialsnotvalid", null, lang));
+					throw new CredentialsNotValidException(messages.getMessage("login.ko.ownercredentialsnotvalid", null, lang));
 				}
 			} else {
 				logger.debug("The operation is READ on public");
@@ -606,7 +615,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 					return;
 				} else {
 					logger.debug("The owner credentials are NOT valid");
-					throw new CredentialsNotValidException(messages.getMessage("login.ko.credentialsnotvalid", null, lang));
+					throw new CredentialsNotValidException(messages.getMessage("login.ko.ownercredentialsnotvalid", null, lang));
 				}
 			} else {
 				logger.debug("The operation is READ on private");
@@ -631,7 +640,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 						}
 					}
 					logger.debug("None of the delegated credential are valid");
-					throw new CredentialsNotValidException(messages.getMessage("login.ko.credentialsnotvalid", null, lang));
+					throw new CredentialsNotValidException(messages.getMessage("login.ko.ownercredentialsnotvalid", null, lang));
 				}
 			}
 		}
@@ -1173,6 +1182,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 
 			ObjectMapper objectMapper = new ObjectMapper();
 			Boolean result = false;
+			String kind = "READ_ACCESS";
 
 			if (response.getBody() != null) {// 204 no content body
 				JsonNode rootNode = objectMapper.readTree(response.getBody().getBytes());
@@ -1186,6 +1196,10 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 					if (resultNode.asBoolean())
 						result = true;
 
+					if (!rootNode.path("kind").isNull()) {
+						kind = rootNode.path("kind").asText();
+					}
+
 					JsonNode messageNode = rootNode.path("message");
 
 					if ((messageNode == null) || (messageNode.isNull()) || (messageNode.isMissingNode())) {
@@ -1197,7 +1211,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 
 			}
 
-			toreturn = new CheckCredential(elementType, username, result, minutesElapsingCache);
+			toreturn = new CheckCredential(elementType, username, result, minutesElapsingCache, kind);
 		} catch (HttpClientErrorException | IOException e) {
 			logger.error("Trouble in getDelegatedCredentials", e);
 			throw new CredentialsNotValidException(messages.getMessage("login.ko.networkproblems", null, lang));

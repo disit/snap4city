@@ -26,6 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -159,6 +160,12 @@ public class OrionController {
 				.build();
 
 		return proxyRequest(uriComponents, payload, headers, HttpMethod.PATCH);
+	}
+	// -------------------OPTIONS update ---------------------------------------------
+	@RequestMapping(value = "/v2/entities/{deviceId}/attrs", method = RequestMethod.OPTIONS, consumes = { "application/json" }, produces = { "application/json" })
+	@ResponseBody
+	public ResponseEntity<String> optionsV2(@PathVariable("deviceId") String deviceId, @RequestBody String payload, @RequestHeader HttpHeaders headers) {
+		return new ResponseEntity<String>("", HttpStatus.NO_CONTENT);
 	}
 
 	// -------------------POST subscribe ---------------------------------------------
