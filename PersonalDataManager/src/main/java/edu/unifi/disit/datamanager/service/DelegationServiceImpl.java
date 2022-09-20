@@ -184,6 +184,9 @@ public class DelegationServiceImpl implements IDelegationService {
 		delegation.setInsertTime(new Date());
 		delegation.setDeleteTime(null);
 
+		if (!"READ_ACCESS".equals(delegation.getKind()) && !"READ_WRITE".equals(delegation.getKind()) && !"MODIFY".equals(delegation.getKind()))
+			throw new DelegationNotValidException(messages.getMessage("postdelegation.ko.delegationalwrongkind", null, lang));
+
 		Delegation toreturn = delegationRepo.save(delegation);
 
 		invalidateCache();

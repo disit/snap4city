@@ -16,6 +16,7 @@ public class Response {
 
 	Boolean result;
 	String message;
+	String kind;
 
 	public Response() {
 		super();
@@ -25,6 +26,14 @@ public class Response {
 		super();
 		this.result = result;
 		this.message = message;
+		this.kind = "READ_ACCESS";
+	}
+
+	public Response(Boolean result, String message, String kind) {
+		super();
+		this.result = result;
+		this.message = message;
+		this.kind = ("READ_ACCESS".equals(kind) || "READ_WRITE".equals(kind) || "MODIFY".equals(kind)) ? kind : "READ_ACCESS";
 	}
 
 	public Boolean getResult() {
@@ -43,8 +52,16 @@ public class Response {
 		this.message = message;
 	}
 
+	public String getKind() {
+		return kind;
+	}
+
+	public void setKind(String kind) {
+		this.kind = kind;
+	}
+
 	@Override
 	public String toString() {
-		return "Response [result=" + result + ", message=" + message + "]";
+		return "Response [result=" + result + ", message=" + message + ", kind=" + kind + "]";
 	}
 }

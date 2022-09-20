@@ -68,11 +68,14 @@ public class Delegation implements Cloneable, Serializable {
 	@Column(name = "groupname_delegated")
 	private String groupnameDelegated;
 
+	@Column(name = "kind")
+	private String kind = "READ_ACCESS";
+
 	public Delegation() {
 		super();
 	}
 
-	public Delegation(String usernameDelegator, String usernameDelegated, String variableName, String motivation, String elementId, String elementType, Date insertTime, Date deleteTime, String delegationDetails, String groupnameDelegated) {
+	public Delegation(String usernameDelegator, String usernameDelegated, String variableName, String motivation, String elementId, String elementType, Date insertTime, Date deleteTime, String delegationDetails, String groupnameDelegated, String kind) {
 		super();
 		this.usernameDelegator = usernameDelegator;
 		this.usernameDelegated = usernameDelegated;
@@ -84,10 +87,11 @@ public class Delegation implements Cloneable, Serializable {
 		this.deleteTime = deleteTime;
 		this.delegationDetails = delegationDetails;
 		this.groupnameDelegated = groupnameDelegated;
+		this.kind = ("READ_ACCESS".equals(kind) || "READ_WRITE".equals(kind) || "MODIFY".equals(kind)) ? kind : "READ_ACCESS";
 	}
 
 	public Delegation(Long id, String usernameDelegator, String usernameDelegated, String variableName, String motivation, String elementId, String elementType, Date insertTime, Date deleteTime, String delegationDetails,
-			String groupnameDelegated) {
+			String groupnameDelegated, String kind) {
 		super();
 		this.id = id;
 		this.usernameDelegator = usernameDelegator;
@@ -100,6 +104,7 @@ public class Delegation implements Cloneable, Serializable {
 		this.deleteTime = deleteTime;
 		this.delegationDetails = delegationDetails;
 		this.groupnameDelegated = groupnameDelegated;
+		this.kind = ("READ_ACCESS".equals(kind) || "READ_WRITE".equals(kind) || "MODIFY".equals(kind)) ? kind : "READ_ACCESS";
 	}
 
 	public Long getId() {
@@ -190,10 +195,18 @@ public class Delegation implements Cloneable, Serializable {
 		this.groupnameDelegated = groupnameDelegated;
 	}
 
+	public String getKind() {
+		return kind;
+	}
+
+	public void setKind(String kind) {
+		this.kind = kind;
+	}
+
 	@Override
 	public String toString() {
 		return "Delegation [id=" + id + ", usernameDelegator=" + usernameDelegator + ", usernameDelegated=" + usernameDelegated + ", variableName=" + variableName + ", motivation=" + motivation + ", elementId=" + elementId
-				+ ", elementType=" + elementType + ", insertTime=" + insertTime + ", deleteTime=" + deleteTime + ", delegationDetails=" + delegationDetails + ", groupnameDelegated=" + groupnameDelegated + "]";
+				+ ", elementType=" + elementType + ", insertTime=" + insertTime + ", deleteTime=" + deleteTime + ", delegationDetails=" + delegationDetails + ", groupnameDelegated=" + groupnameDelegated + ", kind=" + kind + "]";
 	}
 
 	public Delegation clone() throws CloneNotSupportedException {

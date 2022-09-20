@@ -103,9 +103,13 @@ public class ElasticDBDbConfig {
                         
                         if(truststoreFile != null && !truststoreFile.trim().isEmpty()) {
                                 try {
+                                    System.out.println("ELASTICSEARCH sslcontex loading from "+truststoreFile+" "+truststorePass);
                                     sslContext = SSLContexts.custom().loadTrustMaterial(new File(truststoreFile), truststorePass.toCharArray())
 					.build();
+                                    System.out.println("ELASTICSEARCH sslcontex loaded from "+truststoreFile+" "+truststorePass);
                                 } catch(IOException | CertificateException e) {
+                                    System.out.println("ELASTICSEARCH sslcontex FAILED load from "+truststoreFile+" "+truststorePass);
+                                    e.printStackTrace();
                                      logger.warn("Truststore "+truststoreFile+" problem", e);
                                      sslContext = null;
                                 }

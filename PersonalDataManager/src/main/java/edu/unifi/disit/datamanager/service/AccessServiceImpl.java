@@ -13,6 +13,7 @@
 package edu.unifi.disit.datamanager.service;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Locale;
 
 import org.apache.logging.log4j.LogManager;
@@ -103,21 +104,43 @@ public class AccessServiceImpl implements IAccessService {
 	public Response checkDelegationAccess(String elementID, String elementType, String variableName, String username, Locale lang) {
 		logger.debug("checkDelegations INVOKED on elementId {} elementType {} variableName {} username {} ", elementID, elementType, variableName, username);
 
-		Response response = new Response(false, null);
+		Response response = new Response(false, null, null);
 
 		// if there are any delegation to elementID
 		List<Delegation> mydelegations = delegationRepo.getDelegationDelegatorFromAppId(elementID, variableName, null, false, elementType);
+		List<Delegation> modifyDelegations = new ArrayList<Delegation>();
+		List<Delegation> writeDelegations = new ArrayList<Delegation>();
+		List<Delegation> readDelegations = new ArrayList<Delegation>();
+		List<Delegation> orderedDelegations = new ArrayList<Delegation>();
 
 		for (Delegation d : mydelegations) {
+			if (d.getKind() != null && d.getKind().equals("MODIFY")) {
+				modifyDelegations.add(d);
+			}
+			if (d.getKind() != null && d.getKind().equals("READ_WRITE")) {
+				writeDelegations.add(d);
+			}
+			if (d.getKind() != null && d.getKind().equals("READ_ACCESS")) {
+				readDelegations.add(d);
+			}
+		}
+
+		orderedDelegations.addAll(modifyDelegations);
+		orderedDelegations.addAll(writeDelegations);
+		orderedDelegations.addAll(readDelegations);
+
+		for (Delegation d : orderedDelegations) {
 			if ((d.getUsernameDelegated() != null) && (d.getUsernameDelegated().equals("ANONYMOUS"))) {
 				response.setResult(true);
 				response.setMessage(AccessRightType.PUBLIC.toString());
+				response.setKind(d.getKind());
 				return response;
 			}
 
 			if ((d.getUsernameDelegated() != null) && (d.getUsernameDelegated().equalsIgnoreCase(username))) {
 				response.setResult(true);
 				response.setMessage(AccessRightType.DELEGATED.toString());
+				response.setKind(d.getKind());
 				return response;
 			}
 
@@ -125,6 +148,7 @@ public class AccessServiceImpl implements IAccessService {
 			if ((d.getGroupnameDelegated() != null) && (groupnames.contains(d.getGroupnameDelegated()))) {
 				response.setResult(true);
 				response.setMessage(AccessRightType.GROUP_DELEGATED.toString());// delegation to the organization the user belong
+				response.setKind(d.getKind());
 				return response;
 			}
 		}

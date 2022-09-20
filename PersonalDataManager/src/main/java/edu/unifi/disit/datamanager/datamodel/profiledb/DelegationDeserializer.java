@@ -48,6 +48,7 @@ public class DelegationDeserializer extends StdDeserializer<Delegation> {
 		Date deleteTimeValue = null;
 		String delegationDetailsValue = null;
 		String groupnameDelegatedValue = null;
+		String kindValue = "READ_ACCESS";
 
 		if (node.get("id") != null)
 			idValue = node.get("id").asLong();
@@ -71,9 +72,11 @@ public class DelegationDeserializer extends StdDeserializer<Delegation> {
 			delegationDetailsValue = node.get("delegationDetails").toString();
 		if (node.get("groupnameDelegated") != null)
 			groupnameDelegatedValue = node.get("groupnameDelegated").asText();
+		if (node.get("kind") != null)
+			kindValue = node.get("kind").asText();
 
 		return new Delegation(idValue, usernameDelegatorValue, usernameDelegatedValue, variableNameValue, motivationValue, elementIdValue, elementTypeValue, insertTimeValue, deleteTimeValue, delegationDetailsValue,
-				groupnameDelegatedValue);
+				groupnameDelegatedValue, kindValue);
 
 	}
 }

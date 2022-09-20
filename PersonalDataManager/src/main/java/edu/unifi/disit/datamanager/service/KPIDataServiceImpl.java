@@ -107,7 +107,7 @@ public class KPIDataServiceImpl implements IKPIDataService {
 	public boolean makeKPIDataPublic(String username, Long kpiId, String elementType, Locale lang)
 			throws DelegationNotValidException, CredentialsException {
 		Delegation delegation = new Delegation(username, "ANONYMOUS", null, null, kpiId.toString(), elementType,
-				new Date(), null, null, null);
+				new Date(), null, null, null, "READ_ACCESS");
 
 		logger.debug("makeKPIDataPublic");
 

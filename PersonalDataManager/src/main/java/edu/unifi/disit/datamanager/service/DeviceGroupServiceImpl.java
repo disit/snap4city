@@ -93,7 +93,7 @@ public class DeviceGroupServiceImpl implements IDeviceGroupService {
 	public boolean makeDeviceGroupPublic(String username, Long grpId, String elementType, Locale lang)
 			throws DelegationNotValidException, CredentialsException {
 		Delegation delegation = new Delegation(username, "ANONYMOUS", null, null, grpId.toString(), elementType,
-				new Date(), null, null, null);
+				new Date(), null, null, null, "READ_ACCESS");
 
 		logger.debug("makeDeviceGroupPublic");
 

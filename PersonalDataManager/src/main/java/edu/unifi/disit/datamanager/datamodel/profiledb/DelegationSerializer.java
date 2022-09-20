@@ -55,6 +55,8 @@ public class DelegationSerializer extends StdSerializer<Delegation> {
 			jgen.writeStringField("delegationDetails", delegation.getDelegationDetails());
 		if (delegation.getGroupnameDelegated() != null)
 			jgen.writeStringField("groupnameDelegated", delegation.getGroupnameDelegated());
+		if (delegation.getKind() != null)
+			jgen.writeStringField("kind", delegation.getKind());
 
 		jgen.writeEndObject();
 	}
