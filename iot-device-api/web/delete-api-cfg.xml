@@ -120,6 +120,7 @@
                     <validate ref="service-uri">
                         <pick-validator ref="deviceAccessControl" description="The requester must be the owner of the device, identified through a valid access token that must be sent through the Authorization: Bearer [token] HTTP header.">
                             <endpoint>&ownership;</endpoint>
+							<delegation-endpoint>&delegation;</delegation-endpoint>
                             <authorization ref="authorization"/>
                         </pick-validator>
                     </validate>                 

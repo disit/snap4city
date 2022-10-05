@@ -221,7 +221,9 @@
 								(km4c:maintenanceUrl "Maintenance url" xsd:string)
 								(schema:url "Use url" xsd:string)
 								(foaf:name "Name" UNDEF)
-                                (km4c:isMobile "Is Mobile" xsd:string)                                                              
+                                                                (km4c:isMobile "Is Mobile" xsd:string)
+                                                                (schema:telephone "Telephone" xsd:string)
+                                                                (schema:faxNumber "Fax number" xsd:string)                                                              
 							'}'
 							optional '{' ?uri rdfs:label ?label FILTER(LANG(?label)="en")'}'
 							optional '{' ?uri rdfs:range ?type filter(?type!=rdfs:Literal)'}' . 

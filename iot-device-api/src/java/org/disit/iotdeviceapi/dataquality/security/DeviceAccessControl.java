@@ -28,6 +28,10 @@ import org.disit.iotdeviceapi.logging.XLogger;
 import org.disit.iotdeviceapi.utils.Const;
 import org.w3c.dom.Element;
 import org.disit.iotdeviceapi.utils.IotDeviceApiException;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+import java.util.Base64;
 
 /**
  * 
@@ -40,7 +44,7 @@ public class DeviceAccessControl extends Validator {
     }
 
     @Override
-    public Data clean(Data currentData, HashMap<String, Data> builtData) {        
+    public Data clean(Data currentData, HashMap<String, Data> builtData) {
         try {
             if(currentData.getValue() == null) return currentData;
             String deviceUri = new String();
@@ -76,11 +80,42 @@ public class DeviceAccessControl extends Validator {
                 encoding = encoding == null ? "UTF-8" : encoding;
                 String body = IOUtils.toString(in, encoding);
                 if(!"[\n]\n".equals(body)) return currentData;
-                else throw new IotDeviceApiException("Security check failed");
+                else {
+                    String[] tokenParts = accessToken.split( "\\." );
+                    String payload = new String( Base64.getDecoder().decode( tokenParts[1] ) );
+                    JSONObject payloadObj = ((JSONObject)JSONValue.parse(payload));
+                    String username = "";
+                    if (payloadObj.get("username") != null)
+                        username = payloadObj.get("username").toString();
+                    else {
+                        username = payloadObj.get("preferred_username").toString();
+                    }
+                    // Check delegations
+
+                    endpoint = (Element)config.getElementsByTagName(DeviceAccessControlConst.DELEGATION_EL_ENDPOINT).item(0);
+                    endpointUrl = endpoint.getTextContent();
+                    requestUrl = MessageFormat.format(DeviceAccessControlConst.DELEGATION_REQ_URL, new Object[]{endpointUrl, username, accessToken});
+                    url = new URL(requestUrl);
+                    http = (HttpURLConnection)url.openConnection();
+                    if(http.getResponseCode() == 200) {
+                        in = http.getInputStream();
+                        encoding = http.getContentEncoding();
+                        encoding = encoding == null ? "UTF-8" : encoding;
+                        body = IOUtils.toString(in, encoding);
+                        if(!"[\n]\n".equals(body)) {
+                            Object parsed = JSONValue.parse(body);
+                            for(int i = 0; i < ((JSONArray)parsed).size(); i++) {
+                                JSONObject delegation = (JSONObject)((JSONArray) parsed).get(i);
+                                if (delegation.get("elementId").equals(id) && delegation.get("kind").equals("MODIFY")) {
+                                    return currentData;
+                                }
+                            }
+                        }
+                        throw new IotDeviceApiException("No permissions available");
+                    } else throw new IotDeviceApiException("Error retrieving delegation infos");
+                }
             }
-            else {       
-                throw new IotDeviceApiException("Security check failed");
-            }   
+            else throw new IotDeviceApiException("Error retrieving ownership infos");
         }
         catch(Exception e) {
             xlogger.log(DeviceAccessControl.class.getName(), Level.SEVERE, "Security check failed", e);

@@ -24,4 +24,6 @@ public final class DeviceAccessControlConst {
     public static final String CFG_AT_REF = "ref";
     public static final String CFG_EL_AUTHORIZATION = "authorization";
     public static final String CFG_REQ_URL = "{0}?type=IOTID&elementId={1}&accessToken={2}";
+    public static final String DELEGATION_EL_ENDPOINT = "delegation-endpoint";
+    public static final String DELEGATION_REQ_URL = "{0}/username/{1}/delegated?accessToken={2}&sourceRequest=iotdirectory";
 }

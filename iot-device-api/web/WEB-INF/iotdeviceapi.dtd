@@ -2,5 +2,6 @@
 <!ENTITY virtUsr "dba">
 <!ENTITY virtPwd "dba">
 <!ENTITY ownership "http://localhost/ownership-api/v1/list">
+<!ENTITY delegation "http://localhost:8080/datamanager/api/v2">
 <!ENTITY servicemap "http://loclahost/ServiceMap/api/v1/">
 <!ENTITY keycloak "http://localhost/auth/realms/master/protocol/openid-connect/userinfo">
