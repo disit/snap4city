@@ -19,11 +19,13 @@ package org.disit.nifi.processors.enrich_data;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.nifi.components.ValidationContext;
 import org.apache.nifi.components.ValidationResult;
 import org.apache.nifi.components.Validator;
+import org.apache.nifi.processor.util.StandardValidators;
 import org.disit.nifi.processors.enrich_data.enrichment_source.EnrichmentSourceClientService;
 
 import com.google.gson.JsonArray;
@@ -63,8 +65,7 @@ public final class EnrichDataValidators {
 	
 	public static Validator jsonPropertyValidator( boolean allowBlank ) {
 		return new Validator() {
-			JsonParser parser = new JsonParser();
-			
+//			JsonParser parser = new JsonParser();
 			
 			@Override
 			public ValidationResult validate(String subject, String input, ValidationContext context) {
@@ -73,7 +74,8 @@ public final class EnrichDataValidators {
 											   .explanation( "Empty string is allowed for this property." )
 											   .valid(true).build();
 				try{
-					JsonElement propEl = parser.parse( input );
+//					JsonElement propEl = parser.parse( input );
+					JsonElement propEl = JsonParser.parseString( input );
 					if( !propEl.isJsonObject() ) {
 						return new ValidationResult.Builder().subject(subject).input(input)
 												   .explanation( "The json confgiuration must be a json object." )
@@ -100,7 +102,7 @@ public final class EnrichDataValidators {
 	
 	public static Validator innerLatLonPropertyValidator() {
 		 return new Validator() {
-			JsonParser parser = new JsonParser();
+//			JsonParser parser = new JsonParser();
 			 
 			@Override
 			public ValidationResult validate(String subject, String input, ValidationContext context) {
@@ -111,7 +113,8 @@ public final class EnrichDataValidators {
 				
 				JsonElement propsEl;
 				try {
-					propsEl = parser.parse( input );
+//					propsEl = parser.parse( input );
+					propsEl = JsonParser.parseString( input );
 				}catch( JsonSyntaxException e ) {
 					return new ValidationResult.Builder().subject(subject).input(input)
 					    	   .explanation( "Error in json syntax. " + e.getMessage() )
@@ -211,4 +214,23 @@ public final class EnrichDataValidators {
 		 };
 	}
 	
+	public static Validator timePeriodValidatorOrNotSet(long min, TimeUnit minTu, long max , TimeUnit maxTu ) {
+		return new Validator() {
+			private Validator tpValidator = StandardValidators.createTimePeriodValidator(min, minTu, max, maxTu);
+			
+			@Override
+			public ValidationResult validate(String subject, String input, ValidationContext context) {
+				// TODO Auto-generated method stub
+				if( input==null || input.isEmpty() ) {
+					return new ValidationResult.Builder().subject(subject).input(input)
+							.explanation("Allowed null or empty string.")
+							.valid(true).build();
+				}else {
+					return tpValidator.validate(subject, input, context);
+				}
+			}
+			
+		};
+		
+	}
 }

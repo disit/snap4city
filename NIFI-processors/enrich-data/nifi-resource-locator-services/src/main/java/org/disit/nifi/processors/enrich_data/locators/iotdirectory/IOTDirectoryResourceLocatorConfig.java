@@ -15,6 +15,7 @@
 package org.disit.nifi.processors.enrich_data.locators.iotdirectory;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class IOTDirectoryResourceLocatorConfig {
@@ -24,14 +25,16 @@ public class IOTDirectoryResourceLocatorConfig {
 	protected String subIdParamName;
 	protected String additionalQueryString;
 	protected List<String> serviceUriPrefixResponsePath;
+	protected List<String> organizationResponsePath;
+	protected List<String> cbNameResponsePath;
 	
 	protected long maxCacheSize;
 	protected long expireCacheEntriesAfterMillis;
 	protected boolean expireCache;
 	
-	public IOTDirectoryResourceLocatorConfig( String iotDirectoryUrl , String subIdAttributeName ,
-											  String subIdParamName , String additionalQueryString ,
-			  								  List<String> serviceUriPrefixResponsePath ) {
+	protected IOTDirectoryResourceLocatorConfig( String iotDirectoryUrl , String subIdAttributeName ,
+											     String subIdParamName , String additionalQueryString ,
+			  								     List<String> serviceUriPrefixResponsePath ) {
 
 		this.iotDirectoryUrl = iotDirectoryUrl;
 		this.subIdAttributeName = subIdAttributeName;
@@ -42,6 +45,8 @@ public class IOTDirectoryResourceLocatorConfig {
 		this.maxCacheSize = 50;
 		this.expireCache = false;
 		this.expireCacheEntriesAfterMillis = 0;
+		this.cbNameResponsePath = null;
+		this.organizationResponsePath = null;
 	}
 	
 	public IOTDirectoryResourceLocatorConfig( String iotDirectoryUrl , String subIdAttributeName ,
@@ -49,7 +54,23 @@ public class IOTDirectoryResourceLocatorConfig {
 											  String serviceUriPrefixResponsePath ) {
 		this( iotDirectoryUrl , subIdAttributeName ,
 			  subIdParamName , additionalQueryString ,
-			  Arrays.asList( serviceUriPrefixResponsePath.split("/" ) ) );
+			  Arrays.asList( serviceUriPrefixResponsePath.trim().split("/" ) ) );
+	}
+	
+	public IOTDirectoryResourceLocatorConfig( String iotDirectoryUrl , String subIdAttributeName ,
+			  String subIdParamName , String additionalQueryString ,
+			  String serviceUriPrefixResponsePath , 
+			  String organizationResponsePath , 
+			  String cbNameResponsePath) {
+		this( iotDirectoryUrl , subIdAttributeName , subIdParamName , additionalQueryString , 
+			  serviceUriPrefixResponsePath );
+		if( organizationResponsePath != null && !organizationResponsePath.isEmpty() )
+			this.organizationResponsePath = Arrays.asList( 
+				organizationResponsePath.trim().split("/" ) );
+		if( cbNameResponsePath != null && !cbNameResponsePath.isEmpty() )
+			this.cbNameResponsePath = Arrays.asList(
+				cbNameResponsePath.trim().split("/")
+			);
 	}
 	
 	public String getIotDirectoryUrl() {
@@ -65,11 +86,23 @@ public class IOTDirectoryResourceLocatorConfig {
 	}
 	
 	public List<String> getServiceUriPrefixResponsePath() {
-		return serviceUriPrefixResponsePath;
+		return Collections.unmodifiableList( serviceUriPrefixResponsePath );
 	}
 	
 	public String getAdditionalQueryString() {
 		return additionalQueryString;
+	}
+	
+	public List<String> getOrganizationResponsePath(){
+		if( organizationResponsePath == null )
+			return null;
+		return Collections.unmodifiableList( organizationResponsePath );
+	}
+	
+	public List<String> getCBNameResponsePath(){
+		if( cbNameResponsePath == null )
+			return null;
+		return Collections.unmodifiableList( cbNameResponsePath );
 	}
 	
 	public void setMaxCacheSize( long maxCacheSize ) {

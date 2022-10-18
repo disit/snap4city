@@ -9,7 +9,7 @@
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Affero General Public License for more details.
  *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 import { ProcessorConfigApp } from "./modules/processor-config-app.js";
@@ -31,28 +31,28 @@ var clientId = params['clientId'];
 var editable = params['editable'];
 var disconnectedNodeAcknowledged = params['disconnectedNodeAcknowledged'];
 
-var app = new ProcessorConfigApp({ 
+var app = new ProcessorConfigApp({
 	processorId: processorId,
 	revision: revision,
 	clientId: clientId,
 	editable: editable,
 	disconnectedNodeAcknowledged: disconnectedNodeAcknowledged
 });
-app.configureGroup( "Enrichment sources" , 
-	[ 
+app.configureGroup( "Enrichment sources" ,
+	[
 		"ENRICHMENT_SOURCE_CLIENT_SERVICE" ,
 		"ENRICHMENT_RESPONSE_BASE_PATH" ,
 		"ENRICHMENT_BEHAVIOR" ,
 		"ENRICHMENT_RESOURCE_LOCATOR_SERVICE" ,
-		"OWNERSHIP_CLIENT_SERVICE" , 
+		"OWNERSHIP_CLIENT_SERVICE" ,
 		"OWNERSHIP_BEHAVIOR" ,
 		"DEFAULT_OWNERSHIP_PROPERTIES"
-	] 
+	]
 )
 .configureJsonProperty( "DEFAULT_OWNERSHIP_PROPERTIES" )
-.configureGroup( "Fields" , 
+.configureGroup( "Fields" ,
 	[
-		"DEVICE_ID_NAME" , 
+		"DEVICE_ID_NAME" ,
 		"DEVICE_ID_NAME_MAPPING" ,
 		"DEVICE_ID_VALUE_PREFIX_SUBST" ,
 		"VALUE_FIELD_NAME" ,
@@ -62,40 +62,40 @@ app.configureGroup( "Enrichment sources" ,
 	]
 )
 .configureJsonProperty( "DEVICE_ID_VALUE_PREFIX_SUBST" )
-.configureGroup( "Timestamp" , 
-	[ 
-		"TIMESTAMP_FIELD_NAME" , 
+.configureGroup( "Timestamp" ,
+	[
+		"TIMESTAMP_FIELD_NAME" ,
 		"TIMESTAMP_FROM_CONTENT_PROPERTY_NAME" ,
 		"TIMESTAMP_FROM_CONTENT_PROPERTY_VALUE" ,
-	] 
+	]
 )
-.configureGroup( "Coordinates" , 
-	[ 
+.configureGroup( "Coordinates" ,
+	[
 		"LATLON_PRIORITY" ,
 		"ENRICHMENT_LAT_LON_PATH" ,
 		"ENRICHMENT_LAT_LON_FORMAT" ,
 		"INNER_LAT_LON_CONFIG"
-	] 
+	]
 )
 .configureJsonProperty( "INNER_LAT_LON_CONFIG" )
-.configureGroup( "Output" , 
+.configureGroup( "Output" ,
 	[
 		"OUTPUT_FF_CONTENT_FORMAT" ,
 		"HASHED_ID_FIELDS" ,
 		"ORIGINAL_FLOW_FILE_ATTRIBUTES_AUG" ,
 		"ES_INDEX" ,
 		"ES_TYPE" ,
-		"DEVICE_STATE_OUTPUT_FORMAT"
+		"DEVICE_STATE_OUTPUT_FORMAT" ,
+		"DEVICE_STATE_UPDATE_FREQUENCY_FIELD" ,
+		"DEVICE_STATE_DROP_UPDATE_THRESHOLD"
 	]
 )
 .configureJsonProperty( "ORIGINAL_FLOW_FILE_ATTRIBUTES_AUG" )
-.configureGroup( "Other" , 
+.configureGroup( "Other" ,
 	[
 		"NODE_CONFIG_FILE_PATH" ,
-		"SRC_PROPERTY" , 
-		"KIND_PROPERTY" 
+		"SRC_PROPERTY" ,
+		"KIND_PROPERTY"
 	]
 )
 .init();
-
-

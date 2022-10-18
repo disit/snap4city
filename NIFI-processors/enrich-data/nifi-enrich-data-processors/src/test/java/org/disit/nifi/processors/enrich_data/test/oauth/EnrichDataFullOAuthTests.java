@@ -256,7 +256,8 @@ public class EnrichDataFullOAuthTests extends EnrichDataTestBase{
 		addServicemapResource( "id" , serviceUriPrefix , 
 			"src/test/resources/mock_in_ff/testOutputs.ff" ,
 			"src/test/resources/mock_servicemap_response/testOutputs.resp" );
-		addOwnershipResource( "id" , "broker:organization:" , 
+//		addOwnershipResource( "id" , "broker:organization:" ,
+		addOwnershipResource( "id" , "Organization:orionBroker-NAME:" ,
 			"src/test/resources/mock_in_ff/testOutputs.ff" , 
 			"src/test/resources/mock_ownership_response/ownership_mock.resp" );
 		addIOTDirectoryResource( "subid_1" , 
@@ -273,10 +274,10 @@ public class EnrichDataFullOAuthTests extends EnrichDataTestBase{
 		JsonObject expectedResult = TestUtils.prepareExpectedResult( 
 			"src/test/resources/reference_results/ownership/testOutputs_ownershipJsonObject.ref" , 
 			inputFF , parser ).getAsJsonObject();
-		JsonElement content = parser.parse( new String ( 
-			testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP )
-					  .get(0).toByteArray() ) 
-		);
+		MockFlowFile outFF = testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP ).get(0);
+//		System.out.println( expectedResult );
+//		System.out.println( TestUtils.prettyOutFF( outFF ) );
+		JsonElement content = parser.parse( new String ( outFF.toByteArray() ) );
 		assertEquals( true , content.isJsonObject() );
 		assertEquals( true , expectedResult.equals( content.getAsJsonObject() ) );
 	}

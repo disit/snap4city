@@ -2,7 +2,7 @@
 {
   "data_type":"boolean",
   "value_unit":"",
-  "value_str":"true",
+  "value_bool":true,
   "sensorId":"123456789",
   "src":"IOT",
   "kind":"sensor",

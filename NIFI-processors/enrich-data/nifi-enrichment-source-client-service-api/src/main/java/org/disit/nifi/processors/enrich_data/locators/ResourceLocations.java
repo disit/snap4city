@@ -1,6 +1,4 @@
-/**
- *  Nifi EnrichData processor
- *  
+/** 
  *  Copyright (C) 2020 DISIT Lab http://www.disit.org - University of Florence
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,19 +12,40 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>. 
  */
 
-package org.disit.nifi.processors.enrich_data.enrichment_source.http;
+package org.disit.nifi.processors.enrich_data.locators;
 
-import org.apache.nifi.processor.ProcessContext;
-import org.disit.nifi.processors.enrich_data.enrichment_source.EnrichmentSourceClient;
+import java.util.Map;
+import java.util.TreeMap;
 
-public abstract class HttpEnrichmentSourceClient extends HttpBaseClient implements EnrichmentSourceClient {
+public class ResourceLocations {
+
+	public Map<Service , String> locations;
 	
-	protected HttpEnrichmentSourceClient( int maxPerRoute , int maxTotal ) {
-		super( maxPerRoute , maxTotal );
+	public enum Service{
+		SERVICEMAP , 
+		OWNERSHIP
 	}
 	
-	protected HttpEnrichmentSourceClient( ProcessContext context ) {
-		this( context.getMaxConcurrentTasks() , context.getMaxConcurrentTasks() );
+	public ResourceLocations() {
+		locations = new TreeMap<>();
 	}
-
+	
+	public void putLocation( Service service , String location ) {
+		locations.put( service , location );
+	}
+	
+	public String getLocationForService( Service service ) {
+		if( !locations.containsKey( service ) )
+			return null;
+		return locations.get( service );
+	}
+	
+	public boolean hasLocationForService( Service service ) {
+		return locations.containsKey( service );
+	}
+	
+	public String toString() {
+		return locations.toString();
+	}
+	
 }

@@ -19,6 +19,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.nifi.processor.ProcessContext;
 import org.disit.nifi.processors.enrich_data.enrichment_source.EnrichmentSourceException;
 import org.disit.nifi.processors.enrich_data.locators.EnrichmentResourceLocatorException;
+import org.disit.nifi.processors.enrich_data.locators.ResourceLocations;
 import org.disit.nifi.processors.enrich_data.locators.iotdirectory.IOTDirectoryResourceLocator;
 import org.disit.nifi.processors.enrich_data.locators.iotdirectory.IOTDirectoryResourceLocatorConfig;
 import org.disit.nifi.processors.enrich_data.oauth.OAuthTokenProvider;
@@ -38,7 +39,7 @@ public class IOTDirectoryResourceOAuthLocator extends IOTDirectoryResourceLocato
 	}
 	
 	@Override
-	public String fetchServiceUriPrefix( String subscriptionId ) throws EnrichmentResourceLocatorException {
+	public ResourceLocations fetchResourceLocations( String subscriptionId ) throws EnrichmentResourceLocatorException {
 		OAuth2AccessToken token;
 		try {
 			token = tokenProvider.getToken();

@@ -43,7 +43,7 @@ public class JsonProcessingUtils {
 	    			}else {
 	    				if( exploredPath.length() > 0) exploredPath.deleteCharAt(0);
 	    				throw new NoSuchElementException( String.format( "Cannot obtain the specified element. The '%s' field in the root element does not exists. ", 
-								   							        exploredPath.toString() ) );
+								   							        exploredPath.toString()+"/"+pathEl ) );
 	    			}
     			} else {
     				if( exploredPath.length() > 0) exploredPath.deleteCharAt(0);

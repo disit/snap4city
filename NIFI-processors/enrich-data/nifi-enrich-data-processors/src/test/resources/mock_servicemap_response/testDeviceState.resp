@@ -4,8 +4,8 @@
             {
                 "geometry": {
                     "coordinates": [
-                        24.911846,
-                        60.168095
+                        24.91201,
+                        60.157337
                     ],
                     "type": "Point"
                 },
@@ -16,9 +16,9 @@
                     "comments": [],
                     "format": "json",
                     "linkDBpedia": [],
-                    "macaddress": "3D:F2:C9:A6:B3:4F",
+                    "macaddress": "1A:F2:C9:A6:B3:4F",
                     "model": "custom",
-                    "name": "TA-12345",
+                    "name": "123456789",
                     "organization": "MyOrg",
                     "ownership": "public",
                     "photoOrigs": [],
@@ -26,46 +26,98 @@
                     "photos": [],
                     "producer": "null",
                     "protocol": "ngsi",
+                    "frequencySec": "300",
                     "realtimeAttributes": {
-                        "LAeq": {
+                        "EnfuserAQI": {
+                            "attr_type": "CustomAttribute",
+                            "data_type": "float",
+                            "value_unit": ""
+                        },
+                        "BooleanTestAttr":{
+                        	"attr_type": "DeviceAttribute",
+                        	"data_type": "boolean",
+                        	"value_unit": ""
+                        },
+                        "PM10": {
                             "attr_type": "DeviceAttribute",
                             "data_type": "float",
                             "different_values": "0",
                             "value_bounds": "unspecified",
                             "value_refresh_rate": "300",
-                            "value_type": "sound_lv",
+                            "value_type": "PM10_concentration",
+                            "value_unit": "ppm"
+                        },
+                        "PM2.5": {
+                            "attr_type": "DeviceAttribute",
+                            "data_type": "float",
+                            "different_values": "0",
+                            "value_bounds": "unspecified",
+                            "value_refresh_rate": "300",
+                            "value_type": "PM2.5_concentration",
+                            "value_unit": "ppm"
+                        },
+                        "RealTimeAQI": {
+                            "attr_type": "CustomAttribute",
+                            "data_type": "float",
+                            "value_unit": ""
+                        },
+                        "RealTimeDeltaAQI": {
+                            "attr_type": "CustomAttribute",
+                            "data_type": "float",
+                            "value_unit": ""
+                        },
+                        "address": {
+                            "attr_type": "DeviceAttribute",
+                            "data_type": "string",
+                            "different_values": "0",
+                            "value_bounds": "unspecified",
+                            "value_refresh_rate": "300",
+                            "value_type": "latitude_longitude",
                             "value_unit": "#"
                         },
-                        "LAmax": {
-                            "attr_type": "DeviceAttribute",
+                        "airQualityPM10AverageLastHour": {
+                            "attr_type": "CustomAttribute",
                             "data_type": "float",
-                            "different_values": "0",
-                            "value_bounds": "unspecified",
-                            "value_refresh_rate": "300",
-                            "value_type": "sound_lv",
-                            "value_unit": "#"
+                            "value_unit": ""
+                        },
+                        "airQualityPM10Enfuser": {
+                            "attr_type": "CustomAttribute",
+                            "data_type": "float",
+                            "value_unit": ""
+                        },
+                        "airQualityPM10Gral": {
+                            "attr_type": "CustomAttribute",
+                            "data_type": "float",
+                            "value_unit": ""
+                        },
+                        "airQualityPM10RealTimeDelta": {
+                            "attr_type": "CustomAttribute",
+                            "data_type": "float",
+                            "value_unit": ""
+                        },
+                        "airQualityPM10RealTimeDeltaGral": {
+                            "attr_type": "CustomAttribute",
+                            "data_type": "float",
+                            "value_unit": ""
+                        },
+                        "airQualityPM2_5AverageLastHour": {
+                            "attr_type": "CustomAttribute",
+                            "data_type": "float",
+                            "value_unit": ""
+                        },
+                        "airQualityPM2_5Enfuser": {
+                            "attr_type": "CustomAttribute",
+                            "data_type": "float",
+                            "value_unit": ""
+                        },
+                        "airQualityPM2_5RealTimeDelta": {
+                            "attr_type": "CustomAttribute",
+                            "data_type": "float",
+                            "value_unit": ""
                         },
                         "dateObserved": {
                             "attr_type": "DeviceAttribute",
-                            "data_type": "time",
-                            "different_values": "0",
-                            "value_bounds": "unspecified",
-                            "value_refresh_rate": "300",
-                            "value_type": "timestamp",
-                            "value_unit": "s"
-                        },
-                        "dateObservedFrom": {
-                            "attr_type": "DeviceAttribute",
-                            "data_type": "time",
-                            "different_values": "0",
-                            "value_bounds": "unspecified",
-                            "value_refresh_rate": "300",
-                            "value_type": "timestamp",
-                            "value_unit": "s"
-                        },
-                        "dateObservedTo": {
-                            "attr_type": "DeviceAttribute",
-                            "data_type": "time",
+                            "data_type": "string",
                             "different_values": "0",
                             "value_bounds": "unspecified",
                             "value_refresh_rate": "300",
@@ -74,29 +126,29 @@
                         },
                         "location": {
                             "attr_type": "DeviceAttribute",
-                            "data_type": "float",
+                            "data_type": "string",
                             "different_values": "0",
                             "value_bounds": "unspecified",
                             "value_refresh_rate": "300",
                             "value_type": "latitude_longitude",
                             "value_unit": "#"
                         },
-                        "measurand": {
+                        "reliability": {
                             "attr_type": "DeviceAttribute",
                             "data_type": "float",
                             "different_values": "0",
                             "value_bounds": "unspecified",
                             "value_refresh_rate": "300",
-                            "value_type": "latitude_longitude",
+                            "value_type": "status",
                             "value_unit": "#"
                         },
-                        "sonometerClass": {
+                        "source": {
                             "attr_type": "DeviceAttribute",
                             "data_type": "string",
                             "different_values": "0",
                             "value_bounds": "unspecified",
                             "value_refresh_rate": "300",
-                            "value_type": "audio",
+                            "value_type": "status",
                             "value_unit": "#"
                         },
                         "testNumericArray": {
@@ -105,7 +157,7 @@
                             "different_values": "0",
                             "value_bounds": "unspecified",
                             "value_refresh_rate": "300",
-                            "value_type": "audio",
+                            "value_type": "status",
                             "value_unit": "#"
                         },
                         "testBooleanArray": {
@@ -114,7 +166,7 @@
                             "different_values": "0",
                             "value_bounds": "unspecified",
                             "value_refresh_rate": "300",
-                            "value_type": "audio",
+                            "value_type": "status",
                             "value_unit": "#"
                         },
                         "testStringArray": {
@@ -123,7 +175,7 @@
                             "different_values": "0",
                             "value_bounds": "unspecified",
                             "value_refresh_rate": "300",
-                            "value_type": "audio",
+                            "value_type": "status",
                             "value_unit": "#"
                         },
                         "testObjArray": {
@@ -132,7 +184,7 @@
                             "different_values": "0",
                             "value_bounds": "unspecified",
                             "value_refresh_rate": "300",
-                            "value_type": "audio",
+                            "value_type": "status",
                             "value_unit": "#"
                         },
                         "testNullArray": {
@@ -141,7 +193,7 @@
                             "different_values": "0",
                             "value_bounds": "unspecified",
                             "value_refresh_rate": "300",
-                            "value_type": "audio",
+                            "value_type": "status",
                             "value_unit": "#"
                         },
                         "testMixedArray": {
@@ -150,14 +202,14 @@
                             "different_values": "0",
                             "value_bounds": "unspecified",
                             "value_refresh_rate": "300",
-                            "value_type": "audio",
+                            "value_type": "status",
                             "value_unit": "#"
                         }
                     },
-                    "serviceType": "Environment_Noise_level_sensor",
-                    "serviceUri": "http://www.disit.org/km4city/resource/iot/orionFinland/Helsinki/TA-12345",
+                    "serviceType": "Environment_Air_quality_monitoring_station",
+                    "serviceUri": "http://www.disit.org/km4city/resource/iot/orionFinland/Helsinki/123456789",
                     "starsCount": 0,
-                    "typeLabel": "Noise level sensor",
+                    "typeLabel": "Air quality monitoring station",
                     "wktGeometry": ""
                 },
                 "type": "Feature"

@@ -32,15 +32,13 @@ import org.disit.nifi.processors.enrich_data.enrichment_source.http.HttpEnrichme
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 
 public class OwnershipHttpClient extends HttpEnrichmentSourceClient{
 	
 	//Http client
 	protected ResponseHandler<String> responseHandler;
-	
-	//Json parser (Gson)
-	JsonParser parser;
 	
 	protected OwnershipClientConfig config;
 	
@@ -51,7 +49,6 @@ public class OwnershipHttpClient extends HttpEnrichmentSourceClient{
 		
 		responseHandler = new BasicResponseHandler();
 		
-		this.parser = new JsonParser();
 		this.config = config;
 		this.staticUrlPart = buildStaticUrlPart();
 	}
@@ -72,11 +69,10 @@ public class OwnershipHttpClient extends HttpEnrichmentSourceClient{
 		
 		builder.append( config.getElementIdParamName() )
 			   .append( "=" );
-//			   .append( config.getElementIdPrefix() );
-		
 		return builder.toString();
 	}
 	
+	@Override
 	public String buildRequestUrl( String elementId ) {
 		StringBuilder urlBuilder = new StringBuilder( this.staticUrlPart );
 		
@@ -87,29 +83,30 @@ public class OwnershipHttpClient extends HttpEnrichmentSourceClient{
 						 .toString();
 	}
 	
-	public String buildRequestUrl( String elementIdPrefix , String elementId ) {
-		return new StringBuilder( this.staticUrlPart )
-					.append( elementIdPrefix )
-					.append( elementId )
-					.toString();
+	@Override
+	public String buildRequestUrl( String elementId , String prefix ) {
+		StringBuilder urlBuilder = new StringBuilder( this.staticUrlPart )
+										.append( prefix );
+		if( !prefix.endsWith(":") )
+			urlBuilder.append( ":" );
+		return urlBuilder.append( elementId ).toString();
 	}
 	
 	@Override
 	public JsonElement getEnrichmentData( String elementId ) throws EnrichmentSourceException{
+		
 		String requestUrl = buildRequestUrl( elementId );
 		HttpGet get = buildGetRequest( requestUrl );
 		HttpResponse ownershipResponse = executeRequest( get );
-//		HttpResponse ownershipResponse = fetchOwnershipData( requestUrl );
 		
 		return processResponseBody( ownershipResponse );
 	}
 	
 	@Override
 	public JsonElement getEnrichmentData( String elementId , String elementIdPrefix ) throws EnrichmentSourceException{
-		String requestUrl = buildRequestUrl( elementIdPrefix , elementId );
+		String requestUrl = buildRequestUrl( elementId , elementIdPrefix );
 		HttpGet get = buildGetRequest( requestUrl );
 		HttpResponse ownershipResponse = executeRequest( get );
-		
 		return processResponseBody( ownershipResponse );
 	}
 	
@@ -147,19 +144,22 @@ public class OwnershipHttpClient extends HttpEnrichmentSourceClient{
 				String errorResponse = new String( contentStream.toByteArray() ).trim();
 				newEx.addInfo( "Ownership_response" , errorResponse );
 			}
-
 			throw newEx;
-//			throw new EnrichmentSourceException( "ClientProtocolException while processing response body." , e );
 		} catch (IOException e) {
 			// Problem or aborted connection
 			throw new EnrichmentSourceException(
 				String.format( "%s while handling the Ownership response body." , e.getClass().getName() ) ,
 				e
 			);
-//			throw new EnrichmentSourceException( "IOException while processing response body." , e );
 		}
 		
-		JsonElement ownershipResponse = parser.parse( responseBody );
+		JsonElement ownershipResponse;
+		try {
+			ownershipResponse = JsonParser.parseString( responseBody );
+		}catch( JsonParseException ex ) {
+			throw new EnrichmentSourceException( "Exception while parsing the ownership response body: " + responseBody , 
+					ex );
+		}
 		
 		if( ownershipResponse.isJsonArray() ) {
 			if( ownershipResponse.getAsJsonArray().size() == 0 )

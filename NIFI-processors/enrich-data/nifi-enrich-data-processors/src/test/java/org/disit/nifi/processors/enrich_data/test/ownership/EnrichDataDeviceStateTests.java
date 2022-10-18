@@ -20,9 +20,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.Set;
 
-import org.apache.nifi.processor.Relationship;
 import org.apache.nifi.reporting.InitializationException;
 import org.apache.nifi.util.MockFlowFile;
 import org.disit.nifi.processors.enrich_data.EnrichData;
@@ -36,6 +34,7 @@ import org.junit.Test;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public class EnrichDataDeviceStateTests extends EnrichDataTestBase{
 	
@@ -103,9 +102,11 @@ public class EnrichDataDeviceStateTests extends EnrichDataTestBase{
 			"src/test/resources/mock_ownership_response/ownership_mock.resp" );
 		addServicemapResource( "id" , serviceUriPrefix , 
 			"src/test/resources/mock_in_ff/testOutputs.ff" , 
-			"src/test/resources/mock_servicemap_response/testOutputs.resp" );
+				"src/test/resources/mock_servicemap_response/testDeviceState.resp" );
+//			"src/test/resources/mock_servicemap_response/testOutputs.resp" );
 		
-		MockFlowFile inputFF = testRunner.enqueue( Paths.get( "src/test/resources/mock_in_ff/testOutputs.ff" ) );
+//		MockFlowFile inputFF = testRunner.enqueue( Paths.get( "src/test/resources/mock_in_ff/testOutputs.ff" ) );
+		MockFlowFile inputFF = testRunner.enqueue( Paths.get( "src/test/resources/mock_in_ff/testDeviceState.ff" ) );
 		
 		testRunner.run();
 		testRunner.assertTransferCount( EnrichData.SUCCESS_RELATIONSHIP , 1 );
@@ -113,18 +114,20 @@ public class EnrichDataDeviceStateTests extends EnrichDataTestBase{
 		testRunner.assertTransferCount( EnrichData.DEVICE_STATE_RELATIONSHIP , 1 );
 		
 		JsonObject expectedResult = TestUtils.prepareExpectedResult( 
-			"src/test/resources/reference_results/ownership/testOutputs_ownershipJsonObject.ref" , 
+//			"src/test/resources/reference_results/ownership/testOutputs_ownershipJsonObject.ref" ,
+			"src/test/resources/reference_results/ownership/testDeviceState_ownershipJsonObject.ref" ,
 			inputFF , parser ).getAsJsonObject();
 		
 		JsonObject expectedState = TestUtils.prepareExpectedDeviceState( 
 			"src/test/resources/reference_results/ownership/testOutputs_DeviceState_MINIMAL.ff", 
 			inputFF , parser ).getAsJsonObject();
 		
-		JsonElement content = parser.parse( new String( testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP ).get(0).toByteArray() ) );
+		MockFlowFile outFF = testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP ).get(0);
+		JsonElement content = JsonParser.parseString( new String( outFF.toByteArray() ) );
 		assertEquals( true , content.isJsonObject() );
 		assertEquals( true , expectedResult.equals( content.getAsJsonObject() ) );
 		
-		JsonElement deviceStateContent = parser.parse( new String( testRunner.getFlowFilesForRelationship( EnrichData.DEVICE_STATE_RELATIONSHIP ).get(0).toByteArray() ) );
+		JsonElement deviceStateContent = JsonParser.parseString( new String( testRunner.getFlowFilesForRelationship( EnrichData.DEVICE_STATE_RELATIONSHIP ).get(0).toByteArray() ) );
 		assertEquals( true , deviceStateContent.isJsonObject() );
 		assertEquals( true , expectedState.equals( deviceStateContent.getAsJsonObject() ) );
 		System.out.println( deviceStateContent.toString() );
@@ -141,10 +144,12 @@ public class EnrichDataDeviceStateTests extends EnrichDataTestBase{
 			"src/test/resources/mock_in_ff/testOutputs.ff" , 
 			"src/test/resources/mock_ownership_response/ownership_mock.resp" );
 		addServicemapResource( "id" , serviceUriPrefix , 
-			"src/test/resources/mock_in_ff/testOutputs.ff" , 
-			"src/test/resources/mock_servicemap_response/testOutputs.resp" );
+			"src/test/resources/mock_in_ff/testOutputs.ff" ,
+			"src/test/resources/mock_servicemap_response/testDeviceState.resp" );
+//			"src/test/resources/mock_servicemap_response/testOutputs.resp" );
 		
-		MockFlowFile inputFF = testRunner.enqueue( Paths.get( "src/test/resources/mock_in_ff/testOutputs.ff" ) );
+//		MockFlowFile inputFF = testRunner.enqueue( Paths.get( "src/test/resources/mock_in_ff/testOutputs.ff" ) );
+		MockFlowFile inputFF = testRunner.enqueue( Paths.get( "src/test/resources/mock_in_ff/testDeviceState.ff" ) );
 		
 		testRunner.run();
 		testRunner.assertTransferCount( EnrichData.SUCCESS_RELATIONSHIP , 1 );
@@ -152,22 +157,107 @@ public class EnrichDataDeviceStateTests extends EnrichDataTestBase{
 		testRunner.assertTransferCount( EnrichData.DEVICE_STATE_RELATIONSHIP , 1 );
 		
 		JsonObject expectedResult = TestUtils.prepareExpectedResult( 
-			"src/test/resources/reference_results/ownership/testOutputs_ownershipJsonObject.ref" , 
+//			"src/test/resources/reference_results/ownership/testOutputs_ownershipJsonObject.ref" ,
+			"src/test/resources/reference_results/ownership/testDeviceState_ownershipJsonObject.ref" ,
 			inputFF , parser ).getAsJsonObject();
 		
 		JsonObject expectedState = TestUtils.prepareExpectedDeviceState( 
 			"src/test/resources/reference_results/ownership/testOutputs_DeviceState_FULL.ff", 
 			inputFF , parser ).getAsJsonObject();
 		
-		JsonElement content = parser.parse( new String( testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP ).get(0).toByteArray() ) );
+//		JsonElement content = parser.parse( new String( testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP ).get(0).toByteArray() ) );
+		JsonElement content = JsonParser.parseString( new String( testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP ).get(0).toByteArray() ) );
 		assertEquals( true , content.isJsonObject() );
 		assertEquals( true , expectedResult.equals( content.getAsJsonObject() ) );
 		
-		JsonElement deviceStateContent = parser.parse( new String( testRunner.getFlowFilesForRelationship( EnrichData.DEVICE_STATE_RELATIONSHIP ).get(0).toByteArray() ) );
+//		JsonElement deviceStateContent = parser.parse( new String( testRunner.getFlowFilesForRelationship( EnrichData.DEVICE_STATE_RELATIONSHIP ).get(0).toByteArray() ) );
+		JsonElement deviceStateContent = JsonParser.parseString( new String( testRunner.getFlowFilesForRelationship( EnrichData.DEVICE_STATE_RELATIONSHIP ).get(0).toByteArray() ) );
 		assertEquals( true , deviceStateContent.isJsonObject() );
 		assertEquals( true , expectedState.equals( deviceStateContent.getAsJsonObject() ) );
-//		System.out.println( deviceStateContent.toString() );
+		System.out.println( deviceStateContent.toString() );
 	}
 
+	@Test
+	public void testDeviceStateUpdateFrequency() throws IOException{
+		System.out.println( "######## " + testName() + " ########" );
+		testRunner.setProperty( 
+			EnrichData.DEVICE_STATE_UPDATE_FREQUENCY_FIELD , 
+			"Service/features/properties/frequencySec" );
+		
+		addOwnershipResource( "id" , "broker:organization:", 
+				"src/test/resources/mock_in_ff/testOutputs.ff" , 
+				"src/test/resources/mock_ownership_response/ownership_mock.resp" );
+		addServicemapResource( "id" , serviceUriPrefix , 
+			"src/test/resources/mock_in_ff/testOutputs.ff" ,
+			"src/test/resources/mock_servicemap_response/testDeviceState.resp" );
+		
+		MockFlowFile inputFF = testRunner.enqueue( Paths.get( "src/test/resources/mock_in_ff/testDeviceState.ff" ) );
+		testRunner.run();
+		
+		TestUtils.logsToStderr( testRunner.getLogger() ); 
+		
+		testRunner.assertTransferCount( EnrichData.SUCCESS_RELATIONSHIP , 1 );
+		testRunner.assertTransferCount( EnrichData.ORIGINAL_RELATIONSHIP , 1 );
+		testRunner.assertTransferCount( EnrichData.DEVICE_STATE_RELATIONSHIP , 1 );
+		
+		JsonObject expectedResult = TestUtils.prepareExpectedResult( 
+//				"src/test/resources/reference_results/ownership/testOutputs_ownershipJsonObject.ref" ,
+				"src/test/resources/reference_results/ownership/testDeviceState_ownershipJsonObject.ref" ,
+				inputFF , parser ).getAsJsonObject();
+		
+		JsonObject expectedState = TestUtils.prepareExpectedDeviceState( 
+				"src/test/resources/reference_results/ownership/testOutputs_DeviceState_ExpectedNextUpdate.ff", 
+				inputFF , parser ).getAsJsonObject();
+		
+		JsonElement content = JsonParser.parseString( new String( testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP ).get(0).toByteArray() ) );
+		assertEquals( true , content.isJsonObject() );
+		assertEquals( true , expectedResult.equals( content.getAsJsonObject() ) );
+		
+		JsonElement deviceStateContent = JsonParser.parseString( new String( testRunner.getFlowFilesForRelationship( EnrichData.DEVICE_STATE_RELATIONSHIP ).get(0).toByteArray() ) );
+		assertEquals( deviceStateContent.isJsonObject() , true );
+		assertEquals( expectedState.equals( deviceStateContent.getAsJsonObject() ) , true );  
+		System.out.println( deviceStateContent.toString() );
+	}
 
+	@Test
+	public void testDeviceStateDropThresholdDROP() throws IOException{
+		System.out.println( "######## " + testName() + " ########" );
+		
+		testRunner.setProperty( EnrichData.DEVICE_STATE_DROP_UPDATE_THRESHOLD , 
+								"1h" );
+		
+		addOwnershipResource( "id" , "broker:organization:", 
+				"src/test/resources/mock_in_ff/testOutputs.ff" , 
+				"src/test/resources/mock_ownership_response/ownership_mock.resp" );
+		addServicemapResource( "id" , serviceUriPrefix , 
+			"src/test/resources/mock_in_ff/testOutputs.ff" ,
+			"src/test/resources/mock_servicemap_response/testDeviceState.resp" );
+		
+		MockFlowFile inputFF = testRunner.enqueue( Paths.get( "src/test/resources/mock_in_ff/testDeviceState.ff" ) );
+		testRunner.run();
+		
+		TestUtils.logsToStderr( testRunner.getLogger() );
+		testRunner.assertTransferCount( EnrichData.DEVICE_STATE_RELATIONSHIP , 0 );
+	}
+	
+	@Test
+	public void testDeviceStateDropThresholdNODROP() throws IOException{
+		System.out.println( "######## " + testName() + " ########" );
+		
+		testRunner.setProperty( EnrichData.DEVICE_STATE_DROP_UPDATE_THRESHOLD , 
+								"3650d" );
+		
+		addOwnershipResource( "id" , "broker:organization:", 
+				"src/test/resources/mock_in_ff/testOutputs.ff" , 
+				"src/test/resources/mock_ownership_response/ownership_mock.resp" );
+		addServicemapResource( "id" , serviceUriPrefix , 
+			"src/test/resources/mock_in_ff/testOutputs.ff" ,
+			"src/test/resources/mock_servicemap_response/testDeviceState.resp" );
+		
+		MockFlowFile inputFF = testRunner.enqueue( Paths.get( "src/test/resources/mock_in_ff/testDeviceState.ff" ) );
+		testRunner.run();
+		
+		TestUtils.logsToStderr( testRunner.getLogger() );
+		testRunner.assertTransferCount( EnrichData.DEVICE_STATE_RELATIONSHIP , 1 );
+	}
 }

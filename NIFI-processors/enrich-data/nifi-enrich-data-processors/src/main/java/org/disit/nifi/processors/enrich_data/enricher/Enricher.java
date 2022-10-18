@@ -33,9 +33,11 @@ public abstract class Enricher {
 	public final static String DEFAULT_VALUE_NAME_PROPERTY_NAME = "value_name";
 	
 	public final static String VALUE_NAME_STR_SUFFIX = "_str";
+	public final static String VALUE_NAME_BOOL_SUFFIX = "_bool";
 	public final static String VALUE_NAME_OBJ_SUFFIX = "_obj";
-	public final static String VALUE_NAME_ARR_SUFFIX = "_arr";
-	public final static String VALUE_NAME_ARR_OBJ_SUFFIX = "_arr_obj";
+	public final static String VALUE_NAME_JSON_STR_SUFFIX = "_json_str";
+//	public final static String VALUE_NAME_ARR_SUFFIX = "_arr";
+//	public final static String VALUE_NAME_ARR_OBJ_SUFFIX = "_arr_obj";
 	
 	protected String valueFieldName;
 	protected String timestampFieldName;
@@ -108,9 +110,11 @@ public abstract class Enricher {
 		Set<String> names = new HashSet<>();
 		names.add( getValueFieldName() );
 		names.add( getValueFieldName().concat( VALUE_NAME_STR_SUFFIX ) );
+		names.add( getValueFieldName().concat( VALUE_NAME_BOOL_SUFFIX ) );
 		names.add( getValueFieldName().concat( VALUE_NAME_OBJ_SUFFIX ) );
-		names.add( getValueFieldName().concat( VALUE_NAME_ARR_SUFFIX ) );
-		names.add( getValueFieldName().concat( VALUE_NAME_ARR_OBJ_SUFFIX ) );
+		names.add( getValueFieldName().concat( VALUE_NAME_JSON_STR_SUFFIX ) );
+//		names.add( getValueFieldName().concat( VALUE_NAME_ARR_SUFFIX ) );
+//		names.add( getValueFieldName().concat( VALUE_NAME_ARR_OBJ_SUFFIX ) );
 		return names;
 	}
 	

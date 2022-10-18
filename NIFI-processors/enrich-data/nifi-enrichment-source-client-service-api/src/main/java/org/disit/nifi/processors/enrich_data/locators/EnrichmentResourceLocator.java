@@ -18,14 +18,21 @@
 package org.disit.nifi.processors.enrich_data.locators;
 
 import org.apache.nifi.flowfile.FlowFile;
+import org.apache.nifi.logging.ComponentLog;
 
 public interface EnrichmentResourceLocator {
 
-	public String getResourceLocation( String resourceReference ) throws EnrichmentResourceLocatorException;
+//	public String getResourceLocation( String resourceReference ) throws EnrichmentResourceLocatorException;
+//	
+//	public String getResourceLocation( FlowFile ff ) throws EnrichmentResourceLocatorException;
 	
-	public String getResourceLocation( FlowFile ff ) throws EnrichmentResourceLocatorException;
+	public ResourceLocations getResourceLocations( String resourceReference ) throws EnrichmentResourceLocatorException;
+	
+	public ResourceLocations getResourceLocations( FlowFile ff ) throws EnrichmentResourceLocatorException;
 	
 	public String buildRequestUrl( String resourceReference );
 	
 	public String buildRequestUrl( FlowFile ff ) throws EnrichmentResourceLocatorException;
+	
+	public void setLogger( ComponentLog logger );
 }

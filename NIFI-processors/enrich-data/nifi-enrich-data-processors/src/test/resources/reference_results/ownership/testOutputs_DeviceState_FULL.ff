@@ -2,7 +2,7 @@
    "BooleanTestAttr":{
       "data_type":"boolean",
       "value_unit":"",
-      "value_str":"true",
+      "value_bool":true,
       "value_name":"BooleanTestAttr"
    },
    "PM10":{
@@ -70,6 +70,54 @@
       "value_unit":"#",
       "value_str":"https://source.com/source",
       "value_name":"source"
+   },
+   "testNumericArray":{
+      "value_type":"status",
+      "data_type":"array",
+      "value_refresh_rate":"300",
+      "value_unit":"#",
+      "value":[1,2,3],
+      "value_name":"testNumericArray"
+   },
+   "testBooleanArray":{
+      "value_type":"status",
+      "data_type":"array",
+      "value_refresh_rate":"300",
+      "value_unit":"#",
+      "value_bool":[true,false,true],
+      "value_name":"testBooleanArray"
+   },
+   "testStringArray":{
+      "value_type":"status",
+      "data_type":"array",
+      "value_refresh_rate":"300",
+      "value_unit":"#",
+      "value_str":["one","two","three"],
+      "value_name":"testStringArray"
+   },
+   "testObjArray":{
+      "value_type":"status",
+      "data_type":"array",
+      "value_refresh_rate":"300",
+      "value_unit":"#",
+      "value_json_str": "[{\"a\":1,\"b\":\"two\",\"c\":true},{\"a\":2,\"b\":\"two\",\"c\":false}]",
+      "value_name":"testObjArray"
+   },
+   "testNullArray":{
+      "value_type":"status",
+      "data_type":"array",
+      "value_refresh_rate":"300",
+      "value_unit":"#",
+      "value": [null,null,null],
+      "value_name":"testNullArray"
+   },
+   "testMixedArray":{
+      "value_type":"status",
+      "data_type":"array",
+      "value_refresh_rate":"300",
+      "value_unit":"#",
+      "value_json_str": "[1,\"one\",true,{\"a\":1,\"b\":\"two\",\"c\":false}]",
+      "value_name":"testMixedArray"
    },
    "owner":"user",
    "date_time1sec":"2019-06-06T15:46:54.000Z",

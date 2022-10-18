@@ -28,7 +28,7 @@ import com.google.gson.JsonElement;
  */
 public interface EnrichmentSourceClient {
 
-	public JsonElement getEnrichmentData( String arg ) throws EnrichmentSourceException;
+	public JsonElement getEnrichmentData( String id ) throws EnrichmentSourceException;
 	
 	/**
 	 * @param arg1 prefix
@@ -36,11 +36,11 @@ public interface EnrichmentSourceClient {
 	 * @return
 	 * @throws EnrichmentSourceException
 	 */
-	public JsonElement getEnrichmentData( String arg1 , String arg2 ) throws EnrichmentSourceException;
+	public JsonElement getEnrichmentData( String id , String prefix ) throws EnrichmentSourceException;
 	
 	public void close() throws EnrichmentSourceException;
 	
-	public String buildRequestUrl( String arg1 , String arg2 ) throws UnsupportedEncodingException;
+	public String buildRequestUrl( String id , String prefix ) throws UnsupportedEncodingException;
 	
-	public String buildRequestUrl( String arg ) throws UnsupportedEncodingException;
+	public String buildRequestUrl( String id ) throws UnsupportedEncodingException;
 }

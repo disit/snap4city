@@ -16,6 +16,7 @@ public class EnrichmentResourceLocatorException extends Exception {
 	
 	public EnrichmentResourceLocatorException( String message , Throwable cause ) {
 		super( message , cause );
+		this.additionalInfos = new HashMap<>();
 	}
 	
 	public void addAdditionalInfo( String name , String value ) {

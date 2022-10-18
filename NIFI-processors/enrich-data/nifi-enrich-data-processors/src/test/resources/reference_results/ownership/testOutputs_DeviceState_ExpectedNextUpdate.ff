@@ -59,5 +59,6 @@
    "sensorId":"123456789",
    "latlon":"60.157337,24.91201",
    "date_time":"2019-06-06T15:46:54.930Z",
-   "organization":"MyOrg"
+   "organization":"MyOrg",
+   "expected_next_date_time":"2019-06-06T15:51:54.930Z"
 }

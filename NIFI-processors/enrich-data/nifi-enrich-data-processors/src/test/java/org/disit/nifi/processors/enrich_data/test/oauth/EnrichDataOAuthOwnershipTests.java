@@ -80,7 +80,7 @@ public class EnrichDataOAuthOwnershipTests extends EnrichDataOwnershipTests{
 		testRunner.setProperty( ownershipService , 
 			OwnershipControllerService.ELEMENT_ID_NAME , "elementId" );
 		testRunner.setProperty( ownershipService , 
-			OwnershipControllerService.ELEMENT_ID_PREFIX , "broker:organization:" );
+			OwnershipControllerService.ELEMENT_ID_PREFIX , "organization:broker:" );
 		testRunner.setProperty( ownershipService , 
 			OwnershipControllerService.OWNERSHIP_FIELDS , "username" );
 		testRunner.setProperty( ownershipService , 

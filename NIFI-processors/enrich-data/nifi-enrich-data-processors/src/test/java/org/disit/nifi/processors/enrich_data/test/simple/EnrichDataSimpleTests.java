@@ -123,7 +123,7 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 		testRunner.setProperty( EnrichData.OUTPUT_FF_CONTENT_FORMAT , EnrichData.OUTPUT_FF_CONTENT_FORMAT_VALUES[2] ); // Split JSON
 		
 		testRunner.run();
-		testRunner.assertTransferCount( EnrichData.SUCCESS_RELATIONSHIP , 8 );
+		testRunner.assertTransferCount( EnrichData.SUCCESS_RELATIONSHIP , 14 );
 		testRunner.assertTransferCount( EnrichData.ORIGINAL_RELATIONSHIP , 1 );
 		
 		JsonArray expectedResult = TestUtils.prepareExpectedResult( 

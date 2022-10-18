@@ -18,8 +18,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.nifi.util.LogMessage;
+import org.apache.nifi.util.MockComponentLog;
 import org.apache.nifi.util.MockFlowFile;
 
 import com.google.gson.Gson;
@@ -121,6 +125,25 @@ public class TestUtils {
     	return prettyOutResult.toString();
     }
     
+    public static String prettyOutFF( MockFlowFile outFF ) {
+        
+    	Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    	
+    	String prettyOutFFContent = gson.toJson( JsonParser.parseString( new String( outFF.toByteArray() ) ) );
+    	
+    	String prettyOutFFAttributes = outFF.getAttributes().entrySet().stream()
+       		 .map( entry -> { return entry.getKey() + " : " + entry.getValue(); } )
+       		 .reduce( (s1 , s2) -> { return s1 + "\n\t" + s2; } )
+       		 .get();
+    	
+    	StringBuilder prettyOutResult = new StringBuilder( "FF-Attributes:\n{\n\t" )
+    			.append( prettyOutFFAttributes )
+    			.append( "\n}\n\nFF-Content:\n" )
+    			.append( prettyOutFFContent );
+    	
+    	return prettyOutResult.toString();
+    }
+    
     public static String notPrettyOutFF( MockFlowFile outFF ) {
     	
     	String prettyOutFFAttributes = outFF.getAttributes().entrySet().stream()
@@ -135,5 +158,17 @@ public class TestUtils {
     	
     	return outResult.toString();
     	
+    }
+
+    public static void logsToStderr( MockComponentLog logger ) {
+    	List<LogMessage> logs = new ArrayList<>();
+		logs.addAll( logger.getTraceMessages() );
+		logs.addAll( logger.getDebugMessages() );
+		logs.addAll( logger.getInfoMessages() );
+		logs.addAll( logger.getWarnMessages() );
+		logs.addAll( logger.getErrorMessages() );
+		logs.stream().forEach( (LogMessage l) -> {
+			System.err.println( l.toString() );
+		});
     }
 }

@@ -133,6 +133,7 @@ public class EnrichDataTestBase {
     		String v = testRunner.getProcessContext().getProperty( p ).getValue();
     		if( !controllerServicesDescriptors.contains( p ) ) { // Do not validate controller services
 	    		ValidationResult r = p.validate( v , validationContext );
+	    		System.out.println( "Valid: " + r.isValid() + " | " + r.getExplanation() );
 	    		assertEquals( true , r.isValid() );
     		}
     	}

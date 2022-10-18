@@ -28,11 +28,13 @@ import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.nifi.flowfile.FlowFile;
+import org.apache.nifi.logging.ComponentLog;
 import org.apache.nifi.processor.ProcessContext;
 import org.disit.nifi.processors.enrich_data.enrichment_source.EnrichmentSourceException;
 import org.disit.nifi.processors.enrich_data.enrichment_source.http.HttpBaseClient;
 import org.disit.nifi.processors.enrich_data.locators.EnrichmentResourceLocator;
 import org.disit.nifi.processors.enrich_data.locators.EnrichmentResourceLocatorException;
+import org.disit.nifi.processors.enrich_data.locators.ResourceLocations;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -44,18 +46,17 @@ import com.google.gson.JsonParser;
 
 public class IOTDirectoryResourceLocator extends HttpBaseClient implements EnrichmentResourceLocator {
 
+	protected ComponentLog logger;
 	protected IOTDirectoryResourceLocatorConfig config;
-	protected JsonParser parser;
 	protected ResponseHandler<String> responseHandler;
 	
 	protected String staticRequestUrlPart;
 	
-	protected LoadingCache<String, String> locationsCache;
+	protected LoadingCache<String, ResourceLocations> locationsCache;
 	
 	protected IOTDirectoryResourceLocator( IOTDirectoryResourceLocatorConfig config , ProcessContext context ) {
 		super(context);
 		this.config = config;
-		this.parser = new JsonParser();
 		this.responseHandler = new BasicResponseHandler();
 		
 		this.staticRequestUrlPart = buildStaticRequestUrlPart();
@@ -68,23 +69,27 @@ public class IOTDirectoryResourceLocator extends HttpBaseClient implements Enric
 			cacheBuilder.expireAfterWrite( config.expireCacheEntriesAfterMillis , TimeUnit.MILLISECONDS );
 		}
 		
-		cacheBuilder.recordStats();
+//		cacheBuilder.recordStats();
 		this.locationsCache = cacheBuilder
 			.build(
-				new CacheLoader<String , String>(){				
+				new CacheLoader<String , ResourceLocations>(){
 					@Override
-					public String load(String subscriptionId) throws EnrichmentResourceLocatorException{
-						return fetchServiceUriPrefix( subscriptionId );
+					public ResourceLocations load(String subscriptionId) throws EnrichmentResourceLocatorException{
+						return fetchResourceLocations( subscriptionId );
 					}
 				}
 			);
-		
+	}
+	
+	@Override
+	public void setLogger( ComponentLog logger ) {
+		this.logger = logger;
 	}
 	
 	@Override 
-	public String getResourceLocation( FlowFile ff ) throws EnrichmentResourceLocatorException {
+	public ResourceLocations getResourceLocations( FlowFile ff ) throws EnrichmentResourceLocatorException {
 		String subId = subIdFromFlowFileAttributes(ff);
-		return getResourceLocation( subId );
+		return getResourceLocations( subId );
 	}
 
 	protected String subIdFromFlowFileAttributes( FlowFile ff ) throws EnrichmentResourceLocatorException {
@@ -102,30 +107,28 @@ public class IOTDirectoryResourceLocator extends HttpBaseClient implements Enric
 	}
 	
 	@Override
-	public String getResourceLocation( String resourceReference ) throws EnrichmentResourceLocatorException{
+	public ResourceLocations getResourceLocations( String resourceReference ) throws EnrichmentResourceLocatorException{
 		try {
-			String location = locationsCache.get( resourceReference );
-			System.out.println( locationsCache.stats() );
+			ResourceLocations location = locationsCache.get( resourceReference );
 			return location;
 		} catch( ExecutionException ex ) {
 			throw (EnrichmentResourceLocatorException) ex.getCause();
 		}
 	}
 	
-	public String fetchServiceUriPrefix( String subscriptionId ) throws EnrichmentResourceLocatorException {
+	public ResourceLocations fetchResourceLocations( String subscriptionId ) throws EnrichmentResourceLocatorException {
 		String requestUrl = buildRequestUrl( subscriptionId );
 		HttpGet get = new HttpGet( requestUrl );
 		HttpResponse iotDirectoryResponse;
 		try {
 			iotDirectoryResponse = executeRequest( get );
-		} catch( EnrichmentSourceException ex ) {
-			throw new EnrichmentResourceLocatorException( "Exception while fetching the service uri prefix.", ex );
+		}catch( EnrichmentSourceException ex ) {
+			throw new EnrichmentResourceLocatorException( "Exception while fetching the resource location.", ex );
 		}
-		
 		return processResponseBody( iotDirectoryResponse );
 	}
 	
-	protected String processResponseBody( HttpResponse response ) throws EnrichmentResourceLocatorException {		
+	protected ResourceLocations processResponseBody( HttpResponse response ) throws EnrichmentResourceLocatorException {
 		String responseBody;
 		ByteArrayOutputStream contentStream = new ByteArrayOutputStream();
 		
@@ -164,12 +167,17 @@ public class IOTDirectoryResourceLocator extends HttpBaseClient implements Enric
 			);
 		}
 		
+		if( responseBody == null ) {
+			throw new EnrichmentResourceLocatorException( "Null body in the response from the IOTDirectory service." );
+		}
+		
 		JsonElement iotDirectoryResponse;
 		try {
-			iotDirectoryResponse = parser.parse( responseBody );
+			iotDirectoryResponse = JsonParser.parseString( responseBody );
 		}catch( JsonParseException ex ) {
 			EnrichmentResourceLocatorException newEx = new EnrichmentResourceLocatorException( 
-				String.format( "%s while parsing the IOTDirectory service response body." , ex.getClass().getName() ) , 
+				String.format( "%s while parsing the IOTDirectory service response body." , 
+				ex.getClass().getName() ) , 
 				ex 
 			);
 			newEx.addAdditionalInfo( "IOTDirectory_response" , responseBody );
@@ -187,12 +195,55 @@ public class IOTDirectoryResourceLocator extends HttpBaseClient implements Enric
 			throw new EnrichmentResourceLocatorException( "The IOTDirectory response is not a JSON object: " + iotDirectoryResponse.toString() );
 		}
 		
-		JsonObject responseObj = iotDirectoryResponse.getAsJsonObject();
+		// service uri prefix
+		ResourceLocations locations = new ResourceLocations();
+		try {
+			String serviceUriPrefix = getResponseObjectElement( 
+				iotDirectoryResponse.getAsJsonObject() , 
+				config.getServiceUriPrefixResponsePath() );
+			locations.putLocation( 
+				ResourceLocations.Service.SERVICEMAP , 
+				serviceUriPrefix
+			);
+		} catch( EnrichmentResourceLocatorException ex ) {
+			StringBuilder msg = new StringBuilder( "Cannot retrieve the service uri prefix from the IOTDirectory response.\n" )
+				.append( ex.toString() );
+			logger.warn( msg.toString() );
+		}
+		
+		// ownership prefix
+		if( config.getOrganizationResponsePath() != null && 
+			config.getCBNameResponsePath() != null ) {
+			
+			try {
+				String organization = getResponseObjectElement(
+					iotDirectoryResponse.getAsJsonObject() ,
+					config.getOrganizationResponsePath()
+				);
+				String contextBrokerName = getResponseObjectElement(
+					iotDirectoryResponse.getAsJsonObject() ,
+					config.getCBNameResponsePath()
+				);
+				StringBuilder ownershipPrefix = new StringBuilder( organization )
+					.append( ":" ).append( contextBrokerName ).append( ":" );
+				locations.putLocation( 
+					ResourceLocations.Service.OWNERSHIP , 
+					ownershipPrefix.toString()
+				);
+			}catch( EnrichmentResourceLocatorException ex ) {
+				StringBuilder msg = new StringBuilder( "Cannot retrieve the ownership prefix form the IOTDirectory service response.\n" )
+					.append( ex.getMessage() );
+				logger.warn( msg.toString() );
+			}
+		}
+		return locations;		
+	}
+	
+	private String getResponseObjectElement( JsonObject responseObj , List<String> responsePath ) throws EnrichmentResourceLocatorException{
 		StringBuilder exploredPath = new StringBuilder("");
-		List<String> responsePath = config.getServiceUriPrefixResponsePath(); 
-				
+		
 		JsonElement curEl = responseObj;
-		String serviceUriPrefix = null;
+		String targetElement = null;
 		for( int i = 0 ; i < responsePath.size() ; i++ ) {
 			String nextPathEl = responsePath.get(i);
 			exploredPath.append( nextPathEl );
@@ -209,7 +260,7 @@ public class IOTDirectoryResourceLocator extends HttpBaseClient implements Enric
 						String.format( "The target field '%s' is not a string in the IOTDirectory response object: %s" , 
 							exploredPath.toString() , responseObj.toString() ) );
 				}
-				serviceUriPrefix = targetEl.getAsString();
+				targetElement = targetEl.getAsString();
 			} else {
 				if( !curEl.getAsJsonObject().get( nextPathEl ).isJsonObject() ){
 					throw new EnrichmentResourceLocatorException( 
@@ -222,8 +273,9 @@ public class IOTDirectoryResourceLocator extends HttpBaseClient implements Enric
 				exploredPath.append( "/" );
 			}
 		}
-		return serviceUriPrefix;
+		return targetElement;
 	}
+	
 	
 	protected String buildStaticRequestUrlPart() {
 		StringBuilder urlBuilder = new StringBuilder( config.getIotDirectoryUrl() );
@@ -241,6 +293,7 @@ public class IOTDirectoryResourceLocator extends HttpBaseClient implements Enric
 		return urlBuilder.toString();
 	}
 	
+	@Override
 	public String buildRequestUrl( String resourceReference ) {
 		return new StringBuilder( this.staticRequestUrlPart )
 				.append( "&" )
@@ -250,6 +303,7 @@ public class IOTDirectoryResourceLocator extends HttpBaseClient implements Enric
 				.toString();
 	}
 	
+	@Override
 	public String buildRequestUrl( FlowFile ff ) throws EnrichmentResourceLocatorException {
 		String subId = subIdFromFlowFileAttributes( ff );
 		return buildRequestUrl( subId );

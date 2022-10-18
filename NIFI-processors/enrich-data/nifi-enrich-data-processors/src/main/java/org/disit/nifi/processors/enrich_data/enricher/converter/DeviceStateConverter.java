@@ -17,15 +17,22 @@
 package org.disit.nifi.processors.enrich_data.enricher.converter;
 
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import org.apache.nifi.logging.ComponentLog;
 import org.disit.nifi.processors.enrich_data.enricher.EnrichUtils;
 import org.disit.nifi.processors.enrich_data.enricher.Enricher;
+import org.disit.nifi.processors.enrich_data.json_processing.JsonProcessingUtils;
+import org.disit.nifi.processors.enrich_data.logging.LoggingUtils;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 
 
 /**
@@ -47,16 +54,21 @@ public class DeviceStateConverter {
 	private Set<String> nonMeasureProperties;
 	private Set<String> valueFieldNames;
 	private Set<String> ignoredDeviceLvlProperties;
-//	private String idField;
+	
+	private String timestampFieldName;
+	private String updateFrequencyFieldName;
+	private final String NEXT_UPDATE_FIELD_PREFIX = "expected_next_";
+	
+	ComponentLog logger;
 	
 	/**
 	 * 
 	 * @param enricher a reference to the Enricher which produces the output on which this class operates.
 	 */
-//	public DeviceStateConverter( Enricher enricher , String idField ) {
-	public DeviceStateConverter( Enricher enricher , OutputMode outputMode ) {
-//		this.idField = idField;
+	public DeviceStateConverter( Enricher enricher , OutputMode outputMode , ComponentLog logger ) {
 		this.outputMode = outputMode;
+		this.logger = logger;
+		this.timestampFieldName = enricher.getTimestampFieldName();
 		
 		nonMeasureProperties = new HashSet<>();
 		if( !enricher.getDeviceIdNameMapping().isEmpty() )
@@ -77,6 +89,13 @@ public class DeviceStateConverter {
 				EnrichUtils.getTruncatedDateTimeFieldNames( enricher.getTimestampFieldName() ) 
 			);
 		}
+		
+		this.updateFrequencyFieldName = null;
+	}
+	
+	public DeviceStateConverter( Enricher enricher , OutputMode outputMode , ComponentLog logger , String updateFrequencyFieldName ) {
+		this( enricher , outputMode , logger );
+		this.updateFrequencyFieldName = updateFrequencyFieldName;
 	}
 	
 	/**
@@ -86,12 +105,14 @@ public class DeviceStateConverter {
 	 * @param additionalProperties the additional properties used to enrich the initial object.
 	 * @return a new JsonObject representing the srcObj in the "Device state" format.
 	 */
-	public JsonElement convert( JsonObject srcObj , Map<String , JsonElement> additionalProperties) {
+	public JsonElement convert( JsonObject srcObj , Map<String , JsonElement> additionalProperties ,
+								JsonElement responseRootEl ) {
 		
 		Set<String> toUpperLvlProperties = new HashSet<String>( nonMeasureProperties );
 		toUpperLvlProperties.addAll( additionalProperties.keySet() );		
 //		toUpperLvlProperties.stream().forEach( (p) -> { System.out.println( p ); });
 		
+		// Map device-level properties
 		Map<String , JsonElement> deviceLvlProperties = new HashMap<>();
 		srcObj.get( srcObj.keySet().iterator().next() )
 				 .getAsJsonObject().entrySet().stream().forEach(
@@ -108,13 +129,12 @@ public class DeviceStateConverter {
 			srcObj.get( measure ).getAsJsonObject().entrySet().forEach(
 				(Map.Entry<String , JsonElement> entry) -> {
 					
-					if( outputMode == OutputMode.FULL && !toUpperLvlProperties.contains( entry.getKey() ) ) {
+					if( outputMode == OutputMode.FULL && !toUpperLvlProperties.contains( entry.getKey() ) ) 
 						measureObj.add( entry.getKey() , entry.getValue() );
-					}
-					if( outputMode == OutputMode.MINIMAL && !toUpperLvlProperties.contains( entry.getKey() ) && valueFieldNames.contains( entry.getKey() ) ) {
-						measureObj.add( entry.getKey() , entry.getValue() );
-					}
 					
+					if( outputMode == OutputMode.MINIMAL && !toUpperLvlProperties.contains( entry.getKey() ) 
+														 && valueFieldNames.contains( entry.getKey() ) ) 
+						measureObj.add( entry.getKey() , entry.getValue() );
 				}
 			);
 			outputObj.add( measure , measureObj );
@@ -125,14 +145,72 @@ public class DeviceStateConverter {
 				outputObj.add( pName , pValue );
 		});
 		
-		// Add custom _id copied from the idField
-//		if( this.idField != null ) {
-//			if( outputObj.has( this.idField ) && outputObj.get( this.idField ).isJsonPrimitive() ) {
-//				outputObj.addProperty( "_id" , outputObj.get( this.idField ).getAsString() );
-//			}
-//		}
+		// Expected next update
+		if( this.updateFrequencyFieldName != null && !this.updateFrequencyFieldName.isEmpty() ) {
+			this.addNextUpdate(srcObj, responseRootEl, outputObj);
+		}
 		
 		return outputObj;
+	}
+	
+	private void addNextUpdate( JsonObject srcObj , JsonElement responseRootEl , JsonObject outputObj ) {
+		JsonObject responseRootObj;
+		if( responseRootEl.isJsonObject() )
+			responseRootObj = responseRootEl.getAsJsonObject();
+		else {
+			LoggingUtils.produceErrorObj( "Cannot calculate the next update time: the enrichment response ins not a JSON object. Skipping.")
+						.logAsWarning(logger);
+			return;
+		}
+			
+		try {
+//			JsonElement currentTimeEl = JsonProcessingUtils.getElementByPath(srcObj , timestampFieldName);
+			JsonElement currentTimeEl = JsonProcessingUtils.getElementByPath(outputObj , this.timestampFieldName);
+			JsonElement updateFrequency = JsonProcessingUtils.getElementByPath(responseRootObj, this.updateFrequencyFieldName);
+			if( currentTimeEl.isJsonPrimitive() && currentTimeEl.getAsJsonPrimitive().isString() ) {
+				OffsetDateTime currentTime = OffsetDateTime.parse( currentTimeEl.getAsJsonPrimitive().getAsString() );
+				
+				if( updateFrequency.isJsonPrimitive() ) {
+					JsonPrimitive freqPrimitive = updateFrequency.getAsJsonPrimitive();
+					long freq;
+					if( freqPrimitive.isNumber() ) {
+						freq = updateFrequency.getAsJsonPrimitive().getAsLong();
+					} else if( freqPrimitive.isString() ) {
+						freq = (long)Float.parseFloat( freqPrimitive.getAsString() );
+					} else {
+						LoggingUtils.produceErrorObj( String.format( "Cannot calculate the next update time: the '%s' field in the enrichment response must be a number or a string parsable as a number. Skipping." ,
+														this.updateFrequencyFieldName) )
+									.logAsWarning( logger );
+						return;
+					}
+					
+					if( freq > 0 ) {
+						outputObj.addProperty(
+							NEXT_UPDATE_FIELD_PREFIX + timestampFieldName ,
+							currentTime.plusSeconds( freq ).toString()
+						);
+					}else{
+						// Negative update frequency
+						LoggingUtils.produceErrorObj( "Cannot calculate the next update time: the parsed update frequency is negative. Skipping." )
+									.logAsWarning( logger );
+					}
+				}else {
+					LoggingUtils.produceErrorObj( String.format( "Cannot calculate the next update time: the '%s' field in the enrichment response is not a json primitive type. Skipping." ,
+													this.updateFrequencyFieldName) )
+								.logAsWarning( logger );
+				}
+			}else {
+				// CurrentTimeEl is not a string
+				LoggingUtils.produceErrorObj( String.format("Cannot calculate the next update time: the specified timestamp field '%s' is not a string. Skipping." , 
+												this.timestampFieldName ) )
+							.logAsWarning( logger );
+			}
+		}catch( DateTimeParseException | NoSuchElementException | NumberFormatException ex ) {
+			// The timestamp cannot be parsed
+			LoggingUtils.produceErrorObj( "Cannot calculate the next update time. Skipping." )
+						.withExceptionInfo( ex )
+						.logAsWarning( logger );
+		}
 	}
 
 }

@@ -21,6 +21,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -34,11 +37,11 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.naming.ConfigurationException;
 import javax.servlet.http.HttpServletResponse;
-import javax.sound.midi.MidiDevice.Info;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -76,6 +79,7 @@ import org.disit.nifi.processors.enrich_data.json_processing.JsonProcessingUtils
 import org.disit.nifi.processors.enrich_data.locators.EnrichmentResourceLocator;
 import org.disit.nifi.processors.enrich_data.locators.EnrichmentResourceLocatorException;
 import org.disit.nifi.processors.enrich_data.locators.EnrichmentResourceLocatorService;
+import org.disit.nifi.processors.enrich_data.locators.ResourceLocations;
 import org.disit.nifi.processors.enrich_data.logging.LoggingUtils;
 import org.disit.nifi.processors.enrich_data.logging.LoggingUtils.LoggableObject;
 import org.disit.nifi.processors.enrich_data.output_producer.ElasticsearchBulkIndexingOutputProducer;
@@ -86,12 +90,10 @@ import org.disit.nifi.processors.enrich_data.output_producer.SplitObjectOutputPr
 import com.google.common.net.MediaType;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSyntaxException;
 
 @Tags({"snap4city" , "servicemap" , "enrichment","enrich"})
 @CapabilityDescription("This processor enirches incoming data from a broker subscription with informations retrieved from Servicemap." )
@@ -214,7 +216,9 @@ public class EnrichData extends AbstractProcessor {
 		  	"NODE_CONFIG_FILE_PATH" , 
 		  	"ATTEMPT_STRING_VALUES_PARSING" ,
 		  	"ORIGINAL_FLOW_FILE_ATTRIBUTES_AUG" ,
-		  	"DEVICE_STATE_OUTPUT_FORMAT"
+		  	"DEVICE_STATE_OUTPUT_FORMAT" ,
+		  	"DEVICE_STATE_UPDATE_FREQUENCY_FIELD",
+		  	"DEVICE_STATE_DROP_UPDATE_THRESHOLD"
 		) 
 	);
 	
@@ -336,16 +340,6 @@ public class EnrichData extends AbstractProcessor {
             .defaultValue("")
             .addValidator(Validator.VALID)
             .build();
-    
-    // Uri prefix form flow file content object property
-//    public static final PropertyDescriptor URI_PREFIX_FROM_ATTR_NAME = new PropertyDescriptor
-//            .Builder().name( "URI_PREFIX_FROM_ATTR_NAME" )
-//            .displayName( "Service uri prefix from attribute name" )
-//            .description( "If this property is set the processor first looks for an attribute with the specified name in the input flow file to parse the service uri prefix from. Otherwise it uses the configured 'Enrichment Source Client Service'." )
-//            .required(false)
-//            .defaultValue("")
-//            .addValidator(Validator.VALID)
-//            .build();
     
     // Value field (flow file content object)
     public static final PropertyDescriptor VALUE_FIELD_NAME = new PropertyDescriptor
@@ -524,7 +518,25 @@ public class EnrichData extends AbstractProcessor {
     		.defaultValue( DeviceStateConverter.OutputMode.MINIMAL.toString() )
     		.addValidator( StandardValidators.NON_EMPTY_VALIDATOR )
     		.build();
-    		
+    
+    public static final PropertyDescriptor DEVICE_STATE_UPDATE_FREQUENCY_FIELD = new PropertyDescriptor
+    		.Builder().name( "DEVICE_STATE_UPDATE_FREQUENCY_FIELD" )
+    		.displayName( "Update frequency field" )
+    		.description( "This property specifies the path of an attribute in the enrichment response which contains the time (in seconds) to the next sensor update. This time is added to the parsed timestamp to produce a field, in the device state, prefixed with 'expected_next_' which will contain the expected next update time. " )
+    		.required( false )
+    		.defaultValue("")
+    		.addValidator( Validator.VALID )
+    		.build();
+    
+    public static final PropertyDescriptor DEVICE_STATE_DROP_UPDATE_THRESHOLD = new PropertyDescriptor
+    		.Builder().name( "DEVICE_STATE_DROP_UPDATE_THRESHOLD" )
+    		.displayName( "Drop device state update threshold" )
+    		.description("This property specifies a threshold to drop the device state if the timestamp contained in it is older than the current time minus the quantity specified by this property. Leave this property not set to keep every device state update." )
+    		.required(false)
+//    		.addValidator( StandardValidators.createTimePeriodValidator( 1 , TimeUnit.SECONDS , 3650 , TimeUnit.DAYS ) )
+    		.addValidator(EnrichDataValidators.timePeriodValidatorOrNotSet(1, TimeUnit.SECONDS, 3650, TimeUnit.DAYS) )
+    		.build();
+    
     		
     // Relationships
     public static final Relationship SUCCESS_RELATIONSHIP = new Relationship.Builder()
@@ -587,7 +599,9 @@ public class EnrichData extends AbstractProcessor {
 	        NODE_CONFIG_FILE_PATH ,					// Other
 	        ATTEMPT_STRING_VALUES_PARSING ,			// Fields
 	        ORIGINAL_FLOW_FILE_ATTRIBUTES_AUG ,		// Output
-	        DEVICE_STATE_OUPUT_FORMAT				// Output
+	        DEVICE_STATE_OUPUT_FORMAT ,				// Output - Device state
+	        DEVICE_STATE_UPDATE_FREQUENCY_FIELD	, 	// Output - Device state
+	        DEVICE_STATE_DROP_UPDATE_THRESHOLD		// Output - Device state
     	) );
     	
     	final Set<Relationship> rels = new HashSet<>();
@@ -615,7 +629,7 @@ public class EnrichData extends AbstractProcessor {
     private JsonObject defaultOwnershipProperties;
     
     // Servicemap configuration properties
-    private String serviceUriPrefixAttrName;
+//    private String serviceUriPrefixAttrName;
     
     // Timestamp properties
     private String timestampFromContentPropertyName;
@@ -653,11 +667,12 @@ public class EnrichData extends AbstractProcessor {
     // Enricher
     private Enricher enricher;
     
-    // Converter
+    // Device state converter
     private DeviceStateConverter deviceStateConverter;
     // Determined by the check on the auto-termination of the 
     // DEVICE_STATE relationship
-    private boolean outputDeviceState; 
+    private boolean outputDeviceState;
+    private long deviceStateDropThreshold = 0;
     
     // Output properties
     private String esIndex;
@@ -687,9 +702,6 @@ public class EnrichData extends AbstractProcessor {
     // Logger
     private ComponentLog logger;
     
-    //GSON parser
-    private JsonParser parser;
-    
     @Override
     protected void init(final ProcessorInitializationContext context) {
         final List<PropertyDescriptor> descriptors = new ArrayList<PropertyDescriptor>();
@@ -704,7 +716,6 @@ public class EnrichData extends AbstractProcessor {
         descriptors.add( TIMESTAMP_FIELD_NAME );
         descriptors.add( TIMESTAMP_FROM_CONTENT_PROPERTY_NAME );
         descriptors.add( TIMESTAMP_FROM_CONTENT_PROPERTY_VALUE );
-//        descriptors.add( URI_PREFIX_FROM_ATTR_NAME );
         descriptors.add( VALUE_FIELD_NAME );
         descriptors.add( ENRICHMENT_RESPONSE_BASE_PATH );
         descriptors.add( LATLON_PRIORITY );
@@ -723,6 +734,8 @@ public class EnrichData extends AbstractProcessor {
         descriptors.add( ATTEMPT_STRING_VALUES_PARSING );
         descriptors.add( ORIGINAL_FLOW_FILE_ATTRIBUTES_AUG );
         descriptors.add( DEVICE_STATE_OUPUT_FORMAT );
+        descriptors.add( DEVICE_STATE_UPDATE_FREQUENCY_FIELD );
+        descriptors.add( DEVICE_STATE_DROP_UPDATE_THRESHOLD );
         this.descriptors = Collections.unmodifiableList(descriptors);
 
         final Set<Relationship> relationships = new HashSet<Relationship>();
@@ -771,9 +784,6 @@ public class EnrichData extends AbstractProcessor {
     	// Set up processor
     	this.logger = getLogger();
     	
-    	// JSON parser
-    	this.parser = new JsonParser();
-    	
     	// Controller service
     	//
     	// Do NOT cache client here, otherwise if we edit controller settings configs
@@ -811,6 +821,7 @@ public class EnrichData extends AbstractProcessor {
     		
     		
 			this.enrichmentResourceLocator = enrichmentResourceLocatorService.getResourceLocator(context);
+			this.enrichmentResourceLocator.setLogger( logger );
     	}else {
     		this.enrichmentResourceLocatorService = null;
     		this.enrichmentResourceLocator = null;
@@ -852,8 +863,7 @@ public class EnrichData extends AbstractProcessor {
     	// Default ownership properties
     	String defaultOwnershpVal = context.getProperty( DEFAULT_OWNERSHIP_PROPERTIES ).getValue();
     	if( defaultOwnershpVal != null && !defaultOwnershpVal.isEmpty() )
-    		this.defaultOwnershipProperties = parser.parse( defaultOwnershpVal )
-    											    .getAsJsonObject();
+    		this.defaultOwnershipProperties = JsonParser.parseString( defaultOwnershpVal ).getAsJsonObject();
     	else this.defaultOwnershipProperties = new JsonObject();
     		
     	
@@ -863,7 +873,7 @@ public class EnrichData extends AbstractProcessor {
     	
     	this.deviceIdValuePrefixSubst = new HashMap<>();
     	if( !context.getProperty( DEVICE_ID_VALUE_PREFIX_SUBST ).getValue().isEmpty() ) {
-    		JsonElement mappingRootEl = this.parser.parse( context.getProperty( DEVICE_ID_VALUE_PREFIX_SUBST ).getValue() );
+    		JsonElement mappingRootEl = JsonParser.parseString( context.getProperty( DEVICE_ID_VALUE_PREFIX_SUBST ).getValue() );
     		if( mappingRootEl.isJsonObject() ) {
     			mappingRootEl.getAsJsonObject().entrySet().stream()
     						 .forEach( (Map.Entry<String , JsonElement> subst) -> {
@@ -891,7 +901,7 @@ public class EnrichData extends AbstractProcessor {
     	if( innerLatlonConfigVal.isEmpty() ) {
     		innerLatlonConfig = new JsonObject();
     	}else {
-    		innerLatlonConfig = parser.parse( innerLatlonConfigVal ).getAsJsonObject();
+    		innerLatlonConfig = JsonParser.parseString( innerLatlonConfigVal ).getAsJsonObject();
     	}
     	
     	
@@ -976,9 +986,6 @@ public class EnrichData extends AbstractProcessor {
     		this.timestampFromContent = true;
     	else
     		this.timestampFromContent = false;
-    	
-    	// Service URI from content
-//    	this.serviceUriPrefixAttrName = context.getProperty( URI_PREFIX_FROM_ATTR_NAME ).getValue();
 
     	// Output configs
     	//
@@ -1074,7 +1081,6 @@ public class EnrichData extends AbstractProcessor {
     	
     	// DeviceState
     	// determine the device state output mode
-    	System.out.println( "DEVICE_STATE_OUTPUT_FORMAT: " + context.getProperty( DEVICE_STATE_OUPUT_FORMAT ).getValue() );
     	DeviceStateConverter.OutputMode deviceStateOutputMode = DeviceStateConverter.OutputMode.valueOf( 
     		context.getProperty( DEVICE_STATE_OUPUT_FORMAT ).getValue() );
     	
@@ -1084,7 +1090,16 @@ public class EnrichData extends AbstractProcessor {
     	// device state operations when the relation is auto-terminated.
     	if( context.hasConnection( DEVICE_STATE_RELATIONSHIP ) ) {
     		this.outputDeviceState = true;
-    		this.deviceStateConverter = new DeviceStateConverter( enricher , deviceStateOutputMode );
+    		if( context.getProperty( DEVICE_STATE_UPDATE_FREQUENCY_FIELD).isSet() ) {
+    			String updateFrequencyFieldName = context.getProperty(DEVICE_STATE_UPDATE_FREQUENCY_FIELD).getValue();
+    			this.deviceStateConverter = new DeviceStateConverter(enricher, deviceStateOutputMode, logger, updateFrequencyFieldName);
+    		}else {
+    			this.deviceStateConverter = new DeviceStateConverter( enricher , deviceStateOutputMode , logger );
+    		}
+    		if( context.getProperty( DEVICE_STATE_DROP_UPDATE_THRESHOLD ).isSet() ) {
+    			this.deviceStateDropThreshold = context.getProperty(DEVICE_STATE_DROP_UPDATE_THRESHOLD)
+    												   .asTimePeriod(TimeUnit.SECONDS).longValue();
+    		}
     	}else {
     		this.outputDeviceState = false;
     	}
@@ -1093,7 +1108,8 @@ public class EnrichData extends AbstractProcessor {
     	originalFFAttributesAugMapping =  new HashMap<>();
     	String augMappingPropVal = context.getProperty( ORIGINAL_FLOW_FILE_ATTRIBUTES_AUG ).getValue();
     	if( !augMappingPropVal.isEmpty() ) {
-    		JsonObject propObj = parser.parse( augMappingPropVal ).getAsJsonObject();
+//    		JsonObject propObj = parser.parse( augMappingPropVal ).getAsJsonObject();
+    		JsonObject propObj = JsonParser.parseString( augMappingPropVal ).getAsJsonObject();
     		for( Map.Entry<String , JsonElement> prop : propObj.entrySet() ) {
     			originalFFAttributesAugMapping.put(
     				prop.getKey() , 
@@ -1105,8 +1121,6 @@ public class EnrichData extends AbstractProcessor {
     
     /**
      * Loads the configurations from the node configuration file.
-     * 
-     * TODO: allows for skipping node file configs. Currently it throws an IOException if the file does not exists.
      * 
      * @param context the processor context.
      * @throws ConfigurationException in case of IOException during file operations.
@@ -1127,8 +1141,6 @@ public class EnrichData extends AbstractProcessor {
             		}
             	});
         	} catch ( IOException ex ) {
-//        		throw new ConfigurationException( String.format( "IOException while parsing file '%s': %s" , filePath , ex.getMessage() ) );
-//        		logger.info( "The specified 'Node config file path property' does not point to a valid configuration file. Using default configurations." );
         		LoggingUtils.produceErrorObj( "The specified 'Node config file path property' does not point to a valid configuration file. Using default configurations." )
         			.withExceptionInfo( ex )
         			.logAsWarning( logger );
@@ -1172,10 +1184,9 @@ public class EnrichData extends AbstractProcessor {
         String flowFileContent = contentBytes.toString();
         
         // Content parsing
-//        JsonElement rootEl = parser.parse( flowFileContent );
         JsonElement rootEl;
         try {
-        	rootEl = parser.parse( flowFileContent );
+        	rootEl = JsonParser.parseString( flowFileContent );
         }catch( JsonParseException e ) {
         	String reason = "The flow file content is not parsable as Json.";
         	LoggingUtils.produceErrorObj( reason )
@@ -1194,8 +1205,6 @@ public class EnrichData extends AbstractProcessor {
 						.withProperty( "ff-uuid" , uuid )
 						.logAsError( logger );
 			// Route to failure
-//			flowFile = session.putAttribute( flowFile , "failure" , reason );
-//			session.transfer( flowFile , FAILURE_RELATIONSHIP );
 			routeToRelationship( flowFile , FAILURE_RELATIONSHIP , session, 
 				new ImmutablePair<String , String>( "failure" , reason ) );
 			return;
@@ -1211,8 +1220,6 @@ public class EnrichData extends AbstractProcessor {
 						.withProperty( "ff-uuid" , uuid )
 						.logAsError( logger );
 			// Route to failure
-//			flowFile = session.putAttribute( flowFile , "failure" , reason );
-//			session.transfer( flowFile , FAILURE_RELATIONSHIP );
 			routeToRelationship( flowFile , FAILURE_RELATIONSHIP , session, 
 					new ImmutablePair<String,String>( "failure" , reason ) );
 			return;
@@ -1237,12 +1244,14 @@ public class EnrichData extends AbstractProcessor {
 			timestamp = rootObject.get( this.timestampFieldName ).getAsString();
 		}
 		
-		// SERVICE URI PREFIX
+		// EnrichmentResourceLocator
 		// -----
-		String uriPrefix = null;
+		// Initialize empty resource locations
+		ResourceLocations resourceLocations = new ResourceLocations();
+//		String uriPrefix = null;
 		if( this.enrichmentResourceLocator != null ) {
 			try {
-				uriPrefix = enrichmentResourceLocator.getResourceLocation( flowFile );
+				resourceLocations = enrichmentResourceLocator.getResourceLocations( flowFile );
 			} catch (EnrichmentResourceLocatorException e) {
 				StringBuilder msg = new StringBuilder( e.getMessage() );
 				List<Pair<String,String>> errorAttributes = new ArrayList<>();
@@ -1274,27 +1283,25 @@ public class EnrichData extends AbstractProcessor {
 					return;
 				}
 				
-				msg.append( " The enrichment data will be retrieved using the service uri prefix configured in the Enrichment Source." );
+				msg.append( " The enrichment data will be retrieved using the service uri prefix configured in the Enrichment Source and the default ownership prefix configured in the Ownership Controller Service." );
 				errorObj.setReason( msg.toString() );
 				errorObj.logAsError( logger );
 			}
 		}
 		
-		
-		// Service uri prefix from attributes handling
-//		if( uriPrefix == null ) {
-//			if( !this.serviceUriPrefixAttrName.isEmpty() ) {
-//				// If the input ff does not contain such attribute the getAttribute() returns null
-//				uriPrefix = flowFile.getAttribute( this.serviceUriPrefixAttrName );
-//			}
-//		}
 		// -----
 		
 		// Get enrichment data
 		JsonElement responseRootEl;
 		try {
-			if( uriPrefix != null )
-				responseRootEl = enrichmentSourceClient.getEnrichmentData( uriPrefix , deviceId );
+//			if( uriPrefix != null )
+//				responseRootEl = enrichmentSourceClient.getEnrichmentData( uriPrefix , deviceId );
+//			else
+//				responseRootEl = enrichmentSourceClient.getEnrichmentData( deviceId );
+			if( resourceLocations.hasLocationForService( ResourceLocations.Service.SERVICEMAP ) )
+				responseRootEl = enrichmentSourceClient.getEnrichmentData( 
+					resourceLocations.getLocationForService( ResourceLocations.Service.SERVICEMAP ) , 
+					deviceId );
 			else
 				responseRootEl = enrichmentSourceClient.getEnrichmentData( deviceId );
 		} catch (EnrichmentSourceException e) {
@@ -1323,8 +1330,14 @@ public class EnrichData extends AbstractProcessor {
 			
 			String requestUrl = null;
 			try {
-				if( uriPrefix != null )
-					requestUrl = enrichmentSourceClient.buildRequestUrl( uriPrefix , deviceId );
+//				if( uriPrefix != null )
+//					requestUrl = enrichmentSourceClient.buildRequestUrl( uriPrefix , deviceId );
+//				else
+//					requestUrl = enrichmentSourceClient.buildRequestUrl( deviceId );
+				if( resourceLocations.hasLocationForService( ResourceLocations.Service.SERVICEMAP ) )
+					requestUrl = enrichmentSourceClient.buildRequestUrl( 
+						resourceLocations.getLocationForService( ResourceLocations.Service.SERVICEMAP ) , 
+						deviceId );
 				else
 					requestUrl = enrichmentSourceClient.buildRequestUrl( deviceId );
 			} catch( UnsupportedEncodingException ue) { requestUrl = ""; }
@@ -1340,21 +1353,26 @@ public class EnrichData extends AbstractProcessor {
 		//Get ownership data
 		JsonObject ownershipResponseObj = null;
 		if( this.ownershipClient != null ) {
-			try {
-				JsonElement ownershipResponseRootEl = ownershipClient.getEnrichmentData( deviceId );
+			try {				
+				JsonElement ownershipResponseRootEl; 
+				if( resourceLocations.hasLocationForService( ResourceLocations.Service.OWNERSHIP ) ) {
+					ownershipResponseRootEl = ownershipClient.getEnrichmentData(
+						deviceId ,
+						resourceLocations.getLocationForService( ResourceLocations.Service.OWNERSHIP ) );
+				}else
+					ownershipResponseRootEl = ownershipClient.getEnrichmentData( deviceId );
+				
 				if( !ownershipResponseRootEl.isJsonObject() )
 					throw new EnrichmentSourceException( "The ownership response is not a valid json object." );
 				
 				ownershipResponseObj = ownershipResponseRootEl.getAsJsonObject();
-				
 				// Add defaults if not in ownership service response
-				if( this.defaultOwnershipProperties.entrySet().isEmpty() )
-					for(Map.Entry<String, JsonElement> dProp : this.defaultOwnershipProperties.entrySet() ) {
-						if( !ownershipResponseObj.has( dProp.getKey() ) )
-							ownershipResponseObj.add( dProp.getKey() , dProp.getValue() );
-					}
+//				if( !this.defaultOwnershipProperties.entrySet().isEmpty() )
+//					for(Map.Entry<String, JsonElement> dProp : this.defaultOwnershipProperties.entrySet() ) {
+//						if( !ownershipResponseObj.has( dProp.getKey() ) )
+//							ownershipResponseObj.add( dProp.getKey() , dProp.getValue() );
+//					}
 			} catch (EnrichmentSourceException ex) {
-				
 				if( !this.ownershipRouteToFailureOnError ) {
 					 // Default ownership properties
 					ownershipResponseObj = this.defaultOwnershipProperties.deepCopy();
@@ -1383,7 +1401,6 @@ public class EnrichData extends AbstractProcessor {
 		String latlonStr;
 		JsonObject enrichmentObj;
 		try {
-//			responseRootEl = parser.parse( responseBody );		
 			enrichmentObj = getEnrichmentObject( enrichmentResponseBasePath , responseRootEl );
 			latlonStr = getLatLonString( this.enrichmentLatLonPath , responseRootEl ); // Coordinates from the enrichment response object, always retrieved
 		} catch( ProcessException ex ) {
@@ -1395,10 +1412,6 @@ public class EnrichData extends AbstractProcessor {
 						.logAsError( logger );
 			
 			// Route to failure
-//			flowFile = session.putAttribute( flowFile , "failure" , reason );
-//			flowFile = session.putAttribute( flowFile , "failure.cause", ex.toString() );
-//			flowFile = session.putAttribute( flowFile , "deviceId" , deviceId );
-//			session.transfer( flowFile , FAILURE_RELATIONSHIP );
 			routeToRelationship( flowFile , FAILURE_RELATIONSHIP , session ,
 				new ImmutablePair<String , String>( "failure" , reason ) ,
 				new ImmutablePair<String , String>( "failure.cause" , ex.toString()) );
@@ -1419,14 +1432,11 @@ public class EnrichData extends AbstractProcessor {
 		}
 					
 		// Enrichment
-		//
+		// uses the configured enricher implementation
 		try {
-			// Use configured enricher implementation
-//			Map<String, JsonElement> additionalProperties = new TreeMap<>();
-
 			StringBuilder serviceUriPropertyValue = new StringBuilder("");
-			if( uriPrefix != null )
-				serviceUriPropertyValue.append( uriPrefix );
+			if( resourceLocations.hasLocationForService( ResourceLocations.Service.SERVICEMAP ) )
+				serviceUriPropertyValue.append( resourceLocations.getLocationForService( ResourceLocations.Service.SERVICEMAP ) );
 			else if( this.defaultServiceUriPrefix != null )
 				serviceUriPropertyValue.append( this.defaultServiceUriPrefix );
 			if( !serviceUriPropertyValue.toString().endsWith("/") )
@@ -1468,14 +1478,9 @@ public class EnrichData extends AbstractProcessor {
 			outList.stream().forEach( (FlowFile ff) -> {
 					
 				// Additional ff attributes 
-//				ff = session.putAttribute( ff , "requestUrl" , requestUrl );
-//				ff = session.putAttribute( ff , "deviceId" , deviceId );
-//				ff = session.putAttribute( ff , "timestampSource" , this.enricher.getLastTimestampSource() );
-				
 				ff = session.putAllAttributes( ff , additionalFieldsErrors );
 				
 				//Route to success
-//					session.transfer( ff , SUCCESS_RELATIONSHIP );
 				routeToRelationship( ff , SUCCESS_RELATIONSHIP , session , 
 					new ImmutablePair<String, String>( "timestampSource" , this.enricher.getLastTimestampSource() ) 
 				);
@@ -1483,24 +1488,33 @@ public class EnrichData extends AbstractProcessor {
 			
 			// Device State
 			if( outputDeviceState ) {
-				JsonElement deviceState = deviceStateConverter.convert( rootObject , additionalProperties );
-				
-				FlowFile deviceStateFF = session.clone( originalFF );
-				deviceStateFF = session.putAllAttributes( deviceStateFF , additionalFieldsErrors );
-				// Write flow file content 
-				deviceStateFF = session.write( deviceStateFF , new OutputStreamCallback() {
-					@Override
-					public void process(OutputStream out) throws IOException {
-						out.write( deviceState.toString().getBytes() );
-					}
-				});				
-				deviceStateFF = session.putAttribute( deviceStateFF , 
-						"serviceUri" , deviceState.getAsJsonObject().get("serviceUri").getAsString() );
-				deviceStateFF = session.putAttribute( deviceStateFF , 
-						"mime.type" , MediaType.JSON_UTF_8.toString() );
-
-				routeToRelationship( deviceStateFF , DEVICE_STATE_RELATIONSHIP , session , 
-					new ImmutablePair<String , String>( "timestampSource" , this.enricher.getLastTimestampSource() ) );
+				JsonElement deviceState = deviceStateConverter.convert( 
+					rootObject , additionalProperties ,
+					responseRootEl );
+				// NOTE: the check on the timestamp for the device state drop must be done 
+				// on the result of the conversion because the enricher may use a different timestamp
+				// (if configured to pick the timestamp from a measure)
+				if( this.deviceStateDropThreshold == 0 || 
+					(this.deviceStateDropThreshold > 0 && 
+					ChronoUnit.SECONDS.between( getTimestamp(deviceState.getAsJsonObject()) , 
+						OffsetDateTime.now(ZoneOffset.UTC) ) <= this.deviceStateDropThreshold ) ) {
+					// Create and route the device state flow file to the dedicated relationship
+					FlowFile deviceStateFF = session.clone( originalFF );
+					deviceStateFF = session.putAllAttributes( deviceStateFF , additionalFieldsErrors );
+					// Write flow file content 
+					deviceStateFF = session.write( deviceStateFF , new OutputStreamCallback() {
+						@Override
+						public void process(OutputStream out) throws IOException {
+							out.write( deviceState.toString().getBytes() );
+						}
+					});				
+					deviceStateFF = session.putAttribute( deviceStateFF , 
+							"serviceUri" , deviceState.getAsJsonObject().get("serviceUri").getAsString() );
+					deviceStateFF = session.putAttribute( deviceStateFF , 
+							"mime.type" , MediaType.JSON_UTF_8.toString() );
+					routeToRelationship( deviceStateFF , DEVICE_STATE_RELATIONSHIP , session , 
+						new ImmutablePair<String , String>( "timestampSource" , this.enricher.getLastTimestampSource() ) );
+				} // Otherwise the device state is ignored
 			}
 			
 			//Original flow file augmentation
@@ -1533,14 +1547,35 @@ public class EnrichData extends AbstractProcessor {
 					    .logAsError( logger );
 			
 			// Route to failure
-//			flowFile = session.putAttribute( flowFile , "failure" , ex.getMessage() );
-//			flowFile = session.putAttribute( flowFile , "failure.cause" , ex.toString() );
-//			flowFile = session.putAttribute( flowFile , "deviceId" , deviceId );
-//			session.transfer( flowFile , FAILURE_RELATIONSHIP );
 			routeToRelationship( flowFile , FAILURE_RELATIONSHIP , session , 
 				new ImmutablePair<String , String>( "failure" , ex.getMessage()) ,
 				new ImmutablePair<String , String>( "failure.cause" , ex.toString()) );
 		}
+    }
+    
+    /**
+     * Return the timestamp property content from the supplied object.
+     * The timestamp property name is the one configured for the processor.
+     */
+    private OffsetDateTime getTimestamp( JsonObject rootObj ) throws NoSuchElementException{
+    	if( rootObj.has(timestampFieldName) ) {
+    		JsonElement timestampEl = rootObj.get(timestampFieldName);
+    		if( timestampEl.isJsonPrimitive() ) {
+    			JsonPrimitive timestampPr = timestampEl.getAsJsonPrimitive();
+    			if( timestampPr.isString() ) {
+    				return OffsetDateTime.parse(timestampPr.getAsString());
+    			}else {
+					throw new NoSuchElementException( String.format( "The timestamp field field '%s' inside the rootObject is not a string." ,
+	    	    			timestampFieldName ) );
+    			}
+    		}else {
+    			throw new NoSuchElementException( String.format( "The timestamp field field '%s' inside the rootObject is not a JsonPrimitive." ,
+    	    			timestampFieldName ) );
+    		}
+    	}else {
+    		throw new NoSuchElementException( String.format( "Cannot find the timestamp field '%s' inside the rootObject." ,
+    			timestampFieldName ) );
+    	}
     }
     
     /**
@@ -1818,12 +1853,8 @@ public class EnrichData extends AbstractProcessor {
     }
     
     /**
-     * Routes flow files to the failure relationship.
-     * 
-     * @param flowFile the flow file to be routed to the failure relationship.
-     * @param session the process session.
-     * @param reason the failure reason.
-     * @param additionalAttributes additional key-value pairs wich will be added as attributes to the flow file routed to failure.
+     * Routes the flow file to the target relationship adding the additional
+     * attributes supplied if any.
      */
     private void routeToRelationship( FlowFile flowFile , Relationship rel , ProcessSession session ,
     							 	  Pair<String , String>... additionalAttributes ) {

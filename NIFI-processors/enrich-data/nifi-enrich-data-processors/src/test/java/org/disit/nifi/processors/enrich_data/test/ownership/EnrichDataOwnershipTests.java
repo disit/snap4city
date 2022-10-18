@@ -53,7 +53,7 @@ public class EnrichDataOwnershipTests extends EnrichDataTestBase{
 		testRunner.addControllerService( csName , ownershipService );
 		testRunner.setProperty( ownershipService , OwnershipControllerService.OWNERSHIP_API_URL , ownershipUrl );
     	testRunner.setProperty( ownershipService , OwnershipControllerService.ELEMENT_ID_NAME , "elementId" );
-    	testRunner.setProperty( ownershipService , OwnershipControllerService.ELEMENT_ID_PREFIX , "broker:organization:" );
+    	testRunner.setProperty( ownershipService , OwnershipControllerService.ELEMENT_ID_PREFIX , "organization:broker:" );
     	testRunner.setProperty( ownershipService , OwnershipControllerService.OWNERSHIP_FIELDS , "username" );
     	testRunner.setProperty( ownershipService , OwnershipControllerService.FIELDS_MAPPING , "{\"username\":\"owner\"}" );
     	testRunner.setProperty( ownershipService , "elementType" , "IOTID" );
@@ -95,7 +95,7 @@ public class EnrichDataOwnershipTests extends EnrichDataTestBase{
 	@Test
 	public void testOwnership() throws IOException {
 		System.out.println( "######## " + testName() + " ########" );
-		addOwnershipResource( "id" , "broker:organization:", 
+		addOwnershipResource( "id" , "organization:broker:", 
 			"src/test/resources/mock_in_ff/testOutputs.ff" , 
 			"src/test/resources/mock_ownership_response/ownership_mock.resp" );
 		addServicemapResource( "id" , serviceUriPrefix , 
@@ -112,7 +112,9 @@ public class EnrichDataOwnershipTests extends EnrichDataTestBase{
 			"src/test/resources/reference_results/ownership/testOutputs_ownershipJsonObject.ref" , 
 			inputFF , parser ).getAsJsonObject();
 		
-		JsonElement content = parser.parse( new String( testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP ).get(0).toByteArray() ) );
+		MockFlowFile outFF = testRunner.getFlowFilesForRelationship(EnrichData.SUCCESS_RELATIONSHIP).get(0);
+		System.out.println( TestUtils.prettyOutFF( outFF ) );
+		JsonElement content = parser.parse( new String( outFF.toByteArray() ) );
 		assertEquals( true , content.isJsonObject() );
 		assertEquals( true , expectedResult.equals( content.getAsJsonObject() ) );
 	}

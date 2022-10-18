@@ -23,9 +23,14 @@
                 "string_values" : {
                     "path_match": "*.value_str" ,
                     "mapping" : {
-                        "type": "keyword"
-                    }
-                }
+		            	"fields" : {
+		                	"keyword" : {
+		                  		"type" : "keyword"
+		                	}
+	              		},
+		              	"type" : "text"
+                	}
+            	}
             } ,
             {
                 "obj_values": {
@@ -37,7 +42,7 @@
             } ,
             {
                 "obj_values_str" : {
-                    "path_match" : "*.value_obj" ,
+                    "path_match" : "*.value_obj.*" ,
                     "match_mapping_type" : "string" ,
                     "mapping" : {
                         "type" : "keyword"
@@ -45,21 +50,22 @@
                 }
             } ,
             {
-                "arr_obj" : {
-                    "path_match" : "*.value_arr_obj" ,
-                    "mapping" : {
-                        "type" : "object"
-                    }
-                }
+            	"json_str_values": {
+            		"path_match":"*.value_json_str",
+            		"match_mapping_type": "string",
+            		"mapping" : {
+		              	"type" : "text"
+                	}
+            	}
             } ,
             {
-                "arr_obj_values_str" : {
-                    "path_match": "*.value_arr_obj" ,
-                    "match_mapping_type": "string" ,
-                    "mapping": {
-                        "type": "keyword"
-                    }
-                }
+            	"expected_next_update": {
+            		"path_match":"expected_next_*",
+            		"match_mapping_type": "string",
+            		"mapping" : {
+		              	"type" : "date"
+                	}
+            	}
             }
         ] , 
         "properties" : {

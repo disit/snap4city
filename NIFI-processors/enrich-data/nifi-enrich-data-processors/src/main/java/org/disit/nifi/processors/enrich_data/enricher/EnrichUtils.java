@@ -23,15 +23,19 @@ import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.util.AbstractMap;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.TreeMap;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 
 public final class EnrichUtils {
 	
@@ -94,13 +98,21 @@ public final class EnrichUtils {
     		// The candidate object contains a field named as valueFieldName from which to pick the timestamp.
     		// This function is called after the enrichment, so the field containing the value could have been 
     		// renamed concatenating "_str" to the end.
-    		if( candidateObject.has( valueFieldName ) )	
-    			timestampStr = candidateObject.get( valueFieldName ).getAsString();
+    		if( candidateObject.has( valueFieldName ) ) {
+    			JsonElement dateValue = candidateObject.get( valueFieldName );
+    			if( dateValue.isJsonPrimitive() ) 
+    				try {
+    					timestampStr = dateValue.toString();
+    				}catch(IllegalStateException ex ) { } 
+    		}
     		
-//    		if( candidateObject.has( valueFieldName.concat( "_str" ) ) )
-//    			timestampStr = candidateObject.get( valueFieldName.concat( "_str" ) ).getAsString();
-			if( candidateObject.has( valueFieldName.concat( Enricher.VALUE_NAME_STR_SUFFIX ) ) )
-    			timestampStr = candidateObject.get( valueFieldName.concat( Enricher.VALUE_NAME_STR_SUFFIX ) ).getAsString();
+			if( candidateObject.has( valueFieldName.concat( Enricher.VALUE_NAME_STR_SUFFIX ) ) ) {
+				JsonElement dateValue = candidateObject.get( valueFieldName.concat( Enricher.VALUE_NAME_STR_SUFFIX ) );
+				if( dateValue.isJsonPrimitive() && dateValue.getAsJsonPrimitive().isString() )
+					try {
+						timestampStr = dateValue.getAsString();
+					}catch(IllegalStateException ex) { }
+			}
     		
     		if( !timestampStr.isEmpty() ) {
 				try {
@@ -191,18 +203,19 @@ public final class EnrichUtils {
      * Perform the mapping of the field specified by valueFieldName
      * to one of the following types: 
      * 	- String
+     *  - Boolean
+     *  - Number
      *  - JsonObject
      *  - JsonArray
-     *  - JsonArray of objects
      * 
      * The mapping is done in-place on the rootObjMember, the resulting field in such
      * object is named with a suffix indicating the type:
      * 	- "_str" suffix for strings
+     *  - "_bool" suffix for booleans
      *  - "_obj" suffix for objects
-     *  - "_arr" suffix for arrays
-     *  - "_arr_obj" suffix for arrays of objects
+     *  - "_json_str" suffix for arrays of objects and mixed arrays
      *  
-     * Boolean values are converted to string values with the "_str" suffix.
+     * Arrays of objects and mixed arrays are converted to string.
      *  
      * If the value type is numeric the field is left untouched;
      *  
@@ -215,30 +228,34 @@ public final class EnrichUtils {
 			JsonElement valueEl = rootObjMember.get( valueFieldName );
 			
 			if( valueEl.isJsonPrimitive() ) { // Check if "value" contains a primitive JSON type
-				
-				if( valueEl.getAsJsonPrimitive().isString() ) { // Value contains a string
+				JsonPrimitive primitive = valueEl.getAsJsonPrimitive();
+				if( primitive.isString() ) { // Value contains a string
 					if( parseNumericStrings ) { // Try numeric string parsing
 						tryParseStringValues( rootObjMember , valueEl , valueFieldName );
 					} else { // Map directly to string value
-//						rootObjMember.addProperty( valueFieldName.concat( "_str" ) , valueEl.getAsString() );
+						rootObjMember.remove( valueFieldName );
 						rootObjMember.addProperty( 
 							valueFieldName.concat( Enricher.VALUE_NAME_STR_SUFFIX ) , 
 							valueEl.getAsString() );
-						rootObjMember.remove( valueFieldName );
 					}
 				}
 				
 				// Map boolean values to string values
-				if( valueEl.getAsJsonPrimitive().isBoolean() ) {
-//					rootObjMember.addProperty( valueFieldName.concat( "_str" ) , valueEl.getAsString() );
-					rootObjMember.addProperty( 
-						valueFieldName.concat( Enricher.VALUE_NAME_STR_SUFFIX ) , 
-						valueEl.getAsString() );
+//				if( primitive.isBoolean() ) {
+//					rootObjMember.remove( valueFieldName );
+//					rootObjMember.addProperty( 
+//						valueFieldName.concat( Enricher.VALUE_NAME_STR_SUFFIX ) , 
+//						valueEl.getAsString() );
+//				}
+				if( primitive.isBoolean() ) {
 					rootObjMember.remove( valueFieldName );
+					rootObjMember.addProperty( 
+						valueFieldName.concat( Enricher.VALUE_NAME_BOOL_SUFFIX ) , 
+						valueEl.getAsBoolean() );
 				}
 				
-				// If the value is a number the "value" attribute is left untouch
 				
+				// If the value is a number the "value" attribute is left untouch
 			} else { // Non-primitive value types
 				mapNonPrimitiveValue( rootObjMember , valueFieldName , valueEl );
 			}
@@ -261,23 +278,43 @@ public final class EnrichUtils {
 				parsedValue = Float.valueOf( strValue );
 				if( ((Float)parsedValue).isNaN() )
 					parsedValue = null;
-			} catch( NumberFormatException ex1 ) { }
+			} catch( NumberFormatException ex1 ) { 
+				parsedValue = null; 
+			}
 		}
-		
 		
 		
 		// If the value has been parsed correctly into a numeric type, then add it 
 		// with the original valueFieldName, ow add it as string value
-		if( parsedValue != null ) {
-			rootObjMember.remove( valueFieldName );
+		rootObjMember.remove( valueFieldName );
+		if( parsedValue != null ) 
 			rootObjMember.addProperty( valueFieldName , parsedValue );
-		} else {
-//			rootObjMember.addProperty( valueFieldName.concat( "_str" ) , valueEl.getAsString() );
+		else 
 			rootObjMember.addProperty( 
 				valueFieldName.concat( Enricher.VALUE_NAME_STR_SUFFIX ) , 
 				valueEl.getAsString() );
-			rootObjMember.remove( valueFieldName );
-		}
+		
+    }
+    
+    /**
+	 * Provides the specialized class for a generic JsonElement, 
+	 * either:  JsonNull, JsonObject, JsonArray, Boolean, String, Number
+     */
+    private static Class<?> getSpecializedClass( JsonElement el ) {
+    	if( el.isJsonNull() )
+    		return JsonNull.class;
+    	if( el.isJsonObject() )
+    		return JsonObject.class;
+    	if( el.isJsonArray() )
+    		return JsonArray.class;
+    	else {
+    		JsonPrimitive primitive = el.getAsJsonPrimitive();
+    		if( primitive.isBoolean() )
+    			return Boolean.class;
+    		if( primitive.isString() )
+    			return String.class;
+			return Number.class;
+    	}
     }
     
     /**
@@ -285,42 +322,99 @@ public final class EnrichUtils {
      */
     private static void mapNonPrimitiveValue( JsonObject rootObjMember , String valueFieldName , JsonElement valueEl ) {
     	if( valueEl.isJsonObject() ) { // Check if "value" contains a JsonObject
-//			rootObjMember.add( valueFieldName.concat( "_obj" ) , valueEl.getAsJsonObject() );
     		rootObjMember.add( 
     			valueFieldName.concat( Enricher.VALUE_NAME_OBJ_SUFFIX ) , 
     			valueEl.getAsJsonObject() );
 			rootObjMember.remove( valueFieldName );
 		} else {
-			
 			if( valueEl.isJsonArray() ) { // Check if "value" contains a JsonArray
 				Iterator<JsonElement> it = valueEl.getAsJsonArray().iterator();
+				
+				/*
 				boolean primitiveTypesArray = true;
 				while( it.hasNext() ) {
-					if( !it.next().isJsonPrimitive() ) {
+					if( !it.next().isJsonPrimitive() ) { // use first array value to infer the array type
 						primitiveTypesArray = false;
 						break;
 					}
 				}
-				
 				if( primitiveTypesArray ) { // Array of primitve types
-//					rootObjMember.add( valueFieldName.concat( "_arr" ) , valueEl.getAsJsonArray() );
 					rootObjMember.add( 
 						valueFieldName.concat( Enricher.VALUE_NAME_ARR_SUFFIX ) , 
 						valueEl.getAsJsonArray() );
-					rootObjMember.remove( valueFieldName );
 				} else { // Array of JsonObjects
 					JsonArray valueArrObj = new JsonArray();
 					valueEl.getAsJsonArray().forEach( ( JsonElement e )-> {
 						valueArrObj.add( e.getAsJsonObject() );
 					});
-					
-//					rootObjMember.add( valueFieldName.concat( "_arr_obj" ) , valueArrObj );
 					rootObjMember.add( 
 						valueFieldName.concat( Enricher.VALUE_NAME_ARR_OBJ_SUFFIX ) , 
 						valueArrObj );
 				}
 				rootObjMember.remove( valueFieldName );
+				*/
+				
+				/**
+				 * FIX: map arrays of numbes, strings booleans and objects using the 
+				 * the same name of the primitive type.
+				 * Array of objects and mixed arrays are 
+				 * encoded to a single string value.
+				 */
+				if( it.hasNext() ) {
+					JsonElement arrEl = it.next();
+					JsonElement lastValidEl = null;
+					Set<Class<?>> foundClasses = new HashSet<>();
+					Class<?> elClass = getSpecializedClass(arrEl);
+					if( !elClass.equals(JsonNull.class) ) {
+						foundClasses.add( elClass );
+						lastValidEl = arrEl;
+					}
+					while( it.hasNext() ) {
+						arrEl = it.next();
+						elClass = getSpecializedClass(arrEl);
+						if( !elClass.equals(JsonNull.class) ) {
+							foundClasses.add(elClass);
+							lastValidEl = arrEl;
+						}
+					}
+					String valueArrName = valueFieldName;
+					JsonArray valueArr;
+//					System.out.println( foundClasses.toString() );
+					if( foundClasses.size() == 0 ) { // array of null values
+						valueArr = valueEl.getAsJsonArray();
+						rootObjMember.remove( valueFieldName );
+						rootObjMember.add( valueArrName , valueArr );
+					} else if( foundClasses.size() == 1 ) { // all array elements of the same type
+						if( lastValidEl.isJsonPrimitive() ) { // array of primitives
+							if( foundClasses.contains(String.class) ) { 		// strings
+								valueArrName = valueArrName.concat( Enricher.VALUE_NAME_STR_SUFFIX );
+								valueArr = valueEl.getAsJsonArray();
+							} else if( foundClasses.contains(Number.class) ) {  // numbers
+								valueArr = valueEl.getAsJsonArray();
+							} else if( foundClasses.contains(Boolean.class) ) { // booleans
+								valueArrName = valueArrName.concat( Enricher.VALUE_NAME_BOOL_SUFFIX );
+								valueArr = valueEl.getAsJsonArray();
+							} else {
+								valueArr = null;
+							}
+							if( valueArr != null ) {
+								rootObjMember.remove( valueFieldName );
+								rootObjMember.add( valueArrName , valueArr );
+							}
+						} else { // array of objects
+							valueArrName = valueArrName.concat( Enricher.VALUE_NAME_JSON_STR_SUFFIX );
+							rootObjMember.remove( valueFieldName );
+							rootObjMember.addProperty( valueArrName , valueEl.toString() );
+						}
+					} else { // mixed type array
+						valueArrName = valueArrName.concat( Enricher.VALUE_NAME_JSON_STR_SUFFIX );
+						rootObjMember.remove( valueFieldName );
+						rootObjMember.addProperty( valueArrName , valueEl.toString() );
+					}
+				}
+				// ---
 			}
+			
 		}
     }
     

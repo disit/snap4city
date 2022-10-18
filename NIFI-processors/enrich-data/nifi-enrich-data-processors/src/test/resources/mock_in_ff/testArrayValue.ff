@@ -42,5 +42,48 @@
 		"value":"1",
 		"metadata":{}
 	},
+	"testNumericArray":{
+		"type":"Array",
+		"value": [ 1 , 2 , 3 , null ],
+		"metadata":{}
+	},
+	"testBooleanArray":{
+		"type":"Array",
+		"value": [ true , false , true , null ],
+		"metadata":{}
+	},
+	"testStringArray":{
+		"type":"Array",
+		"value":["one","two","three",null],
+		"metadata":{}
+	},
+	"testObjArray":{
+		"type":"Array",
+		"value":[
+			{ "a": 1, "b":"two" , "c":true },
+			{ "a": 2, "b":"two" , "c":false },
+			null
+		],
+		"metadata":{}
+	},
+	"testNullArray":{
+		"type":"Array",
+		"value":[null,null,null],
+		"metadata":{}
+	},
+	"testMixedArray":{
+		"type":"Array",
+		"value":[
+			1,
+			"one",
+			true,
+			{
+				"a":1,
+				"b":"two",
+				"c":false
+			}
+		],
+		"metadata":{}
+	},
 	"date_time":"2019-08-30T13:19:41.264Z"
 }

@@ -37,6 +37,8 @@ public class IOTDirectoryLocatorControllerService extends AbstractControllerServ
 	public static final String DEFAULT_SUBSCRIPTION_ID_ATTRIBUTE_NAME_VALUE = "subscriptionId";
 	public static final String DEFAULT_SUBSCRIPTION_ID_REQUEST_NAME_VALUE = "sub_ID";
 	public static final String DEFAULT_SERVICE_URI_PREFIX_RESPONSE_PATH_VALUE = "content/serviceUriPrefix";
+	public static final String DEFAULT_ORGANIZATION_RESPONSE_PATH_VALUE = "content/organization";
+	public static final String DEFAULT_CB_NAME_RESPONSE_PATH_VALUE = "content/name";
 	public static final String DEFAULT_MAX_CACHE_SIZE_VALUE = "50";
 	
 	protected static final List<PropertyDescriptor> descriptors;
@@ -86,6 +88,24 @@ public class IOTDirectoryLocatorControllerService extends AbstractControllerServ
 		.addValidator( StandardValidators.NON_EMPTY_VALIDATOR )
 		.build();
 	
+	public static final PropertyDescriptor ORGANIZATION_RESPONSE_PATH = new PropertyDescriptor
+		.Builder().name( "ORGANIZATION_RESPONSE_PATH" )
+		.displayName( "Organization response path" )
+		.description( "The path inside the JSON response from the IOTDirectory service containing the organization name. This property is used together with 'Context Broker Name response path' to determine the ownership prefix. Unset this property or 'Context Broker Name response path' to disable the automatic ownership prefix." )
+		.required( false )
+		.defaultValue( DEFAULT_ORGANIZATION_RESPONSE_PATH_VALUE )
+		.addValidator( Validator.VALID )
+		.build();
+	
+	public static final PropertyDescriptor CB_NAME_RESPONSE_PATH = new PropertyDescriptor
+		.Builder().name( "CB_NAME_RESPONSE_PATH" )
+		.displayName( "Context Broker Name response path" )
+		.description( "The path inside the JSON response from the IOTDirectory service containing the context broker name. This property is used together with 'Organization Name response path' to determine the ownership prefix. Unset this property or 'Organization response path' to disable the automatic ownership prefix." )
+		.required( false )
+		.defaultValue( DEFAULT_CB_NAME_RESPONSE_PATH_VALUE )
+		.addValidator( Validator.VALID )
+		.build();
+	
 	public static final PropertyDescriptor MAX_CACHE_SIZE = new PropertyDescriptor
 		.Builder().name( "MAX_CACHE_SIZE" )
 		.displayName( "Max cache size" )
@@ -111,6 +131,8 @@ public class IOTDirectoryLocatorControllerService extends AbstractControllerServ
 		descs.add( SUBSCRIPTION_ID_REQUEST_NAME );
 		descs.add( ADDITIONAL_QUERY_STRING );
 		descs.add( SERVICE_URI_PREFIX_RESPONSE_PATH );
+		descs.add( ORGANIZATION_RESPONSE_PATH );
+		descs.add( CB_NAME_RESPONSE_PATH );
 		descs.add( MAX_CACHE_SIZE );
 		descs.add( EXPIRE_CACHE_ENTRIES_TIME );
 		
@@ -135,12 +157,22 @@ public class IOTDirectoryLocatorControllerService extends AbstractControllerServ
 		if( additionalQueryString == null )
 			additionalQueryString = "";
 		
+		String organizationResponsePath = null;
+		if( context.getProperty( ORGANIZATION_RESPONSE_PATH ).isSet() )
+			organizationResponsePath = context.getProperty(ORGANIZATION_RESPONSE_PATH).getValue();
+		
+		String cbNameResponsePath = null;
+		if( context.getProperty( CB_NAME_RESPONSE_PATH ).isSet() )
+			cbNameResponsePath = context.getProperty(CB_NAME_RESPONSE_PATH).getValue();
+		
 		IOTDirectoryResourceLocatorConfig config = new IOTDirectoryResourceLocatorConfig( 
 			context.getProperty( IOTDIRECTORY_URL ).evaluateAttributeExpressions().getValue() , 
 			context.getProperty( SUBSCRIPTION_ID_ATTRIBUTE_NAME ).getValue() ,
 			context.getProperty( SUBSCRIPTION_ID_REQUEST_NAME ).getValue() , 
 			additionalQueryString ,
-			context.getProperty( SERVICE_URI_PREFIX_RESPONSE_PATH ).getValue()
+			context.getProperty( SERVICE_URI_PREFIX_RESPONSE_PATH ).getValue() ,
+			organizationResponsePath ,
+			cbNameResponsePath
 		);
 		config.setMaxCacheSize( Long.parseLong( context.getProperty( MAX_CACHE_SIZE ).getValue() ) );
 		if( context.getProperty( EXPIRE_CACHE_ENTRIES_TIME ).isSet() ) {

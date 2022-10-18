@@ -42,13 +42,16 @@ public class EnrichDataLocatorTests extends EnrichDataSimpleTests {
 	
 	// IOTDirectoryLocator configs
 	protected static final String iotDirectoryEndpoint = "/iotdirectory";
-	protected static final String iotDirectoryUrl = "http://localhost:" + 
+	protected static final String iotDirectoryUrl = "http://localhost:" +
+//	protected static final String iotDirectoryUrl = "http://wronghost:" +
 									   mockServicemapPort +
 									   iotDirectoryEndpoint;
 	
 	protected static String subIdAttrName = "subscriptionId";
 	protected static String subIdReqName = "sub_ID";
 	protected static String serviceUriPrefixRespPath = "content/serviceUriPrefix";
+	protected static String organizationRespPath = "content/organization";
+	protected static String cbNameRespPath = "content/name";
 	protected static String iotDirectoryAdditionalQueryString = "action=get_specific_context_broker";
 	
 	// IOTDirectory server mock
@@ -64,8 +67,10 @@ public class EnrichDataLocatorTests extends EnrichDataSimpleTests {
 		String csName = "IOTDirectoryLocatorControllerService";
 		iotDirectoryService = new IOTDirectoryLocatorControllerService();
 		testRunner.addControllerService( csName , iotDirectoryService );
+//		testRunner.setProperty( iotDirectoryService , 
+//			IOTDirectoryLocatorControllerService.IOTDIRECTORY_URL , iotDirectoryUrl );
 		testRunner.setProperty( iotDirectoryService , 
-			IOTDirectoryLocatorControllerService.IOTDIRECTORY_URL , iotDirectoryUrl );
+				IOTDirectoryLocatorControllerService.IOTDIRECTORY_URL , iotDirectoryUrl );
 		testRunner.setProperty( iotDirectoryService , 
 			IOTDirectoryLocatorControllerService.SUBSCRIPTION_ID_ATTRIBUTE_NAME , subIdAttrName );
 		testRunner.setProperty( iotDirectoryService , 
