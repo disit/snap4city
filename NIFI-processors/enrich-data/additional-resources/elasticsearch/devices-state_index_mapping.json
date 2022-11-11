@@ -45,7 +45,12 @@
                     "path_match" : "*.value_obj.*" ,
                     "match_mapping_type" : "string" ,
                     "mapping" : {
-                        "type" : "keyword"
+                        "type" : "text",
+                        "fields":{
+                        	"keyword":{
+                        		"type": "keyword"
+                        	}
+                        }
                     }
                 }
             } ,
@@ -76,10 +81,20 @@
                 "type": "geo_point"
             } ,
             "deviceModel" : {
-            	"type": "keyword"
+            	"type": "keyword",
+            	"fields": {
+            		"text": {
+            			"type": "text"
+            		}
+            	}
             } ,
             "deviceName" : {
-            	"type": "keyword"
+            	"type": "keyword",
+            	"fields": { 
+            		"text": {
+            			"type": "text"
+            		}
+            	}
             }
         }
     }
