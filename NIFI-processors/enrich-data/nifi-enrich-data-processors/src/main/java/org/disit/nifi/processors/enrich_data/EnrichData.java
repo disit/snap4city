@@ -799,11 +799,9 @@ public class EnrichData extends AbstractProcessor {
 			this.enrichmentSourceClient = this.enrichmentSourceClientService.getClient( context );
 		} catch (InstantiationException e) {
 			String reason = "Unable to obtain an EnrichmentSourceClient instance from the controller service.";
-			
 			LoggingUtils.produceErrorObj( reason )
 						.withExceptionInfo( e )
 						.logAsError( logger );
-			
 			throw new ConfigurationException( reason );
 		}
 
@@ -991,7 +989,9 @@ public class EnrichData extends AbstractProcessor {
     	//
     	// Json output format
     	if( context.getProperty( OUTPUT_FF_CONTENT_FORMAT ).getValue().equals( OUTPUT_FF_CONTENT_FORMAT_VALUES[0] ) ) {
-    		this.outProducer = new JsonOutputProducer();
+    		JsonOutputProducer jsonProducer = new JsonOutputProducer();
+    		jsonProducer.setTimestampAttribute( timestampFieldName );
+    		this.outProducer = jsonProducer;
     	}
     	
     	// Elasticsearch bulk compliant output format
@@ -1017,14 +1017,17 @@ public class EnrichData extends AbstractProcessor {
     	if( context.getProperty( OUTPUT_FF_CONTENT_FORMAT ).getValue().equals( OUTPUT_FF_CONTENT_FORMAT_VALUES[2] ) ) {
     		String hashedIdFieldsString = context.getProperty( HASHED_ID_FIELDS ).getValue().trim();
     		
+    		SplitObjectOutputProducer splitProducer;
     		if( !hashedIdFieldsString.isEmpty() ) {
     			List<String> hashedIdFields = Arrays.asList( hashedIdFieldsString.split( "," ) ).stream()
     											    .map( (String field) -> { return field.trim(); } )
     											    .collect( Collectors.toList() ); 
-    			this.outProducer = new SplitObjectOutputProducer( hashedIdFields );
+    			splitProducer = new SplitObjectOutputProducer( hashedIdFields );
     		}else {
-    			this.outProducer = new SplitObjectOutputProducer();
+    			splitProducer = new SplitObjectOutputProducer();
     		}
+    		splitProducer.setTimestampAttribute( this.timestampFieldName );
+    		this.outProducer = splitProducer;
     	}
     	
     	//User defined properties
@@ -1476,9 +1479,10 @@ public class EnrichData extends AbstractProcessor {
 			List<FlowFile> outList = this.outProducer.produceOutput( rootObject , flowFile , session );
 			
 			outList.stream().forEach( (FlowFile ff) -> {
-					
 				// Additional ff attributes 
 				ff = session.putAllAttributes( ff , additionalFieldsErrors );
+				ff = session.putAttribute( ff , "serviceUri" , serviceUriPropertyValue.toString() );
+//				ff = session.putAttribute( ff , timestampFieldName , rootObject.get(timestampFieldName).toString() );
 				
 				//Route to success
 				routeToRelationship( ff , SUCCESS_RELATIONSHIP , session , 

@@ -40,6 +40,7 @@ import com.google.gson.JsonObject;
 public class SplitObjectOutputProducer implements OutputProducer {
 
 	private List<String> hashedIdFields;
+	private String timestampAttribute = null;
 	
 	public SplitObjectOutputProducer() {
 		this.hashedIdFields = new ArrayList<>();
@@ -47,6 +48,10 @@ public class SplitObjectOutputProducer implements OutputProducer {
 	
 	public SplitObjectOutputProducer( List<String> hashedIdFields ) {
 		this.hashedIdFields = hashedIdFields;
+	}
+	
+	public void setTimestampAttribute( String timestampAttribute ) {
+		this.timestampAttribute = timestampAttribute;
 	}
 	
 	@Override
@@ -72,6 +77,13 @@ public class SplitObjectOutputProducer implements OutputProducer {
 			}
 			
 			ff = session.putAttribute( ff , "mime.type" , MediaType.JSON_UTF_8.toString() );
+			// value name and timestamp for each produced flow file as attributes
+			ff = session.putAttribute( ff , "valueName" , rootEntry.getKey() );
+			if( this.timestampAttribute != null ) { 
+				if( entryObj.has(timestampAttribute) )
+					ff = session.putAttribute( ff , timestampAttribute , entryObj.get(timestampAttribute).getAsString() );
+			}
+				
 			outputList.add( ff );
 		});
 		

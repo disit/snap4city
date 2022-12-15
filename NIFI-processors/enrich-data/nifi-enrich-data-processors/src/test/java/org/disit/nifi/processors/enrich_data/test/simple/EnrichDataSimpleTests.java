@@ -33,6 +33,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 /**
  * Unit tests for the EnrichData processor using:
@@ -58,11 +59,11 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 		testRunner.assertTransferCount( EnrichData.SUCCESS_RELATIONSHIP , 1 );
 		testRunner.assertTransferCount( EnrichData.ORIGINAL_RELATIONSHIP , 1 );
 		
-		JsonElement outFFContent = parser.parse( 
-			new String( testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP ).get(0).toByteArray() ) 
-		);
+		MockFlowFile outFF = testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP ).get(0);
+		JsonElement outFFContent = JsonParser.parseString( new String( outFF.toByteArray() ) ); 
 		assertEquals( true , outFFContent.isJsonObject() );
 		assertEquals( true , outFFContent.getAsJsonObject().equals( expectedResult.getAsJsonObject() ) );
+//		System.out.println( TestUtils.prettyOutFF( outFF ) );
 	}
 	
 	@Test
@@ -90,6 +91,7 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 			JsonElement content = parser.parse( new String( successFFs.get(i).toByteArray() ) );
 			assertEquals( true , content.isJsonObject() );
 			assertEquals( true , expectedResult.get(i).equals(content.getAsJsonObject() ) );
+//			System.out.println( TestUtils.prettyOutFF( successFFs.get(i) ) );
 		}
 	}
 	

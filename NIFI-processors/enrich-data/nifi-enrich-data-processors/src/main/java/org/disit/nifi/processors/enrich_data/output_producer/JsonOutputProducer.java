@@ -27,6 +27,7 @@ import org.apache.nifi.processor.ProcessSession;
 import org.apache.nifi.processor.io.OutputStreamCallback;
 
 import com.google.common.net.MediaType;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 /**
@@ -36,6 +37,12 @@ import com.google.gson.JsonObject;
  */
 public class JsonOutputProducer implements OutputProducer {
 
+	private String timestampAttribute = null;
+	
+	public void setTimestampAttribute( String timestampAttribute ) {
+		this.timestampAttribute = timestampAttribute;
+	}
+	
 	@Override
 	public List<FlowFile> produceOutput(JsonObject rootObj , FlowFile inFlowFile , final ProcessSession session ) {
 		 List<FlowFile> outputList = new ArrayList<>();
@@ -51,6 +58,14 @@ public class JsonOutputProducer implements OutputProducer {
 		});
 		 
 		inFlowFile = session.putAttribute( inFlowFile , "mime.type" , MediaType.JSON_UTF_8.toString() );
+		if( timestampAttribute != null ) { // put timestamp of the first measure in the root object as attribute
+			JsonElement firstElement = rootObj.entrySet().stream().findFirst().get().getValue();
+			if( firstElement.isJsonObject() && firstElement.getAsJsonObject().has(timestampAttribute) ) {
+				String timestampAttrVal = firstElement.getAsJsonObject().get(timestampAttribute).getAsString();
+				inFlowFile = session.putAttribute( inFlowFile , timestampAttribute , timestampAttrVal );
+			}
+		}
+		
 		outputList.add( inFlowFile );
 		return outputList;
  	}

@@ -87,11 +87,12 @@ public class OwnershipControllerService extends AbstractControllerService implem
     	@Override
 		public ValidationResult validate(String subject, String input, ValidationContext context) {
 			ValidationResult.Builder builder = new ValidationResult.Builder();
-			JsonParser parser = new JsonParser();
+//			JsonParser parser = new JsonParser();
 			
 			if( !input.isEmpty() ) {
 				try {
-					JsonElement mapping = parser.parse( input );
+//					JsonElement mapping = parser.parse( input );
+					JsonElement mapping = JsonParser.parseString( input );
 					
 					if( mapping.isJsonObject() ) {
 						JsonObject mappingObj = mapping.getAsJsonObject();
@@ -154,7 +155,7 @@ public class OwnershipControllerService extends AbstractControllerService implem
     
     protected OwnershipClientConfig clientConfig;
     
-    private JsonParser parser = new JsonParser();
+//    private JsonParser parser = new JsonParser();
     
     @Override
     protected List<PropertyDescriptor> getSupportedPropertyDescriptors() {
@@ -174,11 +175,17 @@ public class OwnershipControllerService extends AbstractControllerService implem
     @OnEnabled
     public void onEnabled(final ConfigurationContext context) throws InitializationException {
 //    	String ownershipApiUrl = context.getProperty( OWNERSHIP_API_URL ).getValue();
+//    	String elementIdPrefix = context.getProperty( ELEMENT_ID_PREFIX ).getValue();
+    	
     	String ownershipApiUrl = context.getProperty( OWNERSHIP_API_URL )
     									.evaluateAttributeExpressions()
     									.getValue();
-    	String elementIdPrefix = context.getProperty( ELEMENT_ID_PREFIX ).getValue();
     	String elementIdName = context.getProperty( ELEMENT_ID_NAME ).getValue();
+    	
+    	String elementIdPrefix="";
+    	if( context.getProperty( ELEMENT_ID_PREFIX ).isSet() ) {
+    		elementIdPrefix = context.getProperty( ELEMENT_ID_PREFIX ).getValue();
+    	}
     	
     	OwnershipClientConfig clientConfig = new OwnershipClientConfig( ownershipApiUrl , elementIdName );
     	clientConfig.setElementIdPrefix( elementIdPrefix );
@@ -202,7 +209,8 @@ public class OwnershipControllerService extends AbstractControllerService implem
     	String fieldsMappingStr = context.getProperty( FIELDS_MAPPING ).getValue();
     	
     	if( fieldsMappingStr != null && !fieldsMappingStr.isEmpty() ) {
-	    	JsonObject fieldsMappingObj = parser.parse( fieldsMappingStr ).getAsJsonObject();
+//	    	JsonObject fieldsMappingObj = parser.parse( fieldsMappingStr ).getAsJsonObject();
+    		JsonObject fieldsMappingObj = JsonParser.parseString( fieldsMappingStr ).getAsJsonObject();
 	    	
 	    	for( String field : fieldsMappingObj.keySet() ) {
 	    		clientConfig.addFieldMapping( field , fieldsMappingObj.get( field ).getAsString() );
