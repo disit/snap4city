@@ -1,0 +1,5 @@
+{
+"ws_url":"ws://<ip>:8888/kurento",
+"db":{"host":"localhost","port":"3306","user":"user","password":"password"},
+"servicemapApiUrl":"http://localhost/ServiceMap/api/v1/"
+}

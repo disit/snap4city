@@ -1,0 +1,25 @@
+version: "3.3"
+services:
+  kurento:
+    image: "kurento/kurento-media-server"
+    network_mode: host
+    environment:
+      - KMS_MIN_PORT=5000
+      - KMS_MAX_PORT=5050
+      - KMS_STUN_IP=<external ip>
+      - KMS_STUN_PORT=3478
+      - KMS_TURN_URL=user:password@<ip>:3478
+      - KMS_ICE_TCP=1
+  coturn:
+    image: "coturn/coturn"
+    network_mode: host
+    volumes:
+      - ./coturn/turnserver.conf:/etc/coturn/turnserver.conf
+  snap4rtsp:
+    image: "disitlab/snap4rtsp-server:v0"
+    network_mode: host
+    environment:
+      - ws_uri=ws://<ip>:8888/kurento
+    volumes:
+      - ./snap4rtsp-conf:/usr/src/app/conf
+      - ./snap4rtsp-conf/static-conf:/usr/src/app/static/conf
