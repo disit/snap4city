@@ -170,12 +170,13 @@ public class AccessServiceImpl implements IAccessService {
 					response.setMessage(AccessRightType.MYGROUP_DELEGATED.toString());
 					return response;
 				}
-				//
-				// if ((d.getGroupnameDelegated() != null) && (groupnames.contains(d.getGroupnameDelegated()))) {
-				// response.setResult(true);
-				// response.setMessage(AccessRightType.GROUP_DELEGATED.toString());// mygroup delegation to the organization the user belong
-				// return response;
-				// }
+				
+				List<String> groupnames = lu.getGroupAndOUnames(username);
+				if ((d.getGroupnameDelegated() != null) && (groupnames.contains(d.getGroupnameDelegated()))) {
+					response.setResult(true);
+					response.setMessage(AccessRightType.GROUP_DELEGATED.toString());// mygroup delegation to the organization the user belong
+					return response;
+				}
 			}
 		}
 		return response;
