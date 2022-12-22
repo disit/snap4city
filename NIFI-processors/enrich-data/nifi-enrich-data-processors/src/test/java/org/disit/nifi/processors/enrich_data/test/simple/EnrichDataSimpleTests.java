@@ -24,6 +24,7 @@ import java.util.Map;
 import org.apache.nifi.components.ValidationResult;
 import org.apache.nifi.util.MockFlowFile;
 import org.disit.nifi.processors.enrich_data.EnrichData;
+import org.disit.nifi.processors.enrich_data.enricher.EnrichUtils;
 import org.disit.nifi.processors.enrich_data.test.EnrichDataTestBase;
 import org.disit.nifi.processors.enrich_data.test.TestUtils;
 import org.junit.BeforeClass;

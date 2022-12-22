@@ -19,6 +19,8 @@ package org.disit.nifi.processors.enrich_data.output_producer;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +30,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.nifi.flowfile.FlowFile;
 import org.apache.nifi.processor.ProcessSession;
 import org.apache.nifi.processor.io.OutputStreamCallback;
+import org.disit.nifi.processors.enrich_data.enricher.EnrichUtils;
 
 import com.google.common.net.MediaType;
 import com.google.gson.JsonElement;
@@ -80,8 +83,13 @@ public class SplitObjectOutputProducer implements OutputProducer {
 			// value name and timestamp for each produced flow file as attributes
 			ff = session.putAttribute( ff , "valueName" , rootEntry.getKey() );
 			if( this.timestampAttribute != null ) { 
-				if( entryObj.has(timestampAttribute) )
-					ff = session.putAttribute( ff , timestampAttribute , entryObj.get(timestampAttribute).getAsString() );
+				if( entryObj.has(timestampAttribute) ) {
+					String timestampAttrVal = entryObj.get(timestampAttribute).getAsString();
+					try {
+						timestampAttrVal = EnrichUtils.toFullISO8601Format( timestampAttrVal );
+					}catch( DateTimeParseException ex ) { /*if cannot parse leave as it is*/ }
+					ff = session.putAttribute( ff , timestampAttribute , timestampAttrVal );
+				}
 			}
 				
 			outputList.add( ff );

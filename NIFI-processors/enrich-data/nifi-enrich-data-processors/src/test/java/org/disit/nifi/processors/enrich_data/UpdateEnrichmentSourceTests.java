@@ -151,6 +151,7 @@ public class UpdateEnrichmentSourceTests {
     public void testFFContentCondition() throws IOException {
     	System.out.println( "**** TEST FF-CONTENT CONDITION *** " );
     	testRunner.setProperty( UpdateEnrichmentSource.CONDITION , "{\"a\":123}" );
+//    	testRunner.setProperty( UpdateEnrichmentSource.CONDITION , "{\"id\":\"wind1\"}" );
         testRunner.setProperty( UpdateEnrichmentSource.REQ_RESOURCE_URI_NAME , "uri" );
         testRunner.setProperty( UpdateEnrichmentSource.TIMESTAMP_FIELD_NAME , "date_time" );
         testRunner.setProperty( UpdateEnrichmentSource.STATIC_AUGMENT_PERFORMED_UPDATES , 
@@ -158,6 +159,8 @@ public class UpdateEnrichmentSourceTests {
         testRunner.setProperty( "id" , "id" );
         testRunner.setProperty( "a" , "A" );
         testRunner.setProperty( "location/coordinates" , "[latitude , longitude]" );
+//        testRunner.setProperty( "latitude/value" , "latitude" );
+//        testRunner.setProperty( "longitude/value" , "longitude" );
 
         testRunner.addConnection( UpdateEnrichmentSource.PERFORMED_UPDATES_RELATIONSHIP );
         
@@ -166,11 +169,13 @@ public class UpdateEnrichmentSourceTests {
         Map<String, String> attributes = new HashMap<>();
         attributes.put( "date_time" , ZonedDateTime.now(ZoneOffset.UTC).format( DateTimeFormatter.ISO_INSTANT ) );
         attributes.put( "serviceUri" , "http://serviceuriprefix.org/test-id" );
+//        attributes.put( "serviceUri" , "http://serviceuriprefix.org/wind1" );
         
         // Success mock flow file
     	testRunner.enqueue( 
     		TestUtils.mockJsonElementFromFile(
 				Paths.get( "src/test/resources/test_update_enrichment_source/input.ff" ) ,
+//				Paths.get( "src/test/resources/test_update_enrichment_source/input_alt.ff" ) ,
 				jsonParser 
 			).toString(),
     		attributes

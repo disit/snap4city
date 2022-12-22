@@ -489,14 +489,13 @@ public class UpdateEnrichmentSource extends AbstractProcessor {
     		}
     	}
     	
-    	String deviceId = rootObject.get( this.deviceIdName )
-    								.getAsString();
-
+    	String deviceId = rootObject.get( this.deviceIdName ).getAsString();
+    	String resourceUri = enrichmentSourceUpdater.buildResourceUri( deviceId );
+    	
     	// Build the update Json object
     	//========================================
     	JsonObject reqBodyObj = new JsonObject(); 
     	if( this.includeResourceUri ) { // include resource uri in the request payload
-    		String resourceUri = enrichmentSourceUpdater.buildResourceUri( deviceId );
     		reqBodyObj.addProperty( this.reqResourceUriName , resourceUri );
     	}
     	
@@ -573,7 +572,7 @@ public class UpdateEnrichmentSource extends AbstractProcessor {
 //			}
 //		});
     	if( this.outputPerformedUpdates ) {
-	    	FlowFile updateFlowFile = produceUpdateFlowFile( session , flowFile , rootObject , reqBodyObj );
+	    	FlowFile updateFlowFile = produceUpdateFlowFile( session , flowFile , rootObject , reqBodyObj , deviceId , resourceUri );
 	    	session.transfer( updateFlowFile , PERFORMED_UPDATES_RELATIONSHIP );
     	}
 		session.putAttribute( flowFile , "Update request body" , reqBodyObj.toString() );
@@ -581,7 +580,7 @@ public class UpdateEnrichmentSource extends AbstractProcessor {
 	}
 	
 	private FlowFile produceUpdateFlowFile( ProcessSession session , FlowFile inFlowFile , 
-			JsonObject rootObject , JsonObject reqBodyObj ) {
+			JsonObject rootObject , JsonObject reqBodyObj , String deviceId , String resourceUri) {
 		FlowFile updateFlowFile = session.clone( inFlowFile );
 //		FlowFile updateFlowFile = session.create();
 		
@@ -596,8 +595,8 @@ public class UpdateEnrichmentSource extends AbstractProcessor {
 		updateObject.add( "value_obj" , updateValueObj );
 		
 		// TODO: static names?
-		updateObject.addProperty( "sensorID" , reqBodyObj.get(this.deviceIdName).getAsString() );
-		updateObject.addProperty( "serviceUri" , reqBodyObj.get(this.reqResourceUriName).getAsString() );
+		updateObject.addProperty( "sensorID" , deviceId );
+		updateObject.addProperty( "serviceUri" , resourceUri );
 		
 		// date_Time
 		if( this.timestampFieldName != null && inFlowFile.getAttributes().containsKey( this.timestampFieldName ) ) {

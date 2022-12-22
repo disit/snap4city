@@ -19,12 +19,16 @@ package org.disit.nifi.processors.enrich_data.output_producer;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.nifi.flowfile.FlowFile;
 import org.apache.nifi.processor.ProcessSession;
 import org.apache.nifi.processor.io.OutputStreamCallback;
+import org.disit.nifi.processors.enrich_data.enricher.EnrichUtils;
 
 import com.google.common.net.MediaType;
 import com.google.gson.JsonElement;
@@ -62,6 +66,9 @@ public class JsonOutputProducer implements OutputProducer {
 			JsonElement firstElement = rootObj.entrySet().stream().findFirst().get().getValue();
 			if( firstElement.isJsonObject() && firstElement.getAsJsonObject().has(timestampAttribute) ) {
 				String timestampAttrVal = firstElement.getAsJsonObject().get(timestampAttribute).getAsString();
+				try {
+					timestampAttrVal = EnrichUtils.toFullISO8601Format(timestampAttrVal);
+				}catch( DateTimeParseException ex ) { /* if cannot parse, leave as it is */ }
 				inFlowFile = session.putAttribute( inFlowFile , timestampAttribute , timestampAttrVal );
 			}
 		}

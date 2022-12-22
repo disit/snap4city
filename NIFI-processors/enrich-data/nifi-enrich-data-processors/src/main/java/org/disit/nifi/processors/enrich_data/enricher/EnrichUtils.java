@@ -42,6 +42,13 @@ public final class EnrichUtils {
 	private EnrichUtils() {};
 	
 	public static final DateTimeFormatter timestampFormatter = DateTimeFormatter.ofPattern( "yyyy-MM-dd'T'HH:mm:ss.SSSXXX" );
+	public static final DateTimeFormatter iso8601FullOutFormatter = DateTimeFormatter.ofPattern( "yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXXXX" );
+	
+	public static final String toFullISO8601Format( String timestamp ) throws DateTimeParseException{
+//		OffsetDateTime ot = OffsetDateTime.parse( timestamp , DateTimeFormatter.ISO_OFFSET_DATE_TIME );
+		OffsetDateTime ot = OffsetDateTime.parse( timestamp );
+		return iso8601FullOutFormatter.format( ot );
+	}
 	
 	/**
      * Get the value of a dynamic field.
