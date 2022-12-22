@@ -220,7 +220,6 @@ public final class EnrichDataValidators {
 			
 			@Override
 			public ValidationResult validate(String subject, String input, ValidationContext context) {
-				// TODO Auto-generated method stub
 				if( input==null || input.isEmpty() ) {
 					return new ValidationResult.Builder().subject(subject).input(input)
 							.explanation("Allowed null or empty string.")

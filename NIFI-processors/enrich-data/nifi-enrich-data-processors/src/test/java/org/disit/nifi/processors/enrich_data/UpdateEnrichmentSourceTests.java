@@ -23,7 +23,11 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.nio.file.Paths;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -148,18 +152,28 @@ public class UpdateEnrichmentSourceTests {
     	System.out.println( "**** TEST FF-CONTENT CONDITION *** " );
     	testRunner.setProperty( UpdateEnrichmentSource.CONDITION , "{\"a\":123}" );
         testRunner.setProperty( UpdateEnrichmentSource.REQ_RESOURCE_URI_NAME , "uri" );
+        testRunner.setProperty( UpdateEnrichmentSource.TIMESTAMP_FIELD_NAME , "date_time" );
+        testRunner.setProperty( UpdateEnrichmentSource.STATIC_AUGMENT_PERFORMED_UPDATES , 
+        	"{\"value_name\":\"__location\",\"value_type\":\"location\"}" );
         testRunner.setProperty( "id" , "id" );
         testRunner.setProperty( "a" , "A" );
         testRunner.setProperty( "location/coordinates" , "[latitude , longitude]" );
 
+        testRunner.addConnection( UpdateEnrichmentSource.PERFORMED_UPDATES_RELATIONSHIP );
+        
         validateProcessorProperties();
     	
-    	// Success mock flow file
+        Map<String, String> attributes = new HashMap<>();
+        attributes.put( "date_time" , ZonedDateTime.now(ZoneOffset.UTC).format( DateTimeFormatter.ISO_INSTANT ) );
+        attributes.put( "serviceUri" , "http://serviceuriprefix.org/test-id" );
+        
+        // Success mock flow file
     	testRunner.enqueue( 
     		TestUtils.mockJsonElementFromFile(
 				Paths.get( "src/test/resources/test_update_enrichment_source/input.ff" ) ,
 				jsonParser 
-			).toString() 
+			).toString(),
+    		attributes
 		);
     	
     	// Condition not met mock flow file
@@ -167,7 +181,8 @@ public class UpdateEnrichmentSourceTests {
     		TestUtils.mockJsonElementFromFile(
 				Paths.get( "src/test/resources/test_update_enrichment_source/failContentConditionInput.ff" ) ,
 				jsonParser 
-			).toString() 
+			).toString(),
+    		attributes
 		);
     	
     	servicemap.addEndpoint( "/move" , (JsonElement reqBody) -> {
@@ -198,6 +213,14 @@ public class UpdateEnrichmentSourceTests {
 				  .stream().forEach( (MockFlowFile ff) -> {
 					  System.out.println( TestUtils.prettyOutFF( ff , jsonParser ) );
 				  });
+//    	testRunner.assertTransferCount( UpdateEnrichmentSource.PERFORMED_UPDATES_RELATIONSHIP , 1 );
+    	if( testRunner.getFlowFilesForRelationship( UpdateEnrichmentSource.PERFORMED_UPDATES_RELATIONSHIP ).size() > 0 ) {
+	    	System.out.println( "--- Performed updates FFs: ");
+	    	testRunner.getFlowFilesForRelationship( UpdateEnrichmentSource.PERFORMED_UPDATES_RELATIONSHIP )
+	    			  .stream().forEach( (MockFlowFile ff)->{
+	    				  System.out.println( TestUtils.prettyOutFF( ff ) );
+	    			  });
+    	}
     	System.out.println( "**** END TEST FF-CONTENT CONDITION ***\n\n" );
     }
     
@@ -269,6 +292,7 @@ public class UpdateEnrichmentSourceTests {
     	testRunner.setProperty( UpdateEnrichmentSource.ATTRIBUTES_CONDITION , 
     							"{\"perform\":true}" );
         testRunner.setProperty( UpdateEnrichmentSource.REQ_RESOURCE_URI_NAME , "uri" );
+        testRunner.setProperty( UpdateEnrichmentSource.TIMESTAMP_FIELD_NAME , "date_time" );
         testRunner.setProperty( "id" , "id" );
         testRunner.setProperty( "a" , "A" );
         testRunner.setProperty( "location/coordinates" , "[latitude , longitude]" );
@@ -283,7 +307,7 @@ public class UpdateEnrichmentSourceTests {
 			).toString() , 
     		Stream.of( new String[][] { 
     			{ "perform" , "true" }
-    		}).collect( Collectors.toMap( data -> data[0] , data -> data[1] ) )
+    		}).collect( Collectors.toMap( data -> data[0] , data -> data[1] ) ) 
 		);
     	
     	// Condition not met on content

@@ -127,10 +127,12 @@ public class EnrichDataDeviceStateTests extends EnrichDataTestBase{
 		assertEquals( true , content.isJsonObject() );
 		assertEquals( true , expectedResult.equals( content.getAsJsonObject() ) );
 		
-		JsonElement deviceStateContent = JsonParser.parseString( new String( testRunner.getFlowFilesForRelationship( EnrichData.DEVICE_STATE_RELATIONSHIP ).get(0).toByteArray() ) );
+		MockFlowFile deviceStateFF = testRunner.getFlowFilesForRelationship( EnrichData.DEVICE_STATE_RELATIONSHIP).get(0);
+		JsonElement deviceStateContent = JsonParser.parseString( new String( deviceStateFF.toByteArray() ) );
 		assertEquals( true , deviceStateContent.isJsonObject() );
 		assertEquals( true , expectedState.equals( deviceStateContent.getAsJsonObject() ) );
-		System.out.println( deviceStateContent.toString() );
+//		System.out.println( deviceStateContent.toString() );
+		System.out.println( TestUtils.prettyOutFF( deviceStateFF ) );
 	}
 	
 	@Test
@@ -171,10 +173,12 @@ public class EnrichDataDeviceStateTests extends EnrichDataTestBase{
 		assertEquals( true , expectedResult.equals( content.getAsJsonObject() ) );
 		
 //		JsonElement deviceStateContent = parser.parse( new String( testRunner.getFlowFilesForRelationship( EnrichData.DEVICE_STATE_RELATIONSHIP ).get(0).toByteArray() ) );
-		JsonElement deviceStateContent = JsonParser.parseString( new String( testRunner.getFlowFilesForRelationship( EnrichData.DEVICE_STATE_RELATIONSHIP ).get(0).toByteArray() ) );
+		MockFlowFile deviceStateFF = testRunner.getFlowFilesForRelationship( EnrichData.DEVICE_STATE_RELATIONSHIP ).get(0);
+		JsonElement deviceStateContent = JsonParser.parseString( new String( deviceStateFF.toByteArray() ) );
 		assertEquals( true , deviceStateContent.isJsonObject() );
 		assertEquals( true , expectedState.equals( deviceStateContent.getAsJsonObject() ) );
-		System.out.println( deviceStateContent.toString() );
+//		System.out.println( deviceStateContent.toString() );
+		System.out.println( TestUtils.prettyOutFF( deviceStateFF ) );
 	}
 
 	@Test

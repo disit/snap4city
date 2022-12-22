@@ -330,6 +330,7 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
     	MockFlowFile originalFF = testRunner.getFlowFilesForRelationship( EnrichData.ORIGINAL_RELATIONSHIP ).get(0);
     	originalFF.assertAttributeExists( "format" );
     	originalFF.assertAttributeEquals( "format" , "json" );
+    	System.out.println( TestUtils.prettyOutFF( originalFF ) );
 	}
 	
 }

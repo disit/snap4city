@@ -69,11 +69,13 @@ import org.disit.nifi.processors.enrich_data.enrichment_source.EnrichmentSourceU
 import org.disit.nifi.processors.enrich_data.logging.LoggingUtils;
 import org.disit.nifi.processors.enrich_data.oauth.OAuthTokenProviderService;
 
+import com.google.common.net.MediaType;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 
 @Tags({"snap4city" , "servicemap" , "update"})
 @CapabilityDescription("This processor performs updates on an enrichment source.")
@@ -159,6 +161,27 @@ public class UpdateEnrichmentSource extends AbstractProcessor {
 			.addValidator(Validator.VALID)
 			.build();
 	
+	public static final String DEFAULT_TIMESTAMP_FIELD_NAME = "date_time";
+	public static final PropertyDescriptor TIMESTAMP_FIELD_NAME = new PropertyDescriptor
+			.Builder().name( "TIMESTAMP_FIELD_NAME" )
+			.description( "The name of the timestamp attribute inside the input flow file content. Used to augment the content of the flow files emitted on the 'Performed updates' relationship." )
+			.displayName( "Timestamp field name" )
+			.required( false )
+			.defaultValue( DEFAULT_TIMESTAMP_FIELD_NAME )
+			.addValidator( Validator.VALID )
+			.build();
+	
+	public static final String DEFAULT_STATIC_AUGMENT_PERFORMED_UPDATES = 
+			"{\"value_name\":\"__location\",\"value_type\":\"location\"}";
+	public static final PropertyDescriptor STATIC_AUGMENT_PERFORMED_UPDATES = new PropertyDescriptor
+			.Builder().name( "STATIC_AUGMENT_PERFORMED_UPDATES" )
+			.description( "A static JSON object which is merged with the content of the flow files emitted on the 'Performed updates' realtionships." )
+			.displayName( "Augment performed updates" )
+			.required( false )
+			.defaultValue( DEFAULT_STATIC_AUGMENT_PERFORMED_UPDATES )
+			.addValidator( EnrichDataValidators.jsonPropertyValidator(true) )
+			.build();
+	
 	// Relationships 
     public static final Relationship SUCCESS_RELATIONSHIP = new Relationship.Builder()
             .name("Success")
@@ -175,13 +198,20 @@ public class UpdateEnrichmentSource extends AbstractProcessor {
             .description("Flow files which cannot be correctly enriched will be routed to this relationship." )
             .build();
     
+    public static final Relationship PERFORMED_UPDATES_RELATIONSHIP = new Relationship.Builder()
+    		.name("Performed updates")
+    		.description( "Json objects containing the performed updates." )
+    		.build();
+    
     private static final Set<String> staticProperties = new HashSet<>( Arrays.asList(
     		"ENRICHMENT_SOURCE_UPDATER_SERVICE" ,
     		"ENDPOINT" ,
     		"DEVICE_ID_NAME" ,
     		"CONDITION",
     		"ATTRIBUTES_CONDITION" ,
-    		"REQ_RESOURCE_URI_NAME"
+    		"REQ_RESOURCE_URI_NAME" ,
+    		"TIMESTAMP_FIELD_NAME",
+    		"STATIC_AUGMENT_PERFORMED_UPDATES"
     	) 
     );
 	
@@ -196,7 +226,7 @@ public class UpdateEnrichmentSource extends AbstractProcessor {
     private ComponentLog logger;
     
     // GSON parser
-    private JsonParser parser;
+//    private JsonParser parser;
     
     // Properties
     private String endpoint;
@@ -205,7 +235,11 @@ public class UpdateEnrichmentSource extends AbstractProcessor {
     private JsonObject conditionObj;
     private Map<String , String> attributesConditionMap;
     private String reqResourceUriName;
+    private String timestampFieldName;
+    private JsonObject staticAugPerformedUpdates;
+    
     private boolean includeResourceUri;
+    private boolean outputPerformedUpdates;
     
     private Map<String,List<String>> reqBodyFieldsMapping; 
     
@@ -222,12 +256,15 @@ public class UpdateEnrichmentSource extends AbstractProcessor {
     	descs.add( CONDITION );
     	descs.add( ATTRIBUTES_CONDITION );
     	descs.add( REQ_RESOURCE_URI_NAME );
+    	descs.add( TIMESTAMP_FIELD_NAME );
+    	descs.add( STATIC_AUGMENT_PERFORMED_UPDATES );
     	this.descriptors = Collections.unmodifiableList( descs );
     	
     	final Set<Relationship> rels = new HashSet<>();
     	rels.add( SUCCESS_RELATIONSHIP );
     	rels.add( FAILURE_RELATIONSHIP );
     	rels.add( CONDITION_NOT_MET_RELATIONSHIP );
+    	rels.add( PERFORMED_UPDATES_RELATIONSHIP );
     	this.relationships = Collections.unmodifiableSet( rels );
     }
 	
@@ -285,7 +322,8 @@ public class UpdateEnrichmentSource extends AbstractProcessor {
     			);
     			// Check if array unpacking
     			try { 
-    				JsonElement jsonV = parser.parse( v );
+//    				JsonElement jsonV = parser.parse( v );
+    				JsonElement jsonV = JsonParser.parseString( v );
     				if( jsonV.isJsonArray() ) {
     					JsonArray array = jsonV.getAsJsonArray();
     					if( array.size() > 0 ) {
@@ -307,7 +345,7 @@ public class UpdateEnrichmentSource extends AbstractProcessor {
     public void onScheduled(final ProcessContext context) throws ConfigurationException{
     	
     	this.logger = getLogger();
-    	this.parser = new JsonParser();
+//    	this.parser = new JsonParser();
     	
     	// Enrichment source updater service and updater client
     	this.enrichmentSourceUpdaterService = context.getProperty( ENRICHMENT_SOURCE_UPDATER_SERVICE )
@@ -332,7 +370,8 @@ public class UpdateEnrichmentSource extends AbstractProcessor {
     	
     	// Determine condition on ff payload
     	if( !context.getProperty( CONDITION ).getValue().isEmpty() ) {
-    		this.conditionObj = parser.parse( context.getProperty( CONDITION ).getValue() ).getAsJsonObject();
+//    		this.conditionObj = parser.parse( context.getProperty( CONDITION ).getValue() ).getAsJsonObject();
+    		this.conditionObj = JsonParser.parseString( context.getProperty( CONDITION ).getValue() ).getAsJsonObject();
     		this.useCondition = true;
     	}else {
     		this.useCondition = false;
@@ -341,8 +380,10 @@ public class UpdateEnrichmentSource extends AbstractProcessor {
     	// Determine condition of ff attributes
     	this.attributesConditionMap = new HashMap<>();
     	if( !context.getProperty( ATTRIBUTES_CONDITION ).getValue().isEmpty() ) {
-    		JsonObject attributesConditionObj = parser.parse( context.getProperty( ATTRIBUTES_CONDITION ).getValue() )
-    												  .getAsJsonObject();
+//    		JsonObject attributesConditionObj = parser.parse( context.getProperty( ATTRIBUTES_CONDITION ).getValue() )
+//    												  .getAsJsonObject();
+    		JsonObject attributesConditionObj = JsonParser.parseString( context.getProperty( ATTRIBUTES_CONDITION ).getValue() )
+					  								  .getAsJsonObject();
     		attributesConditionObj.entrySet().forEach( (Map.Entry<String , JsonElement> condEl) -> {
     			attributesConditionMap.put( condEl.getKey() , condEl.getValue().getAsString() );
     		});
@@ -360,6 +401,37 @@ public class UpdateEnrichmentSource extends AbstractProcessor {
     	// Dynamic properties
 //    	this.reqBodyFieldsMapping = parseDynamicProperties(context);
     	configureMappings( context );
+    	
+    	// Performed updates
+    	// output performed updates only if the dedicated relationship
+    	// is connected to another component
+    	if( context.hasConnection( PERFORMED_UPDATES_RELATIONSHIP ) ) {
+    		this.outputPerformedUpdates = true;
+    	}else {
+    		this.outputPerformedUpdates = false;
+    	}
+    	// Performed updates augmentation
+    	if( context.getProperty( TIMESTAMP_FIELD_NAME ).isSet() &&
+			!context.getProperty( TIMESTAMP_FIELD_NAME ).getValue().isEmpty() ) {
+    		this.timestampFieldName = context.getProperty( TIMESTAMP_FIELD_NAME ).getValue();
+    	}
+    	
+    	if( context.getProperty( STATIC_AUGMENT_PERFORMED_UPDATES ).isSet() && 
+    		!context.getProperty( STATIC_AUGMENT_PERFORMED_UPDATES ).getValue().isEmpty() ) {
+    		try {
+    			JsonElement staticAugEl = JsonParser.parseString( context.getProperty( STATIC_AUGMENT_PERFORMED_UPDATES ).getValue() );
+    			if( staticAugEl.isJsonObject() )
+    				this.staticAugPerformedUpdates = staticAugEl.getAsJsonObject();
+    			else {
+    				logger.warn( "The '" + STATIC_AUGMENT_PERFORMED_UPDATES.getDisplayName() + "' property content is not a valid JsonObject. Skipping augmentation." );
+    				this.staticAugPerformedUpdates = null;
+    			}
+    		}catch( JsonParseException ex ) { 
+    			logger.warn( "The '" + STATIC_AUGMENT_PERFORMED_UPDATES.getDisplayName() + "' property content is not a valid JsonObject. Skipping augmentation." );
+    			this.staticAugPerformedUpdates = null;
+    		}
+    	}
+    	
     }
     
 	@Override
@@ -374,7 +446,15 @@ public class UpdateEnrichmentSource extends AbstractProcessor {
         String flowFileContent = contentBytes.toString();
 		
         // Content parsing
-        JsonElement rootEl = parser.parse( flowFileContent );
+//        JsonElement rootEl = parser.parse( flowFileContent );
+        JsonElement rootEl;
+        try {
+        	rootEl = JsonParser.parseString( flowFileContent );
+        }catch( JsonParseException ex ) {
+        	routeToFailure( session , flowFile , "The flow file content is not valid JSON. JsonParseException: " + ex.getMessage() );
+        	return;
+        }
+//        JsonElement rootEl = JsonParser.parseString( flowFileContent );
         
         // Base validation
         //
@@ -492,8 +572,55 @@ public class UpdateEnrichmentSource extends AbstractProcessor {
 //				out.write( rootObject.toString().getBytes() );
 //			}
 //		});
+    	if( this.outputPerformedUpdates ) {
+	    	FlowFile updateFlowFile = produceUpdateFlowFile( session , flowFile , rootObject , reqBodyObj );
+	    	session.transfer( updateFlowFile , PERFORMED_UPDATES_RELATIONSHIP );
+    	}
 		session.putAttribute( flowFile , "Update request body" , reqBodyObj.toString() );
 		session.transfer( flowFile , SUCCESS_RELATIONSHIP );
+	}
+	
+	private FlowFile produceUpdateFlowFile( ProcessSession session , FlowFile inFlowFile , 
+			JsonObject rootObject , JsonObject reqBodyObj ) {
+		FlowFile updateFlowFile = session.clone( inFlowFile );
+//		FlowFile updateFlowFile = session.create();
+		
+		JsonObject updateValueObj = new JsonObject();
+		for( Map.Entry<String , JsonElement> reqEntry : reqBodyObj.entrySet() ) {
+			if( reqEntry.getKey() != this.deviceIdName && 
+				reqEntry.getKey() != this.reqResourceUriName ) {
+				updateValueObj.add( reqEntry.getKey() , reqEntry.getValue() );
+			}
+		}
+		JsonObject updateObject = new JsonObject();
+		updateObject.add( "value_obj" , updateValueObj );
+		
+		// TODO: static names?
+		updateObject.addProperty( "sensorID" , reqBodyObj.get(this.deviceIdName).getAsString() );
+		updateObject.addProperty( "serviceUri" , reqBodyObj.get(this.reqResourceUriName).getAsString() );
+		
+		// date_Time
+		if( this.timestampFieldName != null && inFlowFile.getAttributes().containsKey( this.timestampFieldName ) ) {
+			updateObject.addProperty( this.timestampFieldName , inFlowFile.getAttribute( timestampFieldName ) );
+		}
+		
+		// static augmentation (value_name,value_type)
+		if( this.staticAugPerformedUpdates != null && this.staticAugPerformedUpdates.size() > 0 ) {
+			this.staticAugPerformedUpdates.entrySet()
+				.stream().forEach( (Map.Entry<String, JsonElement> entry)->{
+					updateObject.add( entry.getKey() , entry.getValue() );
+				});
+		}
+		
+		updateFlowFile = session.putAttribute( updateFlowFile , "mime.type" , MediaType.JSON_UTF_8.toString() );
+		
+		updateFlowFile = session.write( updateFlowFile , new OutputStreamCallback() {
+			@Override
+			public void process(OutputStream out) throws IOException {
+				out.write( updateObject.toString().getBytes() );
+			}
+		});
+		return updateFlowFile;
 	}
 	
 	private boolean checkContains( JsonObject ref , JsonObject container ) {
@@ -544,6 +671,15 @@ public class UpdateEnrichmentSource extends AbstractProcessor {
 	private void routeToConditionNotMet( ProcessSession session , FlowFile flowFile , String reason ) {
 		flowFile = session.putAttribute( flowFile , "failure" , reason );
 		session.transfer( flowFile , CONDITION_NOT_MET_RELATIONSHIP );
+	}
+	
+	
+	private void routeToFailure( ProcessSession session , FlowFile flowFile , String reason ) {
+		LoggingUtils.produceErrorObj( reason )
+					.withProperty( "ff-uuid", flowFile.getAttribute("uuid") )
+					.logAsError( logger );
+		flowFile = session.putAttribute( flowFile , "failure" , reason );
+		session.transfer( flowFile , FAILURE_RELATIONSHIP );
 	}
 	
 	private void routeToFailure( ProcessSession session , FlowFile flowFile , String reason , JsonElement rootEl ) {
