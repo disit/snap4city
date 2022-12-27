@@ -89,7 +89,7 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 		
 		List<MockFlowFile> successFFs = testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP );
 		for( int i=0 ; i < successFFs.size() ; i++ ) {
-			JsonElement content = parser.parse( new String( successFFs.get(i).toByteArray() ) );
+			JsonElement content = JsonParser.parseString( new String( successFFs.get(i).toByteArray() ) );
 			assertEquals( true , content.isJsonObject() );
 			assertEquals( true , expectedResult.get(i).equals(content.getAsJsonObject() ) );
 //			System.out.println( TestUtils.prettyOutFF( successFFs.get(i) ) );
@@ -134,7 +134,7 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 			inputFF , parser ).getAsJsonArray();
 		List<MockFlowFile> successFFs = testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP );
 		for( int i=0 ; i < successFFs.size() ; i++ ) {
-			JsonElement content = parser.parse( new String( successFFs.get(i).toByteArray() ) );
+			JsonElement content = JsonParser.parseString( new String( successFFs.get(i).toByteArray() ) );
 			assertEquals( true , content.isJsonObject() );
 			assertEquals( true , expectedResult.get(i).equals( content.getAsJsonObject() ) );
 		}
@@ -159,7 +159,8 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 		JsonObject expectedResult = TestUtils.prepareExpectedResult( 
 			"src/test/resources/reference_results/testOutputs_parseStringValue.ref" , 
 			inputFF , parser ).getAsJsonObject();
-		JsonElement outputContent = parser.parse( 
+
+		JsonElement outputContent = JsonParser.parseString( 
 			new String( testRunner.getFlowFilesForRelationship(EnrichData.SUCCESS_RELATIONSHIP)
 								  .get(0).toByteArray() ) 
 		);
@@ -190,9 +191,7 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 											.getAsJsonArray();
 		List<MockFlowFile> successFFs = testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP );
 		for( int i=0 ; i < successFFs.size() ; i++ ) {
-			JsonElement content = parser.parse( 
-				new String( successFFs.get(i).toByteArray() )
-			);
+			JsonElement content = JsonParser.parseString( new String( successFFs.get(i).toByteArray() ) );
 			assertEquals( true , content.isJsonObject() );
 			assertEquals( true , expectedResult.get(i).equals( content.getAsJsonObject() ) );
 		}
@@ -331,7 +330,7 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
     	MockFlowFile originalFF = testRunner.getFlowFilesForRelationship( EnrichData.ORIGINAL_RELATIONSHIP ).get(0);
     	originalFF.assertAttributeExists( "format" );
     	originalFF.assertAttributeEquals( "format" , "json" );
-    	System.out.println( TestUtils.prettyOutFF( originalFF ) );
+//    	System.out.println( TestUtils.prettyOutFF( originalFF ) );
 	}
 	
 }

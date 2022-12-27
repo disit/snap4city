@@ -30,6 +30,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.nifi.flowfile.FlowFile;
 import org.apache.nifi.processor.ProcessSession;
 import org.apache.nifi.processor.io.OutputStreamCallback;
+import org.disit.nifi.processors.enrich_data.EnrichData;
 import org.disit.nifi.processors.enrich_data.enricher.EnrichUtils;
 
 import com.google.common.net.MediaType;
@@ -79,9 +80,11 @@ public class SplitObjectOutputProducer implements OutputProducer {
 				ff = session.putAttribute( ff , "_id" , id );
 			}
 			
-			ff = session.putAttribute( ff , "mime.type" , MediaType.JSON_UTF_8.toString() );
+//			ff = session.putAttribute( ff , "mime.type" , MediaType.JSON_UTF_8.toString() );
+			ff = session.putAttribute( ff , EnrichData.MIME_TYPE_ATTRIBUTE_NAME , MediaType.JSON_UTF_8.toString() );
 			// value name and timestamp for each produced flow file as attributes
-			ff = session.putAttribute( ff , "valueName" , rootEntry.getKey() );
+//			ff = session.putAttribute( ff , "valueName" , rootEntry.getKey() );
+			ff = session.putAttribute( ff , EnrichData.VALUE_NAME_ATTRIBUTE_NAME , rootEntry.getKey() );
 			if( this.timestampAttribute != null ) { 
 				if( entryObj.has(timestampAttribute) ) {
 					String timestampAttrVal = entryObj.get(timestampAttribute).getAsString();

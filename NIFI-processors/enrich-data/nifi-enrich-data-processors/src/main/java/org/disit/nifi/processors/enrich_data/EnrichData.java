@@ -708,6 +708,7 @@ public class EnrichData extends AbstractProcessor {
     public static final String SRC_PROPERTY_OUTPUT_NAME = "src";
     public static final String KIND_PROPERTY_OUTPUT_NAME = "kind";
     public static final String DEVICE_ID_ATTRIBUTE_NAME = "deviceId";
+    public static final String VALUE_NAME_ATTRIBUTE_NAME = "value_name";
     public static final String UUID_ATTRIBUTE_NAME = "uuid";
     public static final String MIME_TYPE_ATTRIBUTE_NAME = "mime.type";
     

@@ -154,8 +154,8 @@ public class UpdateEnrichmentSourceTests {
 //    	testRunner.setProperty( UpdateEnrichmentSource.CONDITION , "{\"id\":\"wind1\"}" );
         testRunner.setProperty( UpdateEnrichmentSource.REQ_RESOURCE_URI_NAME , "uri" );
         testRunner.setProperty( UpdateEnrichmentSource.TIMESTAMP_FIELD_NAME , "date_time" );
-        testRunner.setProperty( UpdateEnrichmentSource.STATIC_AUGMENT_PERFORMED_UPDATES , 
-        	"{\"value_name\":\"__location\",\"value_type\":\"location\"}" );
+//        testRunner.setProperty( UpdateEnrichmentSource.STATIC_AUGMENT_PERFORMED_UPDATES , 
+//        	"{\"value_name\":\"__location\",\"value_type\":\"location\"}" );
         testRunner.setProperty( "id" , "id" );
         testRunner.setProperty( "a" , "A" );
         testRunner.setProperty( "location/coordinates" , "[latitude , longitude]" );

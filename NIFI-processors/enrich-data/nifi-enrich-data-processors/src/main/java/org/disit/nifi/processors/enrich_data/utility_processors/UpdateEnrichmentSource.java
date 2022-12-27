@@ -59,6 +59,7 @@ import org.apache.nifi.processor.Relationship;
 import org.apache.nifi.processor.exception.ProcessException;
 import org.apache.nifi.processor.io.OutputStreamCallback;
 import org.apache.nifi.processor.util.StandardValidators;
+import org.disit.nifi.processors.enrich_data.EnrichData;
 import org.disit.nifi.processors.enrich_data.EnrichDataValidators;
 import org.disit.nifi.processors.enrich_data.EnrichmentSourceServiceValidators;
 import org.disit.nifi.processors.enrich_data.enrichment_source.EnrichmentSourceClient;
@@ -611,7 +612,12 @@ public class UpdateEnrichmentSource extends AbstractProcessor {
 				});
 		}
 		
-		updateFlowFile = session.putAttribute( updateFlowFile , "mime.type" , MediaType.JSON_UTF_8.toString() );
+		// attributes
+		updateFlowFile = session.putAttribute( updateFlowFile , EnrichData.MIME_TYPE_ATTRIBUTE_NAME , MediaType.JSON_UTF_8.toString() );
+		for( Map.Entry<String,JsonElement> entry : this.staticAugPerformedUpdates.entrySet() ) {
+			updateFlowFile = session.putAttribute( 
+				updateFlowFile , entry.getKey() , entry.getValue().getAsString() );
+		}
 		
 		updateFlowFile = session.write( updateFlowFile , new OutputStreamCallback() {
 			@Override
