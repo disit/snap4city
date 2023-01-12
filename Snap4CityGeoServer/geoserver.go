@@ -1,4 +1,4 @@
-'''
+/*
 Snap4city -- GeoServer API --
    Copyright (C) 2020 DISIT Lab http://www.disit.org - University of Florence
    This program is free software: you can redistribute it and/or modify
@@ -11,7 +11,7 @@ Snap4city -- GeoServer API --
    GNU Affero General Public License for more details.
    You should have received a copy of the GNU Affero General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-'''
+*/
 
 package main
 
