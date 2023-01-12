@@ -38,6 +38,8 @@ import json
 import yaml
 import os
 import math
+import traceback
+import sys
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 with open(os.path.join(script_dir,'config.yaml'), 'r') as file:
@@ -492,8 +494,8 @@ def getMGRSflows(lon, lat, precision, from_date, organization, inFlow):
         AND ST_AsText(dest_geom) <> ST_AsText(orig_geom)
         '''
         
-        # print(query)
-        # print([from_date, organization, precision])
+        print(query)
+        print([from_date, organization, precision])
 
         # fetch results as dataframe
         df = pd.read_sql_query(query, connection, 
@@ -538,7 +540,7 @@ def getMGRSflows(lon, lat, precision, from_date, organization, inFlow):
             # append feature to features' array
             features.append(feature)
 
-            # print(feature)
+            print(feature)
             
         # create features' collection from features array
         feature_collection = FeatureCollection(features)
@@ -594,7 +596,7 @@ def getFlows(lon, lat, precision, from_date, organization, inFlow, od_id, get_pe
 
         # initial query to assess the geom table to use. If 'od_id' is empty,
         # then the defauls 'gadm36' table is selected
-        if(not(source) or source == '' or source == 'gadm36'): 
+        if(not(source) or source == ''): 
             source = 'gadm36'
             # get query
             query = '''
@@ -663,10 +665,10 @@ def getFlows(lon, lat, precision, from_date, organization, inFlow, od_id, get_pe
                             perc_ = float(data[keys[t]])
                         else: # i valori salvati sono assoluti
                             if(get_perc == 'True'): # posso calcolare le percentuali, se get_perc = True
-                                # print('is true')
+                                print('is true')
                                 perc_ = float(data[keys[t]])/ total[t]
                             else: # o mandare i valori assoluti
-                                # print('is false')
+                                print('is false')
                                 perc_ = float(data[keys[t]])
                         perc[keys[t]] = perc_
                     # print(perc)
@@ -723,7 +725,7 @@ def getFlows(lon, lat, precision, from_date, organization, inFlow, od_id, get_pe
             # AND ST_AsText(d.geom) <> ST_AsText(c.geom)
             # '''
 
-            # print(query)
+            print(query)
             # print(from_date)
             # print(organization)
             # print(od_id)
@@ -733,8 +735,8 @@ def getFlows(lon, lat, precision, from_date, organization, inFlow, od_id, get_pe
                                 params={'from_date': from_date, 
                                         'organization': organization,
                                         'od_id': od_id})
-                
-            
+
+            print("query DONE!")
             
             # get total sum of values            
             if(is_json(df.at[0,'value'])):
@@ -753,6 +755,8 @@ def getFlows(lon, lat, precision, from_date, organization, inFlow, od_id, get_pe
             else:
                 df['value'] = df['value'].astype(float)
                 total = df['value'].sum()
+            
+            print("SUM DONE")
             
             # remove duplicates rows by od_id, keeping the last
             #df = df.drop_duplicates(subset='od_id', keep='last')
@@ -1015,24 +1019,32 @@ def convertColor(rgb):
     
 # get color map as array
 def getColorMap(metric_name):
-    # setup MySQL connection
-    cnx = sqlConnect(config)
-    # get the total number of rows
-    df = pd.read_sql('SELECT * FROM colors WHERE metric_name = %s', 
-                     params=(metric_name,), 
-                     con=cnx)
-    
-    # close MySQL connection
-    cnx.close()
-    
-    # create hex color column
-    df['hex'] = df.apply(lambda x: convertColor(x['rgb']), axis=1)
-    
-    # replace nans with empty strings
-    df = df.replace(np.nan, '', regex=True)
-    
-    return df[['min', 'max', 'hex']].to_numpy().tolist()
+    out = None
+    try:
+        # setup MySQL connection
+        cnx = sqlConnect(config)
+        # get the total number of rows
+        df = pd.read_sql('SELECT * FROM colors WHERE metric_name = %s', 
+                        params=(metric_name,), 
+                        con=cnx)
+        
+        # close MySQL connection
+        cnx.close()
+        
+        # create hex color column
+        df['hex'] = df.apply(lambda x: convertColor(x['rgb']), axis=1)
+        
+        # replace nans with empty strings
+        df = df.replace(np.nan, '', regex=True)
+        
+        out = df[['min', 'max', 'hex']].to_numpy().tolist()
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
+        out = 'Error: ' + str(exc_type) + ' ' + str(fname) + ' ' + str(exc_tb.tb_lineno) + '\n' + traceback.format_exc()
 
+    return out
 
 # New function to get statistics stored in a OD matrix (i.e., od_id) for a given polygon (i.e., dest_id)
 # - invalid_id is used to identify dest_id not previsously defined (e.g., -9999)
@@ -1183,9 +1195,9 @@ def getAllPoly(latitude_ne, longitude_ne, latitude_sw, longitude_sw, type, organ
         if(type == 'poi' or type == 'ace' or type == 'municipality' or type == 'province' or type == 'region'):
             source = 'italy_epgs4326'
         elif(type == 'communes'):
-            source = 'gadm36' 
+            source = 'gadm36' # TODO: CONTROLLA BENE!!!!
         else:
-            source = 'mgrs' 
+            source = 'mgrs' # TODO: CONTROLLA BENE !!!!!
 
         #   p0 ------ p1
         #    |         |
@@ -1254,7 +1266,7 @@ def getAllPoly(latitude_ne, longitude_ne, latitude_sw, longitude_sw, type, organ
                                 'poi_id=\'NULL\''  
             elif type == 'poi':  
                 query = query + 'poi_id LIKE \'%' + organization + '%\''
-            # print(query)
+            print(query)
             
             # fetch results as dataframe
             df = pd.read_sql_query(query, connection)
@@ -1276,8 +1288,39 @@ def getAllPoly(latitude_ne, longitude_ne, latitude_sw, longitude_sw, type, organ
             # create features' collection from features array
             feature_collection = FeatureCollection(features)
             # print(feature_collection)
-        else:
-            feature_collection = [] # TODO implement for gadm and msgr
+
+        elif (source == 'gadm36'):
+            query = '''
+            SELECT 
+                uid, name_3, geom
+            FROM public.''' + source + '''
+            WHERE 
+                ST_Intersects(geom, ''' + aoi + ''')
+            '''
+            print(query)
+
+            # fetch results as dataframe
+            df = pd.read_sql_query(query, connection)
+            # print(df)            
+                    
+            features = []
+
+            for index, row in df.iterrows():            
+                polygon = wkb.loads(row['geom'], hex=True)
+                feature = Feature(geometry=shapely.wkt.loads(polygon.wkt),
+                                id = row['uid'],
+                                properties={
+                                    'name': row['uid'], 
+                                    'txt_name': row['name_3']
+                                })
+                features.append(feature)
+    
+            # print(features)
+            # create features' collection from features array
+            feature_collection = FeatureCollection(features)
+
+        elif (source == 'mgrs'):
+            print('TODO!!!') # TODO cases for gadm and msgr !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     except (Exception, psycopg2.Error) as error:
         print("[GET POLYGON STATS] Error while fetching data from PostgreSQL", error)
@@ -1296,15 +1339,24 @@ def getAllPoly(latitude_ne, longitude_ne, latitude_sw, longitude_sw, type, organ
 
 class ODMGRS(Resource):
     def get(self):
+
+        print('[ODMGRS]')
+        print(self)
+
+        print(parser.parse_args())
         # parse arguments
         args = parser.parse_args()
 
+        print(args)
+        
         longitude = args['longitude']
         latitude = args['latitude']
         precision = args['precision']
         from_date = args['from_date']
         organization = args['organization']
         inFlow = args['inflow']
+        
+        print('read')
         
         return getMGRSflows(longitude, latitude, precision, from_date, organization, inFlow)
 
@@ -1315,7 +1367,7 @@ class OD(Resource):
     def get(self):
         # parse arguments
         args = parser.parse_args()
-        # print(args)
+        print(args)
         
         longitude = args['longitude']
         latitude = args['latitude']
@@ -1356,7 +1408,8 @@ class GetMGRSPolygonCenter(Resource):
         
         return getMGRSpolygonShapelyCenter(longitude, latitude, precision)
 
-# 2022/04/21 modified to handle the new parameters 'type' and 'organization'. 
+# 2022/04/21 modified to handle the new optional parameter 'type'. If missing it is 
+#            set to an empty string and the legacy functionality is kept
 class GetPolygon(Resource):
     def get(self):
         # parse arguments
