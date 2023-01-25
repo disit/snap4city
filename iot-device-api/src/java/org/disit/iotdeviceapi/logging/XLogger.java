@@ -47,17 +47,24 @@ public class XLogger {
     private final long timestamp;
     int status;
     private HashMap<String, Level> config;
+    private Level baseMinLevel;
     
     public XLogger (String api, String folder) {
         this.timestamp = System.currentTimeMillis() / 1000L;
         this.filename = System.getProperty("user.home")+folder+"/"+Long.toString(this.timestamp)+"_"+UUID.randomUUID().toString()+".xml";
         status = Const.OK;
         this.config = new HashMap<>();
+        String minLevelStr = System.getenv("IOT_DEVICE_API_LOGLEVEL");
+        if(minLevelStr != null) {
+          this.baseMinLevel = Level.parse(minLevelStr);
+        } else {
+          this.baseMinLevel = Level.OFF;
+        }
     }
     
     public void log(String origin, Level level, String label, Object content) {
         try {		
-            Level minLevel = Level.OFF;
+            Level minLevel = baseMinLevel;
             if(config.containsKey(origin)) minLevel = config.get(origin);
             if(minLevel.intValue() <= level.intValue()) {
                 String messageStr;

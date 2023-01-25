@@ -41,6 +41,7 @@ import virtuoso.sesame2.driver.VirtuosoRepository;
  */
 public class VirtuosoLoader extends Loader {
 
+    static Repository mRepository;
     RepositoryConnection mRepositoryConnection;
     String deleteInsert;
     ArrayList<Data> pendingDataForInsert;
@@ -50,25 +51,28 @@ public class VirtuosoLoader extends Loader {
     public void connect(Repos datasource) {
             
         try {
-            Repository repo;
-            String virtuosoEndpoint = datasource.getParameter(VirtuosoLoaderConst.CFG_DS_PAR_VIRTENDPT);
-            String virtuosoUser = datasource.getParameter(VirtuosoLoaderConst.CFG_DS_PAR_VIRTUSER);
-            if(virtuosoUser == null) virtuosoUser = VirtuosoLoaderConst.DEFAULT_VIRTUSER;
-            String virtuosoPwd = datasource.getParameter(VirtuosoLoaderConst.CFG_DS_PAR_VIRTPWD);
-            if(virtuosoPwd == null) virtuosoPwd = VirtuosoLoaderConst.DEFAULT_VIRTPWD;
-            String virtuosoTimeout = datasource.getParameter(VirtuosoLoaderConst.CFG_DS_PAR_VIRTIMEOUT);
-            if(virtuosoTimeout == null) virtuosoTimeout = VirtuosoLoaderConst.DEFAULT_TIMEOUT;
-            if(virtuosoEndpoint!=null && !virtuosoEndpoint.trim().isEmpty()) {
-              VirtuosoRepository vrepo = new VirtuosoRepository(virtuosoEndpoint, virtuosoUser, virtuosoPwd);
-              vrepo.setQueryTimeout(Integer.parseInt(virtuosoTimeout)); 
-              repo = vrepo;
+            if(mRepository == null) {
+              Repository repo;
+              String virtuosoEndpoint = datasource.getParameter(VirtuosoLoaderConst.CFG_DS_PAR_VIRTENDPT);
+              String virtuosoUser = datasource.getParameter(VirtuosoLoaderConst.CFG_DS_PAR_VIRTUSER);
+              if(virtuosoUser == null) virtuosoUser = VirtuosoLoaderConst.DEFAULT_VIRTUSER;
+              String virtuosoPwd = datasource.getParameter(VirtuosoLoaderConst.CFG_DS_PAR_VIRTPWD);
+              if(virtuosoPwd == null) virtuosoPwd = VirtuosoLoaderConst.DEFAULT_VIRTPWD;
+              String virtuosoTimeout = datasource.getParameter(VirtuosoLoaderConst.CFG_DS_PAR_VIRTIMEOUT);
+              if(virtuosoTimeout == null) virtuosoTimeout = VirtuosoLoaderConst.DEFAULT_TIMEOUT;
+              if(virtuosoEndpoint!=null && !virtuosoEndpoint.trim().isEmpty()) {
+                VirtuosoRepository vrepo = new VirtuosoRepository(virtuosoEndpoint, virtuosoUser, virtuosoPwd);
+                vrepo.setQueryTimeout(Integer.parseInt(virtuosoTimeout)); 
+                repo = vrepo;
+              }
+              else {
+                String sparqlEndpoint = datasource.getParameter(VirtuosoLoaderConst.CFG_DS_PAR_SPARQLENDPT);
+                repo = new SPARQLRepository(sparqlEndpoint);
+              }
+              repo.initialize();
+              mRepository = repo;
             }
-            else {
-              String sparqlEndpoint = datasource.getParameter(VirtuosoLoaderConst.CFG_DS_PAR_SPARQLENDPT);
-              repo = new SPARQLRepository(sparqlEndpoint);
-            }
-            repo.initialize();
-            this.mRepositoryConnection = repo.getConnection();
+            this.mRepositoryConnection = mRepository.getConnection();
             setConnected(true);
             this.deleteInsert = datasource.getParameter(VirtuosoLoaderConst.CFG_DS_PAR_DELINS);
             if(null != this.deleteInsert) {

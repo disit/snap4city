@@ -22,6 +22,7 @@ import java.lang.reflect.Constructor;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import javax.activation.MimeType;
 import javax.servlet.ServletException;
@@ -51,7 +52,6 @@ import org.json.simple.JSONValue;
 @WebServlet(name = "Insert", urlPatterns = {"/Insert"})
 public class Insert extends HttpServlet {
 
-    HashMap<String, Loader> mLoaders; 
     int status;
     
     /**
@@ -103,6 +103,7 @@ public class Insert extends HttpServlet {
         XLogger xlogger = null;
         Parser cfgParser;
         setStatus(Const.OK);
+        HashMap<String, Loader> loaders = null;
         
         try {
 
@@ -143,9 +144,9 @@ public class Insert extends HttpServlet {
             HashMap<String, Class<?>> datatypes = cfgParser.getDatatypes();
             HashMap<String,Provider> providers = cfgParser.getProviders();
             HashMap<String,Constructor> builders = cfgParser.getBuilders();
-            HashMap<String, Loader> loaders = cfgParser.getLoaders();
+            loaders = cfgParser.getLoaders();
             HashMap<String, ArrayList<Validator>> validations = cfgParser.getValidations();
-            this.mLoaders = loaders; 
+            //this.mLoaders = loaders; 
             
             xlogger.log(Insert.class.getName(), Level.INFO, "request", repos.get(ParserConst.REQUEST).getParameter(ParserConst.REQUEST_RAW));
             if(Const.ERROR == xlogger.getStatus()) {
@@ -230,7 +231,7 @@ public class Insert extends HttpServlet {
             // Disconnecting loaders
             
             for(String loaderID: loaders.keySet()) {
-                if(mLoaders.get(loaderID).isConnected()) {
+                if(loaders.get(loaderID).isConnected()) {
                     loaders.get(loaderID).disconnect(getStatus());
                 }
                 if(Const.ERROR == loaders.get(loaderID).getStatus()) {
@@ -306,13 +307,13 @@ public class Insert extends HttpServlet {
 
             setStatus(Const.ERROR);
             
-            if(mLoaders != null) {
-                mLoaders.keySet().forEach((loaderID) -> {
-                    if(mLoaders.get(loaderID) != null && 
-                            mLoaders.get(loaderID).isConnected()) {
-                        mLoaders.get(loaderID).disconnect(getStatus());
+            if(loaders != null) {
+                for(Entry<String,Loader> entry: loaders.entrySet()){
+                    if(entry.getValue() != null && 
+                            entry.getValue().isConnected()) {
+                        entry.getValue().disconnect(getStatus());
                     }
-                });
+                }
             }
             
             if(xlogger!=null) xlogger.log(Insert.class.getName(), Level.SEVERE, "insert error", e);
