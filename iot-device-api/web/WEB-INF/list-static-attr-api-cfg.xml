@@ -222,6 +222,7 @@
 								(schema:url "Use url" xsd:string)
 								(foaf:name "Name" UNDEF)
                                                                 (km4c:isMobile "Is Mobile" xsd:string)
+                                                                (km4c:isCertified "Is Certified" xsd:string)
                                                                 (schema:telephone "Telephone" xsd:string)
                                                                 (schema:faxNumber "Fax number" xsd:string)                                                              
 							'}'

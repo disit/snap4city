@@ -1251,6 +1251,7 @@
 								(schema:url "Use url" xsd:string)
 								(foaf:name "Name" UNDEF)
                                                                 (km4c:isMobile "Is Mobile" xsd:string)
+                                                                (km4c:isCertified "Is Certified" xsd:string)
 							'}'
 							optional '{' ?uri rdfs:label ?label FILTER(LANG(?label)="en")'}'
 							optional '{' ?uri rdfs:range ?type filter(?type!=rdfs:Literal)'}' . 
