@@ -20,6 +20,8 @@ Other github repositories with tools used on snap4city are:
 - https://github.com/disit/synoptics
 - https://github.com/disit/whatif-router
 
+Moreover the Unified Knowowledge Model (UKM) used to represent and reason about snap4city platform elements is available at http://model.snap4city.org/s4c as OWL ontology.
+
 Most of the Snap4City components can be provided in form of appliance, please contact Paolo.nesi@unifi.it
 Appliance are in subtance Virtual Machines that you can execute on your premise, fully configure, since we provide you full access at level of Root / Admin. The Vm are mainly with Linux like operating system.
 
