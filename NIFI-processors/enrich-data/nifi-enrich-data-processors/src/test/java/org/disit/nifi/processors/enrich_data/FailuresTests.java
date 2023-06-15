@@ -46,7 +46,6 @@ import com.google.gson.JsonParser;
 public class FailuresTests {
 
 	private TestRunner testRunner;
-    JsonParser jsonParser;
     
     private ServicemapControllerService servicemapService;
     
@@ -67,7 +66,6 @@ public class FailuresTests {
     	System.setProperty( "org.eclipse.jetty.LEVEL" , "INFO" );
     	
     	testRunner = TestRunners.newTestRunner(EnrichData.class);
-        jsonParser = new JsonParser();
         
         
         testRunner.setProperty( EnrichData.DEVICE_ID_NAME , "id" );
@@ -126,7 +124,7 @@ public class FailuresTests {
 		servicemap.addError( 
 			FailuresTests.serviceUriPrefix + "/" + failureDeviceId , 
 			HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
-			jsonParser.parse( "{'error':'Internal Server Error'}" ) 
+			JsonParser.parseString( "{'error':'Internal Server Error'}" )
 		);
 		
 		JsonObject mockInFFContent = new JsonObject();
@@ -145,13 +143,13 @@ public class FailuresTests {
 		System.out.println( "-------------- FAILURE_RELATIONSHIP flow files: --------------\n");
 		List<MockFlowFile> outFFList = testRunner.getFlowFilesForRelationship( EnrichData.FAILURE_RELATIONSHIP );
 		outFFList.stream().forEach( (MockFlowFile ff) -> {
-			System.out.println( TestUtils.prettyOutFF( ff , jsonParser ) );
+			System.out.println( TestUtils.prettyOutFF( ff ) );
 		});
 		
 		System.out.println( "\n\n-------------- RETRY_RELATIONSHIP flow files: --------------\n");
 		outFFList = testRunner.getFlowFilesForRelationship( EnrichData.RETRY_RELATIONSHIP );
 		outFFList.stream().forEach( (MockFlowFile ff) -> {
-			System.out.println( TestUtils.prettyOutFF( ff , jsonParser ) );
+			System.out.println( TestUtils.prettyOutFF( ff ) );
 		});
 	}
 	
@@ -179,13 +177,13 @@ public class FailuresTests {
 		System.out.println( "-------------- FAILURE_RELATIONSHIP flow files: --------------\n");
 		List<MockFlowFile> outFFList = testRunner.getFlowFilesForRelationship( EnrichData.FAILURE_RELATIONSHIP );
 		outFFList.stream().forEach( (MockFlowFile ff) -> {
-			System.out.println( TestUtils.prettyOutFF( ff , jsonParser ) );
+			System.out.println( TestUtils.prettyOutFF( ff ) );
 		});
 		
 		System.out.println( "\n\n-------------- RETRY_RELATIONSHIP flow files: --------------\n");
 		outFFList = testRunner.getFlowFilesForRelationship( EnrichData.RETRY_RELATIONSHIP );
 		outFFList.stream().forEach( (MockFlowFile ff) -> {
-			System.out.println( TestUtils.prettyOutFF( ff , jsonParser ) );
+			System.out.println( TestUtils.prettyOutFF( ff ) );
 		});
 	}
 
@@ -198,7 +196,7 @@ public class FailuresTests {
 		servicemap.addError( 
 			FailuresTests.serviceUriPrefix + "/" + failureDeviceId , 
 			HttpServletResponse.SC_NOT_FOUND, 
-			jsonParser.parse( "{'error':'Not Found'}" ) 
+			JsonParser.parseString( "{'error':'Not Found'}" )
 		);
 		
 		JsonObject mockInFFContent = new JsonObject();
@@ -217,13 +215,13 @@ public class FailuresTests {
 		System.out.println( "-------------- FAILURE_RELATIONSHIP flow files: --------------\n");
 		List<MockFlowFile> outFFList = testRunner.getFlowFilesForRelationship( EnrichData.FAILURE_RELATIONSHIP );
 		outFFList.stream().forEach( (MockFlowFile ff) -> {
-			System.out.println( TestUtils.prettyOutFF( ff , jsonParser ) );
+			System.out.println( TestUtils.prettyOutFF( ff ) );
 		});
 		
 		System.out.println( "\n\n-------------- RETRY_RELATIONSHIP flow files: --------------\n");
 		outFFList = testRunner.getFlowFilesForRelationship( EnrichData.RETRY_RELATIONSHIP );
 		outFFList.stream().forEach( (MockFlowFile ff) -> {
-			System.out.println( TestUtils.prettyOutFF( ff , jsonParser ) );
+			System.out.println( TestUtils.prettyOutFF( ff ) );
 		});
 	}
 	
@@ -238,7 +236,7 @@ public class FailuresTests {
 			HttpServletResponse.SC_OK, 
 			// Service/features/properties/realtimeAttributes
 			// Service/features/geometry/coordinates
-			jsonParser.parse( "{'Service': { 'features': { 'properties': 1 } } }" ) 
+			JsonParser.parseString( "{'Service': { 'features': { 'properties': 1 } } }" )
 		);
 		
 		JsonObject mockInFFContent = new JsonObject();
@@ -260,13 +258,13 @@ public class FailuresTests {
 		System.out.println( "-------------- FAILURE_RELATIONSHIP flow files: --------------\n");
 		List<MockFlowFile> outFFList = testRunner.getFlowFilesForRelationship( EnrichData.FAILURE_RELATIONSHIP );
 		outFFList.stream().forEach( (MockFlowFile ff) -> {
-			System.out.println( TestUtils.prettyOutFF( ff , jsonParser ) );
+			System.out.println( TestUtils.prettyOutFF( ff ) );
 		});
 		
 		System.out.println( "\n\n-------------- RETRY_RELATIONSHIP flow files: --------------\n");
 		outFFList = testRunner.getFlowFilesForRelationship( EnrichData.RETRY_RELATIONSHIP );
 		outFFList.stream().forEach( (MockFlowFile ff) -> {
-			System.out.println( TestUtils.prettyOutFF( ff , jsonParser ) );
+			System.out.println( TestUtils.prettyOutFF( ff ) );
 		});
 		
 	}

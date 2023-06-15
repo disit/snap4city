@@ -69,7 +69,7 @@ public class UpdateEnrichmentSourceTests {
 
 	private TestRunner testRunner;
 	
-	JsonParser jsonParser = new JsonParser();
+//	JsonParser jsonParser = new JsonParser();
 	
 	private static final String serviceUriPrefix = "http://serviceuriprefix.org";
 	private static final String additionalQueryString = "";
@@ -95,7 +95,7 @@ public class UpdateEnrichmentSourceTests {
     	System.setProperty( "org.eclipse.jetty.LEVEL" , "INFO" );
     	
         testRunner = TestRunners.newTestRunner(UpdateEnrichmentSource.class);
-        jsonParser = new JsonParser();
+//        jsonParser = new JsonParser();
         
         testRunner.setProperty( UpdateEnrichmentSource.DEVICE_ID_NAME , "id" );
         testRunner.setProperty( UpdateEnrichmentSource.ENDPOINT , "move" );
@@ -165,18 +165,23 @@ public class UpdateEnrichmentSourceTests {
         testRunner.addConnection( UpdateEnrichmentSource.PERFORMED_UPDATES_RELATIONSHIP );
         
         validateProcessorProperties();
+        
+        String serviceUri = "http://serviceuriprefix.org/test-id";
+//        String serviceUri = "http://anotheruriprefix.org/broker/org/test-id";
+//        String serviceUri = "http://serviceuriprefix.org/wind1";
     	
+        // Mock attributes from EnrichData
         Map<String, String> attributes = new HashMap<>();
         attributes.put( "date_time" , ZonedDateTime.now(ZoneOffset.UTC).format( DateTimeFormatter.ISO_INSTANT ) );
-        attributes.put( "serviceUri" , "http://serviceuriprefix.org/test-id" );
+//        attributes.put( "serviceUri" , "http://serviceuriprefix.org/test-id" );
 //        attributes.put( "serviceUri" , "http://serviceuriprefix.org/wind1" );
+//        attributes.put( EnrichData.SERVICE_URI_OUTPUT_NAME , serviceUri );
         
         // Success mock flow file
     	testRunner.enqueue( 
     		TestUtils.mockJsonElementFromFile(
-				Paths.get( "src/test/resources/test_update_enrichment_source/input.ff" ) ,
-//				Paths.get( "src/test/resources/test_update_enrichment_source/input_alt.ff" ) ,
-				jsonParser 
+				Paths.get( "src/test/resources/test_update_enrichment_source/input.ff" ) 
+//				Paths.get( "src/test/resources/test_update_enrichment_source/input_alt.ff" ) 
 			).toString(),
     		attributes
 		);
@@ -184,8 +189,7 @@ public class UpdateEnrichmentSourceTests {
     	// Condition not met mock flow file
     	testRunner.enqueue( 
     		TestUtils.mockJsonElementFromFile(
-				Paths.get( "src/test/resources/test_update_enrichment_source/failContentConditionInput.ff" ) ,
-				jsonParser 
+				Paths.get( "src/test/resources/test_update_enrichment_source/failContentConditionInput.ff" ) 
 			).toString(),
     		attributes
 		);
@@ -197,8 +201,9 @@ public class UpdateEnrichmentSourceTests {
     		assertEquals( true , obj.get( "id" ).isJsonPrimitive() );
     		
     		assertEquals( true , obj.has("uri") );
-    		assertEquals( serviceUriPrefix + "/" + obj.get("id").getAsString() , 
-    				      obj.get("uri").getAsString() );
+//    		assertEquals( serviceUriPrefix + "/" + obj.get("id").getAsString() , 
+//    				      obj.get("uri").getAsString() );
+    		assertEquals( serviceUri , obj.get("uri").getAsString() );
     		
     		System.out.println( "Servicemap received:" );
     		System.out.println( reqBody.toString() );
@@ -211,12 +216,12 @@ public class UpdateEnrichmentSourceTests {
     	System.out.println( "--- Success FFs: " );
     	testRunner.getFlowFilesForRelationship( UpdateEnrichmentSource.SUCCESS_RELATIONSHIP )
 				  .stream().forEach( (MockFlowFile ff) -> {
-					  System.out.println( TestUtils.prettyOutFF( ff , jsonParser ) );
+					  System.out.println( TestUtils.prettyOutFF( ff ) );
 				  });
     	System.out.println( "--- Condition not met FFs: " );
     	testRunner.getFlowFilesForRelationship( UpdateEnrichmentSource.CONDITION_NOT_MET_RELATIONSHIP )
 				  .stream().forEach( (MockFlowFile ff) -> {
-					  System.out.println( TestUtils.prettyOutFF( ff , jsonParser ) );
+					  System.out.println( TestUtils.prettyOutFF( ff ) );
 				  });
 //    	testRunner.assertTransferCount( UpdateEnrichmentSource.PERFORMED_UPDATES_RELATIONSHIP , 1 );
     	if( testRunner.getFlowFilesForRelationship( UpdateEnrichmentSource.PERFORMED_UPDATES_RELATIONSHIP ).size() > 0 ) {
@@ -245,9 +250,7 @@ public class UpdateEnrichmentSourceTests {
         Map<String , String> ffAttributes = new TreeMap<>();
         ffAttributes.put( "performUpdate" , "true" );
     	JsonElement ffContent = TestUtils.mockJsonElementFromFile(
-    		Paths.get( "src/test/resources/test_update_enrichment_source/input.ff" ) ,
-    		jsonParser 
-    	);
+    		Paths.get( "src/test/resources/test_update_enrichment_source/input.ff" ) );
     	testRunner.enqueue( ffContent.toString() , ffAttributes );
     	
     	// Condition not met flow file mock
@@ -278,13 +281,13 @@ public class UpdateEnrichmentSourceTests {
     	System.out.println( "---- Success FFs: ");
     	testRunner.getFlowFilesForRelationship( UpdateEnrichmentSource.SUCCESS_RELATIONSHIP )
 				  .stream().forEach( (MockFlowFile ff) -> {
-					  System.out.println( TestUtils.prettyOutFF( ff , jsonParser ) );
+					  System.out.println( TestUtils.prettyOutFF( ff ) );
 				  });
     	
     	System.out.println( "---- Condition not met FFs: ");
     	testRunner.getFlowFilesForRelationship( UpdateEnrichmentSource.CONDITION_NOT_MET_RELATIONSHIP )
     			  .stream().forEach( (MockFlowFile ff) -> {
-    				  System.out.println( TestUtils.prettyOutFF( ff , jsonParser ) );
+    				  System.out.println( TestUtils.prettyOutFF( ff ) );
     			  });
     	System.out.println( "**** END TEST FF-ATTRIBUTES CONDITION ***\n\n" );
     }
@@ -307,8 +310,7 @@ public class UpdateEnrichmentSourceTests {
     	// Success mock flow file
     	testRunner.enqueue( 
     		TestUtils.mockJsonElementFromFile(
-				Paths.get( "src/test/resources/test_update_enrichment_source/input.ff" ) ,
-				jsonParser 
+				Paths.get( "src/test/resources/test_update_enrichment_source/input.ff" ) 
 			).toString() , 
     		Stream.of( new String[][] { 
     			{ "perform" , "true" }
@@ -318,8 +320,7 @@ public class UpdateEnrichmentSourceTests {
     	// Condition not met on content
     	testRunner.enqueue( 
     		TestUtils.mockJsonElementFromFile(
-				Paths.get( "src/test/resources/test_update_enrichment_source/failContentConditionInput.ff" ) ,
-				jsonParser 
+				Paths.get( "src/test/resources/test_update_enrichment_source/failContentConditionInput.ff" )  
 			).toString() , 
     		Stream.of( new String[][] { 
     			{ "perform" , "true" }
@@ -329,8 +330,7 @@ public class UpdateEnrichmentSourceTests {
     	// Condition not met on atttibutes
     	testRunner.enqueue( 
     		TestUtils.mockJsonElementFromFile(
-				Paths.get( "src/test/resources/test_update_enrichment_source/input.ff" ) ,
-				jsonParser 
+				Paths.get( "src/test/resources/test_update_enrichment_source/input.ff" ) 
 			).toString() , 
     		Stream.of( new String[][] { 
     			{ "perform" , "false" }
@@ -359,12 +359,12 @@ public class UpdateEnrichmentSourceTests {
     	System.out.println( "--- Success FFs: " );
     	testRunner.getFlowFilesForRelationship( UpdateEnrichmentSource.SUCCESS_RELATIONSHIP )
 				  .stream().forEach( (MockFlowFile ff) -> {
-					  System.out.println( TestUtils.prettyOutFF( ff , jsonParser ) );
+					  System.out.println( TestUtils.prettyOutFF( ff ) );
 				  });
     	System.out.println( "--- Condition not met FFs: " );
     	testRunner.getFlowFilesForRelationship( UpdateEnrichmentSource.CONDITION_NOT_MET_RELATIONSHIP )
 				  .stream().forEach( (MockFlowFile ff) -> {
-					  System.out.println( TestUtils.prettyOutFF( ff , jsonParser ) );
+					  System.out.println( TestUtils.prettyOutFF( ff ) );
 				  });
     	System.out.println( "**** END TEST HYBRID CONDITION ***\n\n" );
     }
@@ -387,9 +387,7 @@ public class UpdateEnrichmentSourceTests {
 		);
 		
 		JsonElement ffContent = TestUtils.mockJsonElementFromFile(
-    		Paths.get( "src/test/resources/test_update_enrichment_source/error400.ff" ) ,
-    		jsonParser 
-    	);
+    		Paths.get( "src/test/resources/test_update_enrichment_source/error400.ff" ) );
     	MockFlowFile inFF = testRunner.enqueue( ffContent.toString() );
     	
     	testRunner.run();

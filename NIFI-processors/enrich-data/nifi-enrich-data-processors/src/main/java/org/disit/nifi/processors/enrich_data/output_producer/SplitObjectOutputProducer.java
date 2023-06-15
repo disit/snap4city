@@ -19,6 +19,8 @@ package org.disit.nifi.processors.enrich_data.output_producer;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -41,10 +43,11 @@ import com.google.gson.JsonObject;
  * a flow file per member. 
  *
  */
-public class SplitObjectOutputProducer implements OutputProducer {
+//public class SplitObjectOutputProducer implements OutputProducer {
+public class SplitObjectOutputProducer extends OutputProducer {
 
 	private List<String> hashedIdFields;
-	private String timestampAttribute = null;
+//	private String timestampAttribute = null;
 	
 	public SplitObjectOutputProducer() {
 		this.hashedIdFields = new ArrayList<>();
@@ -54,13 +57,15 @@ public class SplitObjectOutputProducer implements OutputProducer {
 		this.hashedIdFields = hashedIdFields;
 	}
 	
-	public void setTimestampAttribute( String timestampAttribute ) {
-		this.timestampAttribute = timestampAttribute;
-	}
+//	public void setTimestampAttribute( String timestampAttribute ) {
+//		this.timestampAttribute = timestampAttribute;
+//	}
 	
 	@Override
 	public List<FlowFile> produceOutput(JsonObject rootObj, FlowFile inFlowFile, final ProcessSession session) {		
 		List<FlowFile> outputList = new ArrayList<>();
+		
+		Instant nowRef = Instant.now();
 		
 		rootObj.entrySet().stream().forEach( (Map.Entry<String , JsonElement> rootEntry) -> { 
 			
@@ -80,20 +85,19 @@ public class SplitObjectOutputProducer implements OutputProducer {
 				ff = session.putAttribute( ff , "_id" , id );
 			}
 			
-//			ff = session.putAttribute( ff , "mime.type" , MediaType.JSON_UTF_8.toString() );
 			ff = session.putAttribute( ff , EnrichData.MIME_TYPE_ATTRIBUTE_NAME , MediaType.JSON_UTF_8.toString() );
 			// value name and timestamp for each produced flow file as attributes
-//			ff = session.putAttribute( ff , "valueName" , rootEntry.getKey() );
 			ff = session.putAttribute( ff , EnrichData.VALUE_NAME_ATTRIBUTE_NAME , rootEntry.getKey() );
-			if( this.timestampAttribute != null ) { 
-				if( entryObj.has(timestampAttribute) ) {
-					String timestampAttrVal = entryObj.get(timestampAttribute).getAsString();
-					try {
-						timestampAttrVal = EnrichUtils.toFullISO8601Format( timestampAttrVal );
-					}catch( DateTimeParseException ex ) { /*if cannot parse leave as it is*/ }
-					ff = session.putAttribute( ff , timestampAttribute , timestampAttrVal );
-				}
-			}
+//			if( this.timestampAttribute != null ) { 
+//				if( entryObj.has(timestampAttribute) ) {
+//					String timestampAttrVal = entryObj.get(timestampAttribute).getAsString();
+//					try { 
+//						timestampAttrVal = EnrichUtils.toFullISO8601Format( timestampAttrVal );
+//					}catch( DateTimeParseException ex ) { /*if cannot parse leave as it is*/ }
+//					ff = session.putAttribute( ff , timestampAttribute , timestampAttrVal );
+//				}
+//			}
+			ff = putTimestampAttributes( ff , session , entryObj , nowRef );
 				
 			outputList.add( ff );
 		});

@@ -36,6 +36,7 @@ import org.junit.Test;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import groovy.mock.interceptor.MockFor;
 
@@ -131,7 +132,7 @@ public class EnrichDataLocatorOwnershipTests extends EnrichDataTestBase{
 	}
 	
 	protected static String addOwnershipResource( String deviceIdName , String idPrefix , String inputFilePath , String resourceFilePath ) throws IOException {
-		JsonObject inputObj = TestUtils.mockJsonObjFromFile( Paths.get( inputFilePath ) , parser );
+		JsonObject inputObj = TestUtils.mockJsonObjFromFile( Paths.get( inputFilePath ) );
 		String deviceId = inputObj.get( deviceIdName ).getAsString();
 		
 		StringBuilder ownershipIdentifier = new StringBuilder( idPrefix ).append( deviceId );
@@ -140,7 +141,7 @@ public class EnrichDataLocatorOwnershipTests extends EnrichDataTestBase{
 	}
 	
 	protected static String addIOTDirectoryResource( String subId , String resourceFilePath , String serviceUriPrefixPath ) throws IOException {
-		JsonObject resourceObj = TestUtils.mockJsonObjFromFile( Paths.get( resourceFilePath ), parser );
+		JsonObject resourceObj = TestUtils.mockJsonObjFromFile( Paths.get( resourceFilePath ) );
 		
 		List<String> path = Arrays.asList( serviceUriPrefixPath.split("/") );
 		JsonElement cur = resourceObj;
@@ -197,12 +198,12 @@ public class EnrichDataLocatorOwnershipTests extends EnrichDataTestBase{
 		
 		JsonObject expectedResult = TestUtils.prepareExpectedResult( 
 			"src/test/resources/reference_results/ownership/testOutputs_ownershipJsonObject.ref" , 
-			inputFF , parser ).getAsJsonObject();
+			inputFF ).getAsJsonObject();
 		
 		MockFlowFile outFF = testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP ).get(0);
 //		TestUtils.prettyOutFF(outFF);
-		JsonElement content = parser.parse( new String( outFF.toByteArray() ) );
-		TestUtils.prettyOutFF(inputFF);		
+		System.out.println( TestUtils.prettyOutFF( outFF ) );
+		JsonElement content = JsonParser.parseString( new String( outFF.toByteArray() ) );
 		assertEquals( true , content.isJsonObject() );
 		assertEquals( true , expectedResult.equals( content.getAsJsonObject() ) );
 	}

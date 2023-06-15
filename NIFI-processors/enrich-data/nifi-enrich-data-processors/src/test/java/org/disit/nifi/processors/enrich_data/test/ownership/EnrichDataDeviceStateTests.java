@@ -86,7 +86,7 @@ public class EnrichDataDeviceStateTests extends EnrichDataTestBase{
 	}
 	
 	protected static String addOwnershipResource( String deviceIdName , String idPrefix , String inputFilePath , String resourceFilePath ) throws IOException {
-		JsonObject inputObj = TestUtils.mockJsonObjFromFile( Paths.get( inputFilePath ) , parser );
+		JsonObject inputObj = TestUtils.mockJsonObjFromFile( Paths.get( inputFilePath ) );
 		String deviceId = inputObj.get( deviceIdName ).getAsString();
 		
 		StringBuilder ownershipIdentifier = new StringBuilder( idPrefix ).append( deviceId );
@@ -116,11 +116,11 @@ public class EnrichDataDeviceStateTests extends EnrichDataTestBase{
 		JsonObject expectedResult = TestUtils.prepareExpectedResult( 
 //			"src/test/resources/reference_results/ownership/testOutputs_ownershipJsonObject.ref" ,
 			"src/test/resources/reference_results/ownership/testDeviceState_ownershipJsonObject.ref" ,
-			inputFF , parser ).getAsJsonObject();
+			inputFF ).getAsJsonObject();
 		
 		JsonObject expectedState = TestUtils.prepareExpectedDeviceState( 
 			"src/test/resources/reference_results/ownership/testOutputs_DeviceState_MINIMAL.ff", 
-			inputFF , parser ).getAsJsonObject();
+			inputFF ).getAsJsonObject();
 		
 		MockFlowFile outFF = testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP ).get(0);
 		JsonElement content = JsonParser.parseString( new String( outFF.toByteArray() ) );
@@ -161,11 +161,11 @@ public class EnrichDataDeviceStateTests extends EnrichDataTestBase{
 		JsonObject expectedResult = TestUtils.prepareExpectedResult( 
 //			"src/test/resources/reference_results/ownership/testOutputs_ownershipJsonObject.ref" ,
 			"src/test/resources/reference_results/ownership/testDeviceState_ownershipJsonObject.ref" ,
-			inputFF , parser ).getAsJsonObject();
+			inputFF ).getAsJsonObject();
 		
 		JsonObject expectedState = TestUtils.prepareExpectedDeviceState( 
 			"src/test/resources/reference_results/ownership/testOutputs_DeviceState_FULL.ff", 
-			inputFF , parser ).getAsJsonObject();
+			inputFF ).getAsJsonObject();
 		
 //		JsonElement content = parser.parse( new String( testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP ).get(0).toByteArray() ) );
 		JsonElement content = JsonParser.parseString( new String( testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP ).get(0).toByteArray() ) );
@@ -207,11 +207,11 @@ public class EnrichDataDeviceStateTests extends EnrichDataTestBase{
 		JsonObject expectedResult = TestUtils.prepareExpectedResult( 
 //				"src/test/resources/reference_results/ownership/testOutputs_ownershipJsonObject.ref" ,
 				"src/test/resources/reference_results/ownership/testDeviceState_ownershipJsonObject.ref" ,
-				inputFF , parser ).getAsJsonObject();
+				inputFF ).getAsJsonObject();
 		
 		JsonObject expectedState = TestUtils.prepareExpectedDeviceState( 
 				"src/test/resources/reference_results/ownership/testOutputs_DeviceState_ExpectedNextUpdate.ff", 
-				inputFF , parser ).getAsJsonObject();
+				inputFF ).getAsJsonObject();
 		
 		JsonElement content = JsonParser.parseString( new String( testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP ).get(0).toByteArray() ) );
 		assertEquals( true , content.isJsonObject() );

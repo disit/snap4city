@@ -205,6 +205,7 @@ public class EnrichData extends AbstractProcessor {
 		  	"TIMESTAMP_FIELD_NAME" ,
 		  	"TIMESTAMP_FROM_CONTENT_PROPERTY_NAME" ,
 		  	"TIMESTAMP_FROM_CONTENT_PROPERTY_VALUE" ,
+		  	"TIMESTAMP_THRESHOLD" ,
 //		  	"URI_PREFIX_FROM_ATTR_NAME" ,
 		  	"VALUE_FIELD_NAME" ,  
 		  	"SRC_PROPERTY" , 
@@ -342,6 +343,15 @@ public class EnrichData extends AbstractProcessor {
             .addValidator(Validator.VALID)
             .build();
     
+    public static final PropertyDescriptor TIMESTAMP_THRESHOLD = new PropertyDescriptor
+    		.Builder().name( "TIMESTAMP_THRESHOLD" )
+    		.displayName( "Timestamp threshold" )
+    		.description( "If this property is set, the flow files routed to the 'success' relationship will have an attribute containing: [ffTimestamp-(now-timestampThreshold)] in milliseconds." )
+    		.required( false )
+    		.addValidator( EnrichDataValidators.timePeriodValidatorOrNotSet( 1 , TimeUnit.SECONDS , 36500, TimeUnit.DAYS ) )
+    		.build();    		
+    		
+    
     // Value field (flow file content object)
     public static final PropertyDescriptor VALUE_FIELD_NAME = new PropertyDescriptor
     		.Builder().name( "VALUE_FIELD_NAME" )
@@ -387,7 +397,7 @@ public class EnrichData extends AbstractProcessor {
     		.displayName( "Enrichment latlon format" )
     		.description( "Specifies the ordering of latitude and longitude in the coordinates array retrieved from the enrichment source (Ex. Servicemap)." )
     		.required( true )
-    		.defaultValue( ENRICHMENT_LAT_LON_FORMAT_VALUES[0] )
+    		.defaultValue( ENRICHMENT_LAT_LON_FORMAT_VALUES[1] )
     		.allowableValues( ENRICHMENT_LAT_LON_FORMAT_VALUES )
     		.addValidator( StandardValidators.NON_EMPTY_VALIDATOR )
     		.build();
@@ -582,6 +592,7 @@ public class EnrichData extends AbstractProcessor {
 	        TIMESTAMP_FIELD_NAME , 					// Timestamp
 	        TIMESTAMP_FROM_CONTENT_PROPERTY_NAME , 	// Timestamp
 	        TIMESTAMP_FROM_CONTENT_PROPERTY_VALUE , // Timestamp
+	        TIMESTAMP_THRESHOLD ,					// Timestamp 
 //	        URI_PREFIX_FROM_ATTR_NAME ,				// Fields
 	        VALUE_FIELD_NAME ,						// Fields
 	        ENRICHMENT_RESPONSE_BASE_PATH ,			// Enrichment sources
@@ -726,6 +737,7 @@ public class EnrichData extends AbstractProcessor {
         descriptors.add( TIMESTAMP_FIELD_NAME );
         descriptors.add( TIMESTAMP_FROM_CONTENT_PROPERTY_NAME );
         descriptors.add( TIMESTAMP_FROM_CONTENT_PROPERTY_VALUE );
+        descriptors.add( TIMESTAMP_THRESHOLD );
         descriptors.add( VALUE_FIELD_NAME );
         descriptors.add( ENRICHMENT_RESPONSE_BASE_PATH );
         descriptors.add( LATLON_PRIORITY );
@@ -1000,7 +1012,7 @@ public class EnrichData extends AbstractProcessor {
     	// Json output format
     	if( context.getProperty( OUTPUT_FF_CONTENT_FORMAT ).getValue().equals( OUTPUT_FF_CONTENT_FORMAT_VALUES[0] ) ) {
     		JsonOutputProducer jsonProducer = new JsonOutputProducer();
-    		jsonProducer.setTimestampAttribute( timestampFieldName );
+//    		jsonProducer.setTimestampAttribute( timestampFieldName );
     		this.outProducer = jsonProducer;
     	}
     	
@@ -1036,8 +1048,15 @@ public class EnrichData extends AbstractProcessor {
     		}else {
     			splitProducer = new SplitObjectOutputProducer();
     		}
-    		splitProducer.setTimestampAttribute( this.timestampFieldName );
+//    		splitProducer.setTimestampAttribute( this.timestampFieldName );
     		this.outProducer = splitProducer;
+    	}
+    	
+    	this.outProducer.setTimestampAttribute( this.timestampFieldName );
+    	if( context.getProperty( TIMESTAMP_THRESHOLD ).isSet() ) {
+    		long time_threshold = context.getProperty( TIMESTAMP_THRESHOLD )
+						    			 .asTimePeriod( TimeUnit.MILLISECONDS ).longValue();
+    		this.outProducer.setTimestampThreshold( time_threshold );
     	}
     	
     	//User defined properties
@@ -1311,12 +1330,13 @@ public class EnrichData extends AbstractProcessor {
 //				responseRootEl = enrichmentSourceClient.getEnrichmentData( uriPrefix , deviceId );
 //			else
 //				responseRootEl = enrichmentSourceClient.getEnrichmentData( deviceId );
-			if( resourceLocations.hasLocationForService( ResourceLocations.Service.SERVICEMAP ) )
+			if( resourceLocations.hasLocationForService( ResourceLocations.Service.SERVICEMAP ) ) {
 				responseRootEl = enrichmentSourceClient.getEnrichmentData( 
 					resourceLocations.getLocationForService( ResourceLocations.Service.SERVICEMAP ) , 
 					deviceId );
-			else
+			}else {
 				responseRootEl = enrichmentSourceClient.getEnrichmentData( deviceId );
+			}
 		} catch (EnrichmentSourceException e) {
 			// EnrichmentSource ERROR handling
 			StringBuilder msg = new StringBuilder( e.getMessage() );
@@ -1491,8 +1511,11 @@ public class EnrichData extends AbstractProcessor {
 			List<FlowFile> outList = this.outProducer.produceOutput( rootObject , flowFile , session );
 			
 			String determinedTimestamp = null;
-			if( !outList.isEmpty() )
+			String timeSlack = null;
+			if( !outList.isEmpty() ) {
 				determinedTimestamp = outList.get(0).getAttribute( timestampFieldName );
+				timeSlack = outList.get(0).getAttribute( OutputProducer.TIME_SLACK_ATTRIBUTE_NAME );
+			}
 			
 			outList.stream().forEach( (FlowFile ff) -> {
 				// Additional ff attributes 
@@ -1533,6 +1556,8 @@ public class EnrichData extends AbstractProcessor {
 							MIME_TYPE_ATTRIBUTE_NAME , MediaType.JSON_UTF_8.toString() );
 					if( determinedTimestamp != null )
 						deviceStateFF = session.putAttribute( deviceStateFF , timestampFieldName , determinedTimestamp );
+					if( timeSlack != null )
+						deviceStateFF = session.putAttribute( deviceStateFF , OutputProducer.TIME_SLACK_ATTRIBUTE_NAME , timeSlack );
 					routeToRelationship( deviceStateFF , DEVICE_STATE_RELATIONSHIP , session , 
 						new ImmutablePair<String , String>( "timestampSource" , this.enricher.getLastTimestampSource() ) );
 				} // Otherwise the device state is ignored
@@ -1561,6 +1586,8 @@ public class EnrichData extends AbstractProcessor {
 			originalFF = session.putAttribute( originalFF , MIME_TYPE_ATTRIBUTE_NAME , MediaType.JSON_UTF_8.toString() );
 			if( determinedTimestamp != null )
 				originalFF = session.putAttribute( originalFF , timestampFieldName , determinedTimestamp );
+			if( timeSlack != null )
+				originalFF = session.putAttribute( originalFF , OutputProducer.TIME_SLACK_ATTRIBUTE_NAME , timeSlack );
 			routeToRelationship( originalFF , ORIGINAL_RELATIONSHIP , session );
 			
 		}catch( ProcessException ex ) { // Exceptions during enrichment object retriveal from service response body			

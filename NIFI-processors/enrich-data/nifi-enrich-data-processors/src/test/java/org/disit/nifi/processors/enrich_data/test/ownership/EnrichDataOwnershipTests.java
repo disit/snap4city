@@ -32,6 +32,7 @@ import org.junit.Test;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 /**
  * Unit tests for the EnrichData processor using:
@@ -84,7 +85,7 @@ public class EnrichDataOwnershipTests extends EnrichDataTestBase{
 	}
 	
 	protected static String addOwnershipResource( String deviceIdName , String idPrefix , String inputFilePath , String resourceFilePath ) throws IOException {
-		JsonObject inputObj = TestUtils.mockJsonObjFromFile( Paths.get( inputFilePath ) , parser );
+		JsonObject inputObj = TestUtils.mockJsonObjFromFile( Paths.get( inputFilePath ) );
 		String deviceId = inputObj.get( deviceIdName ).getAsString();
 		
 		StringBuilder ownershipIdentifier = new StringBuilder( idPrefix ).append( deviceId );
@@ -110,11 +111,11 @@ public class EnrichDataOwnershipTests extends EnrichDataTestBase{
 		
 		JsonObject expectedResult = TestUtils.prepareExpectedResult( 
 			"src/test/resources/reference_results/ownership/testOutputs_ownershipJsonObject.ref" , 
-			inputFF , parser ).getAsJsonObject();
+			inputFF ).getAsJsonObject();
 		
 		MockFlowFile outFF = testRunner.getFlowFilesForRelationship(EnrichData.SUCCESS_RELATIONSHIP).get(0);
 		System.out.println( TestUtils.prettyOutFF( outFF ) );
-		JsonElement content = parser.parse( new String( outFF.toByteArray() ) );
+		JsonElement content = JsonParser.parseString( new String( outFF.toByteArray() ) );
 		assertEquals( true , content.isJsonObject() );
 		assertEquals( true , expectedResult.equals( content.getAsJsonObject() ) );
 	}

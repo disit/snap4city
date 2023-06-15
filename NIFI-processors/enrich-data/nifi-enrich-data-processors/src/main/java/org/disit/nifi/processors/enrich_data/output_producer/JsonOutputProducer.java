@@ -19,6 +19,7 @@ package org.disit.nifi.processors.enrich_data.output_producer;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -39,13 +40,14 @@ import com.google.gson.JsonObject;
  * Takes the rootObject and produces an output flow file 
  * containing the rootObject unmodified. 
  */
-public class JsonOutputProducer implements OutputProducer {
+//public class JsonOutputProducer implements OutputProducer {
+public class JsonOutputProducer extends OutputProducer {
 
-	private String timestampAttribute = null;
+//	private String timestampAttribute = null;
 	
-	public void setTimestampAttribute( String timestampAttribute ) {
-		this.timestampAttribute = timestampAttribute;
-	}
+//	public void setTimestampAttribute( String timestampAttribute ) {
+//		this.timestampAttribute = timestampAttribute;
+//	}
 	
 	@Override
 	public List<FlowFile> produceOutput(JsonObject rootObj , FlowFile inFlowFile , final ProcessSession session ) {
@@ -62,15 +64,20 @@ public class JsonOutputProducer implements OutputProducer {
 		});
 		 
 		inFlowFile = session.putAttribute( inFlowFile , "mime.type" , MediaType.JSON_UTF_8.toString() );
-		if( timestampAttribute != null ) { // put timestamp of the first measure in the root object as attribute
-			JsonElement firstElement = rootObj.entrySet().stream().findFirst().get().getValue();
-			if( firstElement.isJsonObject() && firstElement.getAsJsonObject().has(timestampAttribute) ) {
-				String timestampAttrVal = firstElement.getAsJsonObject().get(timestampAttribute).getAsString();
-				try {
-					timestampAttrVal = EnrichUtils.toFullISO8601Format(timestampAttrVal);
-				}catch( DateTimeParseException ex ) { /* if cannot parse, leave as it is */ }
-				inFlowFile = session.putAttribute( inFlowFile , timestampAttribute , timestampAttrVal );
-			}
+//		if( timestampAttribute != null ) { // put timestamp of the first measure in the root object as attribute
+//			JsonElement firstElement = rootObj.entrySet().stream().findFirst().get().getValue();
+//			if( firstElement.isJsonObject() && firstElement.getAsJsonObject().has(timestampAttribute) ) {
+//				String timestampAttrVal = firstElement.getAsJsonObject().get(timestampAttribute).getAsString();
+//				try {
+//					timestampAttrVal = EnrichUtils.toFullISO8601Format(timestampAttrVal);
+//				}catch( DateTimeParseException ex ) { /* if cannot parse, leave as it is */ }
+//				inFlowFile = session.putAttribute( inFlowFile , timestampAttribute , timestampAttrVal );
+//			}
+//		}
+		JsonElement firstElement = rootObj.entrySet().stream().findFirst().get().getValue();
+		if( firstElement.isJsonObject() ) {
+			JsonObject firstObj = firstElement.getAsJsonObject();
+			inFlowFile = putTimestampAttributes( inFlowFile , session , firstObj );
 		}
 		
 		outputList.add( inFlowFile );

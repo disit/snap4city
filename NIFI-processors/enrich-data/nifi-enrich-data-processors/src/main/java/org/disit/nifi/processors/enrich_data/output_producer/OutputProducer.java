@@ -16,10 +16,15 @@
 
 
 package org.disit.nifi.processors.enrich_data.output_producer;
+import java.time.DateTimeException;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import org.apache.nifi.flowfile.FlowFile;
 import org.apache.nifi.processor.ProcessSession;
+import org.disit.nifi.processors.enrich_data.enricher.EnrichUtils;
 
 import com.google.gson.JsonObject;
 
@@ -28,7 +33,13 @@ import com.google.gson.JsonObject;
  * 	For every output format, an OutputProducer subclass must be created. 
  *	
  */
-public interface OutputProducer{
+//public interface OutputProducer{
+public abstract class OutputProducer{
+	
+	public static final String TIME_SLACK_ATTRIBUTE_NAME = "time_slack";
+	
+	protected String timestampAttribute = null;
+	protected long timestampThreshold = 0;
 	
 	/**
 	 * Implement this method to realize an output format for the processor.
@@ -36,6 +47,37 @@ public interface OutputProducer{
 	 * @param rootObj the JsonObject from which output flow files are created.
 	 * @return a java.util.List of output flow files.
 	 */
-	public List<FlowFile> produceOutput( JsonObject rootObj , FlowFile inFlowFile , final ProcessSession session );
+	public abstract List<FlowFile> produceOutput( JsonObject rootObj , FlowFile inFlowFile , final ProcessSession session );
+	
+	public void setTimestampAttribute( String attributeName ) {
+		this.timestampAttribute = attributeName;
+	}
+	
+	public void setTimestampThreshold( long timestampThreshold ) {
+		this.timestampThreshold = timestampThreshold;
+	}
+	
+	protected FlowFile putTimestampAttributes( FlowFile ff , ProcessSession session , JsonObject entryObj ) {
+		Instant nowRef = Instant.now();
+		return putTimestampAttributes( ff , session , entryObj , nowRef );
+	}
+	
+	protected FlowFile putTimestampAttributes( FlowFile ff , ProcessSession session , JsonObject entryObj , Instant nowRef ) {
+		if( this.timestampAttribute != null ) {
+			if( entryObj.has( this.timestampAttribute ) ) {
+				String timestampAttrVal = entryObj.get( this.timestampAttribute ).getAsString();
+				try {
+					OffsetDateTime ot = OffsetDateTime.parse( timestampAttrVal );
+					timestampAttrVal = EnrichUtils.toFullISO8601Format( ot );
+					if( this.timestampThreshold > 0 ) {
+						long timeSlack = ot.toInstant().toEpochMilli() - ( nowRef.toEpochMilli() - this.timestampThreshold);
+						ff = session.putAttribute( ff , TIME_SLACK_ATTRIBUTE_NAME , String.valueOf( timeSlack ) );
+					}
+				}catch( DateTimeException ex ) { /* leave as it it*/ }
+				ff = session.putAttribute( ff , this.timestampAttribute , timestampAttrVal );
+			}
+		}
+		return ff;
+	}
 	
 }

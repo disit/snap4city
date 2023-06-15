@@ -16,6 +16,8 @@
 
 package org.disit.nifi.processors.enrich_data.enricher;
 
+import java.time.DateTimeException;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -44,10 +46,14 @@ public final class EnrichUtils {
 	public static final DateTimeFormatter timestampFormatter = DateTimeFormatter.ofPattern( "yyyy-MM-dd'T'HH:mm:ss.SSSXXX" );
 	public static final DateTimeFormatter iso8601FullOutFormatter = DateTimeFormatter.ofPattern( "yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXXXX" );
 	
-	public static final String toFullISO8601Format( String timestamp ) throws DateTimeParseException{
+	public static final String toFullISO8601Format( String timestamp ) throws DateTimeParseException, DateTimeException{
 //		OffsetDateTime ot = OffsetDateTime.parse( timestamp , DateTimeFormatter.ISO_OFFSET_DATE_TIME );
 		OffsetDateTime ot = OffsetDateTime.parse( timestamp );
 		return iso8601FullOutFormatter.format( ot );
+	}
+	
+	public static final String toFullISO8601Format( OffsetDateTime timestamp ) throws DateTimeException {
+		return iso8601FullOutFormatter.format( timestamp );
 	}
 	
 	/**
@@ -204,6 +210,12 @@ public final class EnrichUtils {
      		timestampFieldName + "10sec" ,
      		timestampFieldName + "10min" 
      	);
+    }
+    
+    public static String generateTimestampSlack( String timestamp , int secondsThreshold ) {
+    	OffsetDateTime ot = OffsetDateTime.parse( timestamp );
+    	long tsSlack = ot.toInstant().toEpochMilli() - (Instant.now().toEpochMilli() - secondsThreshold*1000 );
+    	return String.valueOf( tsSlack );
     }
     
     /**

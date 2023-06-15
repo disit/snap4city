@@ -15,6 +15,7 @@
  */
 package org.disit.nifi.processors.ingest_data;
 
+import java.awt.PageAttributes.MediaType;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -171,8 +172,8 @@ public class IngestData extends AbstractProcessor {
 
     private Set<Relationship> relationships;
     
-    private Gson gson;
-    private JsonParser parser;
+//    private Gson gson;
+//    private JsonParser parser;
     private ComponentLog logger;
     
     // Property values attributes
@@ -186,6 +187,8 @@ public class IngestData extends AbstractProcessor {
     private String prefixSeparator;
     private Set<String> fieldsToPrefix;
     private boolean performPrefix;
+    
+    private final static String MIME_JSON_UTF8 = "application/json; charset=utf-8";
     
     @Override
     protected void init(final ProcessorInitializationContext context) {
@@ -242,9 +245,9 @@ public class IngestData extends AbstractProcessor {
     @OnScheduled
     public void onScheduled(final ProcessContext context) throws ConfigurationException {
     	//Set up processor 
-    	this.gson = new Gson();
+//    	this.gson = new Gson();
     	this.logger = getLogger();
-    	this.parser = new JsonParser();
+//    	this.parser = new JsonParser();
     	
     	//reading 'Get timestamp from' property 
     	if( context.getProperty( GET_TIMESTAMP_FROM ).getValue().equals( ConfigConstants.GET_TIMESTAMP_FROM_VALUES[0] ) ) {
@@ -352,7 +355,7 @@ public class IngestData extends AbstractProcessor {
     		throw new ConfigurationException( misconfReason );
     	}
     	
-    	// Determin wether to perform prefixing
+    	// Determine whether to perform prefixing
     	if( context.getProperty(PREFIX).isSet() && !fieldsToPrefix.isEmpty() )
     		performPrefix = true;
 		else
@@ -375,7 +378,8 @@ public class IngestData extends AbstractProcessor {
         // Extracted attributes
         Map<String , String> extractedAttributes;
         
-        JsonElement rootEl = parser.parse( flowFileContent );
+//        JsonElement rootEl = parser.parse( flowFileContent );
+        JsonElement rootEl = JsonParser.parseString( flowFileContent );
         if( rootEl.isJsonObject() ) { // check if the root element (whole flow file content) is a valid JsonObject
         	JsonObject rootObj = rootEl.getAsJsonObject();
         	
@@ -452,6 +456,7 @@ public class IngestData extends AbstractProcessor {
         		
         		flowFile = session.putAttribute( flowFile , "prefix" , prefixReport );
         		flowFile = session.putAllAttributes( flowFile , extractedAttributes );
+        		flowFile = session.putAttribute( flowFile , "mime.type" , MIME_JSON_UTF8 );
         		
         		session.transfer( flowFile , SUCCESS_RELATIONSHIP );
         		

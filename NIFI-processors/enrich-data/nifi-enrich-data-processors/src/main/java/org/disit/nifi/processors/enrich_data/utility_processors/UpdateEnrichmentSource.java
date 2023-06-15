@@ -226,9 +226,6 @@ public class UpdateEnrichmentSource extends AbstractProcessor {
     // Logger
     private ComponentLog logger;
     
-    // GSON parser
-//    private JsonParser parser;
-    
     // Properties
     private String endpoint;
     private String deviceIdName;
@@ -241,8 +238,6 @@ public class UpdateEnrichmentSource extends AbstractProcessor {
     
     private boolean includeResourceUri;
     private boolean outputPerformedUpdates;
-    
-    private Map<String,List<String>> reqBodyFieldsMapping; 
     
     private Map<String , String> nameMapping;
     private Map<String , List<String>> pathExpansions;
@@ -323,7 +318,6 @@ public class UpdateEnrichmentSource extends AbstractProcessor {
     			);
     			// Check if array unpacking
     			try { 
-//    				JsonElement jsonV = parser.parse( v );
     				JsonElement jsonV = JsonParser.parseString( v );
     				if( jsonV.isJsonArray() ) {
     					JsonArray array = jsonV.getAsJsonArray();
@@ -346,7 +340,6 @@ public class UpdateEnrichmentSource extends AbstractProcessor {
     public void onScheduled(final ProcessContext context) throws ConfigurationException{
     	
     	this.logger = getLogger();
-//    	this.parser = new JsonParser();
     	
     	// Enrichment source updater service and updater client
     	this.enrichmentSourceUpdaterService = context.getProperty( ENRICHMENT_SOURCE_UPDATER_SERVICE )
@@ -371,7 +364,6 @@ public class UpdateEnrichmentSource extends AbstractProcessor {
     	
     	// Determine condition on ff payload
     	if( !context.getProperty( CONDITION ).getValue().isEmpty() ) {
-//    		this.conditionObj = parser.parse( context.getProperty( CONDITION ).getValue() ).getAsJsonObject();
     		this.conditionObj = JsonParser.parseString( context.getProperty( CONDITION ).getValue() ).getAsJsonObject();
     		this.useCondition = true;
     	}else {
@@ -381,8 +373,6 @@ public class UpdateEnrichmentSource extends AbstractProcessor {
     	// Determine condition of ff attributes
     	this.attributesConditionMap = new HashMap<>();
     	if( !context.getProperty( ATTRIBUTES_CONDITION ).getValue().isEmpty() ) {
-//    		JsonObject attributesConditionObj = parser.parse( context.getProperty( ATTRIBUTES_CONDITION ).getValue() )
-//    												  .getAsJsonObject();
     		JsonObject attributesConditionObj = JsonParser.parseString( context.getProperty( ATTRIBUTES_CONDITION ).getValue() )
 					  								  .getAsJsonObject();
     		attributesConditionObj.entrySet().forEach( (Map.Entry<String , JsonElement> condEl) -> {
@@ -400,7 +390,6 @@ public class UpdateEnrichmentSource extends AbstractProcessor {
     	}
     	
     	// Dynamic properties
-//    	this.reqBodyFieldsMapping = parseDynamicProperties(context);
     	configureMappings( context );
     	
     	// Performed updates
@@ -447,7 +436,6 @@ public class UpdateEnrichmentSource extends AbstractProcessor {
         String flowFileContent = contentBytes.toString();
 		
         // Content parsing
-//        JsonElement rootEl = parser.parse( flowFileContent );
         JsonElement rootEl;
         try {
         	rootEl = JsonParser.parseString( flowFileContent );
@@ -455,7 +443,6 @@ public class UpdateEnrichmentSource extends AbstractProcessor {
         	routeToFailure( session , flowFile , "The flow file content is not valid JSON. JsonParseException: " + ex.getMessage() );
         	return;
         }
-//        JsonElement rootEl = JsonParser.parseString( flowFileContent );
         
         // Base validation
         //
@@ -491,7 +478,11 @@ public class UpdateEnrichmentSource extends AbstractProcessor {
     	}
     	
     	String deviceId = rootObject.get( this.deviceIdName ).getAsString();
-    	String resourceUri = enrichmentSourceUpdater.buildResourceUri( deviceId );
+    	String resourceUri = flowFile.getAttribute( EnrichData.SERVICE_URI_OUTPUT_NAME );
+    	if( resourceUri == null ) { // If the serviceUri is not contained in the FF attributes uses the default one
+    		resourceUri = enrichmentSourceUpdater.buildResourceUri( deviceId );
+    		flowFile = session.putAttribute( flowFile , EnrichData.SERVICE_URI_OUTPUT_NAME , resourceUri );
+    	}
     	
     	// Build the update Json object
     	//========================================
@@ -502,11 +493,6 @@ public class UpdateEnrichmentSource extends AbstractProcessor {
     	
     	// Include all specified fields
     	try {
-//	    	reqBodyFieldsMapping.forEach( (String name , List<String> path) -> {
-//	    		JsonElement value = getElementByPath(rootObject, path);
-//	    		reqBodyObj.add( name , value);
-//	    	});
-	    	
 	    	pathExpansions.forEach( (String path , List<String> expansionList) -> {
 	    		JsonElement value = getElementByPath( rootObject , expansionList );
 	    		if( !arrayUnpackings.containsKey( path ) ) {
@@ -545,8 +531,7 @@ public class UpdateEnrichmentSource extends AbstractProcessor {
     		routeToFailure(
     			session, flowFile, 
     			"Cannot extract some field from the incoming flow file object.", 
-    			rootEl, ex
-    		);
+    			rootEl, ex );
     		return;
     	}
     	
@@ -558,24 +543,16 @@ public class UpdateEnrichmentSource extends AbstractProcessor {
 			routeToFailure( 
 				session , flowFile, 
 				"Update request failed." , 
-				reqBodyObj , 
-				e
-			);
+				reqBodyObj , e );
 			return;
 		}
 		
-		// Write to flow file and route to success
-//		session.write( flowFile , new OutputStreamCallback() {
-//			
-//			@Override
-//			public void process(OutputStream out) throws IOException {
-//				out.write( rootObject.toString().getBytes() );
-//			}
-//		});
-    	if( this.outputPerformedUpdates ) {
+    	// Produce performed update flow file
+    	if( this.outputPerformedUpdates ) { 
 	    	FlowFile updateFlowFile = produceUpdateFlowFile( session , flowFile , rootObject , reqBodyObj , deviceId , resourceUri );
 	    	session.transfer( updateFlowFile , PERFORMED_UPDATES_RELATIONSHIP );
     	}
+    	// Route to success
 		session.putAttribute( flowFile , "Update request body" , reqBodyObj.toString() );
 		session.transfer( flowFile , SUCCESS_RELATIONSHIP );
 	}
@@ -583,7 +560,6 @@ public class UpdateEnrichmentSource extends AbstractProcessor {
 	private FlowFile produceUpdateFlowFile( ProcessSession session , FlowFile inFlowFile , 
 			JsonObject rootObject , JsonObject reqBodyObj , String deviceId , String resourceUri) {
 		FlowFile updateFlowFile = session.clone( inFlowFile );
-//		FlowFile updateFlowFile = session.create();
 		
 		JsonObject updateValueObj = new JsonObject();
 		for( Map.Entry<String , JsonElement> reqEntry : reqBodyObj.entrySet() ) {
@@ -597,7 +573,7 @@ public class UpdateEnrichmentSource extends AbstractProcessor {
 		
 		// TODO: static names?
 		updateObject.addProperty( "sensorID" , deviceId );
-		updateObject.addProperty( "serviceUri" , resourceUri );
+		updateObject.addProperty( EnrichData.SERVICE_URI_OUTPUT_NAME , resourceUri );
 		
 		// date_Time
 		if( this.timestampFieldName != null && inFlowFile.getAttributes().containsKey( this.timestampFieldName ) ) {

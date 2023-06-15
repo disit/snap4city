@@ -37,45 +37,45 @@ public class TestUtils {
 
 	private TestUtils() {}
 	
-	public static String mockJsonStringFromFile( Path path , JsonParser parser ) throws IOException{
+	public static String mockJsonStringFromFile( Path path ) throws IOException{
     	
 		String content = Files.lines( path )
 							  .reduce( (String s1 , String s2) -> { return s1 + s2; } )
 							  .get();
 		
-		return parser.parse( content ).getAsJsonObject().toString();
+		return JsonParser.parseString( content ).getAsJsonObject().toString();
     }
     
-    public static JsonObject mockJsonObjFromFile( Path path , JsonParser parser ) throws IOException{
+    public static JsonObject mockJsonObjFromFile( Path path ) throws IOException{
     	
 		String content = Files.lines( path )
 							  .reduce( (String s1 , String s2) -> { return s1 + s2; } )
 							  .get();
 		
-		return parser.parse( content ).getAsJsonObject();
+		return JsonParser.parseString(content).getAsJsonObject();
     }
     
-    public static JsonArray mockJsonArrayFromFile( Path path , JsonParser parser ) throws IOException{
+    public static JsonArray mockJsonArrayFromFile( Path path ) throws IOException{
     	
     	String content = Files.lines( path )
     						  .reduce( (s1 , s2) -> { return s1 + s2; } )
     						  .get();
     	
-    	return parser.parse( content ).getAsJsonArray();
+    	return JsonParser.parseString(content).getAsJsonArray();
     }
     
-    public static JsonElement mockJsonElementFromFile( Path path , JsonParser parser ) throws IOException{
+    public static JsonElement mockJsonElementFromFile( Path path ) throws IOException{
     	
     	String content = Files.lines( path )
 				  			  .reduce( (s1 , s2) -> { return s1 + s2; } )
 				  			  .get();
     	
-    	return parser.parse( content );
+    	return JsonParser.parseString(content);
     	
     }
     
-    public static JsonElement prepareExpectedResult( String resultContentFile , MockFlowFile ff , JsonParser parser ) throws IOException {
-    	JsonElement expectedResult = mockJsonElementFromFile( Paths.get( resultContentFile ) , parser );
+    public static JsonElement prepareExpectedResult( String resultContentFile , MockFlowFile ff ) throws IOException {
+    	JsonElement expectedResult = mockJsonElementFromFile( Paths.get( resultContentFile ) );
     	String uuid = ff.getAttribute( "uuid" );
     	if( expectedResult.isJsonArray() ) {
     		JsonArray er = expectedResult.getAsJsonArray();
@@ -94,8 +94,8 @@ public class TestUtils {
     	return expectedResult;
     }
     
-    public static JsonElement prepareExpectedDeviceState( String resultContentFile , MockFlowFile ff , JsonParser parser ) throws IOException{
-    	JsonElement expectedState = mockJsonElementFromFile( Paths.get( resultContentFile ) , parser );
+    public static JsonElement prepareExpectedDeviceState( String resultContentFile , MockFlowFile ff ) throws IOException{
+    	JsonElement expectedState = mockJsonElementFromFile( Paths.get( resultContentFile ) );
     	String uuid = ff.getAttribute("uuid");
     	
     	if( expectedState.isJsonObject() ) {
@@ -104,25 +104,6 @@ public class TestUtils {
     	}
     	
     	return expectedState;
-    }
-    
-    public static String prettyOutFF( MockFlowFile outFF , JsonParser jsonParser ) {
-        
-    	Gson gson = new GsonBuilder().setPrettyPrinting().create();
-    	
-    	String prettyOutFFContent = gson.toJson( jsonParser.parse( new String( outFF.toByteArray() ) ) );
-    	
-    	String prettyOutFFAttributes = outFF.getAttributes().entrySet().stream()
-       		 .map( entry -> { return entry.getKey() + " : " + entry.getValue(); } )
-       		 .reduce( (s1 , s2) -> { return s1 + "\n\t" + s2; } )
-       		 .get();
-    	
-    	StringBuilder prettyOutResult = new StringBuilder( "FF-Attributes:\n{\n\t" )
-    			.append( prettyOutFFAttributes )
-    			.append( "\n}\n\nFF-Content:\n" )
-    			.append( prettyOutFFContent );
-    	
-    	return prettyOutResult.toString();
     }
     
     public static String prettyOutFF( MockFlowFile outFF ) {

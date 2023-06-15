@@ -96,7 +96,7 @@ public class EnrichDataLocatorTests extends EnrichDataSimpleTests {
 	}
 	
 	protected static String addIOTDirectoryResource( String subId , String resourceFilePath , String serviceUriPrefixPath ) throws IOException {
-		JsonObject resourceObj = TestUtils.mockJsonObjFromFile( Paths.get( resourceFilePath ), parser );
+		JsonObject resourceObj = TestUtils.mockJsonObjFromFile( Paths.get( resourceFilePath ) );
 		
 		List<String> path = Arrays.asList( serviceUriPrefixPath.split("/") );
 		JsonElement cur = resourceObj;

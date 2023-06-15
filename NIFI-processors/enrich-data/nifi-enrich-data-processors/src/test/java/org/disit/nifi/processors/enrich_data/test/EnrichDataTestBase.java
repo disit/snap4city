@@ -53,7 +53,6 @@ public class EnrichDataTestBase {
 	
 	// Core
 	protected TestRunner testRunner;
-	protected static JsonParser parser = new JsonParser();
 	
 	// ---- Servicemap mock Stuffs -----
 	// Local servicemap path and uris
@@ -104,6 +103,7 @@ public class EnrichDataTestBase {
         testRunner.setProperty( EnrichData.OUTPUT_FF_CONTENT_FORMAT , EnrichData.OUTPUT_FF_CONTENT_FORMAT_VALUES[0] );
         testRunner.setProperty( EnrichData.HASHED_ID_FIELDS , "serviceUri,value_name,date_time" );
 //        testRunner.setProperty( EnrichData.NODE_CONFIG_FILE_PATH , "src/test/resources/enrich-data.conf" ); 
+        testRunner.setProperty( EnrichData.TIMESTAMP_THRESHOLD , "24 h" );
         
         testRunner.setProperty( "deviceName" , "Service/features/properties/name" );
         testRunner.setProperty( "organization" , "Service/features/properties/organization" );
@@ -158,7 +158,7 @@ public class EnrichDataTestBase {
     }
     
     protected static String addServicemapResource( String deviceIdName , String serviceUriPrefix , String inputFilePath , String resourceFilePath ) throws IOException {
-    	JsonObject inputObject = TestUtils.mockJsonObjFromFile( Paths.get( inputFilePath ) , parser );
+    	JsonObject inputObject = TestUtils.mockJsonObjFromFile( Paths.get( inputFilePath ) );
     	String deviceId = inputObject.get( deviceIdName ).getAsString();
     	
     	StringBuilder serviceUri = new StringBuilder( serviceUriPrefix );

@@ -98,16 +98,13 @@ public class OnePhaseEnricher extends Enricher{
 				// Static properties
 				this.additionalStaticProperties.entrySet().stream().forEach( 
 					(Map.Entry<String , String> property) -> {
-						
 						rootObjMember.addProperty( property.getKey() , property.getValue() );
-						
 					}
 				);
 				
 				// Additional properties
 				additionalProperties.entrySet().stream().forEach( 
 					(Map.Entry<String , JsonElement> property) -> {
-						
 						rootObjMember.add( property.getKey() , property.getValue() );
 					}
 				);

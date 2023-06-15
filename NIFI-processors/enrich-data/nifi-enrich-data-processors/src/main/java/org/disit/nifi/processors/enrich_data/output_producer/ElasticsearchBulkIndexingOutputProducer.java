@@ -35,7 +35,8 @@ import com.google.gson.JsonObject;
  * compliant with an Elasticsearch bulk indexing ("_bulk" endpoint). 
  * 
  */
-public class ElasticsearchBulkIndexingOutputProducer implements OutputProducer {
+//public class ElasticsearchBulkIndexingOutputProducer implements OutputProducer {
+public class ElasticsearchBulkIndexingOutputProducer extends OutputProducer {
 
 	private String esIndex;
 	private String esType;

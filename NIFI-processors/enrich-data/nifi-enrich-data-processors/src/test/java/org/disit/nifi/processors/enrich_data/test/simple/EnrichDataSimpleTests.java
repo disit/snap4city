@@ -45,6 +45,9 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 	@Test
 	public void testJsonOutput() throws IOException {
 		System.out.println( "\n######## " + testName() + " ########" );
+		
+		testRunner.setProperty( EnrichData.TIMESTAMP_THRESHOLD , "24 h" );
+		
 		addServicemapResource( "id" , serviceUriPrefix , 
 			"src/test/resources/mock_in_ff/testOutputs.ff" , 
 			"src/test/resources/mock_servicemap_response/testOutputs.resp" );
@@ -53,7 +56,7 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 		
 		JsonElement expectedResult = TestUtils.prepareExpectedResult( 
 			"src/test/resources/reference_results/testOutputs_jsonOut.ref" , 
-			inputFF , parser );
+			inputFF );
 
 		testRunner.run();
 		
@@ -64,12 +67,15 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 		JsonElement outFFContent = JsonParser.parseString( new String( outFF.toByteArray() ) ); 
 		assertEquals( true , outFFContent.isJsonObject() );
 		assertEquals( true , outFFContent.getAsJsonObject().equals( expectedResult.getAsJsonObject() ) );
-//		System.out.println( TestUtils.prettyOutFF( outFF ) );
+		System.out.println( TestUtils.prettyOutFF( outFF ) );
 	}
 	
 	@Test
 	public void testSplitJsonOutput() throws IOException {
 		System.out.println( "\n######## " + testName() + " ########" );
+		
+		testRunner.setProperty( EnrichData.TIMESTAMP_THRESHOLD , "24 h" );
+		
 		addServicemapResource( "id" , serviceUriPrefix , 
 			"src/test/resources/mock_in_ff/testOutputs.ff" , 
 			"src/test/resources/mock_servicemap_response/testOutputs.resp" );
@@ -78,7 +84,7 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 		
 		JsonArray expectedResult = TestUtils.prepareExpectedResult( 
 			"src/test/resources/reference_results/testOutputs_splitJson.ref" , 
-			inputFF , parser ).getAsJsonArray();
+			inputFF ).getAsJsonArray();
 		
 		// set "Split JSON" as output format
 		testRunner.setProperty( EnrichData.OUTPUT_FF_CONTENT_FORMAT , EnrichData.OUTPUT_FF_CONTENT_FORMAT_VALUES[2] );
@@ -87,12 +93,19 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 		testRunner.assertTransferCount( EnrichData.SUCCESS_RELATIONSHIP , 8 );
 		testRunner.assertTransferCount( EnrichData.ORIGINAL_RELATIONSHIP , 1 );
 		
+		System.out.println( "-------- Success FFs: --------" );
 		List<MockFlowFile> successFFs = testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP );
 		for( int i=0 ; i < successFFs.size() ; i++ ) {
 			JsonElement content = JsonParser.parseString( new String( successFFs.get(i).toByteArray() ) );
 			assertEquals( true , content.isJsonObject() );
 			assertEquals( true , expectedResult.get(i).equals(content.getAsJsonObject() ) );
-//			System.out.println( TestUtils.prettyOutFF( successFFs.get(i) ) );
+			System.out.println( TestUtils.prettyOutFF( successFFs.get(i) ) );
+		}
+		
+		System.out.println( "-------- Original FFs: --------" );
+		List<MockFlowFile> originalFFs = testRunner.getFlowFilesForRelationship( EnrichData.ORIGINAL_RELATIONSHIP );
+		for( int i=0 ; i<originalFFs.size() ; i++ ) {
+			System.out.println( TestUtils.prettyOutFF( originalFFs.get(i) ) );
 		}
 	}
 	
@@ -131,7 +144,7 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 		
 		JsonArray expectedResult = TestUtils.prepareExpectedResult( 
 			"src/test/resources/reference_results/testOutputs_arrayValue.ref" , 
-			inputFF , parser ).getAsJsonArray();
+			inputFF ).getAsJsonArray();
 		List<MockFlowFile> successFFs = testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP );
 		for( int i=0 ; i < successFFs.size() ; i++ ) {
 			JsonElement content = JsonParser.parseString( new String( successFFs.get(i).toByteArray() ) );
@@ -158,7 +171,7 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 		
 		JsonObject expectedResult = TestUtils.prepareExpectedResult( 
 			"src/test/resources/reference_results/testOutputs_parseStringValue.ref" , 
-			inputFF , parser ).getAsJsonObject();
+			inputFF ).getAsJsonObject();
 
 		JsonElement outputContent = JsonParser.parseString( 
 			new String( testRunner.getFlowFilesForRelationship(EnrichData.SUCCESS_RELATIONSHIP)
@@ -187,7 +200,7 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 		testRunner.assertTransferCount( EnrichData.SUCCESS_RELATIONSHIP , expectedSuccessFFCount );
 		testRunner.assertTransferCount( EnrichData.ORIGINAL_RELATIONSHIP , 1 );
 		
-		JsonArray expectedResult = TestUtils.prepareExpectedResult( referenceFilePath , inputFF , parser)
+		JsonArray expectedResult = TestUtils.prepareExpectedResult( referenceFilePath , inputFF )
 											.getAsJsonArray();
 		List<MockFlowFile> successFFs = testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP );
 		for( int i=0 ; i < successFFs.size() ; i++ ) {
@@ -330,7 +343,7 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
     	MockFlowFile originalFF = testRunner.getFlowFilesForRelationship( EnrichData.ORIGINAL_RELATIONSHIP ).get(0);
     	originalFF.assertAttributeExists( "format" );
     	originalFF.assertAttributeEquals( "format" , "json" );
-//    	System.out.println( TestUtils.prettyOutFF( originalFF ) );
+    	System.out.println( TestUtils.prettyOutFF( originalFF ) );
 	}
 	
 }

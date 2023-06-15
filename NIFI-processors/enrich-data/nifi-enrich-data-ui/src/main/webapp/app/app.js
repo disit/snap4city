@@ -67,6 +67,7 @@ app.configureGroup( "Enrichment sources" ,
 		"TIMESTAMP_FIELD_NAME" ,
 		"TIMESTAMP_FROM_CONTENT_PROPERTY_NAME" ,
 		"TIMESTAMP_FROM_CONTENT_PROPERTY_VALUE" ,
+		"TIMESTAMP_THRESHOLD"
 	]
 )
 .configureGroup( "Coordinates" ,
