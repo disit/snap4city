@@ -1,0 +1,57 @@
+{
+  "_from": "@node-red/registry@2.2.2",
+  "_id": "@node-red/registry@2.2.2",
+  "_inBundle": false,
+  "_integrity": "sha512-zszKLaR2XpBE4wG4o8cwe+dtOvqlG/Cl0iRXg1wpJ9zC96WIPRq+UqAkVkZm6uRuNhW5ZjKk8f77Wh1+v6QBAw==",
+  "_location": "/node-red/@node-red/registry",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "version",
+    "registry": true,
+    "raw": "@node-red/registry@2.2.2",
+    "name": "@node-red/registry",
+    "escapedName": "@node-red%2fregistry",
+    "scope": "@node-red",
+    "rawSpec": "2.2.2",
+    "saveSpec": null,
+    "fetchSpec": "2.2.2"
+  },
+  "_requiredBy": [
+    "/node-red/@node-red/runtime"
+  ],
+  "_resolved": "https://registry.npmjs.org/@node-red/registry/-/registry-2.2.2.tgz",
+  "_shasum": "e985cfc1c2eb7aa0e865a9ee6aca881163816fb1",
+  "_spec": "@node-red/registry@2.2.2",
+  "_where": "C:\\Users\\badii.DISIT\\AppData\\Roaming\\npm\\node_modules\\node-red\\node_modules\\@node-red\\runtime",
+  "bugs": {
+    "url": "https://github.com/node-red/node-red/issues"
+  },
+  "bundleDependencies": false,
+  "contributors": [
+    {
+      "name": "Nick O'Leary"
+    },
+    {
+      "name": "Dave Conway-Jones"
+    }
+  ],
+  "dependencies": {
+    "@node-red/util": "2.2.2",
+    "clone": "2.1.2",
+    "fs-extra": "10.0.0",
+    "semver": "7.3.5",
+    "tar": "6.1.11",
+    "uglify-js": "3.15.1"
+  },
+  "deprecated": false,
+  "description": "@node-red/registry ====================",
+  "homepage": "https://github.com/node-red/node-red#readme",
+  "license": "Apache-2.0",
+  "main": "./lib/index.js",
+  "name": "@node-red/registry",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/node-red/node-red.git"
+  },
+  "version": "2.2.2"
+}

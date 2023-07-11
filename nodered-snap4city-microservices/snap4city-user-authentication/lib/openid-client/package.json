@@ -1,0 +1,124 @@
+{
+  "_from": "openid-client",
+  "_id": "openid-client@3.15.9",
+  "_inBundle": false,
+  "_integrity": "sha512-CNKMxM1oj4+JIWi/TQ4kGQuG2l5S/5yvSZ1wzz1fg+/fhD/MWRmqRB8GHW0EV+fbbSncDx9Lhoq04mu7S0/fbw==",
+  "_location": "/openid-client",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "openid-client",
+    "name": "openid-client",
+    "escapedName": "openid-client",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/openid-client/-/openid-client-3.15.9.tgz",
+  "_shasum": "eba7d7546159db69567dda90b8ade89667bffe76",
+  "_spec": "openid-client",
+  "_where": "/usr/src/node-red",
+  "author": {
+    "name": "Filip Skokan",
+    "email": "panva.ip@gmail.com"
+  },
+  "bugs": {
+    "url": "https://github.com/panva/node-openid-client/issues"
+  },
+  "bundleDependencies": false,
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  },
+  "dependencies": {
+    "@types/got": "^9.6.9",
+    "base64url": "^3.0.1",
+    "got": "^9.6.0",
+    "jose": "^1.27.1",
+    "lru-cache": "^6.0.0",
+    "make-error": "^1.3.6",
+    "object-hash": "^2.0.1",
+    "oidc-token-hash": "^5.0.0",
+    "p-any": "^3.0.0"
+  },
+  "deprecated": false,
+  "description": "OpenID Connect Relying Party (RP, Client) implementation for Node.js runtime, supports passportjs",
+  "devDependencies": {
+    "@commitlint/cli": "^9.1.1",
+    "@commitlint/config-conventional": "^9.1.1",
+    "@types/passport": "^1.0.4",
+    "chai": "^4.2.0",
+    "eslint": "^7.4.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.21.2",
+    "husky": "^4.0.0",
+    "mocha": "^8.0.1",
+    "nock": "^13.0.2",
+    "nyc": "^15.1.0",
+    "readable-mock-req": "^0.2.2",
+    "sinon": "^9.0.0",
+    "timekeeper": "^2.2.0"
+  },
+  "engines": {
+    "node": "^10.13.0 || >=12.0.0"
+  },
+  "files": [
+    "lib",
+    "types/index.d.ts"
+  ],
+  "funding": "https://github.com/sponsors/panva",
+  "homepage": "https://github.com/panva/node-openid-client",
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  },
+  "keywords": [
+    "auth",
+    "authentication",
+    "basic",
+    "certified",
+    "client",
+    "connect",
+    "dynamic",
+    "electron",
+    "hybrid",
+    "identity",
+    "implicit",
+    "oauth",
+    "oauth2",
+    "oidc",
+    "openid",
+    "passport",
+    "relying party",
+    "strategy"
+  ],
+  "license": "MIT",
+  "main": "lib/index.js",
+  "name": "openid-client",
+  "nyc": {
+    "reporter": [
+      "lcov",
+      "text-summary"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/panva/node-openid-client.git"
+  },
+  "scripts": {
+    "coverage": "nyc mocha test/**/*.test.js",
+    "lint": "eslint lib test",
+    "lint-fix": "eslint lib test --fix",
+    "lint-ts": "npx typescript@~3.6.0 --build types",
+    "test": "mocha test/**/*.test.js"
+  },
+  "types": "types/index.d.ts",
+  "version": "3.15.9"
+}

@@ -1,0 +1,49 @@
+{
+  "_from": "@node-red/editor-client@2.2.2",
+  "_id": "@node-red/editor-client@2.2.2",
+  "_inBundle": false,
+  "_integrity": "sha512-DivbfvVfoh4sRKHmOGucE9kV8MWwGczbxsJfaEVedCtVt9ZDX40N61+FzPVlf2FGDi8q21cIRV7klV1GWhDFxw==",
+  "_location": "/node-red/@node-red/editor-client",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "version",
+    "registry": true,
+    "raw": "@node-red/editor-client@2.2.2",
+    "name": "@node-red/editor-client",
+    "escapedName": "@node-red%2feditor-client",
+    "scope": "@node-red",
+    "rawSpec": "2.2.2",
+    "saveSpec": null,
+    "fetchSpec": "2.2.2"
+  },
+  "_requiredBy": [
+    "/node-red/@node-red/editor-api"
+  ],
+  "_resolved": "https://registry.npmjs.org/@node-red/editor-client/-/editor-client-2.2.2.tgz",
+  "_shasum": "9d3ca83ffbe7eccd6896fe07f4c693a29a8b6211",
+  "_spec": "@node-red/editor-client@2.2.2",
+  "_where": "C:\\Users\\badii.DISIT\\AppData\\Roaming\\npm\\node_modules\\node-red\\node_modules\\@node-red\\editor-api",
+  "bugs": {
+    "url": "https://github.com/node-red/node-red/issues"
+  },
+  "bundleDependencies": false,
+  "contributors": [
+    {
+      "name": "Nick O'Leary"
+    },
+    {
+      "name": "Dave Conway-Jones"
+    }
+  ],
+  "deprecated": false,
+  "description": "@node-red/editor-client ====================",
+  "homepage": "https://github.com/node-red/node-red#readme",
+  "license": "Apache-2.0",
+  "main": "./index.js",
+  "name": "@node-red/editor-client",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/node-red/node-red.git"
+  },
+  "version": "2.2.2"
+}
