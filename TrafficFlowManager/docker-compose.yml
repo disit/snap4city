@@ -1,0 +1,16 @@
+version: "3"
+services:
+  traffic:
+    image: tomcat:9.0.26-jdk8-openjdk-slim
+    volumes:
+      - ./TrafficFlowManager:/home/debian/TrafficFlowManager
+      - ./TrafficFlowManager/trafficflowmanager.war:/usr/local/tomcat/webapps/trafficflowmanager.war
+      - ./tomcat-users.xml:/usr/local/tomcat/conf/tomcat-users.xml
+    environment:
+      - JAVA_OPTS="-Xmx6g"
+      - CATALINA_OPTS=-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9000 -Dcom.sun.management.jmxremote.rmi.port=9010 -Djava.rmi.server.hostname=TomcatHostName  -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false
+    restart: unless-stopped
+    ports:
+      - 8080:8080
+      - 9000:9000
+      - 9010:9010
