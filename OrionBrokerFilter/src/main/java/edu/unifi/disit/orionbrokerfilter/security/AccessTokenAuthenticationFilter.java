@@ -431,7 +431,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 					logger.warn(messages.getMessage("login.ko.elementidnotvalid", null, multiReadRequest.getLocale()) + " entityBody is {}", entityBody);
 					throw new CredentialsNotValidException(messages.getMessage("login.ko.elementidnotvalid", null, multiReadRequest.getLocale()));
 				}
-                                if(attribute.isBlank())
+                                if(attribute.isEmpty())
                                   attribute = null;
 				return attribute;
 			case "PATCH":// Update
