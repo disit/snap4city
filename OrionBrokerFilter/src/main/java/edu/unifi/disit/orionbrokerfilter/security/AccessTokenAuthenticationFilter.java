@@ -404,7 +404,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		String attribute = null;
 		int attributeStart;
 		int attributeEnd;
-		String entityBody = IOUtils.toString(multiReadRequest.getInputStream(), StandardCharsets.UTF_8.toString()).replace(" ", "");
+		String entityBody = IOUtils.toString(multiReadRequest.getInputStream(), StandardCharsets.UTF_8.toString()).replace(" ", "").replace("\n", "");
 
 		try {
 			switch (req.getMethod()) {
@@ -425,6 +425,8 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 					logger.warn(messages.getMessage("login.ko.elementidnotvalid", null, multiReadRequest.getLocale()) + " entityBody is {}", entityBody);
 					throw new CredentialsNotValidException(messages.getMessage("login.ko.elementidnotvalid", null, multiReadRequest.getLocale()));
 				}
+                                if(attribute.isBlank())
+                                  attribute = null;
 				return attribute;
 			case "PATCH":// Update
 				attributeStart = entityBody.indexOf("{\"") + 2;
