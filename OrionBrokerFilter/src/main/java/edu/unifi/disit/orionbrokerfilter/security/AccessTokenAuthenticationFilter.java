@@ -161,6 +161,12 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		final HttpServletRequest req = (HttpServletRequest) request;
 		MultiReadHttpServletRequest multiReadRequest = new MultiReadHttpServletRequest((HttpServletRequest) request);
 
+                //SKIP checks if is OPTIONS request
+                if(req.getMethod().equals("OPTIONS")) {
+                  filterChain.doFilter(multiReadRequest, response);
+                  return;
+                }
+
 		// retrieve https certicate
 		String pksha1 = null;
 		X509Certificate[] certs = (X509Certificate[]) multiReadRequest.getAttribute("javax.servlet.request.X509Certificate");
