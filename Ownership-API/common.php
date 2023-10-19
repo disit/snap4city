@@ -17,10 +17,16 @@
 
 function ownership_access_log($msg) {
   require 'config.php';
-  
-  $log=fopen($log_path.'/ownership-access.log','a');
-  fwrite($log, date('c') . ' ' . @get_client_ip_server() . ' ' . join(' ', $msg) . "\n");
-  fclose($log);  
+  if(!isset($access_log_file)) {
+    $access_log_file = $log_path.'/ownership-access.log';
+  }
+  $log=fopen($access_log_file,'a');
+  if($log) {
+    if(!isset($access_log_pfx))
+      $access_log_pfx = '';
+    fwrite($log, $access_log_pfx. date('c') . ' ' . @get_client_ip_server() . ' ' . join(' ', $msg) . "\n");
+    fclose($log);
+  }
 }
 
 function get_limit_user($db, $org, $username, $role, $elementType) {
