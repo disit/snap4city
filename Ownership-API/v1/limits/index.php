@@ -33,8 +33,6 @@ if(isset($_REQUEST['username']) && $uinfo->mainRole=='RootAdmin') {
   if(!$role) {
     header("HTTP/1.1 400 BAD REQUEST");
     echo "invalid username no role found for $username";
-    $f=fopen($log_path."/ownership-error.log","a");
-    fwrite($f,date('c')." ERROR: invalid username, no role found for $username\n");
     ownership_access_log(['op'=>$OPERATION,'user'=>$uinfo->username,'forUser'=>$username, 'result'=>'NO_ROLE']);
     exit;  
   }

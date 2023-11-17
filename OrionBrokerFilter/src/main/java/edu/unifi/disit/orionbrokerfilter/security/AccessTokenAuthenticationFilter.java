@@ -142,17 +142,11 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 
 	String refreshToken = null;
 
-	static Map<String, Object> certInfos;
+	static Map<String, Object> certInfos = null;
 
 	@SuppressWarnings("unchecked")
 	@PostConstruct
 	private void postConstruct() {
-		ObjectMapper om = new ObjectMapper();
-		try {
-			certInfos = om.readValue(new URL(token_endpoint.substring(0, token_endpoint.lastIndexOf("/")) + "/certs").openStream(), Map.class);
-		} catch (Exception e) {
-			logger.error("Cannot retrieve the certInfo");
-		}
 	}
 
 	@Override
@@ -271,7 +265,20 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 	@SuppressWarnings("unchecked")
 	private PublicKey retrievePublicKeyFromCertsEndpoint(JWSHeader jwsHeader) {
 		try {
-
+                        if(certInfos == null) {
+                            synchronized(AccessTokenAuthenticationFilter.class) {
+                              if(certInfos == null) {
+                                ObjectMapper om = new ObjectMapper();
+                                try {
+                                        certInfos = om.readValue(new URL(token_endpoint.substring(0, token_endpoint.lastIndexOf("/")) + "/certs").openStream(), Map.class);
+                                } catch (Exception e) {
+                                        logger.error("Cannot retrieve the certInfo", e);
+                                        throw e;
+                                }
+                              }
+                            }
+                        }
+                        
 			List<Map<String, Object>> keys = (List<Map<String, Object>>) certInfos.get("keys");
 
 			Map<String, Object> keyInfo = null;
@@ -350,7 +357,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 			throw new CredentialsNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
 		}
 
-		logger.info("Retrieved username is:" + toreturn);
+		logger.debug("Retrieved username is:" + toreturn);
 
 		return toreturn;
 	}
@@ -410,7 +417,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		String attribute = null;
 		int attributeStart;
 		int attributeEnd;
-		String entityBody = IOUtils.toString(multiReadRequest.getInputStream(), StandardCharsets.UTF_8.toString()).replace(" ", "").replace("\n", "");
+		String entityBody = IOUtils.toString(multiReadRequest.getInputStream(), StandardCharsets.UTF_8.toString()).replace(" ", "").replace("\n", "").replace("\r", "");
 
 		try {
 			switch (req.getMethod()) {

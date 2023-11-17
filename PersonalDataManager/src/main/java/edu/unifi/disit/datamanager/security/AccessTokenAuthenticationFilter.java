@@ -90,17 +90,11 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 
 	ObjectMapper objectMapper = new ObjectMapper();
 
-	static Map<String, Object> certInfos;
+	static Map<String, Object> certInfos = null;
 
 	@SuppressWarnings("unchecked")
 	@PostConstruct
 	private void postConstruct() {
-		ObjectMapper om = new ObjectMapper();
-		try {
-			certInfos = om.readValue(new URL(userinfo_endpoint + "realms/master/protocol/openid-connect/certs").openStream(), Map.class);
-		} catch (Exception e) {
-			logger.error("Cannot retrieve the certInfo");
-		}
 	}
 
 	@Override
@@ -218,6 +212,20 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 	private PublicKey retrievePublicKeyFromCertsEndpoint(JWSHeader jwsHeader) {
 		try {
 
+                        if(certInfos == null) {
+                          synchronized(AccessTokenAuthenticationFilter.class) {
+                            if(certInfos == null) {
+                              ObjectMapper om = new ObjectMapper();
+                              try {
+                                      certInfos = om.readValue(new URL(userinfo_endpoint + "realms/master/protocol/openid-connect/certs").openStream(), Map.class);
+                              } catch (Exception e) {
+                                      logger.error("Cannot retrieve the certInfo", e);
+                                      throw e;
+                              }
+                            }
+                          }
+                        }
+                  
 			List<Map<String, Object>> keys = (List<Map<String, Object>>) certInfos.get("keys");
 
 			Map<String, Object> keyInfo = null;
@@ -294,7 +302,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 				throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
 			}
 		} catch (VerificationException e) {
-			logger.warn("Verification failed");
+			logger.warn("Verification failed", e);
 			throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
 		}
 

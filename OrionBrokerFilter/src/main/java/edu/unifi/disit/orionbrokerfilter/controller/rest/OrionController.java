@@ -14,6 +14,9 @@ package edu.unifi.disit.orionbrokerfilter.controller.rest;
 
 import java.nio.charset.Charset;
 import javax.annotation.PostConstruct;
+import org.apache.http.impl.NoConnectionReuseStrategy;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +26,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -48,9 +53,18 @@ public class OrionController {
 	@Value("${spring.orionbroker_endpoint}")
 	private String orionbroker_endpoint;
 
-	@Autowired
-	RestTemplate restTemplate;
+	//@Autowired
+	RestTemplate restTemplate = new RestTemplate(getClientHttpRequestFactory());
 
+        static private ClientHttpRequestFactory getClientHttpRequestFactory() {
+          logger.info("setting ClientHttpRequestFactory to NoConnectionReuseStrategy");
+          CloseableHttpClient client = HttpClientBuilder
+            .create()
+            .setConnectionReuseStrategy(new NoConnectionReuseStrategy())
+            .build();
+          return new HttpComponentsClientHttpRequestFactory(client);
+        }
+        
         @PostConstruct
         private void init() {
                 logger.debug("TEST converter size: "+restTemplate.getMessageConverters().size());
