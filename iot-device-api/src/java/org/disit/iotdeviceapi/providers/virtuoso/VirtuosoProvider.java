@@ -68,9 +68,11 @@ public class VirtuosoProvider extends Provider{
             conn = repo.getConnection();
             try {
                 for(Object query: queries) {
-                    getXlogger().log(VirtuosoProvider.class.getName(), Level.INFO, "query", query.toString());
                     TupleQuery tq = conn.prepareTupleQuery(QueryLanguage.SPARQL, query.toString());
+                    long ts = System.currentTimeMillis();
                     TupleQueryResult tqr = tq.evaluate();
+                    long time = System.currentTimeMillis() - ts;
+                    getXlogger().log(VirtuosoProvider.class.getName(), Level.INFO, "query", query.toString(), time);
                     try {
                         while (tqr.hasNext()) {
                             BindingSet bs = tqr.next();

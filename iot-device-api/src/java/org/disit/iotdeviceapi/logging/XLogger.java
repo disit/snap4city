@@ -61,8 +61,11 @@ public class XLogger {
           this.baseMinLevel = Level.OFF;
         }
     }
-    
     public void log(String origin, Level level, String label, Object content) {
+        log(origin, level, label, content, -1);
+    }
+    
+    public void log(String origin, Level level, String label, Object content, long timeMs) {
         try {		
             Level minLevel = baseMinLevel;
             if(config.containsKey(origin)) minLevel = config.get(origin);
@@ -117,6 +120,11 @@ public class XLogger {
                 Element messageElement = doc.createElement("message");
                 messageElement.setTextContent(messageStr);
                 logElement.appendChild(messageElement);
+                if(timeMs>=0) {
+                    Element timeElement = doc.createElement("time");
+                    timeElement.setTextContent(timeMs+"ms");
+                    logElement.appendChild(timeElement);
+                }
                 TransformerFactory transformerFactory = TransformerFactory.newInstance();
                 Transformer transformer = transformerFactory.newTransformer();
                 DOMSource source = new DOMSource(doc);
