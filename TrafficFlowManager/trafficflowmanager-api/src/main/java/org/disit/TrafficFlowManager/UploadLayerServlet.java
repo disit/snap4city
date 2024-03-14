@@ -27,6 +27,9 @@ import org.disit.TrafficFlowManager.persistence.JSONStaticGraphPersistence;
 import org.disit.TrafficFlowManager.persistence.ReconstructionPersistenceInterface;
 import org.apache.commons.io.FileUtils;
 
+import org.disit.TrafficFlowManager.persistence.OpenSearchReconstructionPersistence;
+import org.json.JSONObject;
+
 import java.io.*;
 import java.util.Arrays;
 import java.util.List;
@@ -43,12 +46,14 @@ public class UploadLayerServlet extends HttpServlet {
      */
     enum PayloadType {
         staticGraph,
-        reconstruction
+        reconstruction,
+        TTT
     }
 
     /**
      * Handle GET request
-     * @param req request object
+     * 
+     * @param req  request object
      * @param resp response object
      * @throws IOException if an error occurs in response getWriter()
      */
@@ -61,12 +66,16 @@ public class UploadLayerServlet extends HttpServlet {
 
     /**
      * Handle POST request
-     * @param req request object
+     * 
+     * @param req  request object
      * @param resp response object
      * @throws IOException if an error occurs in response getWriter()
      */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+
+        String sessionId = req.getSession().getId(); // GET SESSION ID
+        System.out.println(">>>>> Session ID = " + sessionId + " <<<<<<<");
 
         // Set content type and encoding
         resp.setContentType("application/json");
@@ -79,6 +88,7 @@ public class UploadLayerServlet extends HttpServlet {
             if (type == null) {
                 throw new Exception("Please specify a payload type!");
             }
+            Properties conf = ConfigProperties.getProperties();
 
             // Handle payload based on type
             JsonValue body = getJSONBody(req);
@@ -89,7 +99,23 @@ public class UploadLayerServlet extends HttpServlet {
                     break;
                 case reconstruction:
                     String uploadedLayerName = handleReconstruction(body);
-                    resp.getWriter().print(buildResponse(true, "layerName", uploadedLayerName));
+                    JSONObject jbody = new JSONObject(body.toString());
+                    if (conf.getProperty("saveToES", "onrequest").equals("always") || jbody.has("saveToES")) {
+                        int[] metadata = OpenSearchReconstructionPersistence.sendToEs(jbody, "reconstructed");
+                        resp.getWriter().print(buildResponse(true, "layerName", uploadedLayerName, metadata));
+                    } else {
+                        System.out.println("SKIP save on elastic search");
+                        resp.getWriter().print(buildResponse(true, "layerName", uploadedLayerName));
+                    }
+                    break;
+                case TTT:
+                    // do somethig
+
+                    System.out.println("IN TTT CASE!!!");
+
+                    JSONObject TTT = new JSONObject(body.toString());
+                    System.out.println(TTT.toString(2));
+                    // OpenSearchReconstructionPersistence.ingestTTT(TTT, "TTT");
                     break;
             }
             resp.getWriter().close();
@@ -107,12 +133,23 @@ public class UploadLayerServlet extends HttpServlet {
         }
     }
 
-
     private String buildResponse(Boolean success, String name, String value) {
         JsonObjectBuilder builder = Json.createObjectBuilder().add("success", success);
         if (!name.isEmpty() && !value.isEmpty()) {
             builder.add(name, value);
         }
+        return builder.build().toString();
+    }
+
+    // overloaded method to print metadata from Elastic Search insert
+    private String buildResponse(Boolean success, String name, String value, int[] metadata) {
+        JsonObjectBuilder builder = Json.createObjectBuilder().add("success", success);
+        if (!name.isEmpty() && !value.isEmpty()) {
+            builder.add(name, value);
+        }
+        builder.add("Details",
+                "sent: " + String.valueOf(metadata[0]) + ", failed: " + String.valueOf(metadata[2]));
+
         return builder.build().toString();
     }
 
@@ -147,7 +184,11 @@ public class UploadLayerServlet extends HttpServlet {
         String locality = metadata.getString("locality");
         String scenarioID = metadata.getString("scenarioID");
         String dateTime = metadata.getString("dateTime");
+        if (dateTime.contains("+")) {
+            dateTime = dateTime.split("\\+")[0];
+        }
         dateTime = dateTime.replace(':', '-'); // colon causes problems when uploading to GeoServer
+
         String layerName = locality + "_" + scenarioID + "_" + dateTime;
 
         // Convert to SHP and upload to GeoServer
@@ -162,7 +203,8 @@ public class UploadLayerServlet extends HttpServlet {
         return layerName;
     }
 
-    private void convertToShapefileAndUpload(String layerName, JsonArray staticGraph, JsonObject reconstructionData) throws Exception {
+    private void convertToShapefileAndUpload(String layerName, JsonArray staticGraph, JsonObject reconstructionData)
+            throws Exception {
 
         Logger.log("[Servlet] Starting conversion to Shapefile...");
 
@@ -214,6 +256,7 @@ public class UploadLayerServlet extends HttpServlet {
 
     /**
      * Parse and return the body of the specified HTTP request as a JSON object
+     * 
      * @param request the HttpServletRequest object
      * @return the JSON value
      * @throws IOException exception if body is not in JSON format
