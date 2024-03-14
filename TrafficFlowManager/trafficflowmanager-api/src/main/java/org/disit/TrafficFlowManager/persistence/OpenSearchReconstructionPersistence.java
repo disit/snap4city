@@ -5,12 +5,14 @@ import java.net.URLEncoder;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TimeZone;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -41,6 +43,7 @@ import org.disit.TrafficFlowManager.utils.Logger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
+import org.elasticsearch.client.indices.GetIndexRequest;
 
 public class OpenSearchReconstructionPersistence {
 
@@ -105,6 +108,8 @@ public class OpenSearchReconstructionPersistence {
             Path failureFolderPath = Paths.get(failDir);
             Files.createDirectories(failureFolderPath);
 
+            createIndex(indexName, url.split(";")[0], port, admin, password);
+            
             // split road elements
             Logger.log("[TFM] processing dinamic json");
 
@@ -189,7 +194,7 @@ public class OpenSearchReconstructionPersistence {
     }
     // ############################################# PROCESSING METHODS
 
-    private static JSONArray preProcess(JSONObject dinamic, String kind) throws Exception {
+private static JSONArray preProcess(JSONObject dinamic, String kind) throws Exception {
         try {
             String tmp = "{\"scenario\":\"\",\"dateObserved\":\"\",\"segment\":\"\",\"dir\":0,\"roadElements\":[],\"start\":{\"location\":{\"lon\":\"\",\"lat\":\"\"}},\"end\":{\"location\":{\"lon\":\"\",\"lat\":\"\"}},\"flow\":\"\",\"density\":0,\"numVehicle\":\"\"}";
             JSONObject template = new JSONObject(tmp);
@@ -198,9 +203,29 @@ public class OpenSearchReconstructionPersistence {
 
             template.put("scenario", metadata.getString("scenarioID"));
 
-            // controlla se dateObserved contiene %2B, il percent encoding di +
-
             String dateObserved = metadata.getString("dateTime");
+
+            // Imposta come default la timeZone dell'Italia
+            if (!dateObserved.contains("+") && !dateObserved.contains("Z")) {
+
+                TimeZone timeZone = TimeZone.getTimeZone("Europe/Rome");
+
+                String[] d = dateObserved.split("-");
+                String year = d[0];
+                String month = d[1];
+                String day = d[2].split("T")[0];
+
+                Calendar calendar = Calendar.getInstance(timeZone);
+                calendar.set(Integer.parseInt(year), Integer.parseInt(month) - 1, Integer.parseInt(day), 0, 0, 0);
+                // -1 al mese perchè gennaio corrisponde allo 0
+                calendar.setTimeZone(timeZone);
+
+                if (timeZone.inDaylightTime(calendar.getTime())) {
+                    dateObserved = dateObserved + "+02:00";
+                } else {
+                    dateObserved = dateObserved + "+01:00";
+                }
+            }
 
             template.put("dateObserved", dateObserved);
             template.put("kind", kind);
@@ -992,9 +1017,13 @@ public class OpenSearchReconstructionPersistence {
 
     // FUNZIONI UTILI PER LA CREAZIONE DI INDICE ELASTICSEARCH
 
+    static private boolean indexChecked = false;
+    
     private static void createIndex(String indexName, String url, int port, String admin, String password)
             throws Exception {
         try {
+            if(indexChecked)
+                return;
             // Specifica le credenziali di accesso
             final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
             credentialsProvider.setCredentials(AuthScope.ANY,
@@ -1015,6 +1044,14 @@ public class OpenSearchReconstructionPersistence {
             RestHighLevelClient client = new RestHighLevelClient(builder);
 
             System.out.println("creato il client");
+            
+            boolean exists = client.indices().exists(new GetIndexRequest(indexName), RequestOptions.DEFAULT);
+            if(exists) {
+                System.out.println("index "+indexName+" already exists");
+                indexChecked = true;
+                client.close();
+                return;
+            }
 
             Settings settings = Settings.builder()
                     .put("index.number_of_shards", 1)
@@ -1034,6 +1071,7 @@ public class OpenSearchReconstructionPersistence {
             client.close();
 
             System.out.println("creato il response");
+            indexChecked = true;
 
         } catch (Exception e) {
             System.out.println("Eccezione nella creazione dell'indice: " + e);
@@ -1051,7 +1089,7 @@ public class OpenSearchReconstructionPersistence {
                 mapping.startObject("dateObserved");
                 {
                     mapping.field("type", "date");
-                    mapping.field("format", "yyyy-MM-dd'T'HH:mm:ss");
+                    mapping.field("format", "strict_date_optional_time||yyyy-MM-dd'T'HH:mm:ssZ" );
                 }
                 mapping.endObject();
 
@@ -1087,7 +1125,6 @@ public class OpenSearchReconstructionPersistence {
 
                 mapping.startObject("segments");
                 {
-                    mapping.field("type", "nested");
                     mapping.startObject("properties");
                     {
                         mapping.startObject("segment");

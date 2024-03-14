@@ -147,7 +147,7 @@ public class UploadLayerServlet extends HttpServlet {
         if (!name.isEmpty() && !value.isEmpty()) {
             builder.add(name, value);
         }
-        builder.add("Details",
+        builder.add("details",
                 "sent: " + String.valueOf(metadata[0]) + ", failed: " + String.valueOf(metadata[2]));
 
         return builder.build().toString();

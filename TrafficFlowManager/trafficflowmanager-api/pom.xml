@@ -57,6 +57,27 @@
             <artifactId>gt-swing</artifactId>
             <version>${geotools.version}</version>
         </dependency>
+
+        <!-- Aggiunte integrazione elasticsearch -->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20231013</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.13</version> 
+        </dependency>
+
+        <dependency>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>elasticsearch-rest-high-level-client</artifactId>
+            <version>7.6.1</version>
+        </dependency>
+
+
     </dependencies>
 
     <repositories>
