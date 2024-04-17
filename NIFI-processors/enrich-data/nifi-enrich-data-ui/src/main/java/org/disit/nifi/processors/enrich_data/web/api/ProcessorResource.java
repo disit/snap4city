@@ -35,6 +35,7 @@ import org.apache.nifi.web.ComponentDetails;
 import org.apache.nifi.web.NiFiWebConfigurationContext;
 import org.apache.nifi.web.NiFiWebConfigurationRequestContext;
 import org.disit.nifi.processors.enrich_data.EnrichData;
+import org.disit.nifi.processors.enrich_data.EnrichDataProperties;
 import org.disit.nifi.processors.enrich_data.web.api.tester.EnrichDataWebTester;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -229,7 +230,7 @@ public class ProcessorResource extends AbstractStandardResource {
 					new PropertyComponentDescriptor.Builder()
 						.name( cd.getName() )
 						.description( cd.getDescription() != null && !cd.getDescription().isEmpty() ? 
-										cd.getDescription() : EnrichData.DYNAMIC_PROPERTIES_DESCRIPTION )
+										cd.getDescription() : EnrichDataProperties.DYNAMIC_PROPERTIES_DESCRIPTION )
 						.displayName( cd.getDisplayName() )
 						.isSensitive( false )
 						.isDynamic( true )
@@ -249,7 +250,7 @@ public class ProcessorResource extends AbstractStandardResource {
 				.state( details.getState() )
 				.validateErrors( details.getValidationErrors() )
 				.supportsDynamicProperties( true )
-				.dynamicPropertiesDescription( EnrichData.DYNAMIC_PROPERTIES_DESCRIPTION )
+				.dynamicPropertiesDescription( EnrichDataProperties.DYNAMIC_PROPERTIES_DESCRIPTION )
 				.descriptors( descriptors )
 				.build();
 	}

@@ -44,7 +44,7 @@ public final class EnrichDataValidators {
 			@Override
 			public ValidationResult validate(String subject, String input, ValidationContext context) {
 				try {
-					context.getProperty( EnrichData.ENRICHMENT_SOURCE_CLIENT_SERVICE )
+					context.getProperty( EnrichDataProperties.ENRICHMENT_SOURCE_CLIENT_SERVICE )
 						   .asControllerService( EnrichmentSourceClientService.class );
 					
 					return new ValidationResult.Builder()
@@ -130,14 +130,14 @@ public final class EnrichDataValidators {
 				JsonObject propsObj = propsEl.getAsJsonObject();
 				
 				for( String prop : propsObj.keySet() ) {
-					if( !EnrichData.INNER_LATLON_COMPOUND_FIELDS_CONFIGS.contains(prop) && 
-						!EnrichData.INNER_LATLON_SINGLE_FIELDS_CONFIGS.contains(prop) ) {
+					if( !EnrichDataConstants.INNER_LATLON_COMPOUND_FIELDS_CONFIGS.contains(prop) && 
+						!EnrichDataConstants.INNER_LATLON_SINGLE_FIELDS_CONFIGS.contains(prop) ) {
 							return new ValidationResult.Builder().subject(subject).input(input)
 											   		   .explanation( "'" + prop + "' is not an allowed configuration for the coordinates from the flow file content." )
 												       .valid( false ).build();
 					}
 					
-					if( EnrichData.INNER_LATLON_COMPOUND_FIELDS_CONFIGS.contains(prop) ) {
+					if( EnrichDataConstants.INNER_LATLON_COMPOUND_FIELDS_CONFIGS.contains(prop) ) {
 						JsonElement pvEl = propsObj.get( prop );
 						if( !pvEl.isJsonArray() ) {
 							return new ValidationResult.Builder().subject(subject).input(input)
@@ -154,13 +154,13 @@ public final class EnrichDataValidators {
 														   .explanation( "Every element of the json array for a compound field configuration must be a json object for the coordinates from the flow file content." )
 														   .valid(false).build();
 							JsonObject eObj = e.getAsJsonObject();
-							for( String cfp : EnrichData.INNER_LATLON_COMPOUND_FIELD_PROPERTIES ) {
+							for( String cfp : EnrichDataConstants.INNER_LATLON_COMPOUND_FIELD_PROPERTIES ) {
 								if( !eObj.has( cfp ) )
 									return new ValidationResult.Builder().subject(subject).input(input)
 															   .explanation( "Missing '" + cfp +  "' for a field specification in '" + prop + "' while configuring coordinates from the flow file content." )
 															   .valid(false).build();
 								
-								if( cfp.equals(EnrichData.INNER_LATLON_COMPOUND_FIELD_FORMAT) ) {
+								if( cfp.equals(EnrichDataConstants.INNER_LATLON_COMPOUND_FIELD_FORMAT) ) {
 									List<String> parsedFormatContent = 
 										Arrays.asList( eObj.get(cfp).getAsString().split(",") )
 											  .stream().map( (String s) -> {return s.trim(); } )
@@ -177,7 +177,7 @@ public final class EnrichDataValidators {
 						}
 					}
 					
-					if( EnrichData.INNER_LATLON_SINGLE_FIELDS_CONFIGS.contains(prop) ) {
+					if( EnrichDataConstants.INNER_LATLON_SINGLE_FIELDS_CONFIGS.contains(prop) ) {
 						JsonElement pvEl = propsObj.get( prop );
 						if( !pvEl.isJsonArray() ) {
 							return new ValidationResult.Builder().subject(subject).input(input)
@@ -199,7 +199,7 @@ public final class EnrichDataValidators {
 				
 				int singleFieldsConfCount = 0;
 				for( String prop : propsObj.keySet() ) {
-					if( EnrichData.INNER_LATLON_SINGLE_FIELDS_CONFIGS.contains( prop ) )
+					if( EnrichDataConstants.INNER_LATLON_SINGLE_FIELDS_CONFIGS.contains( prop ) )
 						singleFieldsConfCount ++;
 				}
 				if( singleFieldsConfCount != 0 && singleFieldsConfCount != 2 ) 

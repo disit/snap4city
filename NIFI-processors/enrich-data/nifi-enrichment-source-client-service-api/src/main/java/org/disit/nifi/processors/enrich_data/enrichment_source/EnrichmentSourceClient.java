@@ -36,11 +36,11 @@ public interface EnrichmentSourceClient {
 	 * @return
 	 * @throws EnrichmentSourceException
 	 */
-	public JsonElement getEnrichmentData( String id , String prefix ) throws EnrichmentSourceException;
+	public JsonElement getEnrichmentData( String prefix , String id ) throws EnrichmentSourceException;
 	
 	public void close() throws EnrichmentSourceException;
 	
-	public String buildRequestUrl( String id , String prefix ) throws UnsupportedEncodingException;
+	public String buildRequestUrl( String prefix , String id ) throws UnsupportedEncodingException;
 	
 	public String buildRequestUrl( String id ) throws UnsupportedEncodingException;
 }

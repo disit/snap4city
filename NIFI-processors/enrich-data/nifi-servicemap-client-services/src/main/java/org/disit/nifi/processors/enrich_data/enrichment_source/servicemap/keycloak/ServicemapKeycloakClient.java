@@ -37,6 +37,7 @@ import com.github.scribejava.core.model.OAuth2AccessTokenErrorResponse;
 import com.github.scribejava.core.oauth.OAuth20Service;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public class ServicemapKeycloakClient extends ServicemapClient{
 	
@@ -107,9 +108,7 @@ public class ServicemapKeycloakClient extends ServicemapClient{
 		HttpResponse response;
 		try {
 			HttpGet get = new HttpGet( requestUrl );
-			
-//			System.out.println( "RequestUrl: " + requestUrl );
-			
+		
 			// Sign the get request with the token, Header vs Parameter
 			get.addHeader( "Authorization" , "Bearer " + token.getAccessToken() );
 			
@@ -132,7 +131,7 @@ public class ServicemapKeycloakClient extends ServicemapClient{
 			throw new EnrichmentSourceException( "IOException while handling Servicemap response body." , e ); 
 		}
 		
-		return this.parser.parse( responseBody );
+		return JsonParser.parseString( responseBody );
 	}
 	
 	// Methods to cache and manage access tokens
@@ -174,7 +173,6 @@ public class ServicemapKeycloakClient extends ServicemapClient{
 		// private JsonObject payloadObj;
 		private long exp; //in milliseconds
 		
-		
 		public TokenCache( long cacheThresholdMs ) {
 			this.cacheThreshold = cacheThresholdMs;
 			
@@ -190,9 +188,7 @@ public class ServicemapKeycloakClient extends ServicemapClient{
 		public JsonObject decodeTokenPayload( String tokenStr ) {
 			String[] tokenParts = tokenStr.split( "\\." );
 			String payload = new String( Base64.getDecoder().decode( tokenParts[1] ) );
-			JsonObject payloadObj = ServicemapKeycloakClient.this.parser
-									.parse( payload )
-									.getAsJsonObject();
+			JsonObject payloadObj = JsonParser.parseString( payload ).getAsJsonObject();
 			return payloadObj;
 		}
 		
@@ -202,12 +198,6 @@ public class ServicemapKeycloakClient extends ServicemapClient{
 		
 		public void cacheToken( OAuth2AccessToken token ) {
 			this.token = token;
-			
-//			String[] tokenParts = token.getAccessToken().split( "\\." );
-//			String payload = new String( Base64.getDecoder().decode( tokenParts[1] ) );
-//			payloadObj = ServicemapKeycloakClient.this.parser
-//							.parse( payload )
-//							.getAsJsonObject();
 			JsonObject payloadObj = decodeTokenPayload( token );
 			exp = payloadObj.get("exp").getAsLong();
 		}

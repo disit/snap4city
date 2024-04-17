@@ -53,9 +53,6 @@ public class ServicemapClient implements EnrichmentSourceClient, ServicemapSourc
 	protected String defaultUriPrefix;
 	protected String additionalQueryString;
 	
-	// Parser
-	protected JsonParser parser;
-	
 	/**
 	 * Constructor with explicit connection pool settings. 
 	 *  
@@ -76,8 +73,6 @@ public class ServicemapClient implements EnrichmentSourceClient, ServicemapSourc
 		this.servicemapUrl = servicemapUrl;
 		this.defaultUriPrefix = defaultUriPrefix;
 		this.additionalQueryString = "";
-		
-		this.parser = new JsonParser();
 	}
 	
 	public ServicemapClient( ServicemapConfigs sc , int maxPerRoute , int maxTotal ) {
@@ -151,8 +146,7 @@ public class ServicemapClient implements EnrichmentSourceClient, ServicemapSourc
 	}
 
 	@Override
-	public JsonElement getEnrichmentData(String deviceId, String uriPrefix) throws EnrichmentSourceException{
-		
+	public JsonElement getEnrichmentData(String uriPrefix, String deviceId) throws EnrichmentSourceException{		
 		String requestUrl;
 		try {
 			requestUrl = buildRequestUrl( uriPrefix , deviceId );
@@ -174,7 +168,7 @@ public class ServicemapClient implements EnrichmentSourceClient, ServicemapSourc
 			throw new EnrichmentSourceException( "IOException while retrieving enrichment data from Servicemap." , e );
 		}
 		
-		return parser.parse( responseBody );
+		return JsonParser.parseString( responseBody );
 	}
 	
 	// moved to HttpBaseClient class

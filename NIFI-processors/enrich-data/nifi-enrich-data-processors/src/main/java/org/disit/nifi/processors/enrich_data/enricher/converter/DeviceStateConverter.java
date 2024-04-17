@@ -16,20 +16,23 @@
 
 package org.disit.nifi.processors.enrich_data.enricher.converter;
 
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeParseException;
-import java.util.HashMap;
-import java.util.HashSet;
 
 import org.apache.nifi.logging.ComponentLog;
 import org.disit.nifi.processors.enrich_data.enricher.EnrichUtils;
 import org.disit.nifi.processors.enrich_data.enricher.Enricher;
-import org.disit.nifi.processors.enrich_data.json_processing.JsonProcessingUtils;
+import org.disit.nifi.processors.enrich_data.json_processing.JsonProcessing;
 import org.disit.nifi.processors.enrich_data.logging.LoggingUtils;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
@@ -57,7 +60,11 @@ public class DeviceStateConverter {
 	
 	private String timestampFieldName;
 	private String updateFrequencyFieldName;
+	private String valueObjFieldName;
 	private final String NEXT_UPDATE_FIELD_PREFIX = "expected_next_";
+	private final String VALUE_NAMES_FIELD_NAME = "value_name";
+	
+	private List<String> metricFields;
 	
 	ComponentLog logger;
 	
@@ -81,6 +88,7 @@ public class DeviceStateConverter {
 		nonMeasureProperties.addAll( enricher.getAdditionalFieldPaths().keySet() );
 		nonMeasureProperties.addAll( enricher.getStaticProperties().keySet() );
 		
+		valueObjFieldName = enricher.getValueFieldName().concat( Enricher.VALUE_NAME_OBJ_SUFFIX );
 		valueFieldNames = enricher.getAllValueFieldNames();
 		
 		ignoredDeviceLvlProperties = new HashSet<>();
@@ -91,10 +99,21 @@ public class DeviceStateConverter {
 		}
 		
 		this.updateFrequencyFieldName = null;
+		this.metricFields = new ArrayList<>();
+	}
+	
+	public DeviceStateConverter( Enricher enricher, OutputMode outputMode, ComponentLog logger, List<String> metricFields ) {
+		this( enricher, outputMode, logger );
+		this.metricFields.addAll( metricFields );
 	}
 	
 	public DeviceStateConverter( Enricher enricher , OutputMode outputMode , ComponentLog logger , String updateFrequencyFieldName ) {
 		this( enricher , outputMode , logger );
+		this.updateFrequencyFieldName = updateFrequencyFieldName;
+	}
+	
+	public DeviceStateConverter( Enricher enricher , OutputMode outputMode , ComponentLog logger , String updateFrequencyFieldName , List<String> metricFields ) {
+		this( enricher , outputMode , logger , metricFields );
 		this.updateFrequencyFieldName = updateFrequencyFieldName;
 	}
 	
@@ -124,9 +143,15 @@ public class DeviceStateConverter {
 		);
 		
 		JsonObject outputObj = new JsonObject();
+		JsonArray valueNames = new JsonArray();
+		
+		Map<String,JsonArray> metricArrays = new HashMap<>();
+		this.metricFields.stream().forEach( (String metric) -> {metricArrays.put(metric, new JsonArray() ); });
+		
 		srcObj.keySet().forEach( (String measure) -> {
 			JsonObject measureObj = new JsonObject();
-			srcObj.get( measure ).getAsJsonObject().entrySet().forEach(
+			JsonObject inputMeasure = srcObj.get( measure ).getAsJsonObject();
+			inputMeasure.entrySet().forEach(
 				(Map.Entry<String , JsonElement> entry) -> {
 					
 					if( outputMode == OutputMode.FULL && !toUpperLvlProperties.contains( entry.getKey() ) ) 
@@ -138,11 +163,30 @@ public class DeviceStateConverter {
 				}
 			);
 			outputObj.add( measure , measureObj );
+			valueNames.add( measure );
+			
+			if( !metricFields.isEmpty() ) {
+				this.metricFields.stream().forEach( (String metricField) -> {
+					if( inputMeasure.has(metricField) )
+						metricArrays.get(metricField).add( inputMeasure.get(metricField).getAsString() );
+				});
+				if( measureObj.has( valueObjFieldName ) ) {
+					List<String> objProperties = JsonProcessing.getAllLinearizedProperties( measureObj.getAsJsonObject(valueObjFieldName) );
+					objProperties.stream().forEach( (String prop) -> {
+						valueNames.add( measure.concat(".").concat(prop) );
+					});
+				}
+			}
 		});
 		
 		deviceLvlProperties.forEach( (String pName, JsonElement pValue) -> {
-			if( !ignoredDeviceLvlProperties.contains( pName ) )
+			if( !ignoredDeviceLvlProperties.contains( pName ) ) {
 				outputObj.add( pName , pValue );
+			}
+		});
+		outputObj.add( VALUE_NAMES_FIELD_NAME , valueNames );
+		metricArrays.entrySet().stream().forEach( (Map.Entry<String,JsonArray> metric) -> {
+			outputObj.add( metric.getKey() , metric.getValue() );
 		});
 		
 		// Expected next update
@@ -165,8 +209,8 @@ public class DeviceStateConverter {
 			
 		try {
 //			JsonElement currentTimeEl = JsonProcessingUtils.getElementByPath(srcObj , timestampFieldName);
-			JsonElement currentTimeEl = JsonProcessingUtils.getElementByPath(outputObj , this.timestampFieldName);
-			JsonElement updateFrequency = JsonProcessingUtils.getElementByPath(responseRootObj, this.updateFrequencyFieldName);
+			JsonElement currentTimeEl = JsonProcessing.getElementByPath(outputObj , this.timestampFieldName);
+			JsonElement updateFrequency = JsonProcessing.getElementByPath(responseRootObj, this.updateFrequencyFieldName);
 			if( currentTimeEl.isJsonPrimitive() && currentTimeEl.getAsJsonPrimitive().isString() ) {
 				OffsetDateTime currentTime = OffsetDateTime.parse( currentTimeEl.getAsJsonPrimitive().getAsString() );
 				

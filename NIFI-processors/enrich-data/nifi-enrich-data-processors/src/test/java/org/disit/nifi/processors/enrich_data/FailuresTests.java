@@ -16,10 +16,6 @@
 
 package org.disit.nifi.processors.enrich_data;
 
-import static org.junit.Assert.*;
-
-import java.io.IOException;
-import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.List;
 
@@ -68,23 +64,23 @@ public class FailuresTests {
     	testRunner = TestRunners.newTestRunner(EnrichData.class);
         
         
-        testRunner.setProperty( EnrichData.DEVICE_ID_NAME , "id" );
-        testRunner.setProperty( EnrichData.DEVICE_ID_NAME_MAPPING , "sensorId" );
+        testRunner.setProperty( EnrichDataProperties.DEVICE_ID_NAME , "id" );
+        testRunner.setProperty( EnrichDataProperties.DEVICE_ID_NAME_MAPPING , "sensorId" );
         // testRunner.setProperty( EnrichData.DEVICE_ID_VALUE_PREFIX_SUBST , "{ \"TA-\" : \"TA__\"}" );
-        testRunner.setProperty( EnrichData.TIMESTAMP_FIELD_NAME , "date_time" );
-        testRunner.setProperty( EnrichData.TIMESTAMP_FROM_CONTENT_PROPERTY_NAME , "value_type" );
-        testRunner.setProperty( EnrichData.TIMESTAMP_FROM_CONTENT_PROPERTY_VALUE , "timestamp" );
-        testRunner.setProperty( EnrichData.VALUE_FIELD_NAME , "value" );
-        testRunner.setProperty( EnrichData.ENRICHMENT_RESPONSE_BASE_PATH , "Service/features/properties/realtimeAttributes" );
-        testRunner.setProperty( EnrichData.ENRICHMENT_LAT_LON_PATH , "Service/features/geometry/coordinates" );
-        testRunner.setProperty( EnrichData.ENRICHMENT_LAT_LON_FORMAT , "[lon , lat]" );
-        testRunner.setProperty( EnrichData.ENRICHMENT_BEHAVIOR , EnrichData.ENRICHMENT_BEHAVIOR_VALUES[0] );
-        testRunner.setProperty( EnrichData.SRC_PROPERTY , "IOT" );
-        testRunner.setProperty( EnrichData.KIND_PROPERTY , "sensor" );
-        testRunner.setProperty( EnrichData.PURGE_FIELDS , "type,metadata,value_bounds,different_values,attr_type" );
-        testRunner.setProperty( EnrichData.OUTPUT_FF_CONTENT_FORMAT , EnrichData.OUTPUT_FF_CONTENT_FORMAT_VALUES[0] );
-        testRunner.setProperty( EnrichData.HASHED_ID_FIELDS , "serviceUri,value_name,date_time" );
-        testRunner.setProperty( EnrichData.NODE_CONFIG_FILE_PATH , "src/test/resources/enrich-data.conf" );
+        testRunner.setProperty( EnrichDataProperties.TIMESTAMP_FIELD_NAME , "date_time" );
+        testRunner.setProperty( EnrichDataProperties.TIMESTAMP_FROM_CONTENT_PROPERTY_NAME , "value_type" );
+        testRunner.setProperty( EnrichDataProperties.TIMESTAMP_FROM_CONTENT_PROPERTY_VALUE , "timestamp" );
+        testRunner.setProperty( EnrichDataProperties.VALUE_FIELD_NAME , "value" );
+        testRunner.setProperty( EnrichDataProperties.ENRICHMENT_RESPONSE_BASE_PATH , "Service/features/properties/realtimeAttributes" );
+        testRunner.setProperty( EnrichDataProperties.ENRICHMENT_LAT_LON_PATH , "Service/features/geometry/coordinates" );
+        testRunner.setProperty( EnrichDataProperties.ENRICHMENT_LAT_LON_FORMAT , "[lon , lat]" );
+        testRunner.setProperty( EnrichDataProperties.ENRICHMENT_BEHAVIOR , EnrichDataConstants.ENRICHMENT_BEHAVIOR_VALUES[0] );
+        testRunner.setProperty( EnrichDataProperties.SRC_PROPERTY , "IOT" );
+        testRunner.setProperty( EnrichDataProperties.KIND_PROPERTY , "sensor" );
+        testRunner.setProperty( EnrichDataProperties.PURGE_FIELDS , "type,metadata,value_bounds,different_values,attr_type" );
+        testRunner.setProperty( EnrichDataProperties.OUTPUT_FF_CONTENT_FORMAT , EnrichDataConstants.OUTPUT_FF_CONTENT_FORMAT_VALUES[0] );
+        testRunner.setProperty( EnrichDataProperties.HASHED_ID_FIELDS , "serviceUri,value_name,date_time" );
+        testRunner.setProperty( EnrichDataProperties.NODE_CONFIG_FILE_PATH , "src/test/resources/enrich-data.conf" );
         
         testRunner.setProperty( "deviceName" , "Service/features/properties/name" );
         testRunner.setProperty( "organization" , "Service/features/properties/organization" );
@@ -111,7 +107,7 @@ public class FailuresTests {
 		testRunner.setProperty( servicemapService , ServicemapClientService.ADDITIONAL_QUERY_STRING , FailuresTests.additionalQueryString );
 		testRunner.assertValid( servicemapService );
 		testRunner.enableControllerService( servicemapService );
-		testRunner.setProperty( EnrichData.ENRICHMENT_SOURCE_CLIENT_SERVICE , "ServicemapControllerService" );
+		testRunner.setProperty( EnrichDataProperties.ENRICHMENT_SOURCE_CLIENT_SERVICE , "ServicemapControllerService" );
     }
     
 	/**
@@ -135,19 +131,19 @@ public class FailuresTests {
 		
 		testRunner.run();
 		
-		testRunner.assertAllFlowFilesTransferred( EnrichData.RETRY_RELATIONSHIP );
-		testRunner.assertTransferCount( EnrichData.RETRY_RELATIONSHIP , 1 );
-		testRunner.assertAllFlowFilesContainAttribute( EnrichData.RETRY_RELATIONSHIP , "failure" );
-		testRunner.assertAllFlowFilesContainAttribute( EnrichData.RETRY_RELATIONSHIP , "failure.cause" );
+		testRunner.assertAllFlowFilesTransferred( EnrichDataRelationships.RETRY_RELATIONSHIP );
+		testRunner.assertTransferCount( EnrichDataRelationships.RETRY_RELATIONSHIP , 1 );
+		testRunner.assertAllFlowFilesContainAttribute( EnrichDataRelationships.RETRY_RELATIONSHIP , "failure" );
+		testRunner.assertAllFlowFilesContainAttribute( EnrichDataRelationships.RETRY_RELATIONSHIP , "failure.cause" );
 		
 		System.out.println( "-------------- FAILURE_RELATIONSHIP flow files: --------------\n");
-		List<MockFlowFile> outFFList = testRunner.getFlowFilesForRelationship( EnrichData.FAILURE_RELATIONSHIP );
+		List<MockFlowFile> outFFList = testRunner.getFlowFilesForRelationship( EnrichDataRelationships.FAILURE_RELATIONSHIP );
 		outFFList.stream().forEach( (MockFlowFile ff) -> {
 			System.out.println( TestUtils.prettyOutFF( ff ) );
 		});
 		
 		System.out.println( "\n\n-------------- RETRY_RELATIONSHIP flow files: --------------\n");
-		outFFList = testRunner.getFlowFilesForRelationship( EnrichData.RETRY_RELATIONSHIP );
+		outFFList = testRunner.getFlowFilesForRelationship( EnrichDataRelationships.RETRY_RELATIONSHIP );
 		outFFList.stream().forEach( (MockFlowFile ff) -> {
 			System.out.println( TestUtils.prettyOutFF( ff ) );
 		});
@@ -169,19 +165,19 @@ public class FailuresTests {
 		
 		testRunner.run();
 		
-		testRunner.assertAllFlowFilesTransferred( EnrichData.RETRY_RELATIONSHIP );
-		testRunner.assertTransferCount( EnrichData.RETRY_RELATIONSHIP , 1 );
-		testRunner.assertAllFlowFilesContainAttribute( EnrichData.RETRY_RELATIONSHIP , "failure" );
-		testRunner.assertAllFlowFilesContainAttribute( EnrichData.RETRY_RELATIONSHIP , "failure.cause" );
+		testRunner.assertAllFlowFilesTransferred( EnrichDataRelationships.RETRY_RELATIONSHIP );
+		testRunner.assertTransferCount( EnrichDataRelationships.RETRY_RELATIONSHIP , 1 );
+		testRunner.assertAllFlowFilesContainAttribute( EnrichDataRelationships.RETRY_RELATIONSHIP , "failure" );
+		testRunner.assertAllFlowFilesContainAttribute( EnrichDataRelationships.RETRY_RELATIONSHIP , "failure.cause" );
 		
 		System.out.println( "-------------- FAILURE_RELATIONSHIP flow files: --------------\n");
-		List<MockFlowFile> outFFList = testRunner.getFlowFilesForRelationship( EnrichData.FAILURE_RELATIONSHIP );
+		List<MockFlowFile> outFFList = testRunner.getFlowFilesForRelationship( EnrichDataRelationships.FAILURE_RELATIONSHIP );
 		outFFList.stream().forEach( (MockFlowFile ff) -> {
 			System.out.println( TestUtils.prettyOutFF( ff ) );
 		});
 		
 		System.out.println( "\n\n-------------- RETRY_RELATIONSHIP flow files: --------------\n");
-		outFFList = testRunner.getFlowFilesForRelationship( EnrichData.RETRY_RELATIONSHIP );
+		outFFList = testRunner.getFlowFilesForRelationship( EnrichDataRelationships.RETRY_RELATIONSHIP );
 		outFFList.stream().forEach( (MockFlowFile ff) -> {
 			System.out.println( TestUtils.prettyOutFF( ff ) );
 		});
@@ -207,19 +203,19 @@ public class FailuresTests {
 		
 		testRunner.run();
 		
-		testRunner.assertAllFlowFilesTransferred( EnrichData.FAILURE_RELATIONSHIP );
-		testRunner.assertTransferCount( EnrichData.FAILURE_RELATIONSHIP , 1 );
-		testRunner.assertAllFlowFilesContainAttribute( EnrichData.FAILURE_RELATIONSHIP , "failure" );
-		testRunner.assertAllFlowFilesContainAttribute( EnrichData.FAILURE_RELATIONSHIP , "failure.cause" );
+		testRunner.assertAllFlowFilesTransferred( EnrichDataRelationships.FAILURE_RELATIONSHIP );
+		testRunner.assertTransferCount( EnrichDataRelationships.FAILURE_RELATIONSHIP , 1 );
+		testRunner.assertAllFlowFilesContainAttribute( EnrichDataRelationships.FAILURE_RELATIONSHIP , "failure" );
+		testRunner.assertAllFlowFilesContainAttribute( EnrichDataRelationships.FAILURE_RELATIONSHIP , "failure.cause" );
 		
 		System.out.println( "-------------- FAILURE_RELATIONSHIP flow files: --------------\n");
-		List<MockFlowFile> outFFList = testRunner.getFlowFilesForRelationship( EnrichData.FAILURE_RELATIONSHIP );
+		List<MockFlowFile> outFFList = testRunner.getFlowFilesForRelationship( EnrichDataRelationships.FAILURE_RELATIONSHIP );
 		outFFList.stream().forEach( (MockFlowFile ff) -> {
 			System.out.println( TestUtils.prettyOutFF( ff ) );
 		});
 		
 		System.out.println( "\n\n-------------- RETRY_RELATIONSHIP flow files: --------------\n");
-		outFFList = testRunner.getFlowFilesForRelationship( EnrichData.RETRY_RELATIONSHIP );
+		outFFList = testRunner.getFlowFilesForRelationship( EnrichDataRelationships.RETRY_RELATIONSHIP );
 		outFFList.stream().forEach( (MockFlowFile ff) -> {
 			System.out.println( TestUtils.prettyOutFF( ff ) );
 		});
@@ -250,19 +246,19 @@ public class FailuresTests {
 		
 		testRunner.run();
 		
-		testRunner.assertAllFlowFilesTransferred( EnrichData.FAILURE_RELATIONSHIP );
-		testRunner.assertTransferCount( EnrichData.FAILURE_RELATIONSHIP , 1 );
-		testRunner.assertAllFlowFilesContainAttribute( EnrichData.FAILURE_RELATIONSHIP , "failure" );
-		testRunner.assertAllFlowFilesContainAttribute( EnrichData.FAILURE_RELATIONSHIP , "failure.cause" );
+		testRunner.assertAllFlowFilesTransferred( EnrichDataRelationships.FAILURE_RELATIONSHIP );
+		testRunner.assertTransferCount( EnrichDataRelationships.FAILURE_RELATIONSHIP , 1 );
+		testRunner.assertAllFlowFilesContainAttribute( EnrichDataRelationships.FAILURE_RELATIONSHIP , "failure" );
+		testRunner.assertAllFlowFilesContainAttribute( EnrichDataRelationships.FAILURE_RELATIONSHIP , "failure.cause" );
 		
 		System.out.println( "-------------- FAILURE_RELATIONSHIP flow files: --------------\n");
-		List<MockFlowFile> outFFList = testRunner.getFlowFilesForRelationship( EnrichData.FAILURE_RELATIONSHIP );
+		List<MockFlowFile> outFFList = testRunner.getFlowFilesForRelationship( EnrichDataRelationships.FAILURE_RELATIONSHIP );
 		outFFList.stream().forEach( (MockFlowFile ff) -> {
 			System.out.println( TestUtils.prettyOutFF( ff ) );
 		});
 		
 		System.out.println( "\n\n-------------- RETRY_RELATIONSHIP flow files: --------------\n");
-		outFFList = testRunner.getFlowFilesForRelationship( EnrichData.RETRY_RELATIONSHIP );
+		outFFList = testRunner.getFlowFilesForRelationship( EnrichDataRelationships.RETRY_RELATIONSHIP );
 		outFFList.stream().forEach( (MockFlowFile ff) -> {
 			System.out.println( TestUtils.prettyOutFF( ff ) );
 		});

@@ -23,13 +23,14 @@ import java.util.List;
 
 import org.apache.nifi.reporting.InitializationException;
 import org.apache.nifi.util.MockFlowFile;
-import org.disit.nifi.processors.enrich_data.EnrichData;
+import org.disit.nifi.processors.enrich_data.EnrichDataConstants;
+import org.disit.nifi.processors.enrich_data.EnrichDataProperties;
+import org.disit.nifi.processors.enrich_data.EnrichDataRelationships;
 import org.disit.nifi.processors.enrich_data.locators.iotdirectory.IOTDirectoryLocatorControllerService;
 import org.disit.nifi.processors.enrich_data.ownership.OwnershipControllerService;
 import org.disit.nifi.processors.enrich_data.test.EnrichDataTestBase;
 import org.disit.nifi.processors.enrich_data.test.TestUtils;
 import org.disit.nifi.processors.enrich_data.test.api_mock.JsonResourceMockHandler;
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -37,8 +38,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
-import groovy.mock.interceptor.MockFor;
 
 /**
  * Unit tests for the EnrichData processor using:
@@ -86,7 +85,7 @@ public class EnrichDataLocatorOwnershipTests extends EnrichDataTestBase{
     	testRunner.setProperty( ownershipService , "elementType" , "IOTID" );
     	testRunner.assertValid( ownershipService );
     	testRunner.enableControllerService( ownershipService );
-    	testRunner.setProperty( EnrichData.OWNERSHIP_CLIENT_SERVICE , csName );
+    	testRunner.setProperty( EnrichDataProperties.OWNERSHIP_CLIENT_SERVICE , csName );
 	}
 	
 	// IOTDirectoryLocator CS	
@@ -118,7 +117,7 @@ public class EnrichDataLocatorOwnershipTests extends EnrichDataTestBase{
 		
 		testRunner.assertValid( iotDirectoryService );
 		testRunner.enableControllerService( iotDirectoryService );
-		testRunner.setProperty( EnrichData.ENRICHMENT_RESOURCE_LOCATOR_SERVICE , csName );
+		testRunner.setProperty( EnrichDataProperties.ENRICHMENT_RESOURCE_LOCATOR_SERVICE , csName );
 	}
 	
 	protected static void setupOwnershipMock() {
@@ -193,18 +192,21 @@ public class EnrichDataLocatorOwnershipTests extends EnrichDataTestBase{
 		MockFlowFile inputFF = enqueueFlowFile( "src/test/resources/mock_in_ff/testOutputs.ff" );
 		
 		testRunner.run();
-		testRunner.assertTransferCount( EnrichData.SUCCESS_RELATIONSHIP , 1 );
-		testRunner.assertTransferCount( EnrichData.ORIGINAL_RELATIONSHIP , 1 );
+		testRunner.assertTransferCount( EnrichDataRelationships.SUCCESS_RELATIONSHIP , 1 );
+		testRunner.assertTransferCount( EnrichDataRelationships.ORIGINAL_RELATIONSHIP , 1 );
 		
 		JsonObject expectedResult = TestUtils.prepareExpectedResult( 
 			"src/test/resources/reference_results/ownership/testOutputs_ownershipJsonObject.ref" , 
 			inputFF ).getAsJsonObject();
 		
-		MockFlowFile outFF = testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP ).get(0);
+		MockFlowFile outFF = testRunner.getFlowFilesForRelationship( EnrichDataRelationships.SUCCESS_RELATIONSHIP ).get(0);
 //		TestUtils.prettyOutFF(outFF);
 		System.out.println( TestUtils.prettyOutFF( outFF ) );
 		JsonElement content = JsonParser.parseString( new String( outFF.toByteArray() ) );
 		assertEquals( true , content.isJsonObject() );
+		content.getAsJsonObject().keySet().stream().forEach( (String prop) -> {
+			TestUtils.fixJsonOutputAttribute(content, expectedResult, prop, EnrichDataConstants.ENTRY_DATE_ATTRIBUTE_NAME);
+		});
 		assertEquals( true , expectedResult.equals( content.getAsJsonObject() ) );
 	}
 	

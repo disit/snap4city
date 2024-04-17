@@ -71,7 +71,7 @@ public class KeycloakMockHandler extends AbstractHandler{
 	
 	// Mocking and utilities
 	private KeycloakMock kcmock;
-	private JsonParser parser = new JsonParser();
+//	private JsonParser parser = new JsonParser();
 	
 	public KeycloakMockHandler( String realm , int serverPort ) {
 		this.realm = realm;
@@ -219,7 +219,7 @@ public class KeycloakMockHandler extends AbstractHandler{
 	public JsonObject decodeAccessTokenPayload( String acccessToken ) throws ServletException{
 		String[] parts = acccessToken.split("\\.");
 		String payload = new String( Base64.getDecoder().decode( parts[1] ) );
-		JsonElement payloadObj = parser.parse( payload );
+		JsonElement payloadObj = JsonParser.parseString( payload );
 		if( !payloadObj.isJsonObject() )
 			throw new ServletException( "The access token payload is not a JsonObject." );
 		return payloadObj.getAsJsonObject();

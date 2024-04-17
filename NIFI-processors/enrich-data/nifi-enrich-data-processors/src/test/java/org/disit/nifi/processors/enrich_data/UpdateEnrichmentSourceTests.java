@@ -167,21 +167,15 @@ public class UpdateEnrichmentSourceTests {
         validateProcessorProperties();
         
         String serviceUri = "http://serviceuriprefix.org/test-id";
-//        String serviceUri = "http://anotheruriprefix.org/broker/org/test-id";
-//        String serviceUri = "http://serviceuriprefix.org/wind1";
     	
         // Mock attributes from EnrichData
         Map<String, String> attributes = new HashMap<>();
         attributes.put( "date_time" , ZonedDateTime.now(ZoneOffset.UTC).format( DateTimeFormatter.ISO_INSTANT ) );
-//        attributes.put( "serviceUri" , "http://serviceuriprefix.org/test-id" );
-//        attributes.put( "serviceUri" , "http://serviceuriprefix.org/wind1" );
-//        attributes.put( EnrichData.SERVICE_URI_OUTPUT_NAME , serviceUri );
         
         // Success mock flow file
     	testRunner.enqueue( 
     		TestUtils.mockJsonElementFromFile(
 				Paths.get( "src/test/resources/test_update_enrichment_source/input.ff" ) 
-//				Paths.get( "src/test/resources/test_update_enrichment_source/input_alt.ff" ) 
 			).toString(),
     		attributes
 		);
@@ -201,8 +195,6 @@ public class UpdateEnrichmentSourceTests {
     		assertEquals( true , obj.get( "id" ).isJsonPrimitive() );
     		
     		assertEquals( true , obj.has("uri") );
-//    		assertEquals( serviceUriPrefix + "/" + obj.get("id").getAsString() , 
-//    				      obj.get("uri").getAsString() );
     		assertEquals( serviceUri , obj.get("uri").getAsString() );
     		
     		System.out.println( "Servicemap received:" );
@@ -232,6 +224,69 @@ public class UpdateEnrichmentSourceTests {
 	    			  });
     	}
     	System.out.println( "**** END TEST FF-CONTENT CONDITION ***\n\n" );
+    }
+    
+    @Test
+    public void testServiceUriFromAttribute() throws IOException {
+    	System.out.println( "**** TEST SERVICE-URI-FROM-ATTRIBUTE *** " );
+        testRunner.setProperty( UpdateEnrichmentSource.REQ_RESOURCE_URI_NAME , "uri" );
+        testRunner.setProperty( UpdateEnrichmentSource.TIMESTAMP_FIELD_NAME , "date_time" );
+        testRunner.setProperty( "id" , "id" );
+        testRunner.setProperty( "a" , "A" );
+        testRunner.setProperty( "location/coordinates" , "[latitude , longitude]" );
+//        testRunner.setProperty( "latitude/value" , "latitude" );
+//        testRunner.setProperty( "longitude/value" , "longitude" );
+
+        testRunner.addConnection( UpdateEnrichmentSource.PERFORMED_UPDATES_RELATIONSHIP );
+        
+        validateProcessorProperties();
+        
+        String serviceUri = "http://serviceuriprefix.org/wind1";
+    	
+        // Mock attributes from EnrichData
+        Map<String, String> attributes = new HashMap<>();
+        attributes.put( "date_time" , ZonedDateTime.now(ZoneOffset.UTC).format( DateTimeFormatter.ISO_INSTANT ) );
+        attributes.put( EnrichDataConstants.SERVICE_URI_OUTPUT_NAME , serviceUri );
+        
+        // Success mock flow file
+    	testRunner.enqueue( 
+    		TestUtils.mockJsonElementFromFile(
+				Paths.get( "src/test/resources/test_update_enrichment_source/input.ff" )  
+			).toString(),
+    		attributes
+		);
+    	
+    	servicemap.addEndpoint( "/move" , (JsonElement reqBody) -> {
+    		assertEquals( true , reqBody.isJsonObject() );
+    		JsonObject obj = reqBody.getAsJsonObject();
+    		assertEquals( true , obj.has("id") );
+    		assertEquals( true , obj.get( "id" ).isJsonPrimitive() );
+    		
+    		assertEquals( true , obj.has("uri") );
+    		assertEquals( serviceUri , obj.get("uri").getAsString() );
+    		
+    		System.out.println( "Servicemap received:" );
+    		System.out.println( reqBody.toString() );
+    	});
+    	
+    	testRunner.run( testRunner.getQueueSize().getObjectCount() );
+    	testRunner.assertTransferCount( UpdateEnrichmentSource.SUCCESS_RELATIONSHIP , 1 );
+    	
+    	System.out.println( "--- Success FFs: " );
+    	testRunner.getFlowFilesForRelationship( UpdateEnrichmentSource.SUCCESS_RELATIONSHIP )
+				  .stream().forEach( (MockFlowFile ff) -> {
+					  System.out.println( TestUtils.prettyOutFF( ff ) );
+				  });
+    	
+//    	testRunner.assertTransferCount( UpdateEnrichmentSource.PERFORMED_UPDATES_RELATIONSHIP , 1 );
+    	if( testRunner.getFlowFilesForRelationship( UpdateEnrichmentSource.PERFORMED_UPDATES_RELATIONSHIP ).size() > 0 ) {
+	    	System.out.println( "--- Performed updates FFs: ");
+	    	testRunner.getFlowFilesForRelationship( UpdateEnrichmentSource.PERFORMED_UPDATES_RELATIONSHIP )
+	    			  .stream().forEach( (MockFlowFile ff)->{
+	    				  System.out.println( TestUtils.prettyOutFF( ff ) );
+	    			  });
+    	}
+    	System.out.println( "**** END SERVICE-URI-FROM-ATTRIBUTE CONDITION ***\n\n" );
     }
     
     @Test

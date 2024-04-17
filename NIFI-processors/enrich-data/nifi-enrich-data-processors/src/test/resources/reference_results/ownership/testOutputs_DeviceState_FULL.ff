@@ -133,5 +133,41 @@
    "date_time":"2019-06-06T15:46:54.930Z",
    "organization":"MyOrg",
    "date_time10min":"2019-06-06T15:50:00.000Z",
-   "date_time10sec":"2019-06-06T15:46:50.000Z"
+   "date_time10sec":"2019-06-06T15:46:50.000Z",
+   "value_name": [
+     "BooleanTestAttr",
+     "PM10",
+     "PM2.5",
+     "address",
+     "address.addressCountry",
+     "address.addressLocality",
+     "address.streetAddress",
+     "dateObserved",
+     "location",
+     "location.type",
+     "location.coordinates",
+     "reliability",
+     "source",
+     "testNumericArray",
+     "testBooleanArray",
+     "testStringArray",
+     "testObjArray",
+     "testNullArray",
+     "testMixedArray"
+  ],
+  "value_type": [
+    "PM10_concentration",
+    "PM2.5_concentration",
+    "latitude_longitude",
+    "timestamp",
+    "latitude_longitude",
+    "status",
+    "status",
+    "status",
+    "status",
+    "status",
+    "status",
+    "status",
+    "status"
+  ]
 }

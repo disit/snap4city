@@ -38,13 +38,11 @@ import com.google.gson.JsonParser;
 public class JsonResourceMockHandler extends AbstractHandler{
 
 	private Map<String , JsonElement> resources;
-	private JsonParser parser;
 	private String identifierParameterName;
 	private String handlerName;
 	
 	public JsonResourceMockHandler( String identifierParameterName , String handlerName ) {
 		this.resources = new HashMap<>();
-		this.parser = new JsonParser();
 		this.identifierParameterName = identifierParameterName;
 		this.handlerName = handlerName;
 	}
@@ -124,6 +122,6 @@ public class JsonResourceMockHandler extends AbstractHandler{
 	public void addJsonResourceFromFile( String identifier , String filePath ) throws IOException{
 		String fileContent = Files.lines( Paths.get( filePath ) ).reduce( (String s1 ,String s2) -> { return s1 + s2; } )
 				    .get();
-		resources.put( identifier , parser.parse( fileContent ) );
+		resources.put( identifier , JsonParser.parseString( fileContent ) );
 	}
 }

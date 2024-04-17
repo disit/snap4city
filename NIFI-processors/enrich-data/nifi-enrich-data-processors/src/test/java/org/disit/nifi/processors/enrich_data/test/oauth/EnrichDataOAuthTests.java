@@ -17,6 +17,7 @@ package org.disit.nifi.processors.enrich_data.test.oauth;
 import org.apache.nifi.reporting.InitializationException;
 import org.apache.nifi.util.TestRunners;
 import org.disit.nifi.processors.enrich_data.EnrichData;
+import org.disit.nifi.processors.enrich_data.EnrichDataProperties;
 import org.disit.nifi.processors.enrich_data.enrichment_source.servicemap.ServicemapClientService;
 import org.disit.nifi.processors.enrich_data.enrichment_source.servicemap.oauth.ServicemapOAuthControllerService;
 import org.disit.nifi.processors.enrich_data.oauth.OAuthTokenProviderService;
@@ -58,7 +59,7 @@ public class EnrichDataOAuthTests extends EnrichDataSimpleTests {
 		testRunner.setProperty( servicemapService , ServicemapOAuthControllerService.OAUTH_TOKEN_PROVIDER_SERVICE , "KeycloakTokenProviderControllerService" );
 		testRunner.assertValid( servicemapService );
 		testRunner.enableControllerService( servicemapService );
-		testRunner.setProperty( EnrichData.ENRICHMENT_SOURCE_CLIENT_SERVICE , csName );
+		testRunner.setProperty( EnrichDataProperties.ENRICHMENT_SOURCE_CLIENT_SERVICE , csName );
 	}
 	
 	public void setupKeycloakControllerService() throws InitializationException {

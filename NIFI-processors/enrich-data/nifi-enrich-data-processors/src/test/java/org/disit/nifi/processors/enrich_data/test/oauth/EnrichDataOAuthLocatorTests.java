@@ -19,6 +19,7 @@ import java.io.IOException;
 import org.apache.nifi.reporting.InitializationException;
 import org.apache.nifi.util.TestRunners;
 import org.disit.nifi.processors.enrich_data.EnrichData;
+import org.disit.nifi.processors.enrich_data.EnrichDataProperties;
 import org.disit.nifi.processors.enrich_data.locators.iotdirectory.IOTDirectoryLocatorControllerService;
 import org.disit.nifi.processors.enrich_data.locators.iotdirectory.oauth.IOTDirectoryOAuthLocatorControllerService;
 import org.disit.nifi.processors.enrich_data.oauth.OAuthTokenProviderService;
@@ -98,7 +99,7 @@ public class EnrichDataOAuthLocatorTests extends EnrichDataLocatorTests{
 		
 		testRunner.assertValid( iotDirectoryService );
 		testRunner.enableControllerService( iotDirectoryService );
-		testRunner.setProperty( EnrichData.ENRICHMENT_RESOURCE_LOCATOR_SERVICE , csName );
+		testRunner.setProperty( EnrichDataProperties.ENRICHMENT_RESOURCE_LOCATOR_SERVICE , csName );
 	}
 	
 	protected static void setupOAuthIOTDirectoryMock() throws IOException{

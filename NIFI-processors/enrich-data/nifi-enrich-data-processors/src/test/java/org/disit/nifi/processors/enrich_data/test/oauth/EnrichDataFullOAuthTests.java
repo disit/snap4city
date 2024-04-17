@@ -25,6 +25,9 @@ import org.apache.nifi.reporting.InitializationException;
 import org.apache.nifi.util.MockFlowFile;
 import org.apache.nifi.util.TestRunners;
 import org.disit.nifi.processors.enrich_data.EnrichData;
+import org.disit.nifi.processors.enrich_data.EnrichDataConstants;
+import org.disit.nifi.processors.enrich_data.EnrichDataProperties;
+import org.disit.nifi.processors.enrich_data.EnrichDataRelationships;
 import org.disit.nifi.processors.enrich_data.enrichment_source.servicemap.ServicemapClientService;
 import org.disit.nifi.processors.enrich_data.enrichment_source.servicemap.oauth.ServicemapOAuthControllerService;
 import org.disit.nifi.processors.enrich_data.locators.EnrichmentResourceLocatorService;
@@ -107,7 +110,7 @@ public class EnrichDataFullOAuthTests extends EnrichDataTestBase{
 		testRunner.setProperty( servicemapService , ServicemapOAuthControllerService.OAUTH_TOKEN_PROVIDER_SERVICE , "KeycloakTokenProviderControllerService" );
 		testRunner.assertValid( servicemapService );
 		testRunner.enableControllerService( servicemapService );
-		testRunner.setProperty( EnrichData.ENRICHMENT_SOURCE_CLIENT_SERVICE , servicemapCsName );
+		testRunner.setProperty( EnrichDataProperties.ENRICHMENT_SOURCE_CLIENT_SERVICE , servicemapCsName );
 	}
 	
 	protected void setupIOTDirectoryControllerService() throws InitializationException {
@@ -134,7 +137,7 @@ public class EnrichDataFullOAuthTests extends EnrichDataTestBase{
 		
 		testRunner.assertValid( iotDirectoryService );
 		testRunner.enableControllerService( iotDirectoryService );
-		testRunner.setProperty( EnrichData.ENRICHMENT_RESOURCE_LOCATOR_SERVICE , iotDirectoryCsName );
+		testRunner.setProperty( EnrichDataProperties.ENRICHMENT_RESOURCE_LOCATOR_SERVICE , iotDirectoryCsName );
 	}
 	
 	protected void setupOwnershipControllerService() throws InitializationException {
@@ -157,7 +160,7 @@ public class EnrichDataFullOAuthTests extends EnrichDataTestBase{
 			OwnershipOAuthControllerService.TOKEN_MODE , OwnershipOAuthControllerService.TOKEN_MODE_VALUES[1] );
 		testRunner.assertValid( ownershipService );
 		testRunner.enableControllerService( ownershipService );
-		testRunner.setProperty( EnrichData.OWNERSHIP_CLIENT_SERVICE , ownershipCsName );	
+		testRunner.setProperty( EnrichDataProperties.OWNERSHIP_CLIENT_SERVICE , ownershipCsName );	
 	}
 	
 	
@@ -269,17 +272,20 @@ public class EnrichDataFullOAuthTests extends EnrichDataTestBase{
 		MockFlowFile inputFF = enqueueFlowFile( "src/test/resources/mock_in_ff/testOutputs.ff" );
 		
 		testRunner.run();
-		testRunner.assertTransferCount( EnrichData.SUCCESS_RELATIONSHIP , 1 );
-		testRunner.assertTransferCount( EnrichData.ORIGINAL_RELATIONSHIP , 1 );
+		testRunner.assertTransferCount( EnrichDataRelationships.SUCCESS_RELATIONSHIP , 1 );
+		testRunner.assertTransferCount( EnrichDataRelationships.ORIGINAL_RELATIONSHIP , 1 );
 		
 		JsonObject expectedResult = TestUtils.prepareExpectedResult( 
 			"src/test/resources/reference_results/ownership/testOutputs_ownershipJsonObject.ref" , 
 			inputFF ).getAsJsonObject();
-		MockFlowFile outFF = testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP ).get(0);
+		MockFlowFile outFF = testRunner.getFlowFilesForRelationship( EnrichDataRelationships.SUCCESS_RELATIONSHIP ).get(0);
 //		System.out.println( expectedResult );
 //		System.out.println( TestUtils.prettyOutFF( outFF ) );
 		JsonElement content = JsonParser.parseString( new String ( outFF.toByteArray() ) );
 		assertEquals( true , content.isJsonObject() );
+		content.getAsJsonObject().keySet().stream().forEach( (String prop) -> {
+			TestUtils.fixJsonOutputAttribute(content, expectedResult, prop, EnrichDataConstants.ENTRY_DATE_ATTRIBUTE_NAME );
+		});
 		assertEquals( true , expectedResult.equals( content.getAsJsonObject() ) );
 	}
 

@@ -30,6 +30,7 @@ import org.apache.nifi.util.MockFlowFile;
 import org.apache.nifi.util.TestRunner;
 import org.apache.nifi.util.TestRunners;
 import org.disit.nifi.processors.enrich_data.EnrichData;
+import org.disit.nifi.processors.enrich_data.EnrichDataProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,43 +93,43 @@ public class EnrichDataWebTester {
 		
 		// Enrichment source client service
 		String enrichmentSourceId = registerControllerService( 
-			processorPropertiesConfig.get( EnrichData.ENRICHMENT_SOURCE_CLIENT_SERVICE.getName() ).getAsJsonObject() ,
-			EnrichData.ENRICHMENT_SOURCE_CLIENT_SERVICE.getControllerServiceDefinition()
+			processorPropertiesConfig.get( EnrichDataProperties.ENRICHMENT_SOURCE_CLIENT_SERVICE.getName() ).getAsJsonObject() ,
+			EnrichDataProperties.ENRICHMENT_SOURCE_CLIENT_SERVICE.getControllerServiceDefinition()
 		);
 		this.testRunner.enableControllerService( this.testRunner.getControllerService( enrichmentSourceId ) );
-		this.testRunner.setProperty(EnrichData.ENRICHMENT_SOURCE_CLIENT_SERVICE.getName() , enrichmentSourceId);
+		this.testRunner.setProperty(EnrichDataProperties.ENRICHMENT_SOURCE_CLIENT_SERVICE.getName() , enrichmentSourceId);
 		
 		// Enrichment resource locator service
-		if( processorPropertiesConfig.has( EnrichData.ENRICHMENT_RESOURCE_LOCATOR_SERVICE.getName() ) && 
-			!processorPropertiesConfig.get( EnrichData.ENRICHMENT_RESOURCE_LOCATOR_SERVICE.getName() ).isJsonNull() &&
-			processorPropertiesConfig.get( EnrichData.ENRICHMENT_RESOURCE_LOCATOR_SERVICE.getName() ).isJsonObject() ) {
+		if( processorPropertiesConfig.has( EnrichDataProperties.ENRICHMENT_RESOURCE_LOCATOR_SERVICE.getName() ) && 
+			!processorPropertiesConfig.get( EnrichDataProperties.ENRICHMENT_RESOURCE_LOCATOR_SERVICE.getName() ).isJsonNull() &&
+			processorPropertiesConfig.get( EnrichDataProperties.ENRICHMENT_RESOURCE_LOCATOR_SERVICE.getName() ).isJsonObject() ) {
 			
 			String resourceLocatorId = registerControllerService( 
-				processorPropertiesConfig.get( EnrichData.ENRICHMENT_RESOURCE_LOCATOR_SERVICE.getName() ).getAsJsonObject() ,
-				EnrichData.ENRICHMENT_RESOURCE_LOCATOR_SERVICE.getControllerServiceDefinition() 
+				processorPropertiesConfig.get( EnrichDataProperties.ENRICHMENT_RESOURCE_LOCATOR_SERVICE.getName() ).getAsJsonObject() ,
+				EnrichDataProperties.ENRICHMENT_RESOURCE_LOCATOR_SERVICE.getControllerServiceDefinition() 
 			);
 			this.testRunner.enableControllerService( this.testRunner.getControllerService( resourceLocatorId ) );
-			this.testRunner.setProperty( EnrichData.ENRICHMENT_RESOURCE_LOCATOR_SERVICE , resourceLocatorId );
+			this.testRunner.setProperty( EnrichDataProperties.ENRICHMENT_RESOURCE_LOCATOR_SERVICE , resourceLocatorId );
 		}
 		
 		// Ownership client service
-		if( processorPropertiesConfig.has( EnrichData.OWNERSHIP_CLIENT_SERVICE.getName() ) && 
-			!processorPropertiesConfig.get( EnrichData.OWNERSHIP_CLIENT_SERVICE.getName() ).isJsonNull()  && 
-			processorPropertiesConfig.get( EnrichData.OWNERSHIP_CLIENT_SERVICE.getName() ).isJsonObject() ) {
+		if( processorPropertiesConfig.has( EnrichDataProperties.OWNERSHIP_CLIENT_SERVICE.getName() ) && 
+			!processorPropertiesConfig.get( EnrichDataProperties.OWNERSHIP_CLIENT_SERVICE.getName() ).isJsonNull()  && 
+			processorPropertiesConfig.get( EnrichDataProperties.OWNERSHIP_CLIENT_SERVICE.getName() ).isJsonObject() ) {
 			
 			String ownershipSourceId = registerControllerService( 
-				processorPropertiesConfig.get( EnrichData.OWNERSHIP_CLIENT_SERVICE.getName() ).getAsJsonObject() ,
-				EnrichData.OWNERSHIP_CLIENT_SERVICE.getControllerServiceDefinition()
+				processorPropertiesConfig.get( EnrichDataProperties.OWNERSHIP_CLIENT_SERVICE.getName() ).getAsJsonObject() ,
+				EnrichDataProperties.OWNERSHIP_CLIENT_SERVICE.getControllerServiceDefinition()
 			);
 			this.testRunner.enableControllerService( this.testRunner.getControllerService( ownershipSourceId ) );
-			this.testRunner.setProperty( EnrichData.OWNERSHIP_CLIENT_SERVICE.getName() , ownershipSourceId );
+			this.testRunner.setProperty( EnrichDataProperties.OWNERSHIP_CLIENT_SERVICE.getName() , ownershipSourceId );
 		}
 		
 		// Non-controller service properties
 		for( String pName : processorPropertiesConfig.keySet() ) {
-			if( !pName.equals( EnrichData.ENRICHMENT_SOURCE_CLIENT_SERVICE.getName() ) && 
-				!pName.equals( EnrichData.OWNERSHIP_CLIENT_SERVICE.getName() ) &&
-				!pName.equals( EnrichData.ENRICHMENT_RESOURCE_LOCATOR_SERVICE.getName() ) ) {
+			if( !pName.equals( EnrichDataProperties.ENRICHMENT_SOURCE_CLIENT_SERVICE.getName() ) && 
+				!pName.equals( EnrichDataProperties.OWNERSHIP_CLIENT_SERVICE.getName() ) &&
+				!pName.equals( EnrichDataProperties.ENRICHMENT_RESOURCE_LOCATOR_SERVICE.getName() ) ) {
 				
 				if( !processorPropertiesConfig.get(pName).isJsonNull() )
 					this.testRunner.setProperty( pName , processorPropertiesConfig.get(pName).getAsString() );

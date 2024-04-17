@@ -17,20 +17,17 @@ package org.disit.nifi.processors.enrich_data.test.simple;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.nifi.components.ValidationResult;
 import org.apache.nifi.util.MockFlowFile;
-import org.disit.nifi.processors.enrich_data.EnrichData;
-import org.disit.nifi.processors.enrich_data.enricher.EnrichUtils;
+import org.disit.nifi.processors.enrich_data.EnrichDataConstants;
+import org.disit.nifi.processors.enrich_data.EnrichDataProperties;
+import org.disit.nifi.processors.enrich_data.EnrichDataRelationships;
 import org.disit.nifi.processors.enrich_data.test.EnrichDataTestBase;
 import org.disit.nifi.processors.enrich_data.test.TestUtils;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -46,7 +43,7 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 	public void testJsonOutput() throws IOException {
 		System.out.println( "\n######## " + testName() + " ########" );
 		
-		testRunner.setProperty( EnrichData.TIMESTAMP_THRESHOLD , "24 h" );
+		testRunner.setProperty( EnrichDataProperties.TIMESTAMP_THRESHOLD , "24 h" );
 		
 		addServicemapResource( "id" , serviceUriPrefix , 
 			"src/test/resources/mock_in_ff/testOutputs.ff" , 
@@ -60,12 +57,20 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 
 		testRunner.run();
 		
-		testRunner.assertTransferCount( EnrichData.SUCCESS_RELATIONSHIP , 1 );
-		testRunner.assertTransferCount( EnrichData.ORIGINAL_RELATIONSHIP , 1 );
+		testRunner.assertTransferCount( EnrichDataRelationships.SUCCESS_RELATIONSHIP , 1 );
+		testRunner.assertTransferCount( EnrichDataRelationships.ORIGINAL_RELATIONSHIP , 1 );
 		
-		MockFlowFile outFF = testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP ).get(0);
+		MockFlowFile outFF = testRunner.getFlowFilesForRelationship( EnrichDataRelationships.SUCCESS_RELATIONSHIP ).get(0);
 		JsonElement outFFContent = JsonParser.parseString( new String( outFF.toByteArray() ) ); 
 		assertEquals( true , outFFContent.isJsonObject() );
+		// entry_date
+		outFFContent.getAsJsonObject().keySet().stream().forEach( (String prop) -> {
+			TestUtils.fixJsonOutputAttribute( 
+				outFFContent , expectedResult , 
+				prop , EnrichDataConstants.ENTRY_DATE_ATTRIBUTE_NAME );
+		});
+//		System.out.println( expectedResult.toString() );
+		
 		assertEquals( true , outFFContent.getAsJsonObject().equals( expectedResult.getAsJsonObject() ) );
 		System.out.println( TestUtils.prettyOutFF( outFF ) );
 	}
@@ -74,7 +79,7 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 	public void testSplitJsonOutput() throws IOException {
 		System.out.println( "\n######## " + testName() + " ########" );
 		
-		testRunner.setProperty( EnrichData.TIMESTAMP_THRESHOLD , "24 h" );
+		testRunner.setProperty( EnrichDataProperties.TIMESTAMP_THRESHOLD , "24 h" );
 		
 		addServicemapResource( "id" , serviceUriPrefix , 
 			"src/test/resources/mock_in_ff/testOutputs.ff" , 
@@ -87,23 +92,24 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 			inputFF ).getAsJsonArray();
 		
 		// set "Split JSON" as output format
-		testRunner.setProperty( EnrichData.OUTPUT_FF_CONTENT_FORMAT , EnrichData.OUTPUT_FF_CONTENT_FORMAT_VALUES[2] );
+		testRunner.setProperty( EnrichDataProperties.OUTPUT_FF_CONTENT_FORMAT , EnrichDataConstants.OUTPUT_FF_CONTENT_FORMAT_VALUES[2] );
 		testRunner.assertValid();
 		testRunner.run();
-		testRunner.assertTransferCount( EnrichData.SUCCESS_RELATIONSHIP , 8 );
-		testRunner.assertTransferCount( EnrichData.ORIGINAL_RELATIONSHIP , 1 );
+		testRunner.assertTransferCount( EnrichDataRelationships.SUCCESS_RELATIONSHIP , 8 );
+		testRunner.assertTransferCount( EnrichDataRelationships.ORIGINAL_RELATIONSHIP , 1 );
 		
 		System.out.println( "-------- Success FFs: --------" );
-		List<MockFlowFile> successFFs = testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP );
+		List<MockFlowFile> successFFs = testRunner.getFlowFilesForRelationship( EnrichDataRelationships.SUCCESS_RELATIONSHIP );
 		for( int i=0 ; i < successFFs.size() ; i++ ) {
 			JsonElement content = JsonParser.parseString( new String( successFFs.get(i).toByteArray() ) );
 			assertEquals( true , content.isJsonObject() );
+			TestUtils.fixSplitJsonAttribute( content , expectedResult , i , EnrichDataConstants.ENTRY_DATE_ATTRIBUTE_NAME );
 			assertEquals( true , expectedResult.get(i).equals(content.getAsJsonObject() ) );
 			System.out.println( TestUtils.prettyOutFF( successFFs.get(i) ) );
 		}
 		
 		System.out.println( "-------- Original FFs: --------" );
-		List<MockFlowFile> originalFFs = testRunner.getFlowFilesForRelationship( EnrichData.ORIGINAL_RELATIONSHIP );
+		List<MockFlowFile> originalFFs = testRunner.getFlowFilesForRelationship( EnrichDataRelationships.ORIGINAL_RELATIONSHIP );
 		for( int i=0 ; i<originalFFs.size() ; i++ ) {
 			System.out.println( TestUtils.prettyOutFF( originalFFs.get(i) ) );
 		}
@@ -118,11 +124,11 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 		
 		MockFlowFile inputFF = enqueueFlowFile( "src/test/resources/mock_in_ff/testEmptyOutObj.ff" );
 		
-		testRunner.setProperty( EnrichData.OUTPUT_FF_CONTENT_FORMAT , EnrichData.OUTPUT_FF_CONTENT_FORMAT_VALUES[0] ); // Json Object
+		testRunner.setProperty( EnrichDataProperties.OUTPUT_FF_CONTENT_FORMAT , EnrichDataConstants.OUTPUT_FF_CONTENT_FORMAT_VALUES[0] ); // Json Object
 		testRunner.run();
-		testRunner.assertTransferCount( EnrichData.FAILURE_RELATIONSHIP , 1 );
+		testRunner.assertTransferCount( EnrichDataRelationships.FAILURE_RELATIONSHIP , 1 );
 		
-		MockFlowFile failedFF = testRunner.getFlowFilesForRelationship( EnrichData.FAILURE_RELATIONSHIP ).get(0);
+		MockFlowFile failedFF = testRunner.getFlowFilesForRelationship( EnrichDataRelationships.FAILURE_RELATIONSHIP ).get(0);
 		failedFF.assertAttributeExists( "failure" );
 		assertEquals( "The resulting JsonObject after the enrichment is empty." , failedFF.getAttribute( "failure" ) );
 	}
@@ -136,19 +142,22 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 		
 		MockFlowFile inputFF = enqueueFlowFile( "src/test/resources/mock_in_ff/testArrayValue.ff" );
 		
-		testRunner.setProperty( EnrichData.OUTPUT_FF_CONTENT_FORMAT , EnrichData.OUTPUT_FF_CONTENT_FORMAT_VALUES[2] ); // Split JSON
+		testRunner.setProperty( EnrichDataProperties.OUTPUT_FF_CONTENT_FORMAT , EnrichDataConstants.OUTPUT_FF_CONTENT_FORMAT_VALUES[2] ); // Split JSON
 		
 		testRunner.run();
-		testRunner.assertTransferCount( EnrichData.SUCCESS_RELATIONSHIP , 14 );
-		testRunner.assertTransferCount( EnrichData.ORIGINAL_RELATIONSHIP , 1 );
+		testRunner.assertTransferCount( EnrichDataRelationships.SUCCESS_RELATIONSHIP , 14 );
+		testRunner.assertTransferCount( EnrichDataRelationships.ORIGINAL_RELATIONSHIP , 1 );
 		
 		JsonArray expectedResult = TestUtils.prepareExpectedResult( 
 			"src/test/resources/reference_results/testOutputs_arrayValue.ref" , 
 			inputFF ).getAsJsonArray();
-		List<MockFlowFile> successFFs = testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP );
+		List<MockFlowFile> successFFs = testRunner.getFlowFilesForRelationship( EnrichDataRelationships.SUCCESS_RELATIONSHIP );
 		for( int i=0 ; i < successFFs.size() ; i++ ) {
-			JsonElement content = JsonParser.parseString( new String( successFFs.get(i).toByteArray() ) );
+			MockFlowFile ff = successFFs.get(i);
+			JsonElement content = JsonParser.parseString( new String( ff.toByteArray() ) );
 			assertEquals( true , content.isJsonObject() );
+			TestUtils.fixSplitJsonAttribute( content , expectedResult , i , EnrichDataConstants.ENTRY_DATE_ATTRIBUTE_NAME );
+			System.out.println( TestUtils.prettyOutFF( ff ) );
 			assertEquals( true , expectedResult.get(i).equals( content.getAsJsonObject() ) );
 		}
 	}
@@ -162,22 +171,25 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 		
 		MockFlowFile inputFF = enqueueFlowFile( "src/test/resources/mock_in_ff/testParseStringValue.ff" );
 		
-		testRunner.setProperty( EnrichData.OUTPUT_FF_CONTENT_FORMAT , EnrichData.OUTPUT_FF_CONTENT_FORMAT_VALUES[0] ); // JSON Object
-		testRunner.setProperty( EnrichData.ATTEMPT_STRING_VALUES_PARSING , "Yes" );
+		testRunner.setProperty( EnrichDataProperties.OUTPUT_FF_CONTENT_FORMAT , EnrichDataConstants.OUTPUT_FF_CONTENT_FORMAT_VALUES[0] ); // JSON Object
+		testRunner.setProperty( EnrichDataProperties.ATTEMPT_STRING_VALUES_PARSING , "Yes" );
 		
 		testRunner.run();
-		testRunner.assertTransferCount( EnrichData.SUCCESS_RELATIONSHIP , 1 );
-		testRunner.assertTransferCount( EnrichData.ORIGINAL_RELATIONSHIP , 1 );
+		testRunner.assertTransferCount( EnrichDataRelationships.SUCCESS_RELATIONSHIP , 1 );
+		testRunner.assertTransferCount( EnrichDataRelationships.ORIGINAL_RELATIONSHIP , 1 );
 		
 		JsonObject expectedResult = TestUtils.prepareExpectedResult( 
 			"src/test/resources/reference_results/testOutputs_parseStringValue.ref" , 
 			inputFF ).getAsJsonObject();
 
 		JsonElement outputContent = JsonParser.parseString( 
-			new String( testRunner.getFlowFilesForRelationship(EnrichData.SUCCESS_RELATIONSHIP)
+			new String( testRunner.getFlowFilesForRelationship(EnrichDataRelationships.SUCCESS_RELATIONSHIP)
 								  .get(0).toByteArray() ) 
 		);
 		assertEquals( true , outputContent.isJsonObject() );
+		outputContent.getAsJsonObject().keySet().stream().forEach( (String prop) -> {
+			TestUtils.fixJsonOutputAttribute(outputContent, expectedResult, prop, EnrichDataConstants.ENTRY_DATE_ATTRIBUTE_NAME);
+		});
 		assertEquals( true , expectedResult.equals( outputContent.getAsJsonObject() ) );
 	}
 	
@@ -188,24 +200,25 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 			
 		MockFlowFile inputFF = enqueueFlowFile( inputFlowFilePath );
 		
-		testRunner.setProperty( EnrichData.OUTPUT_FF_CONTENT_FORMAT , EnrichData.OUTPUT_FF_CONTENT_FORMAT_VALUES[2] ); // Split Json
-		testRunner.setProperty( EnrichData.LATLON_PRIORITY , EnrichData.LATLON_PRIORITY_VALUES[1] ); // Priority inner
-		testRunner.setProperty( EnrichData.INNER_LAT_LON_CONFIG , innerLatLonConfig );
+		testRunner.setProperty( EnrichDataProperties.OUTPUT_FF_CONTENT_FORMAT , EnrichDataConstants.OUTPUT_FF_CONTENT_FORMAT_VALUES[2] ); // Split Json
+		testRunner.setProperty( EnrichDataProperties.LATLON_PRIORITY , EnrichDataConstants.LATLON_PRIORITY_VALUES[1] ); // Priority inner
+		testRunner.setProperty( EnrichDataProperties.INNER_LAT_LON_CONFIG , innerLatLonConfig );
 		
-		ValidationResult vr = getValidationResult( EnrichData.INNER_LAT_LON_CONFIG );
+		ValidationResult vr = getValidationResult( EnrichDataProperties.INNER_LAT_LON_CONFIG );
 		System.out.println( "Validation: \n" + vr.toString() );
 		validateProcessorProperties();
 		
 		testRunner.run();
-		testRunner.assertTransferCount( EnrichData.SUCCESS_RELATIONSHIP , expectedSuccessFFCount );
-		testRunner.assertTransferCount( EnrichData.ORIGINAL_RELATIONSHIP , 1 );
+		testRunner.assertTransferCount( EnrichDataRelationships.SUCCESS_RELATIONSHIP , expectedSuccessFFCount );
+		testRunner.assertTransferCount( EnrichDataRelationships.ORIGINAL_RELATIONSHIP , 1 );
 		
 		JsonArray expectedResult = TestUtils.prepareExpectedResult( referenceFilePath , inputFF )
 											.getAsJsonArray();
-		List<MockFlowFile> successFFs = testRunner.getFlowFilesForRelationship( EnrichData.SUCCESS_RELATIONSHIP );
+		List<MockFlowFile> successFFs = testRunner.getFlowFilesForRelationship( EnrichDataRelationships.SUCCESS_RELATIONSHIP );
 		for( int i=0 ; i < successFFs.size() ; i++ ) {
 			JsonElement content = JsonParser.parseString( new String( successFFs.get(i).toByteArray() ) );
 			assertEquals( true , content.isJsonObject() );
+			TestUtils.fixSplitJsonAttribute(content, expectedResult, i, EnrichDataConstants.ENTRY_DATE_ATTRIBUTE_NAME);
 			assertEquals( true , expectedResult.get(i).equals( content.getAsJsonObject() ) );
 		}
 	}
@@ -324,23 +337,23 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 			"src/test/resources/mock_in_ff/testOutputs.ff" , 
 			"src/test/resources/mock_servicemap_response/testOutputs.resp" );
 		
-		testRunner.setProperty( EnrichData.OUTPUT_FF_CONTENT_FORMAT , EnrichData.OUTPUT_FF_CONTENT_FORMAT_VALUES[0] ); // JsonObject
-    	testRunner.setProperty( EnrichData.ORIGINAL_FLOW_FILE_ATTRIBUTES_AUG ,
+		testRunner.setProperty( EnrichDataProperties.OUTPUT_FF_CONTENT_FORMAT , EnrichDataConstants.OUTPUT_FF_CONTENT_FORMAT_VALUES[0] ); // JsonObject
+    	testRunner.setProperty( EnrichDataProperties.ORIGINAL_FLOW_FILE_ATTRIBUTES_AUG ,
     							"{\"format\":\"Service/features/properties/format\",\"err\":\"Service/not/present\"}" );
     	
     	testRunner.assertValid();
     	validateProcessorProperties();
-    	ValidationResult vr = getValidationResult( EnrichData.ORIGINAL_FLOW_FILE_ATTRIBUTES_AUG );
-    	System.out.println("Validation of '" + EnrichData.ORIGINAL_FLOW_FILE_ATTRIBUTES_AUG.getDisplayName() + "':\n\t" + vr.toString() );
+    	ValidationResult vr = getValidationResult( EnrichDataProperties.ORIGINAL_FLOW_FILE_ATTRIBUTES_AUG );
+    	System.out.println("Validation of '" + EnrichDataProperties.ORIGINAL_FLOW_FILE_ATTRIBUTES_AUG.getDisplayName() + "':\n\t" + vr.toString() );
     	
     	enqueueFlowFile( "src/test/resources/mock_in_ff/testOutputs.ff" );
     	
     	testRunner.run();
     	
-    	testRunner.assertTransferCount( EnrichData.SUCCESS_RELATIONSHIP , 1 );
-    	testRunner.assertTransferCount( EnrichData.ORIGINAL_RELATIONSHIP , 1 );
+    	testRunner.assertTransferCount( EnrichDataRelationships.SUCCESS_RELATIONSHIP , 1 );
+    	testRunner.assertTransferCount( EnrichDataRelationships.ORIGINAL_RELATIONSHIP , 1 );
     	
-    	MockFlowFile originalFF = testRunner.getFlowFilesForRelationship( EnrichData.ORIGINAL_RELATIONSHIP ).get(0);
+    	MockFlowFile originalFF = testRunner.getFlowFilesForRelationship( EnrichDataRelationships.ORIGINAL_RELATIONSHIP ).get(0);
     	originalFF.assertAttributeExists( "format" );
     	originalFF.assertAttributeEquals( "format" , "json" );
     	System.out.println( TestUtils.prettyOutFF( originalFF ) );

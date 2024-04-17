@@ -17,6 +17,7 @@ package org.disit.nifi.processors.enrich_data.test.oauth;
 import org.apache.nifi.reporting.InitializationException;
 import org.apache.nifi.util.TestRunners;
 import org.disit.nifi.processors.enrich_data.EnrichData;
+import org.disit.nifi.processors.enrich_data.EnrichDataProperties;
 import org.disit.nifi.processors.enrich_data.oauth.OAuthTokenProviderService;
 import org.disit.nifi.processors.enrich_data.oauth.keycloak.KeycloakTokenProviderControllerService;
 import org.disit.nifi.processors.enrich_data.ownership.OwnershipControllerService;
@@ -91,7 +92,7 @@ public class EnrichDataOAuthOwnershipTests extends EnrichDataOwnershipTests{
 			OwnershipOAuthControllerService.TOKEN_MODE , OwnershipOAuthControllerService.TOKEN_MODE_VALUES[1] );
 		testRunner.assertValid( ownershipService );
 		testRunner.enableControllerService( ownershipService );
-		testRunner.setProperty( EnrichData.OWNERSHIP_CLIENT_SERVICE , csName );	
+		testRunner.setProperty( EnrichDataProperties.OWNERSHIP_CLIENT_SERVICE , csName );	
 	}
 	
 	protected static void setupOAuthOwnershipMock() {

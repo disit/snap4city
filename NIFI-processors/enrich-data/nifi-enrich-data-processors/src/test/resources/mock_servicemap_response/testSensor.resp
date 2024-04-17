@@ -1,45 +1,94 @@
-{ "Service":
-{"type": "FeatureCollection",
-"features": [
-
 {
- "geometry": {
-     "type": "Point",
-    "coordinates": [ 11.290201, 43.776 ]
- },
- "type": "Feature",
- "properties": {
-    "serviceUri": "http://www.disit.org/km4city/resource/iot/orionUNIFI/DISIT/BibliotecaMarioLuzi",
-    "serviceType": "IoTDevice_IoTSensor",
-    "name": "BibliotecaMarioLuzi",
-    "typeLabel": "Sensor",
-    "protocol": "ngsi",
-    "format": "json",
-    "model": "MonitorFirenze",
-    "producer": "Comune di Firenze",
-    "macaddress": "3D:F2:C9:A6:B3:3F",
-    "brokerName": "orionUNIFI",
-    "brokerEndpoint": "192.168.1.9:1026",
-    "ownership": "public",
-    "organization": "DISIT",
-    "realtimeAttributes":{"dateObserved":{"data_type":"datetime","value_type":"timestamp","attr_type":"DeviceAttribute","value_unit":"s","value_refresh_rate":"2592000","value_bounds":"unspecified","different_values":"0"},
-"status":{"data_type":"boolean","value_type":"status","attr_type":"DeviceAttribute","value_unit":"#","value_refresh_rate":"2592000","value_bounds":"unspecified","different_values":"0"}},
-    "linkDBpedia": [],
-    "wktGeometry": "",
-    "photos": [],
-    "photoThumbs": [],
-    "photoOrigs": [],
-    "avgStars": 0.0,
-    "starsCount": 0,
-    "comments": []}
-}
-]}
-,"realtime": 
-{ "head": {
- "vars":[ "measuredTime","dateObserved","status"]},
- "results": {
- "bindings": [
-  {
-  "measuredTime":{"value":"2019-10-22T15:24:43.660+02:00"},  "dateObserved":{"value":"0"},  "status":{"value":"0"} }
-]}}
+   "Service":{
+      "type":"FeatureCollection",
+      "features":[
+         {
+            "geometry":{
+               "type":"Point",
+               "coordinates":[
+                  11.290201,
+                  43.776
+               ]
+            },
+            "type":"Feature",
+            "properties":{
+               "serviceUri":"http://www.disit.org/km4city/resource/iot/orionUNIFI/DISIT/BibliotecaMarioLuzi",
+               "serviceType":"IoTDevice_IoTSensor",
+               "name":"BibliotecaMarioLuzi",
+               "typeLabel":"Sensor",
+               "protocol":"ngsi",
+               "format":"json",
+               "model":"MonitorFirenze",
+               "producer":"Comune di Firenze",
+               "macaddress":"3D:F2:C9:A6:B3:3F",
+               "brokerName":"orionUNIFI",
+               "brokerEndpoint":"192.168.1.9:1026",
+               "ownership":"public",
+               "organization":"DISIT",
+               "realtimeAttributes":{
+                  "dateObserved":{
+                     "data_type":"datetime",
+                     "value_type":"timestamp",
+                     "attr_type":"DeviceAttribute",
+                     "value_unit":"s",
+                     "value_refresh_rate":"2592000",
+                     "value_bounds":"unspecified",
+                     "different_values":"0"
+                  },
+                  "status":{
+                     "data_type":"boolean",
+                     "value_type":"status",
+                     "attr_type":"DeviceAttribute",
+                     "value_unit":"#",
+                     "value_refresh_rate":"2592000",
+                     "value_bounds":"unspecified",
+                     "different_values":"0"
+                  }
+               },
+               "linkDBpedia":[
+                  
+               ],
+               "wktGeometry":"",
+               "photos":[
+                  
+               ],
+               "photoThumbs":[
+                  
+               ],
+               "photoOrigs":[
+                  
+               ],
+               "avgStars":0.0,
+               "starsCount":0,
+               "comments":[
+                  
+               ]
+            }
+         }
+      ]
+   },
+   "realtime":{
+      "head":{
+         "vars":[
+            "measuredTime",
+            "dateObserved",
+            "status"
+         ]
+      },
+      "results":{
+         "bindings":[
+            {
+               "measuredTime":{
+                  "value":"2019-10-22T15:24:43.660+02:00"
+               },
+               "dateObserved":{
+                  "value":"0"
+               },
+               "status":{
+                  "value":"0"
+               }
+            }
+         ]
+      }
+   }
 }

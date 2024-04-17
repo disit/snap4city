@@ -29,15 +29,12 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.nifi.attribute.expression.language.antlr.AttributeExpressionParser.functionCall_return;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-
-import groovyjarjarasm.asm.commons.Method;
 
 /**
  * Handler to mock Servicemap.
@@ -49,7 +46,6 @@ public class ServicemapMockHandler extends AbstractHandler{
 	private Map<String , ServicemapError> failures;
 	private Map<String , AbstractHandler> endpoints;
 	private Map<String , AbstractHandler> errorEndpoints;
-	private JsonParser parser;
 	private boolean verbose;
 	
 	public ServicemapMockHandler() {
@@ -57,7 +53,6 @@ public class ServicemapMockHandler extends AbstractHandler{
 		failures = new HashMap<>();
 		endpoints = new HashMap<>();
 		errorEndpoints = new HashMap<>();
-		parser = new JsonParser();
 		verbose = false;
 	}
 	
@@ -72,7 +67,7 @@ public class ServicemapMockHandler extends AbstractHandler{
 	public void addResourceFromFile( String serviceUri , String path ) throws IOException {
 		String fileContent = Files.lines( Paths.get( path ) ).reduce( (String s1 ,String s2) -> { return s1 + s2; } )
 						   					    .get();
-		resources.put( serviceUri , parser.parse( fileContent ) );
+		resources.put( serviceUri , JsonParser.parseString( fileContent ) );
 	}
 	
 	public void addError( String serviceUri , int statusCode , JsonElement errorJsonResponse ) {
@@ -100,7 +95,7 @@ public class ServicemapMockHandler extends AbstractHandler{
 					);
 					
 					
-					JsonElement reqBody = parser.parse( body );
+					JsonElement reqBody = JsonParser.parseString( body );
 					operation.accept( reqBody );
 					
 					response.getWriter().println( reqBody.toString() );
@@ -133,7 +128,7 @@ public class ServicemapMockHandler extends AbstractHandler{
 					);
 					
 					
-					JsonElement reqBody = parser.parse( body );
+					JsonElement reqBody = JsonParser.parseString( body );
 					operation.accept( reqBody );
 					
 					response.getWriter().println( reqBody.toString() );

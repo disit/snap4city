@@ -53,12 +53,10 @@ public class SimpleProtectedAPIServer {
 
 	private Server server;
 	private ContextHandlerCollection handlers;
-	private JsonParser jsonParser;
 	private boolean verbose;
 	
 	public SimpleProtectedAPIServer( int port ) {
 		server = new Server();
-		jsonParser = new JsonParser();
 		ServerConnector connector = new ServerConnector(server);
 		connector.setPort( port );
 		server.setConnectors( new Connector[] { connector } );
@@ -192,8 +190,7 @@ public class SimpleProtectedAPIServer {
 				rObj = new JsonObject();
 				rObj.addProperty( "verified-access-token", accessTokenStr );
 				rObj.addProperty( "keycloak-response-code" , oaResponse.getCode() );
-				rObj.add( "keycloak-response-body", 
-							SimpleProtectedAPIServer.this.jsonParser.parse( oaResponse.getBody() ) );
+				rObj.add( "keycloak-response-body", JsonParser.parseString( oaResponse.getBody() ) );
 				
 				if( this.protectedHandler == null ) {
 					response.setContentType( "application/json" );

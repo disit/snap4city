@@ -44,12 +44,10 @@ public class ServicemapHttpClient extends HttpBaseClient
 
 	protected ServicemapConfigs configs;
 	protected ResponseHandler<String> responseHandler;
-	protected JsonParser parser;
 	
 	private void configureClient( ServicemapConfigs configs ) {
 		this.configs = configs;
 		this.responseHandler = new BasicResponseHandler();
-		this.parser = new JsonParser();
 	}
 	
 	public ServicemapHttpClient( ServicemapConfigs configs ) {
@@ -90,7 +88,6 @@ public class ServicemapHttpClient extends HttpBaseClient
 	@Override
 	public JsonElement getEnrichmentData(String deviceId) throws EnrichmentSourceException {
 		String requestUrl;
-		
 		try {
 			requestUrl = buildRequestUrl( deviceId );
 		}catch( UnsupportedEncodingException e ) {
@@ -99,23 +96,20 @@ public class ServicemapHttpClient extends HttpBaseClient
 				e
 			);
 		}
-		
 		return fetchEnrichmentData( requestUrl );
 	}
 
 	@Override
-	public JsonElement getEnrichmentData(String deviceId, String uriPrefix) throws EnrichmentSourceException {
+	public JsonElement getEnrichmentData(String uriPrefix, String deviceId) throws EnrichmentSourceException {
 		String requestUrl;
-		
 		try {
-			requestUrl = buildRequestUrl( deviceId , uriPrefix );
+			requestUrl = buildRequestUrl( uriPrefix , deviceId );
 		}catch( UnsupportedEncodingException e ) {
 			throw new EnrichmentSourceException( 
 				String.format( "%s exception while encoding the query string." , e.getClass().getName() ) ,
 				e
 			);
 		}
-		
 		return fetchEnrichmentData( requestUrl );
 	}
 	
@@ -158,7 +152,7 @@ public class ServicemapHttpClient extends HttpBaseClient
 				e
 			);
 		}
-		return parser.parse( responseBody );
+		return JsonParser.parseString( responseBody );
 	}
 
 	@Override

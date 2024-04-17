@@ -20,8 +20,6 @@ package org.disit.nifi.processors.enrich_data;
 import org.apache.nifi.components.ValidationContext;
 import org.apache.nifi.components.ValidationResult;
 import org.apache.nifi.components.Validator;
-
-import org.disit.nifi.processors.enrich_data.EnrichData;
 import org.disit.nifi.processors.enrich_data.enrichment_source.EnrichmentSourceClientService;
 
 public class EnrichmentSourceServiceValidators {
@@ -35,7 +33,7 @@ public class EnrichmentSourceServiceValidators {
 			ValidationResult.Builder builder = new ValidationResult.Builder();
 			
 			try {
-				context.getProperty( EnrichData.ENRICHMENT_SOURCE_CLIENT_SERVICE )
+				context.getProperty( EnrichDataProperties.ENRICHMENT_SOURCE_CLIENT_SERVICE )
 					   .asControllerService( EnrichmentSourceClientService.class );
 				builder.subject( subject ).explanation( "Valid EnrichmentSourceClientService" )
 					   .valid( true );
@@ -54,7 +52,7 @@ public class EnrichmentSourceServiceValidators {
 			ValidationResult.Builder builder = new ValidationResult.Builder();
 			
 			try {
-				context.getProperty( EnrichData.ENRICHMENT_SOURCE_CLIENT_SERVICE )
+				context.getProperty( EnrichDataProperties.ENRICHMENT_SOURCE_CLIENT_SERVICE )
 					   .asControllerService( EnrichmentSourceClientService.class );
 				builder.subject( subject ).explanation( "Valid EnrichmentSourceClientService" )
 					   .valid( true );

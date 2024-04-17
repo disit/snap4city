@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.nifi.reporting.InitializationException;
-import org.disit.nifi.processors.enrich_data.EnrichData;
+import org.disit.nifi.processors.enrich_data.EnrichDataProperties;
 import org.disit.nifi.processors.enrich_data.locators.iotdirectory.IOTDirectoryLocatorControllerService;
 import org.disit.nifi.processors.enrich_data.test.TestUtils;
 import org.disit.nifi.processors.enrich_data.test.api_mock.JsonResourceMockHandler;
@@ -87,7 +87,7 @@ public class EnrichDataLocatorTests extends EnrichDataSimpleTests {
 		
 		testRunner.assertValid( iotDirectoryService );
 		testRunner.enableControllerService( iotDirectoryService );
-		testRunner.setProperty( EnrichData.ENRICHMENT_RESOURCE_LOCATOR_SERVICE , csName );
+		testRunner.setProperty( EnrichDataProperties.ENRICHMENT_RESOURCE_LOCATOR_SERVICE , csName );
 	}
 	
 	protected static void setupIOTDirectoryMock() throws IOException {

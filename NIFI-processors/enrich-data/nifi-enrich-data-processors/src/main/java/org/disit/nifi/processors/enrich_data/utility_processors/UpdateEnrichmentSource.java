@@ -59,7 +59,7 @@ import org.apache.nifi.processor.Relationship;
 import org.apache.nifi.processor.exception.ProcessException;
 import org.apache.nifi.processor.io.OutputStreamCallback;
 import org.apache.nifi.processor.util.StandardValidators;
-import org.disit.nifi.processors.enrich_data.EnrichData;
+import org.disit.nifi.processors.enrich_data.EnrichDataConstants;
 import org.disit.nifi.processors.enrich_data.EnrichDataValidators;
 import org.disit.nifi.processors.enrich_data.EnrichmentSourceServiceValidators;
 import org.disit.nifi.processors.enrich_data.enrichment_source.EnrichmentSourceClient;
@@ -478,10 +478,10 @@ public class UpdateEnrichmentSource extends AbstractProcessor {
     	}
     	
     	String deviceId = rootObject.get( this.deviceIdName ).getAsString();
-    	String resourceUri = flowFile.getAttribute( EnrichData.SERVICE_URI_OUTPUT_NAME );
+    	String resourceUri = flowFile.getAttribute( EnrichDataConstants.SERVICE_URI_OUTPUT_NAME );
     	if( resourceUri == null ) { // If the serviceUri is not contained in the FF attributes uses the default one
     		resourceUri = enrichmentSourceUpdater.buildResourceUri( deviceId );
-    		flowFile = session.putAttribute( flowFile , EnrichData.SERVICE_URI_OUTPUT_NAME , resourceUri );
+    		flowFile = session.putAttribute( flowFile , EnrichDataConstants.SERVICE_URI_OUTPUT_NAME , resourceUri );
     	}
     	
     	// Build the update Json object
@@ -573,7 +573,7 @@ public class UpdateEnrichmentSource extends AbstractProcessor {
 		
 		// TODO: static names?
 		updateObject.addProperty( "sensorID" , deviceId );
-		updateObject.addProperty( EnrichData.SERVICE_URI_OUTPUT_NAME , resourceUri );
+		updateObject.addProperty( EnrichDataConstants.SERVICE_URI_OUTPUT_NAME , resourceUri );
 		
 		// date_Time
 		if( this.timestampFieldName != null && inFlowFile.getAttributes().containsKey( this.timestampFieldName ) ) {
@@ -589,7 +589,7 @@ public class UpdateEnrichmentSource extends AbstractProcessor {
 		}
 		
 		// attributes
-		updateFlowFile = session.putAttribute( updateFlowFile , EnrichData.MIME_TYPE_ATTRIBUTE_NAME , MediaType.JSON_UTF_8.toString() );
+		updateFlowFile = session.putAttribute( updateFlowFile , EnrichDataConstants.MIME_TYPE_ATTRIBUTE_NAME , MediaType.JSON_UTF_8.toString() );
 		for( Map.Entry<String,JsonElement> entry : this.staticAugPerformedUpdates.entrySet() ) {
 			updateFlowFile = session.putAttribute( 
 				updateFlowFile , entry.getKey() , entry.getValue().getAsString() );

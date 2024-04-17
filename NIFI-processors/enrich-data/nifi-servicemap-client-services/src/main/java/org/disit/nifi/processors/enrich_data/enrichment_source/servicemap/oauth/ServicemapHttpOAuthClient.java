@@ -34,6 +34,7 @@ import org.disit.nifi.processors.enrich_data.oauth.OAuthTokenProviderException;
 
 import com.github.scribejava.core.model.OAuth2AccessToken;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
 public class ServicemapHttpOAuthClient extends ServicemapHttpClient {
 
@@ -43,14 +44,12 @@ public class ServicemapHttpOAuthClient extends ServicemapHttpClient {
 									  ServicemapConfigs configs ,
 									  ProcessContext context ) {
 		super( configs , context );
-		
 		this.tokenProvider = tokenProvider;
 	}
 	
 	@Override
 	public JsonElement getEnrichmentData( String elementIdPrefix , String elementId ) throws EnrichmentSourceException{
 		String requestUrl;
-		
 		try {
 			requestUrl = buildRequestUrl( elementIdPrefix , elementId );
 		}catch( UnsupportedEncodingException e ) {
@@ -59,7 +58,6 @@ public class ServicemapHttpOAuthClient extends ServicemapHttpClient {
 				e
 			);
 		}
-		
 		return fetchEnrichmentData(requestUrl);
 	}
 	
@@ -120,7 +118,7 @@ public class ServicemapHttpOAuthClient extends ServicemapHttpClient {
 				e
 			);
 		}
-		return this.parser.parse( responseBody );
+		return JsonParser.parseString( responseBody );
 	}
 	
 }

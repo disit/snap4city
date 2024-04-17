@@ -152,4 +152,26 @@ public class TestUtils {
 			System.err.println( l.toString() );
 		});
     }
+
+    public static void fixJsonOutputAttribute( JsonElement content , JsonElement expected , String prop , String attrName ) {
+    	if( content.getAsJsonObject().get(prop).getAsJsonObject().getAsJsonObject().has(attrName) ) {
+    		expected.getAsJsonObject().get(prop).getAsJsonObject().add(
+    			attrName , content.getAsJsonObject().get(prop).getAsJsonObject().get( attrName ) );
+    	}
+    }
+    
+    public static void fixSplitJsonAttribute( JsonElement content , JsonArray expected , int outIndex , String attrName ) {
+    	if( content.getAsJsonObject().has( attrName ) ) {
+    		expected.get(outIndex).getAsJsonObject().add( attrName , 
+    			content.getAsJsonObject().get( attrName ) );
+    	}
+    }
+    
+    public static void fixDeviceStateAttribute( JsonElement deviceState , JsonElement expectedState , String attrName ) {
+    	if( deviceState.getAsJsonObject().has( attrName ) ) {
+    		expectedState.getAsJsonObject().add( attrName , 
+    			deviceState.getAsJsonObject().get( attrName ) );
+    	}
+    }
+
 }
