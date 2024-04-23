@@ -41,7 +41,7 @@ import virtuoso.sesame2.driver.VirtuosoRepository;
  */
 public class VirtuosoLoader extends Loader {
 
-    static Repository mRepository;
+    /*static*/ Repository mRepository;
     RepositoryConnection mRepositoryConnection;
     String deleteInsert;
     ArrayList<Data> pendingDataForInsert;
@@ -73,6 +73,7 @@ public class VirtuosoLoader extends Loader {
               mRepository = repo;
             }
             this.mRepositoryConnection = mRepository.getConnection();
+            System.out.println("virtuoso open connection to "+mRepository+" "+this.mRepositoryConnection);
             setConnected(true);
             this.deleteInsert = datasource.getParameter(VirtuosoLoaderConst.CFG_DS_PAR_DELINS);
             if(null != this.deleteInsert) {
@@ -95,6 +96,8 @@ public class VirtuosoLoader extends Loader {
             if(Const.OK == transactStatus && null != this.pendingDataForInsert) this.deleteInsert(false);
             if(Const.OK == transactStatus && null != this.pendingDataForDelete) this.deleteInsert(true);
             this.mRepositoryConnection.close();
+            System.out.println("virtuoso closed connection to "+mRepository+" "+this.mRepositoryConnection);
+            this.mRepository.shutDown();
             setConnected(false);
         } 
         catch (Exception ex) {

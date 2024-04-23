@@ -68,6 +68,7 @@ public class Insert extends HttpServlet {
             throws ServletException, IOException {
         
         response.setHeader("Access-Control-Allow-Origin", "*");
+        response.setHeader("Allow", "POST");
         response.setHeader("Warning", "Should send your requests via HTTP POST.");
            
     }
@@ -85,7 +86,8 @@ public class Insert extends HttpServlet {
             throws ServletException, IOException {
         
         processRequest(request, response);
-        
+        response.setStatus(405);
+        response.getWriter().println("GET not supported, use POST");
     }
 
     /**
@@ -166,11 +168,10 @@ public class Insert extends HttpServlet {
                 Builder builder = (Builder)builderConstructor.newInstance(cfgNode, repos, datatypes, providers, data, xlogger);
                 Data builtData = builder.build();
                 
-                if(builtData.getId().equals("device-validity-query")) {
-                    String ciao = "ciao";
-                    
-                }
-                
+                /*if(builtData.getId().equals("device-validity-query")) {
+                    String breaks = "";
+                }*/
+  
                 if(Const.ERROR == builder.getStatus()) {
                     throw new IotDeviceApiException(400, MessageFormat.format("Error while building data: {0}.",new Object[]{cfgNode.getAttribute(ParserConst.CFG_AT_DATA_ID)}));
                 }

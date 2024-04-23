@@ -528,6 +528,10 @@
 			<source ref="request-body"/>
 			<query>attributes.value_unit</query>
                 </data>
+                <data id="attribute-realtime" type="bool" builder="jsonp" loader="volatile">
+			<source ref="request-body"/>
+			<query>attributes.realtime</query>
+                </data>
 
                 <data id="measure-uri" type="uri" builder="template" loader="volatile">
                     <template>http://www.disit.org/km4city/resource/value_type/{0}</template>
@@ -856,6 +860,14 @@
 			<member name="subject" ref="device-attribute-uri"/> 
 			<member name="property" ref="attribute-valueunit-property-uri"/>
 			<member name="filler" ref="attribute-valueunit"/>
+		</data>	
+
+                <data id="attribute-isRealTime-property-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#isRealTime</data>
+                <data id="graph-uri.device-attribute-uri.attribute-isRealTime-property-uri.attribute-realtime" type="quad" builder="bean" loader="virtuoso">
+			<member name="graph" ref="graph-uri"/> 
+			<member name="subject" ref="device-attribute-uri"/> 
+			<member name="property" ref="attribute-isRealTime-property-uri"/>
+			<member name="filler" ref="attribute-realtime"/>
 		</data>	
 		
 		<data id="graph-uri.my-frequency-uri.is-a.frequency-uri" type="quad" builder="bean" loader="virtuoso" trigger="frequency">
@@ -1300,6 +1312,36 @@
                     <member name="subject" ref="service-uri"/> 
                     <member name="property" ref="isMobile"/>
                     <member name="filler" ref="isMobileTrue"/>
+		</data>           
+                
+                <!-- device wkt geometry -->
+		<data id="device-wkt-geometry" type="string" builder="jsonp" loader="volatile">
+			<source ref="request-body"/>
+			<query>wktGeometry</query>
+		</data>
+                <data id="has-geometry-uri" type="uri" builder="const" loader="volatile">http://www.opengis.net/ont/geosparql#hasGeometry</data>
+                <data id="as-wkt-uri" type="uri" builder="const" loader="volatile">http://www.opengis.net/ont/geosparql#asWKT</data>
+                <data id="device-wkt-geometry-value" type="geometry" builder="template" loader="volatile">
+			<template>{0}</template>
+			<param index="0" value="device-wkt-geometry"/>
+		</data>
+		<data id="my-geometry-uri" type="uri" builder="template" loader="volatile">
+			<template>{0}/geometry</template>
+			<param index="0" value="reusable-service-uri"/>
+		</data>
+                
+                <data id="graph-uri.service-uri.hasGeometry" type="quad" builder="bean" loader="virtuoso">
+                    <member name="graph" ref="graph-uri"/> 
+                    <member name="subject" ref="service-uri"/> 
+                    <member name="property" ref="has-geometry-uri"/>
+                    <member name="filler" ref="my-geometry-uri"/>
+		</data>           
+
+                <data id="graph-uri.geometry-uri.asWKT" type="quad" builder="bean" loader="virtuoso">
+                    <member name="graph" ref="graph-uri"/> 
+                    <member name="subject" ref="my-geometry-uri"/> 
+                    <member name="property" ref="as-wkt-uri"/>
+                    <member name="filler" ref="device-wkt-geometry-value"/>
 		</data>           
                 
 	</process>
