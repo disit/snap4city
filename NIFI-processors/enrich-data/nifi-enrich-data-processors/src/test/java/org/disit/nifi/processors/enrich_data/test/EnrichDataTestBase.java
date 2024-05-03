@@ -169,6 +169,16 @@ public class EnrichDataTestBase {
     	return deviceId;
     }
     
+    protected static void addServicemapResource( String deviceId , String serviceUriPrefix , String resourceFilePath ) throws IOException {
+    	StringBuilder serviceUri = new StringBuilder( serviceUriPrefix );
+    	if( !serviceUriPrefix.endsWith("/") )
+    		serviceUri.append( "/" );
+    	serviceUri.append( deviceId );
+    	
+    	servicemap.addResourceFromFile( serviceUri.toString() , resourceFilePath );
+    	System.out.println( "Added resource under serviceUri: " + serviceUri.toString() );
+    }
+    
 	protected void configureFFAttributes( Map<String , String> attributes ) {
 		this.ffAttributes = ImmutableMap.copyOf( attributes );
 	}
@@ -184,6 +194,11 @@ public class EnrichDataTestBase {
 			inputFF = testRunner.enqueue( Paths.get( path ) , this.ffAttributes );
 		else
 			inputFF = testRunner.enqueue( Paths.get( path ) );
+		return inputFF;
+	}
+	
+	public MockFlowFile enqueueFlowFile( String path , Map<String,String> attributes) throws IOException {
+		MockFlowFile inputFF = testRunner.enqueue( Paths.get(path) , attributes );
 		return inputFF;
 	}
     

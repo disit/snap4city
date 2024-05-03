@@ -17,7 +17,10 @@ package org.disit.nifi.processors.enrich_data.test.simple;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.nifi.components.ValidationResult;
 import org.apache.nifi.util.MockFlowFile;
@@ -359,4 +362,222 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
     	System.out.println( TestUtils.prettyOutFF( originalFF ) );
 	}
 	
+	// -------- Test extract attributes tests --------
+	@Test
+	public void testExtractAttributes() throws IOException {
+		System.out.println( "\n######## " + testName() + " ########" );
+		
+		testRunner.addConnection( EnrichDataRelationships.DEVICE_STATE_RELATIONSHIP );
+		
+		testRunner.setProperty( EnrichDataProperties.TIMESTAMP_THRESHOLD , "24 h" );
+		
+		List<String> extractAttributes = new ArrayList<>();
+		extractAttributes.add( "Service/features/properties/ownership" );
+		extractAttributes.add( "Service/features/properties/organization" );
+		extractAttributes.add( "Service/features/properties/model" );
+		
+		testRunner.setProperty( 
+			EnrichDataProperties.EXTRACT_ENRICHMENT_ATTRIBUTES , 
+			extractAttributes.stream().reduce( (String s1, String s2) -> { return s1+","+s2; } )
+							 .get()
+		);
+		
+		addServicemapResource( "id" , serviceUriPrefix , 
+			"src/test/resources/mock_in_ff/testOutputs.ff" , 
+			"src/test/resources/mock_servicemap_response/testOutputs.resp" );
+		
+		MockFlowFile inputFF = enqueueFlowFile( "src/test/resources/mock_in_ff/testOutputs.ff" );
+		
+		JsonElement expectedResult = TestUtils.prepareExpectedResult( 
+			"src/test/resources/reference_results/testOutputs_jsonOut.ref" , 
+			inputFF );
+
+		testRunner.run();
+		
+		testRunner.assertTransferCount( EnrichDataRelationships.SUCCESS_RELATIONSHIP , 1 );
+		testRunner.assertTransferCount( EnrichDataRelationships.ORIGINAL_RELATIONSHIP , 1 );
+		testRunner.assertTransferCount( EnrichDataRelationships.DEVICE_STATE_RELATIONSHIP , 1 );
+		
+		// SUCCESS
+		MockFlowFile outFF = testRunner.getFlowFilesForRelationship( EnrichDataRelationships.SUCCESS_RELATIONSHIP ).get(0);
+		JsonElement outFFContent = JsonParser.parseString( new String( outFF.toByteArray() ) ); 
+		assertEquals( true , outFFContent.isJsonObject() );
+		// entry_date
+		outFFContent.getAsJsonObject().keySet().stream().forEach( (String prop) -> {
+			TestUtils.fixJsonOutputAttribute( 
+				outFFContent , expectedResult , 
+				prop , EnrichDataConstants.ENTRY_DATE_ATTRIBUTE_NAME );
+		});
+//		System.out.println( expectedResult.toString() );
+		assertEquals( true , outFFContent.getAsJsonObject().equals( expectedResult.getAsJsonObject() ) );
+		extractAttributes.stream().forEach( (String path) -> { 
+			String attrName = path.replace( "/" , "." );
+			String attrValue = outFF.getAttribute( attrName );
+			assertEquals( true , attrValue != null );
+		});
+		System.out.println( "======== SUCCESS ========" );
+		System.out.println( TestUtils.prettyOutFF( outFF ) );
+		
+		// DEVICE STATE
+		MockFlowFile deviceStateFF = testRunner.getFlowFilesForRelationship( EnrichDataRelationships.DEVICE_STATE_RELATIONSHIP ).get(0);
+		JsonElement deviceStateFFContent = JsonParser.parseString( new String( deviceStateFF.toByteArray() ) );
+		assertEquals( true , deviceStateFFContent.isJsonObject() );
+		System.out.println( "======== DEVICE STATE ========" );
+		System.out.println( TestUtils.prettyOutFF( deviceStateFF ) );
+	}
+	
+	// -------- deviceId and serviceUriPrefix from attributes tests --------
+	@Test
+	public void testDeviceIdFromAttribute() throws IOException {
+		System.out.println( "\n######## " + testName() + " ########" );
+		testRunner.addConnection( EnrichDataRelationships.DEVICE_STATE_RELATIONSHIP );
+		testRunner.setProperty( EnrichDataProperties.TIMESTAMP_THRESHOLD , "24 h" );
+		
+		testRunner.setProperty( EnrichDataProperties.DEVICE_ID_FROM_ATTRIBUTE , "deviceIdAttribute" );
+		
+		String customDeviceId = "device001";
+		
+		addServicemapResource( customDeviceId , serviceUriPrefix , 
+			"src/test/resources/mock_servicemap_response/testOutputs.resp" );
+		
+		Map<String,String> flowFileAttributes = new HashMap<>();
+		flowFileAttributes.put( "deviceIdAttribute" , customDeviceId );
+		
+		MockFlowFile inputFF = enqueueFlowFile( 
+			"src/test/resources/mock_in_ff/testOutputs.ff" , 
+			flowFileAttributes );
+		JsonElement expectedResult = TestUtils.prepareExpectedResult( 
+			"src/test/resources/reference_results/testDeviceIdFromAttribute_jsonOut.ref" , 
+			inputFF );
+		
+		testRunner.run();
+		
+		testRunner.assertTransferCount( EnrichDataRelationships.SUCCESS_RELATIONSHIP , 1 );
+		testRunner.assertTransferCount( EnrichDataRelationships.DEVICE_STATE_RELATIONSHIP , 1 );
+		testRunner.assertTransferCount( EnrichDataRelationships.ORIGINAL_RELATIONSHIP , 1 );
+		
+		// SUCCESS
+		MockFlowFile outFF = testRunner.getFlowFilesForRelationship( EnrichDataRelationships.SUCCESS_RELATIONSHIP ).get(0);
+		JsonElement outFFContent = JsonParser.parseString( new String(outFF.toByteArray()) );
+		assertEquals( true , outFFContent.isJsonObject() );
+		outFFContent.getAsJsonObject().keySet().stream().forEach( (String prop) -> {
+			TestUtils.fixJsonOutputAttribute( 
+				outFFContent , expectedResult , 
+				prop, EnrichDataConstants.ENTRY_DATE_ATTRIBUTE_NAME );
+		});
+		assertEquals( true , outFFContent.getAsJsonObject().equals( expectedResult.getAsJsonObject() ) );
+		System.out.println( "======== SUCCESS ========" );
+		System.out.println( TestUtils.prettyOutFF( outFF )  );
+		
+		// DEVICE STATE
+		MockFlowFile deviceStateFF = testRunner.getFlowFilesForRelationship( EnrichDataRelationships.DEVICE_STATE_RELATIONSHIP ).get(0);
+		JsonElement deviceStateFFContent = JsonParser.parseString( new String(deviceStateFF.toByteArray()) );
+		assertEquals( true , deviceStateFFContent.isJsonObject() );
+		System.out.println( "======== DEVICE STATE ========" );
+		System.out.println( TestUtils.prettyOutFF( deviceStateFF ) );
+	}
+	
+	@Test
+	public void testServiceUriPrefixFromAttribute() throws IOException {
+		System.out.println( "\n######## " + testName() + " ########" );
+		testRunner.addConnection( EnrichDataRelationships.DEVICE_STATE_RELATIONSHIP );
+		testRunner.setProperty( EnrichDataProperties.TIMESTAMP_THRESHOLD , "24 h" );
+		
+		testRunner.setProperty( EnrichDataProperties.SERVICE_URI_PREFIX_FROM_ATTRIBUTE , "serviceUriPrefix" );
+		
+		String customServiceUriPrefix = "http://customserviceuriprefix.org";
+		
+		addServicemapResource( "id" , customServiceUriPrefix , 
+			"src/test/resources/mock_in_ff/testOutputs.ff" , 
+			"src/test/resources/mock_servicemap_response/testOutputs.resp" );
+
+		Map<String,String> flowFileAttributes = new HashMap<>();
+		flowFileAttributes.put( "serviceUriPrefix" , customServiceUriPrefix );
+		
+		MockFlowFile inputFF = enqueueFlowFile( 
+			"src/test/resources/mock_in_ff/testOutputs.ff" , 
+			flowFileAttributes );
+		JsonElement expectedResult = TestUtils.prepareExpectedResult( 
+			"src/test/resources/reference_results/testServiceUriPrefixFromAttribute_jsonOut.ref" , 
+			inputFF );
+		
+		testRunner.run();
+		
+		testRunner.assertTransferCount( EnrichDataRelationships.SUCCESS_RELATIONSHIP , 1 );
+		testRunner.assertTransferCount( EnrichDataRelationships.ORIGINAL_RELATIONSHIP , 1 );
+		testRunner.assertTransferCount( EnrichDataRelationships.DEVICE_STATE_RELATIONSHIP , 1 );
+		
+		// SUCCESS
+		MockFlowFile outFF = testRunner.getFlowFilesForRelationship( EnrichDataRelationships.SUCCESS_RELATIONSHIP ).get(0);
+		JsonElement outFFContent = JsonParser.parseString( new String(outFF.toByteArray()) );
+		assertEquals( true , outFFContent.isJsonObject() );
+		outFFContent.getAsJsonObject().keySet().stream().forEach( (String prop) -> {
+			TestUtils.fixJsonOutputAttribute( 
+				outFFContent , expectedResult , 
+				prop, EnrichDataConstants.ENTRY_DATE_ATTRIBUTE_NAME );
+		});
+		assertEquals( true , outFFContent.getAsJsonObject().equals( expectedResult.getAsJsonObject() ) );
+		System.out.println( "======== SUCCESS ========" );
+		System.out.println( TestUtils.prettyOutFF( outFF )  );
+		
+		// DEVICE STATE
+		MockFlowFile deviceStateFF = testRunner.getFlowFilesForRelationship( EnrichDataRelationships.DEVICE_STATE_RELATIONSHIP ).get(0);
+		JsonElement deviceStateFFContent = JsonParser.parseString( new String(deviceStateFF.toByteArray()) );
+		assertEquals( true , deviceStateFFContent.isJsonObject() );
+		System.out.println( "======== DEVICE STATE ========" );
+		System.out.println( TestUtils.prettyOutFF( deviceStateFF ) );
+	}
+	
+	@Test
+	public void testServiceUriPrefixAndDeviceIdFromAttribute() throws IOException {
+		System.out.println( "\n######## " + testName() + " ########" );
+		testRunner.addConnection( EnrichDataRelationships.DEVICE_STATE_RELATIONSHIP );
+		testRunner.setProperty( EnrichDataProperties.TIMESTAMP_THRESHOLD , "24 h" );
+		
+		testRunner.setProperty( EnrichDataProperties.SERVICE_URI_PREFIX_FROM_ATTRIBUTE , "serviceUriPrefix" );
+		testRunner.setProperty( EnrichDataProperties.DEVICE_ID_FROM_ATTRIBUTE , "deviceIdAttribute" );
+		
+		String customServiceUriPrefix = "http://customserviceuriprefix.org";
+		String customDeviceId = "device001";
+
+		addServicemapResource( customDeviceId , customServiceUriPrefix , 
+			"src/test/resources/mock_servicemap_response/testOutputs.resp" );
+		
+		Map<String,String> flowFileAttributes = new HashMap<>();
+		flowFileAttributes.put( "deviceIdAttribute" , customDeviceId );
+		flowFileAttributes.put( "serviceUriPrefix" , customServiceUriPrefix );
+		
+		MockFlowFile inputFF = enqueueFlowFile( 
+			"src/test/resources/mock_in_ff/testOutputs.ff" , 
+			flowFileAttributes );
+		JsonElement expectedResult = TestUtils.prepareExpectedResult( 
+			"src/test/resources/reference_results/testServiceUriPrefixAndDeviceIdFromAttribute_jsonOut.ref" , 
+			inputFF );
+		
+		testRunner.run();
+		
+		testRunner.assertTransferCount( EnrichDataRelationships.SUCCESS_RELATIONSHIP , 1 );
+		testRunner.assertTransferCount( EnrichDataRelationships.ORIGINAL_RELATIONSHIP , 1 );
+		testRunner.assertTransferCount( EnrichDataRelationships.DEVICE_STATE_RELATIONSHIP , 1 );
+		
+		// SUCCESS
+		MockFlowFile outFF = testRunner.getFlowFilesForRelationship( EnrichDataRelationships.SUCCESS_RELATIONSHIP ).get(0);
+		JsonElement outFFContent = JsonParser.parseString( new String(outFF.toByteArray()) );
+		assertEquals( true , outFFContent.isJsonObject() );
+		outFFContent.getAsJsonObject().keySet().stream().forEach( (String prop) -> {
+			TestUtils.fixJsonOutputAttribute( 
+				outFFContent , expectedResult , 
+				prop, EnrichDataConstants.ENTRY_DATE_ATTRIBUTE_NAME );
+		});
+		assertEquals( true , outFFContent.getAsJsonObject().equals( expectedResult.getAsJsonObject() ) );
+		System.out.println( "======== SUCCESS ========" );
+		System.out.println( TestUtils.prettyOutFF( outFF )  );
+		
+		// DEVICE STATE
+		MockFlowFile deviceStateFF = testRunner.getFlowFilesForRelationship( EnrichDataRelationships.DEVICE_STATE_RELATIONSHIP ).get(0);
+		JsonElement deviceStateFFContent = JsonParser.parseString( new String(deviceStateFF.toByteArray()) );
+		assertEquals( true , deviceStateFFContent.isJsonObject() );
+		System.out.println( "======== DEVICE STATE ========" );
+		System.out.println( TestUtils.prettyOutFF( deviceStateFF ) );
+	}
 }

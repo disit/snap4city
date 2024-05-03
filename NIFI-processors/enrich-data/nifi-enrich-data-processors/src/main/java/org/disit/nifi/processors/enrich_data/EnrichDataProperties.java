@@ -16,9 +16,6 @@
 
 package org.disit.nifi.processors.enrich_data;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.nifi.components.PropertyDescriptor;
@@ -31,47 +28,6 @@ import org.disit.nifi.processors.enrich_data.locators.EnrichmentResourceLocatorS
 public class EnrichDataProperties {
 
 	// PROPERTY DESCRIPTORS
-	
-	// This set is needed to distinguish between user-defined properties and 
-	// the properties specified by the descriptors.
-//	public static final Set<String> staticProperties = new HashSet<>( Arrays.asList(
-//			"ENRICHMENT_SOURCE_CLIENT_SERVICE" ,
-//			"ENRICHMENT_RESOURCE_LOCATOR_SERVICE" ,
-//			"OWNERSHIP_CLIENT_SERVICE" ,
-//			"OWNERSHIP_BEHAVIOR" ,
-//	        "DEFAULT_OWNERSHIP_PROPERTIES" ,
-//	        "ADDITIONAL_DEFAULT_OWNERSHIP_PROPERTIES" ,
-//		  	"DEVICE_ID_NAME" , 
-//		  	"DEVICE_ID_NAME_MAPPING" ,
-//		  	"DEVICE_ID_VALUE_PREFIX_SUBST" ,
-//		  	"ENRICHMENT_RESPONSE_BASE_PATH" ,
-//		  	"LATLON_PRIORITY",
-//		  	"ENRICHMENT_LAT_LON_PATH" ,
-//		  	"INNER_LAT_LON_CONFIG" ,
-//		  	"ENRICHMENT_LAT_LON_FORMAT" ,
-//		  	"ENRICHMENT_BEHAVIOR" , 
-//		  	"TIMESTAMP_FIELD_NAME" ,
-//		  	"TIMESTAMP_FROM_CONTENT_PROPERTY_NAME" ,
-//		  	"TIMESTAMP_FROM_CONTENT_PROPERTY_VALUE" ,
-//		  	"TIMESTAMP_THRESHOLD" ,
-////		  	"URI_PREFIX_FROM_ATTR_NAME" ,
-//		  	"VALUE_FIELD_NAME" ,  
-//		  	"SRC_PROPERTY" , 
-//		  	"KIND_PROPERTY", 
-//		  	"PURGE_FIELDS" ,
-//		  	"OUTPUT_FF_CONTENT_FORMAT" , 
-//		  	"HASHED_ID_FIELDS",
-//		  	"ES_INDEX" , 
-//		  	"ES_TYPE" , 
-//		  	"NODE_CONFIG_FILE_PATH" , 
-//		  	"ATTEMPT_STRING_VALUES_PARSING" ,
-//		  	"ORIGINAL_FLOW_FILE_ATTRIBUTES_AUG" ,
-//		  	"DEVICE_STATE_OUTPUT_FORMAT" ,
-//		  	"DEVICE_STATE_UPDATE_FREQUENCY_FIELD",
-//		  	"DEVICE_STATE_DROP_UPDATE_THRESHOLD",
-//		  	"DEVICE_STATE_METRICS_ARRAYS"
-//		) 
-//	);
 	
 	// Controller services
 	public static final PropertyDescriptor ENRICHMENT_SOURCE_CLIENT_SERVICE = new PropertyDescriptor
@@ -198,6 +154,24 @@ public class EnrichDataProperties {
         .required(true)
         .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
         .build();
+	
+	public static final PropertyDescriptor SERVICE_URI_PREFIX_FROM_ATTRIBUTE = new PropertyDescriptor
+		.Builder().name( "SERVICE_URI_PREFIX_FROM_ATTRIBUTE" )
+		.displayName( "Service Uri prefix from attribute" )
+		.description( "Specify an attribute in the input flow file to pick the serviceUri prefix from. The attribute has the precedence over the Resource Locator and the default serviceUri prefix configured in the ErichmentSource." )
+		.required( false )
+		.defaultValue("")
+		.addValidator( Validator.VALID )
+		.build();
+	
+	public static final PropertyDescriptor DEVICE_ID_FROM_ATTRIBUTE = new PropertyDescriptor
+		.Builder().name( "DEVICE_ID_FROM_ATTRIBUTE" )
+		.displayName( "Device Id from attribute" )
+		.description( "Specify an attribute in the input flow file to pick the deviceId from. The attribute has the precedence over the id present in the flow file content (specified with 'Device Id Name')." )
+		.required( false )
+		.defaultValue("")
+		.addValidator( Validator.VALID )
+		.build();
 
 	// Enrichment response object
 	public static final PropertyDescriptor ENRICHMENT_RESPONSE_BASE_PATH = new PropertyDescriptor
@@ -207,6 +181,15 @@ public class EnrichDataProperties {
         .required(true)
         .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
         .build();
+	
+	public static final PropertyDescriptor EXTRACT_ENRICHMENT_ATTRIBUTES = new PropertyDescriptor
+		.Builder().name( "EXTRACT_ENRICHMENT_ATTRIBUTES" )
+		.displayName( "Extract Enrichment response attributes" )
+		.description( "A comma-separated list of field paths in the enrichment source response to be added as attributes to the flow files emitted on the 'SUCCESS' and 'devices state' relationships. The paths must be specified using the forward slash (/) syntax. The attribute names will be the paths, where the '/' are replaced with '.', for example, the path 'foo/bar/baz' will generate an attribute with name 'foo.bar.baz'." )
+		.required( false )
+		.defaultValue("")
+		.addValidator(Validator.VALID)
+		.build();
 
 	// Latitude and longitude
 	public static final PropertyDescriptor LATLON_PRIORITY = new PropertyDescriptor
@@ -346,7 +329,7 @@ public class EnrichDataProperties {
 		.defaultValue( "" )
 		.build();
 
-		// Original flow file augmentation
+	// Original flow file augmentation
 	public static final PropertyDescriptor ORIGINAL_FLOW_FILE_ATTRIBUTES_AUG = new PropertyDescriptor
 		.Builder().name( "ORIGINAL_FLOW_FILE_ATTRIBUTES_AUG" )
 		.displayName( "Original flow file attributes enrichment" )
