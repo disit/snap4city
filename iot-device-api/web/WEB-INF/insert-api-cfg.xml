@@ -862,11 +862,11 @@
 			<member name="filler" ref="attribute-valueunit"/>
 		</data>	
 
-                <data id="attribute-isRealTime-property-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#isRealTime</data>
-                <data id="graph-uri.device-attribute-uri.attribute-isRealTime-property-uri.attribute-realtime" type="quad" builder="bean" loader="virtuoso">
+                <data id="attribute-realtime-property-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#realtime</data>
+                <data id="graph-uri.device-attribute-uri.attribute-realtime-property-uri.attribute-realtime" type="quad" builder="bean" loader="virtuoso">
 			<member name="graph" ref="graph-uri"/> 
 			<member name="subject" ref="device-attribute-uri"/> 
-			<member name="property" ref="attribute-isRealTime-property-uri"/>
+			<member name="property" ref="attribute-realtime-property-uri"/>
 			<member name="filler" ref="attribute-realtime"/>
 		</data>	
 		
@@ -1342,6 +1342,23 @@
                     <member name="subject" ref="my-geometry-uri"/> 
                     <member name="property" ref="as-wkt-uri"/>
                     <member name="filler" ref="device-wkt-geometry-value"/>
+		</data>
+                
+                <!-- device high level type -->
+		<data id="device-hlt-name" type="string" builder="jsonp" loader="volatile">
+			<source ref="request-body"/>
+			<query>highleveltype</query>
+		</data>
+                <data id="has-hlt-uri" type="uri" builder="const" loader="volatile">http://www.disit.org/km4city/schema#hasHighLevelType</data>
+                <data id="built-hlt-uri" type="uri" builder="template" loader="volatile">
+                        <template>http://www.disit.org/km4city/schema#{0}</template>
+			<param index="0" value="device-hlt-name"/>
+		</data>
+                <data id="graph-uri.service-uri.hasHLT" type="quad" builder="bean" loader="virtuoso">
+                    <member name="graph" ref="graph-uri"/> 
+                    <member name="subject" ref="service-uri"/> 
+                    <member name="property" ref="has-hlt-uri"/>
+                    <member name="filler" ref="built-hlt-uri"/>
 		</data>           
                 
 	</process>
