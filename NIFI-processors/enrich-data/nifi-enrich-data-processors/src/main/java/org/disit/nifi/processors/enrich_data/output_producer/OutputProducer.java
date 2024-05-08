@@ -19,10 +19,10 @@ package org.disit.nifi.processors.enrich_data.output_producer;
 import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import org.apache.nifi.flowfile.FlowFile;
+import org.apache.nifi.logging.ComponentLog;
 import org.apache.nifi.processor.ProcessSession;
 import org.disit.nifi.processors.enrich_data.enricher.EnrichUtils;
 
@@ -41,6 +41,12 @@ public abstract class OutputProducer{
 	protected String timestampAttribute = null;
 	protected long timestampThreshold = 0;
 	
+	protected ComponentLog logger;
+	
+	protected OutputProducer( ComponentLog logger ) {
+		this.logger = logger;
+	}
+	
 	/**
 	 * Implement this method to realize an output format for the processor.
 	 * 
@@ -48,6 +54,8 @@ public abstract class OutputProducer{
 	 * @return a java.util.List of output flow files.
 	 */
 	public abstract List<FlowFile> produceOutput( JsonObject rootObj , FlowFile inFlowFile , final ProcessSession session );
+	
+	public abstract List<FlowFile> produceOutput( JsonObject rootObj , JsonObject enrichmentObj , FlowFile inFlowFile , final ProcessSession session );
 	
 	public void setTimestampAttribute( String attributeName ) {
 		this.timestampAttribute = attributeName;
@@ -73,7 +81,7 @@ public abstract class OutputProducer{
 						long timeSlack = ot.toInstant().toEpochMilli() - ( nowRef.toEpochMilli() - this.timestampThreshold);
 						ff = session.putAttribute( ff , TIME_SLACK_ATTRIBUTE_NAME , String.valueOf( timeSlack ) );
 					}
-				}catch( DateTimeException ex ) { /* leave as it it*/ }
+				}catch( DateTimeException ex ) { /* leave as it is*/ }
 				ff = session.putAttribute( ff , this.timestampAttribute , timestampAttrVal );
 			}
 		}

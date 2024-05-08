@@ -28,32 +28,75 @@ import org.disit.nifi.processors.enrich_data.enricher.converter.DeviceStateConve
 
 public class EnrichDataConstants {
 	
+	public static final String OWNERSHIP_BEHAVIOR_FAILURE_ON_ERR = "Route to failure on ownership error.";
+	public static final String OWNERSHIP_BEHAVIOR_DEFAULTS_ON_ERR = "Use defaults on ownership error.";
+	public static final String OWNERSHIP_BEHAVIOR_DEFAULTS_IF_NO_CONTROLLER = "Use defaults if no controller service configured.";
+	
 	public static final String OWNERSHIP_BEHAVIOR_VALUES[] = {
-		"Route to failure on ownership error." , 
-		"Use defaults on ownership error." ,
-		"Use defaults if no controller service configured."
+		OWNERSHIP_BEHAVIOR_FAILURE_ON_ERR ,
+		OWNERSHIP_BEHAVIOR_DEFAULTS_ON_ERR ,
+		OWNERSHIP_BEHAVIOR_DEFAULTS_IF_NO_CONTROLLER
 	};
+	
+//	public static final String OWNERSHIP_BEHAVIOR_VALUES[] = {
+//		"Route to failure on ownership error." , 
+//		"Use defaults on ownership error." ,
+//		"Use defaults if no controller service configured."
+//	};
+	
+	public static final String OUTPUT_FF_CONTENT_FORMAT_JSON = "JSON";
+	public static final String OUTPUT_FF_CONTENT_FORMAT_ES_BULK = "Elasticsearch bulk indexing compliant";
+	public static final String OUTPUT_FF_CONTENT_FORMAT_SPLIT_JSON = "Split Json Object";
 	
 	public static final String OUTPUT_FF_CONTENT_FORMAT_VALUES[] = { 
-			"JSON" , 
-			"Elasticsearch bulk indexing compliant" , 
-			"Split Json Object"
+			OUTPUT_FF_CONTENT_FORMAT_JSON , 
+			OUTPUT_FF_CONTENT_FORMAT_ES_BULK , 
+			OUTPUT_FF_CONTENT_FORMAT_SPLIT_JSON
 	};
 	
+//	public static final String OUTPUT_FF_CONTENT_FORMAT_VALUES[] = { 
+//			"JSON" , 
+//			"Elasticsearch bulk indexing compliant" , 
+//			"Split Json Object"
+//	};
+	
+	public static final String ENRICHMENT_BEHAVIOR_REMOVE_NOT_MATCHED = "Remove not matched";
+	public static final String ENRICHMENT_BEHAVIOR_KEEP_NOT_MATCHED = "Keep not matched";
 	public static final String ENRICHMENT_BEHAVIOR_VALUES[] = {
-		"Remove not matched" , 
-		"Keep not matched"
+		ENRICHMENT_BEHAVIOR_REMOVE_NOT_MATCHED ,
+		ENRICHMENT_BEHAVIOR_KEEP_NOT_MATCHED
 	};
+	
+//	public static final String ENRICHMENT_BEHAVIOR_VALUES[] = {
+//		"Remove not matched" , 
+//		"Keep not matched"
+//	};
+	
+	public static final String ENRICHMENT_LAT_LON_FORMAT_LAT_FIRST = "[lat , lon]";
+	public static final String ENRICHMENT_LAT_LON_FORMAT_LON_FIRST = "[lon , lat]";
 	
 	public static final String ENRICHMENT_LAT_LON_FORMAT_VALUES[] = {
-		"[lat , lon]" ,
-		"[lon , lat]"
+		ENRICHMENT_LAT_LON_FORMAT_LAT_FIRST ,
+		ENRICHMENT_LAT_LON_FORMAT_LON_FIRST
 	};
 	
+//	public static final String ENRICHMENT_LAT_LON_FORMAT_VALUES[] = {
+//		"[lat , lon]" ,
+//		"[lon , lat]"
+//	};
+	
+	public static final String LATLON_PRIORITY_ENRICHMENT_SOURCE_FIRST = "Enrichment source response property first."; 
+	public static final String LATLON_PRIORITY_FF_CONTENT_FIRST = "Flow file content object property first.";
+	
 	public static final String LATLON_PRIORITY_VALUES[] = {
-		"Enrichment source response property first." ,
-		"Flow file content object property first."
+		LATLON_PRIORITY_ENRICHMENT_SOURCE_FIRST,
+		LATLON_PRIORITY_FF_CONTENT_FIRST
 	};
+	
+//	public static final String LATLON_PRIORITY_VALUES[] = {
+//		"Enrichment source response property first." ,
+//		"Flow file content object property first."
+//	};
 	
 	public static final String INNER_LATLON_GEOJSON = "geoJsonFields";
 	public static final String INNER_LATLON_GEOPOINT = "geoPointFields";

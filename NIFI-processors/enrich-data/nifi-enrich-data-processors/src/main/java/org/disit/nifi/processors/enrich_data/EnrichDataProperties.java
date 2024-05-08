@@ -181,15 +181,6 @@ public class EnrichDataProperties {
         .required(true)
         .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
         .build();
-	
-	public static final PropertyDescriptor EXTRACT_ENRICHMENT_ATTRIBUTES = new PropertyDescriptor
-		.Builder().name( "EXTRACT_ENRICHMENT_ATTRIBUTES" )
-		.displayName( "Extract Enrichment response attributes" )
-		.description( "A comma-separated list of field paths in the enrichment source response to be added as attributes to the flow files emitted on the 'SUCCESS' and 'devices state' relationships. The paths must be specified using the forward slash (/) syntax. The attribute names will be the paths, where the '/' are replaced with '.', for example, the path 'foo/bar/baz' will generate an attribute with name 'foo.bar.baz'." )
-		.required( false )
-		.defaultValue("")
-		.addValidator(Validator.VALID)
-		.build();
 
 	// Latitude and longitude
 	public static final PropertyDescriptor LATLON_PRIORITY = new PropertyDescriptor
@@ -288,6 +279,17 @@ public class EnrichDataProperties {
 		.required( true )
 		.allowableValues( EnrichDataConstants.OUTPUT_FF_CONTENT_FORMAT_VALUES )
 		.addValidator( StandardValidators.NON_EMPTY_VALIDATOR )
+		.build();
+	
+	// XXX: Extract Enrichment Attributes property
+	public static final PropertyDescriptor EXTRACT_ENRICHMENT_ATTRIBUTES = new PropertyDescriptor
+		.Builder().name( "EXTRACT_ENRICHMENT_ATTRIBUTES" )
+		.displayName( "Extract Enrichment response attributes" )
+//			.description( "A comma-separated list of field paths in the enrichment source response to be added as attributes to the flow files emitted on the 'SUCCESS' and 'devices state' relationships. The paths must be specified using the forward slash (/) syntax. The attribute names will be the paths, where the '/' are replaced with '.', for example, the path 'foo/bar/baz' will generate an attribute with name 'foo.bar.baz'." )
+		.description( "A comma-separated list of field paths to be extracted as attributes from the Enrichment Source response. These paths are checked inside every object contained in the 'Enrichment Response Base Path'. This property is considered ONLY IF 'Output flow file content format' is set to 'Split Json Object'.")
+		.required( false )
+		.defaultValue("")
+		.addValidator(Validator.VALID)
 		.build();
 
 	public static final PropertyDescriptor HASHED_ID_FIELDS = new PropertyDescriptor

@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.nifi.flowfile.FlowFile;
+import org.apache.nifi.logging.ComponentLog;
 import org.apache.nifi.processor.ProcessSession;
 import org.apache.nifi.processor.io.OutputStreamCallback;
 import org.disit.nifi.processors.enrich_data.enricher.EnrichUtils;
@@ -42,12 +43,16 @@ import com.google.gson.JsonObject;
  */
 //public class JsonOutputProducer implements OutputProducer {
 public class JsonOutputProducer extends OutputProducer {
-
-//	private String timestampAttribute = null;
 	
-//	public void setTimestampAttribute( String timestampAttribute ) {
-//		this.timestampAttribute = timestampAttribute;
-//	}
+	public JsonOutputProducer( ComponentLog logger ) {
+		super( logger );
+	}
+	
+	@Override
+	public List<FlowFile> produceOutput(JsonObject rootObj , JsonObject enrichmentObj , FlowFile inFlowFile , final ProcessSession session ) {
+		// ignore enrichmentObj
+		return produceOutput( rootObj , inFlowFile , session );
+	}
 	
 	@Override
 	public List<FlowFile> produceOutput(JsonObject rootObj , FlowFile inFlowFile , final ProcessSession session ) {

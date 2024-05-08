@@ -370,11 +370,12 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 		testRunner.addConnection( EnrichDataRelationships.DEVICE_STATE_RELATIONSHIP );
 		
 		testRunner.setProperty( EnrichDataProperties.TIMESTAMP_THRESHOLD , "24 h" );
+		// set output to Split Json Object 
+		testRunner.setProperty( EnrichDataProperties.OUTPUT_FF_CONTENT_FORMAT , EnrichDataConstants.OUTPUT_FF_CONTENT_FORMAT_VALUES[2] );
 		
 		List<String> extractAttributes = new ArrayList<>();
-		extractAttributes.add( "Service/features/properties/ownership" );
-		extractAttributes.add( "Service/features/properties/organization" );
-		extractAttributes.add( "Service/features/properties/model" );
+		extractAttributes.add( "data_type" );    // present in all flow files
+		extractAttributes.add( "value_bounds" ); // present only in some flow files
 		
 		testRunner.setProperty( 
 			EnrichDataProperties.EXTRACT_ENRICHMENT_ATTRIBUTES , 
@@ -388,35 +389,41 @@ public class EnrichDataSimpleTests extends EnrichDataTestBase{
 		
 		MockFlowFile inputFF = enqueueFlowFile( "src/test/resources/mock_in_ff/testOutputs.ff" );
 		
-		JsonElement expectedResult = TestUtils.prepareExpectedResult( 
-			"src/test/resources/reference_results/testOutputs_jsonOut.ref" , 
-			inputFF );
+		JsonArray expectedResult = TestUtils.prepareExpectedResult( 
+			"src/test/resources/reference_results/testOutputs_splitJson.ref" , 
+			inputFF ).getAsJsonArray();
 
 		testRunner.run();
 		
-		testRunner.assertTransferCount( EnrichDataRelationships.SUCCESS_RELATIONSHIP , 1 );
+		testRunner.assertTransferCount( EnrichDataRelationships.SUCCESS_RELATIONSHIP , expectedResult.size() );
 		testRunner.assertTransferCount( EnrichDataRelationships.ORIGINAL_RELATIONSHIP , 1 );
 		testRunner.assertTransferCount( EnrichDataRelationships.DEVICE_STATE_RELATIONSHIP , 1 );
 		
 		// SUCCESS
-		MockFlowFile outFF = testRunner.getFlowFilesForRelationship( EnrichDataRelationships.SUCCESS_RELATIONSHIP ).get(0);
-		JsonElement outFFContent = JsonParser.parseString( new String( outFF.toByteArray() ) ); 
-		assertEquals( true , outFFContent.isJsonObject() );
-		// entry_date
-		outFFContent.getAsJsonObject().keySet().stream().forEach( (String prop) -> {
-			TestUtils.fixJsonOutputAttribute( 
-				outFFContent , expectedResult , 
-				prop , EnrichDataConstants.ENTRY_DATE_ATTRIBUTE_NAME );
-		});
-//		System.out.println( expectedResult.toString() );
-		assertEquals( true , outFFContent.getAsJsonObject().equals( expectedResult.getAsJsonObject() ) );
-		extractAttributes.stream().forEach( (String path) -> { 
-			String attrName = path.replace( "/" , "." );
-			String attrValue = outFF.getAttribute( attrName );
-			assertEquals( true , attrValue != null );
-		});
+		List<MockFlowFile> successFFList = testRunner.getFlowFilesForRelationship( EnrichDataRelationships.SUCCESS_RELATIONSHIP );
 		System.out.println( "======== SUCCESS ========" );
-		System.out.println( TestUtils.prettyOutFF( outFF ) );
+		for( int i=0; i<successFFList.size() ; i++ ) {
+			MockFlowFile outFF = successFFList.get(i);
+			JsonElement content = JsonParser.parseString( new String(outFF.toByteArray()) );
+			assertEquals( content.isJsonObject() , true );
+			TestUtils.fixSplitJsonAttribute( content, expectedResult, i, EnrichDataConstants.ENTRY_DATE_ATTRIBUTE_NAME );
+			assertEquals( true , expectedResult.get(i).equals(content.getAsJsonObject()) );
+			
+			Map<String,String> contentAttributes = new HashMap<>();
+			extractAttributes.stream().forEach( (String attrName) -> {
+				JsonObject contentObj = content.getAsJsonObject();
+				if( contentObj.has( attrName ) ) {
+					contentAttributes.put( attrName , contentObj.get(attrName).getAsString() );
+				}
+			});
+			
+			contentAttributes.forEach( (String attrName, String attrValue) -> {
+				outFF.assertAttributeExists( attrName );
+				outFF.assertAttributeEquals( attrName , attrValue );
+			});
+			System.out.println( "\n-------- [" + i + "] --------" );
+			System.out.println( TestUtils.prettyOutFF( outFF ) );
+		}
 		
 		// DEVICE STATE
 		MockFlowFile deviceStateFF = testRunner.getFlowFilesForRelationship( EnrichDataRelationships.DEVICE_STATE_RELATIONSHIP ).get(0);

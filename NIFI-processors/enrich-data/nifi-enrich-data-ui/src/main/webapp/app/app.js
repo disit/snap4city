@@ -49,7 +49,6 @@ app.configureGroup( "Enrichment sources" ,
 		"OWNERSHIP_CLIENT_SERVICE" ,
 		"OWNERSHIP_BEHAVIOR" ,
 		"DEFAULT_OWNERSHIP_PROPERTIES",
-		"EXTRACT_ENRICHMENT_ATTRIBUTES"
 	]
 )
 .configureJsonProperty( "DEFAULT_OWNERSHIP_PROPERTIES" )
@@ -59,7 +58,6 @@ app.configureGroup( "Enrichment sources" ,
 		"DEVICE_ID_NAME_MAPPING" ,
 		"DEVICE_ID_VALUE_PREFIX_SUBST" ,
 		"VALUE_FIELD_NAME" ,
-//		"URI_PREFIX_FROM_ATTR_NAME" ,
 		"PURGE_FIELDS" ,
 		"ATTEMPT_STRING_VALUES_PARSING"
 	]
@@ -86,6 +84,7 @@ app.configureGroup( "Enrichment sources" ,
 	[
 		"OUTPUT_FF_CONTENT_FORMAT" ,
 		"HASHED_ID_FIELDS" ,
+		"EXTRACT_ENRICHMENT_ATTRIBUTES",
 		"ORIGINAL_FLOW_FILE_ATTRIBUTES_AUG" ,
 		"ES_INDEX" ,
 		"ES_TYPE" ,

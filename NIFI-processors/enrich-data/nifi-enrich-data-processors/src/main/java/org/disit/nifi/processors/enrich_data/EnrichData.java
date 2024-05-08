@@ -179,7 +179,6 @@ public class EnrichData extends AbstractProcessor {
     private String timestampFieldName;
     private String valueFieldName;
     private List<String> enrichmentResponseBasePath;
-    private Map<String,String> extractEnrichmentAttributesMap;
     // join type
     private boolean leftJoin;
     // Enricher
@@ -346,11 +345,13 @@ public class EnrichData extends AbstractProcessor {
     	String ownershipBehavior = context.getProperty( EnrichDataProperties.OWNERSHIP_BEHAVIOR ).getValue();
     	this.ownershipRouteToFailureOnError = false;
     	this.ownershipWithoutControllerService = false;
-    	if( ownershipBehavior.equals( EnrichDataConstants.OWNERSHIP_BEHAVIOR_VALUES[0] ) ) {
+//    	if( ownershipBehavior.equals( EnrichDataConstants.OWNERSHIP_BEHAVIOR_VALUES[0] ) ) {
+		if( ownershipBehavior.equals( EnrichDataConstants.OWNERSHIP_BEHAVIOR_FAILURE_ON_ERR ) ) {
     		this.ownershipRouteToFailureOnError = true;
     		this.ownershipWithoutControllerService = false;
     	}
-    	if( ownershipBehavior.equals( EnrichDataConstants.OWNERSHIP_BEHAVIOR_VALUES[2] ) ) {
+//		if( ownershipBehavior.equals( EnrichDataConstants.OWNERSHIP_BEHAVIOR_VALUES[2] ) ) {
+    	if( ownershipBehavior.equals( EnrichDataConstants.OWNERSHIP_BEHAVIOR_DEFAULTS_IF_NO_CONTROLLER ) ) {
     		this.ownershipWithoutControllerService = true;
     		this.ownershipRouteToFailureOnError = false;
     	}
@@ -389,29 +390,9 @@ public class EnrichData extends AbstractProcessor {
     	// XXX: Device Id from attribute
     	this.deviceIdFromAttribute = context.getProperty( EnrichDataProperties.DEVICE_ID_FROM_ATTRIBUTE ).getValue().trim();
     	
-    	// Extract enrichment attributes
-    	this.extractEnrichmentAttributesMap = new HashMap<>();
-    	if( context.getProperty( EnrichDataProperties.EXTRACT_ENRICHMENT_ATTRIBUTES ).isSet() ) {
-    		String extractEnrichmentAttributes = context.getProperty( EnrichDataProperties.EXTRACT_ENRICHMENT_ATTRIBUTES ).getValue();
-    		if( !extractEnrichmentAttributes.isEmpty() ) {
-    			this.extractEnrichmentAttributesMap = 
-	    			Arrays.asList( extractEnrichmentAttributes.split( "," ) ).stream()
-						  .map( (String s) -> {
-							  s = s.trim();
-							  if( s.startsWith("/") ) s=s.substring(1);
-							  if( s.endsWith("/") ) s=s.substring(0,s.length()-1);
-							  return s; 
-						  } )
-						  .filter( (String s) -> { return !s.isEmpty(); })
-						  .collect( Collectors.toMap( 
-							(String s) -> { return s; } , 
-							(String s) -> { return s.replace( "/" , "." ); } 
-						  ) );
-    		}
-    	}
-    	
     	// Coordinates 
-    	this.latlonPriorityInner = context.getProperty( EnrichDataProperties.LATLON_PRIORITY ).getValue().equals( EnrichDataConstants.LATLON_PRIORITY_VALUES[1] );
+    	this.latlonPriorityInner = context.getProperty( EnrichDataProperties.LATLON_PRIORITY )
+    			.getValue().equals( EnrichDataConstants.LATLON_PRIORITY_FF_CONTENT_FIRST );
     	
     	this.enrichmentLatLonPath = Arrays.asList( context.getProperty( EnrichDataProperties.ENRICHMENT_LAT_LON_PATH ).getValue().split( "/" ) )
     									  .stream().map( (String pathEl ) -> { return pathEl.trim(); } )
@@ -431,7 +412,7 @@ public class EnrichData extends AbstractProcessor {
     	// Check inner priority + inner latlon path
     	if( this.latlonPriorityInner == true && innerLatlonConfig.size() == 0 ) {
     		throw new ConfigurationException( String.format( "If the coordinates priority is set to '%s' the '%s' must be specified, but it is configured as empty." , 
-    										  EnrichDataConstants.LATLON_PRIORITY_VALUES[1] , EnrichDataProperties.INNER_LAT_LON_CONFIG.getDisplayName() ) );
+    										  EnrichDataConstants.LATLON_PRIORITY_FF_CONTENT_FIRST , EnrichDataProperties.INNER_LAT_LON_CONFIG.getDisplayName() ) );
     	}
     	
     	this.geoJsonFields = new ArrayList<>();
@@ -480,7 +461,8 @@ public class EnrichData extends AbstractProcessor {
     	
     	
     	// True if [lat , lon] false if [lon , lat]
-    	this.enrichmentLatitudeFirst = context.getProperty( EnrichDataProperties.ENRICHMENT_LAT_LON_FORMAT ).getValue().equals( EnrichDataConstants.ENRICHMENT_LAT_LON_FORMAT_VALUES[0] );
+    	this.enrichmentLatitudeFirst = context.getProperty( EnrichDataProperties.ENRICHMENT_LAT_LON_FORMAT ).getValue()
+    			.equals( EnrichDataConstants.ENRICHMENT_LAT_LON_FORMAT_LAT_FIRST );
     	
     	// Static properties
     	this.srcPropertyValue = context.getProperty( EnrichDataProperties.SRC_PROPERTY ).getValue();
@@ -491,11 +473,13 @@ public class EnrichData extends AbstractProcessor {
     							   			.collect( Collectors.toList() );
 
     	// Enrichment type
-    	if( context.getProperty( EnrichDataProperties.ENRICHMENT_BEHAVIOR ).getValue().equals( EnrichDataConstants.ENRICHMENT_BEHAVIOR_VALUES[0]) ) { // Join
+//    	if( context.getProperty( EnrichDataProperties.ENRICHMENT_BEHAVIOR ).getValue().equals( EnrichDataConstants.ENRICHMENT_BEHAVIOR_VALUES[0]) ) { // Join
+		if( context.getProperty( EnrichDataProperties.ENRICHMENT_BEHAVIOR ).getValue().equals( EnrichDataConstants.ENRICHMENT_BEHAVIOR_REMOVE_NOT_MATCHED) ) { // Join
     		this.leftJoin = false;
     	}
     	
-    	if( context.getProperty( EnrichDataProperties.ENRICHMENT_BEHAVIOR ).getValue().equals( EnrichDataConstants.ENRICHMENT_BEHAVIOR_VALUES[1]) ) { // Left Join
+//		if( context.getProperty( EnrichDataProperties.ENRICHMENT_BEHAVIOR ).getValue().equals( EnrichDataConstants.ENRICHMENT_BEHAVIOR_VALUES[1]) ) { // Left Join
+    	if( context.getProperty( EnrichDataProperties.ENRICHMENT_BEHAVIOR ).getValue().equals( EnrichDataConstants.ENRICHMENT_BEHAVIOR_KEEP_NOT_MATCHED) ) { // Left Join
     		this.leftJoin = true;
     	}
     	
@@ -512,14 +496,14 @@ public class EnrichData extends AbstractProcessor {
     	// Output configs
     	//
     	// Json output format
-    	if( context.getProperty( EnrichDataProperties.OUTPUT_FF_CONTENT_FORMAT ).getValue().equals( EnrichDataConstants.OUTPUT_FF_CONTENT_FORMAT_VALUES[0] ) ) {
-    		JsonOutputProducer jsonProducer = new JsonOutputProducer();
+		if( context.getProperty( EnrichDataProperties.OUTPUT_FF_CONTENT_FORMAT ).getValue().equals( EnrichDataConstants.OUTPUT_FF_CONTENT_FORMAT_JSON ) ) {
+    		JsonOutputProducer jsonProducer = new JsonOutputProducer( logger );
 //    		jsonProducer.setTimestampAttribute( timestampFieldName );
     		this.outProducer = jsonProducer;
     	}
     	
     	// Elasticsearch bulk compliant output format
-    	if( context.getProperty( EnrichDataProperties.OUTPUT_FF_CONTENT_FORMAT ).getValue().equals( EnrichDataConstants.OUTPUT_FF_CONTENT_FORMAT_VALUES[1] ) ) {
+		if( context.getProperty( EnrichDataProperties.OUTPUT_FF_CONTENT_FORMAT ).getValue().equals( EnrichDataConstants.OUTPUT_FF_CONTENT_FORMAT_ES_BULK ) ) {
     		
     		// Check if 'ES Index' property is set
     		if( context.getProperty( EnrichDataProperties.ES_INDEX ).getValue().isEmpty() ) {
@@ -534,26 +518,44 @@ public class EnrichData extends AbstractProcessor {
     		this.esIndex = context.getProperty( EnrichDataProperties.ES_INDEX ).getValue();
     		this.esType = context.getProperty( EnrichDataProperties.ES_TYPE ).getValue();
     		
-    		this.outProducer = new ElasticsearchBulkIndexingOutputProducer( this.esIndex , this.esType );
+    		this.outProducer = new ElasticsearchBulkIndexingOutputProducer( this.esIndex , this.esType , logger );
     	}
     
     	// Split Json Object
-    	if( context.getProperty( EnrichDataProperties.OUTPUT_FF_CONTENT_FORMAT ).getValue().equals( EnrichDataConstants.OUTPUT_FF_CONTENT_FORMAT_VALUES[2] ) ) {
+		if( context.getProperty( EnrichDataProperties.OUTPUT_FF_CONTENT_FORMAT ).getValue().equals( EnrichDataConstants.OUTPUT_FF_CONTENT_FORMAT_SPLIT_JSON ) ) {
     		String hashedIdFieldsString = context.getProperty( EnrichDataProperties.HASHED_ID_FIELDS ).getValue().trim();
     		
     		SplitObjectOutputProducer splitProducer;
+    		splitProducer = new SplitObjectOutputProducer( logger );
     		if( !hashedIdFieldsString.isEmpty() ) {
     			List<String> hashedIdFields = Arrays.asList( hashedIdFieldsString.split( "," ) ).stream()
     											    .map( (String field) -> { return field.trim(); } )
     											    .collect( Collectors.toList() ); 
-    			splitProducer = new SplitObjectOutputProducer( hashedIdFields );
-    		}else {
-    			splitProducer = new SplitObjectOutputProducer();
+    			splitProducer.setHashedIdFields( hashedIdFields );
     		}
-//    		splitProducer.setTimestampAttribute( this.timestampFieldName );
+    		
+    		// XXX: Extract enrichment attributes config
+        	if( context.getProperty( EnrichDataProperties.EXTRACT_ENRICHMENT_ATTRIBUTES ).isSet() ) {
+        		String extractEnrichmentAttributes = context.getProperty( EnrichDataProperties.EXTRACT_ENRICHMENT_ATTRIBUTES ).getValue();
+        		if( !extractEnrichmentAttributes.isEmpty() ) {
+        			List<String> extractEnrichmentAttributesList = 
+    	    			Arrays.asList( extractEnrichmentAttributes.split(",") ).stream()
+    	    				.map( (String s) -> { 
+    	    					s = s.trim();
+    	    					if( s.startsWith( "/" ) ) s=s.substring(1);
+    	    					if( s.endsWith( "/") ) s=s.substring(0,s.length()-1);
+    	    					return s;
+    	    				} )
+    	    				.filter( (String s) -> { return !s.isEmpty(); })
+    	    				.collect( Collectors.toList() );
+        			splitProducer.setExtractEnrichmentAttributesList(extractEnrichmentAttributesList);
+        		}
+        	}
+    		
     		this.outProducer = splitProducer;
     	}
     	
+    	// Output producer timestamps
     	this.outProducer.setTimestampAttribute( this.timestampFieldName );
     	if( context.getProperty( EnrichDataProperties.TIMESTAMP_THRESHOLD ).isSet() ) {
     		long time_threshold = context.getProperty( EnrichDataProperties.TIMESTAMP_THRESHOLD )
@@ -561,7 +563,7 @@ public class EnrichData extends AbstractProcessor {
     		this.outProducer.setTimestampThreshold( time_threshold );
     	}
     	
-    	//User defined properties
+    	// User defined properties
     	this.additionalFieldPaths = new ConcurrentHashMap<>();
     	context.getAllProperties().forEach( (String k, String v) -> {
 //    		if( !EnrichDataProperties.staticProperties.contains( k ) ) {
@@ -761,6 +763,7 @@ public class EnrichData extends AbstractProcessor {
         // Root object containing the ff data
     	JsonObject rootObject = rootEl.getAsJsonObject(); 
     	
+    	// TODO: remove?
     	if( !rootObject.has( deviceIdName ) || !rootObject.has( timestampFieldName ) ) {
     		// TODO: deviceIdName can be not present if the attribute is configured and the input flow file has it?
     		String reason = String.format( "Flow file does not contain one (or both) fields: '%s' to pick the device id from, '%s' to pick the timestamp from , routing to failure." , 
@@ -781,7 +784,7 @@ public class EnrichData extends AbstractProcessor {
     		String attrValue = flowFile.getAttribute( this.deviceIdFromAttribute ).trim();
     		if( attrValue != null && !attrValue.isEmpty() ) {
     			deviceId = getSubstitutedPrefixValue( attrValue );
-    			// XXX: if the device id is being picked from the attribute, it is added to the rootObject
+    			// if the device id is being picked from the attribute, it is added to the rootObject
     			rootObject.addProperty( this.deviceIdName , deviceId );
     		}
     	}
@@ -1022,25 +1025,6 @@ public class EnrichData extends AbstractProcessor {
 			return;
 		}
 		
-		// Extract attributes
-		Map<String,String> extractedAttributes = new HashMap<>();
-		if( !this.extractEnrichmentAttributesMap.isEmpty() ) {
-			for( String attributePath : this.extractEnrichmentAttributesMap.keySet() ) {
-				try {
-					JsonElement attributeVal = JsonProcessing.getElementByPath(responseRootEl, attributePath);
-					if( attributeVal.isJsonPrimitive() ) {
-						extractedAttributes.put( 
-							this.extractEnrichmentAttributesMap.get(attributePath) , 
-							attributeVal.getAsString() );
-					}
-				}catch( NoSuchElementException ex ) {
-					LoggingUtils.produceErrorObj( "Skipping attribute extraction for '" + attributePath + "'. " + ex.getMessage() )
-							    .withExceptionInfo( ex )
-							    .logAsWarning( logger );
-				}
-			}
-		}
-		
 		// Determine cordinates to use 
 		Map<String, JsonElement> additionalProperties = new TreeMap<>();
 		if( this.latlonPriorityInner ) {
@@ -1054,22 +1038,9 @@ public class EnrichData extends AbstractProcessor {
 			additionalProperties.put( EnrichDataConstants.COORDS_OUTPUT_NAME , new JsonPrimitive( latlonStr ) );
 		}
 					
-		// Enrichment
+		// ENRICHMENT
 		// uses the configured enricher implementation
-//		StringBuilder serviceUri = new StringBuilder("");
 		try {
-			// SERVICE URI
-			// TODO: remove old Service Uri composition
-//			if( resourceLocations.hasLocationForService( ResourceLocations.Service.SERVICEMAP ) )
-//				serviceUri.append( resourceLocations.getLocationForService( ResourceLocations.Service.SERVICEMAP ) );
-//			else if( this.defaultServiceUriPrefix != null )
-//				serviceUri.append( this.defaultServiceUriPrefix );
-//			if( !serviceUri.toString().endsWith("/") )
-//				serviceUri.append( "/" );
-//			serviceUri.append( deviceId );
-				
-			// ENRICHMENT
-//			additionalProperties.put( EnrichDataConstants.SERVICE_URI_OUTPUT_NAME , new JsonPrimitive( serviceUri.toString() ) ); // TODO: remove
 			additionalProperties.put( EnrichDataConstants.SERVICE_URI_OUTPUT_NAME , new JsonPrimitive( serviceUri ) );
 			additionalProperties.put( EnrichDataConstants.UUID_ATTRIBUTE_NAME , new JsonPrimitive( uuid ) );
 			additionalProperties.put( EnrichDataConstants.ENTRY_DATE_ATTRIBUTE_NAME , new JsonPrimitive( Instant.ofEpochMilli( flowFile.getEntryDate() ).toString() ) );
@@ -1099,8 +1070,8 @@ public class EnrichData extends AbstractProcessor {
 			
 			// clone the input ff before producing the output because the output producer removes
 			// the input flow file from the session implicitly
-			FlowFile originalFF = session.clone( flowFile );  
-			List<FlowFile> outList = this.outProducer.produceOutput( rootObject , flowFile , session );
+			FlowFile originalFF = session.clone( flowFile );
+			List<FlowFile> outList = this.outProducer.produceOutput( rootObject , enrichmentObj , flowFile , session );
 			
 			String determinedTimestamp = null;
 			String timeSlack = null;
@@ -1113,12 +1084,8 @@ public class EnrichData extends AbstractProcessor {
 			outList.stream().forEach( (FlowFile ff) -> {
 				// Additional ff attributes 
 				ff = session.putAllAttributes( ff , additionalFieldsErrors );
-//				ff = session.putAttribute( ff , EnrichDataConstants.SERVICE_URI_OUTPUT_NAME , serviceUri.toString() ); // TODO: remove
 				ff = session.putAttribute( ff , EnrichDataConstants.SERVICE_URI_OUTPUT_NAME , serviceUri );
 //				ff = session.putAttribute( ff , timestampFieldName , rootObject.get(timestampFieldName).toString() );
-				
-				// Add extracted attributes
-				ff = session.putAllAttributes( ff , extractedAttributes );
 				
 				//Route to success
 				routeToRelationship( ff , EnrichDataRelationships.SUCCESS_RELATIONSHIP , session , 
@@ -1147,8 +1114,7 @@ public class EnrichData extends AbstractProcessor {
 						public void process(OutputStream out) throws IOException {
 							out.write( deviceState.toString().getBytes() );
 						}
-					});				
-//					deviceStateFF = session.putAttribute( deviceStateFF , EnrichDataConstants.SERVICE_URI_OUTPUT_NAME , serviceUri.toString() ); // TODO: remove
+					});
 					deviceStateFF = session.putAttribute( deviceStateFF , EnrichDataConstants.SERVICE_URI_OUTPUT_NAME , serviceUri );
 					deviceStateFF = session.putAttribute( deviceStateFF , 
 							EnrichDataConstants.MIME_TYPE_ATTRIBUTE_NAME , MediaType.JSON_UTF_8.toString() );
@@ -1156,9 +1122,6 @@ public class EnrichData extends AbstractProcessor {
 						deviceStateFF = session.putAttribute( deviceStateFF , timestampFieldName , determinedTimestamp );
 					if( timeSlack != null )
 						deviceStateFF = session.putAttribute( deviceStateFF , OutputProducer.TIME_SLACK_ATTRIBUTE_NAME , timeSlack );
-					
-					// Add extracted attributes
-					deviceStateFF = session.putAllAttributes( deviceStateFF , extractedAttributes );
 					
 					routeToRelationship( deviceStateFF , EnrichDataRelationships.DEVICE_STATE_RELATIONSHIP , session , 
 						new ImmutablePair<String , String>( "timestampSource" , this.enricher.getLastTimestampSource() ) );
@@ -1184,7 +1147,6 @@ public class EnrichData extends AbstractProcessor {
 					ex.printStackTrace();
 				}
 			}
-//			originalFF = session.putAttribute( originalFF , EnrichDataConstants.SERVICE_URI_OUTPUT_NAME , serviceUri.toString() ); // TODO: remove
 			originalFF = session.putAttribute( originalFF , EnrichDataConstants.SERVICE_URI_OUTPUT_NAME , serviceUri );
 			originalFF = session.putAttribute( originalFF , EnrichDataConstants.MIME_TYPE_ATTRIBUTE_NAME , MediaType.JSON_UTF_8.toString() );
 			if( determinedTimestamp != null )
@@ -1257,56 +1219,6 @@ public class EnrichData extends AbstractProcessor {
     	
     	return el.getAsJsonObject();
     }
-    
-    // TODO: REMOVE old method
-//    private JsonObject getEnrichmentObject( List<String> basePath , JsonElement responseRootEl ) throws ProcessException{
-//    	JsonElement el = responseRootEl;
-//    	StringBuilder exploredPath = new StringBuilder(); // logging purpose
-//    	for( String pathEl : basePath ) {
-//    		exploredPath.append("/").append( pathEl );
-//    		
-//    		while( el.isJsonArray() ) {
-//				el = el.getAsJsonArray();
-//				if( ((JsonArray)el).size() > 0 ) {
-//					el = ((JsonArray)el).get( 0 );
-//				}else {
-//					exploredPath.deleteCharAt(0);
-//					throw new ProcessException( String.format( "Cannot obtain enrichment object. The '%s' field in the enrichment response contains an empty array." , 
-//															   exploredPath.toString() ) );
-//				}
-//			}
-//    		
-//    		if( el.isJsonObject() ) {
-//    			JsonObject elObj = el.getAsJsonObject();
-//    			
-//    			if( elObj.size() > 0 ) {
-//	    			if( elObj.has( pathEl ) ) {
-//	    				el = elObj.get( pathEl );
-//	    			}else {
-//	    				exploredPath.deleteCharAt(0);
-//	    				throw new ProcessException( String.format( "Cannot obtain enrichment object. The '%s' field in the enrichment service response does not exists. ", 
-//								   							        exploredPath.toString() ) );
-//	    			}
-//    			} else {
-//    				exploredPath.deleteCharAt(0);
-//    				throw new ProcessException( String.format( "Cannot obtain enrichment object. The '%s' field in the enrichment service response is empty. ", 
-//							   								   exploredPath.toString() ) );
-//    			}
-//    		} else {
-//    			exploredPath.deleteCharAt(0);
-//    			throw new ProcessException( String.format( "The '%s' field in the enrichment service response is not a JsonObject." , 
-//    													   exploredPath.toString() ) );
-//    		}
-//    	}
-//    	
-//    	if( el.isJsonObject() ) {
-//    		return el.getAsJsonObject();
-//    	}else {
-//    		exploredPath.deleteCharAt(0);
-//    		throw new ProcessException( String.format( "The last path field ('%s') in the enrichment service response is not a JsonObject." , 
-//    												   exploredPath.toString() ) );
-//    	}
-//    }
     
     /**
      * Get the latitude and longitude as a string (lat and lon are separated from a comma)

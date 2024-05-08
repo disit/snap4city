@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.nifi.flowfile.FlowFile;
+import org.apache.nifi.logging.ComponentLog;
 import org.apache.nifi.processor.ProcessSession;
 import org.apache.nifi.processor.io.OutputStreamCallback;
 
@@ -41,11 +42,17 @@ public class ElasticsearchBulkIndexingOutputProducer extends OutputProducer {
 	private String esIndex;
 	private String esType;
 	
-	public ElasticsearchBulkIndexingOutputProducer( String esIndex , String esType ) {
+	public ElasticsearchBulkIndexingOutputProducer( String esIndex , String esType , ComponentLog logger ) {
+		super( logger );
 		this.esIndex = esIndex;
 		this.esType = esType;
 	}
 	
+	@Override
+	public List<FlowFile> produceOutput(JsonObject rootObj, JsonObject enrichmentObj, FlowFile inFlowFile, final ProcessSession session){
+		// ignores enrichmentObj
+		return produceOutput( rootObj , inFlowFile , session );
+	}
 	
 	@Override
 	public List<FlowFile> produceOutput(JsonObject rootObj, FlowFile inFlowFile, final ProcessSession session) {
