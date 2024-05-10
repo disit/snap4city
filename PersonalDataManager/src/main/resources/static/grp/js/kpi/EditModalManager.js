@@ -155,7 +155,7 @@ var EditModalManager = {
     createNatureSelection: function () {
         $.ajax({
             url: "json/categories.json",
-            async: false,
+            async: true,
             cache: false,
             dataType: "json",
             success: function (_data) {
@@ -179,7 +179,7 @@ var EditModalManager = {
     createSubNatureSelection: function (_nature) {
         $.ajax({
             url: "json/categories.json",
-            async: false,
+            async: true,
             cache: false,
             dataType: "json",
             success: function (_data) {

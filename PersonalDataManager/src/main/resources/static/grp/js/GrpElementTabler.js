@@ -3,7 +3,7 @@ var GrpElementTabler = {
     currentGrpId: null,
     forceReadonly: false,
 
-    deleteElementModal: function (_id, _grpId, _username, _elementId, _elementType, _elementName, _insertTime ) {
+    deleteElementModal: async function (_id, _grpId, _username, _elementId, _elementType, _elementName, _insertTime ) {
         ViewManager.render({
             "groupelement": {
                 "no": _id,
@@ -26,7 +26,7 @@ var GrpElementTabler = {
             } else {
                 APIClient.executeDeleteQuery(query, GrpElementTabler.successAddElmtToGrp, GrpElementTabler.errorQuery);
             }
-        }).error(function () {
+        }).error(async function () {
             var query = GrpQueryManager.createDeleteElmtFromGroupQuery(Authentication.refreshTokenGetAccessToken(), _id);
             if (successCallBack != null && errorCallBack != null) {
                 APIClient.executeDeleteQuery(query, successCallBack, errorCallBack);
@@ -36,7 +36,7 @@ var GrpElementTabler = {
         });
     },
     
-    submitAddElmts: function() {
+    submitAddElmts: async function() {
         var elmtToAdd = [];
         var d = new Date();
         $(".newelchkbox:checked").not(":disabled").each(function(){
@@ -51,20 +51,20 @@ var GrpElementTabler = {
         GrpEditor.keycloak.updateToken(30).success(function () {
             var query = GrpQueryManager.createPostAddElmtToGrp(GrpEditor.keycloak.token, GrpElementTabler.currentGrpId);
             APIClient.executePostQuery(query, elmtToAdd, GrpElementTabler.successAddElmtToGrp, GrpElementTabler.errorQuery);
-        }).error(function () {
+        }).error(async function () {
             var query = GrpQueryManager.createPostAddElmtToGrp(Authentication.refreshTokenGetAccessToken(), GrpElementTabler.currentGrpId);
             APIClient.executePostQuery(query, elmtToAdd, GrpElementTabler.successAddElmtToGrp, GrpElementTabler.errorQuery);
         });
     },
     
-    successAddElmtToGrp: function() {
+    successAddElmtToGrp: async function() {
         $('#genericModal').modal('hide');
         GrpElementTabler.renderTable(GrpElementTabler.currentGrpId);        
     },
     
-    searchInNewElmts: function() {
+    searchInNewElmts: async function() {
         $(".newel").each(
-            function() {
+            async function() {
                 if($(this).text().toLowerCase().indexOf($("#searchNewElmtTxtbox").val().toLowerCase()) > -1 ) {
                     $(this).show();
                 } else { 
@@ -73,9 +73,9 @@ var GrpElementTabler = {
             }
         ); 
     },
-    selAll: function() {
+    selAll: async function() {
         $(".newel").each(
-            function() {
+            async function() {
                 if($(this).text().indexOf($("#searchNewElmtTxtbox").val()) > -1 ) {
                     $(this).find("input").prop("checked",$("#selvisible").prop("checked"));
                 } 
@@ -83,7 +83,7 @@ var GrpElementTabler = {
         ); 
         GrpElementTabler.updAddNewElmtBtnLbl();
     },
-    updAddNewElmtBtnLbl: function() {
+    updAddNewElmtBtnLbl: async function() {
       if($(".newelchkbox:checked").not(":disabled").length > 0) {
           $(".addNewElmtBtn").text("Add ("+$(".newelchkbox:checked").not(":disabled").length+")");
           $(".addNewElmtBtn").prop("disabled",false);
@@ -95,17 +95,17 @@ var GrpElementTabler = {
           $(".addNewElmtBtn").css("cursor","not-allowed");
       }
     },
-    addNewElmtToGrp: function(elmtType) {
+    addNewElmtToGrp: async function(elmtType) {
         ViewManager.render({}, "#genericModal", "templates/grpdata/elems/wait.mst.html"); $('#genericModal').modal('show');
         GrpEditor.keycloak.updateToken(30).success(function () {
             var query = GrpQueryManager.createGetAvailItemsQuery(GrpEditor.keycloak.token,GrpElementTabler.currentGrpId,elmtType);
             APIClient.executeGetQuery(query, GrpElementTabler.getAvailItemsSuccess, function(){ console.log("createGetAvailItemsQuery error"); }); 
-        }).error(function () {
+        }).error(async function () {
             var query = GrpQueryManager.createGetAvailItemsQuery(Authentication.refreshTokenGetAccessToken(),GrpElementTabler.currentGrpId,elmtType);
             APIClient.executeGetQuery(query, GrpElementTabler.getAvailItemsSuccess, function(){ console.log("createGetAvailItemsQuery error"); }); 
         });
     },
-    getAvailItemsSuccess: function(_response) {
+    getAvailItemsSuccess: async function(_response) {
         setTimeout(function(){            
             $('#genericModal').modal('hide');
             console.log(_response);
@@ -123,22 +123,22 @@ var GrpElementTabler = {
             }, "#genericModal", "templates/grpdata/elems/add.mst.html");
             $('#genericModal').modal('show');
             GrpElementTabler.updAddNewElmtBtnLbl();
-            GrpEditor.keycloak.updateToken(30).success(function () {
+            GrpEditor.keycloak.updateToken(30).success(async function () {
                 var query = GrpQueryManager.createGetGrpElemsTableQuery(GrpElementTabler.currentGrpId, -1, false, false, false, false, GrpEditor.keycloak.token);
-                APIClient.executeGetQuery(query, GrpElementTabler.preselectMembers, function(){ console.log("createGetGrpElemsTableQuery error"); });     
-            }).error(function () {
+                APIClient.executeGetQuery(query, GrpElementTabler.preselectMembers, async function(){ console.log("createGetGrpElemsTableQuery error"); });     
+            }).error(async function () {
                 var query = GrpQueryManager.createGetGrpElemsTableQuery(GrpElementTabler.currentGrpId, -1, false, false, false, false, Authentication.refreshTokenGetAccessToken());
-                APIClient.executeGetQuery(query, GrpElementTabler.preselectMembers, function(){ console.log("createGetGrpElemsTableQuery error"); });     
+                APIClient.executeGetQuery(query, GrpElementTabler.preselectMembers, async function(){ console.log("createGetGrpElemsTableQuery error"); });     
             });
         },1000);
     },
-    preselectMembers: function(_response) {        
+    preselectMembers: async function(_response) {        
         _response.forEach(function(element){                       
             $("#add"+$.escapeSelector((element.username && element.elementType != "Sensor"?element.username:"")+(element.elementType?element.elementType:"")+(["MyKPI","MyData","MyPOI","KPI"].indexOf(element.elementType) > -1 ? element.elementName : element.elementId))).prop('checked',true);
             $("#add"+$.escapeSelector((element.username && element.elementType != "Sensor"?element.username:"")+(element.elementType?element.elementType:"")+(["MyKPI","MyData","MyPOI","KPI"].indexOf(element.elementType) > -1 ? element.elementName : element.elementId))).prop('disabled',true);
         });
     },
-    renderTable: function (grpId, forceReadonly = false) {        
+    renderTable: async function (grpId, forceReadonly = false) {        
         GrpElementTabler.currentGrpId = grpId;
         GrpElementTabler.forceReadonly = forceReadonly;
         console.log("forceReadonly: "+GrpElementTabler.forceReadonly);
@@ -151,7 +151,7 @@ var GrpElementTabler = {
         });
     },
 
-    successQuery: function (_response) {
+    successQuery: async function (_response) {
         console.log("forceReadonly: "+GrpElementTabler.forceReadonly);
         if ($("#kpidelegationtable").length == 0) {
             $("#indexPage").
@@ -199,7 +199,7 @@ var GrpElementTabler = {
         _response.currentGrpData = DeviceGrpTabler.getCurrentKPIData(GrpElementTabler.currentGrpId);
         if(_response.currentGrpData == null) {
             var query = GrpQueryManager.createGetDeviceGrpByIdQuery(_response.grpId, GrpEditor.keycloak.token);
-            APIClient.executeGetQuery(query, function(_iresponse){ _response.currentGrpData = _iresponse; }, function(){} );
+            APIClient.executeGetQuery(query, async function(_iresponse){ _response.currentGrpData = _iresponse; }, async function(){} );
         }
 
         _response.timestampToDate = MustacheFunctions.timestampToDate;
@@ -238,13 +238,13 @@ var GrpElementTabler = {
         
     },
     
-    addSensorBtn: function(_response) {
+    addSensorBtn: async function(_response) {
         if(_response["payload"] !== undefined && _response["payload"].length > 0) {
             $("#addnewelement").append($('<button class="btn btn-warning" style="color: white;padding: 0.5rem; margin-bottom:0.5rem; margin-left:0.5rem; margin-right:0.5rem;" type="button" onclick="GrpElementTabler.addNewSensorToGrp();">Add Sensor</button>"'));            
         }
     },
     
-    newGrpElmtBtnsSuccess: function(_response) {
+    newGrpElmtBtnsSuccess: async function(_response) {
         if(_response) {
             _response.forEach(function(elementType) {
                 $("#addnewelement").append($('<button class="btn btn-warning" style="color: white;padding: 0.5rem; margin-bottom:0.5rem; margin-left:0.5rem; margin-right:0.5rem;" type="button" onclick="GrpElementTabler.addNewElmtToGrp(\''+elementType+'\');">Add '+elementType+'</button>"'));            
@@ -257,7 +257,7 @@ var GrpElementTabler = {
         console.log(_response);        
     },
     
-    editKPIDelegationModal: function (_kpiId, _id) {
+    editKPIDelegationModal: async function (_kpiId, _id) {
         if (_id != null && _id != "") {
             GrpEditor.keycloak.updateToken(30).success(function () {
                 var query = GrpQueryManager.createGetGrpDelegationByIdQuery(GrpEditor.keycloak.token, _kpiId, _id);
@@ -271,7 +271,7 @@ var GrpElementTabler = {
         }
     },
 
-    successEditKPIDelegationModal: function (_response) {
+    successEditKPIDelegationModal: async function (_response) {
         console.log(_response);
         if (_response != null && _response != "") {
             _response.insertTime = Utility.timestampToFormatDate(_response.insertTime);
@@ -286,7 +286,7 @@ var GrpElementTabler = {
         $('#genericModal').modal('show');
     },
 
-    deleteKPIDelegationModal: function (_id, _kpiId, _usernameDelegated, _insertTime) {
+    deleteKPIDelegationModal: async function (_id, _kpiId, _usernameDelegated, _insertTime) {
         ViewManager.render({
             "kpidelegation": {
                 "id": _id,
@@ -298,7 +298,7 @@ var GrpElementTabler = {
         $('#genericModal').modal('show');
     },
 
-    saveKPIDelegation: function () {
+    saveKPIDelegation: async function () {
         kpiDelegation = {
             "usernameDelegated": $("#inputUsernameDelegatedKPIDelegationEdit").val()
         }
@@ -322,7 +322,7 @@ var GrpElementTabler = {
             GrpEditor.keycloak.updateToken(30).success(function () {
                 var query = GrpQueryManager.createPatchGrpDelegationQuery(GrpEditor.keycloak.token, kpiDelegation.elementId, kpiDelegation.id);
                 APIClient.executePatchQuery(query, kpiDelegation, GrpDelegationTabler.successSaveKPIDelegation, GrpDelegationTabler.errorQuery);
-            }).error(function () {
+            }).error(async function () {
                 var query = GrpQueryManager.createPatchGrpDelegationQuery(Authentication.refreshTokenGetAccessToken(), kpiDelegation.elementId, kpiDelegation.id);
                 APIClient.executePatchQuery(query, kpiDelegation, GrpDelegationTabler.successSaveKPIDelegation, GrpDelegationTabler.errorQuery);
             });
@@ -330,18 +330,18 @@ var GrpElementTabler = {
             GrpEditor.keycloak.updateToken(30).success(function () {
                 var query = GrpQueryManager.createPostGrpDelegationQuery(GrpEditor.keycloak.token, kpiDelegation.elementId);
                 APIClient.executePostQuery(query, kpiDelegation, GrpDelegationTabler.successSaveKPIDelegation, GrpDelegationTabler.errorQuery);
-            }).error(function () {
+            }).error(async function () {
                 var query = GrpQueryManager.createPostGrpDelegationQuery(Authentication.refreshTokenGetAccessToken(), kpiDelegation.elementId);
                 APIClient.executePostQuery(query, kpiDelegation, GrpDelegationTabler.successSaveKPIDelegation, GrpDelegationTabler.errorQuery);
             });
         }
     },
 
-    getDelegations: function (_kpiId, successCallBack, errorCallBack) {
+    getDelegations: async function (_kpiId, successCallBack, errorCallBack) {
         GrpEditor.keycloak.updateToken(30).success(function () {
             var query = QueryManager.createGetKPIDelegationTableQuery(_kpiId, null, null, null, null, null, GrpEditor.keycloak.token);
             APIClient.executeGetQuery(query, successCallBack, errorCallBack);
-        }).error(function () {
+        }).error(async function () {
             var query = QueryManager.createGetKPIDelegationTableQuery(_kpiId, null, null, null, null, null, Authentication.refreshTokenGetAccessToken());
             APIClient.executeGetQuery(query, successCallBack, errorCallBack);
         });
@@ -365,12 +365,12 @@ var GrpElementTabler = {
         });
     },
 
-    successSaveKPIDelegation: function (_response) {
+    successSaveKPIDelegation: async function (_response) {
         $('#genericModal').modal('hide');
         GrpDelegationTabler.renderTable(_response.elementId, _response.elementType);
     },
 
-    errorQuery: function (_error) {
+    errorQuery: async function (_error) {
         console.log(_error);
         if (_error.responseText != null) {
             alert(_error.responseText);
@@ -378,18 +378,18 @@ var GrpElementTabler = {
         $('#genericModal').modal('hide');
     },
     
-    addNewSensorToGrp: function(pagesize=10, pagenum=1, search="") {
+    addNewSensorToGrp: async function(pagesize=10, pagenum=1, search="") {
         ViewManager.render({}, "#genericModal", "templates/grpdata/elems/wait.mst.html"); $('#genericModal').modal('show');
         GrpEditor.keycloak.updateToken(30).success(function () {
             var query = GrpQueryManager.createGetSensorsAPIQuery(GrpEditor.keycloak.token,pagesize,pagenum,search);
             APIClient.executeGetQuery(query, GrpElementTabler.getAvailSensorsSuccess, function(){ console.log("createGetAvailItemsQuery error"); }); 
-        }).error(function () {
+        }).error(async function () {
             var query = GrpQueryManager.createGetSensorsAPIQuery(Authentication.refreshTokenGetAccessToken(),pagesize,pagenum,search);
             APIClient.executeGetQuery(query, GrpElementTabler.getAvailSensorsSuccess, function(){ console.log("createGetAvailItemsQuery error"); }); 
         });
     },
     
-    getAvailSensorsSuccess: function(_response) {
+    getAvailSensorsSuccess: async function(_response) {
         setTimeout(function(){            
             $('#genericModal').modal('hide');      
             for(var i = 0; i < _response["payload"].length; i++) {

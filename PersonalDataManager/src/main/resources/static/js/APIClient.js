@@ -6,7 +6,7 @@ var APIClient = {
 		$.ajax({
 			method: "GET",
 			url: encodeURI(APIClient.url + APIClient.suffix + query),
-			async: false,
+			async: true,
 			headers: {
 				"Authorization": "Bearer " + accessToken
 			},
@@ -28,7 +28,7 @@ var APIClient = {
 		$.ajax({
 			method: "POST",
 			url: encodeURI(APIClient.url + _query),
-			async: false,
+			async: true,
 			headers: {
 				"Authorization": "Bearer " + accessToken
 			},
@@ -53,7 +53,7 @@ var APIClient = {
 		$.ajax({
 			method: "PUT",
 			url: encodeURI(APIClient.url + _query),
-			async: false,
+			async: true,
 			headers: {
 				"Authorization": "Bearer " + accessToken
 			},
@@ -78,7 +78,7 @@ var APIClient = {
 		$.ajax({
 			method: "PATCH",
 			url: encodeURI(APIClient.url + _query),
-			async: false,
+			async: true,
 			headers: {
 				"Authorization": "Bearer " + accessToken
 			},
@@ -103,7 +103,7 @@ var APIClient = {
 		$.ajax({
 			method: "DELETE",
 			url: encodeURI(APIClient.url + query),
-			async: false,
+			async: true,
 			headers: {
 				"Authorization": "Bearer " + accessToken
 			},

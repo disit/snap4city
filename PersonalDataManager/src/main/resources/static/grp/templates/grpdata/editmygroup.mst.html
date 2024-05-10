@@ -3,9 +3,13 @@
                 <div class="modal-content">
                         <div class="modal-header">
                                 <h5 class="modal-title">My Group Details</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="DeviceGrpTabler.renderTable();">
+                                <!--<button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="DeviceGrpTabler.renderTable();">
+                                        <span aria-hidden="true">&times;</span>
+                                </button>-->
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
                                 </button>
+                                <!-- -->
                         </div>
                         <div class="modal-body" style="padding: 0px;">
                                 <!-- {{#grpdata}} -->
@@ -34,7 +38,9 @@
                                 <!-- {{/grpdata}} -->
                         </div>
                         <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="DeviceGrpTabler.renderTable();">Close</button>
+                                <!--<button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="DeviceGrpTabler.renderTable();">Close</button>-->
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <!-- -->
                                 <button type="submit" class="btn editDashBtn">Save</button>
                         </div>
                 </div>

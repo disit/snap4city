@@ -14,7 +14,7 @@ var ViewManager = {
         return template;
     },
 
-    render: function (data, component, templateName) {
+    render:  function (data, component, templateName) {
         var template = "";
         if (templateName == null) {
             for (var pageType in data) {

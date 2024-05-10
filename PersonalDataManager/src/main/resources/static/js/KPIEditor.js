@@ -25,7 +25,7 @@ var KPIEditor = {
         });
     },
 
-    checkLogin: function () {
+    checkLogin:  function () {
         if ($("#inputUsername").val() != "") {
             Authentication.username = $("#inputUsername").val();
             if ($("#inputPassword").val() != "") {
@@ -41,11 +41,11 @@ var KPIEditor = {
         }
     },
 
-    isRoot: function(){
+    isRoot:  function(){
         return KPIEditor.keycloak.tokenParsed.roles.includes("RootAdmin");
     },
 
-    checkParameters: function () {
+    checkParameters:  function () {
         var kpiId = "";
         var operation = "";
         var dataType = "";

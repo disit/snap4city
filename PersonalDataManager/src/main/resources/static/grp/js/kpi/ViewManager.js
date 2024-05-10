@@ -16,6 +16,8 @@ var ViewManager = {
 
     render: function (data, component, templateName) {
         var template = "";
+        console.log('template: ',template);
+        console.log('-');
         if (templateName == null) {
             for (var pageType in data) {
                 template = this.loadTemplate("templates/" + pageType + ".mst.html");

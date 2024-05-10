@@ -1,6 +1,6 @@
 var DeviceGrpTabler = {
 
-    editDeviceGrpModal: function (_id, _highLevelType) {
+    editDeviceGrpModal: async function (_id, _highLevelType) {
         DeviceGrpTabler.currentHighLevelType = _highLevelType;
         if (_id != null && _id != "") {
             if (_highLevelType != "MyPOI") {
@@ -25,7 +25,7 @@ var DeviceGrpTabler = {
         }
     },
     
-    successEditDeviceGrpModal: function (_response) {
+    successEditDeviceGrpModal: async function (_response) {
         console.log(_response);
         if (_response != null && _response != "") {
             if (_response.properties != null) {
@@ -58,7 +58,7 @@ var DeviceGrpTabler = {
         }
     },
     
-    saveGrpData: function (grpDataToSave) {
+    saveGrpData: async function (grpDataToSave) {
         if (grpDataToSave == null) {
             grpData = {
                 "highLevelType": $("#inputHighLevelTypeGrpDataEdit").val(),
@@ -111,13 +111,13 @@ var DeviceGrpTabler = {
         }
     },
     
-    successSaveGrpData: function (_response) {
+    successSaveGrpData: async function (_response) {
         console.log(_response);
         $('#genericModal').modal('hide');
         DeviceGrpTabler.renderTable();
     },
     
-    errorQuery: function (_error) {
+    errorQuery: async function (_error) {
         console.log(_error);
         if (_error.responseText != null && _error.responseText != "") {
             alert(_error.responseText);
@@ -127,7 +127,7 @@ var DeviceGrpTabler = {
         $('#genericModal').modal('hide');
     },
 
-    renderTable: function () {
+    renderTable: async function () {
         GrpEditor.keycloak.updateToken(30).success(function () {
             var query = GrpQueryManager.createGetDeviceGrpTableQuery(DeviceGrpTabler.privacy, DeviceGrpPager.currentPage, DeviceGrpPager.currentSize, DeviceGrpSorter.currentSortDirection, DeviceGrpSorter.currentSortBy, DeviceGrpFilter.currentSearchKey, GrpEditor.keycloak.token);
             APIClient.executeGetQuery(query, DeviceGrpTabler.successQuery, DeviceGrpTabler.errorQuery);
@@ -137,7 +137,7 @@ var DeviceGrpTabler = {
         });
     },
 
-    successQuery: function (_response) {
+    successQuery: async function (_response) {
         DeviceGrpTabler.currentDeviceGroupsPage = _response;
         GrpEditor.checkParameters();
         if ($("#kpidatatable").length == 0) {
@@ -243,7 +243,7 @@ var DeviceGrpTabler = {
         APIClient.executeAsyncGetQuery(query4, DeviceGrpTabler.chkIfUserHasPublicGroups, function(){}); 
     },
     
-    getCurrentKPIData: function (_kpiId) {
+    getCurrentKPIData: async function (_kpiId) {
         for (var i = 0; i < DeviceGrpTabler.currentDeviceGroupsPage.content.length; i++) {
             if (DeviceGrpTabler.currentDeviceGroupsPage.content[i].id == _kpiId) {
                 return DeviceGrpTabler.currentDeviceGroupsPage.content[i];
@@ -252,7 +252,7 @@ var DeviceGrpTabler = {
         return null;
     },
     
-    setPrivacy: function () {
+    setPrivacy: async function () {
         DeviceGrpTabler.privacy = $("input[name=inlineRadioOptions]:checked").val();
         if (DeviceGrpTabler.privacy != "") {
             DeviceGrpTabler.enableEdit = false;
@@ -270,21 +270,21 @@ var DeviceGrpTabler = {
         DeviceGrpTabler.renderTable();        
     },
     
-    chkIfUserHasGroups: function(_response) {
+    chkIfUserHasGroups: async function(_response) {
         if(_response.content.length == 0) {
             $("input[name=inlineRadioOptions][value='']").prop("disabled",true);
             $("input[name=inlineRadioOptions][value='']").siblings().css("color","lightgray");
         }
     },
     
-    chkIfUserHasPublInOrgGroups: function(_response) {
+    chkIfUserHasPublInOrgGroups: async function(_response) {
         if(_response.content.length == 0) {
             $("input[name=inlineRadioOptions][value='organization']").prop("disabled",true);
             $("input[name=inlineRadioOptions][value='organization']").siblings().css("color","lightgray");
         }
     },
     
-    chkIfUserHasDelegatedGroups: function(_response) {
+    chkIfUserHasDelegatedGroups: async function(_response) {
         console.log(_response);
         if(_response.content.length == 0) {
             $("input[name=inlineRadioOptions][value='delegated']").prop("disabled",true);
@@ -292,14 +292,14 @@ var DeviceGrpTabler = {
         }
     },
     
-    chkIfUserHasPublicGroups: function(_response) {
+    chkIfUserHasPublicGroups: async function(_response) {
         if(_response.content.length == 0) {
             $("input[name=inlineRadioOptions][value='public']").prop("disabled",true);
             $("input[name=inlineRadioOptions][value='public']").siblings().css("color","lightgray");
         }
     },
     
-    makePublic: function (_kpiId) {
+    makePublic: async function (_kpiId) {
         ownData = {
             "id": _kpiId,
             "ownership": "public"
@@ -307,7 +307,7 @@ var DeviceGrpTabler = {
         DeviceGrpTabler.saveGrpData(ownData);
     },
 
-    makePrivate: function (_kpiId) {
+    makePrivate: async function (_kpiId) {
         ownData = {
             "id": _kpiId,
             "ownership": "private"
@@ -315,7 +315,7 @@ var DeviceGrpTabler = {
         DeviceGrpTabler.saveGrpData(ownData);
     },
     
-    showGrpDataModal: function (_id) {
+    showGrpDataModal: async function (_id) {
         GrpEditor.keycloak.updateToken(30).success(function () {
             var query = GrpQueryManager.createGetDeviceGrpByIdQuery(_id, GrpEditor.keycloak.token);
             APIClient.executeGetQuery(query, DeviceGrpTabler.successShowGrpDataModal, DeviceGrpTabler.errorQuery);
@@ -325,7 +325,7 @@ var DeviceGrpTabler = {
         });
     },
     
-    successShowGrpDataModal: function (_response) {
+    successShowGrpDataModal: async function (_response) {
         console.log(_response);
         _response.insertTime = Utility.timestampToFormatDate(_response.insertTime);
         _response.updateTime = Utility.timestampToFormatDate(_response.updateTime);
@@ -337,7 +337,7 @@ var DeviceGrpTabler = {
         $("#genericModal").draggable();
     },
     
-    showReadonlyGrpDataModal: function (_id) {
+    showReadonlyGrpDataModal: async function (_id) {
         GrpEditor.keycloak.updateToken(30).success(function () {
             var query = GrpQueryManager.createGetDeviceGrpByIdQuery(_id, GrpEditor.keycloak.token);
             APIClient.executeGetQuery(query, DeviceGrpTabler.successReadonlyShowGrpDataModal, DeviceGrpTabler.errorQuery);
@@ -347,7 +347,7 @@ var DeviceGrpTabler = {
         });
     },
     
-    successReadonlyShowGrpDataModal: function (_response) {
+    successReadonlyShowGrpDataModal: async function (_response) {
         console.log(_response);
         _response.insertTime = Utility.timestampToFormatDate(_response.insertTime);
         _response.updateTime = Utility.timestampToFormatDate(_response.updateTime);
@@ -359,7 +359,7 @@ var DeviceGrpTabler = {
         $('#genericModal').modal('show');
     },
     
-    deleteDeviceGroupModal: function (_id, _highLevelType, _valueName) {
+    deleteDeviceGroupModal: async function (_id, _highLevelType, _valueName) {
         ViewManager.render({
             "kpidata": {
                 "id": _id,
@@ -369,7 +369,7 @@ var DeviceGrpTabler = {
         }, "#genericModal", "templates/grpdata/deletekpidata.mst.html");
         $('#genericModal').modal('show');
     },
-    clearDeviceGrpModal: function (_id, _highLevelType, _valueName) {
+    clearDeviceGrpModal: async function (_id, _highLevelType, _valueName) {
         ViewManager.render({
             "kpidata": {
                 "id": _id,
@@ -398,7 +398,7 @@ var DeviceGrpTabler = {
             APIClient.executeDeleteQuery(query, DeviceGrpTabler.successSaveGrpData, DeviceGrpTabler.errorQuery);
         });
     },
-    showGrpElemsModal: function (_id) {
+    showGrpElemsModal: async function (_id) {
         GrpEditor.keycloak.updateToken(30).success(function () {
             var query = GrpQueryManager.createGetGrpElemsByIdsQuery(_id, GrpEditor.keycloak.token);
             APIClient.executeGetQuery(query, DeviceGrpTabler.successShowGrpElemsModal, DeviceGrpTabler.errorQuery);
@@ -408,7 +408,7 @@ var DeviceGrpTabler = {
         });
     },
     
-    successShowGrpElemsModal: function (_response) {
+    successShowGrpElemsModal: async function (_response) {
         console.log(_response);
         if (_response != null && _response != "") {
             _response.insertTime = Utility.timestampToFormatDate(_response.insertTime);
@@ -427,7 +427,7 @@ var DeviceGrpTabler = {
     privacy: "",
     enableEdit: true,
 
-    saveKPIData: function (kpiDataToSave) {
+    saveKPIData: async function (kpiDataToSave) {
         if (kpiDataToSave == null) {
             kpiData = {
                 "highLevelType": $("#inputHighLevelTypeKPIDataEdit").val(),

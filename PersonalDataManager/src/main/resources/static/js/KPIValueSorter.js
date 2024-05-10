@@ -2,7 +2,7 @@ var KPIValueSorter = {
     currentSortDirection: "desc",
     currentSortBy: "dataTime",
 
-    setSortOnField: function (field) {
+    setSortOnField: async function (field) {
         if (KPIValueSorter.currentSortBy == field) {
             if (KPIValueSorter.currentSortDirection == "asc") {
                 KPIValueSorter.currentSortDirection = "desc";

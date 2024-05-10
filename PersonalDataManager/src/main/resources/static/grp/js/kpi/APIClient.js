@@ -1,11 +1,11 @@
 var APIClient = {
     suffix: "",
 
-    executeGetQuery: function (query, successCallback, errorCallback) {
+    executeGetQuery: async function (query, successCallback, errorCallback) {
         $.ajax({
             method: "GET",
             url: encodeURI(APIClient.url + APIClient.suffix + query),
-            async: false,
+            async: true,
             success: function (_response) {
                 if (successCallback != null) {
                     successCallback(_response);
@@ -19,7 +19,7 @@ var APIClient = {
         });
     },
     
-    executeAsyncGetQuery: function (query, successCallback, errorCallback) {        
+    executeAsyncGetQuery: async function (query, successCallback, errorCallback) {        
         $.ajax({
             method: "GET",
             url: encodeURI(APIClient.url + APIClient.suffix + query),
@@ -37,11 +37,11 @@ var APIClient = {
         });
     },
 
-    executePostQuery: function (_query, _jsonData, successCallback, errorCallback) {
+    executePostQuery: async function (_query, _jsonData, successCallback, errorCallback) {
         $.ajax({
             method: "POST",
             url: encodeURI(APIClient.url + _query),
-            async: false,
+            async: true,
             dataType: "json",
             contentType: "application/json",
             data: JSON.stringify(_jsonData),
@@ -58,11 +58,11 @@ var APIClient = {
         });
     },
 
-    executePutQuery: function (_query, _jsonData, successCallback, errorCallback) {
+    executePutQuery: async function (_query, _jsonData, successCallback, errorCallback) {
         $.ajax({
             method: "PUT",
             url: encodeURI(APIClient.url + _query),
-            async: false,
+            async: true,
             dataType: "json",
             contentType: "application/json",
             data: JSON.stringify(_jsonData),
@@ -79,11 +79,11 @@ var APIClient = {
         });
     },
 
-    executePatchQuery: function (_query, _jsonData, successCallback, errorCallback) {
+    executePatchQuery: async function (_query, _jsonData, successCallback, errorCallback) {
         $.ajax({
             method: "PATCH",
             url: encodeURI(APIClient.url + _query),
-            async: false,
+            async: true,
             dataType: "json",
             contentType: "application/json",
             data: JSON.stringify(_jsonData),
@@ -100,11 +100,11 @@ var APIClient = {
         });
     },
 
-    executeDeleteQuery: function (query, successCallback, errorCallback) {
+    executeDeleteQuery: async function (query, successCallback, errorCallback) {
         $.ajax({
             method: "DELETE",
             url: encodeURI(APIClient.url + query),
-            async: false,
+            async: true,
             success: function (_response) {
                 if (successCallback != null) {
                     successCallback(_response);

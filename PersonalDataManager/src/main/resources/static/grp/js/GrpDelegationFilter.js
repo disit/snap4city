@@ -1,7 +1,7 @@
 var GrpDelegationFilter = {
     currentSearchKey: "",
 
-    setCurrentSearchKey: function (_currentSearchKey) {
+    setCurrentSearchKey: async function (_currentSearchKey) {
         GrpDelegationFilter.currentSearchKey = _currentSearchKey;
         GrpDelegationPager.currentPage = 0;
     }
