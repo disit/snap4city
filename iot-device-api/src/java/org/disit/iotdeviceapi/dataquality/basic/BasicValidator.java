@@ -901,7 +901,7 @@ public class BasicValidator extends Validator {
         }
         catch(Exception e) {
             xlogger.log(BasicValidator.class.getName(), Level.SEVERE, "data quality check failed", e);
-            setStatus(Const.ERROR);
+            setStatus(Const.ERROR, e.getMessage());
             return currentData;
         }
     }

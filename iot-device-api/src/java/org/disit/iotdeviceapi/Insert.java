@@ -203,7 +203,16 @@ public class Insert extends HttpServlet {
                 if(cfgNode.hasAttribute(ParserConst.CFG_AT_OUTPUT_DATA) && builtData.isTriggered()) {
                     try {
                         Data outputCfgData = data.get(cfgNode.getAttribute(ParserConst.CFG_AT_OUTPUT_DATA));
-                        JSONObject outputCfg = (JSONObject)JSONValue.parse(outputCfgData.getValue()[0].toString());
+                        JSONObject outputCfg;
+                        if(outputCfgData == null) {
+                            outputCfg = new JSONObject();
+                            outputCfg.put(ParserConst.CFG_AT_OUTPUT_TYPE, "text/plain;charset=UTF-8");
+                            outputCfg.put(ParserConst.CFG_AT_OUTPUT_GLUE, "");
+                            outputCfg.put(ParserConst.CFG_AT_OUTPUT_TRAIL, "");
+                            outputCfg.put(ParserConst.CFG_AT_OUTPUT_TAIL, "");
+                        } else {
+                            outputCfg = (JSONObject)JSONValue.parse(outputCfgData.getValue()[0].toString());
+                        }
                         builtData.setOutput(outputCfg);
                     }
                     catch(Exception outputException) {
@@ -232,13 +241,13 @@ public class Insert extends HttpServlet {
             // Disconnecting loaders
             
             for(String loaderID: loaders.keySet()) {
-                if(loaders.get(loaderID).isConnected()) {
-                    loaders.get(loaderID).disconnect(getStatus());
+                Loader l = loaders.get(loaderID);
+                if(l.isConnected()) {
+                    l.disconnect(getStatus());
                 }
-                if(Const.ERROR == loaders.get(loaderID).getStatus()) {
-                    throw new IotDeviceApiException(500, MessageFormat.format("Error while disconnecting loader: {0}.", new Object[]{loaderID}));
-                }
-                else {
+                if(Const.ERROR == l.getStatus()) {
+                    throw new IotDeviceApiException(500, MessageFormat.format("Error while disconnecting loader: {0} {1}.", new Object[]{loaderID, l.getMessage()}));
+                } else {
                     xlogger.log(Insert.class.getName(), Level.FINE, "loader disconnected", MessageFormat.format("Loader {0} disconnected.", new Object[]{loaderID}));
                 }
             }

@@ -300,19 +300,47 @@ var DeviceGrpTabler = {
     },
     
     makePublic: async function (_kpiId) {
+        //       
+        
+        //
         ownData = {
             "id": _kpiId,
             "ownership": "public"
         }
-        DeviceGrpTabler.saveGrpData(ownData);
+        const elem = document.getElementById('modal_loading1');
+        if (elem !== null){
+        elem.style.display = 'inline';
+        DeviceGrpTabler.saveGrpData(ownData).then(() => {  
+            console.log('change public');
+                setTimeout(() => {
+                elem.style.display = 'none';
+                }, 2000);
+            });
+          }else{
+            DeviceGrpTabler.saveGrpData(ownData);
+        }
+        //
     },
 
     makePrivate: async function (_kpiId) {
+        //   
         ownData = {
             "id": _kpiId,
             "ownership": "private"
         }
-        DeviceGrpTabler.saveGrpData(ownData);
+        
+        const elem = document.getElementById('modal_loading1');
+        if (elem !== null){
+        elem.style.display = 'inline';
+        DeviceGrpTabler.saveGrpData(ownData).then(() => { 
+                setTimeout(() => {
+                    elem.style.display = 'none';
+                    }, 2000);
+                });
+        }else{
+            DeviceGrpTabler.saveGrpData(ownData);
+        }
+            
     },
     
     showGrpDataModal: async function (_id) {

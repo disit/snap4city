@@ -79,7 +79,7 @@ public class DeviceAlreadyExists extends Validator {
         }
         catch(Exception e) {
             xlogger.log(DeviceAlreadyExists.class.getName(), Level.SEVERE, "Device already exists", e);
-            setStatus(Const.ERROR);
+            setStatus(Const.ERROR, e.getMessage());
             return currentData;
         }
              

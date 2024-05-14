@@ -101,7 +101,7 @@ public class ValidateToken extends Validator {
         }
         catch(Exception e) {
             xlogger.log(ValidateToken.class.getName(), Level.SEVERE, "Invalid access token", e);
-            setStatus(Const.ERROR);
+            setStatus(Const.ERROR, e.getMessage());
             return currentData;
         }
              

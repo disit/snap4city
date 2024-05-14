@@ -85,7 +85,7 @@ public class VirtuosoLoader extends Loader {
             }
         }
         catch(Exception e) {
-            setStatus(Const.ERROR);
+            setStatus(Const.ERROR, e.getMessage());
             getXlogger().log(VirtuosoLoader.class.getName(), Level.SEVERE, "connect error", e);
         }
     }
@@ -431,7 +431,7 @@ public class VirtuosoLoader extends Loader {
             }
         }
         catch(Exception e) {
-            setStatus(Const.ERROR);
+            setStatus(Const.ERROR, e.getMessage());
             getXlogger().log(VirtuosoLoader.class.getName(), Level.SEVERE, "delete/insert error", e);
         }
     }

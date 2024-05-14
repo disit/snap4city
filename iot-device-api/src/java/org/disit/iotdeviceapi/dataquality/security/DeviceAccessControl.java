@@ -119,7 +119,7 @@ public class DeviceAccessControl extends Validator {
         }
         catch(Exception e) {
             xlogger.log(DeviceAccessControl.class.getName(), Level.SEVERE, "Security check failed", e);
-            setStatus(Const.ERROR);
+            setStatus(Const.ERROR, e.getMessage());
             return currentData;
         }
              

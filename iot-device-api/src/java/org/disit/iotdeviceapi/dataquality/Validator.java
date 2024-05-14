@@ -37,6 +37,7 @@ public abstract class Validator {
     public String id;
     public XLogger xlogger;
     public int status;
+    public String statusMsg = "";
     
     public Validator(String id, Element config, XLogger xlogger) {
         this.config = config;
@@ -74,11 +75,14 @@ public abstract class Validator {
         return status;
     }
 
-    public void setStatus(int status) {
+    public void setStatus(int status, String msg) {
         this.status = status;
+        this.statusMsg = msg;
     }
     
     public String toString() { 
+        return statusMsg;
+        /*
         try {
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
@@ -91,7 +95,7 @@ public abstract class Validator {
         }
         catch(Exception e) {
             return "Unable to produce a string representation for the configuration of the validator.";
-        }
+        }*/
     } 
     
 }

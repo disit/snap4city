@@ -29,7 +29,8 @@ public abstract class Loader {
     
     private Formatting formatting = null;
     private boolean connected;
-    private int status;   
+    private int status;
+    private String message = "";
     private XLogger xlogger;
     
     public Loader() {
@@ -67,6 +68,15 @@ public abstract class Loader {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+    
+    public void setStatus(int status, String msg) {
+        this.status = status;
+        this.message = msg;
+    }
+
+    public String getMessage() {
+        return message;
     }
 
     public XLogger getXlogger() {

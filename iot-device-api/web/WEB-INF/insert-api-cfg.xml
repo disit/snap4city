@@ -110,6 +110,7 @@
                         <validator id="deviceAccessControl" class="org.disit.iotdeviceapi.dataquality.security.DeviceAccessControl"/>
                         <validator id="deviceAlreadyExists" class="org.disit.iotdeviceapi.dataquality.security.DeviceAlreadyExists"/>
                         <validator id="validateToken" class="org.disit.iotdeviceapi.dataquality.security.ValidateToken"/>
+			<validator id="validateWkt" class="org.disit.iotdeviceapi.dataquality.basic.WktValidator"/>
 		</validators>
 		
 		<validations>
@@ -331,6 +332,11 @@
                                 <authorization ref="authorization"/>
                             </pick-validator>                  
                         </validate>
+                        
+			<validate ref="device-wkt-geometry">
+				<pick-validator ref="validateWkt" description="The wktGeometry must be a valid WKT string">
+				</pick-validator>
+			</validate>
 
 		</validations>
 		
