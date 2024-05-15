@@ -95,11 +95,15 @@ public class ValidateToken extends Validator {
                     return currentData;
                 }
             }
-            else {       
-                throw new IotDeviceApiException("Invalid access token");
-            }   
+            else {
+                BufferedReader br = new BufferedReader(new InputStreamReader(http.getInputStream()));
+                String r = ""; String l; while ((l = br.readLine()) != null) { r = r.concat(l);}
+
+                throw new IotDeviceApiException("Invalid access token: "+http.getResponseCode()+" ["+r+"]");
+            }
         }
         catch(Exception e) {
+            e.printStackTrace();
             xlogger.log(ValidateToken.class.getName(), Level.SEVERE, "Invalid access token", e);
             setStatus(Const.ERROR, e.getMessage());
             return currentData;
