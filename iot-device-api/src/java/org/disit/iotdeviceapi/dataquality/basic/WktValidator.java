@@ -27,20 +27,23 @@ public class WktValidator extends Validator {
 
     @Override
     public Data clean(Data currentData, HashMap<String, Data> builtData) {
-        String wkt = currentData.getValue()[0].toString();
-        System.out.println("VALIDATE WKT: "+wkt);
-        try {
-            WKTReader reader = new WKTReader();
+        Object[] value = currentData.getValue();
+        if(value != null && value.length>=1) {
+            String wkt = value[0].toString();
+            System.out.println("VALIDATE WKT: "+wkt);
+            try {
+                WKTReader reader = new WKTReader();
 
-            Geometry geometry = reader.read(wkt);
-            System.out.println("WKT type: " + geometry.getGeometryType());
-            if(!wkt.equals(wkt.toUpperCase())) {
-                System.err.println("WKT is not uppercase");
-                setStatus(Const.ERROR, "WKT is not uppercase");            
+                Geometry geometry = reader.read(wkt);
+                System.out.println("WKT type: " + geometry.getGeometryType());
+                if(!wkt.equals(wkt.toUpperCase())) {
+                    System.err.println("WKT is not uppercase");
+                    setStatus(Const.ERROR, "WKT is not uppercase");            
+                }
+            } catch (ParseException e) {
+                System.err.println("WKT is not valid: " + e.getMessage());
+                setStatus(Const.ERROR, "WKT is not valid: " + e.getMessage());
             }
-        } catch (ParseException e) {
-            System.err.println("WKT is not valid: " + e.getMessage());
-            setStatus(Const.ERROR, "WKT is not valid: " + e.getMessage());
         }
         return currentData;
     }
