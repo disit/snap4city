@@ -33,7 +33,8 @@ public class Response {
 		super();
 		this.result = result;
 		this.message = message;
-		this.kind = ("READ_ACCESS".equals(kind) || "READ_WRITE".equals(kind) || "MODIFY".equals(kind)) ? kind : "READ_ACCESS";
+		this.kind = ("READ_ACCESS".equals(kind) || "READ_WRITE".equals(kind) || 
+                        "WRITE_ONLY".equals(kind) || "MODIFY".equals(kind)) ? kind : "READ_ACCESS";
 	}
 
 	public Boolean getResult() {

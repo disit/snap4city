@@ -64,6 +64,7 @@ CREATE TABLE `profiledb`.`delegation` (
   `delete_time` datetime DEFAULT NULL,
   `delegation_details` text,
   `groupname_delegated` varchar(255) DEFAULT NULL,
+  `kind` varchar(25) DEFAULT 'READ_ACCESS',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;
 

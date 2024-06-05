@@ -565,7 +565,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		} else {
 			String sensorUri = (sensorName == null) ? elementId : prefixServiceUri + "/" + contextBrokerName + "/" + organization + "/" + elementId.substring(elementId.lastIndexOf(":") + 1) + "/" + sensorName;
 			CheckCredential d = retrieveCachedDelegation(sensorUri, elementType, requestUsername, accessToken, lang);
-			boolean canWriteByDelegation = (d.getResult() && (d.getKind().equals("READ_WRITE") || d.getKind().equals("MODIFY")));
+			boolean canWriteByDelegation = (d!=null && d.getResult() && (d.getKind().equals("READ_WRITE") || d.getKind().equals("WRITE_ONLY") || d.getKind().equals("MODIFY") ));
 
 			if (isWriteQuery(queryType, req, version, lang)) {
 				if (canWriteByDelegation) {
@@ -576,9 +576,14 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 					throw new CredentialsNotValidException(messages.getMessage("login.ko.credentialsnotvalid", null, lang));
 				}
 			} else {
-				if ((d != null) && (d.getResult())) {
-					logger.debug("Read OPERATION, got delegation");
-					return;
+				if ((d != null) && d.getResult()) {
+                                        if(!d.getKind().equals("WRITE_ONLY")) {
+                                            logger.debug("Read OPERATION, got delegation");
+                                            return;
+                                        } else {
+                                            logger.debug("Read OPERATION, delegation WRITE ONLY");
+                                            throw new CredentialsNotValidException(messages.getMessage("login.ko.credentialsnotvalid", null, lang));
+                                        }
 				} else {
 					logger.debug("Read OPERATION, not got ownership");
 					// if the sensorUri is public and not elapsed, authorize
@@ -591,10 +596,10 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 							return;
 						}
 
-					if ((d != null) && (d.getResult())) {
-						logger.debug("Got delegation");
+					if ((d != null) && (d.getResult() && !"WRITE_ONLY".equals(d.getKind()))) {
+						logger.debug("Got READ public delegation");
 					} else {
-						logger.debug("NOT Got delegation");
+						logger.debug("NOT Got READ public delegation");
 						throw new CredentialsNotValidException(messages.getMessage("login.ko.credentialsnotvalid", null, lang));
 					}
 				}

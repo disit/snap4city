@@ -37,6 +37,12 @@ var ViewManager = {
 
         $(component).empty();
         $(component).html(html);
+        ///
+        setTimeout(function(){
+          $('#modal_loading_page').modal('hide'); 
+          $('#modal_loading').modal('hide');
+        }, 1000);
+        ///
     }
 
 };

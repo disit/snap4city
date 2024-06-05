@@ -102,6 +102,19 @@ under the License.
   justify-content: center;
   align-items: center;
 }
+
+ .loader_page {
+  border: 16px solid #f3f3f3; /* Light grey */
+  border-top: 16px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 2s linear infinite;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 </style>
 <body id="mainContentCnt">
   <script type="text/javascript">
@@ -172,18 +185,32 @@ under the License.
     </div>
     <div class="modal" tabindex="-1" role="dialog" id="genericModal"></div>
   </div>
+    <!-- -->
+    <div id="loading_changing_page">
+    <div class="modal" tabindex="-1" role="dialog" id="modal_loading_page">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-body">
+                <center>
+                    <p>Changing current page<p>
+                     <div class="loader_page"></div>
+                </center>
+                <!-- -->
+            </div>
+          </div>
+        </div>
+    </div><!-- comment --> 
+    </div>
+    <!-- -->
 </body>
 <script type='text/javascript'>
     $(document).ready(function () {
-        //window.open('#modal_loading');
         $('#modal_loading').modal('show');
+        
     });
     ///
-    $(window).on('load', function(){
-        setTimeout(function(){
-            $('#modal_loading').modal('hide');
-            }, 2000);
-    });
+    
+    
 
 </script>
 </html>

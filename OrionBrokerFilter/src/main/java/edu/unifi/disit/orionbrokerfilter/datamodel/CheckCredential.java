@@ -35,7 +35,8 @@ public class CheckCredential extends DelegationPublic {
 
 		this.username = username;
 		this.result = result;
-		this.kind = ("READ_ACCESS".equals(kind) || "READ_WRITE".equals(kind) || "MODIFY".equals(kind)) ? kind : "READ_ACCESS";
+		this.kind = ("READ_ACCESS".equals(kind) || "READ_WRITE".equals(kind) || 
+                        "WRITE_ONLY".equals(kind) || "MODIFY".equals(kind)) ? kind : "READ_ACCESS";
 	}
 
 	public String getUsername() {

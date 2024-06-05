@@ -27,6 +27,7 @@ import edu.unifi.disit.datamanager.datamodel.Response;
 import edu.unifi.disit.datamanager.datamodel.ldap.LDAPUserDAO;
 import edu.unifi.disit.datamanager.datamodel.profiledb.Delegation;
 import edu.unifi.disit.datamanager.datamodel.profiledb.DelegationDAO;
+import edu.unifi.disit.datamanager.datamodel.profiledb.DelegationDAOCustom;
 import edu.unifi.disit.datamanager.datamodel.profiledb.DeviceGroupElement;
 import edu.unifi.disit.datamanager.datamodel.profiledb.DeviceGroupElementDAO;
 import edu.unifi.disit.datamanager.datamodel.profiledb.Ownership;
@@ -108,28 +109,11 @@ public class AccessServiceImpl implements IAccessService {
 
 		// if there are any delegation to elementID
 		List<Delegation> mydelegations = delegationRepo.getDelegationDelegatorFromAppId(elementID, variableName, null, false, elementType);
-		List<Delegation> modifyDelegations = new ArrayList<Delegation>();
-		List<Delegation> writeDelegations = new ArrayList<Delegation>();
-		List<Delegation> readDelegations = new ArrayList<Delegation>();
-		List<Delegation> orderedDelegations = new ArrayList<Delegation>();
-
-		for (Delegation d : mydelegations) {
-			if (d.getKind() != null && d.getKind().equals("MODIFY")) {
-				modifyDelegations.add(d);
-			}
-			if (d.getKind() != null && d.getKind().equals("READ_WRITE")) {
-				writeDelegations.add(d);
-			}
-			if (d.getKind() != null && d.getKind().equals("READ_ACCESS")) {
-				readDelegations.add(d);
-			}
-		}
-
-		orderedDelegations.addAll(modifyDelegations);
-		orderedDelegations.addAll(writeDelegations);
-		orderedDelegations.addAll(readDelegations);
-
+		List<Delegation> orderedDelegations = Delegation.orderDelegations(mydelegations);
+                
+                List<String> groupnames = null;;
 		for (Delegation d : orderedDelegations) {
+                        logger.debug("check delegation {}", d);
 			if ((d.getUsernameDelegated() != null) && (d.getUsernameDelegated().equals("ANONYMOUS"))) {
 				response.setResult(true);
 				response.setMessage(AccessRightType.PUBLIC.toString());
@@ -144,14 +128,21 @@ public class AccessServiceImpl implements IAccessService {
 				return response;
 			}
 
-			List<String> groupnames = lu.getGroupAndOUnames(username);
-			if ((d.getGroupnameDelegated() != null) && (groupnames.contains(d.getGroupnameDelegated()))) {
+			if (d.getGroupnameDelegated() != null) {
+                            if(groupnames == null) {
+                                    groupnames = lu.getGroupAndOUnames(username);
+                                    logger.debug("LDAP username {} --> groups {}",username, groupnames);
+                            }
+                            if (groupnames.contains(d.getGroupnameDelegated())) {
 				response.setResult(true);
 				response.setMessage(AccessRightType.GROUP_DELEGATED.toString());// delegation to the organization the user belong
 				response.setKind(d.getKind());
 				return response;
+                            }
 			}
 		}
+                
+                logger.debug("check devicegroups");
 
 		// if the elementId belong to any groups that got some delegation
 		List<DeviceGroupElement> dges = dgeRepo.findByElementIdAndElementTypeAndDeleteTimeIsNull(elementID, elementType);
@@ -168,6 +159,7 @@ public class AccessServiceImpl implements IAccessService {
 				if ((d.getUsernameDelegated() != null) && (d.getUsernameDelegated().equalsIgnoreCase(username))) {
 					response.setResult(true);
 					response.setMessage(AccessRightType.MYGROUP_DELEGATED.toString());
+                                        response.setKind(d.getKind());
 					return response;
 				}
 				

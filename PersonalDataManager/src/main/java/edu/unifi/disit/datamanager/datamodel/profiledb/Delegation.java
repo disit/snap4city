@@ -28,6 +28,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import java.util.ArrayList;
+import java.util.List;
 
 @JsonDeserialize(using = DelegationDeserializer.class)
 @JsonSerialize(using = DelegationSerializer.class)
@@ -87,7 +89,8 @@ public class Delegation implements Cloneable, Serializable {
 		this.deleteTime = deleteTime;
 		this.delegationDetails = delegationDetails;
 		this.groupnameDelegated = groupnameDelegated;
-		this.kind = ("READ_ACCESS".equals(kind) || "READ_WRITE".equals(kind) || "MODIFY".equals(kind)) ? kind : "READ_ACCESS";
+		this.kind = ("READ_ACCESS".equals(kind) || "READ_WRITE".equals(kind) || 
+                        "WRITE_ONLY".equals(kind) || "MODIFY".equals(kind)) ? kind : "READ_ACCESS";
 	}
 
 	public Delegation(Long id, String usernameDelegator, String usernameDelegated, String variableName, String motivation, String elementId, String elementType, Date insertTime, Date deleteTime, String delegationDetails,
@@ -104,7 +107,8 @@ public class Delegation implements Cloneable, Serializable {
 		this.deleteTime = deleteTime;
 		this.delegationDetails = delegationDetails;
 		this.groupnameDelegated = groupnameDelegated;
-		this.kind = ("READ_ACCESS".equals(kind) || "READ_WRITE".equals(kind) || "MODIFY".equals(kind)) ? kind : "READ_ACCESS";
+		this.kind = ("READ_ACCESS".equals(kind) || "READ_WRITE".equals(kind) ||
+                        "WRITE_ONLY".equals(kind) || "MODIFY".equals(kind)) ? kind : "READ_ACCESS";
 	}
 
 	public Long getId() {
@@ -212,4 +216,33 @@ public class Delegation implements Cloneable, Serializable {
 	public Delegation clone() throws CloneNotSupportedException {
 		return (Delegation) super.clone();
 	}
+                
+        public static List<Delegation> orderDelegations(List<Delegation> mydelegations) {
+		List<Delegation> modifyDelegations = new ArrayList<Delegation>();
+		List<Delegation> readWriteDelegations = new ArrayList<Delegation>();
+		List<Delegation> readDelegations = new ArrayList<Delegation>();
+                List<Delegation> writeOnlyDelegations = new ArrayList<Delegation>();
+		List<Delegation> orderedDelegations = new ArrayList<Delegation>();
+
+		for (Delegation d : mydelegations) {
+                        String kind = d.getKind();
+                        if(kind!=null) {
+                                if (kind.equals("MODIFY")) {
+                                        modifyDelegations.add(d);
+                                } else if (kind.equals("READ_WRITE")) {
+                                        readWriteDelegations.add(d);
+                                } else if (kind.equals("READ_ACCESS")) {
+                                        readDelegations.add(d);
+                                } else if(kind.equals("WRITE_ONLY")) {
+                                        writeOnlyDelegations.add(d);
+                                }
+                        }
+		}
+
+		orderedDelegations.addAll(modifyDelegations);
+		orderedDelegations.addAll(readWriteDelegations);
+		orderedDelegations.addAll(readDelegations);
+		orderedDelegations.addAll(writeOnlyDelegations);
+                return orderedDelegations;
+        }
 }
