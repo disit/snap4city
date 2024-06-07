@@ -95,7 +95,7 @@ while($o=mysqli_fetch_object($r)) {
     $o->elementDetails=json_decode($o->elementDetails);
   }
   if(isset($_REQUEST['delegations'])) {
-    $delegations = getElementDelegations($o->elementId, $o->elementType, $accessToken);
+    $delegations = getElementDelegations($o->elementId, $o->elementType, $accessToken, isset($_REQUEST['includeWriteOnly']));
     $o->usersDelegations = $delegations['users'];
     $o->orgsDelegations = $delegations['orgs'];
     $o->grpsDelegations = $delegations['grps'];

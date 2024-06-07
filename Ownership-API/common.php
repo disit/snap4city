@@ -125,7 +125,7 @@ function encryptOSSL($string) {
     return $output;
 }
 
-function getElementDelegations($elId, $elType, $accessToken) {
+function getElementDelegations($elId, $elType, $accessToken, $includeWriteOnly=false) {
   require 'config.php';
   
   $r = http_get($datamanager_api_url."/v3/apps/$elId/delegator?sourceRequest=ownership&elementType=$elType",$accessToken);
@@ -134,6 +134,8 @@ function getElementDelegations($elId, $elType, $accessToken) {
   $grps = array();
   if ($r['httpcode']==200) {
     foreach ($r['result'] as $k) {
+      if(!$includeWriteOnly && isset($k['kind']) && $k['kind'] == 'WRITE_ONLY')
+          continue;
       if(isset($k['usernameDelegated'])) {
         $users[] = encryptOSSL($k['usernameDelegated']);
       } else if(isset($k['groupnameDelegated'])){
