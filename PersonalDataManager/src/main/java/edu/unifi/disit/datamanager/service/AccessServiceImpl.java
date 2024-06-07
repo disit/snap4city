@@ -154,8 +154,9 @@ public class AccessServiceImpl implements IAccessService {
 				return response;
 			}
 
-			List<Delegation> mygroupdelegations = delegationRepo.getDelegationDelegatorFromAppId(dge.getDeviceGroupId().toString(), null, null, false, ElementType.MYGROUP.toString());
-			for (Delegation d : mygroupdelegations) {
+			List<Delegation> mygroupDelegations = delegationRepo.getDelegationDelegatorFromAppId(dge.getDeviceGroupId().toString(), null, null, false, ElementType.MYGROUP.toString());
+                        List<Delegation> orderedGroupDelegations = Delegation.orderDelegations(mygroupDelegations);
+			for (Delegation d : orderedGroupDelegations) {
 				if ((d.getUsernameDelegated() != null) && (d.getUsernameDelegated().equalsIgnoreCase(username))) {
 					response.setResult(true);
 					response.setMessage(AccessRightType.MYGROUP_DELEGATED.toString());
