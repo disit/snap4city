@@ -33,4 +33,9 @@ public interface DeviceGroupElementDAO extends JpaRepository<DeviceGroupElement,
 	List<DeviceGroupElement> findByDeviceGroupIdAndDeleteTimeIsNull(Long grpId);
 
 	List<DeviceGroupElement> findByElementIdAndElementTypeAndDeleteTimeIsNull(String elementId, String elementType);
+        
+        //boolean existsByDeviceGroupIdAndElementTypeAndElementId(Long groupId, String elementType, String elementId);
+        
+        boolean existsByDeviceGroupIdAndElementTypeAndElementIdAndDeleteTimeIsNull(Long deviceGroupId, String elementType, String elementId);
 }
+

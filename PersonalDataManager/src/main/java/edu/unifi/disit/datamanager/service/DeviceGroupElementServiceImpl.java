@@ -23,6 +23,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+///
+import java.util.stream.Collectors;
+////
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -309,7 +312,7 @@ public class DeviceGroupElementServiceImpl implements IDeviceGroupElementService
 			return new HashSet<>(sset);
 		}
 	}
-
+        /*
 	@Override
 	public List<DeviceGroupElement> addElmtsToGrp(Long grpId, List<DeviceGroupElement> elements) {
 		try {
@@ -319,7 +322,7 @@ public class DeviceGroupElementServiceImpl implements IDeviceGroupElementService
 		} catch (Exception e) {
 		}
 		return deviceGroupElementRepository.saveAll(elements);
-	}
+	}*/
 
 	@Override
 	public Page<DeviceGroupElement> findByDeviceGroupIdFiltered(Long grpId, String searchKey, PageRequest pageRequest)
@@ -448,7 +451,35 @@ public class DeviceGroupElementServiceImpl implements IDeviceGroupElementService
 		}
 		return elmt;
 	}
+        
+    @Override
+        public List<DeviceGroupElement> addElmtsToGrp(Long grpId, List<DeviceGroupElement> elements) {
+            try {
+                DeviceGroup grp = deviceGroupRepository.findById(grpId).orElse(new DeviceGroup());
+                grp.setUpdateTime(new Date());
+                deviceGroupRepository.save(grp);
 
+                // Rimuovi duplicati dalla lista di elementi
+                Set<DeviceGroupElement> uniqueElements = new HashSet<>(elements);
+
+                // Filtra gli elementi che già esistono nel database
+                List<DeviceGroupElement> elementsToSave = uniqueElements.stream()
+                    .filter(el -> !deviceGroupElementRepository.existsByDeviceGroupIdAndElementTypeAndElementIdAndDeleteTimeIsNull(
+                        grpId, el.getElementType(), el.getElementId()))
+                    .collect(Collectors.toList());
+
+                return deviceGroupElementRepository.saveAll(elementsToSave);
+            } catch (Exception e) {
+                // Gestione dell'eccezione
+                e.printStackTrace();
+                return Collections.emptyList();
+            }
+        }
+        
+        
+        
+        
+        
 	private Sensor getSensor(String sensorId) throws IOException {
 
 		String response = sensorService.getSensors(request.getParameter("accessToken"), null, null, null, sensorId);
