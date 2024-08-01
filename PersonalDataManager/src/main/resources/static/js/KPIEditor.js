@@ -2,14 +2,15 @@ var KPIEditor = {
 
     initialize: function () {
 
-        KPIEditor.keycloak = Keycloak({
+        KPIEditor.keycloak = new Keycloak({
             "realm": "master",
             "url": Authentication.url,
             "clientId": Authentication.clientId
         });
 
         KPIEditor.keycloak.init({
-            onLoad: 'check-sso'
+            onLoad: 'check-sso',
+            checkLoginIframe: (location.protocol === 'https')            
         }).success(
             function (authenticated) {
                 //console.log(authenticated);

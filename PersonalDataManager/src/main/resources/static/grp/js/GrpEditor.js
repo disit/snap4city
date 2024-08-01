@@ -1,6 +1,6 @@
 var GrpEditor = {
     initialize: async function () {
-        GrpEditor.keycloak = Keycloak({
+        GrpEditor.keycloak = new Keycloak({
             "realm": "master",
             "url": Authentication.url,
             "clientId": Authentication.clientId
@@ -8,7 +8,8 @@ var GrpEditor = {
 
         try {
             await GrpEditor.keycloak.init({
-                onLoad: 'check-sso'
+                onLoad: 'check-sso',
+                checkLoginIframe: (location.protocol === 'https')
             });
             const authenticated = GrpEditor.keycloak.authenticated;
             console.log(authenticated);
