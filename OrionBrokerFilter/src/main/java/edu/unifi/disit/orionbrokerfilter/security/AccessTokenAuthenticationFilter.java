@@ -74,12 +74,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.unifi.disit.orionbrokerfilter.datamodel.CachedCredentials;
+import edu.unifi.disit.orionbrokerfilter.datamodel.Certified;
 import edu.unifi.disit.orionbrokerfilter.datamodel.CheckCredential;
 import edu.unifi.disit.orionbrokerfilter.datamodel.Credentials;
 import edu.unifi.disit.orionbrokerfilter.datamodel.DelegationPublic;
 import edu.unifi.disit.orionbrokerfilter.datamodel.Ownership;
 import edu.unifi.disit.orionbrokerfilter.datamodel.Response;
 import edu.unifi.disit.orionbrokerfilter.exception.CredentialsNotValidException;
+import java.util.Objects;
 
 @Component
 public class AccessTokenAuthenticationFilter extends GenericFilterBean {
@@ -122,8 +124,13 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 	@Value("${multitenancy:false}")
 	private Boolean multitenancy;
 
+      	@Value("${use_blockchain:false}")
+	private Boolean use_blockchain;
+
 	@Autowired
 	private MessageSource messages;
+
+	Certified certified;
 
 	ObjectMapper objectMapper = new ObjectMapper();
 
@@ -131,6 +138,14 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 	HashMap<String, CachedCredentials> cachedCredentials = new HashMap<String, CachedCredentials>();
 	HashMap<String, Ownership> cachedCredentialsOwnership = new HashMap<String, Ownership>();
 	HashMap<String, String> cachedPksha1UsernameOwnership = new HashMap<String, String>();
+
+	static HashMap<String,Certified> certifiedDevice= new HashMap<String,Certified>();
+
+	public static Certified getCertifiedDevice(String elementId){
+		synchronized (certifiedDevice) {
+			return certifiedDevice.get(elementId);
+		}
+	}
 
 	// used for EDGE-CLOUD scenario
 	Map<String, ArrayList<CheckCredential>> cachedDelegation = new HashMap<String, ArrayList<CheckCredential>>();
@@ -236,6 +251,22 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 					logger.debug("sensor's name {} - It's a serviceURI", sensorName);
 				}
 
+                                if(use_blockchain) {
+                                        if(!certifiedDevice.containsKey(elementId)){
+                                                Certified certificationCheck=new Certified();
+                                                certificationCheck.setBearerToken("bearer "+requestedAccessToken);
+                                                certificationCheck.setDeviceType(elementType);
+                                                certificationCheck.setOrganization(organization);
+                                                synchronized (certifiedDevice){
+                                                        certifiedDevice.put(elementId,certificationCheck);
+                                                }
+                                        }
+                                        if(!Objects.equals(certifiedDevice.get(elementId).getBearerToken(), "bearer " + requestedAccessToken)){
+                                                logger.debug("Access token updated");
+                                                certifiedDevice.get(elementId).setBearerToken("bearer "+requestedAccessToken);
+                                        }
+                                }
+                                
 				checkAuthorization(organization + ":" + contextBrokerName + ":" + elementId, elementType, sensorName, k1, k2, pksha1, requestedAccessToken, queryType, version, req, request.getLocale());
 
 				logger.debug("Credentials ARE VALID");
@@ -278,7 +309,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
                               }
                             }
                         }
-                        
+
 			List<Map<String, Object>> keys = (List<Map<String, Object>>) certInfos.get("keys");
 
 			Map<String, Object> keyInfo = null;
@@ -578,9 +609,9 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 			} else {
 				if ((d != null) && d.getResult()) {
                                         if(!d.getKind().equals("WRITE_ONLY")) {
-                                            logger.debug("Read OPERATION, got delegation");
-                                            return;
-                                        } else {
+					logger.debug("Read OPERATION, got delegation");
+					return;
+				} else {
                                             logger.debug("Read OPERATION, delegation WRITE ONLY");
                                             throw new CredentialsNotValidException(messages.getMessage("login.ko.credentialsnotvalid", null, lang));
                                         }
@@ -987,6 +1018,16 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 				throw new CredentialsNotValidException(messages.getMessage("login.ko.configurationerror", null, lang));
 			}
 
+                        if(use_blockchain) {
+                                JsonNode certNode = edNode.path("Certified");
+                                if ((certNode == null) || (certNode.isNull()) || (certNode.isMissingNode())){
+                                        logger.info("Device not certified");
+                                        certifiedDevice.get(elementId).setCertified(false);
+                                }else{
+                                        logger.info("Device is certified");
+                                        certifiedDevice.get(elementId).setCertified(true);
+                                }
+                        }
 			// publickeySHA1 - can be missing
 			String pksha1 = null;
 			JsonNode pksha1Node = elNode.path("publickeySHA1");
@@ -1044,6 +1085,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 			}
 
 			toreturn = usernameNode.asText();
+
 
 		} catch (HttpClientErrorException | IOException e) {
 			logger.error("Trouble in getOwnerCredentials", e);
@@ -1143,6 +1185,8 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		params.add("accessToken", accessToken);
 		params.add("elementId", elementId);
 
+		String[] elementName = elementId.split(":");
+
 		UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(ownership_endpoint)
 				.queryParams(params)
 				.build();
@@ -1169,6 +1213,19 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 			}
 
 			toreturn = new CheckCredential(elementType, username, result, minutesElapsingCache);
+
+                        if(use_blockchain) {
+                                JsonNode elNode = els.next();
+
+                                JsonNode edNode = elNode.path("elementDetails");
+                                JsonNode certNode = edNode.path("Certified");
+                                if ((certNode == null) || (certNode.isNull())  || (certNode.isMissingNode())){
+                                        //certifiedDevice.get(elementId).setCertified(false);
+                                }else{
+                                        logger.info("Device certified");
+                                        certifiedDevice.get(elementName[2].replaceAll("\"", "")).setCertified(true);
+                                }
+                        }
 		} catch (HttpClientErrorException | IOException e) {
 			logger.error("Trouble in getOwnerCredentials", e);
 			throw new CredentialsNotValidException(messages.getMessage("login.ko.networkproblems", null, lang));

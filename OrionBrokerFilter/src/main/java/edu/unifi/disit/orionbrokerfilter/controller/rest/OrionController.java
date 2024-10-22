@@ -13,25 +13,29 @@
 package edu.unifi.disit.orionbrokerfilter.controller.rest;
 
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.annotation.PostConstruct;
 import org.apache.http.impl.NoConnectionReuseStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.unifi.disit.orionbrokerfilter.datamodel.Certified;
+import edu.unifi.disit.orionbrokerfilter.security.AccessTokenAuthenticationFilter;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -44,6 +48,10 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 
 @RestController
 public class OrionController {
@@ -53,7 +61,10 @@ public class OrionController {
 	@Value("${spring.orionbroker_endpoint}")
 	private String orionbroker_endpoint;
 
-	//@Autowired
+	@Value("${spring.blockchain_interface_endpoint}")
+	private String blockchain_endpoint;
+
+        //@Autowired
 	RestTemplate restTemplate = new RestTemplate(getClientHttpRequestFactory());
 
         static private ClientHttpRequestFactory getClientHttpRequestFactory() {
@@ -64,8 +75,8 @@ public class OrionController {
             .build();
           return new HttpComponentsClientHttpRequestFactory(client);
         }
-        
-        @PostConstruct
+
+	@PostConstruct
         private void init() {
                 logger.debug("TEST converter size: "+restTemplate.getMessageConverters().size());
                 restTemplate.getMessageConverters()
@@ -190,7 +201,6 @@ public class OrionController {
 
 		UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(orionbroker_endpoint + "/v2/subscriptions")
 				.build();
-
 		return proxyRequest(uriComponents, payload, headers, HttpMethod.POST);
 	}
 
@@ -211,10 +221,16 @@ public class OrionController {
 		logger.info("Proxying request to {} on {}", uriComponents.toString(), payload);
 
 		HttpEntity<String> entity = (payload != null) ? new HttpEntity<>(payload, headers) : new HttpEntity<>(headers);
-                
+
 		try {
 			ResponseEntity<String> response = restTemplate.exchange(uriComponents.toUri(), method, entity, String.class);
-			logger.debug(response);
+
+                        if(blockchain_endpoint!=null && !blockchain_endpoint.isEmpty()) {
+                            isCertifiable(response,payload,method,uriComponents);
+                        }
+                        
+                        logger.debug(response);
+
 			return response;
 		} catch (HttpClientErrorException e) {
 			logger.error("Trouble in proxyRequest: \nresponse:"+e.getResponseBodyAsString(), e);
@@ -222,6 +238,57 @@ public class OrionController {
 		} catch (Exception e) {
 			logger.error("BIG Trouble in proxyRequest: ", e);
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	public void isCertifiable(ResponseEntity<String> response,String payload,HttpMethod method,UriComponents uriComponents) {
+		//Do the blockchain transaction only when the request to the broker is positive (204)
+		if (response.getStatusCode() == HttpStatus.NO_CONTENT) {
+			//Do the blockchain transaction only when executing a PATCH operation to the broker
+			if (method.matches("PATCH")) {
+				//recovering {deviceId} from the URI
+				String[] parts = uriComponents.toString().split("/v2/entities/");
+				String deviceId = parts[1].split("/attrs")[0];
+				Certified certified = AccessTokenAuthenticationFilter.getCertifiedDevice(deviceId);
+				//Do the blockchain transaction only when a device is certified
+				if (certified.getCertified()) {
+					try {
+						blockchainVerification(payload, deviceId, certified);
+					} catch (JsonProcessingException e) {
+						logger.info("Problem POSTing to the blockchain API endpoint");
+					}
+				}
+			}
+		}
+	}
+	private void blockchainVerification(String payload, String deviceId,Certified certified) throws JsonProcessingException {
+		//Building headers
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("authorization", certified.getBearerToken());
+		//logger.info(certified.getBearerToken());
+
+		//Building body
+		Map<String, String> requestBody = new HashMap<String, String>();
+		requestBody.put("devName", deviceId);
+		requestBody.put("devType", certified.getDeviceType());
+		requestBody.put("strDev", payload);
+		requestBody.put("organization",certified.getOrganization());
+
+		//converting body to json
+		ObjectMapper objectMapper = new ObjectMapper();
+		String body = objectMapper.writeValueAsString(requestBody);
+
+		HttpEntity<String> entity = new HttpEntity<>(body, headers);
+
+		//logger.info("Forwarding Certification request to the Blockchain : {}", entity.toString());
+
+		ResponseEntity<String> response = restTemplate.exchange(blockchain_endpoint +"/api/adddata/", HttpMethod.POST, entity, String.class);
+
+		if(response.getStatusCode()==HttpStatus.OK){
+			logger.info("Transaction submitted successfully");
+		}else{
+			logger.info("Problem writing transaction");
 		}
 	}
 }
