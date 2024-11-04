@@ -61,7 +61,7 @@ public class OrionController {
 	@Value("${spring.orionbroker_endpoint}")
 	private String orionbroker_endpoint;
 
-	@Value("${spring.blockchain_interface_endpoint}")
+	@Value("${spring.blockchain_interface_endpoint:}") //default empty string
 	private String blockchain_endpoint;
 
         //@Autowired
