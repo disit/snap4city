@@ -1214,7 +1214,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 
 			toreturn = new CheckCredential(elementType, username, result, minutesElapsingCache);
 
-                        if(use_blockchain) {
+                        if(result && use_blockchain) {
                                 JsonNode elNode = els.next();
 
                                 JsonNode edNode = elNode.path("elementDetails");
