@@ -282,13 +282,17 @@ public class OrionController {
 		HttpEntity<String> entity = new HttpEntity<>(body, headers);
 
 		//logger.info("Forwarding Certification request to the Blockchain : {}", entity.toString());
+                
+                logger.debug("BLOCKCHAIN POST "+blockchain_endpoint +"/api/adddata/ "+entity);
 
+                long ts = System.currentTimeMillis();
 		ResponseEntity<String> response = restTemplate.exchange(blockchain_endpoint +"/api/adddata/", HttpMethod.POST, entity, String.class);
+                long te = System.currentTimeMillis();
 
 		if(response.getStatusCode()==HttpStatus.OK){
-			logger.info("Transaction submitted successfully");
+			logger.info("BLOCKCHAIN Transaction submitted successfully to "+blockchain_endpoint +"/api/adddata/ in "+(te-ts)+"ms");
 		}else{
-			logger.info("Problem writing transaction");
+			logger.info("BLOCKCHAIN Problem writing transaction "+response);
 		}
 	}
 }
