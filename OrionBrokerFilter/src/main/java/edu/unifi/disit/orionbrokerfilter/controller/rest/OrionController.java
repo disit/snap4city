@@ -28,6 +28,7 @@ import edu.unifi.disit.orionbrokerfilter.security.AccessTokenAuthenticationFilte
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
@@ -64,7 +65,7 @@ public class OrionController {
 	@Value("${spring.blockchain_interface_endpoint:}") //default empty string
 	private String blockchain_endpoint;
 
-        //@Autowired
+        @Autowired
 	RestTemplate restTemplate = new RestTemplate(getClientHttpRequestFactory());
 
         static private ClientHttpRequestFactory getClientHttpRequestFactory() {
