@@ -403,7 +403,7 @@ func getColorOld(conf map[string]string, metricName string, value float64) (int,
 			return getRGB("red")
 		}
 	} else {
-		fmt.Println("Color table not found for metric: " + metricName)
+		log.Println("Color table not found for metric: " + metricName)
 		return -1, -1, -1
 	}
 }
@@ -449,7 +449,7 @@ func getColorsMaps(conf map[string]string) map[string]map[int]map[string]interfa
 
 	// if there is an error opening the connection, handle it
 	if err != nil {
-		panic(err.Error())
+		log.Panic(err.Error())
 	}
 
 	// defer the close till after the main function has finished
@@ -458,7 +458,7 @@ func getColorsMaps(conf map[string]string) map[string]map[int]map[string]interfa
 	// get map's colors
 	results, err := db.Query("SELECT metric_name, `min`, `max`, `order`, rgb FROM heatmap.colors")
 	if err != nil {
-		panic(err.Error())
+		log.Panic(err.Error())
 	}
 	var metricName, min_b, max_b, order_b, rgb_b []byte
 	result := map[string]map[int]map[string]interface{}{}
@@ -534,6 +534,11 @@ func getBoundingCoordinates(lat_center, lon_center, bboxLengthX, bboxLengthY flo
 
 // save a GeoTIFF to disk
 func saveGeoTIFF(conf map[string]string, colorMap map[string]map[int]map[string]interface{}, filePath, mapName, metricName string, latitude, longitude, value float64, date string, bboxLengthX, bboxLengthY float64, deltaLatLon bool) bool {
+        defer func() {
+          if r := recover(); r != nil {
+             log.Println("saveGeoTIFF Recovered", r)
+          }
+        }()
 	dateString := strings.Replace(date, ":", "", -1)
 	dateString = strings.Replace(dateString, "-", "", -1)
 	dateString = strings.Replace(dateString, " ", "T", -1) + "Z"
@@ -548,7 +553,7 @@ func saveGeoTIFF(conf map[string]string, colorMap map[string]map[int]map[string]
 	r, g, b := getColor(colorMap, metricName, value)
 
 	if r == -1 {
-		fmt.Println("error getting color for metric", metricName)
+		log.Println("error getting color for metric", metricName)
 		return false
 	}
 
@@ -581,7 +586,7 @@ func saveGeoTIFF(conf map[string]string, colorMap map[string]map[int]map[string]
 
 	driver, err := gdal.GetDriverByName("GTiff")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 	dst_ds := driver.Create(fileName, ny, nx, 4, gdal.Byte, nil)
@@ -607,6 +612,11 @@ func saveGeoTIFF(conf map[string]string, colorMap map[string]map[int]map[string]
 
 // save a GeoTIFF to disk from a whole dataset, reading data from MySQL
 func saveGeoTIFFDataset(conf map[string]string, colorMap map[string]map[int]map[string]interface{}, filePath, mapName, metricName, date string) bool {
+        defer func() {
+          if r := recover(); r != nil {
+             log.Println("saveGeoTIFFDataset Recovered", r)
+          }
+        }()
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		os.Mkdir(filePath, 0700)
 	}
@@ -620,7 +630,7 @@ func saveGeoTIFFDataset(conf map[string]string, colorMap map[string]map[int]map[
 	db, err := sql.Open("mysql", conf["MySQL_username"]+":"+conf["MySQL_password"]+"@tcp("+conf["MySQL_hostname"]+":"+conf["MySQL_port"]+")/"+conf["MySQL_database"])
 
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 
@@ -628,7 +638,7 @@ func saveGeoTIFFDataset(conf map[string]string, colorMap map[string]map[int]map[
 
 	results, err := db.Query("SELECT x_length, y_length, projection FROM heatmap.metadata WHERE map_name = '" + mapName + "' AND metric_name = '" + metricName + "' AND date = '" + date + "'")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 	var xLength, yLength int
@@ -636,21 +646,21 @@ func saveGeoTIFFDataset(conf map[string]string, colorMap map[string]map[int]map[
 	for results.Next() {
 		err = results.Scan(&xLength, &yLength, &projection)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			return false
 		}
 	}
 
 	results, err = db.Query("SELECT (max(latitude)-min(latitude))/" + fmt.Sprintf("%v", yLength) + " AS ny, (max(longitude)-min(longitude))/" + fmt.Sprintf("%v", xLength) + " AS nx, max(latitude) AS ymax, min(latitude) AS ymin, max(longitude) AS xmax, min(longitude) AS xmin FROM heatmap.data WHERE map_name = '" + mapName + "' AND metric_name = '" + metricName + "' AND date = '" + date + "'")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 	var nx, ny, xmax, xmin, ymax, ymin int
 	for results.Next() {
 		err = results.Scan(&ny, &nx, &ymax, &ymin, &xmax, &xmin)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			return false
 		}
 	}
@@ -665,7 +675,7 @@ func saveGeoTIFFDataset(conf map[string]string, colorMap map[string]map[int]map[
 
 	results, err = db.Query("SELECT latitude AS y, longitude AS x, value FROM heatmap.data WHERE map_name = '" + mapName + "' AND metric_name = '" + metricName + "' AND date = '" + date + "'")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 	var x, y int
@@ -673,12 +683,12 @@ func saveGeoTIFFDataset(conf map[string]string, colorMap map[string]map[int]map[
 	for results.Next() {
 		err = results.Scan(&y, &x, &value)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			return false
 		}
 		r, g, b := getColor(colorMap, metricName, value)
 		if r == -1 {
-			fmt.Println("error getting color for metric", metricName)
+			log.Println("error getting color for metric", metricName)
 			return false
 		}
 		loc := (x-xmin)/xLength + ((ymax-y)/yLength)*nx
@@ -694,7 +704,7 @@ func saveGeoTIFFDataset(conf map[string]string, colorMap map[string]map[int]map[
 
 	driver, err := gdal.GetDriverByName("GTiff")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 	dst_ds := driver.Create(filePath+"/tmp.tiff", nx, ny, 4, gdal.Byte, nil)
@@ -718,14 +728,14 @@ func saveGeoTIFFDataset(conf map[string]string, colorMap map[string]map[int]map[
 	cmd := conf["gdalwarp_path"] + " " + filePath + "/tmp.tiff" + " " + fileName + " -t_srs \"+proj=longlat +datum=WGS84 +ellps=WGS84\""
 	_, err = exec.Command("sh", "-c", cmd).Output()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 
 	cmd = "rm " + filePath + "/tmp.tiff"
 	_, err = exec.Command("sh", "-c", cmd).Output()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 	return true
@@ -733,6 +743,11 @@ func saveGeoTIFFDataset(conf map[string]string, colorMap map[string]map[int]map[
 
 // save a GeoTIFF to disk from a whole dataset, reading data from a binary file (GRAL)
 func saveGeoTIFFDatasetFile(conf map[string]string, colorMap map[string]map[int]map[string]interface{}, filePath, mapName, metricName, date string) bool {
+        defer func() {
+          if r := recover(); r != nil {
+             log.Println("saveGeoTIFFDatasetFile Recovered", r)
+          }
+        }()
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		os.Mkdir(filePath, 0700)
 	}
@@ -746,7 +761,7 @@ func saveGeoTIFFDatasetFile(conf map[string]string, colorMap map[string]map[int]
 	db, err := sql.Open("mysql", conf["MySQL_username"]+":"+conf["MySQL_password"]+"@tcp("+conf["MySQL_hostname"]+":"+conf["MySQL_port"]+")/"+conf["MySQL_database"])
 
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 
@@ -754,7 +769,7 @@ func saveGeoTIFFDatasetFile(conf map[string]string, colorMap map[string]map[int]
 
 	results, err := db.Query("SELECT x_length, y_length, projection, insertOnDB FROM heatmap.metadata WHERE map_name = '" + mapName + "' AND metric_name = '" + metricName + "' AND date = '" + date + "'")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 	var xLength, yLength int32
@@ -762,7 +777,7 @@ func saveGeoTIFFDatasetFile(conf map[string]string, colorMap map[string]map[int]
 	for results.Next() {
 		err = results.Scan(&xLength, &yLength, &projection, &insertOnDB)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			return false
 		}
 	}
@@ -771,7 +786,7 @@ func saveGeoTIFFDatasetFile(conf map[string]string, colorMap map[string]map[int]
 		"(map_name, metric_name, latitude, longitude, value, date) " +
 		"VALUES (?,?,?,?,?,?)")
 	if err != nil {
-		panic(err.Error())
+		log.Panic(err.Error())
 	}
 
 	var ymax int32 = -1 
@@ -780,13 +795,13 @@ func saveGeoTIFFDatasetFile(conf map[string]string, colorMap map[string]map[int]
 	var xmin int32 = -1 
 	file, err := os.Open(conf["gral_data"] + "/" + mapName + dateString)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 	m := payload{}
 	fileinfo, err := file.Stat()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 	filesize := fileinfo.Size()
@@ -797,7 +812,7 @@ func saveGeoTIFFDatasetFile(conf map[string]string, colorMap map[string]map[int]
 		buffer := bytes.NewBuffer(data)
 		err = binary.Read(buffer, binary.LittleEndian, &m)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			return false
 		}
 		if m.UTMN > ymax || ymax == -1 {
@@ -826,12 +841,12 @@ func saveGeoTIFFDatasetFile(conf map[string]string, colorMap map[string]map[int]
 	file, err = os.Open(conf["gral_data"] + "/" + mapName + dateString)
 	defer file.Close()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 	fileinfo, err = file.Stat()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 	filesize = fileinfo.Size()
@@ -845,7 +860,7 @@ func saveGeoTIFFDatasetFile(conf map[string]string, colorMap map[string]map[int]
 		}
 		r, g, b := getColor(colorMap, metricName, float64(m.Value))
 		if r == -1 {
-			fmt.Println("error getting color for metric", metricName)
+			log.Println("error getting color for metric", metricName)
 			return false
 		}
 		loc := (m.UTME-xmin)/xLength + ((ymax-m.UTMN)/yLength)*int32(nx)
@@ -859,7 +874,7 @@ func saveGeoTIFFDatasetFile(conf map[string]string, colorMap map[string]map[int]
 			if latitude >= 60.15500512818767 && latitude <= 60.16173190973275 && longitude >= 24.911051048489185 && longitude <= 24.92336775228557 {
 				_, err = data_stmt.Exec(mapName, metricName, float64(m.UTME), float64(m.UTMN), m.Value, date)
 				if err != nil {
-					fmt.Println(err)
+					log.Println(err)
 					return false
 				}
 			}
@@ -872,7 +887,7 @@ func saveGeoTIFFDatasetFile(conf map[string]string, colorMap map[string]map[int]
 
 	driver, err := gdal.GetDriverByName("GTiff")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 	dst_ds := driver.Create(filePath+"/tmp.tiff", nx, ny, 4, gdal.Byte, nil)
@@ -896,41 +911,41 @@ func saveGeoTIFFDatasetFile(conf map[string]string, colorMap map[string]map[int]
 	cmd := conf["gdalwarp_path"] + " " + filePath + "/tmp.tiff" + " " + filePath + "/uncompressed.tiff -t_srs \"+proj=longlat +datum=WGS84 +ellps=WGS84\""
 	_, err = exec.Command("sh", "-c", cmd).Output()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 
 	cmd = "rm " + filePath + "/tmp.tiff"
 	_, err = exec.Command("sh", "-c", cmd).Output()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 
 	cmd = conf["gdal_translate_path"] + " -co compress=deflate -co zlevel=9 -co tiled=yes -co NUM_THREADS=ALL_CPUS --config GDAL_CACHEMAX 512 -of GTiff " + filePath + "/uncompressed.tiff" + " " + fileName
 	_, err = exec.Command("sh", "-c", cmd).Output()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 
 	cmd = "rm " + filePath + "/uncompressed.tiff"
 	_, err = exec.Command("sh", "-c", cmd).Output()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 
 	cmd = "tar cJvf " + conf["gral_data"] + "/" + mapName + dateString + ".tar.xz" + " " + conf["gral_data"] + "/" + mapName + dateString
 	_, err = exec.Command("sh", "-c", cmd).Output()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	} else {
 		cmd = "rm " + conf["gral_data"] + "/" + mapName + dateString
 		_, err := exec.Command("sh", "-c", cmd).Output()
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			return false
 		}
 	}
@@ -939,6 +954,11 @@ func saveGeoTIFFDatasetFile(conf map[string]string, colorMap map[string]map[int]
 
 // save a GeoTIFF to disk from a whole dataset, reading data from a text file (csv)
 func saveGeoTIFFDatasetWGS84TextFile(conf map[string]string, colorMap map[string]map[int]map[string]interface{}, filePath, mapName, metricName, job_token, date string) bool {
+        defer func() {
+          if r := recover(); r != nil {
+             log.Println("saveGeoTIFFDatasetWGS84TextFile Recovered", r)
+          }
+        }()
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		os.Mkdir(filePath, 0700)
 	}
@@ -952,7 +972,7 @@ func saveGeoTIFFDatasetWGS84TextFile(conf map[string]string, colorMap map[string
 	db, err := sql.Open("mysql", conf["MySQL_username"]+":"+conf["MySQL_password"]+"@tcp("+conf["MySQL_hostname"]+":"+conf["MySQL_port"]+")/"+conf["MySQL_database"])
 
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 
@@ -960,7 +980,7 @@ func saveGeoTIFFDatasetWGS84TextFile(conf map[string]string, colorMap map[string
 
 	results, err := db.Query("SELECT x_length, y_length, projection FROM heatmap.metadata WHERE map_name = '" + mapName + "' AND metric_name = '" + metricName + "' AND date = '" + date + "'")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 	var xLength, yLength int32
@@ -968,7 +988,7 @@ func saveGeoTIFFDatasetWGS84TextFile(conf map[string]string, colorMap map[string
 	for results.Next() {
 		err = results.Scan(&xLength, &yLength, &projection)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			return false
 		}
 	}
@@ -979,7 +999,7 @@ func saveGeoTIFFDatasetWGS84TextFile(conf map[string]string, colorMap map[string
 
 	file, err := os.Open(conf["copernicus_data"] + "/" + job_token + "/" + mapName + dateString + ".csv")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 
@@ -1051,7 +1071,7 @@ func saveGeoTIFFDatasetWGS84TextFile(conf map[string]string, colorMap map[string
 			value, _ := strconv.ParseFloat(record[2], 64)
 			r, g, b := getColor(colorMap, metricName, value)
 			if r == -1 {
-				fmt.Println("the color is missing for this metricName", metricName)
+				log.Println("the color is missing for this metricName", metricName, " value ", value)
 				return false
 			}
 			loc := (UTME-xmin)/xLength + ((ymax-UTMN)/yLength)*int32(nx)
@@ -1067,7 +1087,7 @@ func saveGeoTIFFDatasetWGS84TextFile(conf map[string]string, colorMap map[string
 
 	driver, err := gdal.GetDriverByName("GTiff")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 	dst_ds := driver.Create(filePath+"/tmp.tiff", nx, ny, 4, gdal.Byte, nil)
@@ -1091,28 +1111,28 @@ func saveGeoTIFFDatasetWGS84TextFile(conf map[string]string, colorMap map[string
 	cmd := conf["gdalwarp_path"] + " " + filePath + "/tmp.tiff" + " " + filePath + "/uncompressed.tiff -t_srs \"+proj=longlat +datum=WGS84 +ellps=WGS84\""
 	_, err = exec.Command("sh", "-c", cmd).Output()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 
 	cmd = "rm " + filePath + "/tmp.tiff"
 	_, err = exec.Command("sh", "-c", cmd).Output()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 
 	cmd = conf["gdal_translate_path"] + " -co compress=deflate -co zlevel=9 -co tiled=yes -co NUM_THREADS=ALL_CPUS --config GDAL_CACHEMAX 512 -of GTiff " + filePath + "/uncompressed.tiff" + " " + fileName
 	_, err = exec.Command("sh", "-c", cmd).Output()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 
 	cmd = "rm " + filePath + "/uncompressed.tiff"
 	_, err = exec.Command("sh", "-c", cmd).Output()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 
@@ -1121,6 +1141,11 @@ func saveGeoTIFFDatasetWGS84TextFile(conf map[string]string, colorMap map[string
 
 // save a GeoTIFF to disk from a whole dataset, reading data from MySQL
 func saveGeoTIFFDatasetMySQL(conf map[string]string, colorMap map[string]map[int]map[string]interface{}, filePath, mapName, metricName, date string) bool {
+        defer func() {
+          if r := recover(); r != nil {
+             log.Println("saveGeoTIFFDatasetMySQL Recovered", r)
+          }
+        }()
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		os.Mkdir(filePath, 0700)
 	}
@@ -1134,7 +1159,7 @@ func saveGeoTIFFDatasetMySQL(conf map[string]string, colorMap map[string]map[int
 	db, err := sql.Open("mysql", conf["MySQL_username"]+":"+conf["MySQL_password"]+"@tcp("+conf["MySQL_hostname"]+":"+conf["MySQL_port"]+")/"+conf["MySQL_database"])
 
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 
@@ -1142,7 +1167,7 @@ func saveGeoTIFFDatasetMySQL(conf map[string]string, colorMap map[string]map[int
 
 	results, err := db.Query("SELECT FLOOR(x_length), FLOOR(y_length), projection FROM heatmap.metadata WHERE map_name = '" + mapName + "' AND metric_name = '" + metricName + "' AND date = '" + date + "'")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 	var xLength, yLength int32
@@ -1150,14 +1175,14 @@ func saveGeoTIFFDatasetMySQL(conf map[string]string, colorMap map[string]map[int
 	for results.Next() {
 		err = results.Scan(&xLength, &yLength, &projection)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			return false
 		}
 	}
 
 	results, err = db.Query("SELECT FLOOR(MAX(latitude)) AS xmax, FLOOR(MIN(latitude)) AS xmin, FLOOR(MAX(longitude)) AS ymax, FLOOR(MIN(longitude)) AS ymin FROM heatmap.data WHERE map_name = '" + mapName + "' AND metric_name = '" + metricName + "' AND date = '" + date + "'")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 	var ymax int32 
@@ -1167,7 +1192,7 @@ func saveGeoTIFFDatasetMySQL(conf map[string]string, colorMap map[string]map[int
 	for results.Next() {
 		err = results.Scan(&xmax, &xmin, &ymax, &ymin)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			return false
 		}
 	}
@@ -1182,7 +1207,7 @@ func saveGeoTIFFDatasetMySQL(conf map[string]string, colorMap map[string]map[int
 
 	results, err = db.Query("SELECT FLOOR(latitude) AS UTME, FLOOR(longitude) AS UTMN, value FROM heatmap.data WHERE map_name = '" + mapName + "' AND metric_name = '" + metricName + "' AND date = '" + date + "'")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 	var UTME, UTMN int32
@@ -1190,12 +1215,12 @@ func saveGeoTIFFDatasetMySQL(conf map[string]string, colorMap map[string]map[int
 	for results.Next() {
 		err = results.Scan(&UTME, &UTMN, &Value)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			return false
 		}
 		r, g, b := getColor(colorMap, metricName, float64(Value))
 		if r == -1 {
-			fmt.Println("error getting color for metric", metricName)
+			log.Println("error getting color for metric", metricName, "value", Value)
 			return false
 		}
 		loc := (UTME-xmin)/xLength + ((ymax-UTMN)/yLength)*int32(nx)
@@ -1211,7 +1236,7 @@ func saveGeoTIFFDatasetMySQL(conf map[string]string, colorMap map[string]map[int
 
 	driver, err := gdal.GetDriverByName("GTiff")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 	dst_ds := driver.Create(filePath+"/tmp.tiff", nx, ny, 4, gdal.Byte, nil)
@@ -1231,33 +1256,38 @@ func saveGeoTIFFDatasetMySQL(conf map[string]string, colorMap map[string]map[int
 	alpha_band := dst_ds.RasterBand(4)
 	alpha_band.IO(gdal.Write, 0, 0, nx, ny, alpha, nx, ny, 0, 0) 
 	dst_ds.Close()
+	log.Println("saved "+filePath+"/tmp.tiff")
 
 	cmd := conf["gdalwarp_path"] + " " + filePath + "/tmp.tiff" + " " + filePath + "/uncompressed.tiff -t_srs \"+proj=longlat +datum=WGS84 +ellps=WGS84\""
-	_, err = exec.Command("sh", "-c", cmd).Output()
+	log.Println("exec "+cmd)
+	var out []byte
+	out, err = exec.Command("sh", "-c", cmd).Output()
 	if err != nil {
-		fmt.Println(err)
-		fmt.Println(cmd)
+		log.Println(err)
+		log.Println(cmd)
 		return false
 	}
-
+        log.Printf("out:\n%s\n",out)
 	cmd = "rm " + filePath + "/tmp.tiff"
 	_, err = exec.Command("sh", "-c", cmd).Output()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 
 	cmd = conf["gdal_translate_path"] + " -co compress=deflate -co zlevel=9 -co tiled=yes -co NUM_THREADS=ALL_CPUS --config GDAL_CACHEMAX 512 -of GTiff " + filePath + "/uncompressed.tiff" + " " + fileName
-	_, err = exec.Command("sh", "-c", cmd).Output()
+	log.Println("exec "+cmd)
+	out, err = exec.Command("sh", "-c", cmd).Output()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
+        log.Printf("out:\n%s\n",out)
 
 	cmd = "rm " + filePath + "/uncompressed.tiff"
 	_, err = exec.Command("sh", "-c", cmd).Output()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 
@@ -1266,6 +1296,11 @@ func saveGeoTIFFDatasetMySQL(conf map[string]string, colorMap map[string]map[int
 
 // save a GeoTIFF to disk from a whole dataset, reading data from a binary file (GRAL)
 func saveGeoTIFFDatasetTextFile(conf map[string]string, colorMap map[string]map[int]map[string]interface{}, filePath, mapName, metricName, date string) bool {
+        defer func() {
+          if r := recover(); r != nil {
+             log.Println("saveGeoTIFFDatasetTextFile Recovered", r)
+          }
+        }()
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		os.Mkdir(filePath, 0700)
 	}
@@ -1279,7 +1314,7 @@ func saveGeoTIFFDatasetTextFile(conf map[string]string, colorMap map[string]map[
 	db, err := sql.Open("mysql", conf["MySQL_username"]+":"+conf["MySQL_password"]+"@tcp("+conf["MySQL_hostname"]+":"+conf["MySQL_port"]+")/"+conf["MySQL_database"])
 
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 
@@ -1287,7 +1322,7 @@ func saveGeoTIFFDatasetTextFile(conf map[string]string, colorMap map[string]map[
 
 	results, err := db.Query("SELECT x_length, y_length, projection, insertOnDB FROM heatmap.metadata WHERE map_name = '" + mapName + "' AND metric_name = '" + metricName + "' AND date = '" + date + "'")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 	var xLength, yLength int32
@@ -1295,7 +1330,7 @@ func saveGeoTIFFDatasetTextFile(conf map[string]string, colorMap map[string]map[
 	for results.Next() {
 		err = results.Scan(&xLength, &yLength, &projection, &insertOnDB)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			return false
 		}
 	}
@@ -1304,16 +1339,16 @@ func saveGeoTIFFDatasetTextFile(conf map[string]string, colorMap map[string]map[
 		"(map_name, metric_name, latitude, longitude, value, date) " +
 		"VALUES (?,?,?,?,?,?)")
 	if err != nil {
-		panic(err.Error())
+		log.Panic(err.Error())
 	}
 
 	var ymax int32 = -1 
 	var ymin int32 = -1 
 	var xmax int32 = -1 
-	var xmin int32 = -1 g
+	var xmin int32 = -1 
 	file, err := os.Open(conf["gral_data"] + "/" + mapName + dateString)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 	scanner := bufio.NewScanner(file)
@@ -1323,7 +1358,7 @@ func saveGeoTIFFDatasetTextFile(conf map[string]string, colorMap map[string]map[
 		UTME, err := strconv.Atoi(UTME_UTMN_Value[0])
 		UTMN, err := strconv.Atoi(UTME_UTMN_Value[1])
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			return false
 		}
 		if int32(UTMN) > ymax || ymax == -1 {
@@ -1352,7 +1387,7 @@ func saveGeoTIFFDatasetTextFile(conf map[string]string, colorMap map[string]map[
 	file, err = os.Open(conf["gral_data"] + "/" + mapName + dateString)
 	defer file.Close()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 	scanner = bufio.NewScanner(file)
@@ -1363,12 +1398,12 @@ func saveGeoTIFFDatasetTextFile(conf map[string]string, colorMap map[string]map[
 		UTMN, err := strconv.Atoi(UTME_UTMN_Value[1])
 		Value, err := strconv.ParseFloat(UTME_UTMN_Value[2], 64)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			return false
 		}
 		r, g, b := getColor(colorMap, metricName, Value)
 		if r == -1 {
-			fmt.Println("error getting color for metric", metricName)
+			log.Println("error getting color for metric", metricName)
 			return false
 		}
 		loc := (int32(UTME)-xmin)/xLength + ((ymax-int32(UTMN))/yLength)*int32(nx)
@@ -1382,7 +1417,7 @@ func saveGeoTIFFDatasetTextFile(conf map[string]string, colorMap map[string]map[
 			if latitude >= 60.15500512818767 && latitude <= 60.16173190973275 && longitude >= 24.911051048489185 && longitude <= 24.92336775228557 {
 				_, err = data_stmt.Exec(mapName, metricName, latitude, longitude, Value, date)
 				if err != nil {
-					fmt.Println(err)
+					log.Println(err)
 					return false
 				}
 			}
@@ -1395,7 +1430,7 @@ func saveGeoTIFFDatasetTextFile(conf map[string]string, colorMap map[string]map[
 
 	driver, err := gdal.GetDriverByName("GTiff")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 	dst_ds := driver.Create(filePath+"/tmp.tiff", nx, ny, 4, gdal.Byte, nil)
@@ -1419,41 +1454,41 @@ func saveGeoTIFFDatasetTextFile(conf map[string]string, colorMap map[string]map[
 	cmd := conf["gdalwarp_path"] + " " + filePath + "/tmp.tiff" + " " + filePath + "/uncompressed.tiff -t_srs \"+proj=longlat +datum=WGS84 +ellps=WGS84\""
 	_, err = exec.Command("sh", "-c", cmd).Output()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 
 	cmd = "rm " + filePath + "/tmp.tiff"
 	_, err = exec.Command("sh", "-c", cmd).Output()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 
 	cmd = conf["gdal_translate_path"] + " -co compress=deflate -co zlevel=9 -co tiled=yes -co NUM_THREADS=ALL_CPUS --config GDAL_CACHEMAX 512 -of GTiff " + filePath + "/uncompressed.tiff" + " " + fileName
 	_, err = exec.Command("sh", "-c", cmd).Output()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 
 	cmd = "rm " + filePath + "/uncompressed.tiff"
 	_, err = exec.Command("sh", "-c", cmd).Output()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 
 	cmd = "tar cJvf " + conf["gral_data"] + "/" + mapName + dateString + ".tar.xz" + " " + conf["gral_data"] + "/" + mapName + dateString
 	_, err = exec.Command("sh", "-c", cmd).Output()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	} else {
 		cmd = "rm " + conf["gral_data"] + "/" + mapName + dateString
 		_, err := exec.Command("sh", "-c", cmd).Output()
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			return false
 		}
 	}
@@ -1473,14 +1508,14 @@ func saveGeoTIFFsDeltaLatLonOld(conf map[string]string, colorMap map[string]map[
 	db, err := sql.Open("mysql", conf["MySQL_username"]+":"+conf["MySQL_password"]+"@tcp("+conf["MySQL_hostname"]+":"+conf["MySQL_port"]+")/"+conf["MySQL_database"])
 
 	if err != nil {
-		panic(err.Error())
+		log.Panic(err.Error())
 	}
 
 	defer db.Close()
 
 	results, err := db.Query("SELECT latitude FROM heatmap.data WHERE map_name = '" + mapName + "' AND metric_name = '" + metricName + "' AND clustered = " + conf["clustered"] + " AND date = '" + date + "' ORDER BY latitude")
 	if err != nil {
-		panic(err.Error())
+		log.Panic(err.Error())
 	}
 
 	var lat float64
@@ -1490,7 +1525,7 @@ func saveGeoTIFFsDeltaLatLonOld(conf map[string]string, colorMap map[string]map[
 	for results.Next() {
 		err = results.Scan(&lat)
 		if err != nil {
-			panic(err.Error())
+			log.Panic(err.Error())
 		}
 		if latitude != -100 && latitude != lat {
 			lat_delta := math.Abs(latitude - lat)
@@ -1503,7 +1538,7 @@ func saveGeoTIFFsDeltaLatLonOld(conf map[string]string, colorMap map[string]map[
 
 	results, err = db.Query("SELECT longitude FROM heatmap.data WHERE map_name = '" + mapName + "' AND metric_name = '" + metricName + "' AND clustered = " + conf["clustered"] + " AND date = '" + date + "' ORDER BY longitude")
 	if err != nil {
-		panic(err.Error())
+		log.Panic(err.Error())
 	}
 
 	var lon float64
@@ -1513,7 +1548,7 @@ func saveGeoTIFFsDeltaLatLonOld(conf map[string]string, colorMap map[string]map[
 	for results.Next() {
 		err = results.Scan(&lon)
 		if err != nil {
-			panic(err.Error())
+			log.Panic(err.Error())
 		}
 		if longitude != -200 && longitude != lon {
 			lon_delta := math.Abs(longitude - lon)
@@ -1526,7 +1561,7 @@ func saveGeoTIFFsDeltaLatLonOld(conf map[string]string, colorMap map[string]map[
 
 	results, err = db.Query("SELECT latitude, longitude, value FROM heatmap.data WHERE map_name = '" + mapName + "' AND metric_name = '" + metricName + "' AND clustered = " + conf["clustered"] + " AND date = '" + date + "'")
 	if err != nil {
-		panic(err.Error())
+		log.Panic(err.Error())
 	}
 
 	var value float64
@@ -1534,7 +1569,7 @@ func saveGeoTIFFsDeltaLatLonOld(conf map[string]string, colorMap map[string]map[
 	for results.Next() {
 		err = results.Scan(&lat, &lon, &value)
 		if err != nil {
-			panic(err.Error())
+			log.Panic(err.Error())
 		}
 		latitude = lat
 		longitude = lon
@@ -1561,7 +1596,7 @@ func saveGeoTIFFsDeltaLatLon(conf map[string]string, colorMap map[string]map[int
 	db, err := sql.Open("mysql", conf["MySQL_username"]+":"+conf["MySQL_password"]+"@tcp("+conf["MySQL_hostname"]+":"+conf["MySQL_port"]+")/"+conf["MySQL_database"])
 
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 
@@ -1569,7 +1604,7 @@ func saveGeoTIFFsDeltaLatLon(conf map[string]string, colorMap map[string]map[int
 
 	results, err := db.Query("SELECT max(latitude), min(latitude), max(longitude), min(longitude) FROM heatmap.data WHERE map_name = '" + mapName + "' AND metric_name = '" + metricName + "' AND clustered = " + conf["clustered"] + " AND date = '" + date + "' ORDER BY latitude")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 
@@ -1582,7 +1617,7 @@ func saveGeoTIFFsDeltaLatLon(conf map[string]string, colorMap map[string]map[int
 
 	results, err = db.Query("SELECT projection FROM heatmap.metadata WHERE map_name = '" + mapName + "' AND metric_name = '" + metricName + "' AND clustered = " + conf["clustered"] + " AND date = '" + date + "'")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 
@@ -1597,7 +1632,7 @@ func saveGeoTIFFsDeltaLatLon(conf map[string]string, colorMap map[string]map[int
 
 	results, err = db.Query("SELECT DISTINCT(latitude) FROM heatmap.data WHERE map_name = '" + mapName + "' AND metric_name = '" + metricName + "' AND clustered = " + conf["clustered"] + " AND date = '" + date + "' ORDER BY latitude")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 
@@ -1608,7 +1643,7 @@ func saveGeoTIFFsDeltaLatLon(conf map[string]string, colorMap map[string]map[int
 	for results.Next() {
 		err = results.Scan(&lat)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			return false
 		}
 		if latitude != -100 && latitude != lat {
@@ -1622,7 +1657,7 @@ func saveGeoTIFFsDeltaLatLon(conf map[string]string, colorMap map[string]map[int
 
 	results, err = db.Query("SELECT DISTINCT(longitude) FROM heatmap.data WHERE map_name = '" + mapName + "' AND metric_name = '" + metricName + "' AND clustered = " + conf["clustered"] + " AND date = '" + date + "' ORDER BY longitude")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 
@@ -1633,7 +1668,7 @@ func saveGeoTIFFsDeltaLatLon(conf map[string]string, colorMap map[string]map[int
 	for results.Next() {
 		err = results.Scan(&lon)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			return false
 		}
 		if longitude != -200 && longitude != lon {
@@ -1661,7 +1696,7 @@ func saveGeoTIFFsDeltaLatLon(conf map[string]string, colorMap map[string]map[int
 
 	results, err = db.Query("SELECT latitude, longitude, value FROM heatmap.data WHERE map_name = '" + mapName + "' AND metric_name = '" + metricName + "' AND clustered = " + conf["clustered"] + " AND date = '" + date + "'")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 
@@ -1670,12 +1705,12 @@ func saveGeoTIFFsDeltaLatLon(conf map[string]string, colorMap map[string]map[int
 	for results.Next() {
 		err = results.Scan(&lat, &lon, &value)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			return false
 		}
 		r, g, b := getColor(colorMap, metricName, value)
 		if r == -1 {
-			fmt.Println("the color is missing for this metricName", metricName)
+			log.Println("the color is missing for this metricName", metricName)
 			return false
 		}
 		loc := int32((lon-minLon)/lon_delta_min) + int32((maxLat-lat)/lat_delta_min)*int32(nx)
@@ -1691,7 +1726,7 @@ func saveGeoTIFFsDeltaLatLon(conf map[string]string, colorMap map[string]map[int
 
 	driver, err := gdal.GetDriverByName("GTiff")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 	dst_ds := driver.Create(filePath+"/uncompressed.tiff", nx, ny, 4, gdal.Byte, nil)
@@ -1715,14 +1750,14 @@ func saveGeoTIFFsDeltaLatLon(conf map[string]string, colorMap map[string]map[int
 	cmd := conf["gdal_translate_path"] + " -co compress=deflate -co zlevel=9 -co tiled=yes -co NUM_THREADS=ALL_CPUS --config GDAL_CACHEMAX 512 -of GTiff " + filePath + "/uncompressed.tiff" + " " + fileName
 	_, err = exec.Command("sh", "-c", cmd).Output()
 	if err != nil {
-		fmt.Println("error compressing GeoTIFF")
+		log.Println("error compressing GeoTIFF")
 		return false
 	}
 
 	cmd = "rm " + filePath + "/uncompressed.tiff"
 	_, err = exec.Command("sh", "-c", cmd).Output()
 	if err != nil {
-		fmt.Println("error removing uncompressed GeoTIFF")
+		log.Println("error removing uncompressed GeoTIFF")
 		return false
 	}
 
@@ -1750,7 +1785,7 @@ func saveGeoTIFFs(conf map[string]string, colorMap map[string]map[int]map[string
 	db, err := sql.Open("mysql", conf["MySQL_username"]+":"+conf["MySQL_password"]+"@tcp("+conf["MySQL_hostname"]+":"+conf["MySQL_port"]+")/"+conf["MySQL_database"])
 
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 
@@ -1762,14 +1797,14 @@ func saveGeoTIFFs(conf map[string]string, colorMap map[string]map[int]map[string
 
 	results, err := db.Query("SELECT latitude, longitude, value FROM heatmap.data WHERE map_name = '" + mapName + "' AND metric_name = '" + metricName + "' AND clustered = " + conf["clustered"] + " AND date = '" + date + "'")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 
 	for results.Next() {
 		err = results.Scan(&latitude, &longitude, &value)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			return false
 		}
 		save = saveGeoTIFF(conf, colorMap, filePath, mapName, metricName, latitude, longitude, value, date, xLength, yLength, false)
@@ -1793,7 +1828,7 @@ func saveGeoTIFFsNetCDFFile(conf map[string]string, colorMap map[string]map[int]
 
 	ds, err := netcdf.OpenFile(NetCDFFile, netcdf.NOWRITE)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 	defer ds.Close()
@@ -1808,43 +1843,43 @@ func saveGeoTIFFsNetCDFFile(conf map[string]string, colorMap map[string]map[int]
 	}
 	lat_v, err := ds.Var("lat")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 	lon_v, err := ds.Var("lon")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 	index_v, err := ds.Var(indexName)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 	lat, err := netcdf.GetFloat32s(lat_v)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 	lon, err := netcdf.GetFloat32s(lon_v)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 	index, err := netcdf.GetFloat32s(index_v)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 	index_dims, err := index_v.LenDims()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 
 	var ymax float32 = -1 
 	var ymin float32 = -1 
-	var xmax float32 = -1 e
+	var xmax float32 = -1 
 	var xmin float32 = -1 
 	for lat_index := 0; lat_index < int(index_dims[1]); lat_index++ {
 		for lon_index := 0; lon_index < int(index_dims[2]); lon_index++ {
@@ -1866,7 +1901,7 @@ func saveGeoTIFFsNetCDFFile(conf map[string]string, colorMap map[string]map[int]
 	db, err := sql.Open("mysql", conf["MySQL_username"]+":"+conf["MySQL_password"]+"@tcp("+conf["MySQL_hostname"]+":"+conf["MySQL_port"]+")/"+conf["MySQL_database"])
 
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 
@@ -1874,7 +1909,7 @@ func saveGeoTIFFsNetCDFFile(conf map[string]string, colorMap map[string]map[int]
 
 	results, err := db.Query("SELECT projection FROM heatmap.metadata WHERE map_name = '" + mapName + "' AND metric_name = '" + metricName + "' AND clustered = " + conf["clustered"] + " AND date = '" + date + "'")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 
@@ -1931,7 +1966,7 @@ func saveGeoTIFFsNetCDFFile(conf map[string]string, colorMap map[string]map[int]
 			for lon_index := 0; lon_index < int(index_dims[2]); lon_index++ {
 				r, g, b := getColor(colorMap, metricName, float64(index[time_index*lat_index*lon_index]))
 				if r == -1 {
-					fmt.Println("error getting color for metric", metricName)
+					log.Println("error getting color for metric", metricName)
 					return false
 				}
 				loc := int32((lon[lon_index]-xmin)/xLength) + int32((ymax-lat[lat_index])/yLength)*int32(nx)
@@ -1949,7 +1984,7 @@ func saveGeoTIFFsNetCDFFile(conf map[string]string, colorMap map[string]map[int]
 
 	driver, err := gdal.GetDriverByName("GTiff")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 	dst_ds := driver.Create(filePath+"/tmp.tiff", nx, ny, 4, gdal.Byte, nil)
@@ -1957,7 +1992,7 @@ func saveGeoTIFFsNetCDFFile(conf map[string]string, colorMap map[string]map[int]
 	spatialRef := gdal.CreateSpatialReference("") 
 	spatialRef.FromEPSG(projection)               
 	srString, err := spatialRef.ToWKT()
-	dst_ds.SetProjection(srString)       ile
+	dst_ds.SetProjection(srString) 
 	dst_ds.SetGeoTransform(geotransform) 
 
 	r_band := dst_ds.RasterBand(1)
@@ -1973,28 +2008,28 @@ func saveGeoTIFFsNetCDFFile(conf map[string]string, colorMap map[string]map[int]
 	cmd := conf["gdalwarp_path"] + " " + filePath + "/tmp.tiff" + " " + filePath + "/uncompressed.tiff -t_srs \"+proj=longlat +datum=WGS84 +ellps=WGS84\""
 	_, err = exec.Command("sh", "-c", cmd).Output()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 
 	cmd = "rm " + filePath + "/tmp.tiff"
 	_, err = exec.Command("sh", "-c", cmd).Output()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 
 	cmd = conf["gdal_translate_path"] + " -co compress=deflate -co zlevel=9 -co tiled=yes -co NUM_THREADS=ALL_CPUS --config GDAL_CACHEMAX 512 -of GTiff " + filePath + "/uncompressed.tiff" + " " + fileName
 	_, err = exec.Command("sh", "-c", cmd).Output()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 
 	cmd = "rm " + filePath + "/uncompressed.tiff"
 	_, err = exec.Command("sh", "-c", cmd).Output()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false
 	}
 	return true
@@ -2013,23 +2048,30 @@ func floatInSlice(a float64, list []float64) bool {
 func indexMap(conf map[string]string, colorMap map[string]map[int]map[string]interface{}, archive, mapName, metricName string, filePath, date, geoTIFF string, xLength, yLength float64, projection, file int, binary int, job_token, fileType string) bool {
 	var save bool
 	if projection != 4326 && projection != 0 && file == 1 && binary == 1 && job_token == "" { 
+		log.Println("saveGeoTIFFDatasetFile")
 		save = saveGeoTIFFDatasetFile(conf, colorMap, filePath, mapName, metricName, date)
 	} else if projection != 4326 && projection != 0 && file == 1 && binary == 0 && job_token == "" { 
+		log.Println("saveGeoTIFFDatasetTextFile")
 		save = saveGeoTIFFDatasetTextFile(conf, colorMap, filePath, mapName, metricName, date)
 	} else if projection != 4326 && file == 1 && binary == 0 && job_token != "" { 
+		log.Println("saveGeoTIFFDatasetWGS84TextFile")
 		save = saveGeoTIFFDatasetWGS84TextFile(conf, colorMap, filePath, mapName, metricName, job_token, date)
 	} else if projection != 4326 && projection != 0 && file == 0 && binary == 0 { 
+		log.Println("saveGeoTIFFDatasetMySQL")
 		save = saveGeoTIFFDatasetMySQL(conf, colorMap, filePath, mapName, metricName, date)
 	} else if projection != 4326 && projection != 0 { 
+		log.Println("saveGeoTIFFDataset")
 		save = saveGeoTIFFDataset(conf, colorMap, filePath, mapName, metricName, date)
 	} else if xLength == 0 && yLength == 0 { 
+		log.Println("saveGeoTIFFsDeltaLatLon")
 		save = saveGeoTIFFsDeltaLatLon(conf, colorMap, filePath, mapName, metricName, date)
 	} else { 
+		log.Println("saveGeoTIFFs")
 		save = saveGeoTIFFs(conf, colorMap, filePath, mapName, metricName, date, xLength, yLength)
 	}
 
 	if !save {
-		fmt.Println("error indexing map into GeoServer")
+		log.Println("error indexing map " + mapName +" "+metricName+" "+date+" into GeoServer")
 		return false
 	}
 
@@ -2045,12 +2087,12 @@ func indexMap(conf map[string]string, colorMap map[string]map[int]map[string]int
 	if len(files_to_mosaic) > 1 {
 		f, err := os.OpenFile(filePath+"/input.txt", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
 		if err != nil {
-			panic(err)
+			log.Panic(err)
 		}
 		defer f.Close()
 		for _, file_to_mosaic := range files_to_mosaic {
 			if _, err = f.WriteString(file_to_mosaic + "\n"); err != nil {
-				panic(err)
+				log.Panic(err)
 			}
 		}
 
@@ -2074,7 +2116,11 @@ func indexMap(conf map[string]string, colorMap map[string]map[int]map[string]int
 
 	compressFiles(conf, mapName, isLayer, filePath, archive)
 
-	sendGeoTIFF(conf, mapName, isLayer, filePath, archive)
+	if conf["update_index_map"]=="true" {
+		if !sendGeoTIFF(conf, mapName, isLayer, filePath, archive) {
+			return false
+		}
+	}
 
 	os.RemoveAll(filePath)
 
@@ -2084,16 +2130,17 @@ func indexMap(conf map[string]string, colorMap map[string]map[int]map[string]int
 // index maps into GeoServer
 func indexMaps(conf map[string]string) {
 	filePath := conf["data_folder"]
-
+	//log.Print("Connecting to heatmap db");
 	db, err := sql.Open("mysql", conf["MySQL_username"]+":"+conf["MySQL_password"]+"@tcp("+conf["MySQL_hostname"]+":"+conf["MySQL_port"]+")/"+conf["MySQL_database"])
 
 	if err != nil {
-		panic(err.Error())
+		log.Panic(err.Error())
 	}
 
 	defer db.Close()
 
 	colorMap := getColorsMaps(conf)
+	//log.Println(colorMap)
 
 	results, err := db.Query(`SELECT a.map_name, a.metric_name, b.x_length, b.y_length, 
 		b.projection, b.file, b.binary, b.fileType, a.date, c.token 
@@ -2105,7 +2152,7 @@ func indexMaps(conf map[string]string) {
 		AND a.attempts <= ` + conf["Map_Indexing_Attempts"] +
 		` ORDER BY a.id DESC, a.indexed DESC, a.attempts ASC`)
 	if err != nil {
-		panic(err.Error())
+		log.Panic(err.Error())
 	}
 
 	var mapName string
@@ -2132,8 +2179,9 @@ func indexMaps(conf map[string]string) {
 			geoTIFF = dateString + ".tiff"
 			geoTIFFArchive = mapName + "-" + dateString + ".zip"
 
-			fmt.Println("Indexing map: " + mapName + " metric: " + metricName + " date: " + date)
+			log.Print("Indexing map: " + mapName + " metric: " + metricName + " date: " + date)
 
+			setIndexedMap(conf, mapName, metricName, date, "2")
 			tmpPath := fmt.Sprintf("%d", time.Now().UnixNano())
 
 			job_token := ""
@@ -2142,11 +2190,12 @@ func indexMaps(conf map[string]string) {
 			}
 
 			i := indexMap(conf, colorMap, geoTIFFArchive, mapName, metricName, filePath+"/"+mapName+"_"+tmpPath, date, geoTIFF, xLength, yLength, projection, file, binary, job_token, string(fileType))
-
-			if i == true {
-				setIndexedMap(conf, mapName, metricName, date, "1")
-			} else { 
-				setIndexedMap(conf, mapName, metricName, date, "-1")
+			if conf["update_index_map"]=="true" {
+				if i == true {
+					setIndexedMap(conf, mapName, metricName, date, "1")
+				} else { 
+					setIndexedMap(conf, mapName, metricName, date, "-1")
+				}
 			}
 		}
 	}
@@ -2154,10 +2203,11 @@ func indexMaps(conf map[string]string) {
 
 // set a map as indexed into MySQL
 func setIndexedMap(conf map[string]string, mapName, metricName, date, indexed string) {
+
 	db, err := sql.Open("mysql", conf["MySQL_username"]+":"+conf["MySQL_password"]+"@tcp("+conf["MySQL_hostname"]+":"+conf["MySQL_port"]+")/"+conf["Mysql_database"])
 
 	if err != nil {
-		panic(err.Error())
+		log.Panic(err.Error())
 	}
 
 	defer db.Close()
@@ -2166,11 +2216,11 @@ func setIndexedMap(conf map[string]string, mapName, metricName, date, indexed st
 		"UPDATE heatmap.maps_completed SET indexed = ?, attempts = attempts + 1 WHERE map_name = ? AND metric_name = ? AND date = ?",
 	)
 	if err != nil {
-		panic(err.Error())
+		log.Panic(err.Error())
 	}
 	_, err = stmt.Exec(indexed, mapName, metricName, date)
 	if err != nil {
-		panic(err.Error())
+		log.Panic(err.Error())
 	}
 }
 
@@ -2179,7 +2229,7 @@ func getMapPointsNumber(conf map[string]string, mapName, metricName, date string
 	db, err := sql.Open("mysql", conf["MySQL_username"]+":"+conf["MySQL_password"]+"@tcp("+conf["MySQL_hostname"]+":"+conf["MySQL_port"]+")/"+conf["MySQL_database"])
 
 	if err != nil {
-		panic(err.Error())
+		log.Panic(err.Error())
 	}
 
 	defer db.Close()
@@ -2195,7 +2245,7 @@ func getMapPointsNumber(conf map[string]string, mapName, metricName, date string
 	for results.Next() {
 		err = results.Scan(&num)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			return 0
 		}
 	}
@@ -2214,7 +2264,7 @@ func readGRALFile(fileName string) {
 	m := payload{}
 	fileinfo, err := file.Stat()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
 	filesize := fileinfo.Size()
@@ -2296,7 +2346,7 @@ func writeFile(filePath, filename, text string) {
 	t := []byte(text)
 	err := ioutil.WriteFile(filePath+"/"+filename, t, 0700)
 	if err != nil {
-		panic(err.Error())
+		log.Panic(err.Error())
 	}
 }
 
@@ -2371,66 +2421,75 @@ func compressFiles(conf map[string]string, mapName string, isLayer bool, filePat
 }
 
 // send GeoTIFF to GeoServer
-func sendGeoTIFF(conf map[string]string, layer string, isLayer bool, filePath, filename string) {
+func sendGeoTIFF(conf map[string]string, layer string, isLayer bool, filePath, filename string) bool {
 	if !isLayer {
 		f, err := os.Open(filePath + "/" + filename)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
+			return false
 		}
 		defer f.Close()
 		req, err := http.NewRequest("PUT", conf["GeoServer_url"]+"/workspaces/"+conf["GeoServer_workspace"]+"/coveragestores/"+layer+"/file.imagemosaic?recalculate=nativebbox,latlonbbox", f)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
+			return false
 		}
 		req.SetBasicAuth(conf["GeoServer_username"], conf["GeoServer_password"])
 		req.Header.Set("Content-Type", "application/zip")
 
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
+			return false
 		}
 		defer resp.Body.Close()
 		body, err := ioutil.ReadAll(resp.Body)
-		fmt.Println(string(body))
+		log.Println(string(body))
 	} else { 
 		f, err := os.Open(filePath + "/" + filename)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
+			return false
 		}
 		defer f.Close()
 		req, err := http.NewRequest("POST", conf["GeoServer_url"]+"/workspaces/"+conf["GeoServer_workspace"]+"/coveragestores/"+layer+"/file.imagemosaic?recalculate=nativebbox,latlonbbox", f)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
+			return false
 		}
 		req.SetBasicAuth(conf["GeoServer_username"], conf["GeoServer_password"])
 		req.Header.Set("Content-Type", "application/zip")
 
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
+			return false
 		}
 		defer resp.Body.Close()
 		body, err := ioutil.ReadAll(resp.Body)
-		fmt.Println(string(body))
+		log.Println(string(body))
 	}
 
 	if !isLayer {
 		body := strings.NewReader(`<coverage><enabled>true</enabled><metadata><entry key="time"><dimensionInfo><enabled>true</enabled><presentation>LIST</presentation><units>ISO8601</units><defaultValue/></dimensionInfo></entry></metadata></coverage>`)
 		req, err := http.NewRequest("PUT", conf["GeoServer_url"]+"/workspaces/"+conf["GeoServer_workspace"]+"/coveragestores/"+layer+"/coverages/"+layer, body)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
+			return false
 		}
 		req.SetBasicAuth(conf["GeoServer_username"], conf["GeoServer_password"])
 		req.Header.Set("Content-Type", "application/xml; charset=UTF-8")
 
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
+			return false
 		}
 		defer resp.Body.Close()
 		b, err := ioutil.ReadAll(resp.Body)
-		fmt.Println(string(b))
+		log.Println(string(b))
 	}
+	return true
 }
 
 // check if this layer name is already present in GeoServer
@@ -2438,14 +2497,16 @@ func checkLayer(conf map[string]string, layer string) bool {
 	isLayer := false
 	req, err := http.NewRequest("GET", conf["GeoServer_url"]+"/layers.json", nil)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
+		return false
 	}
 	req.SetBasicAuth(conf["GeoServer_username"], conf["GeoServer_password"])
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
+		return false
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
@@ -2546,13 +2607,13 @@ func FilterDirsGlob(dir, suffix string) ([]string, error) {
 func appendToTextFile(filename, text string) {
 	f, err := os.OpenFile(filename, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
 	if err != nil {
-		panic(err)
+		log.Panic(err)
 	}
 
 	defer f.Close()
 
 	if _, err = f.WriteString(text); err != nil {
-		panic(err)
+		log.Panic(err)
 	}
 }
 
@@ -2591,13 +2652,15 @@ func main() {
 	conf["MySQL_port"] = "3306"
 	conf["MySQL_database"] = "heatmap"
 	conf["Python_path"] = "/usr/bin/python3"
-	conf["Python_gdal_merge_path"] = "/usr/local/bin/gdal_merge.py"
-	conf["gdalbuildvrt_path"] = "/usr/local/bin/gdalbuildvrt"
-	conf["gdal_translate_path"] = "/usr/local/bin/gdal_translate"
-	conf["gdalwarp_path"] = "/usr/local/bin/gdalwarp"
+	conf["Python_gdal_merge_path"] = "/usr/bin/gdal_merge.py"
+	conf["gdalbuildvrt_path"] = "/usr/bin/gdalbuildvrt"
+	conf["gdal_translate_path"] = "/usr/bin/gdal_translate"
+	conf["gdalwarp_path"] = "/usr/bin/gdalwarp"
 	conf["clustered"] = "0"
-	conf["gral_data"] = "/home/ubuntu/GRAL"
-	conf["copernicus_data"] = "/home/ubuntu/copernicus"
+	conf["gral_data"] = "/GRAL"
+	conf["copernicus_data"] = "/copernicus"
+	conf["update_index_map"] = "true"
+	conf["sleep_time"] = "30"
 	filePath, err := os.Getwd()
 	if err == nil {
 		conf["data_folder"] = filePath + "/data"
@@ -2631,6 +2694,8 @@ func main() {
 		GRALData            string
 		CopernicusData      string
 		DataFolder          string
+		UpdateIndexMap	    string
+		SleepTime	    string
 	}
 	if *c != "" {
 		configuration := Configuration{}
@@ -2664,6 +2729,10 @@ func main() {
 			conf["gral_data"] = configuration.GRALData
 			conf["copernicus_data"] = configuration.CopernicusData
 			conf["data_folder"] = configuration.DataFolder
+			conf["update_index_map"] = configuration.UpdateIndexMap
+			conf["sleep_time"] = configuration.SleepTime
+		} else {
+			log.Fatal(err)
 		}
 	}
 
@@ -2673,6 +2742,7 @@ func main() {
 			conf[k] = env
 		}
 	}
+	log.Printf("Configuration %v",conf)
 
 	if _, err := os.Stat(conf["data_folder"]); os.IsNotExist(err) {
 		os.Mkdir(conf["data_folder"], 0755)
@@ -2684,6 +2754,12 @@ func main() {
 	}
 
 	if err == nil {
-		indexMaps(conf)
+		var s int32
+		fmt.Sscan(conf["sleep_time"],&s)
+		for {
+			indexMaps(conf)
+			//fmt.Printf("Sleep %ds...\n",s);
+			time.Sleep(time.Duration(s) * time.Second)
+		}
 	}
 }
