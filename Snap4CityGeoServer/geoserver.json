@@ -26,5 +26,6 @@
 	"EnfuserFolder": "/enfuser/1Last_file",
 	"EmailRecipients": ["me@email.org"],
 	"updateIndexMaps": "false",
-	"SleepTime": "10"
+	"SleepTime": "10",
+	"Debug": "false"
 }

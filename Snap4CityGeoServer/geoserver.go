@@ -45,369 +45,6 @@ import (
 	"unicode"
 )
 
-// get RGB color from name NOT USED
-func getRGB(colorName string) (int, int, int) {
-	if colorName == "blue" {
-		return 0, 0, 255
-	} else if colorName == "cyan" {
-		return 0, 153, 255
-	} else if colorName == "green" {
-		return 0, 153, 0
-	} else if colorName == "darkgreen" {
-		return 0, 95, 0
-	} else if colorName == "yellowgreen" {
-		return 0, 255, 0
-	} else if colorName == "yellow" {
-		return 255, 255, 0
-	} else if colorName == "gold" {
-		return 255, 187, 0
-	} else if colorName == "orange" {
-		return 255, 102, 0
-	} else if colorName == "red" {
-		return 255, 0, 0
-	} else if colorName == "darkred" {
-		return 153, 0, 0
-	} else if colorName == "maroon" {
-		return 84, 0, 0
-	} else {
-		return -1, -1, -1
-	}
-}
-
-// get color NOT USED
-func getColorOld(conf map[string]string, metricName string, value float64) (int, int, int) {
-	if metricName == "noiseLAeq" || metricName == "noiseLA" ||
-		metricName == "noiseLAmax" || metricName == "LAeq" {
-		if value < 44.3 {
-			return getRGB("blue")
-		} else if value >= 44.3 && value <= 48.8 {
-			return getRGB("cyan")
-		} else if value > 48.8 && value <= 53.3 {
-			return getRGB("green")
-		} else if value > 53.3 && value <= 57.7 {
-			return getRGB("yellowgreen")
-		} else if value > 57.7 && value <= 62.1 {
-			return getRGB("yellow")
-		} else if value > 62.1 && value <= 66.6 {
-			return getRGB("gold")
-		} else if value > 66.6 && value <= 71 {
-			return getRGB("orange")
-		} else if value > 71 && value <= 75.5 {
-			return getRGB("red")
-		} else if value > 75.5 && value <= 79.9 {
-			return getRGB("darkred")
-		} else {
-			return getRGB("maroon")
-		}
-	} else if metricName == "airTemperature" || metricName == "minTemperature" ||
-		metricName == "maxTemperature" || metricName == "minGroundTemperature" {
-		if value < -20 {
-			return getRGB("blue")
-		} else if value >= -20 && value <= 0 {
-			return getRGB("cyan")
-		} else if value > 0 && value <= 9 {
-			return getRGB("green")
-		} else if value > 9 && value <= 15 {
-			return getRGB("yellowgreen")
-		} else if value > 15 && value <= 18 {
-			return getRGB("yellow")
-		} else if value > 18 && value <= 21 {
-			return getRGB("gold")
-		} else if value > 21 && value <= 25 {
-			return getRGB("orange")
-		} else if value > 25 && value <= 30 {
-			return getRGB("red")
-		} else if value > 30 && value <= 34 {
-			return getRGB("darkred")
-		} else {
-			return getRGB("maroon")
-		}
-	} else if metricName == "airHumidity" {
-		if value < 40 {
-			return getRGB("blue")
-		} else if value >= 40 && value <= 45.5 {
-			return getRGB("cyan")
-		} else if value > 45.5 && value <= 51.1 {
-			return getRGB("green")
-		} else if value > 51.1 && value <= 56.7 {
-			return getRGB("yellowgreen")
-		} else if value > 56.7 && value <= 62.2 {
-			return getRGB("yellow")
-		} else if value > 62.2 && value <= 67.8 {
-			return getRGB("gold")
-		} else if value > 67.8 && value <= 73.3 {
-			return getRGB("orange")
-		} else if value > 73.3 && value <= 78.9 {
-			return getRGB("red")
-		} else if value > 78.9 && value <= 84.4 {
-			return getRGB("darkred")
-		} else {
-			return getRGB("maroon")
-		}
-	} else if metricName == "windSpeed" {
-		if value <= 3.9 {
-			return getRGB("blue")
-		} else if value > 3.9 && value <= 7.9 {
-			return getRGB("cyan")
-		} else if value > 7.9 && value <= 11.9 {
-			return getRGB("green")
-		} else if value > 11.9 && value <= 15.9 {
-			return getRGB("yellowgreen")
-		} else if value > 15.9 && value <= 19.9 {
-			return getRGB("yellow")
-		} else if value > 19.9 && value <= 23.9 {
-			return getRGB("gold")
-		} else if value > 23.9 && value <= 27.9 {
-			return getRGB("orange")
-		} else if value > 27.9 && value <= 31.9 {
-			return getRGB("red")
-		} else if value > 31.9 && value <= 35.9 {
-			return getRGB("darkred")
-		} else {
-			return getRGB("maroon")
-		}
-	} else if metricName == "windGust" {
-		if value <= 3.32 {
-			return getRGB("blue")
-		} else if value > 3.32 && value <= 6.66 {
-			return getRGB("cyan")
-		} else if value > 6.66 && value <= 9.99 {
-			return getRGB("green")
-		} else if value > 9.99 && value <= 13.32 {
-			return getRGB("yellowgreen")
-		} else if value > 13.32 && value <= 16.66 {
-			return getRGB("yellow")
-		} else if value > 16.66 && value <= 19.99 {
-			return getRGB("gold")
-		} else if value > 19.99 && value <= 23.32 {
-			return getRGB("orange")
-		} else if value > 23.32 && value <= 26.66 {
-			return getRGB("red")
-		} else if value > 26.66 && value <= 30 {
-			return getRGB("darkred")
-		} else {
-			return getRGB("maroon")
-		}
-	} else if metricName == "dewPoint" {
-		if value < -10 {
-			return getRGB("blue")
-		} else if value >= -10 && value <= -7.99 {
-			return getRGB("cyan")
-		} else if value > -7.99 && value <= -5.99 {
-			return getRGB("green")
-		} else if value > -5.99 && value <= -3.99 {
-			return getRGB("yellowgreen")
-		} else if value > -3.99 && value <= -1.99 {
-			return getRGB("yellow")
-		} else if value > -1.99 && value <= -0.01 {
-			return getRGB("gold")
-		} else if value > -0.01 && value <= 1.99 {
-			return getRGB("orange")
-		} else if value > 1.99 && value <= 3.99 {
-			return getRGB("red")
-		} else if value > 3.99 && value <= 5.99 {
-			return getRGB("darkred")
-		} else {
-			return getRGB("maroon")
-		}
-	} else if metricName == "airQualityAQI" || metricName == "airqualityAQI" {
-		if int(value) == 0 {
-			return getRGB("blue")
-		} else if int(value) == 1 {
-			return getRGB("cyan")
-		} else if int(value) == 2 {
-			return getRGB("green")
-		} else if int(value) == 3 {
-			return getRGB("yellowgreen")
-		} else if int(value) == 4 {
-			return getRGB("yellow")
-		} else if int(value) == 5 {
-			return getRGB("gold")
-		} else if int(value) == 6 {
-			return getRGB("orange")
-		} else if int(value) == 7 {
-			return getRGB("red")
-		} else if int(value) == 8 {
-			return getRGB("darkred")
-		} else {
-			return getRGB("maroon")
-		}
-	} else if metricName == "airQualityPM10" || metricName == "PM10" {
-		if value <= 10 {
-			return getRGB("blue")
-		} else if value > 10 && value <= 20 {
-			return getRGB("cyan")
-		} else if value > 20 && value <= 30 {
-			return getRGB("green")
-		} else if value > 30 && value <= 40 {
-			return getRGB("yellowgreen")
-		} else if value > 40 && value <= 50 {
-			return getRGB("yellow")
-		} else if value > 50 && value <= 60 {
-			return getRGB("gold")
-		} else if value > 60 && value <= 70 {
-			return getRGB("orange")
-		} else if value > 70 && value <= 80 {
-			return getRGB("red")
-		} else if value > 80 && value <= 90 {
-			return getRGB("darkred")
-		} else {
-			return getRGB("maroon")
-		}
-	} else if metricName == "airQualityNO2" || metricName == "NO2" {
-		if value <= 20 {
-			return getRGB("blue")
-		} else if value > 20 && value <= 50 {
-			return getRGB("cyan")
-		} else if value > 50 && value <= 70 {
-			return getRGB("green")
-		} else if value > 70 && value <= 120 {
-			return getRGB("yellowgreen")
-		} else if value > 120 && value <= 150 {
-			return getRGB("yellow")
-		} else if value > 150 && value <= 180 {
-			return getRGB("gold")
-		} else if value > 180 && value <= 200 {
-			return getRGB("orange")
-		} else if value > 200 && value <= 250 {
-			return getRGB("red")
-		} else if value > 250 && value <= 300 {
-			return getRGB("darkred")
-		} else {
-			return getRGB("maroon")
-		}
-	} else if metricName == "airQualityPM2_5" || metricName == "PM2_5" {
-		if value <= 5 {
-			return getRGB("blue")
-		} else if value > 5 && value <= 10 {
-			return getRGB("cyan")
-		} else if value > 10 && value <= 15 {
-			return getRGB("green")
-		} else if value > 15 && value <= 25 {
-			return getRGB("yellowgreen")
-		} else if value > 25 && value <= 35 {
-			return getRGB("yellow")
-		} else if value > 35 && value <= 40 {
-			return getRGB("gold")
-		} else if value > 40 && value <= 50 {
-			return getRGB("orange")
-		} else if value > 50 && value <= 60 {
-			return getRGB("red")
-		} else if value > 60 && value <= 70 {
-			return getRGB("darkred")
-		} else {
-			return getRGB("maroon")
-		}
-	} else if metricName == "safetyOnBikeDensity" || metricName == "bikeSafety" {
-		if int(value) <= -7 {
-			return getRGB("red")
-		} else if int(value) >= -6 && int(value) <= -4 {
-			return getRGB("orange")
-		} else if int(value) >= -3 && int(value) <= -1 {
-			return getRGB("gold")
-		} else if int(value) == 0 {
-			return getRGB("yellow")
-		} else if int(value) > 1 && int(value) <= 3 {
-			return getRGB("yellowgreen")
-		} else if int(value) > 4 && int(value) <= 6 {
-			return getRGB("green")
-		} else {
-			return getRGB("darkgreen")
-		}
-	} else if metricName == "accidentDensity" {
-		if value == 1 {
-			return getRGB("yellowgreen")
-		} else if int(value) >= 2 && int(value) <= 3 {
-			return getRGB("yellow")
-		} else if int(value) >= 4 && int(value) <= 5 {
-			return getRGB("gold")
-		} else if int(value) >= 6 && int(value) <= 7 {
-			return getRGB("orange")
-		} else if int(value) >= 8 && int(value) <= 9 {
-			return getRGB("red")
-		} else {
-			return getRGB("maroon")
-		}
-	} else if metricName == "airQualityNOx" {
-		if value <= 10 {
-			return getRGB("blue")
-		} else if value > 10 && value <= 25 {
-			return getRGB("cyan")
-		} else if value > 25 && value <= 35 {
-			return getRGB("green")
-		} else if value > 35 && value <= 60 {
-			return getRGB("yellowgreen")
-		} else if value > 60 && value <= 75 {
-			return getRGB("yellow")
-		} else if value > 75 && value <= 90 {
-			return getRGB("gold")
-		} else if value > 90 && value <= 105 {
-			return getRGB("orange")
-		} else if value > 105 && value <= 125 {
-			return getRGB("red")
-		} else if value > 125 && value <= 150 {
-			return getRGB("darkred")
-		} else {
-			return getRGB("maroon")
-		}
-	} else if metricName == "CAQI" {
-		if value <= 25 {
-			return getRGB("yellowgreen")
-		} else if value > 25 && value <= 50 {
-			return getRGB("yellow")
-		} else if value > 50 && value <= 75 {
-			return getRGB("gold")
-		} else if value > 75 && value <= 100 {
-			return getRGB("orange")
-		} else {
-			return getRGB("darkred")
-		}
-	} else if metricName == "EAQI" {
-		if value == 1 {
-			return getRGB("green")
-		} else if value == 2 {
-			return getRGB("yellowgreen")
-		} else if value == 3 {
-			return getRGB("yellow")
-		} else if value == 4 {
-			return getRGB("orange")
-		} else {
-			return getRGB("darkred")
-		}
-	} else if metricName == "CO" {
-		if value < 1.9 {
-			return getRGB("green")
-		} else if value >= 1.9 && value <= 3.9 {
-			return getRGB("yellowgreen")
-		} else if value > 3.9 && value <= 5.9 {
-			return getRGB("yellow")
-		} else if value > 5.9 && value <= 7.9 {
-			return getRGB("gold")
-		} else if value > 7.9 && value <= 10 {
-			return getRGB("orange")
-		} else {
-			return getRGB("red")
-		}
-	} else if metricName == "Benzene" {
-		if value < 0.9 {
-			return getRGB("green")
-		} else if value >= 0.9 && value <= 1.9 {
-			return getRGB("yellowgreen")
-		} else if value > 1.9 && value <= 2.9 {
-			return getRGB("yellow")
-		} else if value > 2.9 && value <= 3.9 {
-			return getRGB("gold")
-		} else if value > 3.9 && value <= 5 {
-			return getRGB("orange")
-		} else {
-			return getRGB("red")
-		}
-	} else {
-		log.Println("Color table not found for metric: " + metricName)
-		return -1, -1, -1
-	}
-}
-
 // get color
 func getColor(colorMap map[string]map[int]map[string]interface{}, metricName string, value float64) (int, int, int) {
 	var max, min float64
@@ -732,11 +369,13 @@ func saveGeoTIFFDataset(conf map[string]string, colorMap map[string]map[int]map[
 		return false
 	}
 
-	cmd = "rm " + filePath + "/tmp.tiff"
-	_, err = exec.Command("sh", "-c", cmd).Output()
-	if err != nil {
-		log.Println(err)
-		return false
+	if conf["debug"] != "true" {
+		cmd = "rm " + filePath + "/tmp.tiff"
+		_, err = exec.Command("sh", "-c", cmd).Output()
+		if err != nil {
+			log.Println(err)
+			return false
+		}
 	}
 	return true
 }
@@ -915,11 +554,13 @@ func saveGeoTIFFDatasetFile(conf map[string]string, colorMap map[string]map[int]
 		return false
 	}
 
-	cmd = "rm " + filePath + "/tmp.tiff"
-	_, err = exec.Command("sh", "-c", cmd).Output()
-	if err != nil {
-		log.Println(err)
-		return false
+	if conf["debug"] != "true" {
+		cmd = "rm " + filePath + "/tmp.tiff"
+		_, err = exec.Command("sh", "-c", cmd).Output()
+		if err != nil {
+			log.Println(err)
+			return false
+		}
 	}
 
 	cmd = conf["gdal_translate_path"] + " -co compress=deflate -co zlevel=9 -co tiled=yes -co NUM_THREADS=ALL_CPUS --config GDAL_CACHEMAX 512 -of GTiff " + filePath + "/uncompressed.tiff" + " " + fileName
@@ -929,11 +570,13 @@ func saveGeoTIFFDatasetFile(conf map[string]string, colorMap map[string]map[int]
 		return false
 	}
 
-	cmd = "rm " + filePath + "/uncompressed.tiff"
-	_, err = exec.Command("sh", "-c", cmd).Output()
-	if err != nil {
-		log.Println(err)
-		return false
+	if conf["debug"] != "true" {
+		cmd = "rm " + filePath + "/uncompressed.tiff"
+		_, err = exec.Command("sh", "-c", cmd).Output()
+		if err != nil {
+			log.Println(err)
+			return false
+		}
 	}
 
 	cmd = "tar cJvf " + conf["gral_data"] + "/" + mapName + dateString + ".tar.xz" + " " + conf["gral_data"] + "/" + mapName + dateString
@@ -942,11 +585,13 @@ func saveGeoTIFFDatasetFile(conf map[string]string, colorMap map[string]map[int]
 		log.Println(err)
 		return false
 	} else {
-		cmd = "rm " + conf["gral_data"] + "/" + mapName + dateString
-		_, err := exec.Command("sh", "-c", cmd).Output()
-		if err != nil {
-			log.Println(err)
-			return false
+		if conf["debug"] != "true" {
+			cmd = "rm " + conf["gral_data"] + "/" + mapName + dateString
+			_, err := exec.Command("sh", "-c", cmd).Output()
+			if err != nil {
+				log.Println(err)
+				return false
+			}
 		}
 	}
 	return true
@@ -1115,11 +760,13 @@ func saveGeoTIFFDatasetWGS84TextFile(conf map[string]string, colorMap map[string
 		return false
 	}
 
-	cmd = "rm " + filePath + "/tmp.tiff"
-	_, err = exec.Command("sh", "-c", cmd).Output()
-	if err != nil {
-		log.Println(err)
-		return false
+	if conf["debug"] != "true" {
+		cmd = "rm " + filePath + "/tmp.tiff"
+		_, err = exec.Command("sh", "-c", cmd).Output()
+		if err != nil {
+			log.Println(err)
+			return false
+		}
 	}
 
 	cmd = conf["gdal_translate_path"] + " -co compress=deflate -co zlevel=9 -co tiled=yes -co NUM_THREADS=ALL_CPUS --config GDAL_CACHEMAX 512 -of GTiff " + filePath + "/uncompressed.tiff" + " " + fileName
@@ -1129,11 +776,13 @@ func saveGeoTIFFDatasetWGS84TextFile(conf map[string]string, colorMap map[string
 		return false
 	}
 
-	cmd = "rm " + filePath + "/uncompressed.tiff"
-	_, err = exec.Command("sh", "-c", cmd).Output()
-	if err != nil {
-		log.Println(err)
-		return false
+	if conf["debug"] != "true" {
+		cmd = "rm " + filePath + "/uncompressed.tiff"
+		_, err = exec.Command("sh", "-c", cmd).Output()
+		if err != nil {
+			log.Println(err)
+			return false
+		}
 	}
 
 	return true
@@ -1141,11 +790,12 @@ func saveGeoTIFFDatasetWGS84TextFile(conf map[string]string, colorMap map[string
 
 // save a GeoTIFF to disk from a whole dataset, reading data from MySQL
 func saveGeoTIFFDatasetMySQL(conf map[string]string, colorMap map[string]map[int]map[string]interface{}, filePath, mapName, metricName, date string) bool {
-        defer func() {
-          if r := recover(); r != nil {
-             log.Println("saveGeoTIFFDatasetMySQL Recovered", r)
-          }
-        }()
+	defer func() {
+		if r := recover(); r != nil {
+			log.Println("saveGeoTIFFDatasetMySQL Recovered", r)
+		}
+	}()
+
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		os.Mkdir(filePath, 0700)
 	}
@@ -1267,12 +917,14 @@ func saveGeoTIFFDatasetMySQL(conf map[string]string, colorMap map[string]map[int
 		log.Println(cmd)
 		return false
 	}
-        log.Printf("out:\n%s\n",out)
-	cmd = "rm " + filePath + "/tmp.tiff"
-	_, err = exec.Command("sh", "-c", cmd).Output()
-	if err != nil {
-		log.Println(err)
-		return false
+    log.Printf("out:\n%s\n",out)
+	if conf["debug"] != "true" {
+		cmd = "rm " + filePath + "/tmp.tiff"
+		_, err = exec.Command("sh", "-c", cmd).Output()
+		if err != nil {
+			log.Println(err)
+			return false
+		}
 	}
 
 	cmd = conf["gdal_translate_path"] + " -co compress=deflate -co zlevel=9 -co tiled=yes -co NUM_THREADS=ALL_CPUS --config GDAL_CACHEMAX 512 -of GTiff " + filePath + "/uncompressed.tiff" + " " + fileName
@@ -1284,13 +936,16 @@ func saveGeoTIFFDatasetMySQL(conf map[string]string, colorMap map[string]map[int
 	}
         log.Printf("out:\n%s\n",out)
 
-	cmd = "rm " + filePath + "/uncompressed.tiff"
-	_, err = exec.Command("sh", "-c", cmd).Output()
-	if err != nil {
-		log.Println(err)
-		return false
+	
+	if conf["debug"] != "true" {
+		cmd = "rm " + filePath + "/uncompressed.tiff"
+		_, err = exec.Command("sh", "-c", cmd).Output()
+		if err != nil {
+			log.Println(err)
+			return false
+		}
 	}
-
+	
 	return true
 }
 
@@ -1458,11 +1113,13 @@ func saveGeoTIFFDatasetTextFile(conf map[string]string, colorMap map[string]map[
 		return false
 	}
 
-	cmd = "rm " + filePath + "/tmp.tiff"
-	_, err = exec.Command("sh", "-c", cmd).Output()
-	if err != nil {
-		log.Println(err)
-		return false
+	if conf["debug"] != "true" {
+		cmd = "rm " + filePath + "/tmp.tiff"
+		_, err = exec.Command("sh", "-c", cmd).Output()
+		if err != nil {
+			log.Println(err)
+			return false
+		}
 	}
 
 	cmd = conf["gdal_translate_path"] + " -co compress=deflate -co zlevel=9 -co tiled=yes -co NUM_THREADS=ALL_CPUS --config GDAL_CACHEMAX 512 -of GTiff " + filePath + "/uncompressed.tiff" + " " + fileName
@@ -1472,11 +1129,13 @@ func saveGeoTIFFDatasetTextFile(conf map[string]string, colorMap map[string]map[
 		return false
 	}
 
-	cmd = "rm " + filePath + "/uncompressed.tiff"
-	_, err = exec.Command("sh", "-c", cmd).Output()
-	if err != nil {
-		log.Println(err)
-		return false
+	if conf["debug"] != "true" {
+		cmd = "rm " + filePath + "/uncompressed.tiff"
+		_, err = exec.Command("sh", "-c", cmd).Output()
+		if err != nil {
+			log.Println(err)
+			return false
+		}
 	}
 
 	cmd = "tar cJvf " + conf["gral_data"] + "/" + mapName + dateString + ".tar.xz" + " " + conf["gral_data"] + "/" + mapName + dateString
@@ -1485,11 +1144,13 @@ func saveGeoTIFFDatasetTextFile(conf map[string]string, colorMap map[string]map[
 		log.Println(err)
 		return false
 	} else {
-		cmd = "rm " + conf["gral_data"] + "/" + mapName + dateString
-		_, err := exec.Command("sh", "-c", cmd).Output()
-		if err != nil {
-			log.Println(err)
-			return false
+		if conf["debug"] != "true" {
+			cmd = "rm " + conf["gral_data"] + "/" + mapName + dateString
+			_, err := exec.Command("sh", "-c", cmd).Output()
+			if err != nil {
+				log.Println(err)
+				return false
+			}
 		}
 	}
 	return true
@@ -1754,11 +1415,13 @@ func saveGeoTIFFsDeltaLatLon(conf map[string]string, colorMap map[string]map[int
 		return false
 	}
 
-	cmd = "rm " + filePath + "/uncompressed.tiff"
-	_, err = exec.Command("sh", "-c", cmd).Output()
-	if err != nil {
-		log.Println("error removing uncompressed GeoTIFF")
-		return false
+	if conf["debug"] != "true" {
+		cmd = "rm " + filePath + "/uncompressed.tiff"
+		_, err = exec.Command("sh", "-c", cmd).Output()
+		if err != nil {
+			log.Println("error removing uncompressed GeoTIFF")
+			return false
+		}
 	}
 
 	return true
@@ -2012,11 +1675,13 @@ func saveGeoTIFFsNetCDFFile(conf map[string]string, colorMap map[string]map[int]
 		return false
 	}
 
-	cmd = "rm " + filePath + "/tmp.tiff"
-	_, err = exec.Command("sh", "-c", cmd).Output()
-	if err != nil {
-		log.Println(err)
-		return false
+	if conf["debug"] != "true" {
+		cmd = "rm " + filePath + "/tmp.tiff"
+		_, err = exec.Command("sh", "-c", cmd).Output()
+		if err != nil {
+			log.Println(err)
+			return false
+		}
 	}
 
 	cmd = conf["gdal_translate_path"] + " -co compress=deflate -co zlevel=9 -co tiled=yes -co NUM_THREADS=ALL_CPUS --config GDAL_CACHEMAX 512 -of GTiff " + filePath + "/uncompressed.tiff" + " " + fileName
@@ -2026,11 +1691,13 @@ func saveGeoTIFFsNetCDFFile(conf map[string]string, colorMap map[string]map[int]
 		return false
 	}
 
-	cmd = "rm " + filePath + "/uncompressed.tiff"
-	_, err = exec.Command("sh", "-c", cmd).Output()
-	if err != nil {
-		log.Println(err)
-		return false
+	if conf["debug"] != "true" {
+		cmd = "rm " + filePath + "/uncompressed.tiff"
+		_, err = exec.Command("sh", "-c", cmd).Output()
+		if err != nil {
+			log.Println(err)
+			return false
+		}
 	}
 	return true
 }
@@ -2121,9 +1788,9 @@ func indexMap(conf map[string]string, colorMap map[string]map[int]map[string]int
 			return false
 		}
 	}
-
-	os.RemoveAll(filePath)
-
+	if conf["debug"] != "true" {
+		os.RemoveAll(filePath)
+	}
 	return true
 }
 
@@ -2661,6 +2328,8 @@ func main() {
 	conf["copernicus_data"] = "/copernicus"
 	conf["update_index_map"] = "true"
 	conf["sleep_time"] = "30"
+    conf["debug"] = "false"
+
 	filePath, err := os.Getwd()
 	if err == nil {
 		conf["data_folder"] = filePath + "/data"
@@ -2695,8 +2364,10 @@ func main() {
 		CopernicusData      string
 		DataFolder          string
 		UpdateIndexMap	    string
-		SleepTime	    string
+		SleepTime	    	string
+		Debug				string
 	}
+
 	if *c != "" {
 		configuration := Configuration{}
 		file, err := os.Open(*c)
@@ -2731,6 +2402,7 @@ func main() {
 			conf["data_folder"] = configuration.DataFolder
 			conf["update_index_map"] = configuration.UpdateIndexMap
 			conf["sleep_time"] = configuration.SleepTime
+			conf["debug"] = configuration.Debug
 		} else {
 			log.Fatal(err)
 		}
@@ -2747,10 +2419,17 @@ func main() {
 	if _, err := os.Stat(conf["data_folder"]); os.IsNotExist(err) {
 		os.Mkdir(conf["data_folder"], 0755)
 	}
-	cmd := "rm -rf " + conf["data_folder"] + "/*"
-	_, err = exec.Command("sh", "-c", cmd).Output()
-	if err != nil {
-		log.Fatal(err)
+
+	//clean data folder
+	if conf["debug"] != "true" {
+		log.Println("clean data folder " + conf["data_folder"])
+		cmd := "rm -rf " + conf["data_folder"] + "/*"
+		_, err = exec.Command("sh", "-c", cmd).Output()
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		log.Println("DEBUG not clean data folder " + conf["data_folder"])		
 	}
 
 	if err == nil {
