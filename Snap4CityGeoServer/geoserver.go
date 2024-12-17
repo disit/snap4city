@@ -1762,19 +1762,27 @@ func indexMap(conf map[string]string, colorMap map[string]map[int]map[string]int
 				log.Panic(err)
 			}
 		}
+		// MOD HERE 2024-12-10 ////////////////////////////////////////////////////////////////
+		// cmd := conf["gdalbuildvrt_path"] + " -input_file_list " + filePath + "/input.txt " + filePath + "/" + geoTIFF + ".vrt"
+		// _, err = exec.Command("sh", "-c", cmd).Output()
+		// if err != nil {
+		// 	log.Fatal(err)
+		// }
 
-		cmd := conf["gdalbuildvrt_path"] + " -input_file_list " + filePath + "/input.txt " + filePath + "/" + geoTIFF + ".vrt"
+		// cmd = conf["gdal_translate_path"] + " -co compress=deflate -co zlevel=9 -co tiled=yes -co NUM_THREADS=ALL_CPUS --config GDAL_CACHEMAX 512 -of GTiff " + filePath + "/" + geoTIFF + ".vrt" + " " + filePath + "/merged/" + geoTIFF
+		// _, err = exec.Command("sh", "-c", cmd).Output()
+		// if err != nil {
+		// 	log.Fatal(err)
+		// }
+
+		cmd := "python " + conf["Python_gdal_merge_path"] + " -ot Byte -of GTiff -o " + filePath + "/merged/" + geoTIFF + " --optfile " + filePath + "/input.txt"
 		_, err = exec.Command("sh", "-c", cmd).Output()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		cmd = conf["gdal_translate_path"] + " -co compress=deflate -co zlevel=9 -co tiled=yes -co NUM_THREADS=ALL_CPUS --config GDAL_CACHEMAX 512 -of GTiff " + filePath + "/" + geoTIFF + ".vrt" + " " + filePath + "/merged/" + geoTIFF
-		_, err = exec.Command("sh", "-c", cmd).Output()
-		if err != nil {
-			log.Fatal(err)
-		}
-	} else { 
+		// MOD ENDS 2024-12-10 ////////////////////////////////////////////////////////////////
+	} else {
 		CopyFile(files_to_mosaic[0], filePath+"/merged/"+geoTIFF)
 	}
 
@@ -1809,13 +1817,26 @@ func indexMaps(conf map[string]string) {
 	colorMap := getColorsMaps(conf)
 	//log.Println(colorMap)
 
+	// results, err := db.Query(`SELECT a.map_name, a.metric_name, b.x_length, b.y_length,
+	// 	b.projection, b.file, b.binary, b.fileType, a.date, c.token
+	// 	FROM heatmap.maps_completed a
+	// 	LEFT JOIN heatmap.metadata b ON a.map_name = b.map_name AND a.date = b.date
+	// 	LEFT JOIN heatmap.completed_jobs d ON a.date = d.from_date
+	// 	LEFT JOIN heatmap.jobs c ON a.map_name = c.map_name AND c.token = d.token
+	// 	WHERE a.completed = '1' AND (a.indexed = '0' OR a.indexed = '-1')
+	// 	AND a.attempts <= ` + conf["Map_Indexing_Attempts"] +
+	// 	` ORDER BY a.id DESC, a.indexed DESC, a.attempts ASC`)
+
+	// MOD 2024-12-10 - New query ////////////////////////////////////////////////////////////////////////
+	// the new API search form data with completed==3 (instead of completed==1 like in the orginal API) //
+
 	results, err := db.Query(`SELECT a.map_name, a.metric_name, b.x_length, b.y_length, 
 		b.projection, b.file, b.binary, b.fileType, a.date, c.token 
 		FROM heatmap.maps_completed a 
 		LEFT JOIN heatmap.metadata b ON a.map_name = b.map_name AND a.date = b.date
 		LEFT JOIN heatmap.completed_jobs d ON a.date = d.from_date
 		LEFT JOIN heatmap.jobs c ON a.map_name = c.map_name AND c.token = d.token 
-		WHERE a.completed = '1' AND (a.indexed = '0' OR a.indexed = '-1') 
+		WHERE a.completed = '` + conf["completed_value"] + `' AND (a.indexed = '0' OR a.indexed = '-1') 				
 		AND a.attempts <= ` + conf["Map_Indexing_Attempts"] +
 		` ORDER BY a.id DESC, a.indexed DESC, a.attempts ASC`)
 	if err != nil {
@@ -2329,6 +2350,7 @@ func main() {
 	conf["update_index_map"] = "true"
 	conf["sleep_time"] = "30"
     conf["debug"] = "false"
+    conf["completed_value"] = "1"
 
 	filePath, err := os.Getwd()
 	if err == nil {
@@ -2366,6 +2388,7 @@ func main() {
 		UpdateIndexMap	    string
 		SleepTime	    	string
 		Debug				string
+		CompletedValue		string
 	}
 
 	if *c != "" {
@@ -2403,6 +2426,7 @@ func main() {
 			conf["update_index_map"] = configuration.UpdateIndexMap
 			conf["sleep_time"] = configuration.SleepTime
 			conf["debug"] = configuration.Debug
+			conf["completed_value"] = configuration.CompletedValue
 		} else {
 			log.Fatal(err)
 		}

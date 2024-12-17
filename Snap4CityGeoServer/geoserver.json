@@ -27,5 +27,6 @@
 	"EmailRecipients": ["me@email.org"],
 	"updateIndexMaps": "false",
 	"SleepTime": "10",
-	"Debug": "false"
+	"Debug": "false",
+	"CompletedValue": "1"
 }
