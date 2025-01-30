@@ -18,6 +18,12 @@ package org.disit.TrafficFlowManager.utils;
 
 import javax.json.*;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class CSVExtractor {
 
@@ -74,6 +80,98 @@ public class CSVExtractor {
             }
             writer.write(sb.toString());
         }
+    }
+
+    public static JSONObject extractToJSON(JsonArray staticGraph, JsonObject reconstructionData) throws Exception {
+
+        Logger.log("[CSVExtractor] Extracting merged JSON (static and dinamic)...");
+
+        JSONArray merged = new JSONArray();
+        List<String> roadElements = new ArrayList<>();
+        List<String> roadElementsINV = new ArrayList<>();
+
+        for (JsonValue road: staticGraph) {
+            JsonObject roadObject = road.asJsonObject();
+
+            String roadId = roadObject.getString("road");
+            JsonObject roadDensity = reconstructionData.getJsonObject(roadId).getJsonArray("data").getJsonObject(0);
+
+            for (JsonValue segment: roadObject.getJsonArray("segments")) {
+                JsonObject segmentObj = segment.asJsonObject();
+
+                String segmentId = segmentObj.getString("id");
+                String startLat = segmentObj.getJsonObject("start").getString("lat");
+                String startLon = segmentObj.getJsonObject("start").getString("long");
+                String endLat = segmentObj.getJsonObject("end").getString("lat");
+                String endLon = segmentObj.getJsonObject("end").getString("long");
+
+                boolean isINV = false;
+                // e.g. INV: OS00022926823RE/0--OS00022926823RE/1--OS00022926823RE/2--OS00022926823RE/3--OS00022926823RE/4--OS00022926823RE/5INV.10
+                // e.g. nonINV: OS00022926823RE/0--OS00022926823RE/1--OS00022926823RE/2--OS00022926823RE/3--OS00022926823RE/4--OS00022926823RE/5.10
+                if(segmentId.contains("INV")){
+                    isINV = true;
+                }
+
+                String[] REs = segmentId.split("--");
+                for (int i = 0; i < REs.length; i++) {
+                    if (i == REs.length - 1) {
+                        if(isINV){
+                            // Dividi l'ultimo road element quando trovi "INV"
+                            String[] tmp = REs[i].split("INV");
+                            REs[i] = tmp[0];
+                        } else {
+                            // Dividi l'ultimo road element quando trovi "."
+                            String[] tmp = REs[i].split("\\.");
+                            REs[i] = tmp[0];
+                        }                        
+                    }
+                    if(isINV){
+                        roadElementsINV.add(REs[i]);
+                    } else {
+                        roadElements.add(REs[i]);
+                    }
+                }
+
+                // Field "lanes" could be either a String or an Integer
+                Integer lanes;
+                if (segmentObj.get("lanes").getValueType() == JsonValue.ValueType.NUMBER)
+                    lanes = segmentObj.getInt("lanes");
+                else
+                    lanes = Integer.parseInt(segmentObj.getString("lanes"));
+
+                Integer fipili = segmentObj.getInt("FIPILI", 0);
+                String trafficValue = roadDensity.getString(segmentId);
+                String trafficLabel = extractTrafficLabel(trafficValue, lanes, fipili);
+
+                JSONObject segJSON = new JSONObject();
+                segJSON.put("segmentId", segmentId);
+                segJSON.put("roadId", roadId);
+                segJSON.put("startLat", startLat);
+                segJSON.put("startLon", startLon);
+                segJSON.put("endLat", endLat);
+                segJSON.put("endLon", endLon);
+                segJSON.put("lanes", lanes);
+                segJSON.put("fipili", fipili);
+                segJSON.put("trafficValue", trafficValue);
+                segJSON.put("trafficLabel", trafficLabel);
+                merged.put(segJSON);
+            }
+        }
+
+        // Create a HashSet to filter duplicates
+        HashSet<String> uniqueRoadElementsINV = new HashSet<>(roadElementsINV);
+        HashSet<String> uniqueRoadElements = new HashSet<>(roadElements);
+
+        // Convert the HashSet back to a List if needed
+        roadElementsINV = new ArrayList<>(uniqueRoadElementsINV);
+        roadElements = new ArrayList<>(uniqueRoadElements);
+
+        JSONObject output = new JSONObject();
+        output.put("data", merged);
+        output.put("roadElements", new JSONArray(roadElements));
+        output.put("roadElementsINV", new JSONArray(roadElementsINV));
+
+        return output;
     }
 
     // Extract traffic label from traffic value

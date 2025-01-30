@@ -1,18 +1,29 @@
 package org.disit.TrafficFlowManager.persistence;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.net.URLEncoder;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.Calendar;
+//import java.util.Arrays;
+//import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.TimeZone;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.json.JsonValue;
+
+//import java.util.TimeZone;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -24,6 +35,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.apache.http.util.EntityUtils;
+//import org.checkerframework.checker.units.qual.K;
+import org.disit.TrafficFlowManager.utils.CSVExtractor;
 import org.disit.TrafficFlowManager.utils.ConfigProperties;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.client.RequestOptions;
@@ -32,6 +45,7 @@ import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.CreateIndexResponse;
+//import org.elasticsearch.common.recycler.Recycler.V;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
@@ -44,6 +58,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import org.elasticsearch.client.indices.GetIndexRequest;
+
+import org.disit.TrafficFlowManager.utils.GeoTools;
 
 public class OpenSearchReconstructionPersistence {
 
@@ -79,7 +95,21 @@ public class OpenSearchReconstructionPersistence {
     }
 
     public static int[] sendToEs(JSONObject dinamico, String kind) throws Exception {
+        int[] metadata = null;
+        try{
+            metadata = OpenSearchReconstructionPersistence.sendToEs(dinamico, null, kind);
+        } catch (Exception e) {
+            Logger.log("[TFM] Error in sendToEs: " + e);
+            throw new Exception("[TFM] Failed to send data to ES: " + e);
+        }
+        return metadata;
+    }
 
+    public static int[] sendToEs(JSONObject dinamico, JSONArray roadGraph, String kind) throws Exception {
+        boolean isNewScenario = true;
+        if(roadGraph==null){
+            isNewScenario = false;
+        }
         try {
 
             Properties conf = ConfigProperties.getProperties();
@@ -92,6 +122,7 @@ public class OpenSearchReconstructionPersistence {
             int port = 9200;
             String admin = conf.getProperty("opensearchUsername", "admin");
             String password = conf.getProperty("opensearchPassw", "password");
+            String targetEPGS = conf.getProperty("cartesianEPGS", "EPSG:32632");
 
             String kbUrl = conf.getProperty("kbUrl", "https://www.disit.org/smosm/sparql?format=json");
 
@@ -100,7 +131,7 @@ public class OpenSearchReconstructionPersistence {
             int maxErrors = Integer.parseInt(conf.getProperty("opensearchMaxErrors", "200"));
             int threadNumberPostProcess = Integer.parseInt(conf.getProperty("postProcessThreadNumber", "5"));
 
-            String indexName = conf.getProperty("opensearchIndexName", "roadelement4");
+            String indexName = conf.getProperty("opensearchIndexName", "roadelement4"); 
 
             LocalDate date = LocalDate.now();
             String failDir = conf.getProperty("failFolderTFM") + "/" + date;
@@ -109,52 +140,435 @@ public class OpenSearchReconstructionPersistence {
             Files.createDirectories(failureFolderPath);
 
             createIndex(indexName, url.split(";")[0], port, admin, password);
-            
-            // split road elements
-            Logger.log("[TFM] processing dinamic json");
 
-            JSONArray jd20 = preProcess(dinamico, kind);
-
-            JSONArray reArray = new JSONArray();
-            Logger.log("[TFM] pre-processing JD20");
-
-            reArray = splitRoadElement(jd20);
-
-            // calcolo densità media per roadelement
-            Map<String, Double> densityAverageMap = new HashMap<>();
-            densityAverageMap = mapDensity(reArray);
-
-            Logger.log("[TFM] building inverted JD20");
-            JSONArray invertedArray = new JSONArray();
-
-            // inversione indice
-            invertedArray = invertedIndex(reArray, densityAverageMap);
-
-            Logger.log("[TFM] retrieving road element coordinates in KB");
-
-            // creo client per le query
-            CloseableHttpClient httpClient = HttpClients.createDefault();
-
+            long startTime = -1;
             // Inizializza l'oggetto errorManager condiviso
             ErrorManager errorManager = new ErrorManager();
+            JSONArray dataToES = null;
 
-            // recupero coordinate roadelement in KB
-            long start = System.currentTimeMillis();
-            JSONObject coord = getCoord(invertedArray, batchSize, kbUrl, httpClient, errorManager);
-            Logger.log("[TFM] time retrieving road element coordinates in KB: " + (System.currentTimeMillis() - start)
-                    + " ms");
+            if(isNewScenario){
 
-            JSONArray coordArray = coord.getJSONArray("results");
+                // Retrieve static data and related reconstruction
+                String associatedStaticGraphName = dinamico.getJSONObject("metadata").getString("staticGraphName");
+                String dateObserved = dinamico.getJSONObject("metadata").getString("dateTime");
+                String scenario = dinamico.getJSONObject("metadata").getString("fluxName");
 
-            start = System.currentTimeMillis();
-            PostProcessRes result = postProcess(invertedArray, coordArray, threadNumberPostProcess);
-            Logger.log("[TFM] time post processing: " + (System.currentTimeMillis() - start)
-                    + " ms");
+                JsonValue staticGraph = new JSONStaticGraphPersistence().getStaticGraph(associatedStaticGraphName);
+                JsonArray staticDataGraph = staticGraph.asJsonObject().getJsonArray("dataGraph");
 
-            invertedArray = result.getPostPorcessData();
+                String tmp_jsonString = dinamico.toString();
+                JsonReader tmp_jsonReader = Json.createReader(new StringReader(tmp_jsonString));
+                JsonValue body = tmp_jsonReader.readValue();
+                tmp_jsonReader.close();
+                JsonObject object = body.asJsonObject();
+                JsonObject reconstructionData = object.getJsonObject("reconstructionData");
 
-            // System.out.println("indexing documents in elasticSearch");
-            Logger.log("[TFM] indexing documents in elasticsearch");
+                // Merge static graph with reconstruction data by producing a single JSONObject file
+                JSONObject mergedData = CSVExtractor.extractToJSON(staticDataGraph, reconstructionData); 
+
+                // preprocess the data to define appropriate JSONObjects and convert lat/lon to Cartesian coordinates (approximated)
+                JSONArray roadElements = mergedData.getJSONArray("roadElements");
+                // JSONArray roadElementsINV = mergedData.getJSONArray("roadElementsINV");
+                JSONArray data = mergedData.getJSONArray("data");
+
+                JSONObject roadElementsWithCoord = new JSONObject();
+                for (int i = 0; i < roadElements.length(); i++){
+                    String thisRE = "http://www.disit.org/km4city/resource/" + roadElements.getString(i); // TODO maybe the prefix should be an external parameter???
+                    JSONObject thisREData = GeoTools.findObjectInArray(roadGraph, "segment", thisRE);
+                    if(thisREData != null){
+                        JSONObject newRE = new JSONObject();
+                        newRE.put("nALat", thisREData.getDouble("nALat"));
+                        newRE.put("nALong", thisREData.getDouble("nALong"));
+                        newRE.put("nBLat", thisREData.getDouble("nBLat"));
+                        newRE.put("nBLong", thisREData.getDouble("nBLong"));
+                        newRE.put("type", thisREData.getString("type"));
+                        newRE.put("lanes", thisREData.getString("lanes"));
+                        newRE.put("roadElmSpeedLimit", thisREData.getDouble("roadElmSpeedLimit"));
+                        newRE.put("length", thisREData.getDouble("length"));
+                        double[] cartCoordA = GeoTools.getCartisianApproximatedCoordinates(thisREData.getDouble("nALat"), thisREData.getDouble("nALong"), targetEPGS);
+                        double[] cartCoordB = GeoTools.getCartisianApproximatedCoordinates(thisREData.getDouble("nBLat"), thisREData.getDouble("nBLong"), targetEPGS);
+                        newRE.put("xA", cartCoordA[0]);
+                        newRE.put("yA", cartCoordA[1]);
+                        newRE.put("xB", cartCoordB[0]);
+                        newRE.put("yB", cartCoordB[1]);
+                        roadElementsWithCoord.put(roadElements.getString(i), newRE);
+                    } else {
+                        Logger.log("[TFM][sendToEs] Road Element not found in Scenario RoadGraph: " + roadElements.getString(i));
+                        throw new Exception("[TFM][sendToEs] Road Element not found in Scenario RoadGraph: " + roadElements.getString(i));
+                    }
+                }
+
+                // JSONObject roadElementsINVWithCoord = new JSONObject();
+                // for (int i = 0; i < roadElementsINV.length(); i++){
+                //     String thisRE = "http://www.disit.org/km4city/resource/" + roadElementsINV.getString(i); // TODO maybe the prefix should be an external parameter???
+                //     JSONObject thisREData = GeoTools.findObjectInArray(roadGraph, "segment", thisRE);
+                //     if(thisREData != null){
+                //         JSONObject newRE = new JSONObject();
+                //         newRE.put("nALat", thisREData.getDouble("nALat"));
+                //         newRE.put("nALong", thisREData.getDouble("nALong"));
+                //         newRE.put("nBLat", thisREData.getDouble("nBLat"));
+                //         newRE.put("nBLong", thisREData.getDouble("nBLong"));
+                //         newRE.put("type", thisREData.getString("type"));
+                //         newRE.put("lanes", thisREData.getString("lanes"));
+                //         newRE.put("roadElmSpeedLimit", thisREData.getDouble("roadElmSpeedLimit"));
+                //         newRE.put("length", thisREData.getDouble("length"));
+                //         double[] cartCoordA = GeoTools.getCartisianApproximatedCoordinates(thisREData.getDouble("nALat"), thisREData.getDouble("nALong"));
+                //         double[] cartCoordB = GeoTools.getCartisianApproximatedCoordinates(thisREData.getDouble("nBLat"), thisREData.getDouble("nBLong"));
+                //         newRE.put("xA", cartCoordA[0]);
+                //         newRE.put("yA", cartCoordA[1]);
+                //         newRE.put("xB", cartCoordB[0]);
+                //         newRE.put("yB", cartCoordB[1]);
+                //         roadElementsINVWithCoord.put(roadElementsINV.getString(i), newRE);
+                //     } else {
+                //         System.err.println("Road Element NOT FOUND in RoadGraph!!! >>> RE: " + roadElementsINV.getString(i));
+                //     }
+                // }
+
+                JSONObject accSegments = new JSONObject();
+                Map<String, Integer> isSegmentAssociated = new LinkedHashMap<>();
+                for(int i = 0; i<data.length(); i++){
+                    
+                    JSONObject thisSegment = data.getJSONObject(i);
+                    String thisSegmentID = thisSegment.getString("segmentId");
+
+                    isSegmentAssociated.put(thisSegmentID, 0);
+
+                    String[] tmp = thisSegmentID.split("\\.");
+                    String thisAccSegmentID = tmp[0];
+                    JSONArray segs = null;
+                    if(accSegments.has(thisAccSegmentID)){
+                        segs = accSegments.getJSONArray(thisAccSegmentID);
+                    } else {
+                        segs = new JSONArray();
+                    }
+                    double startLat = Double.parseDouble(thisSegment.getString("startLat"));
+                    double endLat = Double.parseDouble(thisSegment.getString("endLat"));
+                    double startLon = Double.parseDouble(thisSegment.getString("startLon"));
+                    double endLon = Double.parseDouble(thisSegment.getString("endLon")); 
+                    double[] cartCoordA = GeoTools.getCartisianApproximatedCoordinates(startLat, startLon, targetEPGS);
+                    double[] cartCoordB = GeoTools.getCartisianApproximatedCoordinates(endLat, endLon, targetEPGS);
+                    thisSegment.put("xA", cartCoordA[0]);
+                    thisSegment.put("yA", cartCoordA[1]);
+                    thisSegment.put("xB", cartCoordB[0]);
+                    thisSegment.put("yB", cartCoordB[1]);
+                    segs.put(thisSegment);
+                    accSegments.put(thisAccSegmentID, segs);
+                }
+
+                // PROCESSING DATA //////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+                JSONObject prep_roadElementToOS = new JSONObject();
+
+                // For each segment find the closest road element to which the segment should be assigned     
+                // 1. Iterate on all the acc groups of the segments       
+                Iterator<String> accKeys = accSegments.keys();
+                while (accKeys.hasNext()) {
+                    // 2. restrieve the acc group and all the segments in the group
+                    String key = accKeys.next();
+                    JSONArray segs = accSegments.getJSONArray(key);
+
+                    // 3. get the IDs of the road eleements associated with the acc group
+                    String[] reIDs = key.split("--");
+
+                    for (int j = 0; j < segs.length(); j++){
+                        // 4. get the j-th segment in the acc group
+                        JSONObject thisSeg = segs.getJSONObject(j); 
+                        double xAj = thisSeg.getDouble("xA");
+                        double xBj = thisSeg.getDouble("xB");
+                        double yAj = thisSeg.getDouble("yA");
+                        double yBj = thisSeg.getDouble("yB");
+
+                        // Line B defined by its endpoints (longitude, latitude)
+                        double[][] jSegLine = {
+                            {xAj, yAj},
+                            {xBj, yBj}
+                        };
+                        
+                        // 5. iterate on all the road elements associated with the acc group
+                        boolean[] intersections = new boolean[reIDs.length];
+                        double[] distances = new double[reIDs.length];
+                        for (int i = 0; i < reIDs.length; i++){
+                            // 6. get the i-th road element
+                            String reID = reIDs[i];
+                            JSONObject thisRE = null;
+                            // if(roadElementsWithCoord.has(reID)){
+                                thisRE = roadElementsWithCoord.getJSONObject(reID);
+                            // } else if (roadElementsINVWithCoord.has(reID)){
+                            //     thisRE = roadElementsINVWithCoord.getJSONObject(reID);
+                            // }
+                            if(thisRE == null){
+                                throw new Exception("Road elememt " + reID + " not found.");
+                            }
+                            double xAi = thisRE.getDouble("xA");
+                            double yAi = thisRE.getDouble("yA");
+                            double xBi = thisRE.getDouble("xB");
+                            double yBi = thisRE.getDouble("yB");
+
+                            double[][] iRELine = {
+                                {xAi, yAi},
+                                {xBi, yBi}
+                            };
+                
+                            // 7. check if the perpendicular line from the midpoint of jSegLine intersects iRELine and compute 
+                            //    the distance between the endpoints of jSegLine and iRELine
+                            intersections[i] = GeoTools.doesPerpendicularIntersect(iRELine, jSegLine);
+                            double[] pairDists = new double[4];
+                            pairDists[0] = GeoTools.computeDistanceXY(xAi, yAi, xAj, yAj);
+                            pairDists[1] = GeoTools.computeDistanceXY(xAi, yAi, xBj, yBj);
+                            pairDists[2] = GeoTools.computeDistanceXY(xBi, yBi, xAj, yAj);
+                            pairDists[3] = GeoTools.computeDistanceXY(xBi, yBi, xBj, yBj);
+                            distances[i] = GeoTools.getMinValue(pairDists);
+                        }
+
+                        // 8. check if more than one road element is found intersecting the perpendicular of the segment                    
+                        String closestReID = null;
+                        ArrayList<Integer> idxs = GeoTools.getIndexesOfTrueValues(intersections);
+                        if(idxs.size() == 1){
+                            // 8.1 select the unique intersecting road element for the association
+                            closestReID = reIDs[idxs.get(0)];    
+                        } else if (idxs.size() > 1){
+                            // 8.2 if found more than one, associate the road element at minimum distance among the intersecting ones 
+                            double mindist = Double.MAX_VALUE;
+                            int minidx = -1;
+                            for (int i = 0; i < idxs.size(); i++) {
+                                int idx = idxs.get(i);
+                                if(distances[idx] < mindist){
+                                    mindist = distances[idx];
+                                    minidx = idx;
+                                }
+                                if(minidx != -1){
+                                    closestReID = reIDs[minidx];
+                                }
+                            }                        
+                        } else {
+                            Logger.log("[TFM][sendToEs] No association found for segment " + thisSeg.getString("segmentId"));
+                            // System.out.println(Arrays.toString(intersections));
+                            // System.out.println(Arrays.toString(distances));
+                            // throw new Exception("[TFM][sendToEs] No association found for segment " + thisSeg.getString("segmentId"));
+                        }
+
+                        if(closestReID != null){
+                            Integer check = isSegmentAssociated.get(thisSeg.getString("segmentId"));
+                            if(check==0){
+                                isSegmentAssociated.put(thisSeg.getString("segmentId"), 1);
+                            }  else if (check == null){
+                                Logger.log("[TFM][sendToEs] Segment index mismatch: " + thisSeg.getString("segmentId")); 
+                                throw new Exception("[TFM][sendToEs] Segment index mismatch: " + thisSeg.getString("segmentId") );
+                            }  else if (check == 1){
+                                Logger.log("[TFM][sendToEs] Segment already associated: " + thisSeg.getString("segmentId")); 
+                                throw new Exception("[TFM][sendToEs] Segment already associated: " + thisSeg.getString("segmentId") );
+                            }
+
+                            JSONObject closestRe = null;
+                            if(prep_roadElementToOS.has(closestReID)){
+                                closestRe = prep_roadElementToOS.getJSONObject(closestReID);
+                                closestRe.getJSONArray("associatedSegments").put(thisSeg);
+                            } else {
+                                JSONObject thisRE = null;
+                                // if(roadElementsWithCoord.has(closestReID)){
+                                    thisRE = roadElementsWithCoord.getJSONObject(closestReID);
+                                // } else if (roadElementsINVWithCoord.has(closestReID)){
+                                //     thisRE = roadElementsINVWithCoord.getJSONObject(closestReID);
+                                // }
+                                closestRe = new JSONObject();
+                                closestRe.put("roadElements", closestReID);
+                                closestRe.put("dateObserved", dateObserved);
+                                closestRe.put("kind", kind);
+                                closestRe.put("scenario", scenario);
+                                closestRe.put("lane_numbers", Integer.parseInt(thisRE.getString("lanes")));
+                                closestRe.put("dir", 0);
+                                closestRe.put("vmax", thisRE.getFloat("roadElmSpeedLimit"));
+                                closestRe.put("numVehicle", "");
+                                closestRe.put("flow", "");
+                                
+                                JSONArray associatedSegments = new JSONArray();
+                                associatedSegments.put(thisSeg);
+                                closestRe.put("associatedSegments", associatedSegments);
+                                prep_roadElementToOS.put(closestReID, closestRe);
+                            }
+                        }                   
+                    }                    
+                }
+
+                // System.out.println(prep_roadElementToOS.toString(2));
+                
+                // Check if all the segments have been associated to some road element
+                List<String> checkList = new ArrayList<>();
+                for (Map.Entry<String, Integer> entry : isSegmentAssociated.entrySet()) {
+                    if (entry.getValue().equals(0)) {
+                        checkList.add(entry.getKey());
+                    }
+                }
+                if(checkList.size()>0){
+                    String unassociatedSegments = "";
+                    for(int i =0; i < checkList.size(); i++){
+                        unassociatedSegments = unassociatedSegments + " " + checkList.get(i);
+                    }
+                    Logger.log("[TFM][sendToEs] Some segments have not been associated. List: " + unassociatedSegments); 
+                    // throw new Exception("[TFM][sendToEs] Some segments have not been associated. List: " + unassociatedSegments);
+                }                
+
+                // Finalize the JSON to send to OpenSearch
+                JSONArray roadElementToOS = new JSONArray();
+                Iterator<String> keys = prep_roadElementToOS.keys();
+                while(keys.hasNext()){
+                    String key = keys.next();
+                    JSONObject re = prep_roadElementToOS.getJSONObject(key);
+
+                    JSONArray associatedSegments = re.getJSONArray("associatedSegments");
+                    if(associatedSegments.length() == 1){
+                        String startLat = associatedSegments.getJSONObject(0).getString("startLat");
+                        String startLon = associatedSegments.getJSONObject(0).getString("startLon");
+                        String endLat = associatedSegments.getJSONObject(0).getString("endLat");
+                        String endLon = associatedSegments.getJSONObject(0).getString("endLon");
+                        String trafficValue = associatedSegments.getJSONObject(0).getString("trafficValue");
+                        String segmentID = associatedSegments.getJSONObject(0).getString("segmentId");
+
+                        JSONObject endLocation = new JSONObject();
+                        endLocation.put("lat", endLat);
+                        endLocation.put("lon", endLon);
+                        JSONObject end = new JSONObject();
+                        end.put("location", endLocation);
+                        re.put("end", end);
+
+                        JSONObject startLocation = new JSONObject();
+                        startLocation.put("lat", startLat);
+                        startLocation.put("lon", startLon);
+                        JSONObject start = new JSONObject();
+                        start.put("location", startLocation);
+                        re.put("start", start);
+
+                        JSONObject line = new JSONObject();
+                        JSONArray coordinates = new JSONArray();
+                        JSONArray sCoord = new JSONArray();
+                        sCoord.put(Float.parseFloat(startLon));
+                        sCoord.put(Float.parseFloat(startLat));
+                        coordinates.put(sCoord);
+                        JSONArray eCoord = new JSONArray();
+                        eCoord.put(Float.parseFloat(endLon));
+                        eCoord.put(Float.parseFloat(endLat));
+                        coordinates.put(eCoord);
+                        line.put("coordinates", coordinates);
+                        line.put("type", "LineString");
+                        re.put("line", line);
+
+                        re.put("density", Float.parseFloat(trafficValue) * 1000 / 20); // from #car per 20m to #car per 1km
+
+                        JSONArray segments = new JSONArray();
+                        JSONObject segment = new JSONObject();
+                        segment.put("segment", segmentID);
+                        segment.put("densityCar20m", trafficValue);
+                        segment.put("density", Float.parseFloat(trafficValue) * 1000 / 20); // from #car per 20m to #car per 1km
+                        segment.put("lineString", "LINESTRING (" + startLon + " " + startLat + ", " + endLon + " " + endLat + ")");
+                        segments.put(segment);
+                        re.put("segments", segments); 
+
+                    } else if (associatedSegments.length() > 1) {
+                        double sumTrafficValue = 0;
+                        JSONArray segments = new JSONArray();
+                        for (int i = 0; i < associatedSegments.length(); i++){
+                            JSONObject segment = new JSONObject();
+                            segment.put("segment", associatedSegments.getJSONObject(i).getString("segmentId"));
+                            segment.put("densityCar20m", associatedSegments.getJSONObject(i).getString("trafficValue"));
+                            segment.put("density", Float.parseFloat(associatedSegments.getJSONObject(i).getString("trafficValue")) * 1000 / 20); // from #car per 20m to #car per 1km
+                            segment.put("linestring", "LINESTRING (" + 
+                                associatedSegments.getJSONObject(i).getString("startLon") + " " + 
+                                associatedSegments.getJSONObject(i).getString("startLat") + ", " + 
+                                associatedSegments.getJSONObject(i).getString("endLon") + " " + 
+                                associatedSegments.getJSONObject(i).getString("endLat") + ")");
+                            segments.put(segment);
+                            sumTrafficValue += Double.parseDouble(associatedSegments.getJSONObject(i).getString("trafficValue"));
+                        }
+
+                        re.put("segments", segments); 
+
+                        double avgTrafficValue = sumTrafficValue / associatedSegments.length();
+                        avgTrafficValue = avgTrafficValue * 1000 / 20; // from #car per 20m to #car per 1km
+                        re.put("density", (float) avgTrafficValue);
+
+                        String[] extrema = GeoTools.findCorrectOrder(associatedSegments);
+
+                        JSONObject endLocation = new JSONObject();
+                        endLocation.put("lat", extrema[2]);
+                        endLocation.put("lon", extrema[3]);
+                        JSONObject end = new JSONObject();
+                        end.put("location", endLocation);
+                        re.put("end", end);
+
+                        JSONObject startLocation = new JSONObject();
+                        startLocation.put("lat", extrema[0]);
+                        startLocation.put("lon", extrema[1]);
+                        JSONObject start = new JSONObject();
+                        start.put("location", startLocation);
+                        re.put("start", start);
+
+                        JSONObject line = new JSONObject();
+                        JSONArray coordinates = new JSONArray();
+                        JSONArray sCoord = new JSONArray();
+                        sCoord.put(Float.parseFloat(extrema[1]));
+                        sCoord.put(Float.parseFloat(extrema[0]));
+                        coordinates.put(sCoord);
+                        JSONArray eCoord = new JSONArray();
+                        eCoord.put(Float.parseFloat(extrema[3]));
+                        eCoord.put(Float.parseFloat(extrema[2]));
+                        coordinates.put(eCoord);
+                        line.put("coordinates", coordinates);
+                        line.put("type", "LineString");
+                        re.put("line", line);
+
+                    } else if (associatedSegments.length() == 0) {
+                        Logger.log("[TFM][sendToEs] A road element lost its associated segment: " + key); 
+                        // throw new Exception("[TFM][sendToEs] A road element lost its associated segment: " + key);
+                    }
+
+                    re.remove("associatedSegments");
+                    roadElementToOS.put(re);
+
+                }
+
+                // System.out.println(roadElementToOS.toString(2));
+                if(checkList.size()==0){
+                    Logger.log("[TFM][sendToEs] All good. The road element set is ready to be sent to Open Search.");
+                }
+
+                dataToES = roadElementToOS;
+            } else {
+                // split road elements
+                Logger.log("[TFM][sendToEs] processing dinamic json");
+                JSONArray jd20 = preProcess(dinamico, kind, isNewScenario);
+                JSONArray reArray = new JSONArray();
+                Logger.log("[TFM][sendToEs] pre-processing JD20");
+                reArray = splitRoadElement(jd20);
+
+                // calcolo densità media per roadelement
+                Map<String, Double> densityAverageMap = new HashMap<>();
+                densityAverageMap = mapDensity(reArray);
+
+                Logger.log("[TFM] building inverted JD20");
+                JSONArray invertedArray = new JSONArray();
+
+                // inversione indice
+                invertedArray = invertedIndex(reArray, densityAverageMap);            
+
+                Logger.log("[TFM][sendToEs] retrieving road element coordinates in KB");
+                // creo client per le query
+                CloseableHttpClient httpClient = HttpClients.createDefault();
+                // recupero coordinate roadelement in KB
+                startTime = System.currentTimeMillis();
+                JSONObject coord = getCoord(invertedArray, batchSize, kbUrl, httpClient, errorManager);
+                Logger.log("[TFM] time retrieving road element coordinates in KB: " + (System.currentTimeMillis() - startTime) + " ms");
+                JSONArray coordArray = coord.getJSONArray("results");
+                startTime = System.currentTimeMillis();
+                PostProcessRes result = postProcess(invertedArray, coordArray, threadNumberPostProcess);
+                Logger.log("[TFM] time post processing: " + (System.currentTimeMillis() - startTime) + " ms");
+                invertedArray = result.getPostPorcessData();
+
+                // System.out.println(invertedArray.toString(2));
+
+                dataToES = invertedArray;
+            }
+
+            Logger.log("[TFM][sendToEs] indexing documents in elasticsearch");
 
             final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
             credentialsProvider.setCredentials(AuthScope.ANY,
@@ -163,69 +577,79 @@ public class OpenSearchReconstructionPersistence {
             RestClientBuilder[] builder = new RestClientBuilder[hostnames.length];
             for (int i = 0; i < builder.length; i++) {
                 builder[i] = RestClient.builder(
-                        new HttpHost(hostnames[i], port, "https"))
-                        .setHttpClientConfigCallback(new RestClientBuilder.HttpClientConfigCallback() {
-                            @Override
-                            public HttpAsyncClientBuilder customizeHttpClient(
-                                    HttpAsyncClientBuilder httpClientBuilder) {
-                                // Configura l'autenticazione HTTP
-                                httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
-                                return httpClientBuilder;
-                            }
-                        });
+                    new HttpHost(hostnames[i], port, "https"))
+                    .setHttpClientConfigCallback(new RestClientBuilder.HttpClientConfigCallback() {
+                        @Override
+                        public HttpAsyncClientBuilder customizeHttpClient(
+                                HttpAsyncClientBuilder httpClientBuilder) {
+                            // Configura l'autenticazione HTTP
+                            httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+                            return httpClientBuilder;
+                        }
+                    }
+                );
             }
 
             // invio documenti in elasticsearch
-            start = System.currentTimeMillis();
-            int[] metadata = sendToIndex(threadNumber, invertedArray, indexName, hostnames, port, admin, password,
+
+            startTime = System.currentTimeMillis();
+            int[] metadata = sendToIndex(threadNumber, dataToES, indexName, hostnames, port, admin, password,
                     maxErrors,
                     errorManager, builder, failDir);
-            Logger.log("[TFM] time indexing all documents: " + (System.currentTimeMillis() - start)
+            Logger.log("[TFM][sendToEs] time indexing all documents: " + (System.currentTimeMillis() - startTime)
                     + " ms");
 
-            Logger.log("[TFM] done");
-
+            Logger.log("[TFM][sendToEs] done");
             return metadata;
 
         } catch (JSONException e) {
-            Logger.log("[TFM] Error in sendToEs: " + e);
-            throw new Exception("[TFM] Failed to send data to ES: " + e);
+            Logger.log("[TFM][sendToEs] Error in processing and sending data to OpenSearch: " + e);
+            throw new Exception("[TFM][sendToEs] Error in processing and sending data to OpenSearch: " + e);
         }
     }
     // ############################################# PROCESSING METHODS
 
-private static JSONArray preProcess(JSONObject dinamic, String kind) throws Exception {
+    private static JSONArray preProcess(JSONObject dinamic, String kind, boolean isNewScenario) throws Exception {
+        /*
+         * This function split the TFR output creating a new JSONObject for each segment (of 20m) and reporting in 
+         * the roadElements key the list of the road elments to which the segment is related
+         */
         try {
             String tmp = "{\"scenario\":\"\",\"dateObserved\":\"\",\"segment\":\"\",\"dir\":0,\"roadElements\":[],\"start\":{\"location\":{\"lon\":\"\",\"lat\":\"\"}},\"end\":{\"location\":{\"lon\":\"\",\"lat\":\"\"}},\"flow\":\"\",\"density\":0,\"numVehicle\":\"\"}";
             JSONObject template = new JSONObject(tmp);
             JSONObject reconstructionData = dinamic.getJSONObject("reconstructionData");
             JSONObject metadata = dinamic.getJSONObject("metadata");
-
-            template.put("scenario", metadata.getString("scenarioID"));
+            
+            //String dateTimeWithTimeZone = (String) ConfigProperties.getProperties().getOrDefault("dateTimeWithTimeZone", "no");
+            if(isNewScenario){
+                template.put("scenario", metadata.getString("scenarioID"));
+            }else{                
+                template.put("scenario", metadata.getString("fluxName")); // MOD del 2024-07-29 for legacy reconstructions
+            }
 
             String dateObserved = metadata.getString("dateTime");
 
-            // Imposta come default la timeZone dell'Italia
-            if (!dateObserved.contains("+") && !dateObserved.contains("Z")) {
+            // // Imposta come default la timeZone dell'Italia
+            // if (dateTimeWithTimeZone.equals("yes") && !dateObserved.contains("+") && !dateObserved.contains("Z")) {
 
-                TimeZone timeZone = TimeZone.getTimeZone("Europe/Rome");
+            //     TimeZone timeZone = TimeZone.getTimeZone("Europe/Rome");
 
-                String[] d = dateObserved.split("-");
-                String year = d[0];
-                String month = d[1];
-                String day = d[2].split("T")[0];
+            //     String[] d = dateObserved.split("-");
+            //     String year = d[0];
+            //     String month = d[1];
+            //     String day = d[2].split("T")[0];
 
-                Calendar calendar = Calendar.getInstance(timeZone);
-                calendar.set(Integer.parseInt(year), Integer.parseInt(month) - 1, Integer.parseInt(day), 0, 0, 0);
-                // -1 al mese perchè gennaio corrisponde allo 0
-                calendar.setTimeZone(timeZone);
+            //     Calendar calendar = Calendar.getInstance(timeZone);
+            //     calendar.set(Integer.parseInt(year), Integer.parseInt(month) - 1, Integer.parseInt(day), 0, 0, 0);
+            //     // -1 al mese perchè gennaio corrisponde allo 0
+            //     calendar.setTimeZone(timeZone);
 
-                if (timeZone.inDaylightTime(calendar.getTime())) {
-                    dateObserved = dateObserved + "+02:00";
-                } else {
-                    dateObserved = dateObserved + "+01:00";
-                }
-            }
+            //     if (timeZone.inDaylightTime(calendar.getTime())) {
+            //         dateObserved = dateObserved + "+02:00";
+            //     } else {
+            //         dateObserved = dateObserved + "+01:00";
+            //     }
+            // }
 
             template.put("dateObserved", dateObserved);
             template.put("kind", kind);
@@ -406,6 +830,9 @@ private static JSONArray preProcess(JSONObject dinamic, String kind) throws Exce
                     String roadElementValue = segments.getString(j);
                     JSONObject roadElementObject = new JSONObject();
                     roadElementObject.put("segment", roadElementValue);
+                    roadElementObject.put("densityCar20m", "");
+                    roadElementObject.put("density", "");
+                    roadElementObject.put("linestring", "");
                     newSegments.put(roadElementObject);
                 }
 
@@ -487,6 +914,9 @@ private static JSONArray preProcess(JSONObject dinamic, String kind) throws Exce
                     String roadelementInverted = partialArray.getJSONObject(i).getString("roadElements");
                     boolean foundMatch = false;
 
+                    // System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< " + roadelementInverted + " >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+                    // System.out.println(partialArray.getJSONObject(i).toString(2));
+
                     // Scorrere il coordArray per cercare una corrispondenza
                     int j = 0;
 
@@ -514,6 +944,10 @@ private static JSONArray preProcess(JSONObject dinamic, String kind) throws Exce
                         String slat = coordArray.getJSONObject(j).getJSONObject("slat").getString("value");
                         String elong = coordArray.getJSONObject(j).getJSONObject("elong").getString("value");
                         String elat = coordArray.getJSONObject(j).getJSONObject("elat").getString("value");
+                        String lane_num = coordArray.getJSONObject(j).getJSONObject("lane_num").getString("value");
+                        String vmax = coordArray.getJSONObject(j).getJSONObject("vmax").getString("value");
+                        
+                        // System.out.println(slong + "|" + slat + "|" + elong + "|" + elat);
 
                         // MODIFICA MARCO ///////////////////////////////////////
                         double slatDouble = Double.valueOf(slat);
@@ -549,8 +983,7 @@ private static JSONArray preProcess(JSONObject dinamic, String kind) throws Exce
 
                         ////////////////////////////////////////////////////////
 
-                        partialArray.getJSONObject(i).getJSONObject("start").getJSONObject("location").put("lon",
-                                slong);
+                        partialArray.getJSONObject(i).getJSONObject("start").getJSONObject("location").put("lon", slong);
 
                         partialArray.getJSONObject(i).getJSONObject("start").getJSONObject("location").put("lat", slat);
 
@@ -565,6 +998,12 @@ private static JSONArray preProcess(JSONObject dinamic, String kind) throws Exce
                         JSONObject line = new JSONObject(lineString);
 
                         partialArray.getJSONObject(i).put("line", line);
+
+                        partialArray.getJSONObject(i).put("lane_numbers", lane_num);
+
+                        partialArray.getJSONObject(i).put("vmax", vmax);
+
+                        // System.out.println(partialArray.getJSONObject(i).toString(2));
 
                     }
 
@@ -590,6 +1029,7 @@ private static JSONArray preProcess(JSONObject dinamic, String kind) throws Exce
 
         // Inizializza un array di JSONArray per contenere le parti
         JSONArray[] partsArray = new JSONArray[threadNumber];
+
 
         // Suddividi il JSONArray in n parti
         for (int i = 0; i < threadNumber; i++) {
@@ -749,12 +1189,14 @@ private static JSONArray preProcess(JSONObject dinamic, String kind) throws Exce
                         filter.append(" || ");
                     }
                 }
-
+                
                 String queryString = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                         "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
                         "PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>\n" +
                         "PREFIX dct: <http://purl.org/dc/terms/>\n" +
-                        "SELECT   (xsd:string(?id) as ?id) (xsd:string(?slong) as ?slong) (xsd:string(?slat) as ?slat) (xsd:string(?elong) as ?elong) (xsd:string(?elat) as ?elat)\n"
+                        "SELECT   (xsd:string(?id) as ?id) (xsd:string(?slong) as ?slong) (xsd:string(?slat) as ?slat) " +
+                        "(xsd:string(?elong) as ?elong) (xsd:string(?elat) as ?elat) " +
+                        "(IF(bound(?lane_num),?lane_num,1) as ?lane_num) (IF(bound(?vmax),?vmax,\"50\") as ?vmax)\n"
                         +
                         "WHERE {\n" +
                         "  ?s a km4c:RoadElement.\n" +
@@ -765,6 +1207,12 @@ private static JSONArray preProcess(JSONObject dinamic, String kind) throws Exce
                         "  ?ns geo:lat ?slat.\n" +
                         "  ?ne geo:long ?elong.\n" +
                         "  ?ne geo:lat ?elat.\n" +
+                        "  OPTIONAL{\n" +
+                        "    ?s km4c:lanes ?lanes.\n" +
+                        "    ?lanes km4c:lanesCount ?numerolanes.\n" +
+                        "    ?numerolanes km4c:undesignated ?lane_num.\n" +
+                        "  }\n" +
+                        "  OPTIONAL{?s km4c:speedLimit ?vmax.}\n" + 
                         "  FILTER (" + filter.toString() + ").\n" +
                         "}";
                 queryList.add(queryString);
@@ -986,8 +1434,8 @@ private static JSONArray preProcess(JSONObject dinamic, String kind) throws Exce
             if (!documentIndexed) {
                 try {
                     totalFailure++;
-                    Logger.log("[TFM] Error multiple times indexing the document, the document has not been indexed. "
-                            + Thread.currentThread().getName() + " in hostname " + url);
+                    //Logger.log("[TFM] Error multiple times indexing the document, the document has not been indexed. "
+                    //        + Thread.currentThread().getName() + " in hostname " + url);
                     JSONObject failDocument = new JSONObject(jsonDocument);
                     // Salva il documento non indicizzato nel file di fallimenti
                     Path failureFilePath = failureFolderPath.resolve(failDocument.getString("scenario"));
@@ -1039,43 +1487,41 @@ private static JSONArray preProcess(JSONObject dinamic, String kind) throws Exce
                             return httpClientBuilder;
                         }
                     });
-            System.out.println("creato il builder");
+            Logger.log("[TFM][createIndex] builder is ready");
 
             RestHighLevelClient client = new RestHighLevelClient(builder);
 
-            System.out.println("creato il client");
+            Logger.log("[TFM][createIndex] client is ready");
             
             boolean exists = client.indices().exists(new GetIndexRequest(indexName), RequestOptions.DEFAULT);
             if(exists) {
-                System.out.println("index "+indexName+" already exists");
+                Logger.log("[TFM][createIndex] Index "+indexName+" already exists");
                 indexChecked = true;
                 client.close();
                 return;
             }
 
+            Logger.log("[TFM][createIndex] Index "+indexName+" not found, creating");
+            
             Settings settings = Settings.builder()
                     .put("index.number_of_shards", 1)
                     .put("index.number_of_replicas", 1)
                     .build();
 
-            System.out.println("creato il settings");
-
             CreateIndexRequest request = new CreateIndexRequest(indexName)
                     .settings(settings)
                     .mapping(indexMapping());
 
-            System.out.println("creato il request");
-
             CreateIndexResponse response = client.indices().create(request, RequestOptions.DEFAULT);
-            System.out.println("response id: " + response.index());
+            Logger.log("[TFM][createIndex] create index response id: " + response.index());
             client.close();
 
-            System.out.println("creato il response");
+            // System.out.println("creato il response");
             indexChecked = true;
 
         } catch (Exception e) {
-            System.out.println("Eccezione nella creazione dell'indice: " + e);
-            throw new Exception("[TFM] Failed to send data to ES: " + e);
+            Logger.log("[TFM][createIndex] Error in index creation: " + e);
+            throw new Exception("[TFM][createIndex] Error in index creation: " + e);
 
         }
     }
@@ -1096,6 +1542,18 @@ private static JSONArray preProcess(JSONObject dinamic, String kind) throws Exce
                 mapping.startObject("density");
                 {
                     mapping.field("type", "float");
+                }
+                mapping.endObject();
+
+                mapping.startObject("vmax");
+                {
+                    mapping.field("type", "float");
+                }
+                mapping.endObject();
+
+                mapping.startObject("lane_numbers");
+                {
+                    mapping.field("type", "integer");
                 }
                 mapping.endObject();
 
@@ -1125,17 +1583,50 @@ private static JSONArray preProcess(JSONObject dinamic, String kind) throws Exce
 
                 mapping.startObject("segments");
                 {
+                    mapping.field("type", "nested");
                     mapping.startObject("properties");
                     {
+                        mapping.startObject("densityCar20m");
+                        {
+                            mapping.field("type", "text");
+                        }
+                        mapping.endObject();
+
+                        mapping.startObject("density");
+                        {
+                            mapping.field("type", "float");
+                        }
+                        mapping.endObject();
+
                         mapping.startObject("segment");
                         {
-                            mapping.field("type", "keyword");
+                            mapping.field("type", "text");
+                        }
+                        mapping.endObject();
+
+                        mapping.startObject("linestring");
+                        {
+                            mapping.field("type", "geo_shape");
                         }
                         mapping.endObject();
                     }
                     mapping.endObject();
                 }
                 mapping.endObject();
+
+                // mapping.startObject("segments");
+                // {
+                //     mapping.startObject("properties");
+                //     {
+                //         mapping.startObject("segment");
+                //         {
+                //             mapping.field("type", "keyword");
+                //         }
+                //         mapping.endObject();
+                //     }
+                //     mapping.endObject();
+                // }
+                // mapping.endObject();
 
                 mapping.startObject("start");
                 {

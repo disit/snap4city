@@ -67,6 +67,7 @@ public class JsonIndexServlet extends HttpServlet {
             ZipFile zipFile = new ZipFile(fullFilenameZip);
             ZipEntry zipEntry = zipFile.entries().nextElement();
             inputStream = zipFile.getInputStream(zipEntry);
+            zipFile.close();
         } else {
             inputStream = new FileInputStream(fullFilename);
         }

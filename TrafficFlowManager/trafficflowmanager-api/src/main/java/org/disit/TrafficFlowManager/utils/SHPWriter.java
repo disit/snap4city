@@ -149,6 +149,7 @@ public class SHPWriter {
                 shpDataStore.dispose();
             } else {
                 // Just try again, it should work
+                transaction.close();
                 writeFeatures(features);
             }
         } catch (IOException e) {
