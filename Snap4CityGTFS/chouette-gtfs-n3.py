@@ -11,7 +11,7 @@
    You should have received a copy of the GNU Affero General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-   
+
 from zipfile import ZipFile
 import pandas as pd
 import os, pytz, datetime, argparse
@@ -20,7 +20,7 @@ import requests
 
 import json, flask, sys
 
- 
+
 class ChouettePublisher:
     _api_directory = '/api/v1/datas/'
 
@@ -49,7 +49,7 @@ class ChouettePublisher:
 
     def __str__(self):
         return """Source URL: %s\n Publication Name: %s\n Publication Key: %s\n Output directory: %s""" \
-               % (self.chouette_url, self.publication_api, self.publication_api_key, self.output_directory)
+            % (self.chouette_url, self.publication_api, self.publication_api_key, self.output_directory)
 
     def set_url(self, url: str):
         self.chouette_url = url
@@ -74,14 +74,16 @@ class ChouettePublisher:
         f = open(self.output_directory + os.sep + "agency.n3", "w+")
         for i in range(len(agency["agency_id"])):
             # semantic subject
-            first_term = "<http://www.disit.org/km4city/resource/" + entry_name + "_Agency_" + str(agency["agency_id"][i]) + \
+            first_term = "<http://www.disit.org/km4city/resource/" + entry_name + "_Agency_" + str(
+                agency["agency_id"][i]) + \
                          ">"
 
             f.write(first_term + " <http://purl.org/dc/terms/identifier> " +
                     '"' + entry_name + '_' + str(agency["agency_id"][i]) + '" .\n')
             f.write(first_term + " <http://xmlns.com/foaf/0.1/name> " + '"' + str(agency["agency_name"][i]) + '" .\n')
             f.write(
-                first_term + " <http://vocab.gtfs.org/terms#timeZone> " + '"' + str(agency["agency_timezone"][i]) + '" .\n')
+                first_term + " <http://vocab.gtfs.org/terms#timeZone> " + '"' + str(
+                    agency["agency_timezone"][i]) + '" .\n')
             f.write(
                 first_term + " <http://vocab.gtfs.org/terms#fareUrl> " + '"' + str(agency["agency_url"][i]) + '" .\n')
             f.write(
@@ -100,8 +102,10 @@ class ChouettePublisher:
         print("Write triples for calendar_dates")
         f = open(self.output_directory + os.sep + "calendar_dates.n3", "w+")
         for i in range(len(calendar["service_id"])):
-            first_term = "<http://www.disit.org/km4city/resource/" + entry_name + "_Service_" + str(calendar["service_id"][i]) + ">"
-            date = str(calendar["date"][i])[0:4] + "-" + str(calendar["date"][i])[4:6] + "-" + str(calendar["date"][i])[6:8]
+            first_term = "<http://www.disit.org/km4city/resource/" + entry_name + "_Service_" + str(
+                calendar["service_id"][i]) + ">"
+            date = str(calendar["date"][i])[0:4] + "-" + str(calendar["date"][i])[4:6] + "-" + str(calendar["date"][i])[
+                                                                                               6:8]
 
             f.write(first_term + " <http://purl.org/dc/terms/identifier> " + '"' + entry_name + "_Service_" +
                     str(calendar["service_id"][i]) + '" .\n')
@@ -118,12 +122,14 @@ class ChouettePublisher:
         print("Write triples for stops")
         f = open(self.output_directory + os.sep + 'stops.n3', "w+")
         for i in range(len(stops["stop_id"])):
-            first_term = "<http://www.disit.org/km4city/resource/" + entry_name + "_Stop_" + str(stops["stop_id"][i]) + ">"
+            first_term = "<http://www.disit.org/km4city/resource/" + entry_name + "_Stop_" + str(
+                stops["stop_id"][i]) + ">"
 
-            f.write(first_term + " <http://vocab.gtfs.org/terms#agency> " + agency +' .\n')
+            f.write(first_term + " <http://vocab.gtfs.org/terms#agency> " + agency + ' .\n')
             f.write(
-                first_term + " <http://purl.org/dc/terms/identifier> " + '"' + entry_name + "_Stop_" + str(stops["stop_id"][
-                    i]) + '" .\n')
+                first_term + " <http://purl.org/dc/terms/identifier> " + '"' + entry_name + "_Stop_" + str(
+                    stops["stop_id"][
+                        i]) + '" .\n')
             f.write(first_term + " <http://vocab.gtfs.org/terms#code> " + '"' + str(stops["stop_code"][i]) + '" .\n')
 
             f.write(first_term + " <http://www.w3.org/2003/01/geo/wgs84_pos#long> " + '"' + str(
@@ -131,14 +137,15 @@ class ChouettePublisher:
             f.write(first_term + " <http://www.w3.org/2003/01/geo/wgs84_pos#lat> " + '"' + str(
                 stops["stop_lat"][i]) + '"^^<http://www.w3.org/2001/XMLSchema#float> .\n')
             f.write(first_term + " <http://www.w3.org/2003/01/geo/wgs84_pos#geometry> " + '"POINT(' + str(
-                stops["stop_lon"][i]) + ' ' + str(stops["stop_lat"][i]) + ')"^^<http://www.openlinksw.com/schemas/virtrdf#Geometry> .\n')
+                stops["stop_lon"][i]) + ' ' + str(
+                stops["stop_lat"][i]) + ')"^^<http://www.openlinksw.com/schemas/virtrdf#Geometry> .\n')
 
             f.write(
                 first_term + " <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://vocab.gtfs.org/terms#Stop> .\n")
             f.write(first_term + " <http://xmlns.com/foaf/0.1/name> " + '"' +
                     str(stops["stop_name"][i]).replace('"', r'\"') + '" .\n')
             f.write(
-                first_term + " <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.disit.org/km4city/schema#" + km4c_class +"> .\n")
+                first_term + " <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.disit.org/km4city/schema#" + km4c_class + "> .\n")
             f.write("\n")
         f.close()
 
@@ -149,12 +156,15 @@ class ChouettePublisher:
         print("Write triples for stop_times")
         f = open(self.output_directory + os.sep + 'StopTimes.n3', "w+")
         for i in range(len(stop_times["trip_id"])):
-            first_term = "<http://www.disit.org/km4city/resource/" + entry_name + "_StopTime_" + str(stop_times["trip_id"][
-                i]) + "_" + str(stop_times["stop_sequence"][i]).zfill(2) + "> "
-            first_term_var = "<http://www.disit.org/km4city/resource/" + entry_name + "_Trip_" + str(stop_times["trip_id"][
-                i]) + "> "
-            first_term_var2 = "<http://www.disit.org/km4city/resource/" + entry_name + "_Stop_" + str(stop_times["stop_id"][
-                i]) + ">"
+            first_term = "<http://www.disit.org/km4city/resource/" + entry_name + "_StopTime_" + str(
+                stop_times["trip_id"][
+                    i]) + "_" + str(stop_times["stop_sequence"][i]).zfill(2) + "> "
+            first_term_var = "<http://www.disit.org/km4city/resource/" + entry_name + "_Trip_" + str(
+                stop_times["trip_id"][
+                    i]) + "> "
+            first_term_var2 = "<http://www.disit.org/km4city/resource/" + entry_name + "_Stop_" + str(
+                stop_times["stop_id"][
+                    i]) + ">"
 
             f.write(first_term + " <http://purl.org/dc/terms/identifier> " + '"' + entry_name + "_StopTime_" +
                     str(stop_times["trip_id"][i]) + "_" + str(stop_times["stop_sequence"][i]).zfill(2) + '" .\n')
@@ -163,8 +173,9 @@ class ChouettePublisher:
             f.write(
                 first_term_var + " <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://vocab.gtfs.org/terms#Trip> .\n")
             f.write(first_term + " <http://vocab.gtfs.org/terms#trip> " + first_term_var + " .\n")
-            f.write(first_term + " <http://vocab.gtfs.org/terms#departureTime> " + '"' + str(stop_times["departure_time"][
-                i]) + '" .\n')
+            f.write(
+                first_term + " <http://vocab.gtfs.org/terms#departureTime> " + '"' + str(stop_times["departure_time"][
+                                                                                             i]) + '" .\n')
             f.write(
                 first_term + " <http://vocab.gtfs.org/terms#stop> <http://www.disit.org/km4city/resource/" + entry_name + "_Stop_" +
                 str(stop_times["stop_id"][i]) + "> .\n")
@@ -172,7 +183,7 @@ class ChouettePublisher:
                 stop_times["stop_sequence"][i]).zfill(2) + '" .\n')
             f.write(
                 first_term + " <http://vocab.gtfs.org/terms#arrivalTime> " + '"' + str(stop_times["arrival_time"][
-                    i]) + '" .\n')
+                                                                                           i]) + '" .\n')
             f.write(first_term_var + " <http://purl.org/dc/terms/identifier> " + '"' + entry_name + "_Trip_" +
                     str(stop_times["trip_id"][i]) + '" .\n')
             f.write(
@@ -187,10 +198,11 @@ class ChouettePublisher:
         print("Write triples for trips")
         f = open(self.output_directory + os.sep + "trips.n3", "w+")
         for i in range(len(trips["route_id"])):
-            first_term = "<http://www.disit.org/km4city/resource/" + entry_name + "_Trip_" + str(trips["trip_id"][i]) + ">"
+            first_term = "<http://www.disit.org/km4city/resource/" + entry_name + "_Trip_" + str(
+                trips["trip_id"][i]) + ">"
             first_term_var = "<http://www.disit.org/km4city/resource/" + entry_name + "_Service_" + \
                              str(trips["service_id"][
-                                 i]) + ">"
+                                     i]) + ">"
             first_term_var2 = "<http://www.disit.org/km4city/resource/" + entry_name + "_Shape_" + str(
                 trips["shape_id"][i]) + ">"
             first_term_var3 = "<http://www.disit.org/km4city/resource/" + entry_name + "_Route_" + str(
@@ -222,8 +234,9 @@ class ChouettePublisher:
             f.write(first_term + ' <http://vocab.gtfs.org/terms#shortName> "' + short_name + '" .\n')
             f.write(
                 first_term_var3 + " <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://vocab.gtfs.org/terms#Route> .\n")
-            f.write(first_term + ' <http://purl.org/dc/terms/identifier> "' + entry_name + "_Trip_" + str(trips["trip_id"][
-                i]) + '" .\n')
+            f.write(
+                first_term + ' <http://purl.org/dc/terms/identifier> "' + entry_name + "_Trip_" + str(trips["trip_id"][
+                                                                                                          i]) + '" .\n')
             f.write(
                 first_term + " <http://vocab.gtfs.org/terms#service> <http://www.disit.org/km4city/resource/" + entry_name + "_Service_" +
                 str(trips["service_id"][i]) + "> .\n")
@@ -277,8 +290,9 @@ class ChouettePublisher:
             f.write(
                 """%s <http://vocab.gtfs.org/terms#textColor> "%s" .\n""" % (first_term, routes['route_text_color'][i]))
             f.write("""%s <http://vocab.gtfs.org/terms#longName> "%s" .\n""" % (
-            first_term, str(routes['route_long_name'][i]).replace('"', r'\"')))
-            f.write("""%s <http://vocab.gtfs.org/terms#shortName> "%s" . \n""" % (first_term, short_name.replace('"', r'\"')))
+                first_term, str(routes['route_long_name'][i]).replace('"', r'\"')))
+            f.write("""%s <http://vocab.gtfs.org/terms#shortName> "%s" . \n""" % (
+                first_term, short_name.replace('"', r'\"')))
             f.write("""%s <http://purl.org/dc/terms/identifier> "%s_Agency_%s" . \n""" % (agency_first_term, entry_name,
                                                                                           str(routes['agency_id'][i])))
             f.write("""%s <http://vocab.gtfs.org/terms#agency> %s .\n""" % (first_term, agency_first_term))
@@ -351,13 +365,13 @@ class ChouettePublisher:
             url = self.chouette_url + self._api_directory + self.publication_api + "/gtfs.zip"
         else:
             url = self.chouette_url
-            
+
         print(url)
 
         payload = {}
         headers = {}
         if self.publication_api_key != '':
-            headres['Authorization'] = 'Token token=' + self.publication_api_key
+            headers['Authorization'] = 'Token token=' + self.publication_api_key
 
         response = requests.request("GET", url, headers=headers, data=payload).content
         file_path = self.output_directory + os.sep + entry_name + '_publication.gtfs'
@@ -371,86 +385,127 @@ class ChouettePublisher:
 
 app = flask.Flask(__name__)
 
-os.environ["FLASK_APP"]= __name__ + ".py"
+os.environ["FLASK_APP"] = __name__ + ".py"
+
 
 @app.route('/chouette2n3', methods=['GET', 'POST'])
 def chouette2n3():
     try:
         if flask.request.method == 'GET':
             api_namespace = flask.request.values.get('api_namespace')
-            if api_namespace==None:
+            if api_namespace == None:
                 return "missing api_namespace"
             api_key = flask.request.values.get('api_key')
-            if api_key==None:
+            if api_key == None:
                 return "missing api_key"
             chouette_url = flask.request.values.get('chouette_url')
-            if chouette_url==None:
-                chouette_url="https://chouette.enroute.mobi"
+            if chouette_url == None:
+                chouette_url = "https://chouette.enroute.mobi"
             entry_name = flask.request.values.get('entry_name')
-            if entry_name==None:
-                entryname=api_namespace
+            if entry_name == None:
+                entryname = api_namespace
 
-            print("params: ",api_namespace," ",api_key," ",chouette_url," ",entry_name)
+            print("params: ", api_namespace, " ", api_key, " ", chouette_url, " ", entry_name)
 
-            publisher = ChouettePublisher(chouette_url, api_namespace, api_key, '/data/gtfs-triples/'+api_namespace)
+            publisher = ChouettePublisher(chouette_url, api_namespace, api_key, '/data/gtfs-triples/' + api_namespace)
             print(publisher)
             publisher.get_triples(entry_name, True)
 
             return "done"
     except Exception as e:
-        print ("Error: "+str(e))
-        message = "Error: "+str(e);
+        print("Error: " + str(e))
+        message = "Error: " + str(e);
         return message
 
+
 @app.route('/gtfs2n3', methods=['GET', 'POST'])
-def gtfs2n3():
+def gtfs2n3(gtfs_url=None, entry_name=None, km4c_class=None):
     try:
-        if flask.request.method == 'GET':
-            gtfs_url = flask.request.values.get('gtfs_url')
-            if gtfs_url==None:
-                return "missing gtfs_url"
-            entry_name = flask.request.values.get('entry_name')
-            if entry_name==None:
-                return "missing entry_name"
-            km4c_class = flask.request.values.get('km4c_class')
-            if km4c_class==None:
-                km4c_class = 'BusStop'
+        if gtfs_url == None:
+            if flask.request.method == 'GET':
+                gtfs_url = flask.request.values.get('gtfs_url')
+                if gtfs_url == None:
+                    return "missing gtfs_url"
+                entry_name = flask.request.values.get('entry_name')
+                if entry_name == None:
+                    return "missing entry_name"
+                km4c_class = flask.request.values.get('km4c_class')
+                if km4c_class == None:
+                    km4c_class = 'BusStop'
+        else:
+            print("params: ", gtfs_url, " ", entry_name)
 
-            print("params: ",gtfs_url," ",entry_name)
-
-            publisher = ChouettePublisher(gtfs_url, '', '', '/data/gtfs-triples/'+entry_name)
+            publisher = ChouettePublisher(gtfs_url, '', '', './data/gtfs-triples/' + entry_name)
             print(publisher)
             publisher.get_triples(entry_name, km4c_class, True)
 
-            return "{\"result\":\"done\",\"entry_name\":\""+entry_name+"\"}"
+            return "{\"result\":\"done\",\"entry_name\":\"" + entry_name + "\"}"
+
     except Exception as e:
-        print ("Error: "+str(e))
-        message = "Error: "+str(e);
+        print("Error: " + str(e))
+        message = "Error: " + str(e);
         return message
 
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=8080)
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Interface for connect to a Enroute Chouette application and export'
-                                                 'publications in triples format')
-    parser.add_argument('api_namespace', metavar='API_SHORT_NAME', type=str,
-                        help='The short name of the publications API (can be found in '
-                             'Settings > Publications inside Chouette)')
-    parser.add_argument('api_key', metavar='API_KEY', type=str,
-                        help='The API key, can be created in Settings > Publication APIs inside Chouette')
-    parser.add_argument('url', metavar='CHOUETTE_URL', default='chouette.snap4city.org', type=str, nargs='?',
-                        help='The URL of the publications source. Default connects to "chouette.snap4city.org"')
-    parser.add_argument('-o', '--output-directory', type=str, default=None,
-                        help='The output directory of the triples. Default is inside current directory: '
-                             + os.path.curdir + os.sep + 'output')
-    parser.add_argument('-s', '--save', action='store_true',
-                        help='This flag can be userd to preserve the original GTFS export inside OUTPUT_FOLDER')
-    parser.add_argument('-e', '--entry-name', type=str, default=None,
-                        help='The name for the extracted data entries. Dafault API_SHORT_NAME')
-    args = parser.parse_args()
+    parser = argparse.ArgumentParser(
+        description='Interface for connecting to Enroute Chouette application and exporting '
+                    'publications in triples format.')
+
+    parser.add_argument('-action', metavar='ACTION', type=str, choices=['gtfs2n3', 'chouette', 'flask'],
+                        default='flask',
+                        help='Action to perform: \n'
+                             '  gtfs2n3 -> generate from gtfs url\n'
+                             '  chouette -> generate from chouette url')
+
+    args, remaining_argv = parser.parse_known_args()
+
+    parser = argparse.ArgumentParser()
+
+
+    if args.action == "chouette":
+
+        parser.add_argument('api_namespace', metavar='API_SHORT_NAME', type=str,
+                            help='The short name of the publications API (can be found in '
+                                 'Settings > Publications inside Chouette)')
+
+        parser.add_argument('api_key', metavar='API_KEY', type=str,
+                            help='The API key, can be created in Settings > Publication APIs inside Chouette')
+
+        parser.add_argument('url', metavar='CHOUETTE_URL', default='chouette.snap4city.org', type=str, nargs='?',
+                            help='The URL of the publications source. Default connects to "chouette.snap4city.org"')
+
+        parser.add_argument('-s', '--save', action='store_true',
+                            help='This flag can be used to preserve the original GTFS export inside OUTPUT_FOLDER')
+
+        parser.add_argument('-e', '--entry-name', type=str, default=None,
+                            help='The name for the extracted data entries. Default API_SHORT_NAME')
+
+        parser.add_argument('-o', '--output-directory', type=str, default=os.path.join(os.curdir, 'output'),
+                            help='The output directory of the triples. Default is inside the current directory.')
+
+    elif args.action == "gtfs2n3":
+
+        parser.add_argument('url', metavar='GTFS_URL', type=str, nargs='?',
+                            help='The URL of the gtfs publications source.')
+        parser.add_argument('entry_name', metavar='ENTRY-NAME', type=str, nargs='?',
+                            help='Name of the entry')
+
+        parser.add_argument('-km4c_class', metavar='KM4C_CLASS', default="BusStop", type=str,
+                            help='Name of the km4c_class. Defatults to "BusStop"')
+
+    else:
+
+        parser.add_argument("-port", metavar='FLASK_PORT', type=int, default=8080, help='flask server run port')
+
+    args = parser.parse_args(remaining_argv, namespace=args)
     print(args)
 
-    publisher = ChouettePublisher(args.url, args.api_namespace, args.api_key, args.output_directory)
-    print(publisher)
-    publisher.get_triples(args.entry_name, args.save)
+    if args.action == "gtfs2n3":
+        gtfs2n3(args.url, args.entry_name, args.km4c_class)
+    elif args.action == "chouette":
+        publisher = ChouettePublisher(args.url, args.api_namespace, args.api_key, args.output_directory)
+        print(publisher)
+        publisher.get_triples(args.entry_name, args.save)
+    else:
+        app.run(host='0.0.0.0', port=args.port)
