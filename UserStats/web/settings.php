@@ -1,6 +1,6 @@
 <?php
 /*
-Snap4city -- connection.php --
+Snap4city -- settings.php --
    Copyright (C) 2020 DISIT Lab http://www.disit.org - University of Florence
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU Affero General Public License as
@@ -13,5 +13,9 @@ Snap4city -- connection.php --
    You should have received a copy of the GNU Affero General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-$connection = mysqli_connect("localhost", "user", "passw", "iot");
+$config['session.save_path'] = '/mnt/nfs';
+$config['session.gc_probability'] = 1;
+$config['sessionTimeoutSecs'] = 2678400;
+$config['ldapServer'] = 'ldap-server';
+$config['ldapPort'] = 389;
 ?>

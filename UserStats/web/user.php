@@ -1,10 +1,18 @@
 <?php
-// http://jsfiddle.net/RR4hw/7/ 
-// https://jsfiddle.net/8jpmkcr5/2791/ 
-// http://jsfiddle.net/cjp7y/2262/
-// https://stackoverflow.com/questions/20964218/how-to-restrict-bootstrap-date-picker-from-future-date
-// http://jsfiddle.net/tovic/ve8mU/light/
-// http://markdotto.com/playground/3d-text/
+/*
+Snap4city -- user.php --
+   Copyright (C) 2020 DISIT Lab http://www.disit.org - University of Florence
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as
+   published by the Free Software Foundation, either version 3 of the
+   License, or (at your option) any later version.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Affero General Public License for more details.
+   You should have received a copy of the GNU Affero General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 header('Access-Control-Allow-Origin: *');
 require 'sso/autoload.php';

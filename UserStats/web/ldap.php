@@ -1,20 +1,30 @@
 <?php
 
-// apt-get install php5-ldap nfs-commons cifs-utils
-// mkdir /mnt/nfs
-// in /etc/fstab
-// localhost:/var/nfs    /mnt/nfs   nfs rw,user,auto 0 0
-// mount -a
-// service apache2 restart
-
+/*
+Snap4city -- ldap.php --
+   Copyright (C) 2020 DISIT Lab http://www.disit.org - University of Florence
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as
+   published by the Free Software Foundation, either version 3 of the
+   License, or (at your option) any later version.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Affero General Public License for more details.
+   You should have received a copy of the GNU Affero General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 define(LDAP_OPT_DIAGNOSTIC_MESSAGE, 0x0032);
 
+include_once "./settings.php";
+
 function check_auth_ldap($username, $password, $tool, $role) {
-    ini_set('session.save_path', '/mnt/nfs');
-    ini_set('session.gc_probability', 1);
-    $sessionTimeoutSecs = 2678400;
-    $ldapServer = 'localhost';
-    $ldapPort = 389;
+    global $config;
+    ini_set('session.save_path', $config['session.save_path']);
+    ini_set('session.gc_probability', $config['session.gc_probability']);
+    $sessionTimeoutSecs = $config['sessionTimeoutSecs'];
+    $ldapServer = $config['ldapServer'];
+    $ldapPort = $config['ldapPort'];
 
     //if (!isset($_SESSION)) {
     //session_name("name");

@@ -1,6 +1,19 @@
 <?php
 
-// http://192.168.0.10/iot/heatmap.php?days=7&latitude_min=43.0&latitude_max=43.32&longitude_min=10.0&longitude_max=11.32
+/*
+Snap4city -- heatmap.php --
+   Copyright (C) 2020 DISIT Lab http://www.disit.org - University of Florence
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as
+   published by the Free Software Foundation, either version 3 of the
+   License, or (at your option) any later version.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Affero General Public License for more details.
+   You should have received a copy of the GNU Affero General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 header('Access-Control-Allow-Origin: *');
 include("connection.php");
 $data = array();
