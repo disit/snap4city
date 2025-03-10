@@ -1,0 +1,102 @@
+{
+    "mappings" : {
+      "properties" : {
+        "agent" : {
+          "type" : "keyword"
+        },
+        "app_name" : {
+          "type" : "keyword"
+        },
+        "com_mode" : {
+          "type" : "keyword"
+        },
+        "counts" : {
+          "type" : "integer"
+        },
+        "date_time" : {
+          "type" : "date"
+        },
+        "date_time_10min" : {
+          "type" : "date"
+        },
+        "date_time_10sec" : {
+          "type" : "date"
+        },
+        "date_time_1d" : {
+          "type" : "date"
+        },
+        "date_time_1h" : {
+          "type" : "date"
+        },
+        "date_time_1min" : {
+          "type" : "date"
+        },
+        "date_time_1sec" : {
+          "type" : "date"
+        },
+        "date_time_23h" : {
+          "type" : "date"
+        },
+        "geolocation" : {
+          "type" : "geo_point"
+        },
+        "id" : {
+          "type" : "keyword"
+        },
+        "ip_ext" : {
+          "type" : "keyword"
+        },
+        "ip_local" : {
+          "type" : "keyword"
+        },
+        "lang" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "type" : "keyword",
+              "ignore_above" : 256
+            }
+          }
+        },
+        "lat" : {
+          "type" : "float"
+        },
+        "lon" : {
+          "type" : "float"
+        },
+        "lon_lat" : {
+          "type" : "geo_point"
+        },
+        "message" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "type" : "keyword",
+              "ignore_above" : 256
+            }
+          }
+        },
+        "motivation" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "type" : "keyword",
+              "ignore_above" : 256
+            }
+          }
+        },
+        "payload" : {
+          "type" : "float"
+        },
+        "pid_local" : {
+          "type" : "keyword"
+        },
+        "service_scope" : {
+          "type" : "keyword"
+        },
+        "service_uri" : {
+          "type" : "keyword"
+        }
+      }
+    }
+}
