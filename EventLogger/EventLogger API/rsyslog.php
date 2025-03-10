@@ -98,6 +98,11 @@ if (filter_input(INPUT_GET, 'p') == "log") {
     
     if (!empty($_REQUEST["payloadSize"])) {
         $payloadSize = $_REQUEST["payloadSize"];
+        if ($payloadSize == null) {
+            $payloadSize = 0;
+        } else if ($payloadSize == '') {
+            $payloadSize = 0;
+        }
     }
     
     if (!empty($_REQUEST["agent"])) {
@@ -141,14 +146,10 @@ if (filter_input(INPUT_GET, 'p') == "log") {
           if (strcasecmp($serviceUri, "undefined") != 0) {  
             //   $sparql_query = "SELECT ?lat ?lon WHERE { ".$serviceUri." <http://www.w3.org/2003/01/geo/wgs84_pos#lat> ?lat. ".$serviceUri." <http://www.w3.org/2003/01/geo/wgs84_pos#long> ?lon.}";
             $sparql_query = "SELECT ?lat ?lon WHERE { ".$serviceUri." <http://www.w3.org/2003/01/geo/wgs84_pos%23lat> ?lat. ".$serviceUri." <http://www.w3.org/2003/01/geo/wgs84_pos%23long> ?lon.}";
-         //   $queryText = urlencode("http://192.168.0.206:8890/sparql?default-graph-uri=&query=".$sparql_query);
-         //   $queryText = "http://192.168.0.206:8890/sparql?default-graph-uri=&query=".$sparql_query;
-
-            // query example:
-            // http://192.168.0.206:8890/sparql?default-graph-uri=&query=SELECT ?lat ?lon WHERE { <http://www.disit.org/km4city/resource/6ceacbc32f1e6824ecb71017a668c2a3> <http://www.w3.org/2003/01/geo/wgs84_pos#lat> ?lat. <http://www.disit.org/km4city/resource/6ceacbc32f1e6824ecb71017a668c2a3> <http://www.w3.org/2003/01/geo/wgs84_pos#long> ?lon.
 
            // $query_results = file_get_contents($queryText);
-            $api_header = 'http://servicemap.disit.org/WebAppGrafo/api/v1/?realtime=false&serviceUri=';
+ //           $api_header = 'http://servicemap.disit.org/WebAppGrafo/api/v1/?realtime=false&serviceUri=';
+ 	      $api_header = 'http://127.0.0.1:3128/WebAppGrafo/api/v1/?realtime=false&serviceUri=';
             $api_request = $api_header.$serviceUri;
          //   $query_results = file_get_contents($api_request);
 
@@ -214,20 +215,6 @@ if (filter_input(INPUT_GET, 'p') == "log") {
         } else {
             $serviceScope = "INTERNAL";
         }
-    }
-    
-    if ($counts != null) {
-        if (is_numeric($counts+1)) {
-         //   if (!is_long($counts+1)) {
-                $counts = $counts + 1 - 1;
-         //   } else {
-        //        $counts = 0;
-        //    }
-        } else {
-            $counts = 0;
-        }
-    } else {
-        $counts = 0;
     }
     
     if ($counts != null) {
