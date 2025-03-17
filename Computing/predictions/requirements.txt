@@ -1,0 +1,15 @@
+Flask==3.0.3
+requests==2.32.3
+scikit-learn==1.5.1
+python-dateutil==2.9.0.post0
+numpy==1.26.4
+tensorflow==2.16.2
+matplotlib==3.9.1
+optuna==3.6.1
+pandas==2.2.2
+prophet==1.1.5
+pyproj==3.6.1
+shapely==2.0.6
+geopandas==1.0.1
+geopy==2.4.1
+gunicorn

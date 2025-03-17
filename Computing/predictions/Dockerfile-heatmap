@@ -1,0 +1,29 @@
+FROM python:3.11-slim
+
+# Imposta la working directory
+WORKDIR /app
+
+# Copia i file necessari
+COPY requirements.txt .
+
+# Installa le dipendenze
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copia il codice sorgente
+COPY  heatmap*.py helper.py /app/
+
+# Espone la porta dell'app
+EXPOSE 8085
+
+# Comando di avvio
+#CMD ["python", "-u", "heatmap_service.py"]
+#CMD ["gunicorn", "--workers", "4", "--timeout", "60", "--bind", "0.0.0.0:8085", "heatmap_service:app", "--enable-stdio-inheritance"]
+
+ENV PYTHONUNBUFFERED=True
+ENV WORKERS=4
+ENV TIMEOUT=60
+ENV PORT=8085
+
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh", "heatmap_service:app"]
