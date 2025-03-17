@@ -1,15 +1,21 @@
 FROM python:3.11-slim
 
+RUN groupadd -r pyuser && useradd -r -g pyuser pyuser
+
 # Imposta la working directory
 WORKDIR /app
 
 # Copia i file necessari
 COPY requirements.txt .
+RUN chown -R pyuser:pyuser /app
+USER pyuser
 
 # Installa le dipendenze
-RUN pip install --no-cache-dir -r requirements.txt
+#RUN pip install --no-cache-dir -r requirements.txt
+RUN python -m venv venv && venv/bin/pip install --no-cache-dir -r requirements.txt
 
 # Copia il codice sorgente
+#COPY --chown=pyuser:pyuser  predictions*.py helper.py /app/
 COPY predictions_service.py helper.py /app/
 COPY models /app/models
 
@@ -18,15 +24,13 @@ EXPOSE 8084
 
 # Comando di avvio
 #CMD ["python", "-u", "predictions_service.py"]
-# Command to run the application with Gunicorn
-#CMD ["gunicorn", "--bind", "0.0.0.0:8084", "predictions_service:app"]
+#CMD ["gunicorn", "--workers", "4", "--timeout", "60", "--bind", "0.0.0.0:8085", "predictions_service:app", "--enable-stdio-inheritance"]
 
 ENV PYTHONUNBUFFERED=True
 ENV WORKERS=4
 ENV TIMEOUT=60
 ENV PORT=8084
 
-COPY entrypoint.sh /entrypoint.sh
+COPY --chown=pyuser:pyuser entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh", "predictions_service:app"]
-

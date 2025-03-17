@@ -1,16 +1,21 @@
 FROM python:3.11-slim
 
+RUN groupadd -r pyuser && useradd -r -g pyuser pyuser
+
 # Imposta la working directory
 WORKDIR /app
 
 # Copia i file necessari
 COPY requirements.txt .
+RUN chown -R pyuser:pyuser /app
+USER pyuser
 
 # Installa le dipendenze
-RUN pip install --no-cache-dir -r requirements.txt
+#RUN pip install --no-cache-dir -r requirements.txt
+RUN python -m venv venv && venv/bin/pip install --no-cache-dir -r requirements.txt
 
 # Copia il codice sorgente
-COPY  heatmap*.py helper.py /app/
+COPY --chown=pyuser:pyuser  heatmap*.py helper.py /app/
 
 # Espone la porta dell'app
 EXPOSE 8085
@@ -24,6 +29,6 @@ ENV WORKERS=4
 ENV TIMEOUT=60
 ENV PORT=8085
 
-COPY entrypoint.sh /entrypoint.sh
+COPY --chown=pyuser:pyuser entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh", "heatmap_service:app"]

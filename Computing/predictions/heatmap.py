@@ -482,7 +482,8 @@ def heatmapIDW(city: str, long_min: float, long_max: float, lat_min: float, lat_
 
     base_url = os.getenv("BASE_URL","https://www.snap4city.org")
     orionfilter_base_url = os.getenv("ORIONFILTER_BASE_URL","https://www.snap4city.org/orionfilter")
-    broker = os.getenv("DEFAULT_BROKER", "orionUNIFI")
+    if(broker is None):
+        broker = os.getenv("DEFAULT_BROKER", "orionUNIFI")
 
     config = {
         "token": token,
@@ -572,7 +573,7 @@ def heatmapIDW(city: str, long_min: float, long_max: float, lat_min: float, lat_
     request_body_json = json.dumps(interpolated_heatmap['attributes'], indent=4)
 
     # Define the URL for the POST request
-    heatmap_insert_base_url = os.getenv("HEATMAP_INSERT_BASE_URL","http://snap4city:disit2019@192.168.0.59:8000")
+    heatmap_insert_base_url = os.getenv("HEATMAP_INSERT_BASE_URL","http://192.168.0.59:8000")
     heatmap_setmap_url = os.getenv("HEATMAP_SETMAP_URL","http://192.168.0.59/setMap.php")
     url = heatmap_insert_base_url + "/insertArray"
     print("Sending POST to ",url)
