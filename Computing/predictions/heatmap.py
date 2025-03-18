@@ -281,8 +281,10 @@ def heatmapIDW(city: str, long_min: float, long_max: float, lat_min: float, lat_
 
         temp_new = {}
         var_name = None
-
+        print("-----------------------------------------------------")
+        print(names_matrix)
         if not names_matrix[names_matrix['sensorDataIndex'] == j].empty:
+            print("Entrato")
             var_name = names_matrix.loc[names_matrix['sensorDataIndex'] == j, 'varNameList'].values[0]
             if "dateTime" in temp.columns:
                 temp_new = temp.loc[:, [var_name, "dateTime"]]
@@ -296,12 +298,14 @@ def heatmapIDW(city: str, long_min: float, long_max: float, lat_min: float, lat_
         sensor_data[j]['indexValues'] = temp_new
 
         # Handle missing values
-        if temp_new[var_name].isna().all():
-            print(f"No Available Measures for the Variable '{var_name}' in ServiceUri '{entry['sensorName']}'")
-            data.at[j, "value"] = np.nan
-        else:
-            # Calculate mean, skipping NaN values
-            data.at[j, "value"] = temp_new[var_name].mean(skipna=True)
+        print("var_name:",var_name)
+        if var_name and var_name in temp_new.columns:
+            if temp_new[var_name].isna().all() :
+                print(f"No Available Measures for the Variable '{var_name}' in ServiceUri '{entry['sensorName']}'")
+                data.at[j, "value"] = np.nan
+            else:
+                # Calculate mean, skipping NaN values
+                data.at[j, "value"] = temp_new[var_name].mean(skipna=True)
 
         # Assign latitude and longitude
         data.at[j, "lat"] = entry['sensorCoordinates'][1]
