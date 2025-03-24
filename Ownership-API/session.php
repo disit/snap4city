@@ -35,10 +35,16 @@ if(isset($_REQUEST['username']) && in_array($ipAddress, $trustedIpAddrs)) {
   } else if(isset($_REQUEST['accessToken'])) {
     $accessToken=$_REQUEST['accessToken'];
   } else {
-    header("HTTP/1.1 401 Unauthorized");
-    echo "No token provided";
-    ownership_access_log(['op'=>$OPERATION,'result'=>'NO_TOKEN']);
-    exit;
+    $headers = array_change_key_case(getallheaders(), CASE_LOWER);
+    if (isset($headers['authorization']) && strlen($headers['authorization'])>8 && 
+            substr( strtolower($headers['authorization']), 0, 7 ) === "bearer ") {
+        $accessToken=substr($headers['authorization'],7);
+    } else {
+        header("HTTP/1.1 401 Unauthorized");
+        echo "No token provided or invalid authorization header";
+        ownership_access_log(['op'=>$OPERATION,'result'=>'NO_TOKEN']);
+        exit;
+    }
   }
   $oidc->setAccessToken($accessToken);
   $payload=$oidc->getAccessTokenPayload();
@@ -47,9 +53,9 @@ if(isset($_REQUEST['username']) && in_array($ipAddress, $trustedIpAddrs)) {
   if(isset($uinfo->error)) {
     header("HTTP/1.1 401 Unauthorized");
     echo json_encode($uinfo);
-    $f=fopen($log_path."/ownership-error.log","a");
-    fwrite($f,date('c')." ERROR: ".json_encode($uinfo)."\n");
     ownership_access_log(['op'=>$OPERATION,'result'=>'UNAUTHORIZED']);
+    $f=fopen($log_path."/ownership-error.log","a");
+    fwrite($f,date('c')." $OPERATION USERINFO ERROR: ".json_encode($uinfo)." tkn:".$accessToken."\n");
     exit;  
   }
 
@@ -60,8 +66,8 @@ if(isset($_REQUEST['username']) && in_array($ipAddress, $trustedIpAddrs)) {
     header("HTTP/1.1 400 BAD REQUEST");
     echo "No username found ".json_encode($uinfo);
     $f=fopen($log_path."/ownership-error.log","a");
-    fwrite($f,date('c')." ERROR: no username found ".json_encode($uinfo)."\n");
-    ownership_access_log(['op'=>$OPERATION,'result'=>'NO_USERNAME']);
+    fwrite($f,date('c')." $OPERATION USERINFO ERROR: no username found ".json_encode($uinfo)." accessToken: ".$accessToken."\n");
+    ownership_access_log(['op'=>$OPERATION,'result'=>'NO_USERNAME','id'=>$_REQUEST['elementId']]);
     exit;  
   }
   
