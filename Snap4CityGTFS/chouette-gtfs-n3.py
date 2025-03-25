@@ -75,12 +75,12 @@ class ChouettePublisher:
         for i in range(len(agency["agency_id"])):
             # semantic subject
             first_term = "<http://www.disit.org/km4city/resource/" + entry_name + "_Agency_" + str(
-                agency["agency_id"][i]) + \
+                agency["agency_id"][i]).replace(" ", "") + \
                          ">"
 
             f.write(first_term + " <http://purl.org/dc/terms/identifier> " +
-                    '"' + entry_name + '_' + str(agency["agency_id"][i]) + '" .\n')
-            f.write(first_term + " <http://xmlns.com/foaf/0.1/name> " + '"' + str(agency["agency_name"][i]) + '" .\n')
+                    '"' + entry_name + '_' + str(agency["agency_id"][i]).replace(" ", "") + '" .\n')
+            f.write(first_term + " <http://xmlns.com/foaf/0.1/name> " + '"' + str(agency["agency_name"][i]).replace(" ", "") + '" .\n')
             f.write(
                 first_term + " <http://vocab.gtfs.org/terms#timeZone> " + '"' + str(
                     agency["agency_timezone"][i]) + '" .\n')
@@ -96,7 +96,43 @@ class ChouettePublisher:
         return first_term
 
     def _extract_calendar_dates_triples(self, entry_name):
-        read_file = pd.read_csv(self.output_directory + os.sep + 'calendar_dates.txt')
+        #check if calendar file exists
+        calendar_file, read_file = None, None
+        if os.path.exists(self.output_directory + os.sep + 'calendar.txt'):
+            calendar_file = pd.read_csv(self.output_directory + os.sep + 'calendar.txt')
+
+        if calendar_file is not None:
+            read_file = pd.read_csv(self.output_directory + os.sep + 'calendar_dates.txt')
+            #clear exception_type 2 (removed service)
+            read_file = read_file[read_file['exception_type'] != 2]
+            read_file.reset_index(drop=True, inplace=True)
+            #add the dates to perform the service changes
+            for service_id in calendar_file['service_id'].to_numpy():
+                #read from the calendar file
+                row = calendar_file.loc[calendar_file['service_id']==service_id]
+                date_from = str(row['start_date'].values[0]) 
+                date_to = str(row['end_date'].values[0])
+                # Convert the string dates to datetime objects
+                start_date = datetime.datetime.strptime(date_from, '%Y%m%d')
+                end_date = datetime.datetime.strptime(date_to, '%Y%m%d')
+                # Generate an array of date strings
+                date_array = [(start_date + datetime.timedelta(days=i)).strftime('%Y%m%d') for i in range((end_date - start_date).days + 1)]
+                for date in date_array:
+                    # Convert the string to a datetime object
+                    date_obj = datetime.datetime.strptime(date, '%Y%m%d')
+                    # Get the day name and convert it to lowercase
+                    day_name = date_obj.strftime('%A').lower()
+                    #check what day is (FER/FEST)
+                    if(row[day_name].values[0] == 1): 
+                        query = f"service_id == '{service_id}' and date == '{date}'"
+                        row_changed = not read_file.query(query).empty
+                        # if not is already added, add it to the df
+                        if not row_changed:
+                            read_file.loc[len(read_file)] = [service_id, int(date), 1]
+            
+        else:
+            read_file = pd.read_csv(self.output_directory + os.sep + 'calendar_dates.txt')                
+
         read_file.to_csv(r'calendar_dates.csv', index=None)
         calendar = pd.read_csv("calendar_dates.csv", delimiter=",")
         print("Write triples for calendar_dates")
@@ -279,7 +315,7 @@ class ChouettePublisher:
             first_term = "<http://www.disit.org/km4city/resource/" + entry_name + "_Route_" + str(
                 routes["route_id"][i]) + ">"
             agency_first_term = "<http://www.disit.org/km4city/resource/" + entry_name + "_Agency_" + \
-                                str(routes["agency_id"][i]) + ">"
+                                str(routes["agency_id"][i]).replace(" ", "") + ">"
             short_name = str(routes["route_short_name"][i])
             if short_name == "nan":
                 short_name = ""
@@ -294,7 +330,7 @@ class ChouettePublisher:
             f.write("""%s <http://vocab.gtfs.org/terms#shortName> "%s" . \n""" % (
                 first_term, short_name.replace('"', r'\"')))
             f.write("""%s <http://purl.org/dc/terms/identifier> "%s_Agency_%s" . \n""" % (agency_first_term, entry_name,
-                                                                                          str(routes['agency_id'][i])))
+                                                                                          str(routes['agency_id'][i]).replace(" ", "")))
             f.write("""%s <http://vocab.gtfs.org/terms#agency> %s .\n""" % (first_term, agency_first_term))
             f.write("""%s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://vocab.gtfs.org/terms#Agency> .\n"""
                     % agency_first_term)
