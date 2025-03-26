@@ -122,9 +122,9 @@ class ChouettePublisher:
                     date_obj = datetime.datetime.strptime(date, '%Y%m%d')
                     # Get the day name and convert it to lowercase
                     day_name = date_obj.strftime('%A').lower()
-                    #check what day is (FER/FEST)
+                    #check what day is (mon, tue, ...)
                     if(row[day_name].values[0] == 1): 
-                        query = f"service_id == '{service_id}' and date == '{date}'"
+                        query = f"date == {date}"
                         row_changed = not read_file.query(query).empty
                         # if not is already added, add it to the df
                         if not row_changed:
@@ -468,14 +468,13 @@ def gtfs2n3(gtfs_url=None, entry_name=None, km4c_class=None):
                 km4c_class = flask.request.values.get('km4c_class')
                 if km4c_class == None:
                     km4c_class = 'BusStop'
-        else:
-            print("params: ", gtfs_url, " ", entry_name)
+        print("params: ", gtfs_url, " ", entry_name)
 
-            publisher = ChouettePublisher(gtfs_url, '', '', './data/gtfs-triples/' + entry_name)
-            print(publisher)
-            publisher.get_triples(entry_name, km4c_class, True)
+        publisher = ChouettePublisher(gtfs_url, '', '', './data/gtfs-triples/' + entry_name)
+        print(publisher)
+        publisher.get_triples(entry_name, km4c_class, True)
 
-            return "{\"result\":\"done\",\"entry_name\":\"" + entry_name + "\"}"
+        return "{\"result\":\"done\",\"entry_name\":\"" + entry_name + "\"}"
 
     except Exception as e:
         print("Error: " + str(e))
