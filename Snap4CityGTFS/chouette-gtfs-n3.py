@@ -470,9 +470,13 @@ def gtfs2n3(gtfs_url=None, entry_name=None, km4c_class=None):
                     km4c_class = 'BusStop'
         print("params: ", gtfs_url, " ", entry_name)
 
-        publisher = ChouettePublisher(gtfs_url, '', '', './data/gtfs-triples/' + entry_name)
+        data_dir = os.getenv('DATA_DIR', './data') + '/gtfs-triples/' + entry_name
+        publisher = ChouettePublisher(gtfs_url, '', '', data_dir)
         print(publisher)
         publisher.get_triples(entry_name, km4c_class, True)
+
+        if(os.getenv('VIRTUOSO_HOST')!=None):
+            os.system("bash ./virtuoso-update-graph.sh "+data_dir+" " + os.getenv('VIRTUOSO_HOST') + " urn:gtfs:"+entry_name)
 
         return "{\"result\":\"done\",\"entry_name\":\"" + entry_name + "\"}"
 
