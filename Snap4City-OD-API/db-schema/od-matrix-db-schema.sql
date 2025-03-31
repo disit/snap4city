@@ -2,14 +2,13 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 11.11 (Debian 11.11-0+deb10u1)
--- Dumped by pg_dump version 13.4
-
--- Started on 2022-03-24 12:31:59
+-- Dumped from database version 17.4 (Debian 17.4-1.pgdg110+2)
+-- Dumped by pg_dump version 17.4 (Debian 17.4-1.pgdg110+2)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -51,7 +50,6 @@ COMMENT ON DATABASE postgres IS 'default administrative connection database';
 
 
 --
--- TOC entry 2 (class 3079 OID 16386)
 -- Name: postgis; Type: EXTENSION; Schema: -; Owner: -
 --
 
@@ -59,8 +57,6 @@ CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;
 
 
 --
--- TOC entry 4470 (class 0 OID 0)
--- Dependencies: 2
 -- Name: EXTENSION postgis; Type: COMMENT; Schema: -; Owner: 
 --
 
@@ -305,7 +301,55 @@ ALTER SEQUENCE public.gadm36_gid_seq OWNED BY public.gadm36.gid;
 
 
 --
--- TOC entry 217 (class 1259 OID 20433)
+-- Name: italy_epgs4326; Type: TABLE; Schema: public; Owner: debian
+--
+
+CREATE TABLE public.italy_epgs4326 (
+    gid integer NOT NULL,
+    uid integer,
+    text_uid text,
+    cod_reg text,
+    cod_prov text,
+    cod_prov_storico text,
+    cod_com text,
+    cod_ace text,
+    cod_sez text,
+    poi_id text,
+    name text,
+    nuts1 text,
+    nuts2 text,
+    nuts3 text,
+    shape_area numeric,
+    shape_leng numeric,
+    geom public.geometry(MultiPolygon,4326)
+);
+
+
+ALTER TABLE public.italy_epgs4326 OWNER TO debian;
+
+--
+-- Name: italy_epgs4326_gid_seq; Type: SEQUENCE; Schema: public; Owner: debian
+--
+
+CREATE SEQUENCE public.italy_epgs4326_gid_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.italy_epgs4326_gid_seq OWNER TO debian;
+
+--
+-- Name: italy_epgs4326_gid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: debian
+--
+
+ALTER SEQUENCE public.italy_epgs4326_gid_seq OWNED BY public.italy_epgs4326.gid;
+
+
+--
 -- Name: lau_rg_01m_2019_4326; Type: TABLE; Schema: public; Owner: debian
 --
 
@@ -453,7 +497,7 @@ CREATE TABLE public.od_data (
     x_dest numeric,
     y_dest numeric,
     "precision" bigint,
-    value numeric,
+    value text,
     orig_geom public.geometry(Polygon,4326),
     dest_geom public.geometry(Polygon,4326),
     from_date timestamp(0) without time zone,
@@ -527,7 +571,8 @@ CREATE TABLE public.od_metadata (
     kind character varying,
     mode character varying,
     transport character varying,
-    purpose character varying
+    purpose character varying,
+    source text
 );
 
 
@@ -586,7 +631,13 @@ ALTER TABLE ONLY public.gadm36 ALTER COLUMN gid SET DEFAULT nextval('public.gadm
 
 
 --
--- TOC entry 4298 (class 2604 OID 20436)
+-- Name: italy_epgs4326 gid; Type: DEFAULT; Schema: public; Owner: debian
+--
+
+ALTER TABLE ONLY public.italy_epgs4326 ALTER COLUMN gid SET DEFAULT nextval('public.italy_epgs4326_gid_seq'::regclass);
+
+
+--
 -- Name: lau_rg_01m_2019_4326 gid; Type: DEFAULT; Schema: public; Owner: debian
 --
 
@@ -646,7 +697,14 @@ ALTER TABLE ONLY public.gadm36
 
 
 --
--- TOC entry 4314 (class 2606 OID 20438)
+-- Name: italy_epgs4326 italy_epgs4326_pkey; Type: CONSTRAINT; Schema: public; Owner: debian
+--
+
+ALTER TABLE ONLY public.italy_epgs4326
+    ADD CONSTRAINT italy_epgs4326_pkey PRIMARY KEY (gid);
+
+
+--
 -- Name: lau_rg_01m_2019_4326 lau_rg_01m_2019_4326_pkey; Type: CONSTRAINT; Schema: public; Owner: debian
 --
 
@@ -729,7 +787,13 @@ CREATE INDEX gadm36_geom_idx ON public.gadm36 USING gist (geom);
 
 
 --
--- TOC entry 4312 (class 1259 OID 20645)
+-- Name: italy_epgs4326_geom_idx; Type: INDEX; Schema: public; Owner: debian
+--
+
+CREATE INDEX italy_epgs4326_geom_idx ON public.italy_epgs4326 USING gist (geom);
+
+
+--
 -- Name: lau_rg_01m_2019_4326_geom_idx; Type: INDEX; Schema: public; Owner: debian
 --
 
@@ -792,9 +856,6 @@ CREATE INDEX orig_geom_1 ON public.od_data_mgrs_old USING gist (orig_geom);
 CREATE INDEX orig_geom_index ON public.od_data_mgrs USING gist (orig_geom);
 
 
--- Completed on 2022-03-24 12:32:07
-
 --
 -- PostgreSQL database dump complete
 --
-
