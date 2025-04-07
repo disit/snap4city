@@ -2,21 +2,161 @@ openapi: 3.0.1
 info:
   title: Orion Broker K1-K2 Authentication
   version: '1.0'
+  
+
+
 servers:
   - url: https://broker1.snap4city.org:8080
+
 paths:
+  /v2/entities/{deviceid}:
+    get:
+      tags:
+        - Query
+      description: |
+        Forward the query parameters (if the query is authorized) to the localhost orion broker, conforming NGSI V2 specification, and returns the result of the orion broker. 
+
+         GET last value from Orion Broker (it should be carefully used since the broker does not provide data with the ServiceURI, and does not provide historical data, please use Smart City API) .
+
+         deviceid, devicetype, k1 and k2 can be retrieved from IoT Directory, K1 and k2 are two keys allowing read/write access to device.
+
+        If the device is _private_ the client needs to include _k1_ and _k2_ or privide Bearer accesstoken to be authenticated. The access token should be of the owner of the device or of a user that has read only or read/write delegation. If both Bearer and _k1_, _k2_ are provided the authentication procedure uses the Bearer. When accessing _public_ devices non of the above is anyway necessary. A sample curl command that includes the submisison of k1 and k2 follows: 
+
+        `curl --location --request GET 'https://broker1.snap4city.org:8080/v2/entities/collini_device_v2?type=test_model_v2&elementid=collini_device_v2&k1=2e69a841-d070-4ed6-ad00-0e53d41a7c14&k2=3d48c047-0cdb-408a-9677-8bb7231617b5'`
+
+        __Remark:__ Since _Swagger_ does not support https requests to untrusted servers that provide self-signed certificates, trying out this API will result in a   _TypeError: Failed to fetch_ unless you previously connect to [https://broker1.snap4city.org:8080](https://broker1.snap4city.org:8080) and trust the server.
+      parameters:
+        - name: deviceid
+          in: path
+          description: Device Id used in registration of the IOT Device.
+          required: true
+          schema:
+            type: string
+          example: collini_device_v2
+        - name: type
+          in: query
+          description: Device Type used in registration of the IOT Device.
+          required: true
+          schema:
+            type: string
+          example: test_model_v2
+        - name: elementid
+          in: query
+          description: ElementID used in registration of the IOT Device.
+          required: true
+          schema:
+            type: string
+          example: collini_device_v2
+        - name: k1
+          in: query
+          description: k1 value returned when the IOT was registered.
+          required: false
+          schema:
+            type: string
+          example: 2e69a841-d070-4ed6-ad00-0e53d41a7c14
+        - name: k2
+          in: query
+          description: k2 value returned when the IOT was registered.
+          required: false
+          schema:
+            type: string
+          example: 3d48c047-0cdb-408a-9677-8bb7231617b5
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    example: collini_device_v2
+                  type:
+                    type: string
+                    example: test_model_v2
+                  latitude:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                        example: float
+                      value:
+                        type: string
+                        example: '43.77751'
+                      metadata:
+                        type: string
+                        example: "[]"
+                  longitude:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                        example: float
+                      value:
+                        type: string
+                        example: '11.25781'
+                      metadata:
+                        type: string
+                        example: "[]"
+                  model:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                        example: float
+                      value:
+                        type: string
+                        example: collini_model_v2
+                      metadata:
+                        type: string
+                        example: "[]"
+                  test_field_1:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                        example: integer
+                      value:
+                        type: string
+                        example: '1'
+                      metadata:
+                        type: string
+                        example: "[]"
+                  test_field_2:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                        example: integer
+                      value:
+                        type: number
+                        example: '2.2'
+                      metadata:
+                        type: string
+                        example: "[]"
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '500':
+          $ref: '#/components/responses/500'
+        '501':
+          $ref: '#/components/responses/501'
   /v1/queryContext:
     post:
-      tags: [Query]
+      tags:
+        - Query
       description: |
         Forward the queryContext POST message (if the query is authorized) to the localhost orion broker, conforming NGSI specification, and returns the result of the orion broker. 
-        
+
         When initializing the connection, the client _can_ submit its own X509 certificate signed by the Snap4City certification authority (mutual authentication). If no certificate is submitted, _k1_ and _k2_ parameters are enforced. When accessing _public_ elements, none of the above is anyway necessary. A sample curl command that includes the submission of a X509 certificate follows: 
-        
+
         `curl -k -i --cacert angelo-prova129-cert.pem --cert angelo-prova129-certandkey.pem:password -H "Content-Type: application/json" -X POST -d "{ \"contextElements\": [ { \"type\": \"EdgeDevice\", \"isPattern\": \"false\", \"id\": \"angelo-prova129\", \"attributes\": [ { \"name\": \"roundbutton\", \"value\": \"1\" } ] } ], \"updateAction\": \"APPEND\" }" https://broker1.snap4city.org:8080/v1/updateContext?elementid=angelo-prova129`
-        
+
         __Remark:__ Since _Swagger_ does not support https requests to untrusted servers that provide self-signed certificates, trying out this API will result in a   _TypeError: Failed to fetch_ unless you previously connect to [https://broker1.snap4city.org:8080](https://broker1.snap4city.org:8080) and trust the server.
-        
       requestBody:
         required: true
         content:
@@ -39,7 +179,7 @@ paths:
           in: query
           description: k1 value returned when the IOT was registered.
           required: false
-          schema: 
+          schema:
             type: string
           example: 4e0924a8-fdd6-49cf-8d4a-f49cb5710d8b
         - name: k2
@@ -63,33 +203,111 @@ paths:
           required: false
           schema:
             type: string
-            enum: [on, off]
-          example: on
+            enum:
+              - 'on'
+              - 'off'
+          example: 'on'
       responses:
-        200:
+        '200':
           $ref: '#/components/responses/contextResponses'
-        204:
-           $ref: '#/components/responses/204'
-        400:
-           $ref: '#/components/responses/400'
-        401:
-           $ref: '#/components/responses/401'
-        500:
-           $ref: '#/components/responses/500'
-        501:
-           $ref: '#/components/responses/501'
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '500':
+          $ref: '#/components/responses/500'
+        '501':
+          $ref: '#/components/responses/501'
+  /v2/entities/{deviceid}/attrs:
+    patch:
+      security:
+        - bearerAuth: []
+      tags:
+        - Update
+      description: |
+        Forward the query parameters (if the query is authorized) to the localhost orion broker, conforming NGSI V2 specification, and returns the result of the orion broker. 
+
+         Send data message on Broker: send values of one or more attributes of a device sending data to Orion Broker.
+
+         Please note that at the first registration of a Device /Entity the full set of variables is provided and thus any successive data may arrive by using the PATCH, making POST not needed. If you make some changes on the Device/Entity, the system is also providing the changes into the Storage, and thus after the Device update in structure you can continue to use the PATCH.
+
+        The client needs to include k1 and k2 or privide Bearer accesstoken to be authenticated. The access token should be of the owner of the device or of a user that has __read/write__ delegation. If both Bearer and _k1_, _k2_ are provided the authentication procedure uses the Bearer. Also when accessing public devices the above authentication methods __are__ necessary. Only owners of the device or users with  __read/write__ delegation can send data to the device. A sample curl command on a private device with Bearer as authentication follows: 
+
+        `curl --location --request PATCH 'https://broker1.snap4city.org:8080/v2/entities/collini_device_v2/attrs?elementid=collini_device_v2&type=test_model_v2'  --header 'Authorization: Bearer eyJhbGciOi...  --header 'Content-Type: application/json'  --data-raw '{ 'test_field_1':{'type':'integer','value':'1'}, 'test_field_2':{'type':'float','value':'2.2'} }' `
+
+        __Remark:__ Since _Swagger_ does not support https requests to untrusted servers that provide self-signed certificates, trying out this API will result in a   _TypeError: Failed to fetch_ unless you previously connect to [https://broker1.snap4city.org:8080](https://broker1.snap4city.org:8080) and trust the server.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                test_field_1:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      example: integer
+                    value:
+                      type: string
+                      example: '1'
+                test_field_2:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      example: float
+                    value:
+                      type: string
+                      example: '2.2'
+      parameters:
+        - name: deviceid
+          in: path
+          description: Device Id used in registration of the IOT Device.
+          required: true
+          schema:
+            type: string
+          example: collini_device_v2
+        - name: elementid
+          in: query
+          description: ElementID used in registration of the IOT Device.
+          required: true
+          schema:
+            type: string
+          example: collini_device_v2
+        - name: type
+          in: query
+          description: Device Type used in registration of the IOT Device.
+          required: true
+          schema:
+            type: string
+          example: test_model_v2
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '500':
+          $ref: '#/components/responses/500'
+        '501':
+          $ref: '#/components/responses/501'
   /v1/updateContext:
     post:
-      tags: [Update]
+      tags:
+        - Update
       description: |
         Forward the updateContext POST message (if the query is authorized) to the localhost orion broker, conforming NGSI specification, and returns the result of the orion broker. 
                 
         When initializing the connection, the client _can_ submit its own X509 certificate signed by the Snap4City certification authority (mutual authentication). If no certificate is submitted, _k1_ and _k2_ parameters are enforced. When accessing _public_ elements, none of the above is anyway necessary. A sample curl command that includes the submission of a X509 certificate follows: 
-        
+
         `curl -k -i --cacert angelo-prova129-cert.pem --cert angelo-prova129-certandkey.pem:password -H "Content-Type: application/json" -X POST -d "{ \"contextElements\": [ { \"type\": \"EdgeDevice\", \"isPattern\": \"false\", \"id\": \"angelo-prova129\", \"attributes\": [ { \"name\": \"roundbutton\", \"value\": \"1\" } ] } ], \"updateAction\": \"APPEND\" }" https://broker1.snap4city.org:8080/v1/updateContext?elementid=angelo-prova129`
-        
+
         __Remark:__ Since _Swagger_ does not support https requests to untrusted servers that provide self-signed certificates, trying out this API will result in a   _TypeError: Failed to fetch_ unless you previously connect to [https://broker1.snap4city.org:8080](https://broker1.snap4city.org:8080) and trust the server.     
-        
       requestBody:
         required: true
         content:
@@ -104,33 +322,123 @@ paths:
                 updateAction:
                   type: string
                   example: APPEND
-      parameters: 
+      parameters:
         - $ref: '#/components/parameters/elementId'
         - $ref: '#/components/parameters/k1'
         - $ref: '#/components/parameters/k2'
       responses:
-        200:
+        '200':
           $ref: '#/components/responses/contextResponses'
-        204:
-           $ref: '#/components/responses/204'
-        400:
-           $ref: '#/components/responses/400'
-        401:
-           $ref: '#/components/responses/401'
-        500:
-           $ref: '#/components/responses/500'
-        501:
-           $ref: '#/components/responses/501'
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '500':
+          $ref: '#/components/responses/500'
+        '501':
+          $ref: '#/components/responses/501'
+  /v2/subscriptions:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - Subscribe
+      description: |
+        Forward the subscriptions POST message (if the query is authorized) to the localhost orion broker, conforming NGSI specification, and returns the result of the orion broker. 
+
+        The client needs to include k1 and k2 or privide Bearer accesstoken to be authenticated. The access token should be of the owner of the device or of a user that has __read/write__ delegation. If both Bearer and _k1_, _k2_ are provided the authentication procedure uses the Bearer. Also when accessing public devices the above authentication methods __are__ necessary. Only owners of the device or users with  __read/write__ delegation can perform the subscription of the device.  A sample curl command on a private device with Bearer as authentication follows: 
+        
+        `curl --location --request POST 'https://broker1.snap4city.org:8080/v2/subscriptions/?elementid=collini_device_v2'  --header 'Authorization: Bearer eyJhbGciOi...  --header 'Content-Type: application/json' --data '{ "description": "A subscription to get info about the device  ", "subject": { "entities": [{"id": "collini_device_v2", "isPattern": false,"type": "test_model_v2"}],"condition": {"attrs": [] }},"notification": { "http": {"url": "http://prova/" },"attrs": []}}`
+        
+        __Note__ if the subscription of the device is created successfully in the header of the reponse (Code 201) in the Location is reported the subscriptionid /v2/subscriptions/__subscriptionid__ .
+        
+        __Remark:__ Since _Swagger_ does not support https requests to untrusted servers that provide self-signed certificates, trying out this API will result in a   _TypeError: Failed to fetch_ unless you previously connect to [https://broker1.snap4city.org:8080](https://broker1.snap4city.org:8080) and trust the server.     
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                description:
+                  type: string
+                  example: "A subscription to get info about the device"
+                subject:
+                  type: object
+                  properties:
+                    entities:
+                      type: array
+                      items:
+                        type: object
+                        required:
+                          - type
+                          - isPattern
+                          - id
+                        properties:
+                          id:
+                            type: string
+                            example: collini_device_v2
+                          isPattern:
+                            type: boolean
+                            example: false
+                          type:
+                            type: string
+                            example: test_model_v2
+                    conditions:
+                      type: object
+                      properties:
+                        attrs:
+                          type: string
+                          example: "[]"
+                notification:
+                  type: object
+                  properties:
+                    http:
+                      type: object
+                      properties:
+                        url:
+                          type: string
+                          example: "http://prova/"
+                        attrs:
+                          type: string
+                          example: "[]"
+      parameters:
+        - name: elementid
+          in: query
+          description: Device Id used in registration of the IOT Device.
+          required: true
+          schema:
+            type: string
+          example: collini_device_v2
+      responses:
+        '201':
+          description: Created
+          headers:
+            Location:
+              description: /v2/subscriptions/6406f4edd858b6566b136e43
+              schema:
+                type: string
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '500':
+          $ref: '#/components/responses/500'
+        '501':
+          $ref: '#/components/responses/501'
   /v1/subscribeContext:
     post:
-      tags: [Subscribe]
+      tags:
+        - Subscribe
       description: |
         Forward the subscribeContext POST message (if the query is authorized) to the localhost orion broker, conforming NGSI specification, and returns the result of the orion broker. 
 
-        When initializing the connection, the client _can_ submit its own X509 certificate signed by the Snap4City certification authority (mutual authentication). If no certificate is submitted, _k1_ and _k2_ parameters are enforced. When accessing _public_ elements, none of the above is anyway necessary. A sample curl command that includes the submission of a X509 certificate follows: 
-        
+        If the device is _private_ the client needs to include Bearer accesstoken to be authenticated. The access token should be of the owner of the device or of a user that has read only or read/write delegation. When accessing _public_ devices non of the above is anyway necessary. A sample curl command follows: 
+
         `curl -k -i --cacert angelo-prova129-cert.pem --cert angelo-prova129-certandkey.pem:password -H "Content-Type: application/json" -X POST -d "{ \"contextElements\": [ { \"type\": \"EdgeDevice\", \"isPattern\": \"false\", \"id\": \"angelo-prova129\", \"attributes\": [ { \"name\": \"roundbutton\", \"value\": \"1\" } ] } ], \"updateAction\": \"APPEND\" }" https://broker1.snap4city.org:8080/v1/updateContext?elementid=angelo-prova129`
-        
+
         __Remark:__ Since _Swagger_ does not support https requests to untrusted servers that provide self-signed certificates, trying out this API will result in a   _TypeError: Failed to fetch_ unless you previously connect to [https://broker1.snap4city.org:8080](https://broker1.snap4city.org:8080) and trust the server.     
       requestBody:
         required: true
@@ -168,12 +476,11 @@ paths:
                 throttling:
                   type: string
                   example: PT10S
-      parameters: 
+      parameters:
+        
         - $ref: '#/components/parameters/elementId'
-        - $ref: '#/components/parameters/k1'
-        - $ref: '#/components/parameters/k2'                       
       responses:
-        200:
+        '200':
           description: OK (if content is returned)
           content:
             application/json:
@@ -189,79 +496,51 @@ paths:
                       duration:
                         type: string
                         example: P1M
-                      throttling: 
+                      throttling:
                         type: string
                         example: PT10S
-        204:
-           $ref: '#/components/responses/204'
-        400:
-           $ref: '#/components/responses/400'
-        401:
-           $ref: '#/components/responses/401'
-        500:
-           $ref: '#/components/responses/500'
-        501:
-           $ref: '#/components/responses/501'     
-  /v1/unsubscribeContext:
-    post:
-      tags: [Unsubscribe]
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '500':
+          $ref: '#/components/responses/500'
+        '501':
+          $ref: '#/components/responses/501'
+          
+  /v2/subscriptions/{subscriptionid}:
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - Unsubscribe
       description: |
-        Forward the unsubscribeContext POST message (if the query is authorized) to the localhost orion broker, conforming NGSI specification, and returns the result of the orion broker. 
-        
-        When initializing the connection, the client _can_ submit its own X509 certificate signed by the Snap4City certification authority (mutual authentication). If no certificate is submitted, _k1_ and _k2_ parameters are enforced. When accessing _public_ elements, none of the above is anyway necessary. A sample curl command that includes the submission of a X509 certificate follows: 
-        
-        `curl -k -i --cacert angelo-prova129-cert.pem --cert angelo-prova129-certandkey.pem:password -H "Content-Type: application/json" -X POST -d "{ \"contextElements\": [ { \"type\": \"EdgeDevice\", \"isPattern\": \"false\", \"id\": \"angelo-prova129\", \"attributes\": [ { \"name\": \"roundbutton\", \"value\": \"1\" } ] } ], \"updateAction\": \"APPEND\" }" https://broker1.snap4city.org:8080/v1/updateContext?elementid=angelo-prova129`
-        
+        Forward the delete subscription message (if the query is authorized) to the localhost orion broker, conforming NGSI specification, and returns the result of the orion broker. 
+
+        The client needs to include k1 and k2 or privide Bearer accesstoken to be authenticated. The access token should be of the owner of the device or of a user that has __read/write__ delegation. If both Bearer and _k1_, _k2_ are provided the authentication procedure uses the Bearer. Also when accessing public devices the above authentication methods __are__ necessary. Only owners of the device or users with  __read/write__ delegation can perform deletion of the subscription of the device. A sample curl command on a private device with Bearer as authentication follows: 
+
+        `curl --location --request DELETE 'https://broker1.snap4city.org:8080/v2/subscriptions/6405bcc11855c5730c171848?elementid=collini_device_v2 --header 'Authorization: Bearer eyJhbGciOi...  --header 'Content-Type: application/json'`
+
         __Remark:__ Since _Swagger_ does not support https requests to untrusted servers that provide self-signed certificates, trying out this API will result in a   _TypeError: Failed to fetch_ unless you previously connect to [https://broker1.snap4city.org:8080](https://broker1.snap4city.org:8080) and trust the server.      
-      parameters: 
+      parameters:
+        - name: subscriptionid
+          in: path
+          description: subscriptionid reported in the header returned by the subscribe v2 procedure in the Location /v2/subscriptions/<subscriptionid>
+          required: true
+          schema:
+            type: string
+          example: 6405bcc11855c5730c171848
         - $ref: '#/components/parameters/elementId'
-        - $ref: '#/components/parameters/k1'
-        - $ref: '#/components/parameters/k2'    
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: 
-                - subscriptionId
-              properties:
-                subscriptionId:
-                  type: string
-                  example: 5b4ca79b12c6c59c6beb1dc7
       responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - statusCode
-                  - subscriptionId
-                properties:
-                  statusCode:
-                    type: object
-                    properties:
-                      code:
-                        type: integer
-                        format: int32
-                        enum: [200]
-                        example: 200
-                      reasonPhrase:
-                        type: string
-                        enum: [ OK ]
-                        example: OK
-                  subscriptionId:
-                    type: string
-                    example: 5b4ca79b12c6c59c6beb1dc7
-        204:
-           $ref: '#/components/responses/204'
-        400:
-           $ref: '#/components/responses/400'
-        401:
-           $ref: '#/components/responses/401'
-        404:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
           description: KO
           content:
             application/json:
@@ -277,23 +556,127 @@ paths:
                       code:
                         type: integer
                         format: int32
-                        enum: [404]
+                        enum:
+                          - 404
                         example: 404
                       reasonPhrase:
                         type: string
-                        enum: [No context element found]
+                        enum:
+                          - No context element found
                         example: No context element found
                       details:
                         type: string
                         example: 'subscriptionId: /5b4dbcf312c6c59c6beb1daa/'
                   subscriptionId:
                     type: string
-                    example: 5b4ca79b12c6c59c6beb1dc7          
-        500:
-           $ref: '#/components/responses/500'
-        501:
-           $ref: '#/components/responses/501'            
+                    example: 5b4ca79b12c6c59c6beb1dc7
+        '500':
+          $ref: '#/components/responses/500'
+        '501':
+          $ref: '#/components/responses/501'
+          
+  /v1/unsubscribeContext:
+    post:
+      tags:
+        - Unsubscribe
+      description: |
+        Forward the unsubscribeContext POST message (if the query is authorized) to the localhost orion broker, conforming NGSI specification, and returns the result of the orion broker. 
+
+        When initializing the connection, the client _can_ submit its own X509 certificate signed by the Snap4City certification authority (mutual authentication). If no certificate is submitted, _k1_ and _k2_ parameters are enforced. When accessing _public_ elements, none of the above is anyway necessary. A sample curl command that includes the submission of a X509 certificate follows: 
+
+        `curl -k -i --cacert angelo-prova129-cert.pem --cert angelo-prova129-certandkey.pem:password -H "Content-Type: application/json" -X POST -d "{ \"contextElements\": [ { \"type\": \"EdgeDevice\", \"isPattern\": \"false\", \"id\": \"angelo-prova129\", \"attributes\": [ { \"name\": \"roundbutton\", \"value\": \"1\" } ] } ], \"updateAction\": \"APPEND\" }" https://broker1.snap4city.org:8080/v1/updateContext?elementid=angelo-prova129`
+
+        __Remark:__ Since _Swagger_ does not support https requests to untrusted servers that provide self-signed certificates, trying out this API will result in a   _TypeError: Failed to fetch_ unless you previously connect to [https://broker1.snap4city.org:8080](https://broker1.snap4city.org:8080) and trust the server.      
+      parameters:
+        - $ref: '#/components/parameters/elementId'
+        - $ref: '#/components/parameters/k1'
+        - $ref: '#/components/parameters/k2'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - subscriptionId
+              properties:
+                subscriptionId:
+                  type: string
+                  example: 5b4ca79b12c6c59c6beb1dc7
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - statusCode
+                  - subscriptionId
+                properties:
+                  statusCode:
+                    type: object
+                    properties:
+                      code:
+                        type: integer
+                        format: int32
+                        enum:
+                          - 200
+                        example: 200
+                      reasonPhrase:
+                        type: string
+                        enum:
+                          - OK
+                        example: OK
+                  subscriptionId:
+                    type: string
+                    example: 5b4ca79b12c6c59c6beb1dc7
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          description: KO
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - statusCode
+                  - subscriptionId
+                properties:
+                  statusCode:
+                    type: object
+                    properties:
+                      code:
+                        type: integer
+                        format: int32
+                        enum:
+                          - 404
+                        example: 404
+                      reasonPhrase:
+                        type: string
+                        enum:
+                          - No context element found
+                        example: No context element found
+                      details:
+                        type: string
+                        example: 'subscriptionId: /5b4dbcf312c6c59c6beb1daa/'
+                  subscriptionId:
+                    type: string
+                    example: 5b4ca79b12c6c59c6beb1dc7
+        '500':
+          $ref: '#/components/responses/500'
+        '501':
+          $ref: '#/components/responses/501'
 components:
+  securitySchemes:
+    bearerAuth:            # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT    # optional, arbitrary value for documentation purposes
   schemas:
     contextElement:
       type: object
@@ -302,7 +685,7 @@ components:
         - isPattern
         - id
       properties:
-        type: 
+        type:
           type: string
           example: Ambiental
         isPattern:
@@ -324,7 +707,7 @@ components:
                 example: Float
               value:
                 type: string
-                example: 26.00
+                example: 26
     contextElementWithoutAttributes:
       type: object
       required:
@@ -332,7 +715,7 @@ components:
         - isPattern
         - id
       properties:
-        type: 
+        type:
           type: string
           example: Ambiental
         isPattern:
@@ -341,7 +724,6 @@ components:
         id:
           type: string
           example: mypersonaldatatester-device
-               
   parameters:
     elementId:
       name: elementid
@@ -356,9 +738,9 @@ components:
       in: query
       description: k1 value returned when the IOT was registered.
       required: false
-      schema: 
+      schema:
         type: string
-      example: "4e0924a8-fdd6-49cf-8d4a-f49cb5710d8b"
+      example: 4e0924a8-fdd6-49cf-8d4a-f49cb5710d8b
     k2:
       name: k2
       in: query
@@ -366,8 +748,18 @@ components:
       required: false
       schema:
         type: string
-      example: "240567da-64a4-43b3-8ac9-1265178f3cbe"
+      example: 240567da-64a4-43b3-8ac9-1265178f3cbe
   responses:
+    '204':
+      description: No content (if no content is returned)
+    '400':
+      description: Bad request (if an error arise parsing client request)
+    '401':
+      description: Not Authorized (if an autherization error arise parsing client request)
+    '500':
+      description: Internal Server Error (if an error arise on server side)
+    '501':
+      description: Not Implemented (if the invoked api is not supported anymore)
     contextResponses:
       description: OK (if content is returned)
       content:
@@ -392,14 +784,5 @@ components:
                         reasonPhrase:
                           type: string
                           example: OK
-    204:
-      description: No content (if no content is returned)
-    400:
-      description: Bad request (if an error arise parsing client request)
-    401:
-      description: Not Authorized (if an autherization error arise parsing client request)
-    500:
-      description: Internal Server Error (if an error arise on server side)
-    501:
-      description: Not Implemented (if the invoked api is not supported anymore)    
-  
+
+

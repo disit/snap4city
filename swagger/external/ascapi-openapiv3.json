@@ -2,14 +2,22 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Advanced Smart City API",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "contact": {
+      "email": "info@disit.org",
+      "name": "DISIT, DINFO, University of Florence",
+      "url": "https://www.disit.org"
+    }
   },
   "servers": [
+    {
+      "url": "https://www.snap4city.org/superservicemap/api/v1/"
+    },
     {
       "url": "https://servicemap.disit.org/WebAppGrafo/api/v1"
     },
     {
-      "url": "https://www.disit.org/superservicemap/api/v1/"
+      "url": "https://www.snap4city.org/ServiceMap/api/v1"
     }
   ],
   "paths": {
@@ -163,6 +171,367 @@
           },
           "404": {
             "description": "Invalid user id."
+          }
+        }
+      }
+    },
+    "/iot-search/": {
+      "get": {
+        "tags": [
+          "IOT Search"
+        ],
+        "summary": "IoT device search",
+        "description": "This API allows to search over services submitted as IOT devices. The main characteristic is that it can search for devices whose last values satisfy specific conditions, for example it allows to find all Weather_sensor devices in a geographic area whose last value of temperature is over 30 degrees.\n\nThe results can be filtered to be within a specified distance from a GPS position, or within a rectangular area (wkt polygonal area query is not supported). \n\nMoreover results can be filtered by the **model** used in IoT Directory to create the device, **categories** (nature or subnature) associated to the device, **valueFilters** reporting conditions (in AND) on the last value received for dynamic attributes (e.g status\\:Active;temperature>=23). The results can be paged using  **fromResult**/**maxResults**.\n\nNormally only public iot devices are returned, if you want to include private devices (your own or delegated to you) you have to send an access token in the Authorization header or using the accessToken query parameter.\n\nData is indexed on elasticsearch only after any update on the context  broker, thus if you change ownership or add a delegation on the device it will be  applied only after a data update.\n\nConsider that the device status is updated on every device change on the context broker, thus if updates are made out of time order it is not guaranteed that the device status  provided is the most recent.\n",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "selection",
+            "description": "Through this parameter, the user indicates _where_ the services have to be searched. It could be a rectangular boundary within which to search, or a point around which to search.\n\n_Usages & Sample values:_\n\n* **Service search near GPS position** - WGS84 sessadecimal representation of the latitude and longitude of the position of interest, separated by a semicolon. Required. Sample value: _43.7756;11.2490_.\n\n* **Service search near a service** - Service search near a service. Required. Sample value: _http://www.disit.org/km4city/resource/7ad6d2d3be461b1f0514956279c00eab_\n\n* **Service search within a GPS (rectangular) area** - _Lat#1;Lon#1;Lat#2;Lng#2_ where _Lat#1;Lng#1_ are the WGS84 sessadecimal coordinates of the south west point of the rectangle, and _Lat#2;Lng#2_ are the coordinates of the north east point. Required. Sample value: _3.7741;11.2453;43.7768;11.2515_\n",
+            "allowReserved": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "43.7756;11.2490"
+          },
+          {
+            "in": "query",
+            "name": "maxDists",
+            "description": "maximun distance in km from the GPS point specified with *selection* in the form \"_lat;lon_\" (default 0.1)",
+            "schema": {
+              "type": "number"
+            },
+            "example": 0.1
+          },
+          {
+            "in": "query",
+            "name": "categories",
+            "description": "A list of categories as nature or subnature separated with \";\"",
+            "schema": {
+              "type": "string"
+            },
+            "example": "Air_quality_monitoring_station;Weather_sensor"
+          },
+          {
+            "in": "query",
+            "name": "model",
+            "description": "search for iot devices created with a specific model name.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "mymodel"
+          },
+          {
+            "in": "query",
+            "name": "valueFilters",
+            "description": "a list of conditions (separated with ;) on value names matching a constant value. The matching operator can be:\n\n* _value name_=_numeric value_ (e.g. temperature=18), search for devices having the dynamic numeric attribute \"value name\" with a specific numeric value.\n* _value name_>_numeric value_ (e.g. temperature>20), search for devices having a dynamic numeric attribute greater than a specific value.\n* _value name_>=_numeric value_ (e.g. temperature>=20), search for devices having a dynamic numeric attribute greater or equal than a specific value.\n* _value name_<_numeric value_ (e.g. temperature<20), search for devices having a dynamic numeric attribute less than a specific value.\n* _value name_<=_numeric value_ (e.g. temperature<=20), search for devices having a dynamic numeric attribute less or equal than a specific value.\n* _value name_:_string value_ (e.g status:Active), search for devices having the dynamic string attribute \"value name\" with a specific value, the match is case sensitive\n* _value name_!:_string value_ (e.g. status!:Active), search for devices having a dynamic string attribute different from a specific value.            \n* _value name_:>_string value_ (e.g. status:>Act), search for devices having a dynamic string attribute greater than a specific string value.\n* _value name_:>=_string value_ (e.g. status:>=Active), search for devices having a dynamic string attribute greater or equal than a specific value.\n* _value name_:<_string value_ (e.g. status:<A), search for devices having a dynamic string attribute less than a specific value.\n* _value name_:<=_string value_ (e.g. status:<=Active), search for devices having a dynamic string attribute less or equal than a specific value.            \n\nIf multiple conditions are present they are considered in AND.\n\nThe special value name \"deviceDelay_s\" contains the number of seconds elapsed since last data update, it can be used to search for devices that does not send data since a certain number of seconds (to find unhealthy devices) or to find only recently updated devices.\n",
+            "schema": {
+              "type": "string"
+            },
+            "example": "status:Active;temperature>=30"
+          },
+          {
+            "in": "query",
+            "name": "serviceUri",
+            "description": "Through this parameter, the user indicates a list of serviceUri (separated by ;)  to be returned, this filter is used in conjuncion with the other filters.\n",
+            "allowReserved": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "http://www.disit.org/km4city/resource/iot/orionUNIFI/DISIT/IT0825A1;http://www.disit.org/km4city/resource/iot/orionUNIFI/DISIT/IT0884A1"
+          },
+          {
+            "in": "query",
+            "name": "text",
+            "description": "Through this parameter, the user indicates a set of keywords or phrases delimited with \" to be matched on any device value.\n",
+            "allowReserved": true,
+            "schema": {
+              "type": "string"
+            },
+            "examples": {
+              "ex1": {
+                "summary": "simple",
+                "description": "search for iot devices with anyone of the values matching the keyword \"active\"and (anothe value) matching keyword \"test\"",
+                "value": "active test"
+              },
+              "ex2": {
+                "summary": "phrase",
+                "description": "serch for iot devices with anyone of the values matching the keyword active and (another value) matching exact phrase \"this is a test\"",
+                "value": "active \"this is a test\""
+              }
+            }
+          },
+          {
+            "in": "query",
+            "name": "notHealthy",
+            "description": "Through this parameter, the user indicates to return only not healthy devices if \"true\" is specified (default false). Not healthy devices are identified computing at update time the time expected for next update, not healthy devices are those whose value of this time is before current time (a configurable threshold of 1 minute is used).\n",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fromResult",
+            "description": "the first result to be returned (default 0)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "maxResults",
+            "description": "number of results to be returned (default 100)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "values",
+            "description": "list of value names (separated by ;) to be returned for each result, if omitted all values are returned",
+            "schema": {
+              "type": "string"
+            },
+            "example": "status;temperature"
+          },
+          {
+            "in": "query",
+            "name": "sortOnValue",
+            "description": "the value name to sort the result, it can be like \"value name\\:asc|desc:type\" (e.g. temperature:desc:short), order direction is \"asc\" if omitted, type can be string, date, long or short (if type is omitted string is assumed). The type is used to force sorting for dates and numbers. If the parameter is omitted the sort is on the distance from GPS position, if \"none\" is specified no specific sort is used. If \"deviceDelay_s:desc\" is specified results are sorted on the delay time in seconds passed from the last value provided for the device, in this way",
+            "schema": {
+              "type": "string"
+            },
+            "example": "temperature:desc:short"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The results format is a GeoJSON  _FeatureCollection_ with the matching devices. The objects returned have a similar structure as the results of service search.\n",
+            "content": {
+              "application/json": {
+                "example": {
+                  "type": "FeatureCollection",
+                  "fullCount": 651,
+                  "features": [
+                    {
+                      "type": "Feature",
+                      "geometry": {
+                        "type": "Point",
+                        "coordinates": [
+                          11.23627,
+                          43.78081
+                        ]
+                      },
+                      "properties": {
+                        "serviceUri": "http://www.disit.org/km4city/resource/iot/orionUNIFI/DISIT/weather1",
+                        "nature": "Environment",
+                        "subnature": "Weather_sensor",
+                        "organization": "DISIT",
+                        "deviceName": "weather1",
+                        "deviceModel": "WeatherObserved",
+                        "date_time": "2022-07-20T07:36:06.515Z",
+                        "values": {
+                          "dateObserved": "2022-07-20T07:36:06.515Z",
+                          "temperature": 30
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/iot-search/time-range/": {
+      "get": {
+        "tags": [
+          "IOT Search"
+        ],
+        "summary": "IoT device/value search over a time range",
+        "description": "This API allows to search over services submitted as IOT devices. The main characteristic is that it can search for devices whose values satisfy specific conditions in a certain time range, for example it allows to find all Weather_sensor devices in a geographic area whose value of temperature is over 30 degrees at least one time over last week. But this api can return all the temporal values matching the request (in this case a service uri is repeated as many times as it matches the query in the time range)\n\nThe results can be filtered to be within a specified distance from a GPS position, or within a rectangular area (wkt polygonal area query is not supported). \n\nMoreover results can be filtered by the **model** used in IoT Directory to create the device, **categories** (nature or subnature) associated to the device, **valueFilters** reporting conditions (in AND) on the last value received for dynamic attributes (e.g status\\:Active;temperature>=23). \n\nThe results can be aggregated by service uri with **aggregation=true** if data is not aggregated can paged using  **fromResult**/**maxResults**.\n\nNormally only public iot devices are returned, if you want to include private devices (your own or delegated to you) you have to send an access token in the Authorization header or using the accessToken query parameter.\n\nData is indexed on elasticsearch, consider that ownership and delegations are not updated for old data, so if ownership or delegations of a device are modified at a certain point in time this api will provide to the new owner or delegated user only data submitted after this change.\n",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "fromTime",
+            "description": "To be used to indicate the date and time of start of the time interval of interest.",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "in": "query",
+            "name": "toTime",
+            "description": "To be used to indicate the date and time of end of the time interval of interest.",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "in": "query",
+            "name": "selection",
+            "description": "Through this parameter, the user indicates _where_ the services have to be searched. It could be a rectangular boundary within which to search, or a point around which to search.\n\n_Usages & Sample values:_\n\n* **Service search near GPS position** - WGS84 sessadecimal representation of the latitude and longitude of the position of interest, separated by a semicolon. Required. Sample value: _43.7756;11.2490_.\n\n* **Service search near a service** - Service search near a service. Required. Sample value: _http://www.disit.org/km4city/resource/7ad6d2d3be461b1f0514956279c00eab_\n\n* **Service search within a GPS (rectangular) area** - _Lat#1;Lon#1;Lat#2;Lng#2_ where _Lat#1;Lng#1_ are the WGS84 sessadecimal coordinates of the south west point of the rectangle, and _Lat#2;Lng#2_ are the coordinates of the north east point. Required. Sample value: _3.7741;11.2453;43.7768;11.2515_\n",
+            "allowReserved": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "43.7756;11.2490"
+          },
+          {
+            "in": "query",
+            "name": "maxDists",
+            "description": "maximun distance in km from the GPS point specified with *selection* in the form \"_lat;lon_\" (default 0.1)",
+            "schema": {
+              "type": "number"
+            },
+            "example": 0.1
+          },
+          {
+            "in": "query",
+            "name": "categories",
+            "description": "A list of categories as nature or subnature separated with \";\"",
+            "schema": {
+              "type": "string"
+            },
+            "example": "Air_quality_monitoring_station;Weather_sensor"
+          },
+          {
+            "in": "query",
+            "name": "model",
+            "description": "search for iot devices created with a specific model name.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "mymodel"
+          },
+          {
+            "in": "query",
+            "name": "valueFilters",
+            "description": "a list of conditions (separated with ;) on value names matching a constant value. The matching operator can be:\n\n* _value name_=_numeric value_ (e.g. temperature=18), search for devices having the dynamic numeric attribute \"value name\" with a specific numeric value.\n* _value name_>_numeric value_ (e.g. temperature>20), search for devices having a dynamic numeric attribute greater than a specific value.\n* _value name_>=_numeric value_ (e.g. temperature>=20), search for devices having a dynamic numeric attribute greater or equal than a specific value.\n* _value name_<_numeric value_ (e.g. temperature<20), search for devices having a dynamic numeric attribute less than a specific value.\n* _value name_<=_numeric value_ (e.g. temperature<=20), search for devices having a dynamic numeric attribute less or equal than a specific value.\n* _value name_:_string value_ (e.g status:Active), search for devices having the dynamic string attribute \"value name\" with a specific value, the match is case sensitive\n* _value name_!:_string value_ (e.g. status!:Active), search for devices having a dynamic string attribute different from a specific value.            \n* _value name_:>_string value_ (e.g. status:>Act), search for devices having a dynamic string attribute greater than a specific string value.\n* _value name_:>=_string value_ (e.g. status:>=Active), search for devices having a dynamic string attribute greater or equal than a specific value.\n* _value name_:<_string value_ (e.g. status:<A), search for devices having a dynamic string attribute less than a specific value.\n* _value name_:<=_string value_ (e.g. status:<=Active), search for devices having a dynamic string attribute less or equal than a specific value.            \n\nIf multiple conditions are present they are considered in AND.\n",
+            "schema": {
+              "type": "string"
+            },
+            "example": "status:Active;temperature>=30"
+          },
+          {
+            "in": "query",
+            "name": "serviceUri",
+            "description": "Through this parameter, the user indicates a list of serviceUri (separated by ;)  to be returned, this filter is used in conjuncion with the other filters.\n",
+            "allowReserved": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "http://www.disit.org/km4city/resource/iot/orionUNIFI/DISIT/IT0825A1;http://www.disit.org/km4city/resource/iot/orionUNIFI/DISIT/IT0884A1"
+          },
+          {
+            "in": "query",
+            "name": "text",
+            "description": "Through this parameter, the user indicates a set of keywords or phrases delimited with \" to be matched on any device value.\n",
+            "allowReserved": true,
+            "schema": {
+              "type": "string"
+            },
+            "examples": {
+              "ex1": {
+                "summary": "simple",
+                "description": "search for iot devices with anyone of the values matching the keyword \"active\"and (anothe value) matching keyword \"test\"",
+                "value": "active test"
+              },
+              "ex2": {
+                "summary": "phrase",
+                "description": "serch for iot devices with anyone of the values matching the keyword active and (another value) matching exact phrase \"this is a test\"",
+                "value": "active \"this is a test\""
+              }
+            }
+          },
+          {
+            "in": "query",
+            "name": "fromResult",
+            "description": "the first result to be returned (default 0), can be used only if aggregate=false",
+            "schema": {
+              "type": "number",
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "maxResults",
+            "description": "number of results to be returned (default 100)",
+            "schema": {
+              "type": "number",
+              "default": 100
+            }
+          },
+          {
+            "in": "query",
+            "name": "aggregate",
+            "description": "if set to \"true\" results are aggregated by serviceUri, in this case no data values are reported but an \"aggregationCount\" property reports how many data records matches the query for the specific serviceUri. If the aggregation is requested over more than the maxResults the \"sumOtherDocs\" property reports how many matching results have not been considered for the aggregation, so a value different from 0 means that the results are not complete, increasing the maxResults will aggregate more data and reduce the \"sumOtherDocs\". When using aggregation it is not possible to paginate and fromResult parameter cannot be used. Aggregation should be used with care as it can be time consuming.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "false"
+            }
+          },
+          {
+            "in": "query",
+            "name": "values",
+            "description": "list of value names (separated by ;) to be returned for each result, if omitted all values are returned (used only if aggregate=false)",
+            "schema": {
+              "type": "string"
+            },
+            "example": "status;temperature"
+          },
+          {
+            "in": "query",
+            "name": "sortOnValue",
+            "description": "the value name to sort the results, it can be like \"value name\\:asc|desc:type\" (e.g. temperature:desc:short), order direction is \"asc\" if omitted, type can be string, date, long or short (if type is omitted string is assumed). The type is used to force sorting for dates and numbers. If the parameter is omitted the sort is on \"date_time:desc\", if \"none\" is specified no specific sort is used (used only if aggregate=false).",
+            "schema": {
+              "type": "string"
+            },
+            "example": "temperature:desc:short"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The results format is a GeoJSON  _FeatureCollection_ with the matching devices. The objects returned have a similar structure as the results of service search.\n",
+            "content": {
+              "application/json": {
+                "example": {
+                  "type": "FeatureCollection",
+                  "fullCount": 651,
+                  "features": [
+                    {
+                      "type": "Feature",
+                      "geometry": {
+                        "type": "Point",
+                        "coordinates": [
+                          11.23627,
+                          43.78081
+                        ]
+                      },
+                      "properties": {
+                        "serviceUri": "http://www.disit.org/km4city/resource/iot/orionUNIFI/DISIT/weather1",
+                        "nature": "Environment",
+                        "subnature": "Weather_sensor",
+                        "organization": "DISIT",
+                        "deviceName": "weather1",
+                        "deviceModel": "WeatherObserved",
+                        "date_time": "2022-07-20T07:36:06.515Z",
+                        "values": {
+                          "dateObserved": "2022-07-20T07:36:06.515Z",
+                          "temperature": 30
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
           }
         }
       }

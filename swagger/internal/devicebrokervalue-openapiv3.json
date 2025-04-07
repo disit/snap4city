@@ -14,6 +14,11 @@
       }
     }
   ],
+  "security": [
+    {
+      "accessToken": []
+    }
+  ],
   "paths": {
     "/device.php": {
       "summary": "Device Management",
@@ -22,7 +27,7 @@
           "Device"
         ],
         "summary": "Insert, update, delete, retrieve devices and device information.",
-        "description": "This API is for managing the IoT devices. It can be leveraged for inserting, updating, deleting, and retrieving information about a device of interest. \n\nFor any APIs an Authorization __token__ in the Bearer format in the HTTP Header has to be specified, depending on the choosen scenario (see \"nodered\" params below).\n\nThe __action__ input parameter indicates which operation has to be performed:\n\n* __Insert__ - This API is intended for inserting a new device in the Iot-Directory. The user has to specify the required parameters for inserting a device. The status of the operation is returned. This operation also provides the registration in the Knowledge Base. This API provides also the  registration in the specified context broker (when the context broker requires a specific registration).  \n\n* __Update__ - This API is intended for updating a device in the Iot-Directory. The user has to specify the required parameters for updating a device. The status of the operation is returned. This operation also provides the updating in the Knowledge base and the updating in the specified context broker.\n\n* __Delete__ - This API is intended for deleting a device from the Iot-Directory. The user has to specify the required parameters for deleting a device. The status of the operation is returned. This operation also provides the deletion from the Knowledge base and the deletion from corresponding context broker.\n\n* __Get all device__ - This API is intended for retrieving all device from the Iot-Directory. The status of the operation is returned together with the requested data.\n\n* __Get device attributes__ - This API is intended for retrieving all the values associated with devices from the Iot-Directory. The user has to specify the required parameters for retrieving all the attributes. The status of the operation is returned together with the requested data.\n\n* __Get device__ - This API is intended for retrieving all available information about the specified Device. The status of the operation is returned together with the requested data.\n\n* __Download__ - This API is intended for retrieving the private key / certificate of a Device created with Authentication factor. The status of the operation is returned together with the requested data.\n",
+        "description": "This API is for managing the IoT devices. It can be used for inserting, updating, deleting, and retrieving information about a device of interest. \n\nAn Authorization header in Bearer format must be sent, including an access or a refresh token (see the _nodered_ parameter below).\n\nThe __action__ input parameter indicates which operation has to be performed:\n\n* __Insert__ - This API is intended to insert a new device in the Iot-Directory. Read thoroughly the _Parameters_ section below here to learn about the mandatory and optional parameters for this specific operation. The status of the operation is returned. This operation also provides the registration in the Knowledge Base, and in the specified context broker (when the context broker requires a specific registration).  \n\n* __Update__ - This API is intended to update a device in the Iot-Directory. Read thoroughly the _Parameters_ section below here to learn about the mandatory and optional parameters for this specific operation. _Remark: if you omit to submit optional parameters, they are set to their default values or removed, they do not keep their old values._ The status of the operation is returned. This operation also provides the updating in the Knowledge base and the updating in the specified context broker.\n\n* __Delete__ - This API is intended to delete a device from the Iot-Directory. Read thoroughly the _Parameters_ section below here to learn about the mandatory and optional parameters for this specific operation. The status of the operation is returned. This operation also provides the deletion from the Knowledge base and the deletion from corresponding context broker.\n\n* __Change visibility__ - This API is intended to change the visibility of the device. A device can be public (all users can see it), private (only the owner can see it) and delegated (only the owner user and a groups or user  chosen). Read thoroughly the _Parameters_ section below here to learn about the mandatory and optional parameters for this specific operation. The status of the operation is returned.\n\n* __Change owner__ - This API is intended to change the owner of the device. Read thoroughly the _Parameters_ section below here to learn about the mandatory and optional parameters for this specific operation. The status of the operation is returned.\n\n* __Get All Devices__ - This API is intended to retrieve all device from the Iot-Directory. The status of the operation is returned together with the requested data.\n\n* __Get Delegations__ - This API is intended to retrieve the delegation of a device from the Iot-Directory. The status of the operation is returned together with the requested data.\n\n* __Add Delegations__ - This API is intended to add a delegation to a device. The status of the operation is returned together with the requested data.\n\n\n* __Remove Delegations__ - This API is intended to remove the delegation of a device. The status of the operation is returned together with the requested data.  \n\n* __Get Device Attributes__ - This API is intended to retrieve all the values associated with devices from the Iot-Directory. Read thoroughly the _Parameters_ section below here to learn about the mandatory and optional parameters for this specific operation. The status of the operation is returned together with the requested data.\n\n* __Loading value__ - This API is intended to retrieve all the values associated with attributes of a specific devices in that  specific moment. The status of the operation is returned together with the requested data.\n\n* __Insert value__ - This API is intended to insert  all or a subset values associated with attributes of a specific devices. The status of the operation is returned together with the requested data.\n\n* __Get Device__ - This API is intended to retrieve all available information about the specified Device. The status of the operation is returned together with the requested data.\n\n* __Download__ - This API is intended to retrieve the private key / certificate of a Device created with Authentication factor. The status of the operation is returned together with the requested data.\n\n* __Get available static attribute__ - This API is intended to retrieve the static attributes given a subnature. The status of the operation is returned together with the requested data.\n",
         "parameters": [
           {
             "name": "action",
@@ -37,7 +42,15 @@
                 "delete",
                 "get_all_device",
                 "get_device_attributes",
-                "get_param_values"
+                "get_param_values",
+                "change_visibility",
+                "change_owner",
+                "Loading_value",
+                "Insert_Value",
+                "get_available_static",
+                "get_delegations",
+                "add_delegation",
+                "remove_delegation"
               ]
             },
             "example": "insert"
@@ -45,7 +58,7 @@
           {
             "name": "nodered",
             "in": "query",
-            "description": "If this parameter is present (it doesn't matter actually the passed value), the passed Authorization token has to be considered as an AccessToken, otherwise has to be considered as an RefreshToken",
+            "description": "If this parameter is present (the value doesn't actually matter), the token sent through the Authorization header is interpreted as an access token, otherwise it is interpreted as a refresh token.",
             "schema": {
               "type": "string"
             },
@@ -54,7 +67,7 @@
           {
             "name": "id",
             "in": "query",
-            "description": "\nUnique identifier for the device (in the specified context broker). Has to be conformant to regex: /[^a-zA-Z0-9_-]/ (if the device is imported from external source the character : is supported)\n\n_Required for actions:_ insert, update, delete, get_device_attribute, get_device, download.\n",
+            "description": "\nUnique identifier for the device (in the specified context broker). It has to be conformant to regex: /[a-zA-Z0-9_-]/ (if the device is imported from an external source, colons can also be used)\n\n_Required for actions:_ insert, update, delete, get_device_attributes, get_device, download, insert_Value, Loading_value, get_delegation, remove__delegation, add_delegation.\n",
             "required": true,
             "schema": {
               "type": "string"
@@ -74,7 +87,7 @@
           {
             "name": "contextbroker",
             "in": "query",
-            "description": "\nName of the context broker that handles the device. Has to be conformant to regex: /[^a-zA-Z0-9_-]/\n\n_Required for actions:_ insert, update, delete, get_device_attribute, get_device, download.\n",
+            "description": "\nName of the context broker that handles the device. It has to be conformant to regex: /[a-zA-Z0-9_-]/\n\n_Required for actions:_ insert, update, delete, get_device_attributes, get_device, download.\n",
             "required": true,
             "schema": {
               "type": "string"
@@ -82,9 +95,19 @@
             "example": "mqttUNIFI"
           },
           {
+            "name": "start_time , end_time",
+            "in": "query",
+            "description": "\nThese values create an inclusive range that expression is compared to the date of creation of device.\n\n_Required for actions:_ get_all_devices.\n",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2019-08-17T20:05:34.540Z"
+          },
+          {
             "name": "gb_old_cb",
             "in": "query",
-            "description": "\nName of the OLD context broker in case of upated.\n\n_Required for actions:_ update.\n",
+            "description": "\nName of the old context broker (if changed).\n\nIf the context broker is not changed, set this parameter to an empty string.\n\n_Required for actions:_ update.\n",
             "required": true,
             "schema": {
               "type": "string"
@@ -94,7 +117,7 @@
           {
             "name": "kind",
             "in": "query",
-            "description": "\nIt specifies if the value is a Sensor or an Actuator.\n\n_Required for actions:_ insert, update.\n",
+            "description": "\nIt specifies if the device is a sensor or an actuator.\n\n_Required for actions:_ insert, update.\n",
             "required": true,
             "schema": {
               "type": "string",
@@ -108,7 +131,7 @@
           {
             "name": "format",
             "in": "query",
-            "description": "\nFormat of the value: Csv, xml, JSON.\n\n_Required for actions:_ insert, update.\n",
+            "description": "\nFormat of the value that the device accepts or produces.\n\n_Required for actions:_ insert, update.\n",
             "required": true,
             "schema": {
               "type": "string",
@@ -149,7 +172,7 @@
           {
             "name": "frequency",
             "in": "query",
-            "description": "\nFrequency at which it produces observations, in seconds.\n\n_Required for actions:_ insert, update.\n",
+            "description": "\nFrequency at which observations are produced, in seconds.\n\n_Required for actions:_ insert, update.\n",
             "required": true,
             "schema": {
               "type": "integer",
@@ -160,7 +183,7 @@
           {
             "name": "attributes",
             "in": "query",
-            "description": "\nA list of JSON objects representing the values generated by a device for each observation. The value_name has to be conformant to regex: /[^a-zA-Z0-9_-]/\n\n_Required for actions:_ insert, update.\n",
+            "description": "\nA JSON array of objects each representing a kind of value (attribute) that the device accepts (actuator) or produces (sensor). The value_name has to be conformant to regex: /[a-zA-Z0-9_-]/\nand is composed by:\n\n* __value_name__: Name of the measured value\n* __data_type__: Data type measured(int, float, ecc) based on the dictionary\n* __value_type__: Type of value measured based on the dictionary\n* __editable__: Flag to indicate if a value is editable\n* __value_unit__: Unit of measurement of the value based on the dictionary \n* __healthiness_criteria__: Criteria to decide if an attribute is healthy\n* __healthiness_value__: Time in seconds to decide if an attribute is healthy\n* __real_time_flag__: Flag \"true\" or \"false\" to indicate if a value is measured in realtime (if true updates are sent over kafka and websocket connection) default \"false\"\n\n_Required for actions:_ insert, update.\n\n_Example:_\n\n[\n  {\n    \"value_name\": \"humidity\",\n    \"data_type\": \"float\",\n    \"value_type\": \"humidity\",\n    \"editable\": \"0\",\n    \"value_unit\": \"%\",\n    \"healthiness_criteria\": \"refresh_rate\",\n    \"healthiness_value\": \"300\"\n    \"real_time_flag\": \"true\"\n  },\n  \n  {\n    \"value_name\": \"temperature\",\n    \"data_type\": \"float\",\n    \"value_type\": \"temperature\",\n    \"editable\": \"0\",\n    \"value_unit\": \"°C\",\n    \"healthiness_criteria\": \"refresh_rate\",\n    \"healthiness_value\": \"300\"\n  }\n]\n",
             "required": true,
             "schema": {
               "type": "array",
@@ -171,44 +194,10 @@
             }
           },
           {
-            "name": "deleteattributes",
-            "in": "query",
-            "description": "A list of JSON objects representing the values removed by a device. (when available otherwise string \"[]\"). The value_name has to be conformant to regex: /[^a-zA-Z0-9_-]/\n\n_Used in actions:_ update.\n",
-            "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/attribute"
-              }
-            }
-          },
-          {
-            "name": "newattributes",
-            "in": "query",
-            "description": "A list of JSON objects representing the values added to a device. (when available otherwise string \"[]\"). The value_name has to be conformant to regex: /[^a-zA-Z0-9_-]/\n\n_Used in actions:_ update.\n",
-            "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/attribute"
-              }
-            }
-          },
-          {
-            "name": "mac",
-            "in": "query",
-            "description": "\nMac address of the device (when available otherwise empty string).\n\n_Used in actions:_ insert, update.\n",
-            "required": false,
-            "schema": {
-              "type": "string"
-            },
-            "example": "00-14-22-01-23-45"
-          },
-          {
             "name": "producer",
             "in": "query",
-            "description": "\nDevice producer (when available otherwise empty string).\n\n_Used in actions:_ insert, update.\n",
-            "required": false,
+            "description": "\nDevice producer. \n\nIt can be set to an empty string.\n\n_Used in actions:_ insert, update.\n",
+            "required": true,
             "schema": {
               "type": "string"
             },
@@ -217,8 +206,8 @@
           {
             "name": "model",
             "in": "query",
-            "description": "\nDevice model (when available otherwise string \"custom\"). Has to be conformant to regex: /[^a-zA-Z0-9_-]/ and can include teh space character\n\n_Used in actions:_ insert, update.\n",
-            "required": false,
+            "description": "\nDevice model. \n\nIf specified, it has to be conformant to regex: /[a-zA-Z0-9_-]/ but it also can include white spaces. \n\nSet it to \"custom\" if the device is not created from a model.\n\n_Used in actions:_ insert, update.\n",
+            "required": true,
             "schema": {
               "type": "string"
             },
@@ -227,8 +216,8 @@
           {
             "name": "k1",
             "in": "query",
-            "description": "\nIt specify the first part of the secret in case the device is of a protected Model (when available otherwise empty string)\n\nUsed in actions:_ insert, update.\n",
-            "required": false,
+            "description": "\nIt specifies the first part of the secret in case the device is of a protected model. \n\nIt can be set to an empty string if not applicable.\n\n_Used in actions:_ insert, update.\n",
+            "required": true,
             "schema": {
               "type": "string"
             },
@@ -237,17 +226,171 @@
           {
             "name": "k2",
             "in": "query",
-            "description": "\nIt specify the second part of the secret in case the device is of a protected Model (when available otherwise empty string)\n\nUsed in actions:_ insert, update.\n",
-            "required": false,
+            "description": "\nIt specifies the second part of the secret in case the device is of a protected model. \n\nIt can be set to an empty string if not applicable.\n\n_Used in actions:_ insert, update.\n",
+            "required": true,
             "schema": {
               "type": "string"
             },
             "example": "ab68e819-74fb-46c1-906c-2e22ea3ca537"
           },
           {
+            "name": "filename",
+            "in": "query",
+            "description": "\nRelative path and filename of the certificate file to be downloaded from the server.\n\n_Required in actions:_ download.\n\n_Examples:_\n\n/private/prova-modello2-cert-key.pem \n\n/certsdb/prova-modello2-cert-crt.pem\n",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "highleveltype",
+            "in": "query",
+            "description": "\nAdditional type in addition to the subnature\n\nAvailable High level types:\n* iot_device_entity\n* Heatmap\n* Traffic_flow\n* OriginDestinationMatrix\n* Trajectory_path\n* Gardens\n* Building_plant\n* Building\n* Floor\n* Cycling_paths\n",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "wktGeometry",
+            "in": "query",
+            "description": "\nVector geometry for the device (not required when highleveltype is \"iot_device_entity\")\n\nSupported Wkt objects:\n* POINT\n* LINESTRING \n* POLYGON \n* MULTIPOINT \n* MULTILINESTRING \n* MULTIPOLYGON \n* GEOMETRYCOLLECTION\n",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "own, public, delegated",
+            "in": "query",
+            "description": "\nThese parameters filter the devices. _OWN_ : keep only the own devices; _PUBLIC_ : kepp only public devices; _DELEGATED_ : kepp only delegated devices. If an user want own and delegated devices can set to true the parameters: own and delegated.\n\n_Required in actions:_ get_all_device.            \n",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "deleteattributes",
+            "in": "query",
+            "description": "The new list of the device attributes is composed starting from those specified in the _attributes_ parameter, then adding those specified in the _newattributes_ parameter, finally removing those specified in this _deleteattributes_ parameter. The value_name has to be conformant to regex: /[a-zA-Z0-9_-]/\nand is composed by:\n\n* __value_name__: Name of the measured value\n* __data_type__: Data type measured(int, float, ecc) based on the dictionary\n* __value_type__: Type of value measured based on the dictionary\n* __editable__: Flag to indicate if a value is editable\n* __value_unit__: Unit of measurement of the value based on the dictionary \n* __healthiness_criteria__: Criteria to decide if an attribute is healthy\n* __healthiness_value__: Time in seconds to decide if an attribute is healthy\n* __real_time_flag__: Flag to indicate if a value is measured in realtime\n\n_Used in actions:_ update.\n\n_Example:_\n\n[\n  {\n    \"value_name\": \"humidity\",\n    \"data_type\": \"float\",\n    \"value_type\": \"humidity\",\n    \"editable\": \"0\",\n    \"value_unit\": \"%\",\n    \"healthiness_criteria\": \"refresh_rate\",\n    \"healthiness_value\": \"300\"\n  },\n  {\n    \"value_name\": \"temperature\",\n    \"data_type\": \"float\",\n    \"value_type\": \"temperature\",\n    \"editable\": \"0\",\n    \"value_unit\": \"°C\",\n    \"healthiness_criteria\": \"refresh_rate\",\n    \"healthiness_value\": \"300\"\n  }\n]\n",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/attribute"
+              },
+              "default": "[]"
+            }
+          },
+          {
+            "name": "newattributes",
+            "in": "query",
+            "description": "The new list of the device attributes is composed starting from those specified in the _attributes_ parameter, then adding those specified in this _newattributes_ parameter, finally removing those specified in the _deleteattributes_ parameter. The value_name has to be conformant to regex: /[a-zA-Z0-9_-]/\nand is composed by:\n\n* __value_name__: Name of the measured value\n* __data_type__: Data type measured(int, float, ecc) based on the dictionary\n* __value_type__: Type of value measured based on the dictionary\n* __editable__: Flag to indicate if a value is editable\n* __value_unit__: Unit of measurement of the value based on the dictionary \n* __healthiness_criteria__: Criteria to decide if an attribute is healthy\n* __healthiness_value__: Time in seconds to decide if an attribute is healthy\n* __real_time_flag__: Flag to indicate if a value is measured in realtime\n \n _Used in actions:_ update.\n \n _Example:_\n \n [\n   {\n     \"value_name\": \"humidity\",\n     \"data_type\": \"float\",\n     \"value_type\": \"humidity\",\n     \"editable\": \"0\",\n     \"value_unit\": \"%\",\n     \"healthiness_criteria\": \"refresh_rate\",\n     \"healthiness_value\": \"300\"\n   },\n   {\n     \"value_name\": \"temperature\",\n     \"data_type\": \"float\",\n     \"value_type\": \"temperature\",\n     \"editable\": \"0\",\n     \"value_unit\": \"°C\",\n     \"healthiness_criteria\": \"refresh_rate\",\n     \"healthiness_value\": \"300\"\n   }\n ]\n \n",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/attribute"
+              },
+              "default": "[]"
+            }
+          },
+          {
+            "name": "mac",
+            "in": "query",
+            "description": "\nMac address of the device. \n\nIt defaults to an empty string.\n\n_Used in actions:_ insert, update.\n",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "00-14-22-01-23-45"
+          },
+          {
+            "name": "shouldbeRegistered",
+            "in": "query",
+            "description": "\nIf the parameter is set to \"yes\", the device is registered in KB. \n\nIt defaults to \"yes\".\n\n_Used in actions:_ insert.\n",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "<any-value>"
+          },
+          {
+            "name": "service",
+            "in": "query",
+            "description": "\nIn case of a multi-tenant context broker, it specifies the name of the Tenant to be used. \n\nIt defaults to an empty string.\n\n_Used in actions:_ insert, update, delete, get_device_attributes, get_device.\n",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "House"
+          },
+          {
+            "name": "servicePath",
+            "in": "query",
+            "description": "\nIn case of a multi-tenant context broker, it specifies the path to be used. \n\nIt defaults to an empty string.\n\n_Used in actions:_ insert, update, delete, get_device_attributes, get_device.\n",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "/Floor1"
+          },
+          {
+            "name": "subnature",
+            "in": "query",
+            "description": "\nKB Classification of the device. \n\nIt defaults to an empty string.\n\n_Used in actions:_ insert, update.\n",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "Beach_resort"
+          },
+          {
+            "name": "static_attributes",
+            "in": "query",
+            "description": "\nA JSON array of arrays each representing a static attribute of the device.\n\nFor each static attribute the key (URI) and the value must be specified.\nIt defaults to an empty array.\n\n_Used in actions:_ insert, update.\n\n_Example:_ [[\"http://schema.org/addressLocality\",\"Firenze\"],[\"http://schema.org/addressRegion\",\"Toscana\"]]\n",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "length",
+            "in": "query",
+            "description": "\nThe number of the results that are to be returned at maximum.\n\nIt is used for pagination. It sets the page size.\n\nIt defaults to -1, which means that all results must be returned.\n\n_Used in actions:_ get_all_device.\n",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": -1
+            },
+            "example": 10
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "description": "\n1-based index of the first entry to be returned. \n\nIt is only used in case of pagination (parameter _length_ submitted and greater than -1). \n\n_Used in actions:_ get_all_device.\n",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "example": 1
+          },
+          {
+            "name": "draw",
+            "in": "query",
+            "description": "\nSee the the DataTable documentation at \n\nhttps://datatables.net/manual/server-side#Returned-data \n\nto learn more about the draw parameter.  \n\n_Used in actions:_ get_all_device.\n",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "example": 1
+          },
+          {
             "name": "visibility",
             "in": "query",
-            "description": "\n__DEPRECATED__ It specify internally in the Iot-Directory if the IOT Device is Public or Private. (when available otherwise string \"private\")\n\nUsed in actions:_ insert, update.\n",
+            "description": "\n__DEPRECATED__ \n\nIt specifies for internal purposes of the Iot-Directory if the IoT Device is Public or Private. \n\nIt defaults to \"private\".\n\n_Used in actions:_ insert, update.\n",
             "required": false,
             "schema": {
               "type": "string",
@@ -259,64 +402,9 @@
             "example": "public"
           },
           {
-            "name": "shouldbeRegistered",
-            "in": "query",
-            "description": "\nIf this parameter is present (it doesn't matter actually the passed value) the device should be registered in KB (when available otherwise string \"yes\")\n\nUsed in actions:_ insert.\n",
-            "required": false,
-            "schema": {
-              "type": "string"
-            },
-            "example": "<any-value>"
-          },
-          {
-            "name": "service",
-            "in": "query",
-            "description": "\nIn case of context broker Multi-tenancy, it specifies the name of the Tenant to be used (when available otherwise empty string)\n\nUsed in actions:_ insert, update, delete, get_device_attributes, get_device.\n",
-            "required": false,
-            "schema": {
-              "type": "string"
-            },
-            "example": "House"
-          },
-          {
-            "name": "servicePath",
-            "in": "query",
-            "description": "\nIn case of context broker Multi-tenancy, it specifies the path to be used (when available otherwise empty string)\n\nUsed in actions:_ insert, update, delete, get_device_attributes, get_device.\n",
-            "required": false,
-            "schema": {
-              "type": "string"
-            },
-            "example": "/Floor1"
-          },
-          {
-            "name": "subnature",
-            "in": "query",
-            "description": "\nKB Classification of the device (when available otherwise empty string)\n\nUsed in actions:_ insert, update.\n",
-            "required": false,
-            "schema": {
-              "type": "string"
-            },
-            "example": "Beach_resort"
-          },
-          {
-            "name": "static_attributes",
-            "in": "query",
-            "description": "\nA list of JSON objects representing the Static attributes of the device (when available otherwise  string \"[]\")\n\nUsed in actions:_ insert, update.\n",
-            "required": false,
-            "schema": {
-              "type": "string"
-            },
-            "example": [
-              [
-                "http://schema.org/addressLocality",
-                "Firenze"
-              ]
-            ]
-          },
-          {
             "name": "edgegateway_type",
             "in": "query",
-            "description": "\n__DEPRECATED__ Type of edge device (when available otherwise empty string)\n\nUsed in actions:_ insert, update.\n",
+            "description": "\n__DEPRECATED__ \n\nType of edge device. \n\nIt defaults to an empty string.\n\n_Used in actions:_ insert, update.\n",
             "required": false,
             "schema": {
               "type": "string"
@@ -326,61 +414,12 @@
           {
             "name": "edgegateway_uri",
             "in": "query",
-            "description": "\n__DEPRECATED__ URL of edge device (when available otherwise empty string)\n\nUsed in actions:_ insert, update.\n",
+            "description": "\n__DEPRECATED__ \n\nURL of edge device. \n\nIt defaults to an empty string.\n\n_Used in actions:_ insert, update.\n",
             "required": false,
             "schema": {
               "type": "string"
             },
             "example": "N/A"
-          },
-          {
-            "name": "length",
-            "in": "query",
-            "description": "\nHow many entries to return (when available otherwise string \"-1\")\n\nUsed in actions:_ get_all_device.\n",
-            "required": false,
-            "schema": {
-              "type": "integer"
-            },
-            "example": 10
-          },
-          {
-            "name": "start",
-            "in": "query",
-            "description": "\nStart point from entries to return (when available otherwise string \"1\")\n\nUsed in actions:_ get_all_device.\n",
-            "required": false,
-            "schema": {
-              "type": "integer"
-            },
-            "example": 1
-          },
-          {
-            "name": "draw",
-            "in": "query",
-            "description": "\nDraw point from entries to return (when available otherwise string \"1\")\n\nUsed in actions:_ get_all_device.\n",
-            "required": false,
-            "schema": {
-              "type": "integer"
-            },
-            "example": 1
-          },
-          {
-            "name": "columns",
-            "in": "query",
-            "description": "\nArray about the columns from entries to return (when available otherwise empty array)\n\nUsed in actions:_ get_all_device.\n",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filename",
-            "in": "query",
-            "description": "\nFilename of the file to download\n\nUsed in actions:_ download.\n",
-            "required": false,
-            "schema": {
-              "type": "string"
-            },
-            "example": "/private/prova-modello2-cert-key.pem /certsdb/prova-modello2-cert-crt.pem"
           }
         ],
         "responses": {
@@ -397,7 +436,7 @@
           "Model"
         ],
         "summary": "Insert, update, delete, retrieve models and model information.",
-        "description": "This API is for managing the IoT models. It can be leveraged for inserting, updating, deleting, and retrieving information about a model of interest. \n\nFor any APIs an Authorization __token__ in the Bearer format in the HTTP Header has to be specified, depending on the choosen scenario (see \"nodered\" params below).\n\nThe __action__ input parameter indicates which operation has to be performed:\n\n* __Insert__ - This API is intended for inserting a new model in the Iot-Directory. The user has to specify the required parameters for inserting a model. The status of the operation is returned.  \n\n* __Update__ - This API is intended for updating a model in the Iot-Directory. The user has to specify the required parameters for updating a model. The status of the operation is returned. \n\n* __Delete__ - This API is intended for deleting a model from the Iot-Directory. The user has to specify the required parameters for deleting a model. The status of the operation is returned. \n\n* __Get all models__ - This API is intended for retrieving all models from the Iot-Directory. The status of the operation is returned together with the requested data.\n\n* __Get value attributes__ - This API is intended for retrieving all the values associated with model from the Iot-Directory. The user has to specify the required parameters for retrieving all the attributes. The status of the operation is returned together with the requested data.\n\n* __Get model__ - This API is intended for retrieving all available information about the specified model. The status of the operation is returned together with the requested data.\n\n* __Get all models DataTable__ - DEPRECATED (use __Get all models__ instead) This API is intended for retrieving all models from the Iot-Directory in a paginated way. The status of the operation is returned together with the requested data.\n",
+        "description": "This API is for managing the IoT models. It can be used for inserting, updating, deleting, and retrieving information about a model of interest. \n\nAn Authorization header in Bearer format must be sent, including an access or a refresh token (see the _nodered_ parameter below).\n\nThe __action__ input parameter indicates which operation has to be performed:\n\n* __Insert__ - This API is intended to insert a new model in the Iot-Directory. Read thoroughly the _Parameters_ section below here to learn about the mandatory and optional parameters for this specific operation. The status of the operation is returned.  \n\n* __Update__ - This API is intended to update a model in the Iot-Directory. Read thoroughly the _Parameters_ section below here to learn about the mandatory and optional parameters for this specific operation. The status of the operation is returned. \n\n* __Delete__ - This API is intended to delete a model from the Iot-Directory. Read thoroughly the _Parameters_ section below here to learn about the mandatory and optional parameters for this specific operation. The status of the operation is returned. \n\n* __Get All Models__ - This API is intended to retrieve all models from the Iot-Directory. The status of the operation is returned together with the requested data.\n\n* __Get Value Attributes__ - This API is intended to retrieve all kinds of value associated with a model stored in the Iot-Directory. Read thoroughly the _Parameters_ section below here to learn about the mandatory and optional parameters for this specific operation. The status of the operation is returned together with the requested data.\n\n* __Get Model__ - This API is intended to retrieve all available information about the specified model. The status of the operation is returned together with the requested data.\n\n* __Get FIWIRE Model__ - This API is intended to retrieve all available information about the specified smart data model of FIWARE. The status of the operation is returned together with the requested data.\n\n* __Update values of FIWIRE Model__ - This API is intended to aupdate a value or a subset of values of a Smart Data Model's attribute. The status of the operation is returned together with the requested data.\n\n* __Get All Models DataTable__ - __DEPRECATED (use _Get all models_ instead)__ This API is intended to retrieve all models from the Iot-Directory in a paginated way. The status of the operation is returned together with the requested data.\n",
         "parameters": [
           {
             "name": "action",
@@ -413,7 +452,10 @@
                 "get_model",
                 "get_value_attributes",
                 "get_all_models",
-                "get_all_models_DataTable"
+                "get_all_models_DataTable",
+                "get_Fiwire_model",
+                "Update_values_attributes_FIWIRE",
+                "get_value_attributes_FIWIRE"
               ]
             },
             "example": "insert"
@@ -421,7 +463,7 @@
           {
             "name": "nodered",
             "in": "query",
-            "description": "If this parameter is present (it doesn't matter actually the passed value), the passed Authorization token has to be considered as an AccessToken, otherwise has to be considered as an RefreshToken",
+            "description": "If this parameter is present (the value doesn't actually matter), the token provided through the Authorization header is interpreted as an access token, otherwise it is interpreted as a refresh token.",
             "schema": {
               "type": "string"
             },
@@ -440,7 +482,7 @@
           {
             "name": "description",
             "in": "query",
-            "description": "\nDescription for the model. \n\n_Required for actions:_  insert, update.\n",
+            "description": "\nDescription for the model. \n\nIt can be set to an empty string.\n\n_Required for actions:_  insert, update.\n",
             "required": true,
             "schema": {
               "type": "string"
@@ -450,7 +492,7 @@
           {
             "name": "id",
             "in": "query",
-            "description": "\nUnique identifier for the model. Has to be conformant to regex: /[^a-zA-Z0-9_-]/ \n\n_Required for actions:_  update, delete, get_value_attribute.\n",
+            "description": "\nUnique identifier for the model. It must conform to the regex: /[a-zA-Z0-9_-]/ \n\n_Required for actions:_  update, delete, get_value_attribute, Update_values_attributes_FIWIRE, get_value_attributes_FIWIRE.\n",
             "required": true,
             "schema": {
               "type": "string"
@@ -468,9 +510,51 @@
             "example": "Thermometer"
           },
           {
+            "name": "version",
+            "in": "query",
+            "description": "\nThe version of the Smart Data Model .\n\n_Required for actions:_ Update_values_attributes_FIWIRE , get_value_attributes_FIWIRE .\n",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": 2
+          },
+          {
+            "name": "domain",
+            "in": "query",
+            "description": "\nThe domain of the Smart Data Model .\n\n_Required for actions:_ Update_values_attributes_FIWIRE , get_value_attributes_FIWIRE .\n",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "SmartCity"
+          },
+          {
+            "name": "subdomain",
+            "in": "query",
+            "description": "\nThe subdomain of the Smart Data Model .\n\n_Required for actions:_ Update_values_attributes_FIWIRE , get_value_attributes_FIWIRE .\n",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "Streetlight"
+          },
+          {
+            "name": "change",
+            "in": "query",
+            "description": "\nThe payload with the proposed change of the Smart Data Model's attribute .\n\n_Required for actions:_ Update_values_attributes_FIWIRE.\n",
+            "required": true,
+            "schema": {
+              "type": "Json"
+            },
+            "example": {
+              "attribute1": "value_change"
+            }
+          },
+          {
             "name": "contextbroker",
             "in": "query",
-            "description": "\nName of the context broker that handles the device. Has to be conformant to regex: /[^a-zA-Z0-9_-]/\n\n_Required for actions:_ insert, update.\n",
+            "description": "\nName of the context broker that handles the device. It must conform to the regex: /[a-zA-Z0-9_-]/\n\n_Required for actions:_ insert, update.\n",
             "required": true,
             "schema": {
               "type": "string"
@@ -480,7 +564,7 @@
           {
             "name": "kind",
             "in": "query",
-            "description": "\nIt specifies if the value is a Sensor or an Actuator.\n\n_Required for actions:_ insert, update.\n",
+            "description": "\nIt specifies if the model is for a sensor or an actuator.\n\n_Required for actions:_ insert, update.\n",
             "required": true,
             "schema": {
               "type": "string",
@@ -494,7 +578,7 @@
           {
             "name": "format",
             "in": "query",
-            "description": "\nFormat of the value: Csv, xml, JSON.\n\n_Required for actions:_ insert, update.\n",
+            "description": "\nFormat of the values that are accepted (actuator) or produced (sensors) by the devices that conform to the inserting/updating model.\n\n_Required for actions:_ insert, update.\n",
             "required": true,
             "schema": {
               "type": "string",
@@ -509,7 +593,7 @@
           {
             "name": "frequency",
             "in": "query",
-            "description": "\nFrequency at which it produces observations, in seconds.\n\n_Required for actions:_ insert, update.\n",
+            "description": "\nFrequency at which observations are produced, in seconds.\n\n_Required for actions:_ insert, update.\n",
             "required": true,
             "schema": {
               "type": "integer",
@@ -520,7 +604,7 @@
           {
             "name": "kgenerator",
             "in": "query",
-            "description": "\nType of autehntication.\n\n_Required for actions:_ insert, update.\n",
+            "description": "\nType of authentication.\n\n_Required for actions:_ insert, update.\n",
             "required": true,
             "schema": {
               "type": "string",
@@ -533,9 +617,32 @@
             "example": "normal"
           },
           {
+            "name": "attributes",
+            "in": "query",
+            "description": "\nA JSON array of objects representing each a kind of values accepted (actuators) or generated (sensors) by the devices that conform to the inserting/updating model. The value_name must conform to regex: /[a-zA-Z0-9_-]/ and is composed by:\n\n* __value_name__: Name of the measured value\n* __data_type__: Data type measured(int, float, ecc) based on the dictionary\n* __value_type__: Type of value measured based on the dictionary\n* __editable__: Flag to indicate if a value is editable\n* __value_unit__: Unit of measurement of the value based on the dictionary \n* __healthiness_criteria__: Criteria to decide if an attribute is healthy\n* __healthiness_value__: Time in seconds to decide if an attribute is healthy\n* __real_time_flag__: Flag to indicate if a value is measured in realtime\n\n_Required for actions:_ insert, update.\n\n_Example:_\n\n[\n  {\n    \"value_name\": \"humidity\",\n    \"data_type\": \"float\",\n    \"value_type\": \"humidity\",\n    \"editable\": \"0\",\n    \"value_unit\": \"%\",\n    \"healthiness_criteria\": \"refresh_rate\",\n    \"healthiness_value\": \"300\",\n    \"real_time_flag\":\"true\"\n  },\n  {\n    \"value_name\": \"temperature\",\n    \"data_type\": \"float\",\n    \"value_type\": \"temperature\",\n    \"editable\": \"0\",\n    \"value_unit\": \"°C\",\n    \"healthiness_criteria\": \"refresh_rate\",\n    \"healthiness_value\": \"300\",\n    \"real_time_flag\":\"true\"\n  }\n]\n",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/components/schemas/attribute"
+              }
+            }
+          },
+          {
+            "name": "producer",
+            "in": "query",
+            "description": "\nDevice producer\n\nIt can be set to an empty string if not available.\n\n_Used in actions:_ insert, update.\n",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "Arduino"
+          },
+          {
             "name": "hc",
             "in": "query",
-            "description": "\nDEPRECATED (use info in sensor value) Healthiness criteria \n\n_Required for actions:_ insert, update.\n",
+            "description": "\n__DEPRECATED__\n\nHealthiness criteria \n\nModel attributes bear this information in new models. Despite mandatory, this parameter should be set to an empty string for new models.\n\n_Required for actions:_ insert, update.\n",
             "required": true,
             "schema": {
               "type": "string",
@@ -550,7 +657,7 @@
           {
             "name": "hv",
             "in": "query",
-            "description": "\nDEPRECATED (use info in sensor value) Healthiness value\n\n_Required for actions:_ insert, update.\n",
+            "description": "\n__DEPRECATED__\n\nHealthiness value\n\nModel attributes bear this information in new models. Despite mandatory, this parameter should be set to an empty string for new models.\n\n_Required for actions:_ insert, update.\n",
             "required": true,
             "schema": {
               "type": "string"
@@ -558,32 +665,18 @@
             "example": 300
           },
           {
-            "name": "attributes",
+            "name": "highleveltype",
             "in": "query",
-            "description": "\nA list of JSON objects representing the values generated by a device for each observation. The value_name has to be conformant to regex: /[^a-zA-Z0-9_-]/\n\n_Required for actions:_ insert, update.\n",
-            "required": true,
-            "schema": {
-              "type": "array",
-              "minItems": 1,
-              "items": {
-                "$ref": "#/components/schemas/attribute"
-              }
-            }
-          },
-          {
-            "name": "producer",
-            "in": "query",
-            "description": "\nDevice producer (when available otherwise empty string). Here is required, meanwhile in device is not needed\n\n_Used in actions:_ insert, update.\n",
-            "required": true,
+            "description": "\nAdditional type in addition to the subnature\n\nAvailable High level types:\n* iot_device_entity\n* Heatmap\n* Traffic_flow\n* OriginDestinationMatrix\n* Trajectory_path\n* Gardens\n* Building_plant\n* Building\n* Floor\n* Cycling_paths\n",
+            "required": false,
             "schema": {
               "type": "string"
-            },
-            "example": "Arduino"
+            }
           },
           {
             "name": "service",
             "in": "query",
-            "description": "\nIn case of context broker Multi-tenancy, it specifies the name of the Tenant to be used (when available otherwise empty string)\n\nUsed in actions:_ insert, update.\n",
+            "description": "\nIn case of a multi-tenant context broker, it specifies the name of the Tenant to be used. \n\nIt defaults to an empty string.\n\n_Used in actions:_ insert, update.\n",
             "required": false,
             "schema": {
               "type": "string"
@@ -593,7 +686,7 @@
           {
             "name": "servicePath",
             "in": "query",
-            "description": "\nIn case of context broker Multi-tenancy, it specifies the path to be used (when available otherwise empty string)\n\nUsed in actions:_ insert, update.\n",
+            "description": "\nIn case of a multi-tenant context broker, it specifies the path to be used. \n\nIt defaults to an empty string.\n\n_Used in actions:_ insert, update.\n",
             "required": false,
             "schema": {
               "type": "string"
@@ -603,7 +696,7 @@
           {
             "name": "subnature",
             "in": "query",
-            "description": "\nKB Classification of the device (when available otherwise empty string)\n\nUsed in actions:_ insert, update.\n",
+            "description": "\nKB classification of the device. \n\nIt defaults to an empty string.\n\n_Used in actions:_ insert, update.\n",
             "required": false,
             "schema": {
               "type": "string"
@@ -613,22 +706,16 @@
           {
             "name": "static_attributes",
             "in": "query",
-            "description": "\nA list of JSON objects representing the Static attributes of the device (when available otherwise  string \"[]\")\n\nUsed in actions:_ insert, update.\n",
+            "description": "\nA JSON array of arrays each representing a static attribute of the device. For each static attribute, the key and the default value must be specified. \n\nIt defaults to an empty array.\n\n_Used in actions:_ insert, update.\n\n_Example:_ [[\"http://schema.org/addressLocality\",\"Firenze\"]]\n",
             "required": false,
             "schema": {
               "type": "string"
-            },
-            "example": [
-              [
-                "http://schema.org/addressLocality",
-                "Firenze"
-              ]
-            ]
+            }
           },
           {
             "name": "edgegateway_type",
             "in": "query",
-            "description": "\n__DEPRECATED__ Type of edge device (when available otherwise empty string)\n\nUsed in actions:_ insert, update.\n",
+            "description": "\n__DEPRECATED__ \n\nType of edge device. \n\nIt defaults to an empty string.\n\n_Used in actions:_ insert, update.\n",
             "required": false,
             "schema": {
               "type": "string"
@@ -638,7 +725,7 @@
           {
             "name": "length",
             "in": "query",
-            "description": "\nHow many entries to return (when available otherwise string \"-1\") DEPRECATED (use Get all models instead)\n\nUsed in actions:_ get_all_models_DataTable.\n",
+            "description": "\n__DEPRECATED (use Get all models instead)__\n\nThe number of the results that are to be returned at maximum.\n\nIt is used for pagination. It sets the page size.\n\nIt defaults to -1, which means that all results must be returned.\n\n_Used in actions:_ get_all_models_DataTable.\n",
             "required": false,
             "schema": {
               "type": "integer"
@@ -648,7 +735,7 @@
           {
             "name": "start",
             "in": "query",
-            "description": "\nStart point from entries to return (when available otherwise string \"1\") DEPRECATED (use Get all models instead)\n\nUsed in actions:_ get_all_models_DataTable.\n",
+            "description": "\n__DEPRECATED (use Get all models instead)__\n\n1-based index of the first entry to be returned. \n\nUsed only in case of pagination (parameter _length_ submitted and greater than -1). \n\nIt defaults to 1. \n\n_Used in actions:_ get_all_models_DataTable.\n",
             "required": false,
             "schema": {
               "type": "integer"
@@ -658,7 +745,7 @@
           {
             "name": "draw",
             "in": "query",
-            "description": "\nDraw point from entries to return (when available otherwise string \"1\") DEPRECATED (use Get all models instead)\n\nUsed in actions:_ get_all_models_DataTable.\n",
+            "description": "\n__DEPRECATED (use Get all models instead)__\n\nSee the the DataTable documentation at \n\nhttps://datatables.net/manual/server-side#Returned-data \n\nto learn more about the draw parameter.  \n\nIt defaults to 1.\n\n_Used in actions:_ get_all_models_DataTable.\n",
             "required": false,
             "schema": {
               "type": "integer"
@@ -668,7 +755,7 @@
           {
             "name": "columns",
             "in": "query",
-            "description": "\nArray about the columns from entries to return (when available otherwise empty array) DEPRECATED (use Get all models instead)\n\nUsed in actions:_ get_all_models_DataTable.\n",
+            "description": "\n__DEPRECATED (use Get all models instead)__\n\nArray of the columns to be returned.\n\nIt defaults to an empty array.\n\n_Used in actions:_ get_all_models_DataTable.\n",
             "required": false,
             "schema": {
               "type": "string"
@@ -677,7 +764,7 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/components/responses/device"
+            "$ref": "#/components/responses/model"
           }
         }
       }
@@ -688,7 +775,7 @@
           "Broker"
         ],
         "summary": "Insert, update, delete, retrieve context brokers and context broker information",
-        "description": "This API is for the management of the context brokers. It allows to insert, update, delete, get the full listing of the brokers. The __action__ input parameter indicates what operation has to be performed:\n\n* __Insert__ - This API is intended for inserting a new Context Broker in the Iot-Directory. The user has to specify the required parameters for inserting the Context Broker. The status of the operation is returned.\n\n* __Update__ - This API is intended for updating a Context Broker in the Iot-Directory. The user has to specify the required parameters for updating the Context Broker. The status of the operation is returned. \n\n* __Delete__ - This API is intended for deleting a Context Broker from the Iot-Directory. The user has to specify the required parameters for deleting the Context Broker. The status of the operation is returned. \n\n* __Get all Contextbroker__ - This API is intended for retrieving all Context Brokers from the Iot-Directory. The user has to specify no parameters. The status of the operation is returned, together with the requested data.\n\n* __Get services by cb name__ - This API is intended for retrieving Context Brokers services information in specific case of a context broker supporting NGSI with multitenancy. The user has to specify the required parameters. The status of the operation is returned, together with the requested data.\n",
+        "description": "This API is for the management of the context brokers. It allows to insert, update, delete, get the full listing of the brokers. The __action__ input parameter indicates the operation to be performed:\n\n* __Insert__ - This API is intended to insert a new Context Broker in the Iot-Directory. Read thoroughly the _Parameters_ section below here to learn about the mandatory and optional parameters for this specific operation. The status of the operation is returned.\n\n* __Update__ - This API is intended to update a Context Broker in the Iot-Directory. Read thoroughly the _Parameters_ section below here to learn about the mandatory and optional parameters for this specific operation. The status of the operation is returned. \n\n* __Delete__ - This API is intended to delete a Context Broker from the Iot-Directory. Read thoroughly the _Parameters_ section below here to learn about the mandatory and optional parameters for this specific operation. The status of the operation is returned. \n\n* __Get All Context Brokers__ - This API is intended to retrieve all Context Brokers from the Iot-Directory. No additional parameters are needed for this operation. The status of the operation is returned, together with the requested data.\n\n* __Get Services By CB Name__ - This API is intended to get information about the services offered by a Context Broker, in the specific case in which it supports the NGSI with multitenancy. Read thoroughly the _Parameters_ section below here to learn about the mandatory and optional parameters for this specific operation. The status of the operation is returned, together with the requested data.\n\n* __Is Broker Up__ - This API verifies that the given context broker is up and running by submitting an HTTP request to its /v2/entities path for version 2, or to /v1/queryContext for version 1.\n\n* __Update Orion version__ - This API verifies that the given context broker has updated version of Orion.\n\n* __Get specific contextbroker__ - This API is intended to get information about the Context Broker, given the subscrition id. The information contemplates the resource link.\n\n* __Take a default CB__ - This API is intended to get a ready-to-use Orion Context Broker. The result give all the information about the Context Broker.\n\n* __Get Orion version__ - This API is intended to get the Orion version about the Context Broker, given the id. \n\n* __Change visibility__ - This API is intended to change the visibility of the Context Broker. A Context Broker can be public (all users can see it), private (only the owner can see it) and delegated (only the owner user and a groups or user  chosen). Read thoroughly the _Parameters_ section below here to learn about the mandatory and optional parameters for this specific operation. The status of the operation is returned.\n\n* __Change owner__ - This API is intended to change the owner of the Context Broker. Read thoroughly the _Parameters_ section below here to learn about the mandatory and optional parameters for this specific operation. The status of the operation is returned.\n\n* __Get Delegations__ - This API is intended to retrieve the delegation of a Context Broker from the Iot-Directory. The status of the operation is returned together with the requested data.\n\n* __Add Delegations__ - This API is intended to add a delegation to a Context Broker. The status of the operation is returned together with the requested data.\n\n* __Remove Delegations__ - This API is intended to remove the delegation of a Contex Broker. The status of the operation is returned together with the requested data.  \n",
         "parameters": [
           {
             "name": "action",
@@ -702,7 +789,15 @@
                 "update",
                 "delete",
                 "get_all_contextbroker",
-                "get_services_by_cb_name"
+                "get_services_by_cb_name",
+                "is_broker_up",
+                "get_specific_contextbroker",
+                "take_default_CB_take",
+                "update_orion",
+                "orion_version",
+                "get_delegations",
+                "add_delegations",
+                "remove_delegation"
               ]
             },
             "example": "insert"
@@ -710,7 +805,7 @@
           {
             "name": "nodered",
             "in": "query",
-            "description": "If this parameter is present (it doesn't matter actually the passed value), the passed Authorization token has to be considered as an AccessToken, otherwise has to be considered as an RefreshToken",
+            "description": "If this parameter is present (the value doesn't actually matter), the token submitted through the Authorization header is interpreted as an access token, otherwise it is interpreted as a refresh token.",
             "schema": {
               "type": "string"
             },
@@ -719,7 +814,7 @@
           {
             "name": "name",
             "in": "query",
-            "description": "Name of the Context Broker that handles different devices. It is a unique identifier.\n\n_Required for actions:_ insert, update, delete, get_services_by_cb_name.\n",
+            "description": "Name of the Context Broker that handles different devices. It is a unique identifier.\n\n_Required for actions:_ insert, update, delete, get_services_by_cb_name, update_orion, orion_version, get_delegations, change_visibility, change_owner.\n",
             "required": true,
             "schema": {
               "type": "string"
@@ -729,7 +824,7 @@
           {
             "name": "kind",
             "in": "query",
-            "description": "Kind of the Context Broker. It can be an Internal or External\n\n_Required for actions:_ insert, update.\n",
+            "description": "Kind of the Context Broker.\n\n_Required for actions:_ insert, update.\n",
             "required": true,
             "schema": {
               "type": "string",
@@ -764,7 +859,7 @@
           {
             "name": "protocol",
             "in": "query",
-            "description": "The type of protocol supported by this Context Broker.\n\n_Required for actions:_ insert, update.\n",
+            "description": "The communication protocol supported by the Context Broker.\n\n_Required for actions:_ insert, update.\n",
             "required": true,
             "schema": {
               "type": "string",
@@ -778,16 +873,6 @@
               ]
             },
             "example": "ngsi"
-          },
-          {
-            "name": "version",
-            "in": "query",
-            "description": "DEPRECATED The version of protocol supported by this Context Broker.\n\n_Required for actions:_ insert, update.\n",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "example": "v1"
           },
           {
             "name": "latitude",
@@ -810,9 +895,39 @@
             "example": 11.255814
           },
           {
+            "name": "contextbroker",
+            "in": "query",
+            "description": "Visibility of the Context Broker.\n\n_Required in actions:_ is_broker_up\n",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "orionUNIFI"
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "\nThe version of the communication protocol supported by the Context Broker.\n\n_Required in actions_: is_broker_up\n\n__Deprecated for actions: insert, update__ \n  \n",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "v1"
+          },
+          {
+            "name": "sub_ID",
+            "in": "query",
+            "description": "\nThe subscription ID of the Context broker.\n\n_Required in actions_: get_specific_contextbroker\n\nDeprecated for actions: insert, update, delete, get_all_contextbroker, get_services_by_cb_name, is_broker_up\n",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "private"
+          },
+          {
             "name": "login",
             "in": "query",
-            "description": "Login name for authenticating to the Context Broker for Internal scenario (when available, otherwise an empty string).\n\n_Used in actions:_ insert, update.\n",
+            "description": "Login name for authenticating to the Context Broker for the Internal scenario. \n\nIt defaults to an empty string.\n\n_Used in actions:_ insert, update.\n",
             "required": false,
             "schema": {
               "type": "string"
@@ -822,7 +937,7 @@
           {
             "name": "password",
             "in": "query",
-            "description": "Login password for authenticating to the Context Broker for Internal scenario  (when available, otherwise an empty string).\n\n_Used in actions:_ insert, update.\n",
+            "description": "Login password for authenticating to the Context Broker for the Internal scenario.\n\nIt defaults to an empty string.\n\n_Used in actions:_ insert, update.\n",
             "required": false,
             "schema": {
               "type": "string"
@@ -832,7 +947,7 @@
           {
             "name": "sha",
             "in": "query",
-            "description": "Sha of the certificate representing the Context Broker.\n\n_Used in actions:_ insert, update.\n",
+            "description": "SHA of the Broker's certificate.\n\n_Used in actions:_ insert, update.\n",
             "required": false,
             "schema": {
               "type": "string"
@@ -842,7 +957,7 @@
           {
             "name": "accesslink",
             "in": "query",
-            "description": "external accesslink to contact the Context Broker.\n\n_Used in actions:_ insert, update.\n",
+            "description": "URL to contact the Context Broker from the external.\n\n_Used in actions:_ insert, update.\n",
             "required": false,
             "schema": {
               "type": "string"
@@ -852,7 +967,7 @@
           {
             "name": "accessport",
             "in": "query",
-            "description": "external accessport to contact the Context Broker.\n\n_Used in actions:_ insert, update.\n",
+            "description": "Port to contact the Context Broker from the external.\n\n_Used in actions:_ insert, update.\n",
             "required": false,
             "schema": {
               "type": "string"
@@ -862,7 +977,7 @@
           {
             "name": "path",
             "in": "query",
-            "description": "path to contact the Context Broker.\n\n_Used in actions:_ insert, update.\n",
+            "description": "Path to contact the Context Broker.\n\n_Used in actions:_ insert, update, is_broker_up.\n",
             "required": false,
             "schema": {
               "type": "string"
@@ -870,19 +985,9 @@
             "example": "/v2/entities"
           },
           {
-            "name": "visibility",
-            "in": "query",
-            "description": "DEPRECATED visibility to the Context Broker.\n\n_Used in actions:_ insert, update.\n",
-            "required": false,
-            "schema": {
-              "type": "string"
-            },
-            "example": "private"
-          },
-          {
             "name": "services",
             "in": "query",
-            "description": "For Context Broker supporting ngsi with Multitenancy specify the list of available services.\n\n_Used in actions:_ insert, update.\n",
+            "description": "The list of the available services, only needed for Context Brokers that support NGSI with multitenancy.\n\n_Used in actions:_ insert, update, is_broker_up.\n",
             "required": false,
             "schema": {
               "type": "string"
@@ -892,12 +997,32 @@
           {
             "name": "urlnificallback",
             "in": "query",
-            "description": "For Context Broker supporting ngsi, if specified, it subsbibe for callback\n\n_Used in actions:_ insert, update.\n",
+            "description": "For internal NGSI Context Brokers, it is possible to specify a callback URL where to receive push updates at every new content published to the broker. \n\n_See also:_ https://www.snap4city.org/drupal/node/562\n\n_Used in actions:_ insert, update.\n",
             "required": false,
             "schema": {
               "type": "string"
             },
             "example": "http://192.168.1.1:5577"
+          },
+          {
+            "name": "visibility",
+            "in": "query",
+            "description": "__DEPRECATED__\n\nVisibility of the Context Broker.\n\n_Used in actions:_ insert, update, change_visibility.\n",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "private"
+          },
+          {
+            "name": "org",
+            "in": "query",
+            "description": "\n\nOrganization of the Context Broker.\n\n_Used in actions:_ insert, update, update_orion,Orion_version.\n",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "DISIT"
           }
         ],
         "responses": {
@@ -914,7 +1039,7 @@
           "Value"
         ],
         "summary": "Insert, update, delete, retrieve values and value information.",
-        "description": "This API is for the management of the event values. It allows to insert, update, delete, get the full listing of the event values, and check value informations. The __action__ input parameter indicates what operation has to be performed:\n\n* __Insert__ - This API is intended for inserting a new value with a device already registered in the Iot-Directory. The user has to specify the required parameters for inserting a value. The status of the operation is returned. This operation also provides the registration in the Knowledge Base. Finally the value is also reported in the structure of the device registered in the Context Broker (when this is required by the Context Broker).\n\n* __Update__ - This API is intended for updating a value with a device already registered in the Iot-Directory. The user has to specify the required parameters for updating a value. The status of the operation is returned. This operation also provides the updating on the Knowledge Base. Finally the value is also reported in the structure of the device registered in the Context Broker (when this is required by the Context Broker).\n\n* __Delete__ - This API is intended for deleting a value from the Iot-Directory. The user has to specify the required parameters for deleting a value. The status of the operation is returned. This operation also provides the deletion from the Knowledge Base.  \n\n* __Get all event values__ - This API is intended for retrieving all values from the Iot-Directory. The user has to specify no parameters. The status of the operation is returned, together with the requested data. \n\n* __Check if last value__ - This API is intended for retrieving the number of the value of a specific device. The user has to specify the required parameters. The status of the operation is returned.\n",
+        "description": "This API is for the management of the event values. It allows to insert, update, delete, get the full listing of the event values, and check value informations. The __action__ input parameter indicates the operation to be performed:\n\n* __Insert__ - This API is intended to insert a new value with a device already registered in the Iot-Directory. Read thoroughly the _Parameters_ section below here to learn about the mandatory and optional parameters for this specific operation. The status of the operation is returned. This operation also provides the registration in the Knowledge Base. The value is also reported in the structure of the device registered in the Context Broker (when this is required by the Context Broker).\n\n* __Update__ - This API is intended to update a value with a device already registered in the Iot-Directory. Read thoroughly the _Parameters_ section below here to learn about the mandatory and optional parameters for this specific operation. The status of the operation is returned. This operation also provides the updating on the Knowledge Base. The value is also reported in the structure of the device registered in the Context Broker (when this is required by the Context Broker).\n\n* __Delete__ - This API is intended to delete a value from the Iot-Directory. Read thoroughly the _Parameters_ section below here to learn about the mandatory and optional parameters for this specific operation. The status of the operation is returned. This operation also provides the deletion from the Knowledge Base.  \n\n* __Get All Event Values__ - This API is intended to retrieve all values from the Iot-Directory. No additional parameters are needed. The status of the operation is returned, together with the requested data. \n\n* __Check If Last Value__ - This API is intended to retrieve the number of the values of a specific device. Read thoroughly the _Parameters_ section below here to learn about the mandatory and optional parameters for this specific operation. The status of the operation is returned.\n\n* __Get all temporary event value for registered devices__\n\n* __Update temporary event values for registered devices__\n\n* __Delete temporary event values for registered devices__\n\n* __Insert all valid event values__\n",
         "parameters": [
           {
             "name": "action",
@@ -928,7 +1053,11 @@
                 "update",
                 "delete",
                 "get_all_event_value",
-                "check_if_last_value"
+                "check_if_last_value",
+                "get_all_temporary_event_value_for_registered_devices",
+                "update_temporary_event_values_for_registered_devices",
+                "delete_temporary_event_values_for_registered_devices",
+                "insert_all_valid_event_values"
               ]
             },
             "example": "insert"
@@ -936,7 +1065,7 @@
           {
             "name": "nodered",
             "in": "query",
-            "description": "If this parameter is present (it doesn't matter actually the passed value), the passed Authorization token has to be considered as an AccessToken, otherwise has to be considered as an RefreshToken",
+            "description": "If this parameter is present (the value doesn't actually matter), the token submitted through the Authorization header is intepreted as an access token, otherwise as a refresh token.",
             "schema": {
               "type": "string"
             },
@@ -945,7 +1074,7 @@
           {
             "name": "device",
             "in": "query",
-            "description": "The device unique identifier.\n\n_Required for actions:_ insert, update, delete, check_if_last_value. \n",
+            "description": "Unique identifier of the device.\n\n_Required for actions:_ insert, update, delete, check_if_last_value, update_temporary_event_values_for_registered_devices, delete_temporary_event_values_for_registered_devices. \n",
             "required": true,
             "schema": {
               "type": "string"
@@ -955,7 +1084,7 @@
           {
             "name": "contextbroker",
             "in": "query",
-            "description": "Name of the Context Broker that handles the device.\n\n_Required for actions:_ insert, update, delete, check_if_last_value. \n",
+            "description": "Name of the Context Broker that handles the device.\n\n_Required for actions:_ insert, update, delete, check_if_last_value, update_temporary_event_values_for_registered_devices, delete_temporary_event_values_for_registered_devices. \n",
             "required": true,
             "schema": {
               "type": "string"
@@ -965,8 +1094,8 @@
           {
             "name": "value_name",
             "in": "query",
-            "description": "Name of the value (and unique in the specified device and context broker).\n\n_Required for actions:_ insert, update, delete. \n",
-            "required": false,
+            "description": "Name of the value.\n\nThe name of the value is unique given the device and the context broker.\n\n_Required for actions:_ insert, update, delete, update_temporary_event_values_for_registered_devices, delete_temporary_event_values_for_registered_devices. \n",
+            "required": true,
             "schema": {
               "type": "string"
             },
@@ -975,7 +1104,7 @@
           {
             "name": "data_type",
             "in": "query",
-            "description": "Data type of the value (e.g. integer, float, string, boolean, and so on).\n\n_Required for actions:_ insert, update. \n",
+            "description": "Data type of the value (e.g. integer, float, string, boolean, and so on).\n\n_Required for actions:_ insert, update, update_temporary_event_values_for_registered_devices. \n",
             "required": true,
             "schema": {
               "type": "string"
@@ -985,7 +1114,7 @@
           {
             "name": "value_type",
             "in": "query",
-            "description": "Type of the value (e.g. Temperature, humidity, light, CO_concentration, and so on).\n\n_Required for actions:_ insert, update. \n",
+            "description": "Type of the value (e.g. Temperature, humidity, light, CO_concentration, and so on).\n\n_Required for actions:_ insert, update, update_temporary_event_values_for_registered_devices. \n",
             "required": true,
             "schema": {
               "type": "string"
@@ -995,7 +1124,7 @@
           {
             "name": "value_unit",
             "in": "query",
-            "description": "Unit of measure of the value (eg. oC,  %, lux, ppm, and so on).\n\n_Required for actions:_ insert, update. \n",
+            "description": "Unit of measure of the value (eg. °C,  %, lux, ppm, and so on).\n\n_Required for actions:_ insert, update, update_temporary_event_values_for_registered_devices. \n",
             "required": true,
             "schema": {
               "type": "string"
@@ -1005,17 +1134,21 @@
           {
             "name": "editable",
             "in": "query",
-            "description": "It specifies if the measure can be only read (false) or a value can be assigned (true). \n\n_Required for actions:_ insert, update, delete.\n",
+            "description": "It specifies if the measure can be only read (0) or a value can be assigned (1). \n\n_Required for actions:_ insert, update, delete, update_temporary_event_values_for_registered_devices.\n",
             "required": true,
             "schema": {
-              "type": "boolean"
+              "type": "integer",
+              "enum": [
+                0,
+                1
+              ]
             },
-            "example": true
+            "example": 0
           },
           {
             "name": "healthiness_criteria",
             "in": "query",
-            "description": "The type of check to perform on values (value_refresh_rate, different_values or value_bounds).\n\n_Required for actions:_ insert, update.\n",
+            "description": "It indicates how the value can be used to determine if the device is healthy:\n* _value_refresh_rate_ means that we can base on the frequency at which new values are generated;\n* _different_values_ means that we can base on the variability of values;\n* _value_bounds_ means that we can base on the belonging of generated values to a given range of values.\n\n_Required for actions:_ insert, update, update_temporary_event_values_for_registered_devices.\n",
             "required": true,
             "schema": {
               "type": "string",
@@ -1030,7 +1163,7 @@
           {
             "name": "healthiness_value",
             "in": "query",
-            "description": "Healthiness value related to the healthiness criteria. The interpretetation varies depending of the adopted healthiness criteria: it could be the frequence of data acquisition (e.g. 300 seconds), the number of last values that have to have at least two different values, or the min and max allowed values.\n\n_Required for actions:_ insert, update.\n",
+            "description": "Healthiness value related to the healthiness criteria. The interpretetation varies depending of the adopted healthiness criteria: it could be the expected frequency of generation of new values (e.g. 300 seconds), the maximum number of identical consecutive values, or the minimum and maximum allowed values.\n\n_Required for actions:_ insert, update, update_temporary_event_values_for_registered_devices.\n",
             "required": true,
             "schema": {
               "type": "string"
@@ -1038,9 +1171,38 @@
             "example": 100
           },
           {
+            "name": "real_time_flag",
+            "in": "query",
+            "description": "It indicates if the values are measured in real time\n\nRequired for actions: insert, update, update_temporary_event_values_for_registered_devices.\n\nAvailable values : true,false\n",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "example": true
+          },
+          {
+            "name": "old_value_name",
+            "in": "query",
+            "description": "\nOld name of the value.\n\n_Required for actions:_  update_temporary_event_values_for_registered_devices.\n",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "ProvaValOld"
+          },
+          {
+            "name": "listAttributes",
+            "in": "query",
+            "description": "List of the attributes.\n\nIt is expected to be a string serialization of a JSON array of objects each having properties _contextbroker_, _device_, and _attribute_. The attribute is expected to be again an object with properties: value_name, data_type, value_type, editable, value_unit, healthiness_criteria, healthiness_value.\n\n_Required for actions:_ insert_all_valid_event_values\n",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "length",
             "in": "query",
-            "description": "\nHow many entries to return (when available otherwise string \"-1\")\n\nUsed in actions:_ get_all_event_value.\n",
+            "description": "\nThe number of the results that are to be returned at maximum.\n\nIt is used for pagination. It sets the page size.\n\nIt defaults to -1, which means that all results must be returned.\n\n_Used in actions:_ get_all_event_value, get_all_temporary_event_value_for_registered_devices.\n",
             "required": false,
             "schema": {
               "type": "integer"
@@ -1050,7 +1212,7 @@
           {
             "name": "start",
             "in": "query",
-            "description": "\nStart point from entries to return (when available otherwise string \"1\")\n\nUsed in actions:_ get_all_event_value.\n",
+            "description": "\n1-based index of the first entry to be returned.\n\nIt is only used in case of pagination (parameter _length_ submitted and greater than -1).\n\nIt defaults to 1.\n\n_Used in actions:_ get_all_event_value, get_all_temporary_event_value_for_registered_devices.\n",
             "required": false,
             "schema": {
               "type": "integer"
@@ -1060,7 +1222,7 @@
           {
             "name": "draw",
             "in": "query",
-            "description": "\nDraw point from entries to return (when available otherwise string \"1\")\n\nUsed in actions:_ get_all_event_value.\n",
+            "description": "\nSee the the DataTable documentation at \n\nhttps://datatables.net/manual/server-side#Returned-data \n\nto learn more about the draw parameter.  \n\nIt defaults to 1.\n\n_Used in actions:_ get_all_event_value, get_all_temporary_event_value_for_registered_devices.\n",
             "required": false,
             "schema": {
               "type": "integer"
@@ -1070,7 +1232,16 @@
           {
             "name": "columns",
             "in": "query",
-            "description": "\nArray about the columns from entries to return (when available otherwise empty array)\n\nUsed in actions:_ get_all_event_value.\n",
+            "description": "\nArray of the columns to be returned.\n\nIt defaults to an empty array.\n\n_Used in actions:_ get_all_event_value, get_all_temporary_event_value_for_registered_devices.\n",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "select",
+            "in": "query",
+            "description": "\nString serialization of a JSON array of objects each representing a filter to be applied.\n\nIt defaults to an empty array.\n\n_Used in actions:_ get_all_temporary_event_value_for_registered_devices.\n",
             "required": false,
             "schema": {
               "type": "string"
@@ -1285,6 +1456,11 @@
                             "type": "string",
                             "format": "date-time",
                             "example": "2018-03-12T15:21:00.000Z"
+                          },
+                          "url": {
+                            "type": "string",
+                            "format": "uri",
+                            "example": "http://log.disit.org/service/index.php?uri=http://www.disit.org/km4city/resource/RT04800102991TO&sparql=http://192.168.0.206:8890/sparql&keyword=VIA%20GIACOMO%20MATTEOTTI&multiple_search=false"
                           }
                         }
                       }
@@ -1375,6 +1551,40 @@
           }
         }
       },
+      "model": {
+        "description": "JSON document where the status of the operation and the possible retrieved data can be found.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "description": "The mandatory status of the operation: Ok, or Ko.\n\n_Returned by all actions._\n",
+                  "type": "string",
+                  "enum": [
+                    "ok",
+                    "ko"
+                  ],
+                  "example": "ok"
+                },
+                "msg": {
+                  "description": "A message related to the execution of the operation.\n\n_Returned by all actions._\n",
+                  "type": "string"
+                },
+                "content": {
+                  "description": "The retrieved data, or an empty string for write operations.\n"
+                },
+                "log": {
+                  "description": "Detailed information about the different steps of the execution.\n"
+                },
+                "error_msg": {
+                  "description": "In the case, a description of the occurred error.\n"
+                }
+              }
+            }
+          }
+        }
+      },
       "broker": {
         "description": "JSON document where the status of the operation and the possible retrieved data can be found.",
         "content": {
@@ -1398,201 +1608,72 @@
                   "description": "A message related to the execution of the operation.\n\n_Returned by all actions._\n",
                   "type": "string"
                 },
+                "error_msg": {
+                  "description": "A message that describes the specific error occurred during the execution of the operation.\n\n_Returned by all actions in case of error._\n",
+                  "type": "string"
+                },
+                "log": {
+                  "description": "A text that describes in detail the steps that the API has performed for satisfying the request.\n\n_Returned by all actions._\n",
+                  "type": "string"
+                },
                 "content": {
-                  "oneOf": [
-                    {
-                      "description": "A list of the identified context brokers. \n\n_Returned by actions:_ get_all_contextbroker.\n",
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "contextbroker": {
-                            "type": "string",
-                            "example": "mqttUNIFI"
-                          },
-                          "protocol": {
-                            "type": "string",
-                            "enum": [
-                              "mqtt",
-                              "amqp",
-                              "ngsi"
-                            ],
-                            "example": "mqtt"
-                          },
-                          "ip": {
-                            "type": "string",
-                            "example": "192.168.1.10"
-                          },
-                          "port": {
-                            "type": "integer",
-                            "format": "int32",
-                            "example": 1883
-                          },
-                          "uri": {
-                            "type": "string",
-                            "nullable": true,
-                            "example": "http://www.disit.org/km4city/resource/iot/mqttUNIFI"
-                          },
-                          "login": {
-                            "type": "string",
-                            "example": "brokeruser"
-                          },
-                          "password": {
-                            "type": "string",
-                            "example": "brokerpwd"
-                          },
-                          "latitude": {
-                            "type": "number",
-                            "format": "float",
-                            "example": 43.7731
-                          },
-                          "longitude": {
-                            "type": "number",
-                            "format": "float",
-                            "example": 11.256
-                          },
-                          "created": {
-                            "type": "string",
-                            "format": "date-time",
-                            "example": "2018-02-07T15:14:39.000Z"
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "description": "A list of devices present on the server that can be accessed relying on the device name.\n\n_Returned by actions:_ get_config_data.\n",
-                      "type": "object",
-                      "properties": {
-                        "additionalProperties": {
-                          "type": "object",
-                          "properties": {
-                            "entityType": {
-                              "type": "string",
-                              "example": "Temperature"
-                            },
-                            "kind": {
-                              "type": "string",
-                              "enum": [
-                                "sensor",
-                                "actuator"
-                              ],
-                              "example": "sensor"
-                            },
-                            "protocol": {
-                              "type": "string",
-                              "enum": [
-                                "ngsi",
-                                "mqtt",
-                                "amqp"
-                              ],
-                              "example": "ngsi"
-                            },
-                            "longitude": {
-                              "type": "number",
-                              "format": "float",
-                              "example": 9.214914
-                            },
-                            "latitude": {
-                              "type": "number",
-                              "format": "float",
-                              "example": 45.463701
-                            },
-                            "contextBroker": {
-                              "type": "string",
-                              "example": "orionUNIMI"
-                            },
-                            "name": {
-                              "type": "string",
-                              "example": "orionUNIMI"
-                            },
-                            "type": {
-                              "type": "string",
-                              "enum": [
-                                "ngsi",
-                                "mqtt",
-                                "amqp"
-                              ],
-                              "example": "mqtt"
-                            },
-                            "ip": {
-                              "type": "string",
-                              "example": "159.149.129.184"
-                            },
-                            "port": {
-                              "type": "integer",
-                              "format": "int32",
-                              "example": 1026
-                            }
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "description": "A list of values associated with the devices present on the system.\n\n_Returned by actions:_ get_config_data_values.\n",
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "cb": {
-                            "type": "string",
-                            "example": "rabbitUNIMI"
-                          },
-                          "device": {
-                            "type": "string",
-                            "example": "provaMM7779"
-                          },
-                          "value_name": {
-                            "type": "string",
-                            "example": "a"
-                          },
-                          "data_type": {
-                            "type": "string",
-                            "example": "binary"
-                          },
-                          "value_type": {
-                            "type": "string",
-                            "example": "actuator_canceller"
-                          },
-                          "editable": {
-                            "type": "string",
-                            "example": 0
-                          },
-                          "value_unit": {
-                            "type": "string",
-                            "example": "A"
-                          },
-                          "healthiness_criteria": {
-                            "type": "string",
-                            "enum": [
-                              "refresh_rate",
-                              "different_values",
-                              "value_bounds"
-                            ],
-                            "example": "refresh_rate"
-                          },
-                          "longitude": {
-                            "type": "number",
-                            "format": "float",
-                            "example": 9.214914
-                          },
-                          "latitude": {
-                            "type": "number",
-                            "format": "float",
-                            "example": 45.463701
-                          },
-                          "protocol": {
-                            "type": "string",
-                            "enum": [
-                              "ngsi",
-                              "mqtt",
-                              "amqp"
-                            ],
-                            "example": "ngsi"
-                          }
-                        }
+                  "description": "A list of the identified context brokers. \n\n_Returned by actions:_ get_all_contextbroker.\n",
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "contextbroker": {
+                        "type": "string",
+                        "example": "mqttUNIFI"
+                      },
+                      "protocol": {
+                        "type": "string",
+                        "enum": [
+                          "mqtt",
+                          "amqp",
+                          "ngsi"
+                        ],
+                        "example": "mqtt"
+                      },
+                      "ip": {
+                        "type": "string",
+                        "example": "192.168.1.10"
+                      },
+                      "port": {
+                        "type": "integer",
+                        "format": "int32",
+                        "example": 1883
+                      },
+                      "uri": {
+                        "type": "string",
+                        "nullable": true,
+                        "example": "http://www.disit.org/km4city/resource/iot/mqttUNIFI"
+                      },
+                      "login": {
+                        "type": "string",
+                        "example": "brokeruser"
+                      },
+                      "password": {
+                        "type": "string",
+                        "example": "brokerpwd"
+                      },
+                      "latitude": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 43.7731
+                      },
+                      "longitude": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 11.256
+                      },
+                      "created": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2018-02-07T15:14:39.000Z"
                       }
                     }
-                  ]
+                  }
                 }
               }
             }
@@ -1622,173 +1703,110 @@
                   "description": "A message related to the execution of the operation.\n\n_Returned by all actions._\n",
                   "type": "string"
                 },
+                "error_msg": {
+                  "description": "A message that describes the specific error occurred during the execution of the operation.\n\n_Returned by all actions in case of error._\n",
+                  "type": "string"
+                },
+                "log": {
+                  "description": "A text that describes in detail the steps that the API has performed for satisfying the request.\n\n_Returned by all actions._\n",
+                  "type": "string"
+                },
                 "content": {
-                  "oneOf": [
-                    {
-                      "description": "A list of values associated with devices of the system.\n\n_Returned by actions:_ get_all_event_value.\n",
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "cb": {
-                            "type": "string",
-                            "example": "orionUNIMI"
-                          },
-                          "device": {
-                            "type": "string",
-                            "example": "ARDUINO_ST_4201"
-                          },
-                          "value_name": {
-                            "type": "string",
-                            "example": "latitude"
-                          },
-                          "data_type": {
-                            "type": "string",
-                            "example": "float"
-                          },
-                          "value_type": {
-                            "type": "string",
-                            "example": "latitude"
-                          },
-                          "editable": {
-                            "type": "string",
-                            "example": 0
-                          },
-                          "value_unit": {
-                            "type": "string",
-                            "example": "A"
-                          },
-                          "healthiness_criteria": {
-                            "type": "string",
-                            "enum": [
-                              "refresh_rate",
-                              "different_values",
-                              "value_bounds"
-                            ],
-                            "example": "refresh_rate"
-                          },
-                          "value_refresh_rate": {
-                            "type": "integer",
-                            "format": "int32",
-                            "example": 300
-                          },
-                          "different_values": {
-                            "type": "integer",
-                            "format": "int32",
-                            "nullable": true,
-                            "example": 10
-                          },
-                          "value_bounds": {
-                            "type": "string",
-                            "nullable": true,
-                            "example": 620
-                          },
-                          "order": {
-                            "type": "integer",
-                            "format": "int32",
-                            "example": 1
-                          },
-                          "kind": {
-                            "type": "string",
-                            "enum": [
-                              "sensor",
-                              "actuator"
-                            ],
-                            "example": "sensor"
-                          },
-                          "latitude": {
-                            "type": "number",
-                            "format": "float",
-                            "example": 45.463701
-                          },
-                          "longitude": {
-                            "type": "number",
-                            "format": "float",
-                            "example": 9.214914
-                          },
-                          "status1": {
-                            "type": "string",
-                            "example": "active"
-                          },
-                          "visibility": {
-                            "type": "string",
-                            "enum": [
-                              "public",
-                              "private"
-                            ],
-                            "example": "public"
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "description": "The information associated with the specified value_name.\n\n_Returned by actions:_ get_event_value.\n",
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "cb": {
-                            "type": "string",
-                            "example": "orionUNIMI"
-                          },
-                          "device": {
-                            "type": "string",
-                            "example": "ARDUINO_ST_4201"
-                          },
-                          "value_name": {
-                            "type": "string",
-                            "example": "latitude"
-                          },
-                          "data_type": {
-                            "type": "string",
-                            "example": "float"
-                          },
-                          "value_type": {
-                            "type": "string",
-                            "example": "latitude"
-                          },
-                          "editable": {
-                            "type": "string",
-                            "example": 0
-                          },
-                          "value_unit": {
-                            "type": "string",
-                            "example": "A"
-                          },
-                          "healthiness_criteria": {
-                            "type": "string",
-                            "enum": [
-                              "refresh_rate",
-                              "different_values",
-                              "value_bounds"
-                            ],
-                            "example": "refresh_rate"
-                          },
-                          "value_refresh_rate": {
-                            "type": "integer",
-                            "format": "int32",
-                            "example": 300
-                          },
-                          "different_values": {
-                            "type": "integer",
-                            "format": "int32",
-                            "nullable": true,
-                            "example": 10
-                          },
-                          "value_bounds": {
-                            "type": "string",
-                            "nullable": true,
-                            "example": 620
-                          },
-                          "order": {
-                            "type": "integer",
-                            "format": "int32",
-                            "example": 1
-                          }
-                        }
+                  "description": "A list of values associated with devices of the system.\n\n_Returned by actions:_ get_all_event_value, get_all_temporary_event_value_for_registered_devices.\n",
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "cb": {
+                        "type": "string",
+                        "example": "orionUNIMI"
+                      },
+                      "device": {
+                        "type": "string",
+                        "example": "ARDUINO_ST_4201"
+                      },
+                      "value_name": {
+                        "type": "string",
+                        "example": "latitude"
+                      },
+                      "data_type": {
+                        "type": "string",
+                        "example": "float"
+                      },
+                      "value_type": {
+                        "type": "string",
+                        "example": "latitude"
+                      },
+                      "editable": {
+                        "type": "string",
+                        "example": 0
+                      },
+                      "value_unit": {
+                        "type": "string",
+                        "example": "A"
+                      },
+                      "healthiness_criteria": {
+                        "type": "string",
+                        "enum": [
+                          "refresh_rate",
+                          "different_values",
+                          "value_bounds"
+                        ],
+                        "example": "refresh_rate"
+                      },
+                      "value_refresh_rate": {
+                        "type": "integer",
+                        "format": "int32",
+                        "example": 300
+                      },
+                      "different_values": {
+                        "type": "integer",
+                        "format": "int32",
+                        "nullable": true,
+                        "example": 10
+                      },
+                      "value_bounds": {
+                        "type": "string",
+                        "nullable": true,
+                        "example": 620
+                      },
+                      "order": {
+                        "type": "integer",
+                        "format": "int32",
+                        "example": 1
+                      },
+                      "kind": {
+                        "type": "string",
+                        "enum": [
+                          "sensor",
+                          "actuator"
+                        ],
+                        "example": "sensor"
+                      },
+                      "latitude": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 45.463701
+                      },
+                      "longitude": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 9.214914
+                      },
+                      "status1": {
+                        "type": "string",
+                        "example": "active"
+                      },
+                      "visibility": {
+                        "type": "string",
+                        "enum": [
+                          "public",
+                          "private"
+                        ],
+                        "example": "public"
                       }
                     }
-                  ]
+                  }
                 }
               }
             }

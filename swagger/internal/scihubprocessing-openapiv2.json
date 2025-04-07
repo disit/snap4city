@@ -1,0 +1,426 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "Sci-Hub Processing API",
+    "version": "1.0.0",
+    "title": "Sci-Hub Processing API",
+    "contact": {
+      "email": "info@disit.org"
+    }
+  },
+  "tags": [
+    {
+      "name": "jobs",
+      "description": "Insert and read jobs"
+    },
+    {
+      "name": "geojson",
+      "description": "Insert and read map processing jobs"
+    }
+  ],
+  "paths": {
+    "/insert": {
+      "post": {
+        "tags": [
+          "jobs"
+        ],
+        "summary": "insert job",
+        "operationId": "insert a map processing job",
+        "description": "By passing in the appropriate options, you can insert a map processing job into the system\n",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "insert",
+            "description": "Insert job data",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/InsertItem"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "search results matching criteria",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Token"
+              }
+            }
+          },
+          "400": {
+            "description": "bad input parameter"
+          }
+        }
+      }
+    },
+    "/nominatim": {
+      "get": {
+        "tags": [
+          "geojson"
+        ],
+        "operationId": "getBoundingBox",
+        "description": "Get a bounding box for a locality from Nominatim",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "location",
+            "type": "string",
+            "description": "Location's type"
+          },
+          {
+            "in": "query",
+            "name": "location_name",
+            "type": "string",
+            "description": "Location's name"
+          },
+          {
+            "in": "query",
+            "name": "polygon_geojson",
+            "type": "number",
+            "format": "int",
+            "enum": [
+              0,
+              1
+            ]
+          },
+          {
+            "in": "query",
+            "name": "addressdetails",
+            "type": "number",
+            "format": "int",
+            "enum": [
+              0,
+              1
+            ]
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "bounding box retrieved",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Nominatim"
+              }
+            }
+          },
+          "400": {
+            "description": "invalid input, object invalid"
+          }
+        },
+        "summary": "Get a bounding box for a locality"
+      }
+    },
+    "/completed": {
+      "get": {
+        "tags": [
+          "completed"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "token",
+            "type": "string",
+            "description": "Job's token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "job's completed flag retrieved",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Completed"
+              }
+            }
+          },
+          "400": {
+            "description": "invalid input, object invalid"
+          }
+        },
+        "summary": "Get the completed flag for a token"
+      }
+    },
+    "/indexed": {
+      "get": {
+        "tags": [
+          "indexed"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "token",
+            "type": "string",
+            "description": "Job's token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "job's indexed flag retrieved",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Indexed"
+              }
+            }
+          },
+          "400": {
+            "description": "invalid input, object invalid"
+          }
+        },
+        "summary": "Get the indexed flag for a token"
+      }
+    }
+  },
+  "definitions": {
+    "InsertItem": {
+      "type": "object",
+      "required": [
+        "map_name",
+        "metric_name",
+        "description",
+        "org",
+        "color_map",
+        "from_date",
+        "to_date",
+        "length",
+        "write"
+      ],
+      "properties": {
+        "map_name": {
+          "type": "string",
+          "format": "string",
+          "example": "Altitude Florence"
+        },
+        "metric_name": {
+          "type": "string",
+          "example": "Altitude"
+        },
+        "description": {
+          "type": "string",
+          "format": "string",
+          "example": "This map shows the altitude in Florence"
+        },
+        "org": {
+          "type": "string",
+          "format": "string",
+          "example": "DISIT"
+        },
+        "minLat": {
+          "type": "string",
+          "format": "string",
+          "example": "43.10"
+        },
+        "maxLat": {
+          "type": "string",
+          "format": "string",
+          "example": "43.10"
+        },
+        "minLon": {
+          "type": "string",
+          "format": "string",
+          "example": "11.0"
+        },
+        "maxLon": {
+          "type": "string",
+          "format": "string",
+          "example": "11.10"
+        },
+        "location": {
+          "type": "string",
+          "format": "string",
+          "example": "city"
+        },
+        "location_name": {
+          "type": "string",
+          "format": "string",
+          "example": "Florence"
+        },
+        "color_map": {
+          "type": "string",
+          "format": "string",
+          "example": "Altitude"
+        },
+        "from_date": {
+          "type": "string",
+          "format": "datetime",
+          "example": "2020-01-01T10:00:00"
+        },
+        "to_date": {
+          "type": "string",
+          "format": "datetime",
+          "example": "2020-01-01T10:00:00"
+        },
+        "length": {
+          "type": "number",
+          "format": "int",
+          "example": 100
+        },
+        "write": {
+          "type": "number",
+          "format": "int",
+          "enum": [
+            0,
+            1
+          ],
+          "example": 1
+        }
+      }
+    },
+    "Token": {
+      "properties": {
+        "token": {
+          "type": "object",
+          "example": {
+            "token": "94d5768cd4211c355b2575f3ca63e2af152e8780a6c187b8968a6cc2fc2b1151"
+          }
+        }
+      }
+    },
+    "Completed": {
+      "properties": {
+        "completed": {
+          "type": "object",
+          "example": {
+            "completed": 1
+          }
+        }
+      }
+    },
+    "Indexed": {
+      "properties": {
+        "indexed": {
+          "type": "object",
+          "example": {
+            "indexed": 1
+          }
+        }
+      }
+    },
+    "Nominatim": {
+      "properties": {
+        "token": {
+          "type": "array",
+          "example": [
+            {
+              "place_id": 257532309,
+              "licence": "Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright",
+              "osm_type": "relation",
+              "osm_id": 42602,
+              "boundingbox": [
+                "43.7258716",
+                "43.8354631",
+                "11.1497598",
+                "11.3389044"
+              ],
+              "lat": "43.7698712",
+              "lon": "11.2555757",
+              "display_name": "Firenze, Toscana, Italia",
+              "class": "boundary",
+              "type": "administrative",
+              "importance": 0.8105633028502386,
+              "icon": "https://nominatim.openstreetmap.org/ui/mapicons//poi_boundary_administrative.p.20.png",
+              "address": {
+                "city": "Firenze",
+                "county": "Firenze",
+                "state": "Toscana",
+                "country": "Italia",
+                "country_code": "it"
+              },
+              "geojson": {
+                "type": "Polygon",
+                "coordinates": [
+                  [
+                    [
+                      11.1497598,
+                      43.7869451
+                    ],
+                    [
+                      11.1502498,
+                      43.7859534
+                    ],
+                    [
+                      11.1502434,
+                      43.7857801
+                    ],
+                    [
+                      11.1527367,
+                      43.7860718
+                    ],
+                    [
+                      11.1543821,
+                      43.7861836
+                    ],
+                    [
+                      11.1544507,
+                      43.7857972
+                    ],
+                    [
+                      11.1544651,
+                      43.7857844
+                    ],
+                    [
+                      11.1545378,
+                      43.7856945
+                    ],
+                    [
+                      11.1545698,
+                      43.7856643
+                    ],
+                    [
+                      11.1545911,
+                      43.7856521
+                    ],
+                    [
+                      11.1546164,
+                      43.7856259
+                    ],
+                    [
+                      11.1546297,
+                      43.7855857
+                    ],
+                    [
+                      11.1546385
+                    ]
+                  ]
+                ]
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "host": "hostname",
+  "basePath": "/copernicus",
+  "schemes": [
+    "http"
+  ]
+}

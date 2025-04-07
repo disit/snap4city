@@ -1,38 +1,38 @@
-# See also:
-# - https://github.com/swagger-api/swagger-ui/issues/3803
-#   type: object must be put as a child of oneOf even if it looks
-#   redundant, for that an acceptable yet improvable rendering of top
-#   level models could be achieved from Swagger UI.
-
 openapi: 3.0.0
 info:
   title: Advanced Smart City API
   version: 1.0.0
+  contact:
+    email: info@disit.org
+    name: DISIT, DINFO, University of Florence
+    url: https://www.disit.org
 servers:
-  - url: 'https://servicemap.disit.org/WebAppGrafo/api/v1'
-  - url: 'https://www.disit.org/superservicemap/api/v1/'
+  - url: https://www.snap4city.org/superservicemap/api/v1/
+  - url: https://servicemap.disit.org/WebAppGrafo/api/v1
+  - url: https://www.snap4city.org/ServiceMap/api/v1
 paths:
   /:
     get:
-      tags: [Services]
-      summary: Service discovery and information 
+      tags:
+        - Services
+      summary: Service discovery and information
       description: |
         * **Service search near GPS position** - It allows to retrieve the set of services that are near a given GPS position. The services can be filtered as belonging to specific categories (e.g. Accommodation, Hotel, Restaurant, etc.), or having specific words in any textual field. It can also be used to find services that have a WKT spatial description that contains a specific GPS position.
-        
+
         * **Service search near a service** - It allows to retrieve the set of services that are near a given service identified by its _serviceUri_. The services can be filtered as belonging to specific categories (e.g. Accomodation, Hotel, Restaurant, etc.), or having specific words in any textual field. It can also be used to find services that have a WKT spatial description that contains a specific GPS position.
-        
+
         * **Service search within a GPS area** - It allows to retrieve the set of services that are inside a rectangular area. The services can be filtered as belonging to specific categories (e.g. Accomodation, Hotel, Restaurant, etc.), or having specific words in any textual field.
-        
+
         * **Service search within a WKT described area** - It allows to retrieve the set of services that are inside a geographic region described using the Well Known Text (WKT) format. The services can be filtered as belonging to specific categories (e.g. Accomodation, Hotel, Restaurant, etc.), or having specific words in any textual field.
-        
+
         * **Service search within a stored WKT described area** - It allows to retrieve the set of services that are inside a geographic region described using the Well Known Text (WKT) format, by referring to the WKT with an identifier provided when the WKT is stored. The services can be filtered as belonging to specific categories (e.g. Accomodation, Hotel, Restaurant, etc.), or having specific words in any textual field. The list of available geometries can be retrived from the [Service Map](https://servicemap.disit.org/WebAppGrafo/) in the _Search Area_ selection box (with _Search Range_ _specific area_). New geometries can be provided using the [http://www.km4city.org/wkt](http://www.km4city.org/wkt) web service which can store a WKT from a shp file or providing directly the WKT string.
-        
+
         * **Service search by municipality** - It allows to retrieve the set of services that are in a specific municipality. The services can be filtered as belonging to specific categories (e.g. Accomodation, Hotel, Restaurant, etc.), or having specific words in any textual field.
-        
+
         * **Service search by query id** - It allows to retrieve the set of services associated with a query stored using the [Service Map](https://servicemap.disit.org/WebAppGrafo/) user interface.
-        
+
         * **Full text search** - It allows to retrieve the geolocated entities (not only services) that match with a list of keywords. The results can be possibly filtered to be within a specified distance from a GPS position, or within a rectangular area or inside a WKT geolocated area.
-        
+
         * **Service info** - It allows to retrieve information about a service using its _serviceUri_, as an HTML (_format_ query parameter set to _html_) or a machine readable JSON document (_format_ query parameter set to _json_).
       parameters:
         - $ref: '#/components/parameters/selection'
@@ -62,7 +62,7 @@ paths:
         - $ref: '#/components/parameters/accessToken'
         - $ref: '#/components/parameters/apikey'
       responses:
-        200:
+        '200':
           description: |
             * GEOGRAPHICAL SERVICE DISCOVERY:
               
@@ -72,9 +72,9 @@ paths:
               (3) Any service whose geometry contains the provided GPS position [[HTML]](http://servicemap.disit.org/WebAppGrafo/api/v1/?selection=43.7754;11.2494&categories=Service&maxResults=20&maxDists=inside&lang=it&format=html&geometry=true) [[JSON]](http://servicemap.disit.org/WebAppGrafo/api/v1/?selection=43.7754;11.2494&categories=Service&maxResults=20&maxDists=inside&lang=it&format=json&geometry=true); 
               (4) Accomodation within 1Km with _casa di dante_ in a textual description [[HTML]](http://servicemap.disit.org/WebAppGrafo/api/v1/?selection=43.7754;11.2494&categories=Accommodation&maxResults=2&maxDists=1&lang=it&format=html&text=casa%20di%20dante) [[JSON]](http://servicemap.disit.org/WebAppGrafo/api/v1/?selection=43.7754;11.2494&categories=Accommodation&maxResults=2&maxDists=1&lang=it&format=json&text=casa%20di%20dante);               (5) Search for Wine and food in 100m from Palazzo Vecchio [[HTML]](http://servicemap.disit.org/WebAppGrafo/api/v1/?selection=http://www.disit.org/km4city/resource/7ad6d2d3be461b1f0514956279c00eab&categories=WineAndFood&maxResults=10&lang=it&format=html) [[JSON]](http://servicemap.disit.org/WebAppGrafo/api/v1/?selection=http://www.disit.org/km4city/resource/7ad6d2d3be461b1f0514956279c00eab&categories=WineAndFood&maxResults=10&lang=it&format=json);
               (6) Accommodation, bus stop, sensor site or car park in a GPS area [[HTML]](http://servicemap.disit.org/WebAppGrafo/api/v1/?selection=43.7741;11.2453;43.7768;11.2515&categories=Accommodation;BusStop;SensorSite;Car_park&maxResults=10&lang=it&format=html) [[JSON]](http://servicemap.disit.org/WebAppGrafo/api/v1/?selection=43.7741;11.2453;43.7768;11.2515&categories=Accommodation;BusStop;SensorSite;Car_park&maxResults=10&lang=it&format=json); (7) Search for any service within the given WKT perimeter [[HTML]](http://servicemap.disit.org/WebAppGrafo/api/v1/?selection=wkt:POLYGON((11.25539%2043.77339,11.25608%2043.77348,11.25706%2043.77362,11.25759%2043.77328,11.25755%2043.77291,11.25675%2043.77260,11.25536%2043.77270,11.25539%2043.77339))&categories=Service&maxResults=0&lang=it&format=html) [[JSON]](http://servicemap.disit.org/WebAppGrafo/api/v1/?selection=wkt:POLYGON((11.25539%2043.77339,11.25608%2043.77348,11.25706%2043.77362,11.25759%2043.77328,11.25755%2043.77291,11.25675%2043.77260,11.25536%2043.77270,11.25539%2043.77339))&categories=Service&maxResults=0&lang=it&format=json); (8) Search for any service in a previously saved WKT perimeter [[HTML]](http://servicemap.disit.org/WebAppGrafo/api/v1/?selection=geo:ritmi_01&categories=Service&maxResults=100&lang=it&format=html) [[JSON]](http://servicemap.disit.org/WebAppGrafo/api/v1/?selection=geo:ritmi_01&categories=Service&maxResults=100&lang=it&format=json); (9) Search for any Entertainment service in the municipality of FIRENZE [[HTML]](http://servicemap.disit.org/WebAppGrafo/api/v1/?selection=COMUNE%20di%20FIRENZE&categories=Entertainment&maxResults=100&lang=it&format=html) [[JSON]](http://servicemap.disit.org/WebAppGrafo/api/v1/?selection=COMUNE%20di%20FIRENZE&categories=Entertainment&maxResults=100&lang=it&format=json); (10) Recall a previously saved query (in this example, search for any BusStop or CulturalActivity service in 100m near Santa Maria del Fiore) [[HTML]](https://servicemap.disit.org/WebAppGrafo/api/v1/?queryId=e053c4203f09a3f413ee7945f3bb47f3&format=html) [[JSON]](https://servicemap.disit.org/WebAppGrafo/api/v1/?queryId=e053c4203f09a3f413ee7945f3bb47f3&format=json)
-            
+
             * FULL TEXT SERVICE DISCOVERY - The results format is a GeoJSON _FeatureCollection_ with the matching entities, additionally the _fullCount_ property provides the full count of results available matching the query. For each _Feature_ a minimal set of properties is provided. HTML responses look the same as for the geographical search discovery. Real world example: search for any geolocated entity matching “via nave” [[HTML]](http://servicemap.disit.org/WebAppGrafo/api/v1/?search=via%20nave&maxResults=10&lang=en&format=html) [[JSON]](http://servicemap.disit.org/WebAppGrafo/api/v1/?search=via%20nave&maxResults=10&lang=en&format=json) 
-          
+
             * SERVICE INFO - If the _format_ query parameter is set to _html_, a visual representation of the service on the map is provided. Instead, if the _format_ query parameter is set to _json_, the API provides a GeoJSON description of the service with the main properties (name, address, city, type, etc.) and possibly some time varying properties for some kinds of services (traffic sensors, car park sensors, etc.). Real world examples follow: (1) Generic service [[HTML]](http://servicemap.disit.org/WebAppGrafo/api/v1/?serviceUri=http://www.disit.org/km4city/resource/5511cc9ffba0895908b765e802c6f475&format=html) [[JSON]](http://servicemap.disit.org/WebAppGrafo/api/v1/?serviceUri=http://www.disit.org/km4city/resource/5511cc9ffba0895908b765e802c6f475); (2)  Event [[HTML]](http://servicemap.disit.org/WebAppGrafo/api/v1/?serviceUri=http://www.disit.org/km4city/resource/Event_17249_92b81b10402b69977906977c4c836238&format=html) [[JSON]](http://servicemap.disit.org/WebAppGrafo/api/v1/?serviceUri=http://www.disit.org/km4city/resource/Event_17249_92b81b10402b69977906977c4c836238); (3) Parking [[HTML]](http://servicemap.disit.org/WebAppGrafo/api/v1/?serviceUri=http://www.disit.org/km4city/resource/RT04801702315PO&format=html) [[JSON]](http://servicemap.disit.org/WebAppGrafo/api/v1/?serviceUri=http://www.disit.org/km4city/resource/RT04801702315PO); (4) Traffic sensor [[HTML]](http://servicemap.disit.org/WebAppGrafo/api/v1/?serviceUri=http://www.disit.org/km4city/resource/METRO487&format=html) [[JSON]](http://servicemap.disit.org/WebAppGrafo/api/v1/?serviceUri=http://www.disit.org/km4city/resource/METRO487); (5) Weather forecast [[HTML]](http://servicemap.disit.org/WebAppGrafo/api/v1/?serviceUri=http://www.disit.org/km4city/resource/048017&format=html) [[JSON]](http://servicemap.disit.org/WebAppGrafo/api/v1/?serviceUri=http://www.disit.org/km4city/resource/048017); (6)  Bus stop [[HTML]](http://servicemap.disit.org/WebAppGrafo/api/v1/?serviceUri=http://www.disit.org/km4city/resource/Bus_ataflinea_Stop_FM0022_5&format=html) [[JSON]](http://servicemap.disit.org/WebAppGrafo/api/v1/?serviceUri=http://www.disit.org/km4city/resource/Bus_ataflinea_Stop_FM0022_5); (7) Fuel station [[HTML]](http://www.disit.org/ServiceMap/api/v1/?serviceUri=http://www.disit.org/km4city/resource/6784a5b6dcad37f9d683eefd993cc2c9&format=html) [[JSON]](http://www.disit.org/ServiceMap/api/v1/?serviceUri=http://www.disit.org/km4city/resource/6784a5b6dcad37f9d683eefd993cc2c9); (8) First Aid [[HTML]](http://www.disit.org/ServiceMap/api/v1/?serviceUri=http://www.disit.org/km4city/resource/dde440c760ef578da41599feb2396631&format=html) [[JSON]](http://www.disit.org/ServiceMap/api/v1/?serviceUri=http://www.disit.org/km4city/resource/dde440c760ef578da41599feb2396631); (9) Smart waste [[HTML]](http://www.disit.org/ServiceMap/api/v1/?serviceUri=http://www.disit.org/km4city/resource/smartwaste39465783&format=html) [[JSON]](http://www.disit.org/ServiceMap/api/v1/?serviceUri=http://www.disit.org/km4city/resource/smartwaste39465783); (10) Smart bench [[HTML]](http://www.disit.org/ServiceMap/api/v1/?serviceUri=http://www.disit.org/km4city/resource/smartbench_1&format=html) [[JSON]](http://www.disit.org/ServiceMap/api/v1/?serviceUri=http://www.disit.org/km4city/resource/smartbench_1); (11) Air quality monitoring station [[HTML]](http://servicemap.disit.org/WebAppGrafo/api/v1/?serviceUri=http://www.disit.org/km4city/resource/ARPAT_QA_FI-GRAMSCI&format=html) [[JSON]](http://servicemap.disit.org/WebAppGrafo/api/v1/?serviceUri=http://www.disit.org/km4city/resource/ARPAT_QA_FI-GRAMSCI)
           content:
             application/json:
@@ -83,7 +83,7 @@ paths:
             text/html:
               schema:
                 $ref: '#/components/schemas/ServicesHtmlDocument'
-        400:
+        '400':
           description: |
             None of _selection_, _search_, _serviceUri_, _queryId_ can be found in the request. [[Example]](http://servicemap.disit.org/WebAppGrafo/api/v1)
           content:
@@ -93,34 +93,358 @@ paths:
                 properties:
                   failure:
                     type: string
-                    enum: [ERROR]
+                    enum:
+                      - ERROR
                     example: ERROR
                   httpcode:
                     type: integer
                     format: int32
-                    enum: [400]
+                    enum:
+                      - 400
                     example: ERROR
                   message:
                     type: string
-                    enum: 
+                    enum:
                       - please specify 'selection', 'search', 'serviceUri' or 'queryId' parameters
                     example: |
                       please specify 'selection', 'search', 'serviceUri' or 'queryId' parameters
-                  apiDoc: 
+                  apiDoc:
                     type: string
                     format: uri
-                    enum: ["http://www.disit.org/6991"]
-                    example: "http://www.disit.org/6991"
+                    enum:
+                      - http://www.disit.org/6991
+                    example: http://www.disit.org/6991
               example:
-                externalValue: 'http://servicemap.disit.org/WebAppGrafo/api/v1'
-                
-        404:
+                externalValue: http://servicemap.disit.org/WebAppGrafo/api/v1
+        '404':
           description: Invalid user id.
-              
-                
+  /iot-search/:
+    get:
+      tags:
+        - IOT Search
+      summary: IoT device search
+      description: |
+        This API allows to search over services submitted as IOT devices. The main characteristic is that it can search for devices whose last values satisfy specific conditions, for example it allows to find all Weather_sensor devices in a geographic area whose last value of temperature is over 30 degrees.
+
+        The results can be filtered to be within a specified distance from a GPS position, or within a rectangular area (wkt polygonal area query is not supported). 
+
+        Moreover results can be filtered by the **model** used in IoT Directory to create the device, **categories** (nature or subnature) associated to the device, **valueFilters** reporting conditions (in AND) on the last value received for dynamic attributes (e.g status\:Active;temperature>=23). The results can be paged using  **fromResult**/**maxResults**.
+
+        Normally only public iot devices are returned, if you want to include private devices (your own or delegated to you) you have to send an access token in the Authorization header or using the accessToken query parameter.
+
+        Data is indexed on elasticsearch only after any update on the context  broker, thus if you change ownership or add a delegation on the device it will be  applied only after a data update.
+
+        Consider that the device status is updated on every device change on the context broker, thus if updates are made out of time order it is not guaranteed that the device status  provided is the most recent.
+      parameters:
+        - in: query
+          name: selection
+          description: |
+            Through this parameter, the user indicates _where_ the services have to be searched. It could be a rectangular boundary within which to search, or a point around which to search.
+
+            _Usages & Sample values:_
+
+            * **Service search near GPS position** - WGS84 sessadecimal representation of the latitude and longitude of the position of interest, separated by a semicolon. Required. Sample value: _43.7756;11.2490_.
+
+            * **Service search near a service** - Service search near a service. Required. Sample value: _http://www.disit.org/km4city/resource/7ad6d2d3be461b1f0514956279c00eab_
+
+            * **Service search within a GPS (rectangular) area** - _Lat#1;Lon#1;Lat#2;Lng#2_ where _Lat#1;Lng#1_ are the WGS84 sessadecimal coordinates of the south west point of the rectangle, and _Lat#2;Lng#2_ are the coordinates of the north east point. Required. Sample value: _3.7741;11.2453;43.7768;11.2515_
+          allowReserved: true
+          schema:
+            type: string
+          example: 43.7756;11.2490
+        - in: query
+          name: maxDists
+          description: maximun distance in km from the GPS point specified with *selection* in the form "_lat;lon_" (default 0.1)
+          schema:
+            type: number
+          example: 0.1
+        - in: query
+          name: categories
+          description: A list of categories as nature or subnature separated with ";"
+          schema:
+            type: string
+          example: Air_quality_monitoring_station;Weather_sensor
+        - in: query
+          name: model
+          description: search for iot devices created with a specific model name.
+          schema:
+            type: string
+          example: mymodel
+        - in: query
+          name: valueFilters
+          description: |
+            a list of conditions (separated with ;) on value names matching a constant value. The matching operator can be:
+
+            * _value name_=_numeric value_ (e.g. temperature=18), search for devices having the dynamic numeric attribute "value name" with a specific numeric value.
+            * _value name_>_numeric value_ (e.g. temperature>20), search for devices having a dynamic numeric attribute greater than a specific value.
+            * _value name_>=_numeric value_ (e.g. temperature>=20), search for devices having a dynamic numeric attribute greater or equal than a specific value.
+            * _value name_<_numeric value_ (e.g. temperature<20), search for devices having a dynamic numeric attribute less than a specific value.
+            * _value name_<=_numeric value_ (e.g. temperature<=20), search for devices having a dynamic numeric attribute less or equal than a specific value.
+            * _value name_:_string value_ (e.g status:Active), search for devices having the dynamic string attribute "value name" with a specific value, the match is case sensitive
+            * _value name_!:_string value_ (e.g. status!:Active), search for devices having a dynamic string attribute different from a specific value.            
+            * _value name_:>_string value_ (e.g. status:>Act), search for devices having a dynamic string attribute greater than a specific string value.
+            * _value name_:>=_string value_ (e.g. status:>=Active), search for devices having a dynamic string attribute greater or equal than a specific value.
+            * _value name_:<_string value_ (e.g. status:<A), search for devices having a dynamic string attribute less than a specific value.
+            * _value name_:<=_string value_ (e.g. status:<=Active), search for devices having a dynamic string attribute less or equal than a specific value.            
+
+            If multiple conditions are present they are considered in AND.
+
+            The special value name "deviceDelay_s" contains the number of seconds elapsed since last data update, it can be used to search for devices that does not send data since a certain number of seconds (to find unhealthy devices) or to find only recently updated devices.
+          schema:
+            type: string
+          example: status:Active;temperature>=30
+        - in: query
+          name: serviceUri
+          description: |
+            Through this parameter, the user indicates a list of serviceUri (separated by ;)  to be returned, this filter is used in conjuncion with the other filters.
+          allowReserved: true
+          schema:
+            type: string
+          example: http://www.disit.org/km4city/resource/iot/orionUNIFI/DISIT/IT0825A1;http://www.disit.org/km4city/resource/iot/orionUNIFI/DISIT/IT0884A1
+        - in: query
+          name: text
+          description: |
+            Through this parameter, the user indicates a set of keywords or phrases delimited with " to be matched on any device value.
+          allowReserved: true
+          schema:
+            type: string
+          examples:
+            ex1:
+              summary: simple
+              description: search for iot devices with anyone of the values matching the keyword "active"and (anothe value) matching keyword "test"
+              value: active test
+            ex2:
+              summary: phrase
+              description: serch for iot devices with anyone of the values matching the keyword active and (another value) matching exact phrase "this is a test"
+              value: active "this is a test"
+        - in: query
+          name: notHealthy
+          description: |
+            Through this parameter, the user indicates to return only not healthy devices if "true" is specified (default false). Not healthy devices are identified computing at update time the time expected for next update, not healthy devices are those whose value of this time is before current time (a configurable threshold of 1 minute is used).
+          schema:
+            type: string
+        - in: query
+          name: fromResult
+          description: the first result to be returned (default 0)
+          schema:
+            type: number
+        - in: query
+          name: maxResults
+          description: number of results to be returned (default 100)
+          schema:
+            type: number
+        - in: query
+          name: values
+          description: list of value names (separated by ;) to be returned for each result, if omitted all values are returned
+          schema:
+            type: string
+          example: status;temperature
+        - in: query
+          name: sortOnValue
+          description: the value name to sort the result, it can be like "value name\:asc|desc:type" (e.g. temperature:desc:short), order direction is "asc" if omitted, type can be string, date, long or short (if type is omitted string is assumed). The type is used to force sorting for dates and numbers. If the parameter is omitted the sort is on the distance from GPS position, if "none" is specified no specific sort is used. If "deviceDelay_s:desc" is specified results are sorted on the delay time in seconds passed from the last value provided for the device, in this way
+          schema:
+            type: string
+          example: temperature:desc:short
+      responses:
+        '200':
+          description: |
+            The results format is a GeoJSON  _FeatureCollection_ with the matching devices. The objects returned have a similar structure as the results of service search.
+          content:
+            application/json:
+              example:
+                type: FeatureCollection
+                fullCount: 651
+                features:
+                  - type: Feature
+                    geometry:
+                      type: Point
+                      coordinates:
+                        - 11.23627
+                        - 43.78081
+                    properties:
+                      serviceUri: http://www.disit.org/km4city/resource/iot/orionUNIFI/DISIT/weather1
+                      nature: Environment
+                      subnature: Weather_sensor
+                      organization: DISIT
+                      deviceName: weather1
+                      deviceModel: WeatherObserved
+                      date_time: '2022-07-20T07:36:06.515Z'
+                      values:
+                        dateObserved: '2022-07-20T07:36:06.515Z'
+                        temperature: 30
+  /iot-search/time-range/:
+    get:
+      tags:
+        - IOT Search
+      summary: IoT device/value search over a time range
+      description: |
+        This API allows to search over services submitted as IOT devices. The main characteristic is that it can search for devices whose values satisfy specific conditions in a certain time range, for example it allows to find all Weather_sensor devices in a geographic area whose value of temperature is over 30 degrees at least one time over last week. But this api can return all the temporal values matching the request (in this case a service uri is repeated as many times as it matches the query in the time range)
+
+        The results can be filtered to be within a specified distance from a GPS position, or within a rectangular area (wkt polygonal area query is not supported). 
+
+        Moreover results can be filtered by the **model** used in IoT Directory to create the device, **categories** (nature or subnature) associated to the device, **valueFilters** reporting conditions (in AND) on the last value received for dynamic attributes (e.g status\:Active;temperature>=23). 
+
+        The results can be aggregated by service uri with **aggregation=true** if data is not aggregated can paged using  **fromResult**/**maxResults**.
+
+        Normally only public iot devices are returned, if you want to include private devices (your own or delegated to you) you have to send an access token in the Authorization header or using the accessToken query parameter.
+
+        Data is indexed on elasticsearch, consider that ownership and delegations are not updated for old data, so if ownership or delegations of a device are modified at a certain point in time this api will provide to the new owner or delegated user only data submitted after this change.
+      parameters:
+        - in: query
+          name: fromTime
+          description: To be used to indicate the date and time of start of the time interval of interest.
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: toTime
+          description: To be used to indicate the date and time of end of the time interval of interest.
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: selection
+          description: |
+            Through this parameter, the user indicates _where_ the services have to be searched. It could be a rectangular boundary within which to search, or a point around which to search.
+
+            _Usages & Sample values:_
+
+            * **Service search near GPS position** - WGS84 sessadecimal representation of the latitude and longitude of the position of interest, separated by a semicolon. Required. Sample value: _43.7756;11.2490_.
+
+            * **Service search near a service** - Service search near a service. Required. Sample value: _http://www.disit.org/km4city/resource/7ad6d2d3be461b1f0514956279c00eab_
+
+            * **Service search within a GPS (rectangular) area** - _Lat#1;Lon#1;Lat#2;Lng#2_ where _Lat#1;Lng#1_ are the WGS84 sessadecimal coordinates of the south west point of the rectangle, and _Lat#2;Lng#2_ are the coordinates of the north east point. Required. Sample value: _3.7741;11.2453;43.7768;11.2515_
+          allowReserved: true
+          schema:
+            type: string
+          example: 43.7756;11.2490
+        - in: query
+          name: maxDists
+          description: maximun distance in km from the GPS point specified with *selection* in the form "_lat;lon_" (default 0.1)
+          schema:
+            type: number
+          example: 0.1
+        - in: query
+          name: categories
+          description: A list of categories as nature or subnature separated with ";"
+          schema:
+            type: string
+          example: Air_quality_monitoring_station;Weather_sensor
+        - in: query
+          name: model
+          description: search for iot devices created with a specific model name.
+          schema:
+            type: string
+          example: mymodel
+        - in: query
+          name: valueFilters
+          description: |
+            a list of conditions (separated with ;) on value names matching a constant value. The matching operator can be:
+
+            * _value name_=_numeric value_ (e.g. temperature=18), search for devices having the dynamic numeric attribute "value name" with a specific numeric value.
+            * _value name_>_numeric value_ (e.g. temperature>20), search for devices having a dynamic numeric attribute greater than a specific value.
+            * _value name_>=_numeric value_ (e.g. temperature>=20), search for devices having a dynamic numeric attribute greater or equal than a specific value.
+            * _value name_<_numeric value_ (e.g. temperature<20), search for devices having a dynamic numeric attribute less than a specific value.
+            * _value name_<=_numeric value_ (e.g. temperature<=20), search for devices having a dynamic numeric attribute less or equal than a specific value.
+            * _value name_:_string value_ (e.g status:Active), search for devices having the dynamic string attribute "value name" with a specific value, the match is case sensitive
+            * _value name_!:_string value_ (e.g. status!:Active), search for devices having a dynamic string attribute different from a specific value.            
+            * _value name_:>_string value_ (e.g. status:>Act), search for devices having a dynamic string attribute greater than a specific string value.
+            * _value name_:>=_string value_ (e.g. status:>=Active), search for devices having a dynamic string attribute greater or equal than a specific value.
+            * _value name_:<_string value_ (e.g. status:<A), search for devices having a dynamic string attribute less than a specific value.
+            * _value name_:<=_string value_ (e.g. status:<=Active), search for devices having a dynamic string attribute less or equal than a specific value.            
+
+            If multiple conditions are present they are considered in AND.
+          schema:
+            type: string
+          example: status:Active;temperature>=30
+        - in: query
+          name: serviceUri
+          description: |
+            Through this parameter, the user indicates a list of serviceUri (separated by ;)  to be returned, this filter is used in conjuncion with the other filters.
+          allowReserved: true
+          schema:
+            type: string
+          example: http://www.disit.org/km4city/resource/iot/orionUNIFI/DISIT/IT0825A1;http://www.disit.org/km4city/resource/iot/orionUNIFI/DISIT/IT0884A1
+        - in: query
+          name: text
+          description: |
+            Through this parameter, the user indicates a set of keywords or phrases delimited with " to be matched on any device value.
+          allowReserved: true
+          schema:
+            type: string
+          examples:
+            ex1:
+              summary: simple
+              description: search for iot devices with anyone of the values matching the keyword "active"and (anothe value) matching keyword "test"
+              value: active test
+            ex2:
+              summary: phrase
+              description: serch for iot devices with anyone of the values matching the keyword active and (another value) matching exact phrase "this is a test"
+              value: active "this is a test"
+        - in: query
+          name: fromResult
+          description: the first result to be returned (default 0), can be used only if aggregate=false
+          schema:
+            type: number
+            default: 0
+        - in: query
+          name: maxResults
+          description: number of results to be returned (default 100)
+          schema:
+            type: number
+            default: 100
+        - in: query
+          name: aggregate
+          description: if set to "true" results are aggregated by serviceUri, in this case no data values are reported but an "aggregationCount" property reports how many data records matches the query for the specific serviceUri. If the aggregation is requested over more than the maxResults the "sumOtherDocs" property reports how many matching results have not been considered for the aggregation, so a value different from 0 means that the results are not complete, increasing the maxResults will aggregate more data and reduce the "sumOtherDocs". When using aggregation it is not possible to paginate and fromResult parameter cannot be used. Aggregation should be used with care as it can be time consuming.
+          schema:
+            type: string
+            enum:
+              - 'true'
+              - 'false'
+            default: 'false'
+        - in: query
+          name: values
+          description: list of value names (separated by ;) to be returned for each result, if omitted all values are returned (used only if aggregate=false)
+          schema:
+            type: string
+          example: status;temperature
+        - in: query
+          name: sortOnValue
+          description: the value name to sort the results, it can be like "value name\:asc|desc:type" (e.g. temperature:desc:short), order direction is "asc" if omitted, type can be string, date, long or short (if type is omitted string is assumed). The type is used to force sorting for dates and numbers. If the parameter is omitted the sort is on "date_time:desc", if "none" is specified no specific sort is used (used only if aggregate=false).
+          schema:
+            type: string
+          example: temperature:desc:short
+      responses:
+        '200':
+          description: |
+            The results format is a GeoJSON  _FeatureCollection_ with the matching devices. The objects returned have a similar structure as the results of service search.
+          content:
+            application/json:
+              example:
+                type: FeatureCollection
+                fullCount: 651
+                features:
+                  - type: Feature
+                    geometry:
+                      type: Point
+                      coordinates:
+                        - 11.23627
+                        - 43.78081
+                    properties:
+                      serviceUri: http://www.disit.org/km4city/resource/iot/orionUNIFI/DISIT/weather1
+                      nature: Environment
+                      subnature: Weather_sensor
+                      organization: DISIT
+                      deviceName: weather1
+                      deviceModel: WeatherObserved
+                      date_time: '2022-07-20T07:36:06.515Z'
+                      values:
+                        dateObserved: '2022-07-20T07:36:06.515Z'
+                        temperature: 30
   /events/:
     get:
-      tags: [Events]
+      tags:
+        - Events
       summary: Event search
       description: It allows to retrieve the geolocated events in a given temporal range (day, week or month). The results can be possibly filtered to be within a specified distance from a GPS position, or within a rectangular area or inside a WKT described geographic area.
       parameters:
@@ -129,38 +453,39 @@ paths:
           description: Time range for the events to be retrieved, it can be _day_ for the events of the day of the request, _week_ for the events in the next 7 days or _month_ for the events in the next 30 days (if omitted _day_ is assumed).
           schema:
             type: string
-            enum: [day, week, month]
+            enum:
+              - day
+              - week
+              - month
             default: day
           example: day
         - in: query
           name: selection
           description: |
             Optional _lat;lng_ with a GPS position, or _lat1;lng1;lat2;lng2_ for a rectangular area or wkt:_string_ or geo:_geoid_ for a geographic area described as Well Known Text (see other request types for more details).
-            
+
             _Example:_ 43.7756;11.2490
           schema:
             type: string
-
         - in: query
           name: maxDists
           description: |
             Maximum distance from the reference position (_selection_ parameter), expressed in kilometers. This parameter can also be set to _inside_, in which case services are discovered that have a WKT geometry that covers the reference position. It defaults to _0.1_.
-          
+
             _Example:_ 0.2
-            
           schema:
             oneOf:
               - type: string
-                enum: [inside]
+                enum:
+                  - inside
               - type: number
                 format: float
             default: 0.1
-
         - in: query
           name: maxResults
           description: |
             Maximum number of results to be returned. If it is set to zero, all results are returned. It defaults to 100.
-            
+
             _Example:_ 10
           schema:
             type: integer
@@ -169,17 +494,16 @@ paths:
         - $ref: '#/components/parameters/uid'
         - $ref: '#/components/parameters/requestFrom'
       responses:
-        200:
+        '200':
           description: |
             The results format is a GeoJSON  _FeatureCollection_ with the matching events. For each _Feature_ a set of properties is provided. [[Example]](http://servicemap.disit.org/WebAppGrafo/api/v1/events/?range=day&format=json)
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/EventsJsonDocument'
-              example: 
-                externalValue: 'http://servicemap.disit.org/WebAppGrafo/api/v1/events/?range=day&format=json'
-        
-        400:
+              example:
+                externalValue: http://servicemap.disit.org/WebAppGrafo/api/v1/events/?range=day&format=json
+        '400':
           description: Invalid _range_ or _selection_. [[Example]](http://servicemap.disit.org/WebAppGrafo/api/v1/events/?range=day&format=json&selection=invalid)
           content:
             application/json:
@@ -188,30 +512,32 @@ paths:
                 properties:
                   failure:
                     type: string
-                    enum: [ERROR]
+                    enum:
+                      - ERROR
                     example: ERROR
                   httpcode:
                     type: integer
                     format: int32
-                    enum: [400]
+                    enum:
+                      - 400
                     example: 400
                   message:
                     type: string
-                    enum: 
-                      - "invalid 'selection' parameter (lat;long[;lat;long] | wkt:... | geo: ...)"
+                    enum:
+                      - 'invalid ''selection'' parameter (lat;long[;lat;long] | wkt:... | geo: ...)'
                     example: |
                       invalid 'selection' parameter (lat;long[;lat;long] | wkt:... | geo: ...)
-                  apiDoc: 
+                  apiDoc:
                     type: string
                     format: uri
-                    enum: [ "http://www.disit.org/6991" ]
-                    example: "http://www.disit.org/6991"
+                    enum:
+                      - http://www.disit.org/6991
+                    example: http://www.disit.org/6991
               example:
-                externalValue: 'http://servicemap.disit.org/WebAppGrafo/api/v1/events/?range=day&format=json&selection=invalid'
-        404:
+                externalValue: http://servicemap.disit.org/WebAppGrafo/api/v1/events/?range=day&format=json&selection=invalid
+        '404':
           description: Invalid user id.
-                
-        500:
+        '500':
           description: Invalid _maxResults_ and other unexpected errors. [[Example]](http://servicemap.disit.org/WebAppGrafo/api/v1/events/?range=day&format=json&maxResults=invalid)
           content:
             application/json:
@@ -220,40 +546,42 @@ paths:
                 properties:
                   failure:
                     type: string
-                    enum: [EXCEPTION]
+                    enum:
+                      - EXCEPTION
                     example: EXCEPTION
                   httpcode:
                     type: integer
                     format: int32
-                    enum: [500]
+                    enum:
+                      - 500
                     example: 500
                   exception:
                     type: string
-                    example: 'javax.servlet.ServletException'
-                  message: 
+                    example: javax.servlet.ServletException
+                  message:
                     type: string
                     example: |
                       org.openrdf.query.QueryEvaluationException: : SPARQL execute failed: [...] Exception:virtuoso.jdbc4.VirtuosoException: SQ074: Line 28: SP030: SPARQL compiler, line 28: syntax error at 'invalid'
               example:
-                externalExample: 'http://servicemap.disit.org/WebAppGrafo/api/v1/events/?range=day&format=json&maxResults=invalid'
+                externalExample: http://servicemap.disit.org/WebAppGrafo/api/v1/events/?range=day&format=json&maxResults=invalid
   /location/:
     get:
-      tags: [Locations]
+      tags:
+        - Locations
       summary: Address and geometry search by GPS
       description: |
         * **Address and geometry search by GPS** 
         It allows to retrieve the complete address (municipality, street and civic number) given the GPS position. It may also provide a list of services or public transport lines intersecting with the provided GPS position.
-        
+
         * **Address/POI search by text**
         It allows to retrieve a list of street addresses and service names based on a text search. The search may be filtered excluding POIs and to be within a maximum distance from a GPS position.
       parameters:
         - in: query
           name: position
-          description: | 
+          description: |
             The position of interest, identified through a pair of WGS84 coordinates, _latitude_ and _longitude_, separated by a semicolon. Required.
-            
+
             _Usages:_ Address and geometry search by GPS (_Required_), Address/POI search by text (_Optional_)
-            
           allowReserved: true
           schema:
             type: string
@@ -262,35 +590,34 @@ paths:
           name: search
           description: |
             A text with the words to be found in the names of the streets, civic number, municipality names and service names. Required.
-            
+
             _Usages:_ Address/POI search by text
-            
+
             _Example:_ via calzaioli
-          
           schema:
             type: string
         - in: query
           name: searchMode
           description: |
             Optional can be AND or ANDOR (default ANDOR), indicates if all or any word of the query need to match.
-            
+
             _Usages:_ Address/POI search by text
-            
+
             _Example:_ AND
-            
           schema:
             type: string
-            enum: [AND, ANDOR]
+            enum:
+              - AND
+              - ANDOR
             default: ANDOR
         - in: query
           name: maxDists
           description: |
             Optional maximum distance in km from position for searching the text (if omitted 5 km is assumed).
-            
+
             _Usages:_ Address/POI search by text
-            
+
             _Example:_ 10
-            
           schema:
             type: number
             format: float
@@ -298,26 +625,23 @@ paths:
         - in: query
           name: excludePOI
           description: |
-          
+
             Optional true or false (assumed false if missing), if true the search is performed only on street names, civic numbers and municipalities.
-            
+
             _Usages:_ Address/POI search by text
-            
+
             _Example:_ true
-            
           schema:
             type: boolean
             default: false
- 
         - in: query
           name: maxResults
           description: |
             Optional maximum number of results provided (default 10).
-            
+
             _Usages:_ Address/POI search by text
-            
+
             _Example:_ 20
-          
           schema:
             type: integer
             format: int32
@@ -326,50 +650,43 @@ paths:
           name: intersectGeom
           description: |
             True or false (assumed false if missing), if true it reports all the services and public transportation lines that have a geometry intersecting with the provided GPS position.
-          
+
             _Usages:_ Address/POI search by GPS
-            
+
             _Example:_ true
-            
           schema:
             type: boolean
             default: false
-
         - in: query
           name: uid
           description: |
             Optional user identifier.
-            
+
             _Usages:_ Address and geometry search by GPS, Address/POI search by text.
-            
+
             _Example:_ e7c13b5ce309dcddce9f72c810c3f93c61ac1c47d66126127f7a78bd5c2cb8a2
-            
           schema:
             type: string
-            
         - $ref: '#/components/parameters/requestFrom'
-          
       responses:
-        200:
+        '200':
           description: |
-          
+
             * ADDRESS AND GEOMETRY SEARCH BY GPS:
-            
+
               A JSON object with properties: (1) address: the street name; (2) number: the civic number; (3) addressUri: the URI identifying the civic number in the road graph; (4) municipality: the estimated municipality (it may not work properly on the municipality borders); (5) municipalityUri: the URI identifying the municipality in the road graph; (6) intersect: array of objects with properties: (6.1) name: name of the intersecting service or public transport line; (6.2) uri: URI of the intersecting service or public transport line; (6.3) class: URI representing the class; (6.4) type: type of geometry intersecting the GPS position, can be lineString or Polygon; (6.5) routeType: type of route can be Bus, LightRail, Ferry, Train; (6.6) agency: name of the agency providing the service; (6.7) direction: direction of the line; (6.8) distance: distance of the GPS position with the intersecting geometry. Note: address, number and addressUri may be not present if the GPS position is outside a populated place. Examples: [[Address only]](http://servicemap.disit.org/WebAppGrafo/api/v1/location/?position=43.7741;11.2505), [[Intersect]](http://servicemap.disit.org/WebAppGrafo/api/v1/location/?position=43.7741;11.2505&intersectGeom=true).
               
             * ADDRESS/POI SEARCH BY TEXT: 
               
               A GeoJSON FeatureCollection object with the matching objects. Note: Next version will consider also TPL stop names and municipalities. Examples: [[With POIs]](http://servicemap.disit.org/WebAppGrafo/api/v1/location/?search=via%20calzaioli), [[Without POIs]](http://servicemap.disit.org/WebAppGrafo/api/v1/location/?search=via%20calzaioli&excludePOI=true).
-
           content:
             application/json:
               schema:
                 type: object
                 oneOf:
                   - $ref: '#/components/schemas/AddressSearchByGPS'
-                  - $ref: '#/components/schemas/FeatureCollection' #with ExtendedFeatureProperties
-                  
-        400:
+                  - $ref: '#/components/schemas/FeatureCollection'
+        '400':
           description: When nor the _position_ neither the _search_ parameter can be found in the input query. [[Example]](http://servicemap.disit.org/WebAppGrafo/api/v1/location)
           content:
             application/json:
@@ -378,30 +695,32 @@ paths:
                 properties:
                   failure:
                     type: string
-                    enum: [ERROR]
+                    enum:
+                      - ERROR
                     example: ERROR
                   httpcode:
                     type: integer
                     format: int32
-                    enum: [400]
+                    enum:
+                      - 400
                     example: 400
                   message:
                     type: string
-                    enum: [missing 'position' or 'search' parameters]
+                    enum:
+                      - missing 'position' or 'search' parameters
                     example: |
                       missing 'position' or 'search' parameters
-                  apiDoc: 
+                  apiDoc:
                     type: string
                     format: uri
-                    enum: [ "http://www.disit.org/6991" ]
-                    example: "http://www.disit.org/6991"
+                    enum:
+                      - http://www.disit.org/6991
+                    example: http://www.disit.org/6991
               example:
-                externalValue: 'http://servicemap.disit.org/WebAppGrafo/api/v1/location'
-        
-        404:
+                externalValue: http://servicemap.disit.org/WebAppGrafo/api/v1/location
+        '404':
           description: Invalid user id.
-          
-        500:
+        '500':
           description: Invalid _maxDists_, _maxResults_ and other unexpected errors. [[Example]](http://servicemap.disit.org/WebAppGrafo/api/v1/location/?search=via%20calzaioli&maxDists=invalid)
           content:
             application/json:
@@ -410,47 +729,50 @@ paths:
                 properties:
                   failure:
                     type: string
-                    enum: [EXCEPTION]
+                    enum:
+                      - EXCEPTION
                     example: EXCEPTION
                   httpcode:
                     type: integer
                     format: int32
-                    enum: [500]
+                    enum:
+                      - 500
                     example: 500
                   exception:
                     type: string
                     example: java.lang.NumberFormatException
-                  message: 
+                  message:
                     type: string
                     example: |
                       For input string: "invalid"
               example:
-                externalExample: 'http://servicemap.disit.org/WebAppGrafo/api/v1/location/?search=via%20calzaioli&maxDists=invalid'
+                externalExample: http://servicemap.disit.org/WebAppGrafo/api/v1/location/?search=via%20calzaioli&maxDists=invalid
   /tpl/agencies/:
     get:
-      tags: [Public Transport]
-      summary: Agency list    
+      tags:
+        - Public Transport
+      summary: Agency list
       description: _Note:_ The information regarding timetable is acquired in GTFS format. Due to different names used in the previous version of the API that was only for buses, the names used in the API are not aligned with GTFS nomenclature in particular bus lines are mapped to GTFS routes and bus routes are mapped to GTFS trips. In the next version of the API names used may change to be aligned with GTFS.
       parameters:
         - in: query
           name: selection
           description: |
             Optional _lat;lng_ with a GPS position, or _lat1;lng1;lat2;lng2_ for a rectangular area or wkt:_string_ or geo:_geoid_ for a geographic area described as Well Known Text (see other request types for more details).
-            
+
             _Example:_ 43.7756;11.2490
           schema:
-            type: string      
+            type: string
         - in: query
           name: uid
           description: |
             Optional user identifier.
-          
+
             _Example:_ e7c13b5ce309dcddce9f72c810c3f93c61ac1c47d66126127f7a78bd5c2cb8a2
-          schema: 
+          schema:
             type: string
         - $ref: '#/components/parameters/requestFrom'
       responses:
-        200:
+        '200':
           description: The API provides an array of JSON objects of the agencies available, for each agency is provided the agency name and the agency URI used to identify the agency in other APIs. [[Example]](http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/agencies/)
           content:
             application/json:
@@ -462,7 +784,7 @@ paths:
                     items:
                       type: object
                       properties:
-                        name: 
+                        name:
                           type: string
                           example: Autolinee Chianti Valdarno
                         agency:
@@ -470,13 +792,13 @@ paths:
                           format: uri
                           example: http://www.disit.org/km4city/resource/Bus_acvbus_Agency_173
               example:
-                externalExample: 'http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/agencies/'
-        404:
+                externalExample: http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/agencies/
+        '404':
           description: Invalid user id.
-          
   /tpl/bus-lines/:
     get:
-      tags: [Public Transport]
+      tags:
+        - Public Transport
       summary: (Bus) Lines list
       description: The API provide a list of the public transport lines available for a given agency. The API can be used on any kind of public transport (Tram, Train, etc.) not only Bus.
       parameters:
@@ -484,25 +806,24 @@ paths:
           name: agency
           description: |
             URI of the agency whose lines are to be retrieved.
-            
+
             _Example:_ http://www.disit.org/km4city/resource/Bus_ataflinea_Agency_172
-            
           required: true
           schema:
             type: string
             format: uri
-          example: 'http://www.disit.org/km4city/resource/Bus_ataflinea_Agency_172'
+          example: http://www.disit.org/km4city/resource/Bus_ataflinea_Agency_172
         - in: query
           name: uid
           description: |
             Optional user identifier.
-            
+
             _Example:_ e7c13b5ce309dcddce9f72c810c3f93c61ac1c47d66126127f7a78bd5c2cb8a2
-          schema: 
+          schema:
             type: string
         - $ref: '#/components/parameters/requestFrom'
       responses:
-        200:
+        '200':
           description: |
             The API provides an array of JSON objects of the lines available, for each line is provided the line long and short name, the uri identifying the line. Example: [[ATAF lines]](http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/bus-lines/?agency=http://www.disit.org/km4city/resource/Bus_ataflinea_Agency_172)
           content:
@@ -519,7 +840,7 @@ paths:
                           description: URI of the _agency_
                           type: string
                           format: uri
-                          example: 'http://www.disit.org/km4city/resource/Bus_ataflinea_Agency_172'
+                          example: http://www.disit.org/km4city/resource/Bus_ataflinea_Agency_172
                         shortName:
                           description: Short name of the line (tipically, a letter or number)
                           type: string
@@ -527,15 +848,15 @@ paths:
                         longName:
                           description: Long name of the line (tipically, the terminus names)
                           type: string
-                          example: 'Piazza Stazione-Piazza Pitti'
+                          example: Piazza Stazione-Piazza Pitti
                         uri:
-                          description: "URI of the line"
+                          description: URI of the line
                           type: string
                           format: uri
                           example: http://www.disit.org/km4city/resource/Bus_ataflinea_Route_100554186
               example:
-                externalExample: 'http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/bus-lines/?agency=http://www.disit.org/km4city/resource/Bus_ataflinea_Agency_172'
-        400:
+                externalExample: http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/bus-lines/?agency=http://www.disit.org/km4city/resource/Bus_ataflinea_Agency_172
+        '400':
           description: When the _agency_ parameter cannot be found in the input query. [[Example]](http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/bus-lines)
           content:
             application/json:
@@ -544,31 +865,34 @@ paths:
                 properties:
                   failure:
                     type: string
-                    enum: [ERROR]
+                    enum:
+                      - ERROR
                     example: ERROR
                   httpcode:
                     type: integer
                     format: int32
-                    enum: [400]
+                    enum:
+                      - 400
                     example: 400
                   message:
                     type: string
-                    enum: [missing agency paramenter]
+                    enum:
+                      - missing agency paramenter
                     example: missing agency paramenter
-                  apiDoc: 
+                  apiDoc:
                     type: string
                     format: uri
-                    enum: [ "http://www.disit.org/6991" ]
-                    example: "http://www.disit.org/6991"
+                    enum:
+                      - http://www.disit.org/6991
+                    example: http://www.disit.org/6991
               example:
-                externalValue: 'http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/bus-lines'
-                
-        404:
+                externalValue: http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/bus-lines
+        '404':
           description: Invalid user id.
-
   /tpl/bus-routes/:
     get:
-      tags: [Public Transport]
+      tags:
+        - Public Transport
       summary: (Bus) Routes list
       description: The API provides a list of the public transport routes available for a given agency, line or passing by a specific stop.
       parameters:
@@ -578,7 +902,7 @@ paths:
           schema:
             type: string
             format: uri
-          example: 'http://www.disit.org/km4city/resource/Bus_ataflinea_Agency_172'
+          example: http://www.disit.org/km4city/resource/Bus_ataflinea_Agency_172
         - in: query
           name: line
           description: URI or _shortName_ of a line (if URI is provided the agency is not needed).
@@ -589,9 +913,9 @@ paths:
           name: busStopName
           description: |
             URI or _name_ of a stop (if URI is provided the agency is not needed).
-            
+
             _Example:_ Stazione Pensilina
-          schema: 
+          schema:
             type: string
         - in: query
           name: geometry
@@ -604,13 +928,13 @@ paths:
           name: uid
           description: |
             Optional user identifier.
-            
+
             _Example:_ e7c13b5ce309dcddce9f72c810c3f93c61ac1c47d66126127f7a78bd5c2cb8a2
-          schema: 
+          schema:
             type: string
         - $ref: '#/components/parameters/requestFrom'
       responses:
-        200:
+        '200':
           description: |
             The API provides an array of JSON objects of the routes available, for each route is provided:
               * line: line short name;
@@ -619,7 +943,7 @@ paths:
               * wktGeometry: the WKT geometry of the route;
               * firstBusStop: name of the first bus stop;
               * lastBusStop: name of the last bus stop.
-            
+
             The API can be used on any kind of public transport (Tram, Train, etc.) not only Bus.
 
             Examples: [[By line]](http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/bus-routes/?agency=http://www.disit.org/km4city/resource/Bus_ataflinea_Agency_172&line=11&geometry=true), [[By stop]](http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/bus-routes/?agency=http://www.disit.org/km4city/resource/Bus_ataflinea_Agency_172&busStopName=Stazione%20Pensilina)
@@ -646,11 +970,11 @@ paths:
                           description: The route URI.
                           type: string
                           format: uri
-                          example: 'http://www.disit.org/km4city/resource/Bus_ataflinea_Trip_2199_3475614'
+                          example: http://www.disit.org/km4city/resource/Bus_ataflinea_Trip_2199_3475614
                         routeName:
                           description: The possible route name.
                           type: string
-                          example: 'Piazza Stazione-Piazza Pitti'
+                          example: Piazza Stazione-Piazza Pitti
                         wktGeometry:
                           description: The WKT geometry of the route.
                           type: string
@@ -658,14 +982,13 @@ paths:
                         firstBusStop:
                           description: Name of the first bus stop.
                           type: string
-                          example: Ficino 
+                          example: Ficino
                         lastBusStop:
                           description: Name of the last bus stop.
                           type: string
                           example: Boito
-              example: 'http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/bus-routes/?agency=http://www.disit.org/km4city/resource/Bus_ataflinea_Agency_172&busStopName=Stazione%20Pensilina'  
-
-        400:
+              example: http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/bus-routes/?agency=http://www.disit.org/km4city/resource/Bus_ataflinea_Agency_172&busStopName=Stazione%20Pensilina
+        '400':
           description: |
             When the combination of the values that can be found for the _agency_, _line_, and _busStopName_ input query parameters is such that the semantic of the user request cannot be univoquely resolved.  [[Example]](http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/bus-routes/)
           content:
@@ -675,32 +998,35 @@ paths:
                 properties:
                   failure:
                     type: string
-                    enum: [ERROR]
+                    enum:
+                      - ERROR
                     example: ERROR
                   httpcode:
                     type: integer
                     format: int32
-                    enum: [400]
+                    enum:
+                      - 400
                     example: 400
                   message:
                     type: string
-                    enum: [missing 'line' or 'busStopName' or 'agency' parameters]
+                    enum:
+                      - missing 'line' or 'busStopName' or 'agency' parameters
                     example: |
                       missing 'line' or 'busStopName' or 'agency' parameters
-                  apiDoc: 
+                  apiDoc:
                     type: string
                     format: uri
-                    enum: [ "http://www.disit.org/6991" ]
-                    example: "http://www.disit.org/6991"
+                    enum:
+                      - http://www.disit.org/6991
+                    example: http://www.disit.org/6991
               example:
-                externalValue: 'http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/bus-lines'
-                
-        404:
+                externalValue: http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/bus-lines
+        '404':
           description: Invalid user id.
-
   /tpl/bus-stops/:
     get:
-      tags: [Public Transport]
+      tags:
+        - Public Transport
       summary: (Bus) Stop list
       description: The API provides a list of the public transport stops available for a given route. The API can be used on any kind of public transport (Tram, Train, etc.) not only Bus.
       parameters:
@@ -710,11 +1036,11 @@ paths:
           schema:
             type: string
             format: uri
-          example: 'http://www.disit.org/km4city/resource/Bus_tiemme_Trip_2205_262677'
+          example: http://www.disit.org/km4city/resource/Bus_tiemme_Trip_2205_262677
         - in: query
           name: geometry
           description: If _true_, the WKT geometry of the route is returned. It defaults to _true_.
-          schema: 
+          schema:
             type: boolean
             default: true
           example: true
@@ -722,25 +1048,23 @@ paths:
           name: uid
           description: |
             Optional user identifier.
-            
+
             _Example:_ e7c13b5ce309dcddce9f72c810c3f93c61ac1c47d66126127f7a78bd5c2cb8a2
-            
-          schema: 
+          schema:
             type: string
         - $ref: '#/components/parameters/requestFrom'
       responses:
-        200:
+        '200':
           description: The API provides a JSON Object with line number (aka line short name) and line name (aka line long name) and a GeoJSON FeatureCollection with the stops. The stops are provided in stop order, from the first to the last. [[Example]](http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/bus-stops/?route=http://www.disit.org/km4city/resource/Bus_tiemme_Trip_2205_262677)
           content:
             application/json:
-              schema: 
+              schema:
                 oneOf:
                   - $ref: '#/components/schemas/RouteBusStops'
                   - $ref: '#/components/schemas/LineBusStops'
-                        
               example:
-                externalValue: 'http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/bus-stops/?route=http://www.disit.org/km4city/resource/Bus_tiemme_Trip_2205_262677'
-        400:
+                externalValue: http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/bus-stops/?route=http://www.disit.org/km4city/resource/Bus_tiemme_Trip_2205_262677
+        '400':
           description: When both the _line_ and the _route_ parameters are missing in the request query.
           content:
             application/json:
@@ -749,32 +1073,35 @@ paths:
                 properties:
                   failure:
                     type: string
-                    enum: [ERROR]
+                    enum:
+                      - ERROR
                     example: ERROR
                   httpcode:
                     type: integer
                     format: int32
-                    enum: [400]
+                    enum:
+                      - 400
                     example: 400
                   message:
                     type: string
-                    enum: [missing 'line' or 'route' parameters]
+                    enum:
+                      - missing 'line' or 'route' parameters
                     example: |
                       missing 'line' or 'route' parameters
-                  apiDoc: 
+                  apiDoc:
                     type: string
                     format: uri
-                    enum: [ "http://www.disit.org/6991" ]
-                    example: "http://www.disit.org/6991"
+                    enum:
+                      - http://www.disit.org/6991
+                    example: http://www.disit.org/6991
               example:
-                externalValue: 'http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/bus-stops/'
-                
-        404:
+                externalValue: http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/bus-stops/
+        '404':
           description: Invalid user id.
-          
   /tpl/:
     get:
-      tags: [Public Transport]
+      tags:
+        - Public Transport
       summary: Search (Bus) Routes in a geographic area
       description: The API provides a list of the public transport routes that have a stop in a specified area. The API can be used on any kind of public transport (Tram, Train, etc.) not only Bus.
       parameters:
@@ -786,7 +1113,7 @@ paths:
             * WGS84 coordinates that identify an exact GPS position: _lat_;_lng_
             * rectangular area: _lat1_;_lng1_;_lat2_;_lng2_
             * geographic area described as Well Known Text: wkt:_string_ or geo:_geoid_
-            
+
             See the _selection_ parameter of _Services_ API for further details.
           schema:
             type: string
@@ -811,15 +1138,15 @@ paths:
           name: agency
           description: |
             Optional URI of an agency to restrict the search to a specified agency.
-            
+
             _Example:_ http://www.disit.org/km4city/resource/Bus_ataflinea_Agency_172
-          schema: 
+          schema:
             type: string
             format: uri
         - in: query
           name: geometry
           description: If _true_, the WKT geometry of each route is returned (considered _false_ if not provided).
-          schema: 
+          schema:
             type: boolean
             default: false
           example: true
@@ -827,13 +1154,13 @@ paths:
           name: uid
           description: |
             Optional user identifier.
-            
+
             _Example:_ e7c13b5ce309dcddce9f72c810c3f93c61ac1c47d66126127f7a78bd5c2cb8a2
-          schema: 
+          schema:
             type: string
         - $ref: '#/components/parameters/requestFrom'
       responses:
-        200:
+        '200':
           description: |
             The API provides a JSON Object with all the routes that have stops on the specified area. For each route the following properties are provided [[Example]](http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/?selection=43.7755;11.2495&maxDists=0.1&maxResults=5&geometry=true):
               * lineNumber: the line short name;
@@ -846,14 +1173,14 @@ paths:
               * polyline: with the WKT geometry of the route.
           content:
             application/json:
-              schema: 
+              schema:
                 type: object
                 properties:
                   PublicTransportLine:
-                    $ref: '#/components/schemas/FeatureCollection' #with RouteProperties
+                    $ref: '#/components/schemas/FeatureCollection'
               example:
-                externalValue: 'http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/?selection=43.7755;11.2495&maxDists=0.1&maxResults=5&geometry=true'
-        400:
+                externalValue: http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/?selection=43.7755;11.2495&maxDists=0.1&maxResults=5&geometry=true
+        '400':
           description: Missing or invalid _selection_ parameter in input request. [[Example]](http://servicemap.disit.org/WebAppGrafo/api/v1/tpl)
           content:
             application/json:
@@ -862,32 +1189,33 @@ paths:
                 properties:
                   failure:
                     type: string
-                    enum: [ERROR]
+                    enum:
+                      - ERROR
                     example: ERROR
                   httpcode:
                     type: integer
                     format: int32
-                    enum: [400]
+                    enum:
+                      - 400
                     example: 400
                   message:
                     type: string
-                    enum: 
+                    enum:
                       - missing 'selection' parameter
                       - invalid 'selection' parameter (accepted 'lat;long', 'lat1;long1;lat2;long2', 'wkt:...' or 'geo:...' )
                     example: |
                       missing 'selection' parameter
-                  apiDoc: 
+                  apiDoc:
                     type: string
                     format: uri
-                    enum: [ "http://www.disit.org/6991" ]
-                    example: "http://www.disit.org/6991"
+                    enum:
+                      - http://www.disit.org/6991
+                    example: http://www.disit.org/6991
               example:
-                externalValue: 'http://servicemap.disit.org/WebAppGrafo/api/v1/tpl'
-                
-        404:
+                externalValue: http://servicemap.disit.org/WebAppGrafo/api/v1/tpl
+        '404':
           description: Invalid user id.
-          
-        500:
+        '500':
           description: Invalid _maxDists_, _maxResults_ and other unexpected errors. [[Example]](http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/?selection=43.7755;11.2495&maxDists=invalid&maxResults=5&geometry=true)
           content:
             application/json:
@@ -896,26 +1224,29 @@ paths:
                 properties:
                   failure:
                     type: string
-                    enum: [EXCEPTION]
+                    enum:
+                      - EXCEPTION
                     example: EXCEPTION
                   httpcode:
                     type: integer
                     format: int32
-                    enum: [500]
+                    enum:
+                      - 500
                     example: 500
                   exception:
                     type: string
                     example: javax.servlet.ServletException
-                  message: 
+                  message:
                     type: string
                     example: |
                       org.openrdf.query.QueryEvaluationException: : SPARQL execute failed: [...] 
                       Exception:virtuoso.jdbc4.VirtuosoException: SQ074: Line 26: SP030: SPARQL compiler, line 8: syntax error at 'invalid' before ')'
               example:
-                externalValue: 'http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/?selection=43.7755;11.2495&maxDists=invalid&maxResults=5&geometry=true'
+                externalValue: http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/?selection=43.7755;11.2495&maxDists=invalid&maxResults=5&geometry=true
   /tpl/bus-position/:
     get:
-      tags: [Public Transport]
+      tags:
+        - Public Transport
       summary: Estimated Bus position
       description: The API provides the estimated current position of buses. Currently it provides the position of ATAF&Linea buses based on the timetable.
       parameters:
@@ -923,40 +1254,42 @@ paths:
           name: agency
           description: |
             The agency of interest (optional). The agency can be identified through its URI, or through its name. If not specified, the default agency is used that is configured for the Knowledge Base (e.g. ATAF for Tuscany).
-            
+
             _Example:_ Ataf&Linea
-          schema: 
+          schema:
             type: string
           example: Ataf&Linea
         - in: query
           name: line
           description: |
             The line of interest (optional). The line can be identified through its URI, or through its name. If not specified, positions of all buses are returned.
-            
+
             _Example:_ http://www.disit.org/km4city/resource/Bus_ataflinea_Route_2348415186
-          schema: 
+          schema:
             type: string
           example: http://www.disit.org/km4city/resource/Bus_ataflinea_Route_2348415186
         - in: query
           name: uid
           description: |
             Optional user identifier.
-            
+
             _Example:_ e7c13b5ce309dcddce9f72c810c3f93c61ac1c47d66126127f7a78bd5c2cb8a2
-          schema: 
+          schema:
             type: string
-          example: 
+          example: null
         - in: query
           name: format
           description: HTML, or JSON.
           schema:
             type: string
-            enum: [html, json]
+            enum:
+              - html
+              - json
             default: json
           example: json
-        - $ref: '#/components/parameters/requestFrom'          
+        - $ref: '#/components/parameters/requestFrom'
       responses:
-        200:
+        '200':
           description: |
             When format is HTML the API provides web visualization of the current bus positions [[Example]](http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/bus-position/?format=html), while if format is JSON it provides a GeoJSON _FeatureCollection_ with the data of each bus that is currently active [[Example]](http://servicemap.disit.org/WebAppGrafo/api/v1/tpl/bus-position/?format=json). For each bus the following properties are provided:
               * vehicleNum: the number of vehicle;
@@ -965,18 +1298,17 @@ paths:
               * detectionTime: the delay in minutes from the current time and the time the position was acquired.
           content:
             text/html:
-              schema: 
+              schema:
                 $ref: '#/components/schemas/BusPositionHtmlDocument'
             application/json:
               schema:
                 $ref: '#/components/schemas/FeatureCollection'
-              
-        404:
+        '404':
           description: Invalid user id.
-          
   /feedback/:
     get:
-      tags: [Feedbacks]
+      tags:
+        - Feedbacks
       summary: Rating and comment
       description: The API accepts a star rating (1-5) and/or a comment on a specific service. Comments are not automatically associated with the service, a moderator has to validate the comment provided.
       parameters:
@@ -984,21 +1316,18 @@ paths:
           name: serviceUri
           description: |
             URI identifying a service.
-            
+
             _Example:_ http://www.disit.org/km4city/resource/aserviceidentifier
-            
           required: true
-          schema: 
+          schema:
             type: string
             format: uri
-          
         - in: query
           name: stars
           description: |
             Value 1 to 5 (if omitted no ratings is provided).
-            
+
             _Example:_ 4
-            
           schema:
             type: integer
             format: int32
@@ -1008,43 +1337,38 @@ paths:
           name: comment
           description: |
             User-provided comment.
-            
-            _Example:_ Sarebbe comodo inserire una navetta serale, e durante i festivi iniziare alle 7:00 del mattino piuttosto che alle 9:15. Parlo da studente che abita in garibaldi.
-            
-          required: true
-          schema: 
-            type: string
 
+            _Example:_ Sarebbe comodo inserire una navetta serale, e durante i festivi iniziare alle 7:00 del mattino piuttosto che alle 9:15. Parlo da studente che abita in garibaldi.
+          required: true
+          schema:
+            type: string
         - in: query
           name: lang
           description: |
             The language used in the comment.
-            
-            _Example:_ it
-            
-          schema: 
-            type: string
 
+            _Example:_ it
+          schema:
+            type: string
         - in: query
           name: uid
           description: |
             The user identifier associated with the user providing the data.
-            
+
             _Example:_ e7c13b5ce309dcddce9f72c810c3f93c61ac1c47d66126127f7a78bd5c2cb8a2
-            
           required: true
-          schema: 
-            type: string  
-          example: 
+          schema:
+            type: string
+          example: null
       responses:
-        200:
+        '200':
           description: The API returns the HTTP code 200 when everything is ok, and the comment and possible rating have been delivered to the moderator.
-        404:
+        '404':
           description: The API fails using HTTP error code 404 if the serviceURI is not valid, or the comment is not provided or user id is not provided.
-          
   /feedback/last/:
     get:
-      tags: [Feedbacks]
+      tags:
+        - Feedbacks
       summary: Last contributions
       description: The API reports a list of the last photos, comments and starred services from the users.
       parameters:
@@ -1052,25 +1376,24 @@ paths:
           name: uid
           description: |
             A user identifier.
-            
+
             _Example:_ e7c13b5ce309dcddce9f72c810c3f93c61ac1c47d66126127f7a78bd5c2cb8a2
-            
-          schema: 
-            type: string  
+          schema:
+            type: string
         - in: query
           name: lang
           description: |
             ISO 2 chars language code (e.g. _it_, _en_, _fr_, _de_, _es_) to be used for returned descriptions if available in multiple languages. Currently for languages other than _it_ and _en_ it returns _en_ descriptions. (if parameter is missing _en_ is assumed).
-            
+
             _Example:_ it
           schema:
             type: string
             minLength: 2
             maxLength: 2
             default: en
-        - $ref: '#/components/parameters/requestFrom'            
+        - $ref: '#/components/parameters/requestFrom'
       responses:
-        200:
+        '200':
           description: The API reports a JSON object with informations on the last contributions. [[Example]](http://servicemap.disit.org/WebAppGrafo/api/v1/feedback/last/)
           content:
             application/json:
@@ -1084,13 +1407,13 @@ paths:
                   LastStars:
                     $ref: '#/components/schemas/LastStars'
               example:
-                externalValue: 'http://servicemap.disit.org/WebAppGrafo/api/v1/feedback/last/'
-        404:
+                externalValue: http://servicemap.disit.org/WebAppGrafo/api/v1/feedback/last/
+        '404':
           description: Invalid user id.
-          
   /shortestpath:
     get:
-      tags: [Routing]
+      tags:
+        - Routing
       summary: Shortest Path Finder
       description: This API allows to get a path from a source point to a destination point. The points can be specified as latitude;longitude coordinates or using the serviceUri of a service. The path is provided as WKT geometry and as a sequence of arcs between nodes (the service uses the OpenStreetMap road graph). The type of route can be specified as using public transport, feet, or car. The start datetime is used to select the options for public_transport and to evaluate the time needed to make the path.
       parameters:
@@ -1098,35 +1421,37 @@ paths:
           name: source
           description: |
             _lat_;_long_ or service URI of the starting point.
-            
+
             _Example:_ 43.7767;11.2477
-            
-          schema: 
-            type: string  
+          schema:
+            type: string
         - in: query
           name: destination
           description: |
             _lat_;_long_ or service URI of the destination.
-            
+
             _Example:_ 43.7687;11.2620
-            
-          schema: 
-            type: string              
+          schema:
+            type: string
         - in: query
           name: routeType
           description: |
             Can be _public_transport_, _foot_shortest_, _foot_quiet_, or _car_. It defaults to _foot_shortest_.
-            
+
             _Example:_ foot_shortest
           schema:
             type: string
-            enum: [public_transport, foot_shortest, foot_quiet, car]
+            enum:
+              - public_transport
+              - foot_shortest
+              - foot_quiet
+              - car
             default: foot_shortest
         - in: query
           name: startDatetime
           description: |
             Date and time of start. It defaults to the current date and time.
-            
+
             _Example:_ 2017-01-13T12:34:00
           schema:
             type: string
@@ -1135,24 +1460,25 @@ paths:
           name: format
           description: |
             The output format. It can be _json_, or _html_. It defaults to _json_.
-            
+
             _Example:_ html
           schema:
             type: string
-            enum: [json, html]
-            default: json     
+            enum:
+              - json
+              - html
+            default: json
         - in: query
           name: uid
           description: |
             A user identifier.
-            
+
             _Example:_ e7c13b5ce309dcddce9f72c810c3f93c61ac1c47d66126127f7a78bd5c2cb8a2
-            
-          schema: 
-            type: string        
-        - $ref: '#/components/parameters/requestFrom'            
+          schema:
+            type: string
+        - $ref: '#/components/parameters/requestFrom'
       responses:
-        200:
+        '200':
           description: The API provides a JSON object with the path from the source to the destination. [[HTML Example]](http://servicemap.disit.org/WebAppGrafo/api/v1/shortestpath/?source=43.7767;11.2477&destination=43.7687;11.2620&format=html) [[JSON Example]](http://servicemap.disit.org/WebAppGrafo/api/v1/shortestpath/?source=43.7767;11.2477&destination=43.7687;11.2620)
           content:
             application/json:
@@ -1166,20 +1492,20 @@ paths:
                   journey:
                     type: object
                     properties:
-                      source_node: 
+                      source_node:
                         type: object
                         properties:
                           lon:
                             type: number
                             format: double
                             example: 11.247889800000012
-                          lat: 
+                          lat:
                             type: number
                             format: double
                             example: 43.77658149999974
                           node_id:
                             type: string
-                            example: 2531656509                          
+                            example: 2531656509
                       destination_node:
                         type: object
                         properties:
@@ -1187,13 +1513,13 @@ paths:
                             type: number
                             format: double
                             example: 11.247889800000012
-                          lat: 
+                          lat:
                             type: number
                             format: double
                             example: 43.77658149999974
                           node_id:
                             type: string
-                            example: 2531656509  
+                            example: 2531656509
                       search_route_type:
                         type: string
                         example: shortest_foot_optimization
@@ -1204,7 +1530,7 @@ paths:
                       routes:
                         type: object
                         properties:
-                          wkt: 
+                          wkt:
                             type: string
                             example: |
                               LINESTRING(11.247773300000013 43.776550599999744,11.247889800000012 43.77658149999974,11.248006000000013 43.77661179999975,11.248124300000011 43.77664249999975,11.24830620000001 43.77669059999975,11.24846460000001 43.776735099999755,11.248531900000023 43.7766016,11.24887640000001 43.776686199999986,11.248965100000024 43.77670890000001,11.249017000000006 43.776722200000165,11.249046300000023 43.7767299,11.249252699999948 43.77678319999993,11.24927209999999 43.776788200000055,11.24931299999999 43.77679870000006,11.249333199999947 43.77680389999993,11.24935249999993 43.77680889999993,11.249553099999991 43.77627370000006,11.249689600000035 43.77590960000006,11.249719500000003 43.775805800000114,11.249735999999974 43.77576359999974,11.249945500000004 43.7752983,11.250034100000006 43.77508940000016,11.250061300000004 43.775025200000115,11.250103200000009 43.77491180000031,11.250258000000004 43.77463709999994,11.250346900000004 43.774554000000194,11.250363200000006 43.774538400000175,11.250374899999992 43.77452800000015,11.250392400000004 43.77451490000019,11.25121969999999 43.77397750000005,11.25126949999997 43.773945199999936,11.251320300000014 43.773912999999986,11.251996599999968 43.773543700000275,11.25222250000001 43.77342030000003,11.252272200000014 43.773420399999985,11.252559700000008 43.77342129999998,11.25274760000001 43.77342180000004,11.252761000000007 43.77320539999998,11.25276369999999 43.77316250000003,11.252764299999955 43.77314639999993,11.252777000000039 43.77295750000007,11.25279079999999 43.77274759999997,11.252790999999975 43.77269850000001,11.252792399999969 43.77243069999996,11.252793299999999 43.77224639999996,11.252793599999944 43.77219620000016,11.252792799999998 43.77216019999996,11.252777600000048 43.771499600000105,11.25337260000002 43.77148880000001,11.25352890000002 43.7714817,11.253574100000016 43.77148310000001,11.253570400000013 43.77134440000003,11.253564500000014 43.77111860000015,11.253627799999965 43.77111760000016,11.253826299999988 43.77111699999993,11.254141399999988 43.77111619999993,11.254350299999965 43.77111560000017,11.254427200000006 43.77111499999997,11.254422600000016 43.77088650000006,11.254589900000013 43.77088160000003,11.254685200000011 43.77087860000021,11.254769500000014 43.770874000000234,11.255304300000049 43.77086360000011,11.25529370000001 43.7705961,11.25568590000005 43.770564600000114,11.25586909999997 43.770553600000255,11.25592940000005 43.770549400000114,11.256109300000048 43.77053510000012,11.256097300000063 43.770208899999915,11.256413499999972 43.770213000000226,11.256672699999996 43.77020680000021,11.256846700000063 43.77019789999992,11.25703829999997 43.770176699999986,11.257440699999997 43.77007620000021,11.25769100000001 43.769971500000054,11.257869600000001 43.76991279999989,11.258619200000048 43.76973100000011,11.258822999999982 43.76970029999993,11.259229999999981 43.76966129999993,11.259446799999981 43.769634099999934,11.2595269 43.769619500000054,11.259581499999982 43.769600799999935,11.260587100000025 43.7691122000001,11.260630099999982 43.769091299999936,11.260522999999992 43.768963900000095,11.260680600000027 43.7688982000001,11.260840900000026 43.768831000000105,11.260897500000032 43.76880750000004,11.260909900000033 43.76882090000002,11.261175100000028 43.76870300000011,11.261462600000032 43.76859510000003,11.261585700000033 43.768536800000035,11.261576000000034 43.76852060000002,11.261821299999994 43.7684255000001,11.261813800000027 43.76841470000011,11.261960700000028 43.76834290000011,11.262052300000033 43.768448900000024,11.262093100000003 43.768496100000036,11.262143399999978 43.768559999999894)
@@ -1213,7 +1539,7 @@ paths:
                             items:
                               type: object
                               properties:
-                                distance: 
+                                distance:
                                   type: number
                                   format: double
                                   example: 0.009987643869990633
@@ -1232,7 +1558,7 @@ paths:
                                       type: number
                                       format: double
                                       example: 11.247889800000012
-                                    lat: 
+                                    lat:
                                       type: number
                                       format: double
                                       example: 43.77658149999974
@@ -1246,13 +1572,13 @@ paths:
                                       type: number
                                       format: double
                                       example: 11.247889800000012
-                                    lat: 
+                                    lat:
                                       type: number
                                       format: double
                                       example: 43.77658149999974
                                     node_id:
                                       type: string
-                                      example: 2531656509  
+                                      example: 2531656509
                                 transport_provider:
                                   type: string
                                   example: private
@@ -1281,7 +1607,7 @@ paths:
                     type: number
                     format: double
                     example: 0.011026000000000001
-                  response: 
+                  response:
                     type: object
                     properties:
                       error_message:
@@ -1293,30 +1619,31 @@ paths:
                       error_code:
                         type: string
                         example: 0
-                  elapsed_ms: 
+                  elapsed_ms:
                     type: integer
                     format: int32
                     example: 66
-                  message_version: 
+                  message_version:
                     type: string
-                    example: "1.0"
+                    example: '1.0'
               example:
-                externalValue: 'http://servicemap.disit.org/WebAppGrafo/api/v1/shortestpath/?source=43.7767;11.2477&destination=43.7687;11.2620'
+                externalValue: http://servicemap.disit.org/WebAppGrafo/api/v1/shortestpath/?source=43.7767;11.2477&destination=43.7687;11.2620
             text/html:
-              schema: 
+              schema:
                 type: string
                 format: html
               example:
-                externalValue: 'http://servicemap.disit.org/WebAppGrafo/api/v1/shortestpath/?source=43.7767;11.2477&destination=43.7687;11.2620&format=html'
+                externalValue: http://servicemap.disit.org/WebAppGrafo/api/v1/shortestpath/?source=43.7767;11.2477&destination=43.7687;11.2620&format=html
   /{organization}/wfs:
     post:
-      tags: [WFS]
+      tags:
+        - WFS
       summary: WFS server
       description: It allows to query the service map as if it was a WFS server.
       parameters:
         - in: path
           name: organization
-          schema: 
+          schema:
             type: string
           required: true
           description: The organization within whose boundaries resources are looked up.
@@ -1331,13 +1658,14 @@ paths:
         '200':
           description: A WFS-compliant XML response
     get:
-      tags: [WFS]
+      tags:
+        - WFS
       summary: WFS server
       description: It allows to query the service map as if it was a WFS server.
       parameters:
         - in: path
           name: organization
-          schema: 
+          schema:
             type: string
           required: true
           description: The organization within whose boundaries resources are looked up.
@@ -1348,75 +1676,75 @@ paths:
         - in: query
           name: service
           schema:
-            type: string     
+            type: string
         - in: query
           name: acceptversions
           schema:
-            type: string          
+            type: string
         - in: query
           name: typename
           schema:
-            type: string  
+            type: string
         - in: query
           name: outputformat
           schema:
-            type: string  
+            type: string
         - in: query
           name: storedquery_id
           schema:
-            type: string  
+            type: string
         - in: query
           name: startindex
           schema:
-            type: string  
+            type: string
         - in: query
           name: count
           schema:
-            type: string  
+            type: string
         - in: query
           name: resulttype
           schema:
-            type: string  
+            type: string
         - in: query
           name: resolve
           schema:
-            type: string  
+            type: string
         - in: query
           name: resolvedepth
           schema:
-            type: string  
+            type: string
         - in: query
           name: resolvetimeout
           schema:
-            type: string  
+            type: string
         - in: query
           name: id
           schema:
-            type: string  
+            type: string
         - in: query
           name: version
           schema:
-            type: string  
+            type: string
         - in: query
           name: typenames
           schema:
-            type: string  
+            type: string
         - in: query
           name: propertyname
           schema:
-            type: string  
+            type: string
         - in: query
           name: filter
           schema:
-            type: string              
+            type: string
       responses:
         '200':
           description: A WFS-compliant XML response
 components:
   schemas:
     ServicesJsonDocument:
-      description: 'For plain text service discovery queries, the response document is a collection of services, each described through a minimal set of properties. For geographical service discovery queries, the response document is made of three separated collections of services (i.e. bus stops, sensing devices, and other services), and each service is described through a minimal set of properties. For service detail queries, the response is a complex document where real-time and predicted data can also be found.'
-      type: object 
+      description: For plain text service discovery queries, the response document is a collection of services, each described through a minimal set of properties. For geographical service discovery queries, the response document is made of three separated collections of services (i.e. bus stops, sensing devices, and other services), and each service is described through a minimal set of properties. For service detail queries, the response is a complex document where real-time and predicted data can also be found.
+      type: object
       oneOf:
         - $ref: '#/components/schemas/TextSearchResultJsonDocument'
         - $ref: '#/components/schemas/GeoSearchResultJsonDocument'
@@ -1447,21 +1775,22 @@ components:
       properties:
         type:
           type: string
-          enum: [FeatureCollection]
+          enum:
+            - FeatureCollection
           example: FeatureCollection
         fullCount:
           type: integer
           format: int32
           description: Total number of the discovered services. Some of them could not to appear in the response due to imposed limitations about the maximum number of results.
           example: 26
-        count: 
+        count:
           type: integer
           format: int32
           description: Alias of _fullCount_.
           example: 26
         features:
           type: array
-          items: 
+          items:
             $ref: '#/components/schemas/Feature'
     Feature:
       type: object
@@ -1472,7 +1801,8 @@ components:
           example: 1
         type:
           type: string
-          enum: [Feature]
+          enum:
+            - Feature
           example: Feature
         geometry:
           $ref: '#/components/schemas/Point'
@@ -1494,9 +1824,10 @@ components:
       required:
         - coordinates
       properties:
-        type: 
+        type:
           type: string
-          enum: [Point]
+          enum:
+            - Point
           example: Point
         coordinates:
           description: longitude, latitude
@@ -1506,49 +1837,54 @@ components:
           items:
             type: number
             format: float
-          example: [11.251058, 43.769848]
+          example:
+            - 11.251058
+            - 43.769848
     MinimalFeatureProperties:
       type: object
       properties:
-        name: 
+        name:
           description: Name of the service.
           type: string
-          example: '1927 - Il ritorno in Italia - Salvatore Ferragamo e la cultura visiva del Novecento'
-        tipo: 
+          example: 1927 - Il ritorno in Italia - Salvatore Ferragamo e la cultura visiva del Novecento
+        tipo:
           type: string
           example: Societa_sportive
-        typeLabel: 
+        typeLabel:
           description: Label associated with the type of service in the language provided with the _lang_ parameter.
           type: string
           example: Societa' sportive
-        serviceType: 
-          description: '_MacroClass_ServiceType_'
+        serviceType:
+          description: _MacroClass_ServiceType_
           type: string
           example: Entertainment_Sports_clubs
-        serviceUri: 
+        serviceUri:
           description: An URI identifying the service globally.
           type: string
           format: uri
-          example: 'http://www.disit.org/km4city/resource/Event_21826_282b6cd70f036bb08af1b9854634ad99'
-        distance: 
+          example: http://www.disit.org/km4city/resource/Event_21826_282b6cd70f036bb08af1b9854634ad99
+        distance:
           description: Distance from the position specified in the input query (in Km).
           type: number
           format: float
-          example: 1.2392468323025842E-4
-        photoThumbs: 
+          example: 0.00012392468323025842
+        photoThumbs:
           description: Array of URLs to thumbnails of photoes of the service, provided using the _Photo_ API.
           type: array
           items:
             type: string
             format: uri
-          example: [ "https://servicemap.disit.org/WebAppGrafo/api/v1/photo/thumbs/file-5697308527651966276.jpg", "https://servicemap.disit.org/WebAppGrafo/api/v1/photo/thumbs/file-5967841092303360553.jpg", "https://servicemap.disit.org/WebAppGrafo/api/v1/photo/thumbs/file-9101174593154930510.jpg"]
+          example:
+            - https://servicemap.disit.org/WebAppGrafo/api/v1/photo/thumbs/file-5697308527651966276.jpg
+            - https://servicemap.disit.org/WebAppGrafo/api/v1/photo/thumbs/file-5967841092303360553.jpg
+            - https://servicemap.disit.org/WebAppGrafo/api/v1/photo/thumbs/file-9101174593154930510.jpg
         multimedia:
           description: An URL to a multimedia resource.
           type: string
           format: uri
           example: https://servicemap.disit.org/WebAppGrafo/api/v1/photo/file-6767270095397399490.mpg
         hasGeometry:
-          description: '_True_ if the service has a complex WKT geometry (linestring, polygon), _false_ otherwise. It is only displayed if the _geometry_ query parameter is set to _true_.'
+          description: _True_ if the service has a complex WKT geometry (linestring, polygon), _false_ otherwise. It is only displayed if the _geometry_ query parameter is set to _true_.
           type: boolean
           example: true
     MinimalBusStopProperties:
@@ -1581,11 +1917,11 @@ components:
               example: FIRENZE
             cap:
               type: string
-              example: 50038 
+              example: 50038
             province:
               type: string
               example: FI
-            address: 
+            address:
               description: Address of the service.
               type: string
               example: VIA DANTE
@@ -1596,11 +1932,11 @@ components:
             phone:
               description: Phone number of the service.
               type: string
-              example: 0558430207
+              example: '0558430207'
             fax:
               description: Fax number of the service.
               type: string
-              example: 0552758844
+              example: '0552758844'
             website:
               description: Website of the service.
               type: string
@@ -1619,7 +1955,7 @@ components:
               description: Italian description of the service.
               type: string
               example: La mostra riflette il complesso rapporto fra arte e moda prendendo spunto dalla storia di Salvatore Ferragamo che si ispirò alle avanguardie artistiche del '900 per realizzare le sue creazioni.
-            description2: 
+            description2:
               description: English description of the service (if available).
               type: string
               example: The exhibition reflects the complex relationship between art and fashion starting from the the story of Salvatore Ferragamo who realized his creations inspired by the avant-garde art of the ' 900.
@@ -1636,14 +1972,20 @@ components:
               items:
                 type: string
                 format: uri
-              example: [ "https://servicemap.disit.org/WebAppGrafo/api/v1/photo/file-5697308527651966276.jpg", "https://servicemap.disit.org/WebAppGrafo/api/v1/photo/file-5967841092303360553.jpg", "https://servicemap.disit.org/WebAppGrafo/api/v1/photo/file-9101174593154930510.jpg"]
+              example:
+                - https://servicemap.disit.org/WebAppGrafo/api/v1/photo/file-5697308527651966276.jpg
+                - https://servicemap.disit.org/WebAppGrafo/api/v1/photo/file-5967841092303360553.jpg
+                - https://servicemap.disit.org/WebAppGrafo/api/v1/photo/file-9101174593154930510.jpg
             photoOrigs:
               description: Array of URLs to original photoes of the service, provided using the _Photo_ API.
               type: array
               items:
                 type: string
                 format: uri
-              example: [ "https://servicemap.disit.org/WebAppGrafo/api/v1/photo/originals/file-5697308527651966276.jpg", "https://servicemap.disit.org/WebAppGrafo/api/v1/photo/originals/file-5967841092303360553.jpg", "https://servicemap.disit.org/WebAppGrafo/api/v1/photo/originals/file-9101174593154930510.jpg"]
+              example:
+                - https://servicemap.disit.org/WebAppGrafo/api/v1/photo/originals/file-5697308527651966276.jpg
+                - https://servicemap.disit.org/WebAppGrafo/api/v1/photo/originals/file-5967841092303360553.jpg
+                - https://servicemap.disit.org/WebAppGrafo/api/v1/photo/originals/file-9101174593154930510.jpg
             wktGeometry:
               description: A Well Known Text geometry associated with the service.
               type: string
@@ -1669,7 +2011,6 @@ components:
               type: number
               format: float
               example: 3.847586
-    
     EventProperties:
       allOf:
         - $ref: '#/components/schemas/ExtendedFeatureProperties'
@@ -1681,17 +2022,17 @@ components:
             startDate:
               type: string
               format: date-time
-              example: 2016-05-19T00:00:00+02:00
+              example: '2016-05-18T22:00:00.000Z'
             startTime:
               type: string
-              example: '10.00; chiuso 1/1, 01/05, 15/08 e 25/12'
+              example: 10.00; chiuso 1/1, 01/05, 15/08 e 25/12
             endDate:
               type: string
               format: date-time
-              example: 2017-04-07T00:00:00+02:00
+              example: '2017-04-06T22:00:00.000Z'
             endTime:
               type: string
-              example: '19:30; chiuso 1/1, 01/05, 15/08 e 25/12'
+              example: 19:30; chiuso 1/1, 01/05, 15/08 e 25/12
             eventCategory:
               type: string
               example: Mostre
@@ -1703,8 +2044,10 @@ components:
               example: MUSEO SALVATORE FERRAGAMO
             freeEvent:
               type: string
-              enum: [YES, NO]
-              example: NO
+              enum:
+                - 'YES'
+                - 'NO'
+              example: 'NO'
             price:
               type: string
               example: 6 (incluso museo/including museum)
@@ -1714,7 +2057,6 @@ components:
             descriptionIT:
               type: string
               example: La mostra riflette il complesso rapporto fra arte e moda prendendo spunto dalla storia di Salvatore Ferragamo che si ispirò alle avanguardie artistiche del '900 per realizzare le sue creazioni.
-
     ExtendedFuelStationProperties:
       allOf:
         - $ref: '#/components/schemas/ExtendedFeatureProperties'
@@ -1723,7 +2065,6 @@ components:
             brand:
               type: string
               example: AgipEni
-              
     ExtendedBusStopProperties:
       allOf:
         - $ref: '#/components/schemas/ExtendedFeatureProperties'
@@ -1736,7 +2077,6 @@ components:
               type: string
               format: uri
               example: http://www.disit.org/km4city/resource/Bus_ataflinea_Agency_172
-              
     ExtendedSmartWasteProperties:
       allOf:
         - $ref: '#/components/schemas/ExtendedFeatureProperties'
@@ -1745,18 +2085,27 @@ components:
             wasteType:
               type: string
               format: uri
-              enum: [ 'http://www.disit.org/km4city/schema#glassOrPlasticWaste','http://www.disit.org/km4city/schema#paperWaste', 'http://www.disit.org/km4city/schema#nonRecoverableWaste','http://www.disit.org/km4city/schema#metalWaste','http://www.disit.org/km4city/schema#raeWaste','http://www.disit.org/km4city/schema#anyWaste','http://www.disit.org/km4city/schema#organicWaste','http://www.disit.org/km4city/schema#glassWaste','http://www.disit.org/km4city/schema#plasticWaste','http://www.disit.org/km4city/schema#pharmaWaste' ]
-              example: 'http://www.disit.org/km4city/schema#glassOrPlasticWaste'
+              enum:
+                - http://www.disit.org/km4city/schema#glassOrPlasticWaste
+                - http://www.disit.org/km4city/schema#paperWaste
+                - http://www.disit.org/km4city/schema#nonRecoverableWaste
+                - http://www.disit.org/km4city/schema#metalWaste
+                - http://www.disit.org/km4city/schema#raeWaste
+                - http://www.disit.org/km4city/schema#anyWaste
+                - http://www.disit.org/km4city/schema#organicWaste
+                - http://www.disit.org/km4city/schema#glassWaste
+                - http://www.disit.org/km4city/schema#plasticWaste
+                - http://www.disit.org/km4city/schema#pharmaWaste
+              example: http://www.disit.org/km4city/schema#glassOrPlasticWaste
             capacity:
               type: number
               example: 200
             collectionTime:
               type: string
               example: alle 13:00 tutti i giorni
-            physicalShape: 
+            physicalShape:
               type: string
               example: campana
-      
     ExtendedSmartBenchProperties:
       allOf:
         - $ref: '#/components/schemas/ExtendedFeatureProperties'
@@ -1771,38 +2120,35 @@ components:
             withUsb:
               type: boolean
               example: true
-            withAudio: 
+            withAudio:
               type: boolean
               example: false
-              
     RealTimeBusProperties:
       allOf:
-      - $ref: '#/components/schemas/MinimalFeatureProperties'
-      - type: object
-        properties:
-          vehicleNum:
-            description: The vehicle's number.
-            type: string
-            example: 3133579
-          line:
-            description: The short name of the line.
-            type: string
-            example: 24
-          direction:
-            description: With first and last stop.
-            type: string
-            example: 'Sorgane Piazza Rodolico &#10132; Grassina'
-          detectionTime:
-            description: The delay in minutes from the current time and the time the position was acquired.
-            type: string
-            example: 2
-            
+        - $ref: '#/components/schemas/MinimalFeatureProperties'
+        - type: object
+          properties:
+            vehicleNum:
+              description: The vehicle's number.
+              type: string
+              example: 3133579
+            line:
+              description: The short name of the line.
+              type: string
+              example: 24
+            direction:
+              description: With first and last stop.
+              type: string
+              example: Sorgane Piazza Rodolico &#10132; Grassina
+            detectionTime:
+              description: The delay in minutes from the current time and the time the position was acquired.
+              type: string
+              example: 2
     StaticServiceDetails:
       type: object
       properties:
         Service:
           $ref: '#/components/schemas/FeatureCollection'
-          
     RealTimeServiceDetails:
       type: object
       properties:
@@ -1810,7 +2156,6 @@ components:
           $ref: '#/components/schemas/FeatureCollection'
         realtime:
           $ref: '#/components/schemas/RealTimeData'
-          
     BusStopDetails:
       type: object
       properties:
@@ -1822,13 +2167,11 @@ components:
           $ref: '#/components/schemas/RealTimeData'
         realtime:
           $ref: '#/components/schemas/RealTimeData'
-    
     EventDetails:
       type: object
       properties:
         Event:
           $ref: '#/components/schemas/FeatureCollection'
-
     RealTimeData:
       type: object
       properties:
@@ -1868,101 +2211,158 @@ components:
                   - $ref: '#/components/schemas/SmartBenchRealtimeData'
                   - $ref: '#/components/schemas/SmartIrrigatorRealtimeData'
                   - $ref: '#/components/schemas/AirQualityRealtimeData'
-    
     ParkingServiceRealtimeHead:
       type: array
       minItems: 6
       maxItems: 6
       items:
         type: string
-      example: [capacity, freeParkingLots, occupiedParkingLots, occupancy, status, updating]
-        
+      example:
+        - capacity
+        - freeParkingLots
+        - occupiedParkingLots
+        - occupancy
+        - status
+        - updating
     TrafficSensorRealtimeHead:
       type: array
       minItems: 9
       maxItems: 9
       items:
         type: string
-      example: [avgDistance, avgTime, occupancy, concentration, vehicleFlow, averageSpeed, thresholdPerc, speedPercentile, instantTime]
-        
+      example:
+        - avgDistance
+        - avgTime
+        - occupancy
+        - concentration
+        - vehicleFlow
+        - averageSpeed
+        - thresholdPerc
+        - speedPercentile
+        - instantTime
     WeatherForecastRealtimeHead:
       type: array
       minItems: 5
       maxItems: 5
       items:
         type: string
-      example: [day, description, minTemp, maxTemp, instantDateTime]
-        
+      example:
+        - day
+        - description
+        - minTemp
+        - maxTemp
+        - instantDateTime
     BusLinesRealtimeHead:
       type: array
       minItems: 3
       maxItems: 3
       items:
         type: string
-      example: [busLine, lineUri, lineDesc]
-        
+      example:
+        - busLine
+        - lineUri
+        - lineDesc
     BusTimetableRealtimeHead:
       type: array
       minItems: 6
       maxItems: 6
       items:
         type: string
-      example: [date, arrivalTime, lineName, lineDesc, routeName, trip]
-        
+      example:
+        - date
+        - arrivalTime
+        - lineName
+        - lineDesc
+        - routeName
+        - trip
     BusStopRealtimeHead:
       type: array
       maxItems: 0
       items:
         type: string
-        
     FuelStationRealtimeHead:
       type: array
       minItems: 5
       maxItems: 5
       items:
         type: string
-      example: [measuredTime, fuel, price, currency, self]
-        
+      example:
+        - measuredTime
+        - fuel
+        - price
+        - currency
+        - self
     FirstAidRealtimeHead:
       type: array
       minItems: 7
       maxItems: 7
       items:
         type: string
-      example: [measuredTime, state, redCode, yellowCode, greenCode, blueCode, whiteCode]
-        
+      example:
+        - measuredTime
+        - state
+        - redCode
+        - yellowCode
+        - greenCode
+        - blueCode
+        - whiteCode
     SmartWasteRealtimeHead:
       type: array
       minItems: 3
       maxItems: 3
       items:
         type: string
-      example: [measuredTime, wasteLevel, batteryLevel]
-    
+      example:
+        - measuredTime
+        - wasteLevel
+        - batteryLevel
     SmartBenchRealtimeHead:
       type: array
       minItems: 10
       maxItems: 10
       items:
         type: string
-      example: [measuredTime, temperature, humidity, pressure, airQualityCO2, light, sittingsInRefPeriod, totalSittings, passagesInRefPeriod, totalPassages]
-        
+      example:
+        - measuredTime
+        - temperature
+        - humidity
+        - pressure
+        - airQualityCO2
+        - light
+        - sittingsInRefPeriod
+        - totalSittings
+        - passagesInRefPeriod
+        - totalPassages
     SmartIrrigatorRealtimeHead:
       type: array
       minItems: 7
       maxItems: 7
       items:
         type: string
-      example: [measuredTime, currentlyActive, temperature, internalTemperature, humidity, soilWaterPotential, leafWetness]
-        
+      example:
+        - measuredTime
+        - currentlyActive
+        - temperature
+        - internalTemperature
+        - humidity
+        - soilWaterPotential
+        - leafWetness
     AirQualityRealtimeHead:
       type: array
       minItems: 9
       maxItems: 9
       items:
         type: string
-      example: [NO2, SO2, H2S, CO, Benzene, PM2_5, PM10, annualPM10ExceedCount, measuredTime]
-        
+      example:
+        - NO2
+        - SO2
+        - H2S
+        - CO
+        - Benzene
+        - PM2_5
+        - PM10
+        - annualPM10ExceedCount
+        - measuredTime
     ParkingServiceRealtimeData:
       type: object
       properties:
@@ -1978,14 +2378,13 @@ components:
           $ref: '#/components/schemas/RealTimeValue'
         updating:
           $ref: '#/components/schemas/RealTimeValue'
-          
     TrafficSensorRealtimeData:
       type: object
       properties:
         avgDistance:
           $ref: '#/components/schemas/RealTimeValue'
         avgTime:
-          $ref: '#/components/schemas/RealTimeValue'        
+          $ref: '#/components/schemas/RealTimeValue'
         occupancy:
           $ref: '#/components/schemas/RealTimeValue'
         concentration:
@@ -2000,38 +2399,35 @@ components:
           $ref: '#/components/schemas/RealTimeValue'
         instantTime:
           $ref: '#/components/schemas/RealTimeValue'
-          
     WeatherForecastRealtimeData:
       type: object
       properties:
         day:
           $ref: '#/components/schemas/RealTimeValue'
         description:
-          $ref: '#/components/schemas/RealTimeValue'        
+          $ref: '#/components/schemas/RealTimeValue'
         minTemp:
           $ref: '#/components/schemas/RealTimeValue'
         maxTemp:
           $ref: '#/components/schemas/RealTimeValue'
         instantDateTime:
           $ref: '#/components/schemas/RealTimeValue'
-          
     BusLinesRealtimeData:
       type: object
       properties:
         busLine:
           $ref: '#/components/schemas/RealTimeValue'
         lineUri:
-          $ref: '#/components/schemas/RealTimeValue'        
+          $ref: '#/components/schemas/RealTimeValue'
         lineDesc:
           $ref: '#/components/schemas/RealTimeValue'
-          
     BusTimetableRealtimeData:
       type: object
       properties:
         date:
           $ref: '#/components/schemas/RealTimeValue'
         arrivalTime:
-          $ref: '#/components/schemas/RealTimeValue'        
+          $ref: '#/components/schemas/RealTimeValue'
         departureTime:
           $ref: '#/components/schemas/RealTimeValue'
         lineName:
@@ -2042,116 +2438,108 @@ components:
           $ref: '#/components/schemas/RealTimeValue'
         trip:
           $ref: '#/components/schemas/RealTimeValue'
-          
     BusStopRealtimeData:
       type: object
-          
     FuelStationRealtimeData:
       type: object
       properties:
         measuredTime:
           $ref: '#/components/schemas/RealTimeValue'
         fuel:
-          $ref: '#/components/schemas/RealTimeValue'        
+          $ref: '#/components/schemas/RealTimeValue'
         price:
           $ref: '#/components/schemas/RealTimeValue'
         currency:
           $ref: '#/components/schemas/RealTimeValue'
         self:
           $ref: '#/components/schemas/RealTimeValue'
-          
     FirstAidRealtimeData:
       type: object
       properties:
         measuredTime:
           $ref: '#/components/schemas/RealTimeValue'
         state:
-          $ref: '#/components/schemas/RealTimeValue'        
+          $ref: '#/components/schemas/RealTimeValue'
         redCode:
           $ref: '#/components/schemas/RealTimeValue'
         yellowCode:
           $ref: '#/components/schemas/RealTimeValue'
         greenCode:
-          $ref: '#/components/schemas/RealTimeValue'      
+          $ref: '#/components/schemas/RealTimeValue'
         blueCode:
-          $ref: '#/components/schemas/RealTimeValue'  
+          $ref: '#/components/schemas/RealTimeValue'
         whiteCode:
-          $ref: '#/components/schemas/RealTimeValue'  
-          
+          $ref: '#/components/schemas/RealTimeValue'
     SmartWasteRealtimeData:
       type: object
       properties:
         measuredTime:
           $ref: '#/components/schemas/RealTimeValue'
         wasteLevel:
-          $ref: '#/components/schemas/RealTimeValue'        
+          $ref: '#/components/schemas/RealTimeValue'
         batteryLevel:
           $ref: '#/components/schemas/RealTimeValue'
-          
     SmartBenchRealtimeData:
       type: object
       properties:
         measuredTime:
           $ref: '#/components/schemas/RealTimeValue'
         temperature:
-          $ref: '#/components/schemas/RealTimeValue'        
+          $ref: '#/components/schemas/RealTimeValue'
         humidity:
           $ref: '#/components/schemas/RealTimeValue'
         pressure:
           $ref: '#/components/schemas/RealTimeValue'
         airQualityCO2:
-          $ref: '#/components/schemas/RealTimeValue'      
+          $ref: '#/components/schemas/RealTimeValue'
         light:
-          $ref: '#/components/schemas/RealTimeValue'  
+          $ref: '#/components/schemas/RealTimeValue'
         sittingsInRefPeriod:
-          $ref: '#/components/schemas/RealTimeValue'     
+          $ref: '#/components/schemas/RealTimeValue'
         totalSittings:
           $ref: '#/components/schemas/RealTimeValue'
         passagesInRefPeriod:
-          $ref: '#/components/schemas/RealTimeValue'        
+          $ref: '#/components/schemas/RealTimeValue'
         totalPassages:
           $ref: '#/components/schemas/RealTimeValue'
-          
     SmartIrrigatorRealtimeData:
       type: object
       properties:
         measuredTime:
           $ref: '#/components/schemas/RealTimeValue'
         currentlyActive:
-          $ref: '#/components/schemas/RealTimeValue'        
+          $ref: '#/components/schemas/RealTimeValue'
         temperature:
           $ref: '#/components/schemas/RealTimeValue'
         internalTemperature:
           $ref: '#/components/schemas/RealTimeValue'
         humidity:
-          $ref: '#/components/schemas/RealTimeValue'      
+          $ref: '#/components/schemas/RealTimeValue'
         soilWaterPotential:
-          $ref: '#/components/schemas/RealTimeValue'  
+          $ref: '#/components/schemas/RealTimeValue'
         leafWetness:
-          $ref: '#/components/schemas/RealTimeValue'     
-
+          $ref: '#/components/schemas/RealTimeValue'
     AirQualityRealtimeData:
       type: object
       properties:
         measuredTime:
-          $ref: '#/components/schemas/RealTimeValue'   
+          $ref: '#/components/schemas/RealTimeValue'
         NO2:
           $ref: '#/components/schemas/RealTimeValue'
         SO2:
-          $ref: '#/components/schemas/RealTimeValue'        
+          $ref: '#/components/schemas/RealTimeValue'
         H2S:
           $ref: '#/components/schemas/RealTimeValue'
         CO:
           $ref: '#/components/schemas/RealTimeValue'
         Benzene:
-          $ref: '#/components/schemas/RealTimeValue'      
+          $ref: '#/components/schemas/RealTimeValue'
         PM2_5:
-          $ref: '#/components/schemas/RealTimeValue'  
+          $ref: '#/components/schemas/RealTimeValue'
         PM10:
-          $ref: '#/components/schemas/RealTimeValue'     
+          $ref: '#/components/schemas/RealTimeValue'
         annualPM10ExceedCount:
           $ref: '#/components/schemas/RealTimeValue'
-          
     RealTimeValue:
       type: object
       properties:
@@ -2160,14 +2548,12 @@ components:
           example: literal
         value:
           type: string
-          example: 42.0
-
+          example: 42
     EventsJsonDocument:
       type: object
       properties:
         Event:
           $ref: '#/components/schemas/FeatureCollection'
-      
     AddressSearchByGPS:
       type: object
       required:
@@ -2182,7 +2568,7 @@ components:
           description: The civic number.
           type: string
           example: 17/A
-        addressUri: 
+        addressUri:
           description: The URI identifying the civic number in the road graph.
           type: string
           format: uri
@@ -2205,7 +2591,7 @@ components:
                 description: Name of the intersecting service or public transport line.
                 type: string
                 example: Firenze Card
-              uri: 
+              uri:
                 description: URI of the intersecting service or public transport line.
                 type: string
                 format: uri
@@ -2214,16 +2600,22 @@ components:
                 description: URI representing the class
                 type: string
                 format: uri
-                example: 'http://www.disit.org/km4city/schema#Tourist_trail'
-              type: 
+                example: http://www.disit.org/km4city/schema#Tourist_trail
+              type:
                 description: Type of geometry intersecting the GPS position, can be lineString or Polygon.
                 type: string
-                enum: [LineString, Polygon]
+                enum:
+                  - LineString
+                  - Polygon
                 example: LineString
               routeType:
                 description: Type of route can be Bus, LightRail, Ferry, Train.
                 type: string
-                enum: [Bus, LightRail, Ferry, Train]
+                enum:
+                  - Bus
+                  - LightRail
+                  - Ferry
+                  - Train
                 example: Bus
               agency:
                 description: Name of the agency providing the service.
@@ -2237,8 +2629,7 @@ components:
                 description: Distance of the GPS position with the intersecting geometry.
                 type: number
                 format: float
-                example: 1.2392468323025842E-4
-      
+                example: 0.00012392468323025842
     RouteBusStops:
       type: object
       properties:
@@ -2248,7 +2639,7 @@ components:
             lineNumber:
               type: string
               example: 21
-            lineName: 
+            lineName:
               type: string
               example: Urbano Piombino
             wktGeometry:
@@ -2256,11 +2647,9 @@ components:
               example: |
                 LINESTRING(10.5261053097483 42.9235421882276, 10.5260987187002 42.9235081017126, 10.5261977242379 42.9234650999557, 10.5267317527385 42.9234680967536, 10.5273987874254 42.9237600986083, 10.5277328066462 42.9235420904596, 10.5297179176696 42.9226800552346, 10.5302569479766 42.9224230449896, 10.5309669876055 42.9221260327247, 10.5315880194207 42.9228800417249, 10.5322330551305 42.9226530318227, 10.5331701030549 42.9241350499695, 10.5332941093952 42.9243760529459, 10.533253107414 42.9245110544141, 10.5315090268288 42.9244910347522, 10.5305399814258 42.9246350273131, 10.5291489170029 42.9246530124299, 10.5288859047729 42.9246680098827, 10.5286668942776 42.9247990100161, 10.5288919059093 42.9249370113054, 10.5289589093361 42.9250430126032, 10.5293612260948 42.9253655166093, 10.5308183203532 42.9266085059683, 10.5310854375817 42.9268997494471, 10.5311933318044 42.9269862826032, 10.5316650484038 42.9275390407074, 10.5302619817835 42.9280490358964, 10.528978920984 42.9284660305774, 10.5267828170102 42.9291460208317, 10.5262297907801 42.9293360187309, 10.5257797693092 42.9295490180669, 10.5255577587704 42.9296290172926, 10.525460754224 42.9296440165603, 10.525355749401 42.9296370152362, 10.5252867463185 42.9296170139617, 10.525205743408 42.9295050096407, 10.5253017535345 42.9289369898256, 10.5231206539669 42.9286729593591, 10.5225426276785 42.9285849508218, 10.522281615694 42.9285669475163, 10.5220926069769 42.928561945318, 10.5209815550597 42.9286929360553, 10.5206295384348 42.928787934223, 10.5203325248567 42.9287559301742, 10.5193654797892 42.9288389214326, 10.5175663960762 42.9289619044652, 10.5170893738565 42.9290009001048, 10.5167643585217 42.9290838983202, 10.5166153514076 42.9291578981596, 10.5164993458337 42.9292398984296, 10.5160763254302 42.9296219006548, 10.5157023074446 42.9299009017455, 10.5148352660862 42.9303119004745, 10.514554252647 42.9304649003974, 10.5136322082801 42.931176903463, 10.5133551948966 42.9314609054044, 10.5132661905803 42.9316429072204, 10.5132221885558 42.9321249128374, 10.5129651761293 42.9324059148833, 10.5128051684513 42.9325109151289, 10.5114191027691 42.932971909572, 10.5095100113416 42.9340959104367, 10.5094420081133 42.9341209102085, 10.5091069919783 42.9343959115662, 10.5083699563492 42.9351939173221, 10.5082339497586 42.9353869190033, 10.5080149391374 42.9357669226103, 10.50771992483 42.9363359281952, 10.5076099194966 42.9365099297894, 10.5074759130089 42.93667793115, 10.5065808697885 42.9375629369594, 10.5059578396864 42.9382069413988, 10.5059468400239 42.9381129380591, 10.505919839195 42.9380599360857, 10.505840836079 42.9379829329558, 10.5057298309663 42.9379789316388, 10.505537821963 42.9380109302376, 10.505309811535 42.9379879271683, 10.5049777964502 42.9379359222259, 10.5048017886976 42.9378689185209, 10.5031317176795 42.9368808728152, 10.5031777200882 42.9372078768, 10.5036047420341 42.9387978964152, 10.5008286120746 42.9392038749595, 10.5013256376261 42.9410948982803, 10.5013296378559 42.9411858993728, 10.5025147896055 42.940849026408)
             BusStops:
-              $ref: '#/components/schemas/FeatureCollection' #with MinimalBusStopProperties
-            
+              $ref: '#/components/schemas/FeatureCollection'
     LineBusStops:
-      $ref: '#/components/schemas/FeatureCollection' #with MinimalBusStopProperties
-      
+      $ref: '#/components/schemas/FeatureCollection'
     RouteProperties:
       type: object
       properties:
@@ -2279,7 +2668,7 @@ components:
         routeUri:
           type: string
           format: uri
-          example: 'http://www.disit.org/km4city/resource/Bus_ataflinea_Trip_2199_3393281'
+          example: http://www.disit.org/km4city/resource/Bus_ataflinea_Trip_2199_3393281
         direction:
           description: Route direction
           type: string
@@ -2287,11 +2676,11 @@ components:
         agency:
           description: Agency name
           type: string
-          example: 'Ataf&Linea'
-        agencyUri: 
+          example: Ataf&Linea
+        agencyUri:
           type: string
           format: uri
-          example: 'http://www.disit.org/km4city/resource/Bus_ataflinea_Agency_172'
+          example: http://www.disit.org/km4city/resource/Bus_ataflinea_Agency_172
         polyline:
           description: Route path
           type: string
@@ -2299,38 +2688,37 @@ components:
             LINESTRING(11.2740440352582 43.793504463918, 11.2740737985793 43.7935042217185, 11.2739866769979 43.7933030250387, 11.2739563937326 43.7931190546541, 11.2739770682571 43.7927630020216, 11.2740869991902 43.7922205992176, 11.2740418377679 43.7917263017556, 11.2737919438157 43.791200064989, 11.2734196184715 43.7905997335777, 11.2727987992228 43.7898782943608, 11.272681211281 43.789768088819, 11.2713188455801 43.7887867797889, 11.27058457683 43.7884322270076, 11.269957219486 43.7881520758348, 11.2692273930202 43.7879144718287, 11.2686808983482 43.7877182413402, 11.2690952978597 43.787174296618, 11.2691098402453 43.7870659647799, 11.2690676274151 43.7869767674172, 11.2685410638805 43.7866090732694, 11.268445604357 43.7864263953803, 11.2684632317329 43.7863585184579, 11.2689345488232 43.7857999383314, 11.2691260935487 43.7856070578852, 11.2691378512351 43.7855483010369, 11.2690768215931 43.7854954916324, 11.2688981792269 43.78541350507, 11.2688110609197 43.78545124838, 11.2682176091425 43.7860662572101, 11.2678794229514 43.7863250646836, 11.2676221435641 43.7862176261182, 11.2634632287685 43.7841527344044, 11.2632649278456 43.7840846336588, 11.2626979176347 43.7842489198989, 11.2620290839422 43.7845142565685, 11.2615807929255 43.7845726477233, 11.2613543567129 43.7845411144843, 11.2612505498644 43.7845071544592, 11.2610595282436 43.7843848846128, 11.2609168229694 43.7842256442032, 11.2609585240393 43.7840132345388, 11.2610747073701 43.7838398665486, 11.2612067005619 43.7837562210784, 11.2615413854455 43.7836100384169, 11.2620775465901 43.7834103443563, 11.2624353412715 43.7832591995096, 11.2622859421135 43.7830460718994, 11.2614491043854 43.7819867108042, 11.260195247236 43.7804539019181, 11.2585017701759 43.7782995187201, 11.258593056635 43.7781523190748, 11.2583408560722 43.7780686049478, 11.2565314302467 43.7788561341587, 11.2544381908789 43.7797392682214, 11.2529016181438 43.7779103361067, 11.2525833511199 43.7775834784327, 11.2520642242008 43.7772020554734, 11.2515959202183 43.7768916572494, 11.2506248107521 43.7763030469503, 11.2500237190008 43.7760132644609, 11.2499544355719 43.775991388877, 11.2499100479743 43.7760470140835)
         serviceType:
           type: string
-          enum: [PublicTransportLine]
+          enum:
+            - PublicTransportLine
           example: PublicTransportLine
-
     BusPositionHtmlDocument:
       type: string
       format: html
-      
     LastPhotos:
       type: array
-      items: 
+      items:
         type: object
         properties:
           serviceUri:
             type: string
             format: uri
-            example: 'http://www.disit.org/km4city/resource/Bus_ataflinea_Stop_FM3007_5'
+            example: http://www.disit.org/km4city/resource/Bus_ataflinea_Stop_FM3007_5
           serviceType:
             type: string
-            example: 'TransferServiceAndRenting_BusStop'
+            example: TransferServiceAndRenting_BusStop
           agency:
             type: string
-            example: 'Ataf&Linea'
+            example: Ataf&Linea
           typeLabel:
             type: string
-            example: 'Bus Stop'
+            example: Bus Stop
           agencyUri:
             type: string
             format: uri
-            example: 'http://www.disit.org/km4city/resource/Bus_ataflinea_Agency_172'
+            example: http://www.disit.org/km4city/resource/Bus_ataflinea_Agency_172
           serviceName:
             type: string
-            example: 'Santa Maria Maggiore'
+            example: Santa Maria Maggiore
           lat:
             description: WGS84 sessadecimal latitude
             type: number
@@ -2344,20 +2732,19 @@ components:
           photo:
             type: string
             format: uri
-            example: 'https://servicemap.disit.org/WebAppGrafo/api/v1/photo/file-5697308527651966276.jpg'
+            example: https://servicemap.disit.org/WebAppGrafo/api/v1/photo/file-5697308527651966276.jpg
           photoThumb:
             type: string
             format: uri
-            example: 'https://servicemap.disit.org/WebAppGrafo/api/v1/photo/thumbs/file-5697308527651966276.jpg'
+            example: https://servicemap.disit.org/WebAppGrafo/api/v1/photo/thumbs/file-5697308527651966276.jpg
           photoOrig:
             type: string
             format: uri
-            example: 'https://servicemap.disit.org/WebAppGrafo/api/v1/photo/originals/file-5697308527651966276.jpg'
+            example: https://servicemap.disit.org/WebAppGrafo/api/v1/photo/originals/file-5697308527651966276.jpg
           timestamp:
             type: string
             format: date-time
             example: '2018-02-20 12:14:37.0'
-          
     LastComments:
       type: array
       items:
@@ -2366,23 +2753,23 @@ components:
           serviceUri:
             type: string
             format: uri
-            example: 'http://www.disit.org/km4city/resource/Bus_ataflinea_Stop_FM3007_5'
+            example: http://www.disit.org/km4city/resource/Bus_ataflinea_Stop_FM3007_5
           serviceType:
             type: string
-            example: 'TransferServiceAndRenting_BusStop'
+            example: TransferServiceAndRenting_BusStop
           agency:
             type: string
-            example: 'Ataf&Linea'
+            example: Ataf&Linea
           typeLabel:
             type: string
-            example: 'Bus Stop'
+            example: Bus Stop
           agencyUri:
             type: string
             format: uri
-            example: 'http://www.disit.org/km4city/resource/Bus_ataflinea_Agency_172'
+            example: http://www.disit.org/km4city/resource/Bus_ataflinea_Agency_172
           serviceName:
             type: string
-            example: 'Santa Maria Maggiore'
+            example: Santa Maria Maggiore
           lat:
             description: WGS84 sessadecimal latitude
             type: number
@@ -2395,12 +2782,11 @@ components:
             example: 11.252786
           comment:
             type: string
-            example: 'Il caffè più buono di Firenze e forse anche di più!'
+            example: Il caffè più buono di Firenze e forse anche di più!
           timestamp:
             type: string
             format: date-time
             example: '2018-02-20 12:14:37.0'
-      
     LastStars:
       type: array
       items:
@@ -2409,23 +2795,23 @@ components:
           serviceUri:
             type: string
             format: uri
-            example: 'http://www.disit.org/km4city/resource/Bus_ataflinea_Stop_FM3007_5'
+            example: http://www.disit.org/km4city/resource/Bus_ataflinea_Stop_FM3007_5
           serviceType:
             type: string
-            example: 'TransferServiceAndRenting_BusStop'
+            example: TransferServiceAndRenting_BusStop
           agency:
             type: string
-            example: 'Ataf&Linea'
+            example: Ataf&Linea
           typeLabel:
             type: string
-            example: 'Bus Stop'
+            example: Bus Stop
           agencyUri:
             type: string
             format: uri
-            example: 'http://www.disit.org/km4city/resource/Bus_ataflinea_Agency_172'
+            example: http://www.disit.org/km4city/resource/Bus_ataflinea_Agency_172
           serviceName:
             type: string
-            example: 'Santa Maria Maggiore'
+            example: Santa Maria Maggiore
           lat:
             description: WGS84 sessadecimal latitude
             type: number
@@ -2439,87 +2825,65 @@ components:
           stars:
             type: integer
             format: int32
-            example: 'https://servicemap.disit.org/WebAppGrafo/api/v1/photo/file-5697308527651966276.jpg'
+            example: https://servicemap.disit.org/WebAppGrafo/api/v1/photo/file-5697308527651966276.jpg
           timestamp:
             type: string
             format: date-time
             example: '2018-02-20 12:14:37.0'
-      
   parameters:
-  
     selection:
-      
       in: query
-      
       name: selection
-      
       description: |
         Through this parameter, the user indicates _where_ the services have to be searched. It could be a boundary within which to search, or a point around which to search.
-        
+
         _Usages & Sample values:_
-      
+
         * **Service search near GPS position** - WGS84 sessadecimal representation of the latitude and longitude of the position of interest, separated by a semicolon. Required. Sample value: _43.7756;11.2490_.
-        
+
         * **Service search near a service** - Service search near a service. Required. Sample value: _http://www.disit.org/km4city/resource/7ad6d2d3be461b1f0514956279c00eab_
-        
+
         * **Service search within a GPS (rectangular) area** - _Lat#1;Lon#1;Lat#2;Lng#2_ where _Lat#1;Lng#1_ are the WGS84 sessadecimal coordinates of the south west point of the rectangle, and _Lat#2;Lng#2_ are the coordinates of the north east point. Required. Sample value: _3.7741;11.2453;43.7768;11.2515_
-        
+
         * **Service search within a WKT described area** - wkt:_string_ describes the geographic region as WKT string. Required. Sample value: _wkt:POLYGON((11.25539 43.77339, 11.25608 43.77348, 11.25706 43.77362, 11.25759 43.77328, 11.25755 43.77291, 11.25675 43.77260, 11.25536 43.77270, 11.25539 43.77339))_
-        
+
         * **Service search within a stored WKT described area** - geo:_geo_id_ where _geo_id_ identifies a WKT string stored on the server. Required. Sample value: _geo:ritmi_01_
-        
+
         * **Service search by municipality** - Name of the municipality like FIRENZE, EMPOLI, PISA possibly with prefix "COMUNE di". Required. Sample value: _COMUNE di FIRENZE_
-        
+
         * **Full text search** - Optional _lat;lng_ with a GPS position, or _lat1;lng1;lat2;lng2_ for a rectangular area or wkt:_string_ or geo:_geoid_ for a geographic area described as Well Known Text (see other request types for more details). Sample value: _via dell'artigianato_
-        
       allowReserved: true
-      
       schema:
         type: string
-      
-      example: '43.7756;11.2490'
-      
+      example: 43.7756;11.2490
     queryId:
-      
       in: query
-      
       name: queryId
-      
       description: |
         Identifier of the query stored on servicemap. 
-        
+
         _Usage:_ Service search by query id
-        
+
         _Example:_ e02db54355fea40808300473c3537ff 
-        
       schema:
         type: string
-      
     search:
-    
       in: query
-    
       name: search
-    
       description: |
         The keywords separated by spaces that have to match with any textual description associated with an entity. Required.
-        
+
         _Usage:_ Full text search (_Required_)
-        
+
         _Example:_ via nave
-        
       schema:
         type: string
-      
     categories:
-      
       in: query
-      
       name: categories
-      
       description: |
         The list of categories of the services to be retrieved separated with semicolon, if omitted all kinds of services are returned. It can contain macro categories or categories, if a macro category is specified all categories in the macro category are used. The complete list of categories and macro categories can be retrieved on servicemap.disit.org.
-        
+
         _Usages:_
         * Service search near GPS position
         * Service search near a service
@@ -2527,23 +2891,16 @@ components:
         * Service search within a WKT described area
         * Service search within a stored WKT described area
         * Service search by municipality
-        
       allowReserved: true
-      
       schema:
         type: string
-      
       example: Accommodation;BusStop;SensorSite;Car_park
-        
     text:
-      
       in: query
-      
       name: text
-      
       description: |
         Words in this parameter are used to retrieve services that contain all these words in any textual description associated with the service.
-        
+
         _Usages:_
         * Service search near GPS position
         * Service search near a service
@@ -2551,45 +2908,35 @@ components:
         * Service search within a WKT described area
         * Service search within a stored WKT described area
         * Service search by municipality
-        
+
         _Example:_ casa di dante
-        
       schema:
         type: string
-        
     maxDists:
-      
       in: query
-      
       name: maxDists
-      
       description: |
         Maximum distance from the reference position (_selection_ parameter), expressed in kilometers. This parameter can also be set to _inside_, in which case services are discovered that have a WKT geometry that covers the reference position. It defaults to _0.1_.
-        
+
         _Usages:_
         * Service search near GPS position
         * Service search near a service
         * Full text search
-        
       schema:
         oneOf:
           - type: string
-            enum: [inside]
+            enum:
+              - inside
           - type: number
             format: float
         default: 0.1
-        
       example: 0.2
-        
     maxResults:
-      
       in: query
-      
       name: maxResults
-      
       description: |
         Maximum number of results to be returned. If it is set to zero, all results are returned. It defaults to 100.
-        
+
         _Usages:_
         * Service search near GPS position
         * Service search near a service
@@ -2598,23 +2945,17 @@ components:
         * Service search within a stored WKT described area
         * Service search by municipality
         * Full text search
-        
       schema:
         type: integer
         format: int32
         default: 100
-        
       example: 10
-        
     lang:
-      
       in: query
-      
       name: lang
-      
       description: |
         ISO 2 chars language code (e.g. _it_, _en_, _fr_, _de_, _es_, etc. ) to be used for service  descriptions. For that localized descriptions could be provided, they must be available in the Knowledge Base. No on-the-fly translation is performed. If a description is not available in the requested language, or if the parameter cannot be found in the input query, the English description is returned.
-        
+
         _Usages:_
         * Service search near GPS position
         * Service search near a service
@@ -2625,24 +2966,18 @@ components:
         * Service search by query id
         * Full text search
         * Service info
-        
       schema:
         type: string
         minLength: 2
         maxLength: 2
         default: en
-        
       example: it
-        
     geometry:
-      
       in: query
-      
       name: geometry
-      
       description: |
         If it is set to _true_, the _hasGeometry_ property is returned for each service, that describes whether the service has a complex WKT geometry (linestring, polygon) or not. It defaults to _false_.
-        
+
         _Usages:_
         * Service search near GPS position
         * Service search near a service
@@ -2652,22 +2987,17 @@ components:
         * Service search by municipality
         * Service search by query id
         * Full text search
-        
+
         _Example:_ true
-      
       schema:
         type: boolean
         default: false
-        
     uid:
-      
       in: query
-      
       name: uid
-      
       description: |
         Optional user identifier.
-        
+
         _Usages:_
         * Service search near GPS position
         * Service search near a service
@@ -2678,21 +3008,16 @@ components:
         * Service search by query id
         * Full text search
         * Service info
-        
+
         _Example:_ e7c13b5ce309dcddce9f72c810c3f93c61ac1c47d66126127f7a78bd5c2cb8a2
-        
       schema:
         type: string
-        
     format:
-      
       in: query
-      
       name: format
-      
       description: |
         Output format: _html_, or _json_. It defaults to _json_.
-        
+
         _Usages:_
         * Service search near GPS position
         * Service search near a service
@@ -2703,151 +3028,136 @@ components:
         * Service search by query id
         * Full text search
         * Service info
-      
-      schema: 
+      schema:
         type: string
-        enum: [html, json]
+        enum:
+          - html
+          - json
         default: json
-        
       example: json
-        
     map:
-      
       in: query
-      
       name: map
-      
       description: |
         The type of map to be used (i.e. _satellite_, _streets_ or _grayscale_).
-        
+
         _Usage:_ All requests where the output _format_ is set to _html_
-        
+
         _Example:_ satellite
-      
       schema:
         type: string
-        enum: [satellite, streets, grayscale]
-    
+        enum:
+          - satellite
+          - streets
+          - grayscale
     controls:
-      
       in: query
-      
       name: controls
-      
       description: |
         Hides or collapses the controls on the left and right sides of the Web page. It can be set to _hidden_ or _false_ to hide them, and to _collapsed_ to collapse them.
-        
+
         _Usage:_ All requests where the output _format_ is set to _html_
-      
+
         _Example:_ hidden
-      
       schema:
         oneOf:
           - type: boolean
-            enum: [false]
+            enum:
+              - false
           - type: string
-            enum: [hidden, collapsed]
-            
+            enum:
+              - hidden
+              - collapsed
     info:
-    
       in: query
-      
       name: info
-      
       description: |
         Hides or collapses the info tab at the bottom left corner of the Web page. It can be set to _hidden_ or _false_ to hide it, and to _collapsed_ to collapse it.
-        
+
         _Usage:_ All requests where the output _format_ is set to _html_        
-        
+
         _Example:_ collapsed
-        
       schema:
         oneOf:
           - type: boolean
-            enum: [false]
+            enum:
+              - false
           - type: string
-            enum: [hidden, collapsed]      
-            
+            enum:
+              - hidden
+              - collapsed
     serviceUri:
-     
       in: query
-      
       name: serviceUri
-      
       description: |
         URI of the service of interest. Required.
-        
+
         _Usages:_ Service info
-        
+
         _Example:_ http://www.disit.org/km4city/resource/RT04801702315PO
-      
       schema:
         type: string
         format: uri
-    
     realtime:
-    
       in: query
-      
       name: realtime
-      
       description: |
         It indicates if the last values of the time varying properties should be provided in the result or not. It defaults to _true_.
-        
+
         _Usages:_ Service info
-        
+
         _Example:_ false
-      
       schema:
         type: boolean
         default: true
-        
     valueName:
       in: query
       name: valueName
       description: To be used in requests for real-time values, to retrieve only the value of interest among the set of the available real-time values.
-      schema: 
+      schema:
         type: string
     fromTime:
       in: query
       name: fromTime
       description: To be used in requests for real-time values, to indicate the date and time of start of the time interval of interest.
-      schema: 
-        type: string        
+      schema:
+        type: string
         format: date-time
     toTime:
       in: query
       name: toTime
       description: To be used in requests for real-time values, to indicate the date and time of end of the time interval of interest.
-      schema: 
-        type: string        
-        format: date-time  
+      schema:
+        type: string
+        format: date-time
     value_type:
       in: query
       name: value_type
       description: To be used in requests for real-time values, to retrieve only values of the given type.
-      schema: 
-        type: string        
+      schema:
+        type: string
     graphUri:
       in: query
       name: graphUri
       description: To indicate the URI of the graph where resources have to be looked for.
-      schema: 
-        type: string       
+      schema:
+        type: string
     fullCountParam:
       in: query
       name: fullCount
       description: To indicate whether the full count of the retrieved resources have to be computed and provided back, or not. If set to _false_, an improvement in performances can be observed.
-      schema: 
-        type: boolean    
+      schema:
+        type: boolean
     range:
       in: query
       name: range
       description: Time range for the events to be retrieved, it can be _day_ for the events of the day of the request, _week_ for the events in the next 7 days or _month_ for the events in the next 30 days (if omitted _day_ is assumed).
       schema:
         type: string
-        enum: [day, week, month]
-      
+        enum:
+          - day
+          - week
+          - month
       example: month
     requestFrom:
       in: query
@@ -2874,5 +3184,5 @@ components:
       schema:
         type: string
 externalDocs:
-  description: 'SMART CITY API WEB DOCUMENTATION'
-  url: 'http://www.disit.org/drupal/?q=node/6597'
+  description: SMART CITY API WEB DOCUMENTATION
+  url: http://www.disit.org/drupal/?q=node/6597
