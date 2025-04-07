@@ -1,0 +1,59 @@
+version: '3'
+
+services:
+  od-insert-api:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: od-insert-api
+    ports:
+      - published: 3100
+        target: 3100
+    command: python -u ./od-insert.py
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-file: '10'
+        max-size: 100m
+    environment:
+      - BASE_URL=http://dashboard
+      - INSERT_URL=/orion-filter/ 
+
+  od-build-api:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: od-build-api
+    ports:
+      - published: 3000
+        target: 3000
+    command: python -u ./od-build.py
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-file: '10'
+        max-size: 100m
+    environment:
+      - BASE_URL=http://dashboard
+      - INSERT_URL=/orion-filter/ 
+
+  od-get-api:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: od-get-api
+    ports:
+      - published: 3200
+        target: 3200
+    command: python -u ./od-get.py
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-file: '10'
+        max-size: 100m
+    environment:
+      - BASE_URL=http://dashboard
+      - INSERT_URL=/orion-filter/

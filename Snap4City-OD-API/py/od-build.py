@@ -27,10 +27,15 @@ import mgrs
 import yaml
 import os
 import ast
+from auth import basic_auth
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
+
 with open(os.path.join(script_dir,'config.yaml'), 'r') as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
+    
+with open(os.path.join(script_dir,'url_conf.json'), 'r') as file:
+    url_conf = json.load(file)
 
 app = Flask(__name__)
 api = Api(app)
@@ -274,6 +279,7 @@ def buildOD_geom(x_orig, y_orig, x_dest, y_dest):
         if o[i] != -1 and d[i] != -1:
             orig_ref.append(o[i])
             dest_ref.append(d[i])
+            
     del(o)
     del(d)
     
@@ -439,6 +445,16 @@ def buildOD_geom_old(x_orig, y_orig, x_dest, y_dest):
                                 'value': data[i]})
                 
     return results
+
+
+# check authentication before each request
+@app.before_request
+def before_request():
+    #auth
+    token, message, status = basic_auth(url_conf, request)
+    if status == None or status != 200:
+        return {'message':message, 'status':status}, status
+
 
 class OD(Resource):
     def post(self):

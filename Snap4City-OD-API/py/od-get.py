@@ -25,7 +25,7 @@ import shapely.wkt
 import pyproj
 from pyproj import Transformer, CRS
 from geojson import Feature, Polygon, FeatureCollection
-from flask import Flask, request
+from flask import Flask, request, g
 from flask_restful import reqparse, Resource, Api
 from flask_cors import CORS
 from waitress import serve
@@ -40,10 +40,16 @@ import os
 import math
 import traceback
 import sys
+from auth import basic_auth
+from ownership import check_ownership_by_id
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
+
 with open(os.path.join(script_dir,'config.yaml'), 'r') as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
+
+with open(os.path.join(script_dir,'url_conf.json'), 'r') as file:
+    url_conf = json.load(file)
 
 app = Flask(__name__)
 api = Api(app)
@@ -88,6 +94,10 @@ parser_get_all_polygons.add_argument('latitude_sw', type=str, required=True)
 parser_get_all_polygons.add_argument('longitude_sw', type=str, required=True)
 parser_get_all_polygons.add_argument('type', type=str, required=True)
 parser_get_all_polygons.add_argument('organization', type=str, required=True)
+
+#before request parser
+before_parser = reqparse.RequestParser()
+before_parser.add_argument('contextbroker', type=str, required=True)
 
 
 def psgConnect(conf):
@@ -480,13 +490,14 @@ def getMGRSflows(lon, lat, precision, from_date, organization, inFlow):
         query = ''
         df = None
         
+        # Matteo 31/03/2025 -> correction in query line 492 ('orig_geom' if inFlow != 'True' else 'dest_geom') => ('orig_geom' if inFlow == 'True' else 'dest_geom')
         query = '''
         SELECT a.od_id, a.from_date, c.organization, a.precision, a.value, 
         ''' + ('x_orig AS lon, y_orig AS lat' if inFlow == 'True' else 'x_dest AS lon, y_dest AS lat') + '''
         FROM public.od_data_mgrs a
         LEFT JOIN public.od_metadata c
         ON a.od_id = c.od_id
-        WHERE ST_CONTAINS(''' + ('orig_geom' if inFlow != 'True' else 'dest_geom') + ''', 
+        WHERE ST_CONTAINS(''' + ('orig_geom' if inFlow == 'True' else 'dest_geom') + ''',  
         ST_GEOMFROMEWKT('SRID=4326;POINT(''' + lon + ' ' + lat + ''')'))
         AND from_date = %(from_date)s
         AND organization = %(organization)s
@@ -494,14 +505,15 @@ def getMGRSflows(lon, lat, precision, from_date, organization, inFlow):
         AND ST_AsText(dest_geom) <> ST_AsText(orig_geom)
         '''
         
-        print(query)
-        print([from_date, organization, precision])
+        #print(query)
+        #print([from_date, organization, precision])
 
         # fetch results as dataframe
         df = pd.read_sql_query(query, connection, 
                                params={'from_date': from_date, 
                                        'organization': organization,
                                        'precision': precision})
+        
             
         # get dictionary of flows grouped by od_id
         #od_id_flows = df.groupby(['od_id'])['value'].agg('sum').to_dict()
@@ -532,15 +544,16 @@ def getMGRSflows(lon, lat, precision, from_date, organization, inFlow):
             perc = int(row['value']) / total
             
             # build geojson feature
+            # Matteo 03/04/2025 -> in feature return even od_id and organization to check the ownership
             polygon, reference = get_MGRS_Polygon_Shapely(float(row['lon']), float(row['lat']), float(precision))
             feature = Feature(geometry=shapely.wkt.loads(polygon.wkt),
                               id = reference,
-                              properties={'name': reference, 'density': perc})
+                              properties={'name': reference, 'density': perc},
+                              od_id=row['od_id'],
+                              organization=row['organization']) 
             
             # append feature to features' array
             features.append(feature)
-
-            print(feature)
             
         # create features' collection from features array
         feature_collection = FeatureCollection(features)
@@ -610,7 +623,7 @@ def getFlows(lon, lat, precision, from_date, organization, inFlow, od_id, get_pe
             ON a.dest_commune = d.uid
             LEFT JOIN public.od_metadata e
             ON a.od_id = e.od_id
-            WHERE ST_CONTAINS(''' + ('c.geom' if inFlow != 'True' else 'd.geom') + ''', 
+            WHERE ST_CONTAINS(''' + ('c.geom' if inFlow == 'True' else 'd.geom') + ''', 
             ST_GEOMFROMEWKT('SRID=4326;POINT(''' + lon + ' ' + lat + ''')'))
             AND from_date = %(from_date)s
             AND organization = %(organization)s
@@ -630,29 +643,31 @@ def getFlows(lon, lat, precision, from_date, organization, inFlow, od_id, get_pe
             # get total sum of values
             # total = df['value'].sum()
 
-            if(is_json(df.at[0,'value'])):
-                data0 = json.loads(df.at[0,'value'])
-                keys = list(data0.keys())
-                values = np.zeros((df.shape[0], len(keys)), dtype=float)                
-                for index, row in df.iterrows():
-                    data = json.loads(row['value'])
-                    for k in range(len(keys)):
-                        # print(data[keys[k]])
-                        values[index,k] = data[keys[k]]
-                # print(values)
-                total = np.sum(values, axis=0).tolist()
-                # print(total)
-                # print(keys)
-            else:
-                df['value'] = df['value'].astype(float)
-                total = df['value'].sum()
-            
-            # remove duplicates rows by od_id, keeping the last
-            #df = df.drop_duplicates(subset='od_id', keep='last')
+            # Matteo 31/03/2025 -> ensures that the query result is not empty
+            if not df.empty:
+                if(is_json(df.at[0,'value'])):
+                    data0 = json.loads(df.at[0,'value'])
+                    keys = list(data0.keys())
+                    values = np.zeros((df.shape[0], len(keys)), dtype=float)                
+                    for index, row in df.iterrows():
+                        data = json.loads(row['value'])
+                        for k in range(len(keys)):
+                            # print(data[keys[k]])
+                            values[index,k] = data[keys[k]]
+                    # print(values)
+                    total = np.sum(values, axis=0).tolist()
+                    # print(total)
+                    # print(keys)
+                else:
+                    df['value'] = df['value'].astype(float)
+                    total = df['value'].sum()
 
-            # inspected polygon
-            # name0 = df.at[0,'dest_name'] if inFlow == 'True' else df.at[0,'orig_name']
-            # geom0 = df.at[0,'dest_commune'] if inFlow == 'True' else df.at[0,'orig_commune']
+                # remove duplicates rows by od_id, keeping the last
+                #df = df.drop_duplicates(subset='od_id', keep='last')
+
+                # inspected polygon
+                # name0 = df.at[0,'dest_name'] if inFlow == 'True' else df.at[0,'orig_name']
+                # geom0 = df.at[0,'dest_commune'] if inFlow == 'True' else df.at[0,'orig_commune']
             
             features = []
 
@@ -665,10 +680,10 @@ def getFlows(lon, lat, precision, from_date, organization, inFlow, od_id, get_pe
                             perc_ = float(data[keys[t]])
                         else: # i valori salvati sono assoluti
                             if(get_perc == 'True'): # posso calcolare le percentuali, se get_perc = True
-                                print('is true')
+                                #print('is true')
                                 perc_ = float(data[keys[t]])/ total[t]
                             else: # o mandare i valori assoluti
-                                print('is false')
+                                #print('is false')
                                 perc_ = float(data[keys[t]])
                         perc[keys[t]] = perc_
                     # print(perc)
@@ -683,9 +698,12 @@ def getFlows(lon, lat, precision, from_date, organization, inFlow, od_id, get_pe
                         else:
                             perc = int(row['value']) 
                 # build geojson feature
+                # Matteo 03/04/2025 -> in feature return even od_id and organization to check the ownership
                 polygon = wkb.loads(row['dest_commune'], hex=True) if inFlow != 'True' else wkb.loads(row['orig_commune'], hex=True)
                 feature = Feature(geometry=shapely.wkt.loads(polygon.wkt),
                                 id = row['dest_id'] if inFlow != 'True' else row['orig_id'],
+                                od_id=row['od_id'],
+                                organization=organization,
                                 properties={
                                     'name': row['dest_id'] if inFlow != 'True' else row['orig_id'], 
                                     'txt_name': '', 
@@ -716,7 +734,7 @@ def getFlows(lon, lat, precision, from_date, organization, inFlow, od_id, get_pe
             ON a.dest_commune = d.uid
             LEFT JOIN public.od_metadata e
             ON a.od_id = e.od_id
-            WHERE ST_CONTAINS(''' + ('c.geom' if inFlow != 'True' else 'd.geom') + ''', 
+            WHERE ST_CONTAINS(''' + ('c.geom' if inFlow == 'True' else 'd.geom') + ''', 
             ST_GEOMFROMEWKT('SRID=4326;POINT(''' + lon + ' ' + lat + ''')'))
             AND from_date = %(from_date)s
             AND organization = %(organization)s
@@ -725,7 +743,7 @@ def getFlows(lon, lat, precision, from_date, organization, inFlow, od_id, get_pe
             # AND ST_AsText(d.geom) <> ST_AsText(c.geom)
             # '''
 
-            print(query)
+            #print(query)
             # print(from_date)
             # print(organization)
             # print(od_id)
@@ -736,27 +754,29 @@ def getFlows(lon, lat, precision, from_date, organization, inFlow, od_id, get_pe
                                         'organization': organization,
                                         'od_id': od_id})
 
-            print("query DONE!")
-            
-            # get total sum of values            
-            if(is_json(df.at[0,'value'])):
-                data0 = json.loads(df.at[0,'value'])
-                keys = list(data0.keys())
-                values = np.zeros((df.shape[0], len(keys)), dtype=float)                
-                for index, row in df.iterrows():
-                    data = json.loads(row['value'])
-                    for k in range(len(keys)):
-                        # print(data[keys[k]])
-                        values[index,k] = data[keys[k]]
-                # print(values)
-                total = np.sum(values, axis=0).tolist()
-                # print(total)
-                # print(keys)
-            else:
-                df['value'] = df['value'].astype(float)
-                total = df['value'].sum()
-            
-            print("SUM DONE")
+            # print("query DONE!")
+
+            # Matteo 03/04/2025 -> ensures that the query result is not empty
+            if not df.empty:
+                # get total sum of values            
+                if(is_json(df.at[0,'value'])):
+                    data0 = json.loads(df.at[0,'value'])
+                    keys = list(data0.keys())
+                    values = np.zeros((df.shape[0], len(keys)), dtype=float)                
+                    for index, row in df.iterrows():
+                        data = json.loads(row['value'])
+                        for k in range(len(keys)):
+                            # print(data[keys[k]])
+                            values[index,k] = data[keys[k]]
+                    # print(values)
+                    total = np.sum(values, axis=0).tolist()
+                    # print(total)
+                    # print(keys)
+                else:
+                    df['value'] = df['value'].astype(float)
+                    total = df['value'].sum()
+
+                # print("SUM DONE")
             
             # remove duplicates rows by od_id, keeping the last
             #df = df.drop_duplicates(subset='od_id', keep='last')
@@ -816,6 +836,8 @@ def getFlows(lon, lat, precision, from_date, organization, inFlow, od_id, get_pe
                 polygon = wkb.loads(row['dest_commune'], hex=True) if inFlow != 'True' else wkb.loads(row['orig_commune'], hex=True)
                 feature = Feature(geometry=shapely.wkt.loads(polygon.wkt),
                                 id = row['dest_id'] if inFlow != 'True' else row['orig_id'],
+                                od_id=row['od_id'],
+                                organization=organization,
                                 properties={
                                     'name': row['dest_id'] if inFlow != 'True' else row['orig_id'], 
                                     'txt_name': row['dest_name'] if inFlow != 'True' else row['orig_name'], 
@@ -1030,6 +1052,11 @@ def getColorMap(metric_name):
         
         # close MySQL connection
         cnx.close()
+
+        #Matteo 03/04/2025 -> if df is empty return empty list
+
+        if df.empty:
+            return [], 200
         
         # create hex color column
         df['hex'] = df.apply(lambda x: convertColor(x['rgb']), axis=1)
@@ -1038,18 +1065,22 @@ def getColorMap(metric_name):
         df = df.replace(np.nan, '', regex=True)
         
         out = df[['min', 'max', 'hex']].to_numpy().tolist()
+        status = 200
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         print(exc_type, fname, exc_tb.tb_lineno)
         out = 'Error: ' + str(exc_type) + ' ' + str(fname) + ' ' + str(exc_tb.tb_lineno) + '\n' + traceback.format_exc()
+        print(out)
+        status = 500
 
-    return out
+    return out, status
 
 # New function to get statistics stored in a OD matrix (i.e., od_id) for a given polygon (i.e., dest_id)
 # - invalid_id is used to identify dest_id not previsously defined (e.g., -9999)
 # - invalid_label is used to fill the txt name filed of the response for invalid_id found
 # NOTE: at this moment, it only works if italy_epgs4326 table is used as source for the OD storing the statistics!!!
+# Matteo 03/04/2025 -> add organization parameter
 def getPolygonStatistics(od_id, dest_id, from_date, invalid_id, invalid_label):
     feature_collection = []
     result = None
@@ -1082,7 +1113,6 @@ def getPolygonStatistics(od_id, dest_id, from_date, invalid_id, invalid_label):
         
         # fetch results as dataframe
         df = pd.read_sql_query(query, connection)
-        # print(df)
 
         # print(invalid_id)
         valid_orig_id = []
@@ -1091,40 +1121,43 @@ def getPolygonStatistics(od_id, dest_id, from_date, invalid_id, invalid_label):
         invalid_orig_id_values = []
         valid_orig_id_date = []
         invalid_orig_id_date = []
-        for index, row in df.iterrows():
-            if str(row['orig_commune']) == str(invalid_id):
-                invalid_orig_id.append(row['orig_commune'])
-                invalid_orig_id_values.append(row['value'])
-                invalid_orig_id_date.append(str(row['from_date']))
-            else:
-                valid_orig_id.append(row['orig_commune'])
-                valid_orig_id_values.append(row['value'])
-                valid_orig_id_date.append(str(row['from_date']))
         
-        # print(valid_orig_id)
-        # print(invalid_orig_id)
-        
-        # print(valid_orig_id_date)
-        # print(invalid_orig_id_date)
+        # Matteo 03/04/2025 -> if df is empty return empty feature collection
+        if not df.empty:
+            for index, row in df.iterrows():
+                if str(row['orig_commune']) == str(invalid_id):
+                    invalid_orig_id.append(row['orig_commune'])
+                    invalid_orig_id_values.append(row['value'])
+                    invalid_orig_id_date.append(str(row['from_date']))
+                else:
+                    valid_orig_id.append(row['orig_commune'])
+                    valid_orig_id_values.append(row['value'])
+                    valid_orig_id_date.append(str(row['from_date']))
 
-        query2= '''
-            SELECT ids.orig_id, s.uid, s.name, s.cod_reg, s.cod_prov, s.cod_com, s.cod_ace, s.cod_sez, s.poi_id 
-            FROM (VALUES '''
+            # print(valid_orig_id)
+            # print(invalid_orig_id)
 
-        for i, id in enumerate(valid_orig_id):
-            query2 = query2 + '(' + str(i) + ',' + str(id) + '),'
+            # print(valid_orig_id_date)
+            # print(invalid_orig_id_date)
 
-        query2 = query2[:-1] + ''') 
-            AS ids(rid, orig_id) 
-            LEFT JOIN public.''' + source + ''' AS s 
-            ON ids.orig_id=s.uid 
-            ORDER BY ids.rid;'''
+            query2= '''
+                SELECT ids.orig_id, s.uid, s.name, s.cod_reg, s.cod_prov, s.cod_com, s.cod_ace, s.cod_sez, s.poi_id 
+                FROM (VALUES '''
 
-        # print(query2)
+            for i, id in enumerate(valid_orig_id):
+                query2 = query2 + '(' + str(i) + ',' + str(id) + '),'
 
-        df = pd.read_sql_query(query2, connection)
+            query2 = query2[:-1] + ''') 
+                AS ids(rid, orig_id) 
+                LEFT JOIN public.''' + source + ''' AS s 
+                ON ids.orig_id=s.uid 
+                ORDER BY ids.rid;'''
 
-        # print(df)
+            # print(query2)
+
+            df = pd.read_sql_query(query2, connection)
+
+            # print(df)
                 
         features = []
 
@@ -1266,7 +1299,7 @@ def getAllPoly(latitude_ne, longitude_ne, latitude_sw, longitude_sw, type, organ
                                 'poi_id=\'NULL\''  
             elif type == 'poi':  
                 query = query + 'poi_id LIKE \'%' + organization + '%\''
-            print(query)
+            #print(query)
             
             # fetch results as dataframe
             df = pd.read_sql_query(query, connection)
@@ -1297,7 +1330,7 @@ def getAllPoly(latitude_ne, longitude_ne, latitude_sw, longitude_sw, type, organ
             WHERE 
                 ST_Intersects(geom, ''' + aoi + ''')
             '''
-            print(query)
+            # print(query)
 
             # fetch results as dataframe
             df = pd.read_sql_query(query, connection)
@@ -1323,7 +1356,7 @@ def getAllPoly(latitude_ne, longitude_ne, latitude_sw, longitude_sw, type, organ
             print('TODO!!!') # TODO cases for gadm and msgr !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     except (Exception, psycopg2.Error) as error:
-        print("[GET POLYGON STATS] Error while fetching data from PostgreSQL", error)
+        print("[GET ALL POLYGONS] Error while fetching data from PostgreSQL", error)
 
     finally:
         # closing database connection
@@ -1337,17 +1370,89 @@ def getAllPoly(latitude_ne, longitude_ne, latitude_sw, longitude_sw, type, organ
 
 ########################################################################################################################################################
 
+# these endopints requieres only the auth control, not the owneship
+EXCLUDED_ENDPOINTS = ['getmgrspolygon', 'getmgrspolygoncenter', 'getpolygon', 'color', 'getpolystats', 'getallpolygons']
+    
+
+# check authentication/ownership (when possible) before each request
+@app.before_request
+def before_request():
+    #auth
+    token, message, status = basic_auth(url_conf, request)
+    if status == None or status != 200:
+        return {'message':message, 'status':status}, status
+    
+    #print(request.endpoint)
+    
+    if request.endpoint not in EXCLUDED_ENDPOINTS:
+        before_args = before_parser.parse_args()
+        g.contextbroker = before_args['contextbroker']
+        g.token = token    
+        # check ownership of the resource
+        args = parser.parse_args()
+        organization = args['organization']
+        od_id = None
+        if(args['od_id']):
+            od_id = args['od_id']
+
+        if od_id != None: # if the request has the od_id parameter => query by serviceUri
+            message, status = check_ownership_by_id(url_conf, token, od_id, organization, before_args['contextbroker'])
+            if status == None or status != 200:
+                return {'message':message, 'status':status}, status
+
+
+# check ownership when od_id is not provided from the beginning
+@app.after_request
+def after_request(response):
+
+    if response.status_code != 200:
+        return response
+    
+    if request.endpoint not in EXCLUDED_ENDPOINTS:
+        token = getattr(g, "token", None)
+        contextbroker = getattr(g, "contextbroker", None)
+
+        if token is None:
+            return {'message':'token is None', 'status':500}, 500
+        if contextbroker is None:
+            return {'message':'contextbroker is None', 'status':500}, 500
+
+        # parse response
+        owned_features = []
+        json_response = response.get_json()
+        features = json_response['features']
+        if len(features) > 0:
+            for feature in features:
+                od_id = feature['od_id']
+                organization = feature['organization']
+                # check ownership by serviceUri
+                message, status = check_ownership_by_id(url_conf, token, od_id, organization, contextbroker)
+                if status == 200:
+                    owned_features.append(feature)
+             
+        feature_collection = FeatureCollection(owned_features)
+        feature_collection_json = json.dumps(feature_collection)
+        response.set_data(feature_collection_json)
+        response.content_type = "application/json" 
+
+    #clear g
+    g.token = None
+    g.contextbroker = None
+
+    return response
+
+
 class ODMGRS(Resource):
     def get(self):
 
         print('[ODMGRS]')
-        print(self)
+        #print(self)
 
-        print(parser.parse_args())
+        #print(parser.parse_args())
         # parse arguments
         args = parser.parse_args()
 
-        print(args)
+        #print(args)
         
         longitude = args['longitude']
         latitude = args['latitude']
@@ -1356,7 +1461,7 @@ class ODMGRS(Resource):
         organization = args['organization']
         inFlow = args['inflow']
         
-        print('read')
+        #print('read')
         
         return getMGRSflows(longitude, latitude, precision, from_date, organization, inFlow)
 
@@ -1367,7 +1472,7 @@ class OD(Resource):
     def get(self):
         # parse arguments
         args = parser.parse_args()
-        print(args)
+        #print(args)
         
         longitude = args['longitude']
         latitude = args['latitude']

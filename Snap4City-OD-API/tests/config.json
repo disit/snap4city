@@ -1,0 +1,7 @@
+{
+    "token":"TOKEN",
+    "ip":"ENDPOINTS IP",
+    "port_build":"3000",
+    "port_insert":"3100",
+    "port_get":"3200"
+}

@@ -91,7 +91,7 @@ curl http://hostname:3100/insert -H 'Content-Type:application/json'
 
 # http://spyne.io <- flask soap
 
-from flask import Flask, request
+from flask import Flask, request, g, make_response, jsonify
 from flask_restful import reqparse, Resource, Api
 from flask_cors import CORS
 from waitress import serve
@@ -113,13 +113,32 @@ import psycopg2
 import psycopg2.extras
 import yaml
 import os
+from shapely.wkt import loads
+from shapely.ops import unary_union
+import geojson
+from auth import basic_auth
+from device import create_device, insert_data
+from ownership import check_ownership_by_id
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
+
 with open(os.path.join(script_dir,'config.yaml'), 'r') as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 
+with open(os.path.join(script_dir,'url_conf.json'), 'r') as file:
+    url_conf = json.load(file)
+
 app = Flask(__name__)
 api = Api(app)
+
+# snap4city device parser
+parser = reqparse.RequestParser()
+parser.add_argument('model', type=str, required=True)
+parser.add_argument('type', type=str, required=True)
+parser.add_argument('contextbroker', type=str, required=True)
+parser.add_argument('producer', type=str, required=True)
+parser.add_argument('subnature', type=str, required=True)
+parser.add_argument('organization', type=str, required=True)
 
 #parser = reqparse.RequestParser()
 #parser.add_argument('data', type=str, required=True)
@@ -353,16 +372,44 @@ def getMGRSpolygon(lon, lat, precision):
     #return polygon.wkt
     # return polygon's wkt with flipped coordinates (lon, lat)
     return transform(lambda x, y: (y, x), polygon).wkt
+
+
+# Matteo 01/04/2025 -> separate data creation from insertion
+def buildOD_MGRS(od_id, x_orig, y_orig, x_dest, y_dest, from_date, to_date, precision, values, value_type, value_unit, description, organization, kind, mode, transport, purpose):
+    tuples_data = []
+    tuples_metadata = []
+
+    # for each item
+    for i in range (len(x_orig)):
+        # get MGRS corners for origin and destination
+        # prepare the data
+        #orig_polygon = getMGRSpolygon(x_orig[i], y_orig[i], precision)
+        #dest_polygon = getMGRSpolygon(x_dest[i], y_dest[i], precision)
+        #orig_polygon = getMGRSpolygon_alternative(x_orig[i], y_orig[i], precision)
+        #dest_polygon = getMGRSpolygon_alternative(x_dest[i], y_dest[i], precision)
+        orig_polygon = get_MGRS_Polygon_Shapely(x_orig[i], y_orig[i], precision)
+        dest_polygon = get_MGRS_Polygon_Shapely(x_dest[i], y_dest[i], precision)
+        t = [od_id, x_orig[i], y_orig[i], x_dest[i], y_dest[i], values[i], 
+             precision, from_date, to_date, orig_polygon, dest_polygon]
+        
+        # append data as tuple
+        tuples_data.append(tuple(t))
+        
+        # prepare metadata
+        t = [od_id, value_type, value_unit, description, organization, kind, mode, transport, purpose,
+            od_id, value_type, value_unit, description, organization, kind, mode, transport, purpose]
+        
+        # append metadata as tuple
+        tuples_metadata.append(tuple(t))
+    return tuples_data, tuples_metadata
     
 # insert OD data (MGRS) into PostgreSQL
-def insertOD_MGRS(od_id, x_orig, y_orig, x_dest, y_dest, from_date, to_date, precision, values, value_type, value_unit, description, organization, kind, mode, transport, purpose):
+def insertOD_MGRS(tuples_data, tuples_metadata):
     result = False
     # calculate OD's id (SHA1 of x_orig + y_orig + x_dest + y_dest + precision + from_date + to_date)
     #od_id = str(x_orig) + str(y_orig) + str(x_dest) + str(y_dest) + str(precision) + from_date + to_date
     #od_id = hashlib.sha1(od_id.encode()).hexdigest()
     try:
-        tuples_data = []
-        tuples_metadata = []
         connection = psgConnect(config)
         
         #insert_data = '''
@@ -398,36 +445,12 @@ def insertOD_MGRS(od_id, x_orig, y_orig, x_dest, y_dest, from_date, to_date, pre
                 
         # get the cursor
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        # for each item
-        for i in range (len(x_orig)):
-            # get MGRS corners for origin and destination
-            # prepare the data
-            #orig_polygon = getMGRSpolygon(x_orig[i], y_orig[i], precision)
-            #dest_polygon = getMGRSpolygon(x_dest[i], y_dest[i], precision)
-            #orig_polygon = getMGRSpolygon_alternative(x_orig[i], y_orig[i], precision)
-            #dest_polygon = getMGRSpolygon_alternative(x_dest[i], y_dest[i], precision)
-            orig_polygon = get_MGRS_Polygon_Shapely(x_orig[i], y_orig[i], precision)
-            dest_polygon = get_MGRS_Polygon_Shapely(x_dest[i], y_dest[i], precision)
-            t = [od_id, x_orig[i], y_orig[i], x_dest[i], y_dest[i], values[i], 
-                 precision, from_date, to_date, orig_polygon, dest_polygon]
-            
-            # append data as tuple
-            tuples_data.append(tuple(t))
-            
-            # prepare metadata
-            t = [od_id, value_type, value_unit, description, organization, kind, mode, transport, purpose,
-                od_id, value_type, value_unit, description, organization, kind, mode, transport, purpose]
-            
-            # append metadata as tuple
-            tuples_metadata.append(tuple(t))
             
         # insert
         if len(tuples_data) > 0:
             cursor.executemany(insert_metadata, tuples_metadata)
             cursor.executemany(insert_data, tuples_data)
             connection.commit()
-            tuples_data = []
-            tuples_metadata = []
             result = True
 
     except (Exception, psycopg2.Error) as error:
@@ -439,18 +462,82 @@ def insertOD_MGRS(od_id, x_orig, y_orig, x_dest, y_dest, from_date, to_date, pre
             cursor.close()
             connection.close()
         return result
+    
+
+# Matteo 02/04/2025
+def get_geometry_by_communes_id(orig_communes, dest_communes, source):
+    try:
+        connection = psgConnect(config)
+        # get the cursor
+        cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        result = []
+
+        if orig_communes is None or orig_communes == '':
+            raise Exception("Unable to retrieve source table for orig_communes: %s" % orig_communes)
+        if dest_communes is None or dest_communes == '':
+            raise Exception("Unable to retrieve source table for dest_communes: %s" % dest_communes)
+        
+        if source is None or source == '':
+            source = 'gadm36'
+        
+        #query
+        query = '''
+        SELECT ST_AsText(geom) as geometry 
+        FROM public.''' + source + ''' 
+        WHERE uid IN (''' + ", ".join(f"'{item}'" for item in orig_communes) + ', ' + ", ".join(f"'{item}'" for item in dest_communes) + ''') 
+        '''
+
+        # fetch results as dataframe
+        df = pd.read_sql_query(query, connection)
+        if not df.empty:
+            result = df['geometry'].tolist()
+        
+
+    except (Exception, psycopg2.Error) as error:
+        print("Error while inserting data to PostgreSQL", error)
+
+    finally:
+        # closing database connection
+        if(connection):
+            cursor.close()
+            connection.close()
+        return result
+    
+    
+
+# Matteo 02/04/2025 -> separate data creation from insertion
+def buildOD_Communes(od_id, orig_communes, dest_communes, from_date, to_date, values, value_type, value_unit, description, organization, kind, mode, transport, purpose, source):
+    tuples_data = []
+    tuples_metadata = []
+
+    # for each item
+    for i in range (len(orig_communes)):
+        # prepare the data
+        t = [od_id, orig_communes[i], dest_communes[i], values[i], from_date, to_date]
+        
+        # append data as tuple
+        tuples_data.append(tuple(t))
+        
+        # prepare metadata
+        t = [od_id, value_type, value_unit, description, organization, kind, mode, transport, purpose, source,
+             od_id, value_type, value_unit, description, organization, kind, mode, transport, purpose, source]
+        
+        # append metadata as tuple
+        tuples_metadata.append(tuple(t))
+
+    return tuples_data, tuples_metadata
+
+
 
 # insert OD data (Communes) into PostgreSQL
 # >>>>>>>>>> modified to handle insertion of data from the new table 'italy_epgs4326':
 #            - in od_metadata added new column 'source' to specify the table to which UID refers  
-def insertOD_Communes(od_id, orig_communes, dest_communes, from_date, to_date, values, value_type, value_unit, description, organization, kind, mode, transport, purpose, source):
+def insertOD_Communes(tuples_data, tuples_metadata):
     result = False
     # calculate OD's id (SHA1 of x_orig + y_orig + x_dest + y_dest + precision + from_date + to_date)
     #od_id = str(x_orig) + str(y_orig) + str(x_dest) + str(y_dest) + str(precision) + from_date + to_date
     #od_id = hashlib.sha1(od_id.encode()).hexdigest()
     try:
-        tuples_data = []
-        tuples_metadata = []
         connection = psgConnect(config)
 
         #insert_data = '''
@@ -481,28 +568,12 @@ def insertOD_Communes(od_id, orig_communes, dest_communes, from_date, to_date, v
                 
         # get the cursor
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        # for each item
-        for i in range (len(orig_communes)):
-            # prepare the data
-            t = [od_id, orig_communes[i], dest_communes[i], values[i], from_date, to_date]
-            
-            # append data as tuple
-            tuples_data.append(tuple(t))
-            
-            # prepare metadata
-            t = [od_id, value_type, value_unit, description, organization, kind, mode, transport, purpose, source,
-                 od_id, value_type, value_unit, description, organization, kind, mode, transport, purpose, source]
-            
-            # append metadata as tuple
-            tuples_metadata.append(tuple(t))
             
         # insert
         if len(tuples_data) > 0:
             cursor.executemany(insert_metadata, tuples_metadata)
             cursor.executemany(insert_data, tuples_data)
             connection.commit()
-            tuples_data = []
-            tuples_metadata = []
             result = True
 
     except (Exception, psycopg2.Error) as error:
@@ -514,6 +585,103 @@ def insertOD_Communes(od_id, orig_communes, dest_communes, from_date, to_date, v
             cursor.close()
             connection.close()
         return result
+    
+
+# get the wkt of the bounding box of the polygons    
+def get_wkt_box(polygons_wkt):
+    polygons = [loads(polygon_wkt) for polygon_wkt in polygons_wkt]
+    union_polygon = unary_union(polygons)
+    bounding_box = union_polygon.bounds
+    xmin, ymin, xmax, ymax = bounding_box
+    return f"POLYGON(({xmin} {ymin}, {xmax} {ymin}, {xmax} {ymax}, {xmin} {ymax}, {xmin} {ymin}))"
+
+
+# convert wkt to geojson
+def wtkToGeoJSON(polygon_wkt):
+    polygon = loads(polygon_wkt)
+    geojson_data = geojson.Feature(geometry=polygon, properties={})
+    return geojson_data['geometry']
+
+# check authentication before each request
+@app.before_request
+def before_request():
+
+    args = parser.parse_args()
+    g.model = args['model']
+    g.device_type = args['type']
+    g.contextbroker = args['contextbroker']
+    g.producer = args['producer']
+    g.subnature = args['subnature']
+    g.organization = args['organization']
+
+    #auth
+    token, message, status = basic_auth(url_conf, request)
+    if status == None or status != 200:
+        return {'message':message, 'status':status}, status
+    g.token = token
+
+# after inserting data, clear flask global variable
+@app.after_request
+def after_request(response):
+    # clear g
+    g.token = None
+    g.model = None
+    g.device_type = None
+    g.contextbroker = None
+    g.producer = None
+    g.subnature = None
+    g.organization = None
+
+    return response
+
+
+def try_insert_data_in_device(content, coords, poly, device, token, model, device_type, contextbroker, producer, subnature):
+    if device == 'not_exists':
+
+        #create device
+        message, status = create_device(url_conf, token, content['od_id'], model, device_type, contextbroker, producer, subnature, coords, poly)
+        if status == None or status != 200:
+            return {'message':message, 'status':status}, status
+        # insert into device
+        data = {
+            'description': content['description'],
+            'precision': content['precision'] if 'precision' in content and content['precision'] is not None else None,
+            'kind': content['kind'],
+            'mode': content['mode'],
+            'transport': content['transport'],
+            'purpose': content['purpose'],
+            'instances': 0,
+            'from_date': content['from_date'],
+            'to_date': content['to_date'],
+            'geometry': wtkToGeoJSON(poly),
+            'colormap_name': content['colormap_name'],
+            'representation': content['representation']
+        }
+        message, status = insert_data(token, content['od_id'], device_type, contextbroker, data)
+        if status == None or (status != 204 and status != 200):
+            return {'message':message, 'status':status}, status
+    else:
+        old_data = device['realtime']['results']['bindings'][0]
+        # insert into device
+        data = {
+            'description': content['description'] if content['description'] is not None else old_data['description']['value'],
+            'precision': content['precision'] if 'precision' in content and content['precision'] is not None else old_data['precision']['value'],
+            'kind': content['kind'] if content['kind'] is not None else old_data['kind']['value'],
+            'mode': content['mode'] if content['mode'] is not None else old_data['mode']['value'],
+            'transport': content['transport'] if content['transport'] is not None else old_data['transport']['value'],
+            'purpose': content['purpose'] if content['purpose'] is not None else old_data['purpose']['value'],
+            'instances': int(old_data['instances']['value']) + 1,
+            'from_date': content['from_date'] if content['from_date'] is not None else old_data['fromDate']['value'],
+            'to_date': content['to_date'] if content['to_date'] is not None else old_data['toDate']['value'],
+            'colormap_name': content['colormap_name'] if content['colormap_name'] is not None else old_data['colormapName']['value'],
+            'representation': content['representation'] if content['representation'] is not None else old_data['representation']['value'],
+            'geometry': json.loads(old_data['geometry']['value'])
+        }
+        message, status = insert_data(token, content['od_id'], device_type, contextbroker, data)
+        if status == None or (status != 204 and status != 200):
+            return {'message':message, 'status':status}, status    
+    return None, 200
+    
     
 class OD_MGRS(Resource):
     def post(self):
@@ -539,30 +707,89 @@ class OD_MGRS(Resource):
         transport = args['transport'] #request.args.post('transport')
         purpose = args['purpose'] #request.args.post('purpose')
         '''
+
         content = request.get_json()
-        
-        if ('od_id' in content and
+
+        all_params = (
+            'od_id' in content and 
             'x_orig' in content and 
-            'y_orig' in content and
-            'x_dest' in content and
+            'y_orig' in content and 
+            'x_dest' in content and 
             'y_dest' in content and
-            'from_date' in content and
-            'to_date' in content and
-            'precision' in content and
-            'values' in content and
-            'value_type' in content and
-            'value_unit' in content and
-            'description' in content and
-            'organization' in content and
-            'kind' in content and
-            'mode' in content and
-            'transport' in content and
-            'purpose' in content and
-            len(content['x_orig']) > 0):
-            return insertOD_MGRS(content['od_id'], content['x_orig'], content['y_orig'], content['x_dest'], content['y_dest'], content['from_date'], 
-                            content['to_date'], content['precision'], content['values'], content['value_type'], 
-                            content['value_unit'], content['description'], content['organization'],
-                            content['kind'], content['mode'], content['transport'], content['purpose'])
+            'from_date' in content and 
+            'to_date' in content and 
+            'precision' in content and 
+            'values' in content and 
+            'value_type' in content and 
+            'value_unit' in content and 
+            'description' in content and 
+            'organization' in content and 
+            'kind' in content and 
+            'mode' in content and 
+            'transport' in content and 
+            'purpose' in content and 
+            'colormap_name' in content and 
+            'representation' in content and 
+            len(content['x_orig']) > 0
+        )
+
+        if not all_params:
+            return {'message':'Missing data', 'status':400}, 400
+        
+        #check device ownership/existence before inserting data
+        token = getattr(g, "token", None)
+        model = getattr(g, "model", None)
+        device_type = getattr(g, "device_type", None)
+        contextbroker = getattr(g, "contextbroker", None)
+        producer = getattr(g, "producer", None)
+        subnature = getattr(g, "subnature", None)
+        organization = getattr(g, "organization", None)
+
+        if token is None:
+            return {'message':'token is None', 'status':500}, 500
+        if model is None:
+            return {'message':'model is None', 'status':500}, 500
+        if device_type is None:
+            return {'message':'device_type is None', 'status':500}, 500
+        if contextbroker is None:
+            return {'message':'contextbroker is None', 'status':500}, 500
+        if producer is None:
+            return {'message':'producer is None', 'status':500}, 500
+        if subnature is None:
+            return {'message':'subnature is None', 'status':500}, 500
+        if organization is None:
+            return {'message':'organization is None', 'status':500}, 500
+        
+        
+        #check if device already exists
+        device, status = check_ownership_by_id(url_conf, token, content['od_id'], organization, contextbroker)
+        if status == None or status != 200:
+            device = 'not_exists'
+
+        tuples_data, tuples_metadata = buildOD_MGRS(
+            content['od_id'], content['x_orig'], content['y_orig'], content['x_dest'], content['y_dest'], 
+            content['from_date'], content['to_date'], content['precision'], content['values'], content['value_type'], 
+            content['value_unit'], content['description'], content['organization'],content['kind'], content['mode'], 
+            content['transport'], content['purpose']
+        )
+
+        # get wkt
+        polygons_wkt = [poly for t in tuples_data for poly in t[-2:]]
+        poly = get_wkt_box(polygons_wkt)
+        centroid = loads(poly).centroid
+        coords = {'lat':float(centroid.y), 'lng':float(centroid.x)}
+
+        result, status = try_insert_data_in_device(content, coords, poly, device, token, model, device_type, contextbroker, producer, subnature)
+        if status != 200:
+            return {'message':result, 'status':status}, status
+        
+        #insert data into PostgreSQL
+        result = insertOD_MGRS(tuples_data, tuples_metadata)
+        if result:
+            return {'message':'data inserted successfully', 'status':200}, 200
+
+
+
 
 # 2022/04/21 modified to accept the new 'source' parameter. To keep retrocompatibility
 #            the function check if 'source' is in 'content', and if missing 'gadm36' is
@@ -574,7 +801,7 @@ class OD_Communes(Resource):
         if('source' not in content):
             content['source'] = ''
 
-        if ('od_id' in content and
+        all_params = ('od_id' in content and
             'orig_communes' in content and 
             'dest_communes' in content and
             'from_date' in content and
@@ -589,11 +816,62 @@ class OD_Communes(Resource):
             'transport' in content and
             'purpose' in content and
             'source' in content and
-            len(content['orig_communes']) > 0):
-            return insertOD_Communes(content['od_id'], content['orig_communes'], content['dest_communes'],
-                            content['from_date'], content['to_date'], content['values'], content['value_type'], 
-                            content['value_unit'], content['description'], content['organization'],
-                            content['kind'], content['mode'], content['transport'], content['purpose'], content['source'])
+            'colormap_name' in content and 
+            'representation' in content and 
+            len(content['orig_communes']) > 0)
+        
+        if not all_params:
+            return {'message':'Missing data', 'status':400}, 400
+        
+        #check device ownership/existence before inserting data
+        token = getattr(g, "token", None)
+        model = getattr(g, "model", None)
+        device_type = getattr(g, "device_type", None)
+        contextbroker = getattr(g, "contextbroker", None)
+        producer = getattr(g, "producer", None)
+        subnature = getattr(g, "subnature", None)
+        organization = getattr(g, "organization", None)
+
+        if token is None:
+            return {'message':'token is None', 'status':500}, 500
+        if model is None:
+            return {'message':'model is None', 'status':500}, 500
+        if device_type is None:
+            return {'message':'device_type is None', 'status':500}, 500
+        if contextbroker is None:
+            return {'message':'contextbroker is None', 'status':500}, 500
+        if producer is None:
+            return {'message':'producer is None', 'status':500}, 500
+        if subnature is None:
+            return {'message':'subnature is None', 'status':500}, 500
+        if organization is None:
+            return {'message':'organization is None', 'status':500}, 500
+        
+         #check if device already exists
+        device, status = check_ownership_by_id(url_conf, token, content['od_id'], organization, contextbroker)
+        if status == None or status != 200:
+            device = 'not_exists'
+
+        tuples_data, tuples_metadata = buildOD_Communes(content['od_id'], content['orig_communes'], content['dest_communes'],
+            content['from_date'], content['to_date'], content['values'], content['value_type'], 
+            content['value_unit'], content['description'], content['organization'],
+            content['kind'], content['mode'], content['transport'], content['purpose'], content['source']
+        )
+        
+        # get wkt
+        polygons_wkt = get_geometry_by_communes_id(content['orig_communes'], content['dest_communes'], content['source'])
+        poly = get_wkt_box(polygons_wkt)
+        centroid = loads(poly).centroid
+        coords = {'lat':float(centroid.y), 'lng':float(centroid.x)}
+        
+        result, status = try_insert_data_in_device(content, coords, poly, device, token, model, device_type, contextbroker, producer, subnature)
+        if status != 200:
+            return {'message':result, 'status':status}, status
+        
+        #insert data into PostgreSQL
+        result = insertOD_Communes(tuples_data, tuples_metadata)
+        if result:
+            return {'message':'data inserted successfully', 'status':200}, 200
         
 api.add_resource(OD_MGRS, '/insert')
 api.add_resource(OD_Communes, '/insertcommunes')
@@ -609,6 +887,6 @@ if __name__ == '__main__':
     when running Flask, use waitress instead to serve
     https://stackoverflow.com/questions/51025893/flask-at-first-run-do-not-use-the-development-server-in-a-production-environmen
     '''
-    print(config)
+    #print(config)
     print("[OD-INSERT API] Accepting connections on port 3100")
     serve(app, host='0.0.0.0', port=3100)
