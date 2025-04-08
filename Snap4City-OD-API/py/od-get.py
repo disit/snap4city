@@ -48,9 +48,6 @@ script_dir = os.path.dirname(os.path.realpath(__file__))
 with open(os.path.join(script_dir,'config.yaml'), 'r') as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 
-with open(os.path.join(script_dir,'url_conf.json'), 'r') as file:
-    url_conf = json.load(file)
-
 app = Flask(__name__)
 api = Api(app)
 
@@ -1071,7 +1068,6 @@ def getColorMap(metric_name):
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         print(exc_type, fname, exc_tb.tb_lineno)
         out = 'Error: ' + str(exc_type) + ' ' + str(fname) + ' ' + str(exc_tb.tb_lineno) + '\n' + traceback.format_exc()
-        print(out)
         status = 500
 
     return out, status
@@ -1378,7 +1374,7 @@ EXCLUDED_ENDPOINTS = ['getmgrspolygon', 'getmgrspolygoncenter', 'getpolygon', 'c
 @app.before_request
 def before_request():
     #auth
-    token, message, status = basic_auth(url_conf, request)
+    token, message, status = basic_auth(config, request)
     if status == None or status != 200:
         return {'message':message, 'status':status}, status
     
@@ -1396,7 +1392,7 @@ def before_request():
             od_id = args['od_id']
 
         if od_id != None: # if the request has the od_id parameter => query by serviceUri
-            message, status = check_ownership_by_id(url_conf, token, od_id, organization, before_args['contextbroker'])
+            message, status = check_ownership_by_id(config, token, od_id, organization, before_args['contextbroker'])
             if status == None or status != 200:
                 return {'message':message, 'status':status}, status
 
@@ -1426,7 +1422,7 @@ def after_request(response):
                 od_id = feature['od_id']
                 organization = feature['organization']
                 # check ownership by serviceUri
-                message, status = check_ownership_by_id(url_conf, token, od_id, organization, contextbroker)
+                message, status = check_ownership_by_id(config, token, od_id, organization, contextbroker)
                 if status == 200:
                     owned_features.append(feature)
              

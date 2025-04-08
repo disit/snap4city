@@ -26,23 +26,23 @@ def get_token(request):
             return None, 'Access Token not present', 401
 
 # check if the token is a valid snap4city token
-def is_valid_token(url_conf, token):
+def is_valid_token(config, token):
     # build the userinfo call
     header = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {token}"
     }
-    base_url = os.getenv('BASE_URL')
-    url = base_url + url_conf['user_info']
+    base_url = os.getenv('BASE_URL', config['base_url'])
+    url = base_url + os.getenv('USER_INFO', config['user_info'])
 
     return post_request(url, header)
 
 #basic authentication
-def basic_auth(url_conf, request):
+def basic_auth(config, request):
     token, message, status = get_token(request)
     if status != 200:
         return None, message, status
-    message, status = is_valid_token(url_conf, token)
+    message, status = is_valid_token(config, token)
     if status != 200:
         return None, message, status
     return token, None, 200

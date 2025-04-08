@@ -33,9 +33,6 @@ script_dir = os.path.dirname(os.path.realpath(__file__))
 
 with open(os.path.join(script_dir,'config.yaml'), 'r') as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
-    
-with open(os.path.join(script_dir,'url_conf.json'), 'r') as file:
-    url_conf = json.load(file)
 
 app = Flask(__name__)
 api = Api(app)
@@ -451,7 +448,7 @@ def buildOD_geom_old(x_orig, y_orig, x_dest, y_dest):
 @app.before_request
 def before_request():
     #auth
-    token, message, status = basic_auth(url_conf, request)
+    token, message, status = basic_auth(config, request)
     if status == None or status != 200:
         return {'message':message, 'status':status}, status
 

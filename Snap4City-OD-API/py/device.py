@@ -11,7 +11,6 @@
    You should have received a copy of the GNU Affero General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-
 from http_methods import get_request, patch_request
 import json
 from datetime import datetime, timezone
@@ -55,7 +54,7 @@ def attribute (value_name, value_type = "description", value_unit = "text"):
 
 
 #device creation
-def create_device(url_conf, token, id, model, type, contextbroker, producer, subnature, coords, wkt):
+def create_device(config, token, id, model, type, contextbroker, producer, subnature, coords, wkt):
     dvc = device(token, id, model, type, contextbroker, producer, subnature, coords, wkt)
     attributes = [
         attribute("dateObserved", "datetime", "timestamp"),
@@ -72,8 +71,8 @@ def create_device(url_conf, token, id, model, type, contextbroker, producer, sub
         attribute("colormapName"),
         attribute("representation")
     ]
-    base_url = os.getenv('BASE_URL')
-    url = base_url + url_conf['device_url']
+    base_url = os.getenv('BASE_URL', config['base_url'])
+    url = base_url + os.getenv('DEVICE_URL', config['device_url'])
     dvc['attributes'] = json.dumps(attributes)
     return get_request(url, dvc)
 
@@ -110,9 +109,9 @@ def payload(data):
     
 
 #device data insertion
-def insert_data(token, id, type, contexbroker, data):
-    base_url = os.getenv('BASE_URL')
-    url = base_url + os.getenv('INSERT_URL')
+def insert_data(config, token, id, type, contexbroker, data):
+    base_url = os.getenv('BASE_URL', config['base_url'])
+    url = base_url + os.getenv('INSERT_URL', config['insert_url'])
     url += f"{contexbroker}/v2/entities/{id}/attrs?elementid={id}&type={type}"
     header = {
         'Content-Type': 'application/json',

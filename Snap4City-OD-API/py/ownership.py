@@ -11,19 +11,18 @@
    You should have received a copy of the GNU Affero General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-
-import os
 from http_methods import get_request
+import os
 
 
-def check_ownership_by_id(url_conf, token, id, organization, contextbroker):
-    base_url = os.getenv('BASE_URL')
-    url = base_url + url_conf['servicemap_url']
+def check_ownership_by_id(config, token, id, organization, contextbroker):
+    base_url = os.getenv('BASE_URL', config['base_url'])
+    url = base_url + os.getenv('SERVICEMAP_URL', config['servicemap_url'])
     header={
         'Authorization': f"Bearer {token}",
         'Content-Type': 'application/json'
     }
     params={
-        'serviceUri': f"{url_conf['service_uri']}{contextbroker}/{organization}/{id}",
+        'serviceUri': f"http://www.disit.org/km4city/resource/iot/{contextbroker}/{organization}/{id}",
     }
     return get_request(url, params, header)

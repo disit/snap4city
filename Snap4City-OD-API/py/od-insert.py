@@ -125,9 +125,6 @@ script_dir = os.path.dirname(os.path.realpath(__file__))
 with open(os.path.join(script_dir,'config.yaml'), 'r') as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 
-with open(os.path.join(script_dir,'url_conf.json'), 'r') as file:
-    url_conf = json.load(file)
-
 app = Flask(__name__)
 api = Api(app)
 
@@ -615,7 +612,7 @@ def before_request():
     g.organization = args['organization']
 
     #auth
-    token, message, status = basic_auth(url_conf, request)
+    token, message, status = basic_auth(config, request)
     if status == None or status != 200:
         return {'message':message, 'status':status}, status
     g.token = token
@@ -639,7 +636,7 @@ def try_insert_data_in_device(content, coords, poly, device, token, model, devic
     if device == 'not_exists':
 
         #create device
-        message, status = create_device(url_conf, token, content['od_id'], model, device_type, contextbroker, producer, subnature, coords, poly)
+        message, status = create_device(config, token, content['od_id'], model, device_type, contextbroker, producer, subnature, coords, poly)
         if status == None or status != 200:
             return {'message':message, 'status':status}, status
         # insert into device
@@ -657,7 +654,7 @@ def try_insert_data_in_device(content, coords, poly, device, token, model, devic
             'colormap_name': content['colormap_name'],
             'representation': content['representation']
         }
-        message, status = insert_data(token, content['od_id'], device_type, contextbroker, data)
+        message, status = insert_data(config, token, content['od_id'], device_type, contextbroker, data)
         if status == None or (status != 204 and status != 200):
             return {'message':message, 'status':status}, status
     else:
@@ -677,7 +674,7 @@ def try_insert_data_in_device(content, coords, poly, device, token, model, devic
             'representation': content['representation'] if content['representation'] is not None else old_data['representation']['value'],
             'geometry': json.loads(old_data['geometry']['value'])
         }
-        message, status = insert_data(token, content['od_id'], device_type, contextbroker, data)
+        message, status = insert_data(config, token, content['od_id'], device_type, contextbroker, data)
         if status == None or (status != 204 and status != 200):
             return {'message':message, 'status':status}, status    
     return None, 200
@@ -762,7 +759,7 @@ class OD_MGRS(Resource):
         
         
         #check if device already exists
-        device, status = check_ownership_by_id(url_conf, token, content['od_id'], organization, contextbroker)
+        device, status = check_ownership_by_id(config, token, content['od_id'], organization, contextbroker)
         if status == None or status != 200:
             device = 'not_exists'
 
@@ -848,7 +845,7 @@ class OD_Communes(Resource):
             return {'message':'organization is None', 'status':500}, 500
         
          #check if device already exists
-        device, status = check_ownership_by_id(url_conf, token, content['od_id'], organization, contextbroker)
+        device, status = check_ownership_by_id(config, token, content['od_id'], organization, contextbroker)
         if status == None or status != 200:
             device = 'not_exists'
 
