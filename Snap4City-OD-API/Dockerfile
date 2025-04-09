@@ -7,7 +7,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY py .
 
-ENV INSERT_URL=/orion-filter/ 
 ENV USER_INFO=/auth/realms/master/protocol/openid-connect/userinfo
 ENV DEVICE_URL=/iot-directory/api/device.php?
 ENV SERVICEMAP_URL=/superservicemap/api/v1/?

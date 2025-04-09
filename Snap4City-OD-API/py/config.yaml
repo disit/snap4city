@@ -1,12 +1,20 @@
 # PostgreSQL DB Host and Credentials
-user_psg: <USER_PSG>
-password_psg: <PASSW_PSG>
-host_psg: <HOST_PSG>
-port_psg: 5432
-database_psg: postgres
+POSTGRES_USER: <USER_PSG>
+POSTGRES_PASSWORD: <PASSW_PSG>
+POSTGRES_HOST: <HOST_PSG>
+POSTGRES_PORT: 5432
+POSTGRES_DATABASE: postgres
 
 # SQL DB Host and Credentials for heatmap color tables
-user_sql: <USER_SQL>
-password_sql: <PASSW_SQL>
-host_sql: <HOST_SQL>
-database_sql: heatmap
+MYSQL_USER: <USER_SQL>
+MYSQL_PASSWORD: <PASSW_SQL>
+MYSQL_HOST: <HOST_SQL>
+MYSQL_DATABASE: heatmap
+
+# urls
+BASE_URL: http://dashboard
+INSERT_URL: /orion-filter/ 
+USER_INFO: /auth/realms/master/protocol/openid-connect/userinfo
+DEVICE_URL: /iot-directory/api/device.php?
+SERVICEMAP_URL: /superservicemap/api/v1/?
+SERVICE_URI: http://www.disit.org/km4city/resource/iot/

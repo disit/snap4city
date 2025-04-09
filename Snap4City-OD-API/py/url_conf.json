@@ -1,6 +1,0 @@
-{
-    "user_info":"/auth/realms/master/protocol/openid-connect/userinfo",
-    "device_url":"/iot-directory/api/device.php?",
-    "servicemap_url":"/superservicemap/api/v1/?",
-    "service_uri":"http://www.disit.org/km4city/resource/iot/"
-}

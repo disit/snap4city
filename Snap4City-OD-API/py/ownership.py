@@ -16,13 +16,13 @@ import os
 
 
 def check_ownership_by_id(config, token, id, organization, contextbroker):
-    base_url = os.getenv('BASE_URL', config['base_url'])
-    url = base_url + os.getenv('SERVICEMAP_URL', config['servicemap_url'])
+    base_url = os.getenv('BASE_URL', config['BASE_URL'])
+    url = base_url + os.getenv('SERVICEMAP_URL', config['SERVICEMAP_URL'])
     header={
         'Authorization': f"Bearer {token}",
         'Content-Type': 'application/json'
     }
     params={
-        'serviceUri': f"http://www.disit.org/km4city/resource/iot/{contextbroker}/{organization}/{id}",
+        'serviceUri': os.getenv('SERVICE_URI', config['SERVICE_URI'])+f"{contextbroker}/{organization}/{id}",
     }
     return get_request(url, params, header)

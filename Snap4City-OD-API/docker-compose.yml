@@ -1,9 +1,48 @@
 version: '3'
 
 services:
+  od-postgis:
+    container_name: od-postgis
+    environment:
+      POSTGRES_PASSWORD: <PASSW_PSG>
+      POSTGRES_USER: <USER_PSG>
+      POSTGRES_HOST: <HOST_PSG>
+      POSTGRES_PORT: 5432
+      POSTGRES_DATABASE: postgres
+    image: postgis/postgis:latest
+    ports:
+    - published: 5432
+      target: 5432
+    restart: unless-stopped
+    volumes:
+    - ./od-postgis/od-matrix-db-schema.sql:/docker-entrypoint-initdb.d/20-od-matrix-db-schema.sql:rw
+    - ./od-postgis/italy_rx.sql:/docker-entrypoint-initdb.d/30-italy_rx.sql:rw
+    - ./od-postgis:/od-postgis:rw
+    - od-postgis-data:/var/lib/postgresql/data:rw
+
+  dashboarddb:
+    container_name: dashboarddb
+    environment:
+      MYSQL_DATABASE: heatmap
+      MYSQL_PASSWORD: <PASSW_SQL>
+      MYSQL_USER: <USER_SQL>
+      MYSQL_HOST: <HOST_SQL>
+    image: mariadb:10.3
+    logging:
+      driver: json-file
+      options:
+        max-file: '10'
+        max-size: 100m
+    ports:
+    - published: 3306
+      target: 3306
+    restart: unless-stopped
+    volumes:
+    - ./database/heatmap.sql:/docker-entrypoint-initdb.d/a_init.sql:rw
+    - dashboarddb:/var/lib/mysql:rw
+
   od-insert-api:
     build: 
-      context: .
       dockerfile: Dockerfile
     container_name: od-insert-api
     ports:
@@ -18,11 +57,24 @@ services:
         max-size: 100m
     environment:
       - BASE_URL=http://dashboard
-      - INSERT_URL=/orion-filter/ 
+      - INSERT_URL=/orion-filter/
+      - POSTGRES_PASSWORD=<PASSW_PSG>
+      - POSTGRES_USER=<USER_PSG>
+      - POSTGRES_HOST=<HOST_PSG>
+      - POSTGRES_PORT=5432
+      - POSTGRES_DATABASE=postgres
+      - MYSQL_DATABASE=heatmap
+      - MYSQL_PASSWORD=<PASSW_SQL>
+      - MYSQL_USER=<USER_SQL>
+      - MYSQL_HOST=<HOST_SQL>
+    depends_on:
+      - od-postgis
+      - dashboarddb
+    volumes:
+    - ./od-matrix-conf/config.yaml:/usr/src/app/config.yaml:rw
 
   od-build-api:
     build: 
-      context: .
       dockerfile: Dockerfile
     container_name: od-build-api
     ports:
@@ -37,13 +89,26 @@ services:
         max-size: 100m
     environment:
       - BASE_URL=http://dashboard
-      - INSERT_URL=/orion-filter/ 
+      - INSERT_URL=/orion-filter/
+      - POSTGRES_PASSWORD=<PASSW_PSG>
+      - POSTGRES_USER=<USER_PSG>
+      - POSTGRES_HOST=<HOST_PSG>
+      - POSTGRES_PORT=5432
+      - POSTGRES_DATABASE=postgres
+      - MYSQL_DATABASE=heatmap
+      - MYSQL_PASSWORD=<PASSW_SQL>
+      - MYSQL_USER=<USER_SQL>
+      - MYSQL_HOST=<HOST_SQL>
+    depends_on:
+      - od-postgis
+      - dashboarddb
+    volumes:
+    - ./od-matrix-conf/config.yaml:/usr/src/app/config.yaml:rw
 
   od-get-api:
     build: 
-      context: .
       dockerfile: Dockerfile
-    container_name: od-get-api
+    container_name: get-container
     ports:
       - published: 3200
         target: 3200
@@ -57,3 +122,21 @@ services:
     environment:
       - BASE_URL=http://dashboard
       - INSERT_URL=/orion-filter/
+      - POSTGRES_PASSWORD=<PASSW_PSG>
+      - POSTGRES_USER=<USER_PSG>
+      - POSTGRES_HOST=<HOST_PSG>
+      - POSTGRES_PORT=5432
+      - POSTGRES_DATABASE=postgres
+      - MYSQL_DATABASE=heatmap
+      - MYSQL_PASSWORD=<PASSW_SQL>
+      - MYSQL_USER=<USER_SQL>
+      - MYSQL_HOST=<HOST_SQL> 
+    depends_on:
+      - od-postgis
+      - dashboarddb
+    volumes:
+    - ./od-matrix-conf/config.yaml:/usr/src/app/config.yaml:rw
+
+volumes:
+  - od-postgis-data: {}
+  - dashboarddb: {}

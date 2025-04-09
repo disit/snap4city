@@ -48,11 +48,11 @@ parser.add_argument('precision', type=str, required=True)
 '''
 
 def psgConnect(conf):
-    conn = psycopg2.connect(user=conf['user_psg'],
-                            password=conf['password_psg'],
-                            host=conf['host_psg'],
-                            port=conf['port_psg'],
-                            database=conf['database_psg'])
+    conn = psycopg2.connect(user=os.getenv('POSTGRES_USER', conf['POSTGRES_USER']),
+                            password=os.getenv('POSTGRES_PASSWORD', conf['POSTGRES_PASSWORD']),
+                            host=os.getenv('POSTGRES_HOST', conf['POSTGRES_HOST']),
+                            port=os.getenv('POSTGRES_PORT', conf['POSTGRES_PORT']),
+                            database=os.getenv('POSTGRES_DATABASE', conf['POSTGRES_DATABASE']))
     return conn
 
 # build OD MGRS matrix with precision (m)

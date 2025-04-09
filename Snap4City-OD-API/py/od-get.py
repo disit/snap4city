@@ -98,18 +98,18 @@ before_parser.add_argument('contextbroker', type=str, required=True)
 
 
 def psgConnect(conf):
-    conn = psycopg2.connect(user=conf['user_psg'],
-                            password=conf['password_psg'],
-                            host=conf['host_psg'],
-                            port=conf['port_psg'],
-                            database=conf['database_psg'])
+    conn = psycopg2.connect(user=os.getenv('POSTGRES_USER', conf['POSTGRES_USER']),
+                            password=os.getenv('POSTGRES_PASSWORD', conf['POSTGRES_PASSWORD']),
+                            host=os.getenv('POSTGRES_HOST', conf['POSTGRES_HOST']),
+                            port=os.getenv('POSTGRES_PORT', conf['POSTGRES_PORT']),
+                            database=os.getenv('POSTGRES_DATABASE', conf['POSTGRES_DATABASE']))
     return conn
 
 def sqlConnect(conf):
-    conn = mysql.connector.connect(user=conf['user_sql'],
-                                   password=conf['password_sql'],
-                                   host=conf['host_sql'],
-                                   database=conf['database_sql'])
+    conn = mysql.connector.connect(user=os.getenv('MYSQL_USER', conf['MYSQL_USER']),
+                                   password=os.getenv('MYSQL_PASSWORD', conf['MYSQL_PASSWORD']),
+                                   host=os.getenv('MYSQL_HOST', conf['MYSQL_HOST']),
+                                   database=os.getenv('MYSQL_DATABASE', conf['MYSQL_DATABASE']))
     return conn
 
 # get MGRS precision from precision in meters

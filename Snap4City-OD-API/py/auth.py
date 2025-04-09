@@ -32,8 +32,8 @@ def is_valid_token(config, token):
         "Content-Type": "application/json",
         "Authorization": f"Bearer {token}"
     }
-    base_url = os.getenv('BASE_URL', config['base_url'])
-    url = base_url + os.getenv('USER_INFO', config['user_info'])
+    base_url = os.getenv('BASE_URL', config['BASE_URL'])
+    url = base_url + os.getenv('USER_INFO', config['USER_INFO'])
 
     return post_request(url, header)
 
