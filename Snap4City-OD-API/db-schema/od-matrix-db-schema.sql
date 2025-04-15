@@ -21,7 +21,7 @@ SET row_security = off;
 -- Name: tiger; Type: SCHEMA; Schema: -; Owner: postgres
 --
 
-CREATE SCHEMA tiger;
+CREATE SCHEMA IF NOT EXISTS tiger;
 
 
 ALTER SCHEMA tiger OWNER TO postgres;
@@ -30,7 +30,7 @@ ALTER SCHEMA tiger OWNER TO postgres;
 -- Name: tiger_data; Type: SCHEMA; Schema: -; Owner: postgres
 --
 
-CREATE SCHEMA tiger_data;
+CREATE SCHEMA IF NOT EXISTS tiger_data;
 
 
 ALTER SCHEMA tiger_data OWNER TO postgres;
@@ -39,7 +39,7 @@ ALTER SCHEMA tiger_data OWNER TO postgres;
 -- Name: topology; Type: SCHEMA; Schema: -; Owner: postgres
 --
 
-CREATE SCHEMA topology;
+CREATE SCHEMA IF NOT EXISTS topology;
 
 
 ALTER SCHEMA topology OWNER TO postgres;

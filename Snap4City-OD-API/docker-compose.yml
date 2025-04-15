@@ -108,7 +108,7 @@ services:
   od-get-api:
     build: 
       dockerfile: Dockerfile
-    container_name: get-container
+    container_name: od-get-api
     ports:
       - published: 3200
         target: 3200
@@ -138,5 +138,5 @@ services:
     - ./od-matrix-conf/config.yaml:/usr/src/app/config.yaml:rw
 
 volumes:
-  - od-postgis-data: {}
-  - dashboarddb: {}
+  od-postgis-data: {}
+  dashboarddb: {}

@@ -67,7 +67,7 @@ non_valid_token_header = {
 
 expired_token_header = {
     "Content-Type": "application/json",
-    "Authorization": "Bearer EXPIRED TOKEN"
+    "Authorization": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJXT0Z3bU5iM2xSU25lcUltbzMyTFNxclR3TU9mWE00UkM5S280eEp1ZU5RIn0.eyJleHAiOjE3NDM2OTQ0ODQsImlhdCI6MTc0MzY5MzEwNCwianRpIjoiNWZmNGEyZTEtMDFiMi00N2VhLTk2NWMtNTA0ZDE4ZGY4NTU2IiwiaXNzIjoiaHR0cDovL2Rhc2hib2FyZC9hdXRoL3JlYWxtcy9tYXN0ZXIiLCJzdWIiOiJhMmE3MmVmOS0yZTk2LTQ5YjktOTg0Ni04MDg5N2M1NmIxYzciLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJqcy1rcGktY2xpZW50Iiwic2Vzc2lvbl9zdGF0ZSI6IjRkN2U3NDhmLTJhOTMtNDBkNi05ODNiLTUzOGNjODU4N2Y5YSIsInNjb3BlIjoib3BlbmlkIHByb2ZpbGUgZW1haWwgdXNlcm5hbWUiLCJzaWQiOiI0ZDdlNzQ4Zi0yYTkzLTQwZDYtOTgzYi01MzhjYzg1ODdmOWEiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwicm9sZXMiOlsib2ZmbGluZV9hY2Nlc3MiLCJBcmVhTWFuYWdlciJdLCJuYW1lIjoidXNlckFyZWFNYW5hZ2VyIiwicHJlZmVycmVkX3VzZXJuYW1lIjoidXNlcmFyZWFtYW5hZ2VyIiwiZmFtaWx5X25hbWUiOiJ1c2VyQXJlYU1hbmFnZXIifQ.GdOKgkVP0Kdn5jOBk7UiJ1_mbC00rl1ObHA9hyvRFbwF48SX1k1YZFctQKhHw63dYAtRPXBCVrO572Ix6lqUU5wT5__cDdM1OX1QajQka8cGdG0DUcaWPFHsi2fFEhQCHxKIUNPTMZXkApFJQzs076e5MrMtTOcTWS0chBOl5nMK0960f4Lv23QIFlNRGNVNajNZJACga9hkiizB98pLDevu4Czxm5snWTmaNUtc-pgGcSkLXrC2aNxSsD0syYLNh6kNxymGm_GwCnckZsW-E5wal5T42gXcJoQjrAAOMtYMwXMTmOoOc5dI1-WnBzgcEvWpi1YjfHAOVap3KZlXzQ"
 }
 
 ################################################### FUNCTIONS ###################################################

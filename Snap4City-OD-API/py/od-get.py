@@ -25,7 +25,7 @@ import shapely.wkt
 import pyproj
 from pyproj import Transformer, CRS
 from geojson import Feature, Polygon, FeatureCollection
-from flask import Flask, request, g
+from flask import Flask, request, g, jsonify
 from flask_restful import reqparse, Resource, Api
 from flask_cors import CORS
 from waitress import serve
@@ -40,7 +40,7 @@ import os
 import math
 import traceback
 import sys
-from auth import basic_auth
+from auth import get_token, is_valid_token
 from ownership import check_ownership_by_id
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
@@ -71,6 +71,7 @@ parser_polygon.add_argument('longitude', type=str, required=True)
 parser_polygon.add_argument('latitude', type=str, required=True)
 parser_polygon.add_argument('type', type=str, required=True) # new field (2022/04/21)
 parser_polygon.add_argument('organization', type=str, required=True) # new field (2022/04/21)
+parser_polygon.add_argument('od_id', type=str, required=False) # new field (2025/04/14)
 
 parser_color = reqparse.RequestParser()
 parser_color.add_argument('metric_name', type=str, required=True)
@@ -82,15 +83,17 @@ parser_get_stats.add_argument('poly_id', type=str, required=True)
 parser_get_stats.add_argument('from_date', type=str, required=True)
 parser_get_stats.add_argument('invalid_id', type=str, required=True)
 parser_get_stats.add_argument('invalid_label', type=str, required=True)
+parser_get_stats.add_argument('organization', type=str, required=True) # new field (2025/04/11)
 
 # new parser to retrieve all the polygon shapes included into the visible map
-parser_get_all_polygons  = reqparse.RequestParser()
+parser_get_all_polygons = reqparse.RequestParser()
 parser_get_all_polygons.add_argument('latitude_ne', type=str, required=True)
 parser_get_all_polygons.add_argument('longitude_ne', type=str, required=True)
 parser_get_all_polygons.add_argument('latitude_sw', type=str, required=True)
 parser_get_all_polygons.add_argument('longitude_sw', type=str, required=True)
 parser_get_all_polygons.add_argument('type', type=str, required=True)
 parser_get_all_polygons.add_argument('organization', type=str, required=True)
+parser_get_all_polygons.add_argument('od_id', type=str, required=False) # new field (2025/04/14)
 
 #before request parser
 before_parser = reqparse.RequestParser()
@@ -545,9 +548,8 @@ def getMGRSflows(lon, lat, precision, from_date, organization, inFlow):
             polygon, reference = get_MGRS_Polygon_Shapely(float(row['lon']), float(row['lat']), float(precision))
             feature = Feature(geometry=shapely.wkt.loads(polygon.wkt),
                               id = reference,
-                              properties={'name': reference, 'density': perc},
-                              od_id=row['od_id'],
-                              organization=row['organization']) 
+                              properties={'name': reference, 'density': perc, organization:row['organization']},
+                              od_id=row['od_id']) 
             
             # append feature to features' array
             features.append(feature)
@@ -699,12 +701,12 @@ def getFlows(lon, lat, precision, from_date, organization, inFlow, od_id, get_pe
                 polygon = wkb.loads(row['dest_commune'], hex=True) if inFlow != 'True' else wkb.loads(row['orig_commune'], hex=True)
                 feature = Feature(geometry=shapely.wkt.loads(polygon.wkt),
                                 id = row['dest_id'] if inFlow != 'True' else row['orig_id'],
-                                od_id=row['od_id'],
-                                organization=organization,
                                 properties={
                                     'name': row['dest_id'] if inFlow != 'True' else row['orig_id'], 
                                     'txt_name': '', 
-                                    'density': perc
+                                    'density': perc,
+                                    'od_id':row['od_id'],
+                                    'organization':organization,
                                 })
                 # print(feature)
                 
@@ -833,12 +835,12 @@ def getFlows(lon, lat, precision, from_date, organization, inFlow, od_id, get_pe
                 polygon = wkb.loads(row['dest_commune'], hex=True) if inFlow != 'True' else wkb.loads(row['orig_commune'], hex=True)
                 feature = Feature(geometry=shapely.wkt.loads(polygon.wkt),
                                 id = row['dest_id'] if inFlow != 'True' else row['orig_id'],
-                                od_id=row['od_id'],
-                                organization=organization,
                                 properties={
                                     'name': row['dest_id'] if inFlow != 'True' else row['orig_id'], 
                                     'txt_name': row['dest_name'] if inFlow != 'True' else row['orig_name'], 
-                                    'density': perc
+                                    'density': perc,
+                                    'od_id':row['od_id'],
+                                    'organization':organization,
                                 })
                 # print(feature)
                 
@@ -897,7 +899,7 @@ def getMGRSPolygon(lon, lat, precision):
 #            where seach for the point(lat, lon). The 'type' can be {'region', 
 #            'province', 'municipalty', 'ace', 'section', 'poi'} and work only for 
 #            query in the new 'italy_epgs4326' table
-def getPolygon(lon, lat, type, organization):
+def getPolygon(lon, lat, type, organization, od_id):
     pol = []
     try:
         connection = psgConnect(config)
@@ -909,8 +911,12 @@ def getPolygon(lon, lat, type, organization):
             WHERE ST_Intersects(geom, ST_GeomFromText('POINT(%s %s)', 4326))
             ''' % (lon, lat)
         else:
+            # Matteo 11/04/2025 -> change query to filter by od_id
             query = '''
-            SELECT * FROM public.italy_epgs4326
+            SELECT g.*, d.od_id
+            FROM public.od_data d
+            JOIN public.italy_epgs4326 g
+            ON g.uid = d.orig_commune or g.uid = d.dest_commune
             WHERE ST_Intersects(geom, ST_GeomFromText('POINT(%s %s)', 4326)) AND
             ''' % (lon, lat)
             if type == 'region':
@@ -948,9 +954,11 @@ def getPolygon(lon, lat, type, organization):
                                 'cod_ace<>\'NULL\'  AND ' + \
                                 'cod_sez<>\'NULL\'  AND ' + \
                                 'poi_id=\'NULL\''  
-            elif type == 'poi':
-                # query = query + 'poi_id<>\'NULL\''    
-                query = query + 'poi_id LIKE \'%' + organization + '%\''       
+            elif type == 'poi':   
+                query = query + '(poi_id LIKE \'%' + organization + '%\' or poi_id <> \'NULL\')'
+                if od_id is not None:
+                    query = query + ' AND d.od_id = \'' + od_id +'\''
+
         # print(query)
         # fetch results
         cursor.execute(query)
@@ -969,7 +977,10 @@ def getPolygon(lon, lat, type, organization):
                             id = row['uid'],
                             properties={
                                 'name': row['uid'], 
-                                'txt_name': txt_name
+                                'txt_name': txt_name,
+                                'custom': row['poi_id'] != 'NULL',
+                                'od_id': row['od_id'] if 'od_id' in row else None,
+                                'organization':organization,
                             })
             features.append(feature)
         pol = FeatureCollection(features)
@@ -1077,7 +1088,7 @@ def getColorMap(metric_name):
 # - invalid_label is used to fill the txt name filed of the response for invalid_id found
 # NOTE: at this moment, it only works if italy_epgs4326 table is used as source for the OD storing the statistics!!!
 # Matteo 03/04/2025 -> add organization parameter
-def getPolygonStatistics(od_id, dest_id, from_date, invalid_id, invalid_label):
+def getPolygonStatistics(od_id, organization, dest_id, from_date, invalid_id, invalid_label):
     feature_collection = []
     result = None
     try:
@@ -1171,7 +1182,9 @@ def getPolygonStatistics(od_id, dest_id, from_date, invalid_id, invalid_label):
                                 'cod_com': row['cod_com'],
                                 'cod_ace': row['cod_ace'],
                                 'cod_sez': row['cod_sez'],
-                                'poi_id': row['poi_id']
+                                'poi_id': row['poi_id'],
+                                'od_id': od_id,
+                                'organization': organization,
                             })
             features.append(feature)
 
@@ -1211,7 +1224,7 @@ def getPolygonStatistics(od_id, dest_id, from_date, invalid_id, invalid_label):
 
 # New function to retrieve all polygon shapes included in the map bounding box (< latitude_ne, longitude_ne, latitude_sw, longitude_sw >)
 # NOTE: at this moment it only works for polygon shapes stored into the italy_epgs4326!!!
-def getAllPoly(latitude_ne, longitude_ne, latitude_sw, longitude_sw, type, organization):
+def getAllPoly(latitude_ne, longitude_ne, latitude_sw, longitude_sw, type, od_id, organization):
 
     feature_collection = []
     result = None
@@ -1253,8 +1266,10 @@ def getAllPoly(latitude_ne, longitude_ne, latitude_sw, longitude_sw, type, organ
         if(source == 'italy_epgs4326'):
             query = '''
             SELECT 
-                uid, text_uid, name, geom
-            FROM public.''' + source + '''
+                g.uid, g.text_uid, g.name, g.poi_id, g.geom, d.od_id
+            FROM public.od_data d
+            JOIN public.''' + source + ''' g
+            ON g.uid = d.orig_commune or g.uid = d.dest_commune
             WHERE 
                 ST_Intersects(geom, ''' + aoi + ''') AND
             '''
@@ -1294,8 +1309,9 @@ def getAllPoly(latitude_ne, longitude_ne, latitude_sw, longitude_sw, type, organ
                                 'cod_sez<>\'NULL\'  AND ' + \
                                 'poi_id=\'NULL\''  
             elif type == 'poi':  
-                query = query + 'poi_id LIKE \'%' + organization + '%\''
-            #print(query)
+                query = query + '(poi_id LIKE \'%' + organization + '%\' or poi_id <> \'NULL\')'
+                if od_id is not None:
+                    query = query + ' AND d.od_id = \'' + od_id +'\''
             
             # fetch results as dataframe
             df = pd.read_sql_query(query, connection)
@@ -1309,7 +1325,10 @@ def getAllPoly(latitude_ne, longitude_ne, latitude_sw, longitude_sw, type, organ
                                 id = row['uid'],
                                 properties={
                                     'name': row['uid'], 
-                                    'txt_name': row['name']
+                                    'txt_name': row['name'],
+                                    'custom': row['poi_id'] != 'NULL',
+                                    'od_id': row['od_id'] if 'od_id' in row else None,
+                                    'organization':organization,
                                 })
                 features.append(feature)
     
@@ -1366,26 +1385,32 @@ def getAllPoly(latitude_ne, longitude_ne, latitude_sw, longitude_sw, type, organ
 
 ########################################################################################################################################################
 
-# these endopints requieres only the auth control, not the owneship
-EXCLUDED_ENDPOINTS = ['getmgrspolygon', 'getmgrspolygoncenter', 'getpolygon', 'color', 'getpolystats', 'getallpolygons']
+# these endopints requires only the auth control, not the owneship
+EXCLUDED_ENDPOINTS = ['getmgrspolygon', 'getmgrspolygoncenter', 'getpolygon', 'color', 'getallpolygons']
+# these endpoints requires a late ownership control
+POLYGON_ENDPOINTS = ['getpolygon', 'getallpolygons']
     
 
 # check authentication/ownership (when possible) before each request
 @app.before_request
 def before_request():
     #auth
-    token, message, status = basic_auth(config, request)
-    if status == None or status != 200:
-        return {'message':message, 'status':status}, status
+    token, message, status = get_token(request)
+    if token is not None:
+        message, status = is_valid_token(config, token)
+        if status == None or status != 200:
+            resp = jsonify({'message':message, 'status':status})
+            resp.status_code = status
+            return resp
     
-    #print(request.endpoint)
-    
-    if request.endpoint not in EXCLUDED_ENDPOINTS:
+    if request.endpoint not in EXCLUDED_ENDPOINTS or request.endpoint in POLYGON_ENDPOINTS:
         before_args = before_parser.parse_args()
         g.contextbroker = before_args['contextbroker']
-        g.token = token    
+        g.token = token
+    
+    if request.endpoint not in EXCLUDED_ENDPOINTS: 
         # check ownership of the resource
-        args = parser.parse_args()
+        args = parser.parse_args() if request.endpoint != 'getpolystats' else parser_get_stats.parse_args()
         organization = args['organization']
         od_id = None
         if(args['od_id']):
@@ -1394,8 +1419,38 @@ def before_request():
         if od_id != None: # if the request has the od_id parameter => query by serviceUri
             message, status = check_ownership_by_id(config, token, od_id, organization, before_args['contextbroker'])
             if status == None or status != 200:
-                return {'message':message, 'status':status}, status
+                resp = jsonify({'message':message, 'status':status})
+                resp.status_code = status
+                return resp
 
+def create_feature_collection(response, token, contextbroker):
+    # parse response
+    owned_features = []
+    checked_od_id = []
+    passed_od_id = []
+    json_response = response.get_json()
+    features = json_response['features']
+    if len(features) > 0:
+        for feature in features:
+            od_id = feature['properties']['od_id']
+            organization = feature['properties']['organization']
+            # check ownership by serviceUri
+            if od_id not in checked_od_id:
+                checked_od_id.append(od_id)
+                message, status = check_ownership_by_id(config, token, od_id, organization, contextbroker)
+                if status == 200 and len(message['Service']['features'])>0:
+                    passed_od_id.append(od_id)
+                    owned_features.append(feature)
+            else:
+                if od_id in passed_od_id:
+                    owned_features.append(feature)
+    checked_od_id.clear()
+    passed_od_id.clear()
+    feature_collection = FeatureCollection(owned_features)
+    feature_collection_json = json.dumps(feature_collection)
+    response.set_data(feature_collection_json)
+    response.content_type = "application/json"
+    return response
 
 # check ownership when od_id is not provided from the beginning
 @app.after_request
@@ -1404,32 +1459,14 @@ def after_request(response):
     if response.status_code != 200:
         return response
     
-    if request.endpoint not in EXCLUDED_ENDPOINTS:
+    if request.endpoint not in EXCLUDED_ENDPOINTS or request.endpoint in POLYGON_ENDPOINTS:
         token = getattr(g, "token", None)
         contextbroker = getattr(g, "contextbroker", None)
-
-        if token is None:
-            return {'message':'token is None', 'status':500}, 500
         if contextbroker is None:
-            return {'message':'contextbroker is None', 'status':500}, 500
-
-        # parse response
-        owned_features = []
-        json_response = response.get_json()
-        features = json_response['features']
-        if len(features) > 0:
-            for feature in features:
-                od_id = feature['od_id']
-                organization = feature['organization']
-                # check ownership by serviceUri
-                message, status = check_ownership_by_id(config, token, od_id, organization, contextbroker)
-                if status == 200:
-                    owned_features.append(feature)
-             
-        feature_collection = FeatureCollection(owned_features)
-        feature_collection_json = json.dumps(feature_collection)
-        response.set_data(feature_collection_json)
-        response.content_type = "application/json" 
+            resp = jsonify({'message':'contextbroker is None', 'status':500})
+            resp.status_code = 500
+            return resp
+        response = create_feature_collection(response, token, contextbroker)
 
     #clear g
     g.token = None
@@ -1520,8 +1557,9 @@ class GetPolygon(Resource):
         latitude = args['latitude']
         type = args['type']
         organization = args['organization']
+        od_id = args['od_id']
         
-        return getPolygon(longitude, latitude, type, organization)
+        return getPolygon(longitude, latitude, type, organization, od_id)
     
 class Color(Resource):
     def get(self):
@@ -1536,11 +1574,12 @@ class GetPolyStats(Resource):
         # parse arguments
         args = parser_get_stats.parse_args()
         od_id = args['od_id']
+        organization = args['organization']
         dest_id = args['poly_id']
         from_date = args['from_date']
         invalid_id = args['invalid_id']
-        invalid_label = args['invalid_label']        
-        return getPolygonStatistics(od_id, dest_id, from_date, invalid_id, invalid_label)
+        invalid_label = args['invalid_label']       
+        return getPolygonStatistics(od_id, organization, dest_id, from_date, invalid_id, invalid_label)
 
 class GetAllPolygons(Resource):
     def get(self):
@@ -1550,8 +1589,9 @@ class GetAllPolygons(Resource):
         latitude_sw = args['latitude_sw']
         longitude_sw = args['longitude_sw']
         type = args['type']
+        od_id = args['od_id']
         organization = args['organization']
-        return getAllPoly(latitude_ne, longitude_ne, latitude_sw, longitude_sw, type, organization)
+        return getAllPoly(latitude_ne, longitude_ne, latitude_sw, longitude_sw, type, od_id, organization)
 
         
 api.add_resource(OD, '/get')

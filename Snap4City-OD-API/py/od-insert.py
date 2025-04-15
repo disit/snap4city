@@ -119,7 +119,6 @@ import geojson
 from auth import basic_auth
 from device import create_device, insert_data
 from ownership import check_ownership_by_id
-import os
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -160,7 +159,6 @@ parser.add_argument('purpose', type=str, required=True)
 '''
 
 def psgConnect(conf):
-    
     conn = psycopg2.connect(user=os.getenv('POSTGRES_USER', conf['POSTGRES_USER']),
                             password=os.getenv('POSTGRES_PASSWORD', conf['POSTGRES_PASSWORD']),
                             host=os.getenv('POSTGRES_HOST', conf['POSTGRES_HOST']),
@@ -616,7 +614,9 @@ def before_request():
     #auth
     token, message, status = basic_auth(config, request)
     if status == None or status != 200:
-        return {'message':message, 'status':status}, status
+        resp = jsonify({'message':message, 'status':status})
+        resp.status_code = status
+        return resp
     g.token = token
 
 # after inserting data, clear flask global variable
@@ -678,7 +678,7 @@ def try_insert_data_in_device(content, coords, poly, device, token, model, devic
         }
         message, status = insert_data(config, token, content['od_id'], device_type, contextbroker, data)
         if status == None or (status != 204 and status != 200):
-            return {'message':message, 'status':status}, status    
+            return {'message':message, 'status':status}, status
     return None, 200
     
     
@@ -733,7 +733,10 @@ class OD_MGRS(Resource):
         )
 
         if not all_params:
-            return {'message':'Missing data', 'status':400}, 400
+            resp = jsonify({'message':'Missing data', 'status':400})
+            resp.status_code = 400
+            return resp
+            
         
         #check device ownership/existence before inserting data
         token = getattr(g, "token", None)
@@ -744,21 +747,21 @@ class OD_MGRS(Resource):
         subnature = getattr(g, "subnature", None)
         organization = getattr(g, "organization", None)
 
-        if token is None:
-            return {'message':'token is None', 'status':500}, 500
-        if model is None:
-            return {'message':'model is None', 'status':500}, 500
-        if device_type is None:
-            return {'message':'device_type is None', 'status':500}, 500
-        if contextbroker is None:
-            return {'message':'contextbroker is None', 'status':500}, 500
-        if producer is None:
-            return {'message':'producer is None', 'status':500}, 500
-        if subnature is None:
-            return {'message':'subnature is None', 'status':500}, 500
-        if organization is None:
-            return {'message':'organization is None', 'status':500}, 500
-        
+        required_fields = {
+            'token': token,
+            'model': model,
+            'device_type': device_type,
+            'contextbroker': contextbroker,
+            'producer': producer,
+            'subnature': subnature,
+            'organization': organization,
+        }
+
+        for field_name, value in required_fields.items():
+            if value is None:
+                resp = jsonify({'message': f'{field_name} is None', 'status': 500})
+                resp.status_code = 500
+                return resp
         
         #check if device already exists
         device, status = check_ownership_by_id(config, token, content['od_id'], organization, contextbroker)
@@ -780,12 +783,16 @@ class OD_MGRS(Resource):
 
         result, status = try_insert_data_in_device(content, coords, poly, device, token, model, device_type, contextbroker, producer, subnature)
         if status != 200:
-            return {'message':result, 'status':status}, status
+            resp = jsonify({'message':result, 'status':status})
+            resp.status_code = status
+            return resp
         
         #insert data into PostgreSQL
         result = insertOD_MGRS(tuples_data, tuples_metadata)
         if result:
-            return {'message':'data inserted successfully', 'status':200}, 200
+            resp = jsonify({'message':'data inserted successfully', 'status':200})
+            resp.status_code = 200
+            return resp
 
 
 
@@ -820,7 +827,9 @@ class OD_Communes(Resource):
             len(content['orig_communes']) > 0)
         
         if not all_params:
-            return {'message':'Missing data', 'status':400}, 400
+            resp = jsonify({'message':'Missing data', 'status':400})
+            resp.status_code = 400
+            return resp
         
         #check device ownership/existence before inserting data
         token = getattr(g, "token", None)
@@ -831,20 +840,21 @@ class OD_Communes(Resource):
         subnature = getattr(g, "subnature", None)
         organization = getattr(g, "organization", None)
 
-        if token is None:
-            return {'message':'token is None', 'status':500}, 500
-        if model is None:
-            return {'message':'model is None', 'status':500}, 500
-        if device_type is None:
-            return {'message':'device_type is None', 'status':500}, 500
-        if contextbroker is None:
-            return {'message':'contextbroker is None', 'status':500}, 500
-        if producer is None:
-            return {'message':'producer is None', 'status':500}, 500
-        if subnature is None:
-            return {'message':'subnature is None', 'status':500}, 500
-        if organization is None:
-            return {'message':'organization is None', 'status':500}, 500
+        required_fields = {
+            'token': token,
+            'model': model,
+            'device_type': device_type,
+            'contextbroker': contextbroker,
+            'producer': producer,
+            'subnature': subnature,
+            'organization': organization,
+        }
+
+        for field_name, value in required_fields.items():
+            if value is None:
+                resp = jsonify({'message': f'{field_name} is None', 'status': 500})
+                resp.status_code = 500
+                return resp
         
          #check if device already exists
         device, status = check_ownership_by_id(config, token, content['od_id'], organization, contextbroker)
@@ -865,12 +875,17 @@ class OD_Communes(Resource):
         
         result, status = try_insert_data_in_device(content, coords, poly, device, token, model, device_type, contextbroker, producer, subnature)
         if status != 200:
-            return {'message':result, 'status':status}, status
+            resp = jsonify({'message':result, 'status':status})
+            resp.status_code = status
+            return resp
         
         #insert data into PostgreSQL
         result = insertOD_Communes(tuples_data, tuples_metadata)
         if result:
-            return {'message':'data inserted successfully', 'status':200}, 200
+            resp = jsonify({'message':'data inserted successfully', 'status':200})
+            resp.status_code = status
+            return resp
+                            
         
 api.add_resource(OD_MGRS, '/insert')
 api.add_resource(OD_Communes, '/insertcommunes')

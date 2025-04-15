@@ -128,7 +128,7 @@ def test_insert_mgrs_success():
         "y_orig": [item['y_orig'] for item in dd_data], 
         "x_dest": [item['x_dest'] for item in dd_data], 
         "y_dest": [item['y_dest'] for item in dd_data], 
-        "from_date": "2024-01-01 09:00:00",
+        "from_date": "2036-01-01T09:00:00Z",
         "to_date": "2024-01-01 09:59:59", 
         "precision": precision, 
         "values": [item['value'] for item in dd_data], 
@@ -144,7 +144,9 @@ def test_insert_mgrs_success():
         "representation": "MGRS"
     }
 
-    assert insert_mgrs(header, data_insert).status_code == 200
+    res = insert_mgrs(header, data_insert)
+    assert res.status_code == 200
+    assert res.json() == {"message": "data inserted successfully", "status": 200}
 
 def test_insert_mgrs_device_no_ownership():
     dd_data = compressed_build_mgrs(header)
@@ -201,7 +203,7 @@ def test_insert_mgrs_device_missing_parameters():
         "kind": "test", 
         "mode": "test", 
         "transport": "test", 
-        "purpose": "test",
+        "purpose": "test"
     }
 
     assert insert_mgrs(header, data_insert).status_code == 400
@@ -464,3 +466,51 @@ def test_insert_istat_device_update():
     }
 
     assert insert_gadm_istat(header, data_insert).status_code == 200
+
+def test_insert_custom_success():
+
+    orig_reg = ['9']
+    orig_prov = ['48']
+    orig_comm = ['48017']
+    dest_reg = ['9']
+    dest_prov = ['48']
+    dest_comm = ['48017']
+
+    buf = io.BytesIO()
+    np.savez_compressed(buf, 
+        orig_region_id = orig_reg, 
+        orig_province_id = orig_prov, 
+        orig_municipality_id = orig_comm, 
+        dest_region_id = dest_reg, 
+        dest_province_id = dest_prov, 
+        dest_municipality_id = dest_comm
+    )
+    buf.seek(0)
+    response = requests.post('http://' + IP + ':' + PORT_BUILD + '/buildcommunes', data=buf, headers=header)
+    dd_data = json.loads(response.text)
+
+    od_name = ''.join(random.choices(string.ascii_letters + string.digits, k=5))
+    organization = 'Organization'
+    od_id = od_name + "_" + organization + "_" + str(precision)
+    data_insert = {
+        "od_id": od_id,
+        "orig_communes": [item['orig_commune'] for item in dd_data], 
+        "dest_communes": [item['dest_commune'] for item in dd_data], 
+        "from_date": "2222-01-01 09:00:00",
+        "to_date": "2222-01-01 09:59:59", 
+        "values": [item['value'] for item in dd_data], 
+        "value_type": "test", 
+        "value_unit": "test",  
+        "description": "test", 
+        "organization": organization, 
+        "kind": "test", 
+        "mode": "test", 
+        "transport": "test", 
+        "purpose": "test",
+        "source": "italy_epgs4326",
+        "colormap_name": "colomapshapevalue",
+        "representation": "ISTAT"
+    }
+
+    res = insert_gadm_istat(header, data_insert)
+    assert res.status_code == 200

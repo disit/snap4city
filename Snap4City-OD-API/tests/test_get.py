@@ -38,43 +38,35 @@ contextbroker='orion-1'
 
 def get_mgrs(header, data):
     response = requests.get('http://' + IP + ':' + PORT_GET + '/get_mgrs?' + f"contextbroker={contextbroker}", params=data , headers=header)
-    print(response.json())
     return response.json(), response.status_code
 
 def get_gadm_istat(header, data):
     response = requests.get('http://' + IP + ':' + PORT_GET + '/get?' + f"contextbroker={contextbroker}", params=data , headers=header)
-    print(response.json())
     return response.json(), response.status_code
 
 def get_mgrs_polygon(header, data):
     response = requests.get('http://' + IP + ':' + PORT_GET + '/mgrs_polygon', params=data , headers=header)
-    print(response.json())
     return response.json(), response.status_code
 
 def get_mgrs_polygon_center(header, data):
     response = requests.get('http://' + IP + ':' + PORT_GET + '/mgrs_polygon_center', params=data , headers=header)
-    print(response.json())
-    return response.json(), response.status_code
+    return response.json(), response.status_code\
 
 def get_polygon(header, data):
-    response = requests.get('http://' + IP + ':' + PORT_GET + '/polygon', params=data , headers=header)
-    print(response.json())
+    response = requests.get('http://' + IP + ':' + PORT_GET + '/polygon?' + f"contextbroker={contextbroker}", params=data , headers=header)
     return response.json(), response.status_code
 
 def get_polygon_stats(header, data):
-    response = requests.get('http://' + IP + ':' + PORT_GET + '/get_stats', params=data , headers=header)
-    print(response.json())
+    response = requests.get('http://' + IP + ':' + PORT_GET + '/get_stats?' + f"contextbroker={contextbroker}", params=data , headers=header)
     return response.json(), response.status_code
 
 def get_all_polygon(header, data):
-    response = requests.get('http://' + IP + ':' + PORT_GET + '/get_all_polygons', params=data , headers=header)
-    print(response.json())
+    response = requests.get('http://' + IP + ':' + PORT_GET + '/get_all_polygons?' + f"contextbroker={contextbroker}", params=data , headers=header)
     return response.json(), response.status_code
 
 def get_color(header, data):
-        response = requests.get('http://' + IP + ':' + PORT_GET + '/color', params=data , headers=header)
-        print(response.json())
-        return response.json(), response.status_code
+    response = requests.get('http://' + IP + ':' + PORT_GET + '/color', params=data , headers=header)
+    return response.json(), response.status_code
 
 
 def is_feature_collection(data):
@@ -90,9 +82,9 @@ def test_get_mgrs_success():
     data = {
         "organization": "Organization",
         "precision": 1000,
-        "from_date": "2024-01-01 09:00:00",
-        "latitude": '43.7586',
-        "longitude": '11.2423',
+        "from_date": "2036-01-01 09:00:00",
+        "latitude": '43.867960356353514',
+        "longitude": '11.171681272693329',
         "inflow": True
     }
     result, status = get_mgrs(header, data)
@@ -150,7 +142,7 @@ def test_get_gadm_success():
         "latitude": '43.6977',
         "longitude": '11.2470',
         "inflow": True,
-        "od_id": "fjXRg_Organization_1000"
+        "od_id": "R269k_Organization_1000"
     }
     result, status = get_gadm_istat(header, data)
     assert is_feature_collection(result) == True
@@ -207,7 +199,7 @@ def test_get_istat_success():
         "latitude": '43.77996790468745',
         "longitude": '11.244942607789538',
         "inflow": True,
-        "od_id": "WjYbH_Organization_1000",
+        "od_id": "SIqTI_Organization_1000",
         "source": "italy_epgs4326"
     }
     result, status = get_gadm_istat(header, data)
@@ -360,7 +352,6 @@ def test_get_istat_polygon_not_exists():
 
 def test_get_istat_polygon_missing_parameter():
     data = {
-        "precision": 1000,
         "latitude": '43.7586',
     }
     result, status = get_polygon(header, data)
@@ -369,7 +360,7 @@ def test_get_istat_polygon_missing_parameter():
 
 def test_get_polygon_stats_success():
     data = {
-        "od_id": "WjYbH_Organization_1000",
+        "od_id": "SIqTI_Organization_1000",
         "organization": "Organization",
         "poly_id": "4777",
         "from_date": "2024-01-01 09:00:00",
@@ -384,7 +375,7 @@ def test_get_polygon_stats_success():
 
 def test_get_polygon_stats_resource_no_ownership():
     data = {
-        "od_id": "WjYbH_Organization_1000",
+        "od_id": "SIqTI_Organization_1000",
         "poly_id": "4777",
         "from_date": "2025-01-01 09:00:00",
         "invalid_id": "",
@@ -398,7 +389,7 @@ def test_get_polygon_stats_resource_no_ownership():
 
 def test_get_polygon_stats_resource_not_exists():
     data = {
-        "od_id": "WjYbH_Organization_1000",
+        "od_id": "SIqTI_Organization_1000",
         "poly_id": "4777",
         "from_date": "3024-01-01 09:00:00",
         "invalid_id": "",
@@ -412,7 +403,7 @@ def test_get_polygon_stats_resource_not_exists():
 
 def test_get_polygon_stats_missing_parameter():
     data = {
-        "od_id": "WjYbH_Organization_1000",
+        "od_id": "SIqTI_Organization_1000",
         "poly_id": "4777",
         "from_date": "3024-01-01 09:00:00",
     }
@@ -479,9 +470,179 @@ def test_get_color_resource_not_exists():
     assert status == 200
 
 
-
 def test_get_color_missing_parameter():
     data = {
     }
     result, status = get_color(header, data)
     assert status == 400
+
+
+def test_get_poi_polygon_without_filter_success():
+    data = {
+        "type": "poi",
+        "latitude": '43.7982122',
+        "longitude": '11.2534424',
+        "organization": "Organization",
+    }
+    result, status = get_polygon(header, data)
+    assert is_feature_collection(result) == True
+    assert len(result['features']) > 0
+    assert status == 200
+
+
+def  test_get_poi_polygon_without_filter_not_exists():
+    data = {
+        "type": "poi",
+        "latitude": '0',
+        "longitude": '0',
+        "organization": "Organization",
+    }
+    result, status = get_polygon(header, data)
+    assert is_feature_collection(result) == True
+    assert len(result['features']) == 0
+    assert status == 200
+
+
+def  test_get_poi_polygon_without_filter_missing_parameter():
+    data = {
+        "type": "poi",
+        "latitude": '43.7982122',
+    }
+    result, status = get_polygon(header, data)
+    assert status == 400
+
+
+def test_get_poi_polygon_with_filter_success():
+    data = {
+        "type": "poi",
+        "latitude": '43.7982122',
+        "longitude": '11.2534424',
+        "organization": "Organization",
+        "od_id": "D3Xvu_Organization_1000"
+    }
+    result, status = get_polygon(header, data)
+    assert is_feature_collection(result) == True
+    assert len(result['features']) > 0
+    assert status == 200
+
+
+def  test_get_poi_polygon_with_filter_not_exists():
+    data = {
+        "type": "poi",
+        "latitude": '0',
+        "longitude": '0',
+        "organization": "Organization",
+        "od_id": "D3Xvu_Organization_1000"
+    }
+    result, status = get_polygon(header, data)
+    assert is_feature_collection(result) == True
+    assert len(result['features']) == 0
+    assert status == 200
+
+
+def  test_get_poi_polygon_with_filter_missing_parameter():
+    data = {
+        "type": "poi",
+        "latitude": '43.7982122',
+        "od_id": "D3Xvu_Organization_1000"
+    }
+    result, status = get_polygon(header, data)
+    assert status == 400
+
+
+def test_get_all_poi_polygon_without_filter_success():
+    data = {
+        "latitude_ne": "43.79936936",
+        "longitude_ne": "11.25532783",
+        "latitude_sw": "43.79679365",
+        "longitude_sw": "11.25274512",
+        "organization": "Organization",
+        "type": "poi"
+    }
+    result, status = get_all_polygon(header, data)
+    assert is_feature_collection(result) == True
+    assert len(result['features']) > 0
+    assert status == 200
+
+
+def test_get_all_poi_polygon_without_filter_resource_not_exists():
+    data = {
+        "latitude_ne": "0.7616",
+        "longitude_ne": "0.2473",
+        "latitude_sw": "0.7536",
+        "longitude_sw": "0.2373",
+        "organization": "Organization",
+        "type": "poi"
+    }
+    result, status = get_all_polygon(header, data)
+    assert is_feature_collection(result) == True
+    assert len(result['features']) == 0
+    assert status == 200
+
+
+def test_get_all_poi_polygon_without_filter_missing_parameter():
+    data = {
+        "latitude_ne": "0.7616",
+        "longitude_ne": "0.2473",
+        "latitude_sw": "0.7536",
+        "type": "poi"
+    }
+    result, status = get_all_polygon(header, data)
+    assert status == 400
+
+
+def test_get_all_poi_polygon_with_filter_success():
+    data = {
+        "latitude_ne": "43.79936936",
+        "longitude_ne": "11.25532783",
+        "latitude_sw": "43.79679365",
+        "longitude_sw": "11.25274512",
+        "organization": "Organization",
+        "type": "poi",
+        "od_id": "D3Xvu_Organization_1000"
+    }
+    result, status = get_all_polygon(header, data)
+    assert is_feature_collection(result) == True
+    assert len(result['features']) > 0
+    assert status == 200
+
+
+def test_get_all_poi_polygon_with_filter_resource_not_exists():
+    data = {
+        "latitude_ne": "0.7616",
+        "longitude_ne": "0.2473",
+        "latitude_sw": "0.7536",
+        "longitude_sw": "0.2373",
+        "organization": "Organization",
+        "type": "poi",
+        "od_id": "D3Xvu_Organization_1000"
+    }
+    result, status = get_all_polygon(header, data)
+    assert is_feature_collection(result) == True
+    assert len(result['features']) == 0
+    assert status == 200
+
+
+def test_get_all_poi_polygon_with_filter_missing_parameter():
+    data = {
+        "latitude_ne": "0.7616",
+        "longitude_ne": "0.2473",
+        "latitude_sw": "0.7536",
+        "type": "poi",
+        "od_id": "D3Xvu_Organization_1000"
+    }
+    result, status = get_all_polygon(header, data)
+    assert status == 400
+
+def test_get_all_public_poi_polygon():
+    data = {
+        "latitude_ne": "43.79936936",
+        "longitude_ne": "11.25532783",
+        "latitude_sw": "43.79679365",
+        "longitude_sw": "11.25274512",
+        "type": "poi",
+        "organization": "Organization",
+        "od_id": "D3Xvu_Organization_1000"
+    }
+    result, status = get_all_polygon({}, data)
+    assert status == 200

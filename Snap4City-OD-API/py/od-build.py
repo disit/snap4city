@@ -11,7 +11,7 @@
    You should have received a copy of the GNU Affero General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_restful import reqparse, Resource, Api
 from flask_cors import CORS
 from shapely import wkb
@@ -450,7 +450,9 @@ def before_request():
     #auth
     token, message, status = basic_auth(config, request)
     if status == None or status != 200:
-        return {'message':message, 'status':status}, status
+        resp = jsonify({'message':message, 'status':status})
+        resp.status_code = status
+        return resp
 
 
 class OD(Resource):
