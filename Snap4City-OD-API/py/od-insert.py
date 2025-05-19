@@ -159,11 +159,31 @@ parser.add_argument('purpose', type=str, required=True)
 '''
 
 def psgConnect(conf):
-    conn = psycopg2.connect(user=os.getenv('POSTGRES_USER', conf['POSTGRES_USER']),
-                            password=os.getenv('POSTGRES_PASSWORD', conf['POSTGRES_PASSWORD']),
-                            host=os.getenv('POSTGRES_HOST', conf['POSTGRES_HOST']),
-                            port=os.getenv('POSTGRES_PORT', conf['POSTGRES_PORT']),
-                            database=os.getenv('POSTGRES_DATABASE', conf['POSTGRES_DATABASE']))
+    user_psg = 'user_psg'
+    if 'user_psg' in conf:
+        conf['user_psg']
+
+    password_psg = 'password_psg'
+    if 'password_psg' in conf:
+        password_psg = conf['password_psg']
+
+    host_psg = 'host_psg'
+    if 'host_psg' in conf:
+        host_psg = conf['host_psg']
+
+    port_psg = 'port_psg'
+    if 'port_psg' in conf:
+        port_psg = conf['port_psg']
+
+    database_psg = 'database_psg'
+    if 'database_psg' in conf:
+        database_psg = conf['database_psg']
+        
+    conn = psycopg2.connect(user=os.getenv('POSTGRES_USER', user_psg),
+                            password=os.getenv('POSTGRES_PASSWORD', password_psg),
+                            host=os.getenv('POSTGRES_HOST', host_psg),
+                            port=os.getenv('POSTGRES_PORT', port_psg),
+                            database=os.getenv('POSTGRES_DATABASE', database_psg))
     return conn
 
 # get MGRS precision from precision in meters

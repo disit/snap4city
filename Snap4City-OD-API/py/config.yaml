@@ -1,15 +1,15 @@
 # PostgreSQL DB Host and Credentials
-POSTGRES_USER: <USER_PSG>
-POSTGRES_PASSWORD: <PASSW_PSG>
-POSTGRES_HOST: <HOST_PSG>
-POSTGRES_PORT: 5432
-POSTGRES_DATABASE: postgres
+user_psg: postgres
+password_psg: RWd7Lc543yaMbzjq
+host_psg: 192.168.1.88
+port_psg: 5432
+database_psg: postgres
 
 # SQL DB Host and Credentials for heatmap color tables
-MYSQL_USER: <USER_SQL>
-MYSQL_PASSWORD: <PASSW_SQL>
-MYSQL_HOST: <HOST_SQL>
-MYSQL_DATABASE: heatmap
+user_sql: user
+password_sql: pqGe4h3TMfyiJqch
+host_sql: 192.168.1.88
+database_sql: heatmap
 
 # urls
 BASE_URL: http://dashboard

@@ -32,8 +32,15 @@ def is_valid_token(config, token):
         "Content-Type": "application/json",
         "Authorization": f"Bearer {token}"
     }
-    base_url = os.getenv('BASE_URL', config['BASE_URL'])
-    url = base_url + os.getenv('USER_INFO', config['USER_INFO'])
+    base_url_var = 'base_url'
+    if 'BASE_URL' in config:
+         base_url_var = config['BASE_URL']
+    base_url = os.getenv('BASE_URL', base_url_var)
+    
+    user_info_var = 'user_info'
+    if 'USER_INFO' in config:
+         user_info_var = config['USER_INFO']
+    url = base_url + os.getenv('USER_INFO', user_info_var)
 
     return post_request(url, header)
 
@@ -41,8 +48,10 @@ def is_valid_token(config, token):
 def basic_auth(config, request):
     token, message, status = get_token(request)
     if status != 200:
+        print('message: ',message, 'status: ', status)
         return None, message, status
     message, status = is_valid_token(config, token)
     if status != 200:
+        print('message: ',message, 'status: ', status)
         return None, message, status
     return token, None, 200
