@@ -1,19 +1,17 @@
 # PostgreSQL DB Host and Credentials
-user_psg: postgres
-password_psg: RWd7Lc543yaMbzjq
-host_psg: 192.168.1.88
+user_psg: USER
+password_psg: PASS
+host_psg: HOST
 port_psg: 5432
-database_psg: postgres
+database_psg: DB
 
 # SQL DB Host and Credentials for heatmap color tables
-user_sql: user
-password_sql: pqGe4h3TMfyiJqch
-host_sql: 192.168.1.88
-database_sql: heatmap
+user_sql: USER
+password_sql: PASS
+host_sql: HOST
+database_sql: DB
 
 # urls
-BASE_URL: http://dashboard
-INSERT_URL: /orion-filter/ 
 USER_INFO: /auth/realms/master/protocol/openid-connect/userinfo
 DEVICE_URL: /iot-directory/api/device.php?
 SERVICEMAP_URL: /superservicemap/api/v1/?

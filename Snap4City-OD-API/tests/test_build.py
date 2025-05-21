@@ -29,6 +29,9 @@ except Exception as e:
 
 IP = config['ip']
 PORT_BUILD = config['port_build']
+BASE_URL = config['base_url']
+URL_BUILD =  BASE_URL+config['url_build']
+
 
 #MGRS
 x_orig_mgrs = [11.240716442245125, 11.271746328150613, 11.241751267083647]
@@ -80,7 +83,8 @@ def uncompressed_build_mgrs(header):
     "y_dest": y_dest_mgrs,
     "precision": precision
     }
-    response = requests.post('http://' + IP + ':' + PORT_BUILD + '/build', data=json.dumps(data), headers=header)
+    #response = requests.post('http://' + IP + ':' + PORT_BUILD + '/build', data=json.dumps(data), headers=header)
+    response = requests.post(URL_BUILD + '/build', data=json.dumps(data), headers=header)
     dd_data = json.loads(response.text)
     return dd_data
 
@@ -94,7 +98,8 @@ def compressed_build_mgrs(header):
         precision=precision
     )
     buf.seek(0)
-    response = requests.post('http://' + IP + ':' + PORT_BUILD + '/buildcompressed', data=buf, headers=header)
+    #response = requests.post('http://' + IP + ':' + PORT_BUILD + '/buildcompressed', data=buf, headers=header)
+    response = requests.post(URL_BUILD + '/buildcompressed', data=buf, headers=header)
     dd_data = json.loads(response.text)
     return dd_data
 
@@ -107,7 +112,8 @@ def compressed_build_gadm(header):
         y_dest=y_dest_gadm
     )
     buf.seek(0)
-    response = requests.post('http://' + IP + ':' + PORT_BUILD + '/buildcommunes', data=buf, headers=header)
+    #response = requests.post('http://' + IP + ':' + PORT_BUILD + '/buildcommunes', data=buf, headers=header)
+    response = requests.post(URL_BUILD + '/buildcommunes', data=buf, headers=header)
     dd_data = json.loads(response.text)
     return dd_data
 
@@ -122,7 +128,8 @@ def compressed_build_istat(header):
         dest_municipality_id = dest_comm
     )
     buf.seek(0)
-    response = requests.post('http://' + IP + ':' + PORT_BUILD + '/buildcommunes', data=buf, headers=header)
+    #response = requests.post('http://' + IP + ':' + PORT_BUILD + '/buildcommunes', data=buf, headers=header)
+    response = requests.post(URL_BUILD + '/buildcommunes', data=buf, headers=header)
     dd_data = json.loads(response.text)
     return dd_data
 
@@ -141,7 +148,7 @@ def test_uncompressed_build_mgrs_missing_header():
 
 def test_uncompressed_build_mgrs_missing_token():
     response = uncompressed_build_mgrs(missing_token_header)
-    assert  response['status'] == 401
+    assert response['status'] == 401
 
 
 def test_uncompressed_build_mgrs_non_valid_token():

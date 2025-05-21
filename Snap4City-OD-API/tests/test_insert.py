@@ -49,12 +49,20 @@ dest_prov = ['48', '48', '48']
 dest_comm = ['48001', '48043', '48041']
 
 token = config['token']
+second_user_token = config['second_user_token']
 IP = config['ip']
 PORT_BUILD = config['port_build']
 PORT_INSERT = config['port_insert']
+BASE_URL = config['base_url']
+URL_BUILD =  BASE_URL+config['url_build']
+URL_INSERT =  BASE_URL+config['url_insert']
 header = {
     "Content-Type": "application/json",
     "Authorization": f"Bearer {token}"
+}
+second_user_header = {
+    "Content-Type": "application/json",
+    "Authorization": f"Bearer {second_user_token}"
 }
 
 model = 'ODMModel'
@@ -75,9 +83,9 @@ def compressed_build_mgrs(header):
         precision=precision
     )
     buf.seek(0)
-    response = requests.post('http://' + IP + ':' + PORT_BUILD + '/buildcompressed', data=buf, headers=header)
+    #response = requests.post('http://' + IP + ':' + PORT_BUILD + '/buildcompressed', data=buf, headers=header)
+    response = requests.post(URL_BUILD + '/buildcompressed', data=buf, headers=header)
     dd_data = json.loads(response.text)
-
     return dd_data
 
 def compressed_build_gadm(header):
@@ -89,7 +97,8 @@ def compressed_build_gadm(header):
         y_dest=y_dest_gadm
     )
     buf.seek(0)
-    response = requests.post('http://' + IP + ':' + PORT_BUILD + '/buildcommunes', data=buf, headers=header)
+    #response = requests.post('http://' + IP + ':' + PORT_BUILD + '/buildcommunes', data=buf, headers=header)
+    response = requests.post(URL_BUILD + '/buildcommunes', data=buf, headers=header)
     dd_data = json.loads(response.text)
     return dd_data
 
@@ -104,22 +113,24 @@ def compressed_build_istat(header):
         dest_municipality_id = dest_comm
     )
     buf.seek(0)
-    response = requests.post('http://' + IP + ':' + PORT_BUILD + '/buildcommunes', data=buf, headers=header)
+    #response = requests.post('http://' + IP + ':' + PORT_BUILD + '/buildcommunes', data=buf, headers=header)
+    response = requests.post(URL_BUILD + '/buildcommunes', data=buf, headers=header)
     dd_data = json.loads(response.text)
     return dd_data
 
 def insert_mgrs(header, data_insert):
-    return requests.post('http://' + IP + ':' + PORT_INSERT + '/insert?' + f"model={model}&type={type}&contextbroker={contextbroker}&organization={organization}&producer={producer}&subnature={subnature}", data=json.dumps(data_insert), headers=header)
+    #return requests.post('http://' + IP + ':' + PORT_INSERT + '/insert?' + f"model={model}&type={type}&contextbroker={contextbroker}&organization={organization}&producer={producer}&subnature={subnature}", data=json.dumps(data_insert), headers=header)
+    return requests.post(URL_INSERT + '/insert?' + f"model={model}&type={type}&contextbroker={contextbroker}&organization={organization}&producer={producer}&subnature={subnature}", data=json.dumps(data_insert), headers=header)
 
 def insert_gadm_istat(header, data_insert):
-    return requests.post('http://' + IP + ':' + PORT_INSERT + '/insertcommunes?' + f"model={model}&type={type}&contextbroker={contextbroker}&organization={organization}&producer={producer}&subnature={subnature}", data=json.dumps(data_insert), headers=header)
+    #return requests.post('http://' + IP + ':' + PORT_INSERT + '/insertcommunes?' + f"model={model}&type={type}&contextbroker={contextbroker}&organization={organization}&producer={producer}&subnature={subnature}", data=json.dumps(data_insert), headers=header)
+    return requests.post(URL_INSERT + '/insertcommunes?' + f"model={model}&type={type}&contextbroker={contextbroker}&organization={organization}&producer={producer}&subnature={subnature}", data=json.dumps(data_insert), headers=header)
 ################################################### TESTS ###################################################
 
 def test_insert_mgrs_success():
     dd_data = compressed_build_mgrs(header)
 
-    od_name = ''.join(random.choices(string.ascii_letters + string.digits, k=5))
-    organization = 'Organization'
+    od_name = 'MGRS'
     od_id = od_name + "_" + organization + "_" + str(precision)
 
     data_insert = {
@@ -151,8 +162,7 @@ def test_insert_mgrs_success():
 def test_insert_mgrs_device_no_ownership():
     dd_data = compressed_build_mgrs(header)
     
-    od_name = 'ABCDE'
-    organization = 'Organization'
+    od_name = 'MGRS_NO'
     od_id = od_name + "_" + organization + "_" + str(precision)
 
     data_insert = {
@@ -177,13 +187,15 @@ def test_insert_mgrs_device_no_ownership():
         "representation": "MGRS"
     }
 
+    #insert into another user
+    assert insert_mgrs(second_user_header, data_insert).status_code == 200
+
     assert insert_mgrs(header, data_insert).status_code == 409
 
 def test_insert_mgrs_device_missing_parameters():
     dd_data = compressed_build_mgrs(header)
 
     od_name = ''.join(random.choices(string.ascii_letters + string.digits, k=5))
-    organization = 'Organization'
     od_id = od_name + "_" + organization + "_" + str(precision)
 
     data_insert = {
@@ -212,8 +224,7 @@ def test_insert_mgrs_device_missing_parameters():
 def test_insert_mgrs_device_update():
     dd_data = compressed_build_mgrs(header)
 
-    od_name = 'SIqTI'
-    organization = 'Organization'
+    od_name = 'MGRS'
     od_id = od_name + "_" + organization + "_" + str(precision)
 
     data_insert = {
@@ -244,8 +255,7 @@ def test_insert_mgrs_device_update():
 def test_insert_gadm_success():
     dd_data = compressed_build_gadm(header)
 
-    od_name = ''.join(random.choices(string.ascii_letters + string.digits, k=5))
-    organization = 'Organization'
+    od_name = 'GADM'
     od_id = od_name + "_" + organization + "_" + str(precision)
 
     data_insert = {
@@ -272,8 +282,7 @@ def test_insert_gadm_success():
 def test_insert_gadm_device_no_ownership():
     dd_data = compressed_build_gadm(header)
     
-    od_name = 'ABCDE'
-    organization = 'Organization'
+    od_name = 'GADM_NO'
     od_id = od_name + "_" + organization + "_" + str(precision)
 
     data_insert = {
@@ -295,13 +304,15 @@ def test_insert_gadm_device_no_ownership():
         "representation": "GADM"
     }
 
+    #insert into another user
+    assert insert_gadm_istat(second_user_header, data_insert).status_code == 200
+
     assert insert_gadm_istat(header, data_insert).status_code == 409
 
 def test_insert_gadm_device_missing_parameters():
     dd_data = compressed_build_gadm(header)
 
     od_name = ''.join(random.choices(string.ascii_letters + string.digits, k=5))
-    organization = 'Organization'
     od_id = od_name + "_" + organization + "_" + str(precision)
 
     data_insert = {
@@ -327,8 +338,7 @@ def test_insert_gadm_device_missing_parameters():
 def test_insert_gadm_device_update():
     dd_data = compressed_build_gadm(header)
 
-    od_name = 'SIqTI'
-    organization = 'Organization'
+    od_name = 'GADM'
     od_id = od_name + "_" + organization + "_" + str(precision)
 
     data_insert = {
@@ -355,8 +365,7 @@ def test_insert_gadm_device_update():
 def test_insert_istat_success():
     dd_data = compressed_build_istat(header)
 
-    od_name = ''.join(random.choices(string.ascii_letters + string.digits, k=5))
-    organization = 'Organization'
+    od_name = 'ISTAT'
     od_id = od_name + "_" + organization + "_" + str(precision)
 
     data_insert = {
@@ -384,8 +393,7 @@ def test_insert_istat_success():
 def test_insert_istat_device_no_ownership():
     dd_data = compressed_build_istat(header)
     
-    od_name = 'ABCDE'
-    organization = 'Organization'
+    od_name = 'ISTAT_NO'
     od_id = od_name + "_" + organization + "_" + str(precision)
 
     data_insert = {
@@ -408,13 +416,15 @@ def test_insert_istat_device_no_ownership():
         "representation": "ISTAT"
     }
 
+    #insert into another user
+    assert insert_gadm_istat(second_user_header, data_insert).status_code == 200
+
     assert insert_gadm_istat(header, data_insert).status_code == 409
 
 def test_insert_istat_device_missing_parameters():
     dd_data = compressed_build_istat(header)
 
     od_name = ''.join(random.choices(string.ascii_letters + string.digits, k=5))
-    organization = 'Organization'
     od_id = od_name + "_" + organization + "_" + str(precision)
 
     data_insert = {
@@ -441,8 +451,7 @@ def test_insert_istat_device_missing_parameters():
 def test_insert_istat_device_update():
     dd_data = compressed_build_istat(header)
 
-    od_name = 'SIqTI'
-    organization = 'Organization'
+    od_name = 'ISTAT'
     od_id = od_name + "_" + organization + "_" + str(precision)
 
     data_insert = {
@@ -486,11 +495,12 @@ def test_insert_custom_success():
         dest_municipality_id = dest_comm
     )
     buf.seek(0)
-    response = requests.post('http://' + IP + ':' + PORT_BUILD + '/buildcommunes', data=buf, headers=header)
+    #response = requests.post('http://' + IP + ':' + PORT_BUILD + '/buildcommunes', data=buf, headers=header)
+    response = requests.post(URL_BUILD + '/buildcommunes', data=buf, headers=header)
+
     dd_data = json.loads(response.text)
 
-    od_name = ''.join(random.choices(string.ascii_letters + string.digits, k=5))
-    organization = 'Organization'
+    od_name = 'CSTM'
     od_id = od_name + "_" + organization + "_" + str(precision)
     data_insert = {
         "od_id": od_id,

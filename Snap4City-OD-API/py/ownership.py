@@ -16,22 +16,25 @@ import os
 
 
 def check_ownership_by_id(config, token, id, organization, contextbroker):
-    base_url_var = 'base_url'
-    if 'BASE_URL' in config:
-         base_url_var = config['BASE_URL']
+    base_url_var = 'default_base_url'
+    if 'base_url' in config:
+         base_url_var = config['base_url']
     base_url = os.getenv('BASE_URL', base_url_var)
 
-    sm_url_var = 'sm_url'
-    if 'SERVICEMAP_URL' in config:
-         sm_url_var = config['SERVICEMAP_URL']
-    sm_url_var = os.getenv('SERVICEMAP_URL', base_url_var)
+    sm_url_var = 'default_servicemap_url'
+    if 'servicemap_url' in config:
+         sm_url_var = config['servicemap_url']
 
     url = base_url + os.getenv('SERVICEMAP_URL', sm_url_var)
     header={
         'Authorization': f"Bearer {token}",
         'Content-Type': 'application/json'
     }
+    su_url_var = 'default_service_uri'
+    if 'service_uri' in config:
+         su_url_var = config['service_uri']
+    
     params={
-        'serviceUri': os.getenv('SERVICE_URI', config['SERVICE_URI'])+f"{contextbroker}/{organization}/{id}",
+        'serviceUri': os.getenv('SERVICE_URI', su_url_var) +f"{contextbroker}/{organization}/{id}",
     }
     return get_request(url, params, header)

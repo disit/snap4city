@@ -1,7 +1,12 @@
 {
     "token":"TOKEN",
+    "second_user_token": "TOKEN",
     "ip":"ENDPOINTS IP",
     "port_build":"3000",
     "port_insert":"3100",
-    "port_get":"3200"
+    "port_get":"3200",
+    "url_build": "URL BUILD",
+    "url_insert":"URL INSERT",
+    "url_get":"URL GET",
+    "base_url":"BASE URL"
 }

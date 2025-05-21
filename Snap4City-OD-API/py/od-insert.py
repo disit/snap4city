@@ -680,11 +680,14 @@ def try_insert_data_in_device(content, coords, poly, device, token, model, devic
         if status == None or (status != 204 and status != 200):
             return {'message':message, 'status':status}, status
     else:
-        old_data = device['realtime']['results']['bindings'][0]
+        try:
+            old_data = device['realtime']['results']['bindings'][0]
+        except KeyError:
+            return {'message': 'Please retry', status:503}, 503
         # insert into device
         data = {
             'description': content['description'] if content['description'] is not None else old_data['description']['value'],
-            'precision': content['precision'] if 'precision' in content and content['precision'] is not None else old_data['precision']['value'],
+            'precision': content['precision'] if 'precision' in content and content['precision'] is not None else old_data.get('precision', {}).get('value'),
             'kind': content['kind'] if content['kind'] is not None else old_data['kind']['value'],
             'mode': content['mode'] if content['mode'] is not None else old_data['mode']['value'],
             'transport': content['transport'] if content['transport'] is not None else old_data['transport']['value'],

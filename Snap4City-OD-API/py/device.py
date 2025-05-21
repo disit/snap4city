@@ -71,14 +71,14 @@ def create_device(config, token, id, model, type, contextbroker, producer, subna
         attribute("colormapName"),
         attribute("representation")
     ]
-    base_url_var = 'base_url'
-    if 'BASE_URL' in config:
-         base_url_var = config['BASE_URL']
+    base_url_var = 'default_base_url'
+    if 'base_url' in config:
+         base_url_var = config['base_url']
     base_url = os.getenv('BASE_URL', base_url_var)
     
-    device_url_var = 'device_url'
-    if 'DEVICE_URL' in config:
-        device_url_var = config['DEVICE_URL']
+    device_url_var = 'default_device_url'
+    if 'device_url' in config:
+        device_url_var = config['device_url']
     url = base_url + os.getenv('DEVICE_URL', device_url_var)
 
     dvc['attributes'] = json.dumps(attributes)
@@ -118,13 +118,13 @@ def payload(data):
 
 #device data insertion
 def insert_data(config, token, id, type, contexbroker, data):
-    base_url_var = 'base_url'
-    if 'BASE_URL' in config:
-         base_url_var = config['BASE_URL']
+    base_url_var = 'default_base_url'
+    if 'base_url' in config:
+         base_url_var = config['base_url']
     base_url = os.getenv('BASE_URL', base_url_var)
 
-    insert_url_var = 'insert_url'
-    if 'INSERT_URL' in config:
+    insert_url_var = 'default_insert_url'
+    if 'insert_url' in config:
         insert_url_var = config['INSERT_URL']
     url = base_url + os.getenv('INSERT_URL', insert_url_var)
 

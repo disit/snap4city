@@ -32,14 +32,14 @@ def is_valid_token(config, token):
         "Content-Type": "application/json",
         "Authorization": f"Bearer {token}"
     }
-    base_url_var = 'base_url'
-    if 'BASE_URL' in config:
-         base_url_var = config['BASE_URL']
+    base_url_var = 'default_base_url'
+    if 'base_url' in config:
+         base_url_var = config['base_url']
     base_url = os.getenv('BASE_URL', base_url_var)
     
-    user_info_var = 'user_info'
-    if 'USER_INFO' in config:
-         user_info_var = config['USER_INFO']
+    user_info_var = 'default_user_info'
+    if 'user_info' in config:
+         user_info_var = config['user_info']
     url = base_url + os.getenv('USER_INFO', user_info_var)
 
     return post_request(url, header)
