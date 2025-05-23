@@ -166,7 +166,7 @@ def getGeometryCode(latitude, longitude):
         results = cursor.fetchall()
 
         print('[getGeometryCode] query: ', query)
-        print('[getGeometryCode] query result: ', result)
+        print('[getGeometryCode] query result: ', results)
         
         for row in results:
             result = row['comm_id']
@@ -213,7 +213,7 @@ def getGeometryCodes(latitudes, longitudes):
             cursor.execute(query)
             results = cursor.fetchall()
             print('[getGeometryCodes] query: ', query)
-            print('[getGeometryCodes] query result: ', result)
+            print('[getGeometryCodes] query result: ', results)
         
             for row in results:
                 result.append(row['comm_id'])
@@ -247,7 +247,7 @@ def getGeometryCoordinates(codcom):
         results = cursor.fetchall()
 
         print('[getGeometryCoordinates] query: ', query)
-        print('[getGeometryCoordinates] query result: ', result) 
+        print('[getGeometryCoordinates] query result: ', results) 
    
         for row in results:
             # get geometry's coordinates
@@ -375,7 +375,7 @@ def getGeometryCodesItaly(content,direction):
             results = cursor.fetchall()
 
             print('[getGeometryCodesItaly] query: ', query)
-            print('[getGeometryCodesItaly] query result: ', result)
+            print('[getGeometryCodesItaly] query result: ', results)
         
             for row in results:
                 result.append(row['comm_id'])

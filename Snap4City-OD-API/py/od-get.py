@@ -402,6 +402,9 @@ def getOD(precision, from_date, organization):
         cursor.execute(query, (precision, from_date, organization))
         
         results = cursor.fetchall()
+
+        print('[getOD] query: ', query)
+        print('[getOD] query result: ', results)
         
         features = []
 
@@ -544,6 +547,9 @@ def getMGRSflows(lon, lat, precision, from_date, organization, inFlow):
             
         # create features' collection from features array
         feature_collection = FeatureCollection(features)
+
+        print('[getMGRSflows] query: ', query)
+        print('[getMGRSflows] query result: ', feature_collection)
 
     except (Exception, psycopg2.Error) as error:
         print("[getMGRSflows] Error while fetching data from PostgreSQL", error)
@@ -838,6 +844,9 @@ def getFlows(lon, lat, precision, from_date, organization, inFlow, od_id, get_pe
             # create features' collection from features array
             feature_collection = FeatureCollection(features)
 
+        print('[getFlows] query: ', query)
+        print('[getFlows] query result: ', feature_collection)
+
     except (Exception, psycopg2.Error) as error:
         print("[GET FLOW] Error while fetching data from PostgreSQL", error)
 
@@ -982,7 +991,8 @@ def getPolygon(lon, lat, type, organization, od_id):
             # for i in polygon.split('(((')[1].split('))')[0].split(','):
             #     lat_lon = i.strip().split(' ')
             #     pol.append([float(lat_lon[0]), float(lat_lon[1])])
-
+        print('[getPolygon] query: ', query)
+        print('[getPolygon] query result: ', pol)
     except (Exception, psycopg2.Error) as error:
         print("[GET POLYGON] Error while fetching data from PostgreSQL", error)
 
@@ -1014,7 +1024,8 @@ def getPolygonShapely(lon, lat):
             # flip polygon coordinates
             # this will return coordinates in (lat, lon) order
             polygon = transform(lambda x, y: (y, x), polygon)
-
+        print('[getPolygonShapely] query: ', query)
+        print('[getPolygonShapely] query result: ', results)
     except (Exception, psycopg2.Error) as error:
         print("Error while fetching data from PostgreSQL", error)
 
@@ -1199,7 +1210,8 @@ def getPolygonStatistics(od_id, organization, dest_id, from_date, invalid_id, in
         # create features' collection from features array
         feature_collection = FeatureCollection(features)
         # print(feature_collection)
-
+        print('[getPolygonStatistics] query: ', query)
+        print('[getPolygonStatistics] query result: ', feature_collection)
     except (Exception, psycopg2.Error) as error:
         print("[GET POLYGON STATS] Error while fetching data from PostgreSQL", error)
 
@@ -1357,7 +1369,8 @@ def getAllPoly(latitude_ne, longitude_ne, latitude_sw, longitude_sw, type, od_id
 
         elif (source == 'mgrs'):
             print('TODO!!!') # TODO cases for gadm and msgr !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+        print('[getAllPoly] query: ', query)
+        print('[getAllPoly] query result: ', feature_collection)
     except (Exception, psycopg2.Error) as error:
         print("[GET ALL POLYGONS] Error while fetching data from PostgreSQL", error)
 

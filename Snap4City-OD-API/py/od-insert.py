@@ -435,6 +435,9 @@ def insertOD_MGRS(tuples_data, tuples_metadata):
                 
         # get the cursor
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+        print('[insertOD_MGRS] query: ', insert_data)
+        print('[insertOD_MGRS] query: ', insert_metadata)
             
         # insert
         if len(tuples_data) > 0:
@@ -481,6 +484,9 @@ def get_geometry_by_communes_id(orig_communes, dest_communes, source):
         df = pd.read_sql_query(query, connection)
         if not df.empty:
             result = df['geometry'].tolist()
+
+        print('[get_geometry_by_communes_id] query: ', query)
+        print('[get_geometry_by_communes_id] query result: ', result)
         
 
     except (Exception, psycopg2.Error) as error:
@@ -558,6 +564,9 @@ def insertOD_Communes(tuples_data, tuples_metadata):
                 
         # get the cursor
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+        print('[insertOD_Communes] query: ', insert_data)
+        print('[insertOD_Communes] query: ', insert_metadata)
             
         # insert
         if len(tuples_data) > 0:
