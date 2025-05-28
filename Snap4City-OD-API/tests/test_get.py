@@ -563,6 +563,7 @@ def test_get_polygon_stats_success():
 def test_get_polygon_stats_resource_no_ownership():
     data = {
         "od_id": "GT_ISTAT_NO_Organization_1000",
+        "organization": organization,
         "poly_id": "4777",
         "from_date": "2025-01-01 09:00:00",
         "invalid_id": "",

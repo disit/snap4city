@@ -539,8 +539,8 @@ def getMGRSflows(lon, lat, precision, from_date, organization, inFlow):
             polygon, reference = get_MGRS_Polygon_Shapely(float(row['lon']), float(row['lat']), float(precision))
             feature = Feature(geometry=shapely.wkt.loads(polygon.wkt),
                               id = reference,
-                              properties={'name': reference, 'density': perc, organization:row['organization']},
-                              od_id=row['od_id']) 
+                              properties={'name': reference, 'density': perc, 'organization':row['organization'], 'od_id':row['od_id']}
+                            ) 
             
             # append feature to features' array
             features.append(feature)
@@ -975,7 +975,7 @@ def getPolygon(lon, lat, type, organization, od_id):
                             properties={
                                 'name': row['uid'], 
                                 'txt_name': txt_name,
-                                'custom': row['poi_id'] != 'NULL',
+                                'custom': True if 'poi_id' in row and row['poi_id'] != 'NULL' else False,
                                 'od_id': row['od_id'] if 'od_id' in row else None,
                                 'organization':organization,
                             })
@@ -1326,7 +1326,7 @@ def getAllPoly(latitude_ne, longitude_ne, latitude_sw, longitude_sw, type, od_id
                                 properties={
                                     'name': row['uid'], 
                                     'txt_name': row['name'],
-                                    'custom': row['poi_id'] != 'NULL',
+                                    'custom': True if 'poi_id' in row and row['poi_id'] != 'NULL' else False,
                                     'od_id': row['od_id'] if 'od_id' in row else None,
                                     'organization':organization,
                                 })
@@ -1436,15 +1436,18 @@ def create_feature_collection(response, token, contextbroker):
             od_id = feature['properties']['od_id']
             organization = feature['properties']['organization']
             # check ownership by serviceUri
-            if od_id not in checked_od_id:
-                checked_od_id.append(od_id)
-                message, status = check_ownership_by_id(config, token, od_id, organization, contextbroker)
-                if status == 200 and len(message['Service']['features'])>0:
-                    passed_od_id.append(od_id)
-                    owned_features.append(feature)
+            if od_id is not None:
+                if od_id not in checked_od_id:
+                    checked_od_id.append(od_id)
+                    message, status = check_ownership_by_id(config, token, od_id, organization, contextbroker)
+                    if status == 200 and len(message['Service']['features'])>0:
+                        passed_od_id.append(od_id)
+                        owned_features.append(feature)
+                else:
+                    if od_id in passed_od_id:
+                        owned_features.append(feature)
             else:
-                if od_id in passed_od_id:
-                    owned_features.append(feature)
+                owned_features.append(feature)
     checked_od_id.clear()
     passed_od_id.clear()
     feature_collection = FeatureCollection(owned_features)
