@@ -616,7 +616,7 @@ def getFlows(lon, lat, precision, from_date, organization, inFlow, od_id, get_pe
             ON a.dest_commune = d.uid
             LEFT JOIN public.od_metadata e
             ON a.od_id = e.od_id
-            WHERE ST_CONTAINS(''' + ('c.geom' if inFlow == 'True' else 'd.geom') + ''', 
+            WHERE ST_CONTAINS(''' + ('c.geom' if inFlow != 'True' else 'd.geom') + ''', 
             ST_GEOMFROMEWKT('SRID=4326;POINT(''' + lon + ' ' + lat + ''')'))
             AND from_date = %(from_date)s
             AND organization = %(organization)s
@@ -727,7 +727,7 @@ def getFlows(lon, lat, precision, from_date, organization, inFlow, od_id, get_pe
             ON a.dest_commune = d.uid
             LEFT JOIN public.od_metadata e
             ON a.od_id = e.od_id
-            WHERE ST_CONTAINS(''' + ('c.geom' if inFlow == 'True' else 'd.geom') + ''', 
+            WHERE ST_CONTAINS(''' + ('c.geom' if inFlow != 'True' else 'd.geom') + ''', 
             ST_GEOMFROMEWKT('SRID=4326;POINT(''' + lon + ' ' + lat + ''')'))
             AND from_date = %(from_date)s
             AND organization = %(organization)s
