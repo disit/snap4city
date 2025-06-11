@@ -714,33 +714,31 @@ class OD_MGRS(Resource):
 
         content = request.get_json()
 
-        all_params = (
-            'od_id' in content and 
-            'x_orig' in content and 
-            'y_orig' in content and 
-            'x_dest' in content and 
-            'y_dest' in content and
-            'from_date' in content and 
-            'to_date' in content and 
-            'precision' in content and 
-            'values' in content and 
-            'value_type' in content and 
-            'value_unit' in content and 
-            'description' in content and 
-            'organization' in content and 
-            'kind' in content and 
-            'mode' in content and 
-            'transport' in content and 
-            'purpose' in content and 
-            'colormap_name' in content and 
-            'representation' in content and 
-            len(content['x_orig']) > 0
-        )
+        missing_params = []
 
-        if not all_params:
-            resp = jsonify({'message':'Missing data', 'status':400})
+        required_params = [
+            'od_id', 'x_orig', 'y_orig', 'x_dest', 'y_dest',
+            'from_date', 'to_date', 'precision', 'values',
+            'value_type', 'value_unit', 'description', 'organization',
+            'kind', 'mode', 'transport', 'purpose',
+            'colormap_name', 'representation'
+        ]
+        
+        for param in required_params:
+            if param not in content:
+                missing_params.append(param)
+            elif param == 'x_orig' and not content.get('x_orig'):  # also handles empty list or None
+                missing_params.append('x_orig (empty)')
+        
+        if missing_params:
+            resp = jsonify({
+                'message': 'Missing or invalid data',
+                'missing': missing_params,
+                'status': 400
+            })
             resp.status_code = 400
             return resp
+
             
         
         #check device ownership/existence before inserting data
@@ -812,27 +810,25 @@ class OD_Communes(Resource):
         if('source' not in content):
             content['source'] = ''
 
-        all_params = ('od_id' in content and
-            'orig_communes' in content and 
-            'dest_communes' in content and
-            'from_date' in content and
-            'to_date' in content and
-            'values' in content and
-            'value_type' in content and
-            'value_unit' in content and
-            'description' in content and
-            'organization' in content and
-            'kind' in content and
-            'mode' in content and
-            'transport' in content and
-            'purpose' in content and
-            'source' in content and
-            'colormap_name' in content and 
-            'representation' in content and 
-            len(content['orig_communes']) > 0)
+        missing_params = []
+
+        required_params = [
+            'od_id', 'orig_communes', 'dest_communes', 'from_date', 'to_date',
+            'values', 'value_type', 'value_unit', 'description', 'organization',
+            'kind', 'mode', 'transport', 'purpose', 'source',
+            'colormap_name', 'representation'
+        ]
         
-        if not all_params:
-            resp = jsonify({'message':'Missing data', 'status':400})
+        for param in required_params:
+            if param not in content or (param == 'orig_communes' and len(content.get('orig_communes', [])) == 0):
+                missing_params.append(param)
+        
+        if missing_params:
+            resp = jsonify({
+                'message': 'Missing data',
+                'missing': missing_params,
+                'status': 400
+            })
             resp.status_code = 400
             return resp
         
