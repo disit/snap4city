@@ -909,8 +909,10 @@ def getPolygon(lon, lat, type, organization, od_id):
             ''' % (lon, lat)
         else:
             # Matteo 11/04/2025 -> change query to filter by od_id
-            query = '''
-            SELECT g.*, d.od_id
+            query = "SELECT DISTINCT g.*"
+            if od_id is not None:
+                query = query +  ", d.od_id"
+            query = query + '''
             FROM public.od_data d
             JOIN public.italy_epgs4326 g
             ON g.uid = d.orig_commune or g.uid = d.dest_commune
@@ -1431,6 +1433,7 @@ def create_feature_collection(response, token, contextbroker):
     passed_od_id = []
     json_response = response.get_json()
     features = json_response['features']
+    print("BEFORE FILTERING: " ,len(features))
     if len(features) > 0:
         for feature in features:
             od_id = feature['properties']['od_id']
@@ -1450,6 +1453,7 @@ def create_feature_collection(response, token, contextbroker):
                 owned_features.append(feature)
     checked_od_id.clear()
     passed_od_id.clear()
+    print("AFTER FILTERING: " ,len(owned_features))
     feature_collection = FeatureCollection(owned_features)
     feature_collection_json = json.dumps(feature_collection)
     response.set_data(feature_collection_json)
