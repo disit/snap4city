@@ -909,13 +909,8 @@ def getPolygon(lon, lat, type, organization, od_id):
             ''' % (lon, lat)
         else:
             # Matteo 11/04/2025 -> change query to filter by od_id
-            query = "SELECT DISTINCT g.*"
-            if od_id is not None:
-                query = query +  ", d.od_id"
-            query = query + '''
-            FROM public.od_data d
-            JOIN public.italy_epgs4326 g
-            ON g.uid = d.orig_commune or g.uid = d.dest_commune
+            query = '''
+            SELECT * FROM public.italy_epgs4326
             WHERE ST_Intersects(geom, ST_GeomFromText('POINT(%s %s)', 4326)) AND
             ''' % (lon, lat)
             if type == 'region':
@@ -978,7 +973,7 @@ def getPolygon(lon, lat, type, organization, od_id):
                                 'name': row['uid'], 
                                 'txt_name': txt_name,
                                 'custom': True if 'poi_id' in row and row['poi_id'] != 'NULL' else False,
-                                'od_id': row['od_id'] if 'od_id' in row else None,
+                                'od_id': od_id,
                                 'organization':organization,
                             })
             features.append(feature)
@@ -1266,13 +1261,10 @@ def getAllPoly(latitude_ne, longitude_ne, latitude_sw, longitude_sw, type, od_id
 
         # get query
         if(source == 'italy_epgs4326'):
-            query = "SELECT DISTINCT g.uid, g.text_uid, g.name, g.poi_id, g.geom"
-            if od_id is not None:
-                query = query + ", d.od_id"
-            query = query + '''
-            FROM public.od_data d
-            JOIN public.''' + source + ''' g
-            ON g.uid = d.orig_commune or g.uid = d.dest_commune
+            query = '''
+            SELECT 
+                uid, text_uid, name, geom
+            FROM public.''' + source + '''
             WHERE 
                 ST_Intersects(geom, ''' + aoi + ''') AND
             '''
@@ -1330,7 +1322,7 @@ def getAllPoly(latitude_ne, longitude_ne, latitude_sw, longitude_sw, type, od_id
                                     'name': row['uid'], 
                                     'txt_name': row['name'],
                                     'custom': True if 'poi_id' in row and row['poi_id'] != 'NULL' else False,
-                                    'od_id': row['od_id'] if 'od_id' in row else None,
+                                    'od_id': od_id,
                                     'organization':organization,
                                 })
                 features.append(feature)
@@ -1468,7 +1460,7 @@ def after_request(response):
     if response.status_code != 200:
         return response
     
-    if request.endpoint not in EXCLUDED_ENDPOINTS or request.endpoint in POLYGON_ENDPOINTS:
+    if request.endpoint not in EXCLUDED_ENDPOINTS:
         token = getattr(g, "token", None)
         contextbroker = getattr(g, "contextbroker", None)
         if contextbroker is None:
