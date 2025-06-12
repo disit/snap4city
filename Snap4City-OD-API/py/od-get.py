@@ -1266,9 +1266,10 @@ def getAllPoly(latitude_ne, longitude_ne, latitude_sw, longitude_sw, type, od_id
 
         # get query
         if(source == 'italy_epgs4326'):
-            query = '''
-            SELECT 
-                g.uid, g.text_uid, g.name, g.poi_id, g.geom, d.od_id
+            query = "SELECT DISTINCT g.uid, g.text_uid, g.name, g.poi_id, g.geom"
+            if od_id is not None:
+                query = query + ", d.od_id"
+            query = query + '''
             FROM public.od_data d
             JOIN public.''' + source + ''' g
             ON g.uid = d.orig_commune or g.uid = d.dest_commune

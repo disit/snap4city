@@ -17,6 +17,8 @@ import requests
 #get request to the server
 def get_request(url, params, header=None):
     try:
+        if header.get('Authorization') == 'Bearer None':
+            header.pop('Authorization')
         response = requests.get(url, headers=header, params=params)
         response.raise_for_status()
         json_response =  response.json()
