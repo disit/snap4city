@@ -481,14 +481,13 @@ def getMGRSflows(lon, lat, precision, from_date, organization, inFlow):
         query = ''
         df = None
         
-        # Matteo 31/03/2025 -> correction in query line 492 ('orig_geom' if inFlow != 'True' else 'dest_geom') => ('orig_geom' if inFlow == 'True' else 'dest_geom')
         query = '''
         SELECT a.od_id, a.from_date, c.organization, a.precision, a.value, 
         ''' + ('x_orig AS lon, y_orig AS lat' if inFlow == 'True' else 'x_dest AS lon, y_dest AS lat') + '''
         FROM public.od_data_mgrs a
         LEFT JOIN public.od_metadata c
         ON a.od_id = c.od_id
-        WHERE ST_CONTAINS(''' + ('orig_geom' if inFlow == 'True' else 'dest_geom') + ''',  
+        WHERE ST_CONTAINS(''' + ('orig_geom' if inFlow != 'True' else 'dest_geom') + ''',  
         ST_GEOMFROMEWKT('SRID=4326;POINT(''' + lon + ' ' + lat + ''')'))
         AND from_date = %(from_date)s
         AND organization = %(organization)s
