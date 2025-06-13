@@ -25,7 +25,7 @@ import shapely.wkt
 import pyproj
 from pyproj import Transformer, CRS
 from geojson import Feature, Polygon, FeatureCollection
-from flask import Flask, request, g, jsonify
+from flask import Flask, request, g, jsonify, make_response
 from flask_restful import reqparse, Resource, Api
 from flask_cors import CORS
 from waitress import serve
@@ -1390,6 +1390,14 @@ POLYGON_ENDPOINTS = ['getpolygon', 'getallpolygons']
 # check authentication/ownership (when possible) before each request
 @app.before_request
 def before_request():
+    if request.method == 'OPTIONS':
+        # You can add headers here if needed for CORS
+        response = make_response()
+        response.status_code = 200
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+        return response
     #auth
     token, message, status = get_token(request)
     if token is not None:
