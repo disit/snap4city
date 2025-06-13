@@ -1460,6 +1460,9 @@ def after_request(response):
     if response.status_code != 200:
         return response
     
+    if request.method == 'OPTIONS':
+        return response
+    
     if request.endpoint not in EXCLUDED_ENDPOINTS:
         token = getattr(g, "token", None)
         contextbroker = getattr(g, "contextbroker", None)
