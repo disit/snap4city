@@ -31,34 +31,37 @@ def get_request(url, params, header=None):
         try:
             error_details = h_e.response.json()
         except ValueError:
-            error_details = response.text
+            error_details = h_e.response.text
         print(f"Http Error: {error_details}", h_e.response.status_code)
         return f"Http Error: {error_details}", h_e.response.status_code
     except requests.exceptions.ConnectionError as c_e:
         try:
             error_details = c_e.response.json()
         except ValueError:
-            error_details = response.text
+            error_details = c_e.response.text
         print(f"Error Connecting: {error_details}", 400)
         return f"Error Connecting: {error_details}", 400
     except requests.exceptions.Timeout as t_e:
         try:
             error_details = t_e.response.json()
         except ValueError:
-            error_details = response.text
+            error_details = t_e.response.text
         print(f"Timeout Error: {error_details}", 400)
         return f"Timeout Error: {error_details}", 400
     except requests.exceptions.RequestException as r_e:
         try:
             error_details = r_e.response.json()
         except ValueError:
-            error_details = response.text
+            error_details = r_e.response.text
         print(f"Some error occurred: {error_details}", 400)
         return f"Some error occurred: {error_details}", 400
     except Exception as e:
-        json_response =  response.json()
-        print(f"Unexpected error: {e} {json_response['msg']}", 400)
-        return f"Unexpected error: {e} {json_response['msg']}", 400
+        try:
+            error_details = e.response.json()
+        except ValueError:
+            error_details = e.response.text
+        print(f"Unexpected error: {error_details}", 400)
+        return f"Unexpected error: {error_details}", 400
     
 
 #post request to the server
@@ -71,30 +74,37 @@ def post_request(url, header):
         try:
             error_details = h_e.response.json()
         except ValueError:
-            error_details = response.text
+            error_details = h_e.response.text
         print(f"Http Error: {error_details}", h_e.response.status_code)
         return f"Http Error: {error_details}", h_e.response.status_code
     except requests.exceptions.ConnectionError as c_e:
         try:
             error_details = c_e.response.json()
         except ValueError:
-            error_details = response.text
+            error_details = c_e.response.text
         print(f"Error Connecting: {error_details}", 400)
         return f"Error Connecting: {error_details}", 400
     except requests.exceptions.Timeout as t_e:
         try:
             error_details = t_e.response.json()
         except ValueError:
-            error_details = response.text
+            error_details = t_e.response.text
         print(f"Timeout Error: {error_details}", 400)
         return f"Timeout Error: {error_details}", 400
     except requests.exceptions.RequestException as r_e:
         try:
             error_details = r_e.response.json()
         except ValueError:
-            error_details = response.text
+            error_details = r_e.response.text
         print(f"Some error occurred: {error_details}", 400)
         return f"Some error occurred: {error_details}", 400
+    except Exception as e:
+        try:
+            error_details = e.response.json()
+        except ValueError:
+            error_details = e.response.text
+        print(f"Unexpected error: {error_details}", 400)
+        return f"Unexpected error: {error_details}", 400
     
 
 #patch request to the server
@@ -107,27 +117,34 @@ def patch_request(url, header, data):
         try:
             error_details = h_e.response.json()
         except ValueError:
-            error_details = response.text
+            error_details = h_e.response.text
         print(f"Http Error: {error_details}", h_e.response.status_code)
         return f"Http Error: {error_details}", h_e.response.status_code
     except requests.exceptions.ConnectionError as c_e:
         try:
             error_details = c_e.response.json()
         except ValueError:
-            error_details = response.text
+            error_details = c_e.response.text
         print(f"Error Connecting: {error_details}", 400)
         return f"Error Connecting: {error_details}", 400
     except requests.exceptions.Timeout as t_e:
         try:
             error_details = t_e.response.json()
         except ValueError:
-            error_details = response.text
+            error_details = t_e.response.text
         print(f"Timeout Error: {error_details}", 400)
         return f"Timeout Error: {error_details}", 400
     except requests.exceptions.RequestException as r_e:
         try:
             error_details = r_e.response.json()
         except ValueError:
-            error_details = response.text
+            error_details = r_e.response.text
         print(f"Some error occurred: {error_details}", 400)
         return f"Some error occurred: {error_details}", 400
+    except Exception as e:
+        try:
+            error_details = e.response.json()
+        except ValueError:
+            error_details = e.response.text
+        print(f"Unexpected error: {error_details}", 400)
+        return f"Unexpected error: {error_details}", 400

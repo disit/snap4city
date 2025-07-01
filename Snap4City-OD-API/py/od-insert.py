@@ -134,7 +134,7 @@ parser = reqparse.RequestParser()
 parser.add_argument('model', type=str, required=True)
 parser.add_argument('type', type=str, required=True)
 parser.add_argument('contextbroker', type=str, required=True)
-parser.add_argument('producer', type=str, required=True)
+parser.add_argument('producer', type=str, required=False)
 parser.add_argument('subnature', type=str, required=True)
 parser.add_argument('organization', type=str, required=True)
 
@@ -436,8 +436,8 @@ def insertOD_MGRS(tuples_data, tuples_metadata):
         # get the cursor
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-        print('[insertOD_MGRS] query: ', insert_data)
-        print('[insertOD_MGRS] query: ', insert_metadata)
+        #print('[insertOD_MGRS] query: ', insert_data)
+        #print('[insertOD_MGRS] query: ', insert_metadata)
             
         # insert
         if len(tuples_data) > 0:
@@ -485,8 +485,8 @@ def get_geometry_by_communes_id(orig_communes, dest_communes, source):
         if not df.empty:
             result = df['geometry'].tolist()
 
-        print('[get_geometry_by_communes_id] query: ', query)
-        print('[get_geometry_by_communes_id] query result: ', result)
+        #print('[get_geometry_by_communes_id] query: ', query)
+        #print('[get_geometry_by_communes_id] query result: ', result)
         
 
     except (Exception, psycopg2.Error) as error:
@@ -565,8 +565,8 @@ def insertOD_Communes(tuples_data, tuples_metadata):
         # get the cursor
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-        print('[insertOD_Communes] query: ', insert_data)
-        print('[insertOD_Communes] query: ', insert_metadata)
+        #print('[insertOD_Communes] query: ', insert_data)
+        #print('[insertOD_Communes] query: ', insert_metadata)
             
         # insert
         if len(tuples_data) > 0:
@@ -640,7 +640,7 @@ def try_insert_data_in_device(content, coords, poly, device, token, model, devic
     if device == 'not_exists':
 
         #create device
-        message, status = create_device(config, token, content['od_id'], model, device_type, contextbroker, producer, subnature, coords, poly)
+        message, status = create_device(config, token, content['od_id'], model, producer, subnature, coords, poly)
         if status == None or status != 200:
             return {'message':message, 'status':status}, status
         # insert into device
@@ -738,7 +738,6 @@ class OD_MGRS(Resource):
             })
             resp.status_code = 400
             return resp
-
             
         
         #check device ownership/existence before inserting data
@@ -755,16 +754,32 @@ class OD_MGRS(Resource):
             'model': model,
             'device_type': device_type,
             'contextbroker': contextbroker,
-            'producer': producer,
             'subnature': subnature,
             'organization': organization,
         }
 
         for field_name, value in required_fields.items():
             if value is None:
-                resp = jsonify({'message': f'{field_name} is None', 'status': 500})
-                resp.status_code = 500
+                resp = jsonify({'message': f'{field_name} is None', 'status': 400})
+                resp.status_code = 400
                 return resp
+            
+        #check od_id: must be name-without-underscore_organization_precision
+        splits = content['od_id'].split("_")
+        if len(splits) != 3:
+            resp = jsonify({'message': 'Invalid OD id, must be name-without-underscore_<organization>_<precision>', 'reason': 'too much undescores', 'status': 400})
+            resp.status_code = 400
+            return resp
+
+        if splits[1] != organization:
+            resp = jsonify({'message': 'Invalid OD id, must be name-without-underscore_<organization>_<precision>', 'reason': 'organization mismatch', 'status': 400})
+            resp.status_code = 400
+            return resp
+        
+        if splits[2] != str(content['precision']):
+            resp = jsonify({'message': 'Invalid OD id, must be name-without-underscore_<organization>_<precision>', 'reason': "precision mismatch", 'status': 400})
+            resp.status_code = 400
+            return resp
         
         #check if device already exists
         device, status = check_ownership_by_id(config, token, content['od_id'], organization, contextbroker)
@@ -846,18 +861,29 @@ class OD_Communes(Resource):
             'model': model,
             'device_type': device_type,
             'contextbroker': contextbroker,
-            'producer': producer,
             'subnature': subnature,
             'organization': organization,
         }
 
         for field_name, value in required_fields.items():
             if value is None:
-                resp = jsonify({'message': f'{field_name} is None', 'status': 500})
-                resp.status_code = 500
+                resp = jsonify({'message': f'{field_name} is None', 'status': 400})
+                resp.status_code = 400
                 return resp
+            
+        #check od_id: must be name-without-underscore_organization_precision
+        splits = content['od_id'].split("_")
+        if len(splits) != 3:
+            resp = jsonify({'message': 'Invalid OD id, must be name-without-underscore_<organization>_<precision>', 'reason': 'too much undescores', 'status': 400})
+            resp.status_code = 400
+            return resp
+
+        if splits[1] != organization:
+            resp = jsonify({'message': 'Invalid OD id, must be name-without-underscore_<organization>_<precision>', 'reason': 'organization mismatch', 'status': 400})
+            resp.status_code = 400
+            return resp
         
-         #check if device already exists
+        #check if device already exists
         device, status = check_ownership_by_id(config, token, content['od_id'], organization, contextbroker)
         if status == None or status != 200:
             device = 'not_exists'
@@ -873,7 +899,6 @@ class OD_Communes(Resource):
         poly = get_wkt_box(polygons_wkt)
         centroid = loads(poly).centroid
         coords = {'lat':float(centroid.y), 'lng':float(centroid.x)}
-        
         result, status = try_insert_data_in_device(content, coords, poly, device, token, model, device_type, contextbroker, producer, subnature)
         if status != 200:
             resp = jsonify({'message':result, 'status':status})

@@ -16,72 +16,57 @@ import json
 from datetime import datetime, timezone
 import os
 
-#device metadata
-def device(token, id, model, type, contextbroker, producer, subnature, coords, wkt):
-    return {
-        'action': 'insert',
-        'token': token,
-        'id': id,
-        'type': type,
-        'contextbroker': contextbroker,
-        'kind': "sensor",
-        'format': "json",
-        'model': model,
-        'producer': producer,
-        'latitude': coords['lat'],
-        'longitude': coords['lng'],
-        'k1': "",
-        'k2': "",
-        'frequency': "600",
-        'nodered': "true",
-        'wktGeometry': wkt,
-        'highleveltype': 'OriginDestinationMatrix',
-        'subnature': subnature
-    }
-
-
-#device attributes
-def attribute (value_name, value_type = "description", value_unit = "text"):
-    return {
-        'value_name': value_name,
-        'data_type': "string",
-        'value_type': value_type,
-        'editable': "0",
-        'value_unit': value_unit,
-        'healthiness_criteria': "refresh_rate",
-        'healthiness_value': "300"
-    }
-
 
 #device creation
-def create_device(config, token, id, model, type, contextbroker, producer, subnature, coords, wkt):
-    dvc = device(token, id, model, type, contextbroker, producer, subnature, coords, wkt)
-    attributes = [
-        attribute("dateObserved", "datetime", "timestamp"),
-        attribute("description"),
-        attribute("precision", "Count", "#"),
-        attribute("kind"),
-        attribute("mode"),
-        attribute("transport"),
-        attribute("purpose"),
-        attribute("instances", "Count", "#"),
-        attribute("fromDate", "datetime", "timestamp"),
-        attribute("toDate", "datetime", "timestamp"),
-        attribute('geometry', 'datastructure', 'complex'),
-        attribute("colormapName"),
-        attribute("representation")
-    ]
+def create_device(config, token, id, model, producer, subnature, coords, wkt):
     base_url_var = 'default_base_url'
     if 'base_url' in config:
-         base_url_var = config['base_url']
+        base_url_var = config['base_url']
     base_url = os.getenv('BASE_URL', base_url_var)
-    
+
+    #get model
+    model_url_var = 'default_model_url'
+    if 'model_url' in config:
+        model_url_var = config['model_url']
+    url = base_url + os.getenv('MODEL_URL', model_url_var)
+
+    url = url + f"action=get_model&name={model}&nodered=true"
+    params = {
+        "action": "get_model",
+        "name": model,
+        "nodered": "true"
+    }
+    header = {'Authorization': 'Bearer '+token}
+
+    model_result, status = get_request(url, params, header)
+
+    if status == None or status != 200:
+        return model_result, status
+
+    dvc = {
+        'action': 'insert',
+        'token': token,
+        'latitude': coords['lat'],
+        'longitude': coords['lng'],
+        'wktGeometry': wkt,
+        'subnature': subnature,
+        'nodered': "true",
+        'model': model
+    }
+
     device_url_var = 'default_device_url'
     if 'device_url' in config:
         device_url_var = config['device_url']
     url = base_url + os.getenv('DEVICE_URL', device_url_var)
 
-    dvc['attributes'] = json.dumps(attributes)
+    dvc.update(model_result['content'])
+    dvc['type'] = dvc['devicetype']
+    dvc['k1'] = ""
+    dvc['k2'] = ""
+    dvc['id'] = id
+    if producer is not None:
+        dvc['producer'] = producer
+
     return get_request(url, dvc)
 
 

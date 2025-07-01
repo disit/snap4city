@@ -12,7 +12,8 @@ host_sql: HOST
 database_sql: DB
 
 # urls
-USER_INFO: /auth/realms/master/protocol/openid-connect/userinfo
-DEVICE_URL: /iot-directory/api/device.php?
-SERVICEMAP_URL: /superservicemap/api/v1/?
-SERVICE_URI: http://www.disit.org/km4city/resource/iot/
+user_info: /auth/realms/master/protocol/openid-connect/userinfo
+device_url: /iot-directory/api/device.php?
+servicemap_url: /superservicemap/api/v1/?
+service_uri: http://www.disit.org/km4city/resource/iot/
+model_url: /iot-directory/api/model.php?

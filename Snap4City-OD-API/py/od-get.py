@@ -472,7 +472,7 @@ def is_number(s):
         return False
     
 # get MGRS inflows/outflows
-def getMGRSflows(lon, lat, precision, from_date, organization, inFlow):
+def getMGRSflows(od_id, lon, lat, precision, from_date, organization, inFlow):
     feature_collection = []
     result = None
     try:
@@ -491,6 +491,7 @@ def getMGRSflows(lon, lat, precision, from_date, organization, inFlow):
         ST_GEOMFROMEWKT('SRID=4326;POINT(''' + lon + ' ' + lat + ''')'))
         AND from_date = %(from_date)s
         AND organization = %(organization)s
+        AND a.od_id = %(od_id)s
         AND "precision" = %(precision)s
         AND ST_AsText(dest_geom) <> ST_AsText(orig_geom)
         '''
@@ -502,7 +503,8 @@ def getMGRSflows(lon, lat, precision, from_date, organization, inFlow):
         df = pd.read_sql_query(query, connection, 
                                params={'from_date': from_date, 
                                        'organization': organization,
-                                       'precision': precision})
+                                       'precision': precision,
+                                       'od_id':od_id})
         
             
         # get dictionary of flows grouped by od_id
@@ -1504,10 +1506,11 @@ class ODMGRS(Resource):
         from_date = args['from_date']
         organization = args['organization']
         inFlow = args['inflow']
+        od_id = args['od_id']
         
         #print('read')
         
-        return getMGRSflows(longitude, latitude, precision, from_date, organization, inFlow)
+        return getMGRSflows(od_id, longitude, latitude, precision, from_date, organization, inFlow)
 
 # >>>>>>>>>> modified to handle the new optional parameter 'od_id'. If missing it is 
 #            set to an empty string and the legacy functionality is kept.
