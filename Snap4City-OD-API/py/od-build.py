@@ -496,7 +496,14 @@ class ODCompressed(Resource):
     def post(self):
         # decompress data
         content = np.load(io.BytesIO(request.get_data()))
-        
+        keys = [k for k in content.keys()]
+        #if data comes from nodered
+        if(isinstance(content[keys[0]], (bytes, bytearray))):
+            c2 = dict.fromkeys(keys, [])
+            for k in keys:
+                tmp = ast.literal_eval(content[k].decode())
+                c2[k] = tmp
+            content = c2
         if ('precision' in content and
             getMGRSprecision(content['precision']) >= 0 and
             getMGRSprecision(content['precision']) <= 5):                    
@@ -515,7 +522,8 @@ class ODCompressedCommunes(Resource):
     def post(self):
         print('[buildcommunes]::Processing POST request')
         # decompress data
-        content = np.load(io.BytesIO(request.get_data()))
+        content = np.load(io.BytesIO(request.get_data()), allow_pickle=True)
+        
         # print(content)
         keys = [k for k in content.keys()]
         # print(keys)
@@ -524,11 +532,19 @@ class ODCompressedCommunes(Resource):
             'x_orig' in keys and 'y_orig' in keys and
             'x_dest' in keys and 'y_dest' in keys
         ):
+           #if data comes from nodered
+            if(isinstance(content[keys[0]], (bytes, bytearray))):
+                c2 = dict.fromkeys(keys, [])
+                for k in keys:
+                    tmp = ast.literal_eval(content[k].decode())
+                    c2[k] = tmp
+                content = c2
             return buildOD_geom(content['x_orig'], 
                                 content['y_orig'], 
                                 content['x_dest'], 
                                 content['y_dest'])
         else:
+            #if data comes from nodered
             if(isinstance(content[keys[0]], (bytes, bytearray))):
                 c2 = dict.fromkeys(keys, [])
                 for k in keys:
