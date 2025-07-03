@@ -107,7 +107,7 @@ from pyproj import Transformer, CRS
 import geopy
 import geopy.distance as distance
 # import shapely Polygon as PolygonShapely to avoid collision with geojson's Polygon
-from shapely.geometry import Polygon as PolygonShapely
+from shapely.geometry import Polygon as PolygonShapely, shape
 from shapely.ops import transform
 import psycopg2
 import psycopg2.extras
@@ -364,7 +364,7 @@ def getMGRSpolygon(lon, lat, precision):
     return transform(lambda x, y: (y, x), polygon).wkt
 
 
-# Matteo 01/04/2025 -> separate data creation from insertion
+# Naldi 01/04/2025 -> separate data creation from insertion
 def buildOD_MGRS(od_id, x_orig, y_orig, x_dest, y_dest, from_date, to_date, precision, values, value_type, value_unit, description, organization, kind, mode, transport, purpose):
     tuples_data = []
     tuples_metadata = []
@@ -457,7 +457,7 @@ def insertOD_MGRS(tuples_data, tuples_metadata):
         return result
     
 
-# Matteo 02/04/2025
+# Naldi 02/04/2025
 def get_geometry_by_communes_id(orig_communes, dest_communes, source):
     try:
         connection = psgConnect(config)
@@ -501,7 +501,7 @@ def get_geometry_by_communes_id(orig_communes, dest_communes, source):
     
     
 
-# Matteo 02/04/2025 -> separate data creation from insertion
+# Naldi 02/04/2025 -> separate data creation from insertion
 def buildOD_Communes(od_id, orig_communes, dest_communes, from_date, to_date, values, value_type, value_unit, description, organization, kind, mode, transport, purpose, source):
     tuples_data = []
     tuples_metadata = []
@@ -602,16 +602,18 @@ def wtkToGeoJSON(polygon_wkt):
     return geojson_data['geometry']
 
 # check authentication before each request
+INSERT_AREAS_ENDPOINTS = ['od_circular_custom_area', 'od_custom_area']
+
 @app.before_request
 def before_request():
-
-    args = parser.parse_args()
-    g.model = args['model']
-    g.device_type = args['type']
-    g.contextbroker = args['contextbroker']
-    g.producer = args['producer']
-    g.subnature = args['subnature']
-    g.organization = args['organization']
+    if request.endpoint not in INSERT_AREAS_ENDPOINTS:
+        args = parser.parse_args()
+        g.model = args['model']
+        g.device_type = args['type']
+        g.contextbroker = args['contextbroker']
+        g.producer = args['producer']
+        g.subnature = args['subnature']
+        g.organization = args['organization']
 
     #auth
     token, message, status = basic_auth(config, request)
@@ -626,12 +628,13 @@ def before_request():
 def after_request(response):
     # clear g
     g.token = None
-    g.model = None
-    g.device_type = None
-    g.contextbroker = None
-    g.producer = None
-    g.subnature = None
-    g.organization = None
+    if request.endpoint not in INSERT_AREAS_ENDPOINTS:
+        g.model = None
+        g.device_type = None
+        g.contextbroker = None
+        g.producer = None
+        g.subnature = None
+        g.organization = None
 
     return response
 
@@ -685,6 +688,151 @@ def try_insert_data_in_device(content, coords, poly, device, token, model, devic
         if status == None or (status != 204 and status != 200):
             return {'message':message, 'status':status}, status
     return None, 200
+
+
+#Naldi 02/07/2025 -> check if area insert is unique by searching is poi_id
+def check_poi_id_uniqueness(poi_id):
+    result = False
+    err = None
+    try:
+        connection = psgConnect(config)
+
+        query = '''
+        SELECT *
+        FROM public.italy_epgs4326 
+        WHERE poi_id = \'''' + poi_id + '''\'
+        '''
+        print(query)
+        # fetch results as dataframe
+        df = pd.read_sql_query(query, connection)
+        result = df.empty
+
+
+    except (Exception, psycopg2.Error) as error:
+        print("Error while searching data into PostgreSQL", error)
+        result = False
+        err = "PostgreSQL Error. See logs for more info"
+
+    finally:
+        # closing database connection
+        if(connection):
+            connection.close()
+        return result, err
+
+#Naldi 02/07/2025 -> insert into postgis db a custom circular area
+def insert_circular_area(poi_id, name, shape_area, shape_leng, latitude, longitude, radius):
+    result = False
+    err = None
+    try:
+        connection = psgConnect(config)
+        cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+        #get last uid
+        query = '''
+        SELECT MAX(uid) as uid
+        FROM public.italy_epgs4326
+        '''
+        print(query)
+        # fetch results as dataframe
+        df = pd.read_sql_query(query, connection)
+        if df.empty:
+            uid = 1
+        else:
+            uid = int(df['uid'][0])+1
+
+        query = '''
+        INSERT INTO public.italy_epgs4326 (
+            uid, text_uid, cod_reg, cod_prov, cod_prov_storico, cod_com, cod_ace, cod_sez, 
+            poi_id, name, nuts1, nuts2, nuts3, shape_area, shape_leng, geom
+        )
+        VALUES (%s, %s, 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', %s, %s, 'NULL', 'NULL', 'NULL', %s, %s,
+        ST_Buffer(ST_SetSRID(ST_MakePoint(%s, %s),4326)::geography, %s)::geometry);
+        '''
+
+        # fetch results as dataframe
+        cursor.execute(query, (uid, "POI_"+poi_id, poi_id, name, shape_area, shape_leng, longitude, latitude, radius))
+        connection.commit()
+        result = True
+
+    except (Exception, psycopg2.Error) as error:
+        print("Error while inserting data to PostgreSQL", error)
+        result = False
+        err = "PostgreSQL Error. See logs for more info"
+
+    finally:
+        # closing database connection
+        if(connection):
+            cursor.close()
+            connection.close()
+        return result, err
+
+#Naldi 02/07/2025 -> get surface in m2 and length in m     
+def get_surface_length_custom_area(custom_area):
+    if isinstance(custom_area, str):
+        custom_area = json.loads(custom_area)
+
+    geom = shape(custom_area)
+
+    # Project to an equal-area projection for area calculation
+    crs_wgs84 = CRS('EPSG:4326')
+    crs_equal_area = CRS('EPSG:6933')  # Cylindrical Equal Area projection
+
+    project = Transformer.from_crs(crs_wgs84, crs_equal_area, always_xy=True).transform
+    geom_proj = transform(project, geom)
+
+    area_m2 = geom_proj.area
+    length_m = geom_proj.length
+
+    return area_m2, length_m
+
+
+#Naldi 02/07/2025 -> insert into postgis db a custom area
+def insert_custom_area(poi_id, name, shape_area, shape_leng, custom_area):
+    result = False
+    err = None
+    try:
+        connection = psgConnect(config)
+        cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+        #get last uid
+        query = '''
+        SELECT MAX(uid) as uid
+        FROM public.italy_epgs4326
+        '''
+        print(query)
+        # fetch results as dataframe
+        df = pd.read_sql_query(query, connection)
+        if df.empty:
+            uid = 1
+        else:
+            uid = int(df['uid'][0])+1
+
+        query = '''
+        INSERT INTO public.italy_epgs4326 (
+            uid, text_uid, cod_reg, cod_prov, cod_prov_storico, cod_com, cod_ace, cod_sez, 
+            poi_id, name, nuts1, nuts2, nuts3, shape_area, shape_leng, geom
+        )
+        VALUES (%s, %s, 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', %s, %s, 'NULL', 'NULL', 'NULL', %s, %s,
+        ST_SetSRID(ST_GeomFromGeoJSON(%s),4326));
+        '''
+
+        # fetch results as dataframe
+        cursor.execute(query, (uid, "POI_"+poi_id, poi_id, name, shape_area, shape_leng, custom_area))
+        connection.commit()
+        result = True
+
+    except (Exception, psycopg2.Error) as error:
+        print("Error while inserting data to PostgreSQL", error)
+        result = False
+        err = "PostgreSQL Error. See logs for more info"
+
+    finally:
+        # closing database connection
+        if(connection):
+            cursor.close()
+            connection.close()
+        return result, err
+
     
     
 class OD_MGRS(Resource):
@@ -911,10 +1059,104 @@ class OD_Communes(Resource):
             resp = jsonify({'message':'data inserted successfully', 'status':200})
             resp.status_code = status
             return resp
-                            
+        
+# Naldi 02/07/2025 -> add new endpoint to insert into postgis db custom circular area starting from lat, lng, rad
+class OD_Circular_Custom_Area(Resource):
+    def post(self):
+        content = request.get_json()
+
+        missing_params = []
+
+        required_params = [
+            'poi_id', 'name', 'latitude', 'longitude', 'radius'
+        ]
+        
+        for param in required_params:
+            if param not in content:
+                missing_params.append(param)
+        
+        if missing_params:
+            resp = jsonify({
+                'message': 'Missing data',
+                'missing': missing_params,
+                'status': 400
+            })
+            resp.status_code = 400
+            return resp
+        
+        poi_id = content['poi_id']
+        radius = content['radius']
+        
+        #check if poi_id already exists
+        result, err = check_poi_id_uniqueness(poi_id)
+        if not result:
+            m = err if err is not None else 'POI id passed is already in use, please choose another one'
+            resp = jsonify({'message': m,'status': 400})
+            resp.status_code = 400
+            return resp
+        #calcuate area things
+        shape_area = np.pi * radius * radius
+        shape_leng = 2 * np.pi * radius
+        #insert into db and return ok/error
+        result, err = insert_circular_area(poi_id, content['name'], shape_area, shape_leng, content['latitude'], content['longitude'], content['radius'])
+        if result:
+            resp = jsonify({'message': 'Custom area insert succeed','status': 200})
+            resp.status_code = 200
+        else:
+            resp = jsonify({'message': 'Something went wrong with data inserting','status': 400, 'err': err})
+            resp.status_code = 400
+        return resp
+
+# Naldi 02/07/2025 -> add new endpoint to insert into postgis db custom area starting from geoJSON
+class OD_Custom_Area(Resource):
+    def post(self):
+        content = request.get_json()
+
+        missing_params = []
+
+        required_params = [
+            'poi_id', 'name', 'custom_area'
+        ]
+        
+        for param in required_params:
+            if param not in content:
+                missing_params.append(param)
+        
+        if missing_params:
+            resp = jsonify({
+                'message': 'Missing data',
+                'missing': missing_params,
+                'status': 400
+            })
+            resp.status_code = 400
+            return resp
+        
+        poi_id = content['poi_id']
+        
+        
+        #check if poi_id already exists
+        result, err = check_poi_id_uniqueness(poi_id)
+        if not result:
+            m = err if err is not None else 'POI id passed is already in use, please choose another one'
+            resp = jsonify({'message': m,'status': 400})
+            resp.status_code = 400
+            return resp
+        #calcuate area things
+        shape_leng, shape_area = get_surface_length_custom_area(content['custom_area'])
+        #insert into db and return ok/error
+        result, err = insert_custom_area(poi_id, content['name'], shape_area, shape_leng, content['custom_area'])
+        if result:
+            resp = jsonify({'message': 'Custom area insert succeed','status': 200})
+            resp.status_code = 200
+        else:
+            resp = jsonify({'message': 'Something went wrong with data inserting','status': 400, 'err': err})
+            resp.status_code = 400
+        return resp                                        
         
 api.add_resource(OD_MGRS, '/insert')
 api.add_resource(OD_Communes, '/insertcommunes')
+api.add_resource(OD_Circular_Custom_Area, '/insertcirculararea')
+api.add_resource(OD_Custom_Area, '/insertcustomarea')
 
 # enable CORS
 CORS(app, resources={r'/*': {'origins': '*'}})
