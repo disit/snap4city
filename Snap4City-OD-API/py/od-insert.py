@@ -746,7 +746,7 @@ def insert_circular_area(poi_id, name, shape_area, shape_leng, latitude, longitu
             poi_id, name, nuts1, nuts2, nuts3, shape_area, shape_leng, geom
         )
         VALUES (%s, %s, 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', %s, %s, 'NULL', 'NULL', 'NULL', %s, %s,
-        ST_Buffer(ST_SetSRID(ST_MakePoint(%s, %s),4326)::geography, %s)::geometry);
+        ST_Multi(ST_Buffer(ST_SetSRID(ST_MakePoint(%s, %s),4326)::geography, %s)::geometry));
         '''
 
         # fetch results as dataframe
@@ -813,7 +813,7 @@ def insert_custom_area(poi_id, name, shape_area, shape_leng, custom_area):
             poi_id, name, nuts1, nuts2, nuts3, shape_area, shape_leng, geom
         )
         VALUES (%s, %s, 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', %s, %s, 'NULL', 'NULL', 'NULL', %s, %s,
-        ST_SetSRID(ST_GeomFromGeoJSON(%s),4326));
+        ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON(%s),4326)));
         '''
 
         # fetch results as dataframe
