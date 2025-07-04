@@ -480,6 +480,8 @@ def getMGRSflows(od_id, lon, lat, precision, from_date, organization, inFlow):
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         query = ''
         df = None
+
+        print(od_id)
         
         query = '''
         SELECT a.od_id, a.from_date, c.organization, a.precision, a.value, 
@@ -951,13 +953,24 @@ def getPolygon(lon, lat, type, organization, od_id):
                                 'poi_id=\'NULL\''  
             elif type == 'poi':   
                 query = query + '(poi_id LIKE \'%' + organization + '%\' or poi_id <> \'NULL\')'
-                if od_id is not None:
-                    query = query + ' AND d.od_id = \'' + od_id +'\''
 
         # print(query)
         # fetch results
         cursor.execute(query)
         results = cursor.fetchall()
+        print('[getPolygon] query: ', query)
+        #Naldi 04/07/2025 -> filter poi polygon based on od_id
+        if type == 'poi' and od_id is not None:
+            query = '''
+            SELECT DISTINCT orig_commune, dest_commune
+            FROM public.od_data WHERE od_id = \''''+od_id+'''\'
+            '''
+            cursor.execute(query)
+            arcs = cursor.fetchall()
+            print('[getPolygon] query: ', query) 
+            for idx, row in enumerate(results):
+                if (row['uid'] not in [r[0] for r in arcs]) and (row['uid'] not in [r[1] for r in arcs]):
+                    results.pop(idx)           
         
         features = []
         for row in results:
@@ -989,7 +1002,7 @@ def getPolygon(lon, lat, type, organization, od_id):
             # for i in polygon.split('(((')[1].split('))')[0].split(','):
             #     lat_lon = i.strip().split(' ')
             #     pol.append([float(lat_lon[0]), float(lat_lon[1])])
-        print('[getPolygon] query: ', query)
+       
         #print('[getPolygon] query result: ', pol)
     except (Exception, psycopg2.Error) as error:
         print("[GET POLYGON] Error while fetching data from PostgreSQL", error)
@@ -1306,12 +1319,26 @@ def getAllPoly(latitude_ne, longitude_ne, latitude_sw, longitude_sw, type, od_id
                                 'poi_id=\'NULL\''  
             elif type == 'poi':  
                 query = query + '(poi_id LIKE \'%' + organization + '%\' or poi_id <> \'NULL\')'
-                if od_id is not None:
-                    query = query + ' AND d.od_id = \'' + od_id +'\''
-            
+
             # fetch results as dataframe
             df = pd.read_sql_query(query, connection)
-            # print(df)            
+            # print(df)    
+
+            print('[getAllPoly] query: ', query)
+            #Naldi 04/07/2025 -> filter poi polygon based on od_id
+            if type == 'poi' and od_id is not None:
+                query = '''
+                SELECT DISTINCT orig_commune, dest_commune
+                FROM public.od_data WHERE od_id = \''''+od_id+'''\'
+                '''
+                cursor.execute(query)
+                arcs = cursor.fetchall()
+                print('[getAllPoly] query: ', query) 
+                orig_ids = {r[0] for r in arcs}
+                dest_ids = {r[1] for r in arcs}
+
+                # Keep only rows where uid is in either orig_ids or dest_ids
+                df = df[df['uid'].isin(orig_ids.union(dest_ids))]        
                     
             features = []
 
@@ -1345,7 +1372,9 @@ def getAllPoly(latitude_ne, longitude_ne, latitude_sw, longitude_sw, type, od_id
 
             # fetch results as dataframe
             df = pd.read_sql_query(query, connection)
-            # print(df)            
+            # print(df)
+            # 
+            print('[getAllPoly] query: ', query)          
                     
             features = []
 
@@ -1365,7 +1394,7 @@ def getAllPoly(latitude_ne, longitude_ne, latitude_sw, longitude_sw, type, od_id
 
         elif (source == 'mgrs'):
             print('TODO!!!') # TODO cases for gadm and msgr !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        print('[getAllPoly] query: ', query)
+        
         #print('[getAllPoly] query result: ', feature_collection)
     except (Exception, psycopg2.Error) as error:
         print("[GET ALL POLYGONS] Error while fetching data from PostgreSQL", error)
