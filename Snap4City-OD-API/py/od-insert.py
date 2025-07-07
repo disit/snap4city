@@ -639,11 +639,11 @@ def after_request(response):
     return response
 
 
-def try_insert_data_in_device(content, coords, poly, device, token, model, device_type, contextbroker, producer, subnature):
+def try_insert_data_in_device(content, coords, poly, device, token, model, device_type, contextbroker, organization, producer, subnature):
     if device == 'not_exists':
 
         #create device
-        message, status = create_device(config, token, content['od_id'], model, producer, subnature, coords, poly)
+        message, status = create_device(config, token, content['od_id'], model, contextbroker, organization, producer, subnature, coords, poly)
         if status == None or status != 200:
             return {'message':message, 'status':status}, status
         # insert into device
@@ -947,7 +947,7 @@ class OD_MGRS(Resource):
         centroid = loads(poly).centroid
         coords = {'lat':float(centroid.y), 'lng':float(centroid.x)}
 
-        result, status = try_insert_data_in_device(content, coords, poly, device, token, model, device_type, contextbroker, producer, subnature)
+        result, status = try_insert_data_in_device(content, coords, poly, device, token, model, device_type, contextbroker, organization, producer, subnature)
         if status != 200:
             resp = jsonify({'message':result, 'status':status})
             resp.status_code = status
@@ -1047,7 +1047,7 @@ class OD_Communes(Resource):
         poly = get_wkt_box(polygons_wkt)
         centroid = loads(poly).centroid
         coords = {'lat':float(centroid.y), 'lng':float(centroid.x)}
-        result, status = try_insert_data_in_device(content, coords, poly, device, token, model, device_type, contextbroker, producer, subnature)
+        result, status = try_insert_data_in_device(content, coords, poly, device, token, model, device_type, contextbroker, organization, producer, subnature)
         if status != 200:
             resp = jsonify({'message':result, 'status':status})
             resp.status_code = status

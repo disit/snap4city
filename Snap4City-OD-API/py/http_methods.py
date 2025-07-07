@@ -25,6 +25,7 @@ def get_request(url, params, header=None):
         json_response =  response.json()
         # 200 but not ok
         if 'status' in json_response and 'ok' not in json_response['status'].lower():
+            print(f"KO: {response.text}")
             return json_response['msg'], 409
         return json_response, 200
     except requests.exceptions.HTTPError as h_e:

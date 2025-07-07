@@ -18,7 +18,7 @@ import os
 
 
 #device creation
-def create_device(config, token, id, model, producer, subnature, coords, wkt):
+def create_device(config, token, id, model, contextbroker, organization, producer, subnature, coords, wkt):
     base_url_var = 'default_base_url'
     if 'base_url' in config:
         base_url_var = config['base_url']
@@ -66,7 +66,10 @@ def create_device(config, token, id, model, producer, subnature, coords, wkt):
     dvc['id'] = id
     if producer is not None:
         dvc['producer'] = producer
-
+    if contextbroker is not None and contextbroker != '':
+        dvc['contextbroker'] = contextbroker
+    if organization is not None and organization != '':
+        dvc['organization'] = organization
     return get_request(url, dvc)
 
 
