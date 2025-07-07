@@ -2,7 +2,7 @@ pyYAML==6.0.0
 jinja2==2.11.2
 markupsafe==1.1.1
 itsdangerous==1.1.0
-numpy==1.19.2
+numpy==1.22.0
 Flask==1.1.2
 Flask_Cors==3.0.10
 Flask_RESTful==0.3.8
