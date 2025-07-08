@@ -667,7 +667,7 @@ def try_insert_data_in_device(content, coords, poly, device, token, model, devic
     else:
         try:
             old_data = device['realtime']['results']['bindings'][0]
-        except (KeyError, IndexError, TypeError) as e:
+        except (KeyError, IndexError, TypeError, Exception) as e:
             print("Data access error:", e)
             return {'message': 'Please retry', status:503}, 503
         # insert into device

@@ -967,10 +967,15 @@ def getPolygon(lon, lat, type, organization, od_id):
             '''
             cursor.execute(query)
             arcs = cursor.fetchall()
-            print('[getPolygon] query: ', query) 
-            for idx, row in enumerate(results):
-                if (row['uid'] not in [r[0] for r in arcs]) and (row['uid'] not in [r[1] for r in arcs]):
-                    results.pop(idx)           
+            print('[getPolygon] query: ', query)
+            arc_uids_0 = set(r[0] for r in arcs)
+            arc_uids_1 = set(r[1] for r in arcs)
+
+            # Filter out rows where 'uid' is not in either arcs column
+            results = [
+                row for row in results
+                if row['uid'] in arc_uids_0 or row['uid'] in arc_uids_1
+            ]    
         
         features = []
         for row in results:
