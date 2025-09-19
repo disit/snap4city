@@ -29,6 +29,8 @@ import os
 import ast
 from auth import basic_auth
 from db_connection import psgConnect
+import logging
+import logger_setup
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -81,7 +83,7 @@ def buildOD_mgrs(x_orig, y_orig, x_dest, y_dest, precision):
 # https://stackoverflow.com/questions/56520616/is-it-possible-from-dataframe-transform-to-matrix
 def buildOD(x_orig, y_orig, x_dest, y_dest, precision):
     # build OD MGRS matrix with precision (m)
-    print("Building prec. ", precision)
+    logging.info("Building prec. %s", precision)
     od = buildOD_mgrs(x_orig, y_orig, x_dest, y_dest, precision)
     results = []
 
@@ -165,14 +167,14 @@ def getGeometryCode(latitude, longitude):
         cursor.execute(query)
         results = cursor.fetchall()
 
-        print('[getGeometryCode] query: ', query)
-        print('[getGeometryCode] query result: ', results)
+        logging.info('[getGeometryCode] query: %s', query)
+        logging.info('[getGeometryCode] query result: %s', results)
         
         for row in results:
             result = row['comm_id']
 
     except (Exception, psycopg2.Error) as error:
-        print("Error while fetching data from PostgreSQL", error)
+        logging.info("Error while fetching data from PostgreSQL %s", error)
 
     finally:
         # closing database connection
@@ -212,14 +214,14 @@ def getGeometryCodes(latitudes, longitudes):
             # fetch results
             cursor.execute(query)
             results = cursor.fetchall()
-            print('[getGeometryCodes] query: ', query)
-            print('[getGeometryCodes] query result: ', results)
+            logging.info('[getGeometryCodes] query: %s', query)
+            logging.info('[getGeometryCodes] query result: %s', results)
         
             for row in results:
                 result.append(row['comm_id'])
 
     except (Exception, psycopg2.Error) as error:
-        print("Error while fetching data from PostgreSQL", error)
+        logging.info("Error while fetching data from PostgreSQL %s", error)
 
     finally:
         # closing database connection
@@ -246,15 +248,15 @@ def getGeometryCoordinates(codcom):
         cursor.execute(query, (codcom,))
         results = cursor.fetchall()
 
-        print('[getGeometryCoordinates] query: ', query)
-        print('[getGeometryCoordinates] query result: ', results) 
+        logging.info('[getGeometryCoordinates] query: %s', query)
+        logging.info('[getGeometryCoordinates] query result: %s', results) 
    
         for row in results:
             # get geometry's coordinates
             result = list(wkb.loads(row['centroid'], hex=True).coords)
             
     except (Exception, psycopg2.Error) as error:
-        print("Error while fetching data from PostgreSQL", error)
+        logging.info("Error while fetching data from PostgreSQL %s", error)
 
     finally:
         # closing database connection
@@ -273,6 +275,10 @@ def buildOD_geom(x_orig, y_orig, x_dest, y_dest):
     orig_ref = []
     dest_ref = []
     for i in range(len(o)):
+        if(o[i] == -1):
+            return {"message" : f"Origin area {str(i+1)} not found. Point lat: {y_orig[i]}, lng: {x_orig[i]} does not intersect any area", "status": 400}, 400
+        if(d[i] == -1):
+            return {"message" : f"Destination area {str(i+1)} not found. Point lat: {y_dest[i]}, lng: {x_dest[i]} does not intersect any area", "status": 400}, 400
         #if o[i] != '' and d[i] != '':
         if o[i] != -1 and d[i] != -1:
             orig_ref.append(o[i])
@@ -374,38 +380,42 @@ def getGeometryCodesItaly(content,direction):
             cursor.execute(query)
             results = cursor.fetchall()
 
-            print('[getGeometryCodesItaly] query: ', query)
-            print('[getGeometryCodesItaly] query result: ', results)
+            logging.info('[getGeometryCodesItaly] query: %s', query)
+            logging.info('[getGeometryCodesItaly] query result: %s', results)
         
             for row in results:
                 result.append(row['comm_id'])
 
     except (Exception, psycopg2.Error) as error:
-        print("Error while fetching data from PostgreSQL", error)
+        logging.info("Error while fetching data from PostgreSQL %s", error)
 
     finally:
         # closing database connection
         if(connection):
             cursor.close()
             connection.close()
-        return result
+        return result, tuples
 
 # 2022/04/21 new function to build OD matrix from geometries using 
 #            the new 'italy_epgs4325' table
 def buildOD_geom_italy(content):
-    print("DEBUG: in buildOD_geom_italy")
+    logging.info("DEBUG: in buildOD_geom_italy")
     
 
-    o = getGeometryCodesItaly(content,'orig')
-    d = getGeometryCodesItaly(content,'dest')    
+    o, t_o = getGeometryCodesItaly(content,'orig')
+    d, t_d = getGeometryCodesItaly(content,'dest')    
 
     results = []
     for i in range(len(o)):
+        if(o[i] == -1):
+            return {"message" : f"Origin area {str(i+1)} not found. Error in {t_o[i]} text_uid. Text_uid is created from {[col for col in content.files if col.startswith('orig')][1]} you passed", "status": 400}, 400
+        if(d[i] == -1):
+            return {"message" : f"Destination area {str(i+1)} not found. Error in {t_d[i]} text_uid. Text_uid is created from {[col for col in content.files if col.startswith('dest')][1]} you passed", "status": 400}, 400
         results.append({'orig_commune': o[i], 
                         'dest_commune': d[i], 
                         'value': 1})
     # print(results)
-    return results
+    return results, None
 
 
 # build OD matrix from geometries with precision (m)
@@ -520,7 +530,7 @@ class ODCompressed(Resource):
 #            is called. Note that the new function do not use 'x_orig', etc. 
 class ODCompressedCommunes(Resource):
     def post(self):
-        print('[buildcommunes]::Processing POST request')
+        logging.info('[buildcommunes]::Processing POST request')
         # decompress data
         content = np.load(io.BytesIO(request.get_data()), allow_pickle=True)
         
@@ -551,7 +561,12 @@ class ODCompressedCommunes(Resource):
                     tmp = ast.literal_eval(content[k].decode())
                     c2[k] = tmp
                 content = c2
-            return buildOD_geom_italy(content)
+            response, status =  buildOD_geom_italy(content)
+            if status is not None:
+                resp = jsonify(response)
+                resp.status_code = status
+                return resp
+            return response
             
 api.add_resource(OD, '/build')
 api.add_resource(ODCompressed, '/buildcompressed')
@@ -569,5 +584,5 @@ if __name__ == '__main__':
     https://stackoverflow.com/questions/51025893/flask-at-first-run-do-not-use-the-development-server-in-a-production-environmen
     '''
     # print(config)
-    print("[BUILD-OD API] Accepting connections on port 3000")
+    logging.info("[BUILD-OD API] Accepting connections on port 3000")
     serve(app, host='0.0.0.0', port=3000)

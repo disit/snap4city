@@ -43,6 +43,9 @@ import sys
 from db_connection import psgConnect, sqlConnect
 from auth import get_token, is_valid_token
 from ownership import check_ownership_by_id
+from device import isoformat
+import logging
+import logger_setup
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -403,7 +406,7 @@ def getOD(precision, from_date, organization):
         
         results = cursor.fetchall()
 
-        print('[getOD] query: ', query)
+        logging.info('[getOD] query: %s', query)
         #print('[getOD] query result: ', results)
         
         features = []
@@ -445,7 +448,7 @@ def getOD(precision, from_date, organization):
         feature_collection = FeatureCollection(features)
 
     except (Exception, psycopg2.Error) as error:
-        print("Error while fetching data from PostgreSQL", error)
+        logging.info("Error while fetching data from PostgreSQL %s", error)
 
     finally:
         # closing database connection
@@ -481,7 +484,7 @@ def getMGRSflows(od_id, lon, lat, precision, from_date, organization, inFlow):
         query = ''
         df = None
 
-        print(od_id)
+        logging.info(od_id)
         
         query = '''
         SELECT a.od_id, a.from_date, c.organization, a.precision, a.value, 
@@ -551,11 +554,11 @@ def getMGRSflows(od_id, lon, lat, precision, from_date, organization, inFlow):
         # create features' collection from features array
         feature_collection = FeatureCollection(features)
 
-        print('[getMGRSflows] query: ', query)
+        logging.info('[getMGRSflows] query: %s', query)
         #print('[getMGRSflows] query result: ', feature_collection)
 
     except (Exception, psycopg2.Error) as error:
-        print("[getMGRSflows] Error while fetching data from PostgreSQL", error)
+        logging.info("[getMGRSflows] Error while fetching data from PostgreSQL %s", error)
 
     finally:
         # closing database connection
@@ -847,11 +850,11 @@ def getFlows(lon, lat, precision, from_date, organization, inFlow, od_id, get_pe
             # create features' collection from features array
             feature_collection = FeatureCollection(features)
 
-        print('[getFlows] query: ', query)
+        logging.info('[getFlows] query: %s', query)
         #print('[getFlows] query result: ', feature_collection)
 
     except (Exception, psycopg2.Error) as error:
-        print("[GET FLOW] Error while fetching data from PostgreSQL", error)
+        logging.info("[GET FLOW] Error while fetching data from PostgreSQL %s", error)
 
     finally:
         # closing database connection
@@ -958,7 +961,7 @@ def getPolygon(lon, lat, type, organization, od_id):
         # fetch results
         cursor.execute(query)
         results = cursor.fetchall()
-        print('[getPolygon] query: ', query)
+        logging.info('[getPolygon] query: %s', query)
         #Naldi 04/07/2025 -> filter poi polygon based on od_id
         if type == 'poi' and od_id is not None:
             query = '''
@@ -967,7 +970,7 @@ def getPolygon(lon, lat, type, organization, od_id):
             '''
             cursor.execute(query)
             arcs = cursor.fetchall()
-            print('[getPolygon] query: ', query)
+            logging.info('[getPolygon] query: %s', query)
             arc_uids_0 = set(r[0] for r in arcs)
             arc_uids_1 = set(r[1] for r in arcs)
 
@@ -1010,7 +1013,7 @@ def getPolygon(lon, lat, type, organization, od_id):
        
         #print('[getPolygon] query result: ', pol)
     except (Exception, psycopg2.Error) as error:
-        print("[GET POLYGON] Error while fetching data from PostgreSQL", error)
+        logging.info("[GET POLYGON] Error while fetching data from PostgreSQL %s", error)
 
     finally:
         # closing database connection
@@ -1040,10 +1043,10 @@ def getPolygonShapely(lon, lat):
             # flip polygon coordinates
             # this will return coordinates in (lat, lon) order
             polygon = transform(lambda x, y: (y, x), polygon)
-        print('[getPolygonShapely] query: ', query)
+        logging.info('[getPolygonShapely] query: %s', query)
         #print('[getPolygonShapely] query result: ', results)
     except (Exception, psycopg2.Error) as error:
-        print("Error while fetching data from PostgreSQL", error)
+        logging.info("Error while fetching data from PostgreSQL %s", error)
 
     finally:
         # closing database connection
@@ -1092,7 +1095,7 @@ def getColorMap(metric_name):
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        print(exc_type, exc_tb, fname, exc_tb.tb_lineno)
+        logging.info(f"{exc_type}, {exc_tb}, {fname}, {exc_tb.tb_lineno}")
         out = 'Error: ' + str(exc_type) + ' ' + str(fname) + ' ' + str(exc_tb.tb_lineno) + '\n' + traceback.format_exc()
         status = 500
 
@@ -1226,10 +1229,10 @@ def getPolygonStatistics(od_id, organization, dest_id, from_date, invalid_id, in
         # create features' collection from features array
         feature_collection = FeatureCollection(features)
         # print(feature_collection)
-        print('[getPolygonStatistics] query: ', query)
+        logging.info('[getPolygonStatistics] query: %s', query)
         #print('[getPolygonStatistics] query result: ', feature_collection)
     except (Exception, psycopg2.Error) as error:
-        print("[GET POLYGON STATS] Error while fetching data from PostgreSQL", error)
+        logging.info("[GET POLYGON STATS] Error while fetching data from PostgreSQL %s", error)
 
     finally:
         # closing database connection
@@ -1329,7 +1332,7 @@ def getAllPoly(latitude_ne, longitude_ne, latitude_sw, longitude_sw, type, od_id
             df = pd.read_sql_query(query, connection)
             # print(df)    
 
-            print('[getAllPoly] query: ', query)
+            logging.info('[getAllPoly] query: %s', query)
             #Naldi 04/07/2025 -> filter poi polygon based on od_id
             if type == 'poi' and od_id is not None:
                 query = '''
@@ -1338,7 +1341,7 @@ def getAllPoly(latitude_ne, longitude_ne, latitude_sw, longitude_sw, type, od_id
                 '''
                 cursor.execute(query)
                 arcs = cursor.fetchall()
-                print('[getAllPoly] query: ', query) 
+                logging.info('[getAllPoly] query: %s', query) 
                 orig_ids = {r[0] for r in arcs}
                 dest_ids = {r[1] for r in arcs}
 
@@ -1379,7 +1382,7 @@ def getAllPoly(latitude_ne, longitude_ne, latitude_sw, longitude_sw, type, od_id
             df = pd.read_sql_query(query, connection)
             # print(df)
             # 
-            print('[getAllPoly] query: ', query)          
+            logging.info('[getAllPoly] query: %s', query)          
                     
             features = []
 
@@ -1402,7 +1405,7 @@ def getAllPoly(latitude_ne, longitude_ne, latitude_sw, longitude_sw, type, od_id
         
         #print('[getAllPoly] query result: ', feature_collection)
     except (Exception, psycopg2.Error) as error:
-        print("[GET ALL POLYGONS] Error while fetching data from PostgreSQL", error)
+        logging.info("[GET ALL POLYGONS] Error while fetching data from PostgreSQL %s", error)
 
     finally:
         # closing database connection
@@ -1468,8 +1471,10 @@ def create_feature_collection(response, token, contextbroker):
     checked_od_id = []
     passed_od_id = []
     json_response = response.get_json()
+    if 'features' not in json_response:
+        return response
     features = json_response['features']
-    print("BEFORE FILTERING: " ,len(features))
+    logging.info("BEFORE FILTERING: %s" ,len(features))
     if len(features) > 0:
         for feature in features:
             od_id = feature['properties']['od_id']
@@ -1479,7 +1484,7 @@ def create_feature_collection(response, token, contextbroker):
                 if od_id not in checked_od_id:
                     checked_od_id.append(od_id)
                     message, status = check_ownership_by_id(config, token, od_id, organization, contextbroker)
-                    if status == 200 and len(message['Service']['features'])>0:
+                    if status == 200 and 'Service' in message and 'features' in message['Service'] and len(message['Service']['features'])>0:
                         passed_od_id.append(od_id)
                         owned_features.append(feature)
                 else:
@@ -1489,7 +1494,7 @@ def create_feature_collection(response, token, contextbroker):
                 owned_features.append(feature)
     checked_od_id.clear()
     passed_od_id.clear()
-    print("AFTER FILTERING: " ,len(owned_features))
+    logging.info("AFTER FILTERING: %s" ,len(owned_features))
     feature_collection = FeatureCollection(owned_features)
     feature_collection_json = json.dumps(feature_collection)
     response.set_data(feature_collection_json)
@@ -1525,7 +1530,7 @@ def after_request(response):
 class ODMGRS(Resource):
     def get(self):
 
-        print('[ODMGRS]')
+        logging.info('[ODMGRS]')
         #print(self)
 
         #print(parser.parse_args())
@@ -1543,7 +1548,13 @@ class ODMGRS(Resource):
         od_id = args['od_id']
         
         #print('read')
-        
+
+        response, status = isoformat(args['from_date'])
+        if status is not None:
+            resp = jsonify(response)
+            resp.status_code = status
+            return resp
+        from_date = response
         return getMGRSflows(od_id, longitude, latitude, precision, from_date, organization, inFlow)
 
 # >>>>>>>>>> modified to handle the new optional parameter 'od_id'. If missing it is 
@@ -1569,7 +1580,13 @@ class OD(Resource):
             perc = args['perc']
         else:
             perc = 'True'
-        
+
+        response, status = isoformat(args['from_date'])
+        if status is not None:
+            resp = jsonify(response)
+            resp.status_code = status
+            return resp
+        from_date = response
         return getFlows(longitude, latitude, precision, from_date, organization, inFlow, od_id, perc)
     
 class GetMGRSPolygon(Resource):
@@ -1626,7 +1643,14 @@ class GetPolyStats(Resource):
         dest_id = args['poly_id']
         from_date = args['from_date']
         invalid_id = args['invalid_id']
-        invalid_label = args['invalid_label']       
+        invalid_label = args['invalid_label']
+
+        response, status = isoformat(args['from_date'])
+        if status is not None:
+            resp = jsonify(response)
+            resp.status_code = status
+            return resp
+        from_date = response
         return getPolygonStatistics(od_id, organization, dest_id, from_date, invalid_id, invalid_label)
 
 class GetAllPolygons(Resource):
@@ -1662,6 +1686,6 @@ if __name__ == '__main__':
     when running Flask, use waitress instead to serve
     https://stackoverflow.com/questions/51025893/flask-at-first-run-do-not-use-the-development-server-in-a-production-environmen
     '''
-    print('OD-API_GET :: Listening on port 3200')
+    logging.info('OD-API_GET :: Listening on port 3200')
     serve(app, host='0.0.0.0', port=3200)
     

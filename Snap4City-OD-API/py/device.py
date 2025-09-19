@@ -77,18 +77,27 @@ def create_device(config, token, id, model, contextbroker, organization, produce
 def isoformat(date_str):
     #check if date is in isoformat
     try:
-        datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%SZ")
-        return date_str
+        datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%fZ")
+        base = date_str.split(".")[0]
+        return f"{base}.000Z", None
     except ValueError:
-        dt = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
-        d = dt.isoformat().replace("+00:00", "Z")
-        return d
+        try:
+            dt = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+            d = dt.isoformat().replace("+00:00", ".000Z")
+            return d, None
+        except ValueError:
+            return {"message" :"Invalid date format. Accettable format are ISOString or %Y-%m-%d %H:%M:%S", "status": 400} , 400
         
     
 #device payload
 def payload(data):
+    date_oberserved, _ = isoformat(datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"))
+    from_date, _ = isoformat(data['from_date'])
+    to_date, _ = isoformat(data['to_date'])
+    if _ is not None:
+        return date_oberserved, _
     payload = {}
-    payload['dateObserved'] = {'type':'string', 'value': isoformat(datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"))}
+    payload['dateObserved'] = {'type':'string', 'value': date_oberserved}
     payload['description'] = {'type':'string', 'value': data['description']}
     payload['precision'] = {'type':'integer', 'value': data['precision']}
     payload['kind'] = {'type':'string', 'value': data['kind']}
@@ -96,12 +105,12 @@ def payload(data):
     payload['transport'] = {'type':'string', 'value': data['transport']}
     payload['purpose'] = {'type':'string', 'value': data['purpose']}
     payload['instances'] = {'type':'integer', 'value': data['instances']}
-    payload['fromDate'] = {'type':'string', 'value': isoformat(data['from_date'])}
-    payload['toDate'] = {'type':'string', 'value': isoformat(data['to_date'])}
+    payload['fromDate'] = {'type':'string', 'value': from_date}
+    payload['toDate'] = {'type':'string', 'value': to_date}
     payload['geometry'] = {'type':'json', 'value': data['geometry']}
     payload['colormapName'] = {'type':'string', 'value': data['colormap_name']}
     payload['representation'] = {'type':'string', 'value': data['representation']}
-    return payload
+    return payload, None
     
 
 #device data insertion
@@ -121,6 +130,8 @@ def insert_data(config, token, id, type, contexbroker, data):
         'Content-Type': 'application/json',
         'Authorization': f"Bearer {token}"
     }
-    pld = payload(data)
+    pld, _ = payload(data)
+    if _ is not None:
+        return pld, _
     data = json.dumps(pld)
     return patch_request(url, header, data)

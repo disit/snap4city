@@ -22,3 +22,4 @@ vaex==4.1.0
 vaex_hdf5==0.7.0
 waitress==2.0.0
 werkzeug==2.0.3 #added to solve a missing dependecy from Flask (higher version do not work)
+gunicorn==20.0

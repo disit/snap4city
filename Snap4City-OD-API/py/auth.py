@@ -14,6 +14,8 @@
 
 from http_methods import post_request
 import os
+import logging
+import logger_setup
 
 # get token from request
 # return token, message error and status code
@@ -48,10 +50,10 @@ def is_valid_token(config, token):
 def basic_auth(config, request):
     token, message, status = get_token(request)
     if status != 200:
-        print('message: ',message, 'status: ', status)
+        logging.info(f"message: {message}, status: {status}")
         return None, message, status
     message, status = is_valid_token(config, token)
     if status != 200:
-        print('message: ',message, 'status: ', status)
+        logging.info(f"message: {message}, status: {status}")
         return None, message, status
     return token, None, 200

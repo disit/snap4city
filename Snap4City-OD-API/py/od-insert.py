@@ -117,9 +117,11 @@ from shapely.wkt import loads
 from shapely.ops import unary_union
 import geojson
 from auth import basic_auth
-from device import create_device, insert_data
+from device import create_device, insert_data, isoformat
 from ownership import check_ownership_by_id
 from db_connection import psgConnect
+import logging
+import logger_setup
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -447,7 +449,7 @@ def insertOD_MGRS(tuples_data, tuples_metadata):
             result = True
 
     except (Exception, psycopg2.Error) as error:
-        print("Error while inserting data to PostgreSQL", error)
+        logging.info("Error while inserting data to PostgreSQL %s", error)
 
     finally:
         # closing database connection
@@ -490,7 +492,7 @@ def get_geometry_by_communes_id(orig_communes, dest_communes, source):
         
 
     except (Exception, psycopg2.Error) as error:
-        print("Error while inserting data to PostgreSQL", error)
+        logging.info("Error while inserting data to PostgreSQL %s", error)
 
     finally:
         # closing database connection
@@ -576,7 +578,7 @@ def insertOD_Communes(tuples_data, tuples_metadata):
             result = True
 
     except (Exception, psycopg2.Error) as error:
-        print("Error while inserting data to PostgreSQL", error)
+        logging.info("Error while inserting data to PostgreSQL %s", error)
 
     finally:
         # closing database connection
@@ -649,7 +651,7 @@ def try_insert_data_in_device(content, coords, poly, device, token, model, devic
         # insert into device
         data = {
             'description': content['description'],
-            'precision': content['precision'] if 'precision' in content and content['precision'] is not None else None,
+            'precision': content['precision'] if 'precision' in content and content['precision'] is not None else "",
             'kind': content['kind'],
             'mode': content['mode'],
             'transport': content['transport'],
@@ -668,7 +670,7 @@ def try_insert_data_in_device(content, coords, poly, device, token, model, devic
         try:
             old_data = device['realtime']['results']['bindings'][0]
         except (KeyError, IndexError, TypeError, Exception) as e:
-            print("Data access error:", e)
+            logging.info("Data access error: %s", e)
             return {'message': 'Please retry', 'status':503}, 503
         # insert into device
         data = {
@@ -703,14 +705,14 @@ def check_poi_id_uniqueness(poi_id):
         FROM public.italy_epgs4326 
         WHERE poi_id = \'''' + poi_id + '''\'
         '''
-        print(query)
+        logging.info(query)
         # fetch results as dataframe
         df = pd.read_sql_query(query, connection)
         result = df.empty
 
 
     except (Exception, psycopg2.Error) as error:
-        print("Error while searching data into PostgreSQL", error)
+        logging.info("Error while searching data into PostgreSQL %s", error)
         result = False
         err = "PostgreSQL Error. See logs for more info"
 
@@ -733,7 +735,7 @@ def insert_circular_area(poi_id, name, shape_area, shape_leng, latitude, longitu
         SELECT MAX(uid) as uid
         FROM public.italy_epgs4326
         '''
-        print(query)
+        logging.info(query)
         # fetch results as dataframe
         df = pd.read_sql_query(query, connection)
         if df.empty:
@@ -756,7 +758,7 @@ def insert_circular_area(poi_id, name, shape_area, shape_leng, latitude, longitu
         result = True
 
     except (Exception, psycopg2.Error) as error:
-        print("Error while inserting data to PostgreSQL", error)
+        logging.info("Error while inserting data to PostgreSQL %s", error)
         result = False
         err = "PostgreSQL Error. See logs for more info"
 
@@ -800,7 +802,7 @@ def insert_custom_area(poi_id, name, shape_area, shape_leng, custom_area):
         SELECT MAX(uid) as uid
         FROM public.italy_epgs4326
         '''
-        print(query)
+        logging.info(query)
         # fetch results as dataframe
         df = pd.read_sql_query(query, connection)
         if df.empty:
@@ -823,7 +825,7 @@ def insert_custom_area(poi_id, name, shape_area, shape_leng, custom_area):
         result = True
 
     except (Exception, psycopg2.Error) as error:
-        print("Error while inserting data to PostgreSQL", error)
+        logging.info("Error while inserting data to PostgreSQL %s", error)
         result = False
         err = "PostgreSQL Error. See logs for more info"
 
@@ -886,6 +888,18 @@ class OD_MGRS(Resource):
                 'status': 400
             })
             resp.status_code = 400
+            return resp
+        
+        response, status = isoformat(content['from_date'])
+        if status is not None:
+            resp = jsonify(response)
+            resp.status_code = status
+            return resp
+        
+        response, status = isoformat(content['to_date'])
+        if status is not None:
+            resp = jsonify(response)
+            resp.status_code = status
             return resp
             
         
@@ -994,6 +1008,18 @@ class OD_Communes(Resource):
                 'status': 400
             })
             resp.status_code = 400
+            return resp
+        
+        response, status = isoformat(content['from_date'])
+        if status is not None:
+            resp = jsonify(response)
+            resp.status_code = status
+            return resp
+        
+        response, status = isoformat(content['to_date'])
+        if status is not None:
+            resp = jsonify(response)
+            resp.status_code = status
             return resp
         
         #check device ownership/existence before inserting data
@@ -1171,5 +1197,5 @@ if __name__ == '__main__':
     https://stackoverflow.com/questions/51025893/flask-at-first-run-do-not-use-the-development-server-in-a-production-environmen
     '''
     #print(config)
-    print("[OD-INSERT API] Accepting connections on port 3100")
+    logging.info("[OD-INSERT API] Accepting connections on port 3100")
     serve(app, host='0.0.0.0', port=3100)
