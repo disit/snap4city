@@ -48,7 +48,7 @@ services:
     ports:
       - published: 3100
         target: 3100
-    command: python -u ./od-insert.py
+    command: gunicorn -w 4 -b 0.0.0.0:3100 od-insert:app #python -u ./od-insert.py
     restart: unless-stopped
     logging:
       driver: json-file
@@ -80,7 +80,7 @@ services:
     ports:
       - published: 3000
         target: 3000
-    command: python -u ./od-build.py
+    command: gunicorn -w 4 -b 0.0.0.0:3000 od-build:app #python -u ./od-build.py
     restart: unless-stopped
     logging:
       driver: json-file
@@ -112,7 +112,7 @@ services:
     ports:
       - published: 3200
         target: 3200
-    command: python -u ./od-get.py
+    command: gunicorn -w 4 -b 0.0.0.0:3200 od-get:app #python -u ./od-get.py
     restart: unless-stopped
     logging:
       driver: json-file
