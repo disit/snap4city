@@ -317,8 +317,8 @@ public class UploadLayerServlet extends HttpServlet {
 
         // Add entry to db and save as zipped json file to reconstructions folder
         ReconstructionPersistenceInterface db = new JSONReconstructionPersistence();
-        db.addEntry(metadata, layerName);
         db.saveReconstructionAsZippedJson(json, layerName);
+        db.addEntry(metadata, layerName);
 
         // Done! Return final layer name
         return layerName;

@@ -70,10 +70,24 @@ public class JSONReconstructionPersistence implements ReconstructionPersistenceI
                 newArray = builder.build();
             }
 
-            // Write response
-            try (FileWriter fileWriter = new FileWriter(jsonDatabasePath)) {
-                fileWriter.write(newArray.toString());
-                fileWriter.flush();
+            File originalFile = new File(jsonDatabasePath);
+            File tempFile = new File(jsonDatabasePath + ".tmp");
+
+            // Write temporary
+            try (FileWriter writer = new FileWriter(tempFile)) {
+                writer.write(newArray.toString());
+                writer.flush();
+            }
+
+            // rename temp to original
+            if (!tempFile.renameTo(originalFile)) {
+                // on some systems rename does not substitute, so delete and rename
+                if (originalFile.exists() && !originalFile.delete()) {
+                    throw new IOException("cannot delete " + originalFile);
+                }
+                if (!tempFile.renameTo(originalFile)) {
+                    throw new IOException("cannot rename temp to " + originalFile);
+                }
             }
 
             Logger.log("[DB] Done!");
