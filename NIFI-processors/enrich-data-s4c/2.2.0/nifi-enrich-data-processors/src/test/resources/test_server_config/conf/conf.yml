@@ -1,0 +1,44 @@
+server:
+    port: 8081
+
+keycloak:
+    enabled: true
+    endpoint: "/keycloak"
+    accessTokenExpire: 3600
+    refreshTokenExpire: 3600
+    realm: nifi
+    
+    client:
+        id: nifi-node
+        secret: "nifi-node-secret"
+        users:
+            nifi-node-1: "password"
+            nifi-node-2: "password2"
+
+servicemap:
+    enabled: true
+    usesOAuth: true
+    endpoint: "/servicemap"
+    
+    resources:
+      "http://serviceuriprefix.org":
+          sensor1: conf/servicemap/sensor1.json
+
+ownership:
+    enabled: true
+    usesOAuth: true
+    endpoint: "/ownership"
+    idParameterName: elementId
+    
+    resources:
+        "broker:organization:":
+            sensor1: conf/ownership/sensor1_ownership.json
+
+iotdirectory:
+    enabled: true
+    usesOAuth: true
+    endpoint: "/iotdirectory"
+    idParameterName: sub_ID
+    subscriptions:
+        subid_1: conf/iotdirectory/subid_1.json
+

@@ -1,0 +1,121 @@
+{
+    "Service": {
+        "features": [
+            {
+                "geometry": {
+                    "coordinates": [
+                        11.2422,
+                        43.7705
+                    ],
+                    "type": "Point"
+                },
+                "properties": {
+                    "avgStars": 0,
+                    "brokerEndpoint": "192.168.1.9:1026",
+                    "brokerName": "aBroker",
+                    "comments": [],
+                    "format": "json",
+                    "linkDBpedia": [],
+                    "macaddress": "",
+                    "model": "",
+                    "name": "PA12345",
+                    "organization": "MyOrg",
+                    "photoOrigs": [],
+                    "photoThumbs": [],
+                    "photos": [],
+                    "producer": "",
+                    "protocol": "ngsi",
+                    "realtimeAttributes": {
+                        "actuatorcanceller": {
+                            "data_type": "string",
+                            "different_values": "0",
+                            "editable": "false",
+                            "healthiness_criteria": "refresh_rate",
+                            "value_bounds": "unspecified",
+                            "value_refresh_rate": "300",
+                            "value_type": "actuator_canceller",
+                            "value_unit": "#"
+                        },
+                        "actuatordeleted": {
+                            "data_type": "boolean",
+                            "different_values": "0",
+                            "editable": "false",
+                            "healthiness_criteria": "refresh_rate",
+                            "value_bounds": "unspecified",
+                            "value_refresh_rate": "300",
+                            "value_type": "actuator_deleted",
+                            "value_unit": "#"
+                        },
+                        "actuatordeletiondate": {
+                            "data_type": "string",
+                            "different_values": "0",
+                            "editable": "false",
+                            "healthiness_criteria": "refresh_rate",
+                            "value_bounds": "unspecified",
+                            "value_refresh_rate": "300",
+                            "value_type": "actuator_deletion_date",
+                            "value_unit": "#"
+                        },
+                        "creationdate": {
+                            "data_type": "string",
+                            "different_values": "0",
+                            "editable": "false",
+                            "healthiness_criteria": "refresh_rate",
+                            "value_bounds": "unspecified",
+                            "value_refresh_rate": "300",
+                            "value_type": "creation_date",
+                            "value_unit": "#"
+                        },
+                        "entitycreator": {
+                            "data_type": "string",
+                            "different_values": "0",
+                            "editable": "false",
+                            "healthiness_criteria": "refresh_rate",
+                            "value_bounds": "unspecified",
+                            "value_refresh_rate": "300",
+                            "value_type": "entity_creator",
+                            "value_unit": "#"
+                        },
+                        "entitydesc": {
+                            "data_type": "string",
+                            "different_values": "0",
+                            "editable": "false",
+                            "healthiness_criteria": "refresh_rate",
+                            "value_bounds": "unspecified",
+                            "value_refresh_rate": "300",
+                            "value_type": "entity_desc",
+                            "value_unit": "#"
+                        },
+                        "statecount": {
+                            "data_type": "integer",
+                            "different_values": "0",
+                            "editable": "false",
+                            "healthiness_criteria": "refresh_rate",
+                            "value_bounds": "unspecified",
+                            "value_refresh_rate": "300",
+                            "value_type": "state_count",
+                            "value_unit": "#"
+                        },
+                        "statetime": {
+                            "data_type": "integer",
+                            "different_values": "0",
+                            "editable": "false",
+                            "healthiness_criteria": "refresh_rate",
+                            "value_bounds": "unspecified",
+                            "value_refresh_rate": "300",
+                            "value_type": "state_time",
+                            "value_unit": "#"
+                        }
+                    },
+                    "serviceType": "IoTDevice_IoTSensor",
+                    "serviceUri": "http://www.disit.org/km4city/resource/iot/orionUNIFI/PA12345",
+                    "starsCount": 0,
+                    "typeLabel": "Sensor",
+                    "wktGeometry": ""
+                },
+                "type": "Feature"
+            }
+        ],
+        "type": "FeatureCollection"
+    }
+}

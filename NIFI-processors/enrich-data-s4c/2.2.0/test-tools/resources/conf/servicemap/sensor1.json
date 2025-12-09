@@ -1,0 +1,165 @@
+{
+    "Service": {
+        "features": [
+            {
+                "geometry": {
+                    "coordinates": [
+                        24.91201,
+                        60.157337
+                    ],
+                    "type": "Point"
+                },
+                "properties": {
+                    "avgStars": 0,
+                    "brokerEndpoint": "0.0.0.0:1026",
+                    "brokerName": "aBroker",
+                    "comments": [],
+                    "format": "json",
+                    "linkDBpedia": [],
+                    "macaddress": "1A:F2:C9:A6:B3:4F",
+                    "model": "custom",
+                    "name": "123456789",
+                    "organization": "MyOrg",
+                    "ownership": "public",
+                    "photoOrigs": [],
+                    "photoThumbs": [],
+                    "photos": [],
+                    "producer": "null",
+                    "protocol": "ngsi",
+                    "realtimeAttributes": {
+                        "EnfuserAQI": {
+                            "attr_type": "CustomAttribute",
+                            "data_type": "float",
+                            "value_unit": ""
+                        },
+                        "BooleanTestAttr":{
+                        	"attr_type": "DeviceAttribute",
+                        	"data_type": "boolean",
+                        	"value_unit": ""
+                        },
+                        "PM10": {
+                            "attr_type": "DeviceAttribute",
+                            "data_type": "float",
+                            "different_values": "0",
+                            "value_bounds": "unspecified",
+                            "value_refresh_rate": "300",
+                            "value_type": "PM10_concentration",
+                            "value_unit": "ppm"
+                        },
+                        "PM2.5": {
+                            "attr_type": "DeviceAttribute",
+                            "data_type": "float",
+                            "different_values": "0",
+                            "value_bounds": "unspecified",
+                            "value_refresh_rate": "300",
+                            "value_type": "PM2.5_concentration",
+                            "value_unit": "ppm"
+                        },
+                        "RealTimeAQI": {
+                            "attr_type": "CustomAttribute",
+                            "data_type": "float",
+                            "value_unit": ""
+                        },
+                        "RealTimeDeltaAQI": {
+                            "attr_type": "CustomAttribute",
+                            "data_type": "float",
+                            "value_unit": ""
+                        },
+                        "address": {
+                            "attr_type": "DeviceAttribute",
+                            "data_type": "string",
+                            "different_values": "0",
+                            "value_bounds": "unspecified",
+                            "value_refresh_rate": "300",
+                            "value_type": "latitude_longitude",
+                            "value_unit": "#"
+                        },
+                        "airQualityPM10AverageLastHour": {
+                            "attr_type": "CustomAttribute",
+                            "data_type": "float",
+                            "value_unit": ""
+                        },
+                        "airQualityPM10Enfuser": {
+                            "attr_type": "CustomAttribute",
+                            "data_type": "float",
+                            "value_unit": ""
+                        },
+                        "airQualityPM10Gral": {
+                            "attr_type": "CustomAttribute",
+                            "data_type": "float",
+                            "value_unit": ""
+                        },
+                        "airQualityPM10RealTimeDelta": {
+                            "attr_type": "CustomAttribute",
+                            "data_type": "float",
+                            "value_unit": ""
+                        },
+                        "airQualityPM10RealTimeDeltaGral": {
+                            "attr_type": "CustomAttribute",
+                            "data_type": "float",
+                            "value_unit": ""
+                        },
+                        "airQualityPM2_5AverageLastHour": {
+                            "attr_type": "CustomAttribute",
+                            "data_type": "float",
+                            "value_unit": ""
+                        },
+                        "airQualityPM2_5Enfuser": {
+                            "attr_type": "CustomAttribute",
+                            "data_type": "float",
+                            "value_unit": ""
+                        },
+                        "airQualityPM2_5RealTimeDelta": {
+                            "attr_type": "CustomAttribute",
+                            "data_type": "float",
+                            "value_unit": ""
+                        },
+                        "dateObserved": {
+                            "attr_type": "DeviceAttribute",
+                            "data_type": "string",
+                            "different_values": "0",
+                            "value_bounds": "unspecified",
+                            "value_refresh_rate": "300",
+                            "value_type": "timestamp",
+                            "value_unit": "s"
+                        },
+                        "location": {
+                            "attr_type": "DeviceAttribute",
+                            "data_type": "string",
+                            "different_values": "0",
+                            "value_bounds": "unspecified",
+                            "value_refresh_rate": "300",
+                            "value_type": "latitude_longitude",
+                            "value_unit": "#"
+                        },
+                        "reliability": {
+                            "attr_type": "DeviceAttribute",
+                            "data_type": "float",
+                            "different_values": "0",
+                            "value_bounds": "unspecified",
+                            "value_refresh_rate": "300",
+                            "value_type": "status",
+                            "value_unit": "#"
+                        },
+                        "source": {
+                            "attr_type": "DeviceAttribute",
+                            "data_type": "string",
+                            "different_values": "0",
+                            "value_bounds": "unspecified",
+                            "value_refresh_rate": "300",
+                            "value_type": "status",
+                            "value_unit": "#"
+                        }
+                    },
+                    "serviceType": "Environment_Air_quality_monitoring_station",
+                    "serviceUri": "http://www.disit.org/km4city/resource/iot/orionFinland/Helsinki/123456789",
+                    "starsCount": 0,
+                    "typeLabel": "Air quality monitoring station",
+                    "wktGeometry": ""
+                },
+                "type": "Feature"
+            }
+        ],
+        "type": "FeatureCollection"
+    }
+}

@@ -1,0 +1,272 @@
+FF-Attributes:
+{
+	path : target
+	filename : 16383362197218.mockFlowFile
+	timestampSource : dateObservedTo
+	_id : 488495957f35e4af65e1f451737a4c8c4f5ed7fb74577df7ad18565e89eab516
+	uuid : db880a40-fa7a-47f9-a3d7-0b91a2427cbc
+}
+
+FF-Content:
+{
+  "value": 63.7,
+  "value_type": "sound_lv",
+  "data_type": "float",
+  "value_refresh_rate": "300",
+  "value_unit": "#",
+  "sensorId": "TA-12345",
+  "src": "IOT",
+  "kind": "sensor",
+  "latlon": "60.168095,24.911846",
+  "serviceUri": "http://serviceuriprefix.org/TA-12345",
+  "uuid": "29cae530-1ea2-4531-aad7-c48ccb536fc3",
+  "value_name": "LAeq",
+  "organization": "MyOrg",
+  "deviceName": "TA-12345",
+  "date_time": "2019-08-30T13:19:26.000Z",
+  "date_time10min": "2019-08-30T13:20:00.000Z",
+  "date_time10sec": "2019-08-30T13:19:30.000Z",
+  "date_time1d": "2019-08-30T00:00:00.000Z",
+  "date_time1h": "2019-08-30T13:00:00.000Z",
+  "date_time1min": "2019-08-30T13:19:00.000Z",
+  "date_time1sec": "2019-08-30T13:19:26.000Z"
+}
+FF-Attributes:
+{
+	path : target
+	filename : 16383362197218.mockFlowFile
+	timestampSource : dateObservedTo
+	_id : bb168ed5b9ce0ace3ae96285980d874195323dd77e59c414d156616c72d2e308
+	uuid : a92eee18-13b1-477e-a39d-bfa32865991d
+}
+
+FF-Content:
+{
+  "value": 65.7,
+  "value_type": "sound_lv",
+  "data_type": "float",
+  "value_refresh_rate": "300",
+  "value_unit": "#",
+  "sensorId": "TA-12345",
+  "src": "IOT",
+  "kind": "sensor",
+  "latlon": "60.168095,24.911846",
+  "serviceUri": "http://serviceuriprefix.org/TA-12345",
+  "uuid": "29cae530-1ea2-4531-aad7-c48ccb536fc3",
+  "value_name": "LAmax",
+  "organization": "MyOrg",
+  "deviceName": "TA-12345",
+  "date_time": "2019-08-30T13:19:26.000Z",
+  "date_time10min": "2019-08-30T13:20:00.000Z",
+  "date_time10sec": "2019-08-30T13:19:30.000Z",
+  "date_time1d": "2019-08-30T00:00:00.000Z",
+  "date_time1h": "2019-08-30T13:00:00.000Z",
+  "date_time1min": "2019-08-30T13:19:00.000Z",
+  "date_time1sec": "2019-08-30T13:19:26.000Z"
+}
+FF-Attributes:
+{
+	path : target
+	filename : 16383362197218.mockFlowFile
+	timestampSource : dateObservedTo
+	_id : 4e9d66f385bc5c0eb769e46e1d352dbfb05d1439734503ec79940d17292ff09e
+	uuid : b089b119-64af-4d28-843f-fcc490c6f554
+}
+
+FF-Content:
+{
+  "value_type": "timestamp",
+  "data_type": "time",
+  "value_refresh_rate": "300",
+  "value_unit": "s",
+  "value_str": "2019-08-30T13:19:26.000000Z",
+  "sensorId": "TA-12345",
+  "src": "IOT",
+  "kind": "sensor",
+  "latlon": "60.168095,24.911846",
+  "serviceUri": "http://serviceuriprefix.org/TA-12345",
+  "uuid": "29cae530-1ea2-4531-aad7-c48ccb536fc3",
+  "value_name": "dateObserved",
+  "organization": "MyOrg",
+  "deviceName": "TA-12345",
+  "date_time": "2019-08-30T13:19:26.000Z",
+  "date_time10min": "2019-08-30T13:20:00.000Z",
+  "date_time10sec": "2019-08-30T13:19:30.000Z",
+  "date_time1d": "2019-08-30T00:00:00.000Z",
+  "date_time1h": "2019-08-30T13:00:00.000Z",
+  "date_time1min": "2019-08-30T13:19:00.000Z",
+  "date_time1sec": "2019-08-30T13:19:26.000Z"
+}
+FF-Attributes:
+{
+	path : target
+	filename : 16383362197218.mockFlowFile
+	timestampSource : dateObservedTo
+	_id : fd5400b58f297e32527880c48a4bf8ddf962b864842fd221534e56519133523e
+	uuid : 8d840058-bc3f-4a71-bcf0-a0cc7970aeca
+}
+
+FF-Content:
+{
+  "value_type": "timestamp",
+  "data_type": "time",
+  "value_refresh_rate": "300",
+  "value_unit": "s",
+  "value_str": "2019-08-30T13:18:26.000000Z",
+  "sensorId": "TA-12345",
+  "src": "IOT",
+  "kind": "sensor",
+  "latlon": "60.168095,24.911846",
+  "serviceUri": "http://serviceuriprefix.org/TA-12345",
+  "uuid": "29cae530-1ea2-4531-aad7-c48ccb536fc3",
+  "value_name": "dateObservedFrom",
+  "organization": "MyOrg",
+  "deviceName": "TA-12345",
+  "date_time": "2019-08-30T13:19:26.000Z",
+  "date_time10min": "2019-08-30T13:20:00.000Z",
+  "date_time10sec": "2019-08-30T13:19:30.000Z",
+  "date_time1d": "2019-08-30T00:00:00.000Z",
+  "date_time1h": "2019-08-30T13:00:00.000Z",
+  "date_time1min": "2019-08-30T13:19:00.000Z",
+  "date_time1sec": "2019-08-30T13:19:26.000Z"
+}
+FF-Attributes:
+{
+	path : target
+	filename : 16383362197218.mockFlowFile
+	timestampSource : dateObservedTo
+	_id : 6ec2ce74ac04f8bf94843c535f7c27a35e2c306e67b1d9e8af01e40df9384f37
+	uuid : d755a0d8-60fb-4c99-9c15-cac623114efa
+}
+
+FF-Content:
+{
+  "value_type": "timestamp",
+  "data_type": "time",
+  "value_refresh_rate": "300",
+  "value_unit": "s",
+  "value_str": "2019-08-30T13:19:26.000000Z",
+  "sensorId": "TA-12345",
+  "src": "IOT",
+  "kind": "sensor",
+  "latlon": "60.168095,24.911846",
+  "serviceUri": "http://serviceuriprefix.org/TA-12345",
+  "uuid": "29cae530-1ea2-4531-aad7-c48ccb536fc3",
+  "value_name": "dateObservedTo",
+  "organization": "MyOrg",
+  "deviceName": "TA-12345",
+  "date_time": "2019-08-30T13:19:26.000Z",
+  "date_time10min": "2019-08-30T13:20:00.000Z",
+  "date_time10sec": "2019-08-30T13:19:30.000Z",
+  "date_time1d": "2019-08-30T00:00:00.000Z",
+  "date_time1h": "2019-08-30T13:00:00.000Z",
+  "date_time1min": "2019-08-30T13:19:00.000Z",
+  "date_time1sec": "2019-08-30T13:19:26.000Z"
+}
+FF-Attributes:
+{
+	path : target
+	filename : 16383362197218.mockFlowFile
+	timestampSource : dateObservedTo
+	_id : 773a2832d26f50a68e5dd347d474d3b74010e2a0699a600ae4bf36486143df7f
+	uuid : 1db8d788-9764-46ab-b850-1948ca61c798
+}
+
+FF-Content:
+{
+  "value_type": "latitude_longitude",
+  "data_type": "float",
+  "value_refresh_rate": "300",
+  "value_unit": "#",
+  "value_obj": {
+    "type": "Point",
+    "coordinates": [
+      24.911846,
+      60.168094000
+    ]
+  },
+  "sensorId": "TA-12345",
+  "src": "IOT",
+  "kind": "sensor",
+  "latlon": "60.168095,24.911846",
+  "serviceUri": "http://serviceuriprefix.org/TA-12345",
+  "uuid": "29cae530-1ea2-4531-aad7-c48ccb536fc3",
+  "value_name": "location",
+  "organization": "MyOrg",
+  "deviceName": "TA-12345",
+  "date_time": "2019-08-30T13:19:26.000Z",
+  "date_time10min": "2019-08-30T13:20:00.000Z",
+  "date_time10sec": "2019-08-30T13:19:30.000Z",
+  "date_time1d": "2019-08-30T00:00:00.000Z",
+  "date_time1h": "2019-08-30T13:00:00.000Z",
+  "date_time1min": "2019-08-30T13:19:00.000Z",
+  "date_time1sec": "2019-08-30T13:19:26.000Z"
+}
+FF-Attributes:
+{
+	path : target
+	filename : 16383362197218.mockFlowFile
+	timestampSource : dateObservedTo
+	_id : 066b21e14a6644903c6619683379782220b74a2340f3c582f51f9be6f497f3f0
+	uuid : ced8ce5f-2a4f-406f-a4cf-0ede9954252c
+}
+
+FF-Content:
+{
+  "value_type": "latitude_longitude",
+  "data_type": "float",
+  "value_refresh_rate": "300",
+  "value_unit": "#",
+  "value_arr": [
+    "LAeq | 63.7 | A-weighted, equivalent, sound level"
+  ],
+  "sensorId": "TA-12345",
+  "src": "IOT",
+  "kind": "sensor",
+  "latlon": "60.168095,24.911846",
+  "serviceUri": "http://serviceuriprefix.org/TA-12345",
+  "uuid": "29cae530-1ea2-4531-aad7-c48ccb536fc3",
+  "value_name": "measurand",
+  "organization": "MyOrg",
+  "deviceName": "TA-12345",
+  "date_time": "2019-08-30T13:19:26.000Z",
+  "date_time10min": "2019-08-30T13:20:00.000Z",
+  "date_time10sec": "2019-08-30T13:19:30.000Z",
+  "date_time1d": "2019-08-30T00:00:00.000Z",
+  "date_time1h": "2019-08-30T13:00:00.000Z",
+  "date_time1min": "2019-08-30T13:19:00.000Z",
+  "date_time1sec": "2019-08-30T13:19:26.000Z"
+}
+FF-Attributes:
+{
+	path : target
+	filename : 16383362197218.mockFlowFile
+	timestampSource : dateObservedTo
+	_id : 6cfb7d91903c1d56458f1292349b321ad1d334e9e8b897fdb500c69213be9065
+	uuid : 6549598e-020f-42fb-b84c-bb72096b4635
+}
+
+FF-Content:
+{
+  "value_type": "audio",
+  "data_type": "string",
+  "value_refresh_rate": "300",
+  "value_unit": "#",
+  "value_str": "1",
+  "sensorId": "TA-12345",
+  "src": "IOT",
+  "kind": "sensor",
+  "latlon": "60.168095,24.911846",
+  "serviceUri": "http://serviceuriprefix.org/TA-12345",
+  "uuid": "29cae530-1ea2-4531-aad7-c48ccb536fc3",
+  "value_name": "sonometerClass",
+  "organization": "MyOrg",
+  "deviceName": "TA-12345",
+  "date_time": "2019-08-30T13:19:26.000Z",
+  "date_time10min": "2019-08-30T13:20:00.000Z",
+  "date_time10sec": "2019-08-30T13:19:30.000Z",
+  "date_time1d": "2019-08-30T00:00:00.000Z",
+  "date_time1h": "2019-08-30T13:00:00.000Z",
+  "date_time1min": "2019-08-30T13:19:00.000Z",
+  "date_time1sec": "2019-08-30T13:19:26.000Z"
+}

@@ -1,0 +1,717 @@
+/*
+ *  Copyright (C) 2020 DISIT Lab http://www.disit.org - University of Florence
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+ */
+
+html {
+	height: 100%; 
+}
+
+body {
+	display: flex;
+	flex-flow: column nowrap;
+	justify-content: space-between;
+}
+
+#mainView {
+	min-height: 90%;
+	flex-grow: 2;
+	padding-top: 10px;
+	padding-bottom: 5px;
+}
+
+.btn {
+	width: auto;
+	height: auto;
+}
+
+.btn:focus{
+	outline: none !important;
+	box-shadow: none !important;
+}
+
+/*
+	Groups navigation style
+*/
+li.nav-item button.nav-link{
+	width: auto;
+	height: auto;
+}
+
+#mainView div.tab-content {
+	height: 90%;	
+}
+
+#mainView div.tab-content div.tab-pane {
+	height: 100%;
+}
+
+#mainView div.tab-content div.tab-pane div.tabscontainer {
+	height: 100%;
+}
+
+ul#property-groups-navigation.nav-tabs {
+	border-bottom: 1px solid #004849;
+	justify-content: center;
+}
+
+ul#property-groups-navigation .nav-item:not(:first-child) {
+	margin-left: 2px;
+}
+
+ul#property-groups-navigation .nav-item .nav-link{
+	border-radius: unset;
+	border-top: 1px solid #ccdadb;
+	border-right: 1px solid #ccdadb;
+	border-left: 1px solid #ccdadb;
+	border-bottom: 0px; 
+	
+	background-color: #eaeef0;
+	color: #004849;
+}
+
+ul#property-groups-navigation .nav-item .nav-link.active{
+	border-top: 1px solid #004849;
+	border-left: 1px solid #004849;
+	border-right: 1px solid #004849;
+
+	background-color: #ffffff;
+	border-bottom: 1px solid #ffffff;
+}
+
+
+/*
+	Properties navigation style.
+*/
+.tab.properties-navigation {
+	float: left;
+	background-color: #f1f1f1;
+	width: 30%;
+	height: 100%;
+}
+
+.tab.properties-navigation button {
+	display: block;
+	background-color: inherit;
+	color: black;
+	border: none;
+	outline: none;
+	text-align: left;
+	cursor: pointer;
+	transition: 0.2s;
+	height: auto;
+	width: 100%;
+	padding: 5px 0px 5px 20px;
+	margin: 0;
+}
+
+.tab.properties-navigation button.required-property,
+.tabcontent .cs-details-table .required-property {
+	font-weight: bold;
+}
+
+.tab.properties-navigation button:hover {
+	background-color: #ddd;	
+}
+
+.tab.properties-navigation button.active {
+	background-color: #ccc;
+}
+
+/*
+	Properties configuration style.
+*/
+.tabscontainer {
+	float: left;
+	width: 68%;
+	height: 100%;
+	border-left: 1px solid lightgrey;
+}
+
+.tabcontent {
+	padding-left: 20px;
+	padding-top: 20px;
+	padding-right: 5px;
+	height: 100%;
+	overflow-y: auto;
+}
+
+.tabcontent .check-controls-container {
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: flex-start;	
+	margin-bottom: 8px;
+}
+
+.tabcontent .check-controls-container div {
+	margin-right: 30px;
+}
+
+.tabcontent .no-value-combo-entry{
+	color: darkgrey;	
+}
+
+input[type="checkbox"].no-value-checkbox , 
+input[type="checkbox"].empty-string-checkbox {
+	margin-right: 5px;
+}
+
+.tabcontent textarea.property-value-input {
+	height: 50%;
+}
+
+.tabcontent .jsoneditor.property-value-input {
+	height: 50%;
+}
+
+/* CS property configuration style */
+.tabcontent .cs-status-panel {
+	display: flex;
+	flex-flow: row nowrap;
+	justify-content: space-between;
+	margin-top: 30px;
+}
+
+/* runStatus and valiationStatus icons */
+.tabcontent .cs-status-panel .cs-run-status i.fa.fa-flash,
+.tabcontent .cs-details-table table.nested-cs-table i.fa.fa-flash {
+	color: #44a3cf;
+}
+
+.tabcontent .cs-status-panel .cs-run-status i.icon.icon-enable-false,
+.tabcontent .cs-details-table table.nested-cs-table i.icon.icon-enable-false {
+	color: #728e9b;
+}
+
+.tabcontent .cs-status-panel .cs-validation-status i.fa.fa-check,
+.tabcontent .cs-details-table table.nested-cs-table i.fa.fa-check {
+	color: #44a3cf;
+}
+
+.tabcontent .cs-status-panel .cs-validation-status i.fa.fa-warning,
+.tabcontent .cs-details-table table.nested-cs-table i.fa.fa-warning{
+	color: #cf9f5d;
+}
+	
+/* CS details table style */
+.tabcontent .cs-details-table{
+	width: 100%;
+	margin-top: 30px;
+}
+
+.tabcontent .cs-details-table thead {
+	background-color: #373b3e;
+	color: white;
+}
+
+.tabcontent .cs-details-table .required-property {
+	font-weight: bold;
+}
+
+.tabcontent .cs-details-table span.fa-question-circle{
+	padding-left: 10px;
+}
+
+.tabcontent .cs-details-table table.nested-cs-table {
+	border-left: 1px solid lightgrey;
+	table-layout: fixed;
+}
+
+/* Nested CS style */
+.tabcontent .cs-details-table table.nested-cs-table td{
+	word-break: break-word;
+}
+
+.tabcontent .cs-details-table table.nested-cs-table td.bottom-border {
+	border-bottom: 2px solid black;
+}
+
+.tabcontent .cs-details-table table.nested-cs-table td.bold {
+	font-weight: bold;
+}
+
+.tabcontent .cs-details-table button.accordion-button {
+	height: auto;
+	padding-left: 0;
+}
+
+.tabcontent .cs-details-table button.accordion-button:hover {
+	border: none;
+}
+
+/*
+	Dynamic properties 
+*/
+.dynamic-properties-container {
+	padding-left: 20px;
+	padding-right: 5px;
+	padding-top: 20px;
+	height: 81%;
+	overflow-y: auto;
+}
+
+.dynamic-properties-container button {
+	width: auto;
+	height: auto;
+}
+
+.dynamic-properties-container .add-property-button-container {
+	width: 100%;
+	display: flex;
+	flex-flow: row nowrap;
+	justify-content: flex-end;	
+}
+
+.dynamic-properties-container table {
+	margin-top: 20px;
+}
+
+.dynamic-properties-container table,
+.dynamic-properties-container table tr {
+	width: 100%;
+}
+
+.dynamic-properties-container table thead {
+	background-color: #373b3e;
+	color: white;
+}
+
+.dynamic-properties-container table th:not(:last-child) ,
+.dynamic-properties-container table td:not(:last-child) {
+	width: 45%;
+}
+
+.dynamic-properties-container table th:last-child ,
+.dynamic-properties-container table td:last-child {
+	width: 10%;
+	text-align: center;
+}
+
+/* Popovers style */
+.property-popover {
+	background-color: rgba(0,0,0,0.85);
+}
+
+.validation-popover {
+	background-color: rgba(209,118,0,0.95);
+}
+
+.property-popover .popover-body,
+.validation-popover .popover-body {
+	color: white;
+}
+
+.validation-popover .popover-body ul li {
+	margin-bottom: 10px;
+}
+
+
+/*
+	Controls
+*/
+#controls {
+	width: 100%;
+	display: flex;
+	flex-flow: row nowrap;
+	justify-content: space-between;
+	padding-left: 20px;
+	padding-right: 20px;
+	padding-top: 10px;
+	padding-bottom: 6px;
+}
+
+/* Actions */ 
+#actions {
+	display: flex;
+	flex-flow: row nowrap;
+	justify-content: flex-end;
+	/* alight-items: flex-end; */
+}
+
+#actions button {
+	height: 32px;
+	width: 90px;
+}
+
+/* #actions button:last-child {
+	margin-right: 20px;
+} */
+
+/*
+	Modal
+*/
+.modal .modal-dialog .modal-header,
+.modal .modal-dialog .modal-body,
+.modal .modal-dialog .modal-footer {
+	background-color: white;
+}
+
+.modal button:not(.btn-close){
+	width: auto;
+	height: auto;
+}
+
+.modal .modal-dialog .modal-body div.validation-errors {
+	padding-top: 20px;
+}
+
+.modal .modal-dialog .modal-body div.validation-errors ul li {
+	margin-bottom: 10px;
+}
+
+/***************************
+TestingUI Style
+****************************/
+#testing-ui {
+	min-height: 90%;
+	flex-grow: 2;
+	
+	display: flex;
+	flex-flow: row nowrap;
+	
+}
+
+/* Input FF section*/
+#testing-ui #input-ff-section {
+	width: 50%;
+	height: 100%;
+	
+	display: flex;
+	flex-flow: column nowrap;
+	justify-content: flex-start;
+	
+	padding-left: 10px;
+	padding-right: 10px;
+	border-right: 1px solid darkgrey;
+}
+
+/*OAuth credentials*/
+#testing-ui #input-ff-section #oauth-credentials-container-heading {
+	display: flex;
+	flex-flow: row nowrap;
+	justify-content: space-between;
+	
+	padding-top: 5px;
+	margin-top: 5px;
+	border-top: 1px solid lightgrey;
+}
+
+#testing-ui #input-ff-section #oauth-credentials-container {
+	display: flex;
+	flex-flow: row nowrap;
+	justify-content: space-around;
+	align-items: flex-end;
+}
+
+#testing-ui #input-ff-section #oauth-credentials-container div {
+	width: 49%;
+}
+
+#testing-ui #input-ff-section #oauth-credentials-container label {
+	margin-bottom: 0px;
+}
+
+/*Input FF attributes*/
+#input-ff-section #input-ff-attributes-container {
+	max-height: 166px;
+}
+
+#input-ff-section #input-ff-attributes-container #input-ff-attributes-heading {
+	display: flex;
+	flex-flow: row nowrap;
+	justify-content: space-between;
+	
+	padding-bottom: 5px;
+	border-bottom: 1px solid lightgrey;
+}
+
+#input-ff-section #input-ff-attributes-container #input-ff-attributes-heading .collapse-button {
+	width: auto;
+	height: auto;
+	border: none;	
+}
+
+#input-ff-section #input-ff-attributes-container #input-ff-attributes-heading .collapse-button i {
+	-moz-transition: all 0.4s linear;
+    -webkit-transition: all 0.4s linear;
+    transition: all 0.4s linear;
+}
+
+#input-ff-section #input-ff-attributes-container #input-ff-attributes-heading .collapse-button.up i {
+	-ms-transform: rotate(180deg);
+    -moz-transform: rotate(180deg);
+    -webkit-transform: rotate(180deg);
+    transform: rotate(180deg);
+}
+
+
+#input-ff-section #input-ff-attributes-container #input-ff-attributes {
+	max-height: 78%;
+	overflow-y: auto;
+}
+
+#testing-ui .collapse-button {
+	width: auto;
+	height: auto;
+	border: none;
+}
+
+#testing-ui .collapse-button i {
+	-moz-transition: all 0.4s linear;
+    -webkit-transition: all 0.4s linear;
+    transition: all 0.4s linear;
+}
+
+#testing-ui .collapse-button.up i{
+	-ms-transform: rotate(180deg);
+    -moz-transform: rotate(180deg);
+    -webkit-transform: rotate(180deg);
+    transform: rotate(180deg);
+}
+
+
+/* #testing-ui #input-ff-attributes-container {
+	width: 100%;
+	height: 40%;
+	overflow-y: auto;
+	
+	display: flex;
+	flex-flow: column nowrap;
+	
+	padding-bottom: 5px;
+	margin-bottom: 5px;
+	border-bottom: 1px solid lightgrey;
+}
+
+#testing-ui #input-ff-attributes-container h5 {
+	margin-bottom: 0px;
+} */
+
+#testing-ui .add-attribute-button {
+	width: auto;
+	height: auto;
+	align-self: flex-end;
+}
+
+.input-ff-attributes-table {
+	margin-top: 5px;
+	width: 100%;
+}
+
+.input-ff-attributes-table thead {
+	background-color: #373b3e;
+	color: white;
+	font-size: small;
+}
+
+.input-ff-attributes-table thead th {
+	padding-left: 4px;
+}
+
+/* Input FF content*/
+#testing-ui #input-ff-content-editor {
+	width: 100%;
+ 	min-height: 40%;
+	margin-top: 5px;
+}
+
+/* Output FF section*/
+#testing-ui #output-ff-section {
+	width: 50%;
+	height: 100%;
+	display: flex;
+	flex-flow: column nowrap;
+	justify-content: space-between;
+	
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+#testing-ui #output-ff-section #output-relationships-container {
+	height: 90%;
+}
+
+#testing-ui #output-ff-section #output-relationships-container .rel-tab {
+	height: 100%;
+	display: flex;
+	flex-flow: column nowrap;
+	justify-content: space-around;
+}
+
+#testing-ui #output-ff-section #output-relationships-container .rel-tab .output-relation-ff-view {
+	display: flex;
+	flex-flow: column nowrap;
+	justify-content: space-between;
+	height: 90%;	
+}
+
+#testing-ui #output-ff-section #output-relationships-container .output-relation-ff-nav {
+	margin-top: 5px;
+	padding-bottom: 5px;
+	border-bottom: 1px solid lightgrey;
+	
+	display: flex;
+	flex-flow: row nowrap;
+	justify-content: center;	
+}
+
+#testing-ui #output-ff-section #output-relationships-container .output-relation-ff-nav ul.pagination{
+	margin-bottom: 0;
+}
+
+#testing-ui #output-ff-section #output-relationships-container .output-relation-ff-nav ul.pagination li a {
+	cursor: pointer;	
+}
+
+#testing-ui #output-ff-section .output-ff-attributes {
+	height: 40%;
+	overflow-y: auto;
+}
+
+#testing-ui #output-ff-section .output-ff-attributes table {
+	table-layout: fixed;
+	width: 100%;
+	margin-bottom: 0px;
+}
+
+#testing-ui #output-ff-section .output-ff-attributes table thead {
+	background-color: #373b3e;
+	color: white;
+	font-size: small;
+}
+
+#testing-ui #output-ff-section .output-ff-attributes table thead th { 
+	padding-left: 4px;
+}
+
+#testing-ui #output-ff-section .output-ff-attributes table tbody tr td:first-child { 
+	font-weight: bold;
+}
+
+#testing-ui #output-ff-section .output-ff-attributes table tbody tr:last-child td {
+	border-bottom: 0px;	
+}
+
+#testing-ui #output-ff-section .output-ff-attributes table td {
+	word-wrap: break-word;
+	font-size: small;
+}
+
+#testing-ui #output-ff-section .output-ff-editor {
+	height: 59%;
+}
+
+
+/*Test notification style*/
+#testing-ui #output-ff-section #output-test-notifications {
+	/* margin-bottom: 26px;
+	margin-right: 118px; */
+	z-index: 999;
+	
+	width: 100%;
+	display: flex;
+	flex-flow: row nowrap;
+	justify-content: flex-end;
+	
+	max-height: 70%;
+}
+
+#testing-ui #output-ff-section #output-test-notifications .toast {
+	margin-right: 118px;
+	margin-bottom: 4px;
+	width: 70%;
+}
+
+#testing-ui #output-ff-section #output-test-notifications .toast-header{
+	background-color: #004849;
+	color: white;
+}
+
+#testing-ui #output-ff-section #output-test-notifications .toast-header button {
+	margin-left: 10px;
+	width: auto;
+	height: auto;
+	border: none;
+		
+	background-color: transparent;
+	color: white;
+}
+
+#testing-ui #output-ff-section #output-test-notifications .toast-body{
+	max-height: 90%;
+	overflow-y: auto;
+} 
+
+#testing-ui #output-ff-section #output-test-notifications .toast.minimized {
+	width: 350px;
+}
+
+#testing-ui #output-ff-section #output-test-notifications .toast.hidden {
+	width: 0px;
+	height: 0px;
+}
+
+#testing-ui #output-ff-section #output-test-notifications .toast.minimized .toast-header strong{
+	cursor: pointer;
+}
+
+/* Test output loader*/
+#testing-ui #output-ff-section #test-output-loader {
+	display: flex;
+	flex-flow: row nowrap;
+	justify-content: center;
+	margin-top: 30%;
+}
+
+#testing-ui #output-ff-section #test-output-loader .lds-ring {
+  display: inline-block;
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+
+#testing-ui #output-ff-section #test-output-loader .lds-ring div {
+  box-sizing: border-box;
+  display: block;
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  margin: 8px;
+  border: 8px solid rgb(186,85,74);
+  border-radius: 50%;
+  animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  border-color: rgb(186,85,74) transparent transparent transparent;
+}
+
+#testing-ui #output-ff-section #test-output-loader .lds-ring div:nth-child(1) {
+  animation-delay: -0.45s;
+}
+
+#testing-ui #output-ff-section #test-output-loader .lds-ring div:nth-child(2) {
+  animation-delay: -0.3s;
+}
+
+#testing-ui #output-ff-section #test-output-loader .lds-ring div:nth-child(3) {
+  animation-delay: -0.15s;
+}
+
+@keyframes lds-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+
+

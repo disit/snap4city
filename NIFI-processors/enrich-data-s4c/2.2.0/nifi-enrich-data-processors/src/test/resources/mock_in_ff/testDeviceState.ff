@@ -1,0 +1,113 @@
+{  
+   "id":"123456789",
+   "type":"AirQualityObserved",
+   "BooleanTestAttr":{
+      "type":"Boolean",
+      "value":true,
+      "metadata":{
+      
+      }
+   },
+   "PM10":{  
+      "type":"Number",
+      "value":18.4,
+      "metadata":{  
+
+      }
+   },
+   "PM2.5":{  
+      "type":"Number",
+      "value":6,
+      "metadata":{  
+
+      }
+   },
+   "address":{  
+      "type":"StructuredValue",
+      "value":{  
+         "addressCountry":"",
+         "addressLocality":"",
+         "streetAddress":""
+      },
+      "metadata":{  
+
+      }
+   },
+   "dateObserved":{  
+      "type":"Text",
+      "value":"2019-06-06T15:46:54.930000+00:00",
+      "metadata":{  
+
+      }
+   },
+   "location":{  
+      "type":"StructuredValue",
+      "value":{  
+         "type":"Point",
+         "coordinates":[  
+            24.912011,
+            60.157338000
+         ]
+      },
+      "metadata":{  
+
+      }
+   },
+   "reliability":{  
+      "type":"Number",
+      "value":0.5,
+      "metadata":{  
+
+      }
+   },
+   "source":{  
+      "type":"Text",
+      "value":"https://source.com/source",
+      "metadata":{  
+
+      }
+   },
+   "testNumericArray":{
+		"type":"Array",
+		"value": [ 1 , 2 , 3 ],
+		"metadata":{}
+	},
+	"testBooleanArray":{
+		"type":"Array",
+		"value": [ true , false , true ],
+		"metadata":{}
+	},
+	"testStringArray":{
+		"type":"Array",
+		"value":["one","two","three"],
+		"metadata":{}
+	},
+	"testObjArray":{
+		"type":"Array",
+		"value":[
+			{ "a": 1, "b":"two" , "c":true },
+			{ "a": 2, "b":"two" , "c":false }
+		],
+		"metadata":{}
+	},
+	"testNullArray":{
+		"type":"Array",
+		"value":[null,null,null],
+		"metadata":{}
+	},
+	"testMixedArray":{
+		"type":"Array",
+		"value":[
+			1,
+			"one",
+			true,
+			{
+				"a":1,
+				"b":"two",
+				"c":false
+			}
+		],
+		"metadata":{}
+	},
+   "date_time":"2019-06-06T15:46:54.939Z"
+}

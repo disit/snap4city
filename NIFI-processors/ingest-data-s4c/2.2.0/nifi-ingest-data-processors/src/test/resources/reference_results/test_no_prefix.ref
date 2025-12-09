@@ -1,0 +1,24 @@
+{
+  "id": "test-device-1",
+  "type": "Test",
+  "latitude": {
+    "type": "float",
+    "value": "43.77295",
+    "metadata": {}
+  },
+  "longitude": {
+    "type": "float",
+    "value": "11.25704",
+    "metadata": {}
+  },
+  "temperature": {
+    "type": "float",
+    "value": "",
+    "metadata": {}
+  },
+  "model": {
+    "type": "string",
+    "value": "custom",
+    "metadata": {}
+  }
+}

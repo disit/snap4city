@@ -1,0 +1,45 @@
+{
+  "id":"PA12345",
+  "type":"personaAppGlobalEntity",
+  "actuatorCanceller": {
+    "type":"String",
+    "value":null,
+    "metadata":{}
+  },
+  "actuatorDeleted": {
+    "type":"Boolean",
+    "value":false,
+    "metadata":{}
+  },
+  "actuatorDeletionDate": {
+    "type":"String",
+    "value":null,
+    "metadata":{}
+  },
+  "creationDate": {
+    "type":"String",
+    "value":"2018-02-22 10:52:17",
+    "metadata":{}
+  },
+  "entityCreator": {
+    "type":"String",
+    "value":"creator",
+    "metadata":{}
+  },
+  "entityDesc": {
+    "type":"String",
+    "value":"SpeedLimit",
+    "metadata":{}
+  },
+  "stateCount": {
+    "type":"Integer",
+    "value":"29",
+    "metadata":{}
+  },
+  "stateTime": {
+    "type":"Integer",
+    "value":"2",
+    "metadata":{}
+  },
+  "date_time":"2019-06-04T15:37:22.402Z"
+}

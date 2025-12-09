@@ -1,0 +1,38 @@
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.0.0" 
+		  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  		  xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.0.0 http://maven.apache.org/xsd/assembly-2.0.0.xsd">
+  		  
+	<id>test-tools-pack</id>
+  	<includeBaseDirectory>false</includeBaseDirectory>
+		  
+  	<formats>
+  		<format>dir</format>
+  	</formats>
+  	
+  	<fileSets>
+  		<fileSet>
+  			<outputDirectory>test-server/lib</outputDirectory>
+  			<directory>target/jars</directory>
+  			<includes>
+  				<include>test-tools.jar</include>
+  			</includes>
+  		</fileSet>
+  		
+  		<fileSet>
+  			<outputDirectory>test-server/conf</outputDirectory>
+  			<directory>resources/conf</directory>
+  			<includes>
+  				<include>**/*</include>
+  			</includes>
+  		</fileSet>
+  		
+  		<fileSet>
+  			<directory>resources/bin</directory>
+  			<outputDirectory>test-server/bin</outputDirectory>
+	  		<includes>
+	  			<include>test_server.sh</include>
+	  		</includes>
+  		</fileSet>
+  	</fileSets>
+  	
+</assembly>

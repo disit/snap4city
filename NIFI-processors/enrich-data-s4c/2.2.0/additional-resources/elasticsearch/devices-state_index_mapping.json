@@ -1,0 +1,101 @@
+{
+    "mappings":{
+        "dynamic_templates":[
+            {
+                "numeric_values_long" : {
+                    "path_match": "*.value" ,
+                    "match_mapping_type": "long" ,
+                    "mapping" : {
+                        "type" : "float"
+                    }
+                }
+            } ,
+            {
+                "numeric_values_double" : {
+                    "path_match": "*.value" ,
+                    "match_mapping_type": "double" ,
+                    "mapping" : {
+                        "type" : "float"
+                    }
+                }
+            } ,
+            {
+                "string_values" : {
+                    "path_match": "*.value_str" ,
+                    "mapping" : {
+		            	"fields" : {
+		                	"keyword" : {
+		                  		"type" : "keyword"
+		                	}
+	              		},
+		              	"type" : "text"
+                	}
+            	}
+            } ,
+            {
+                "obj_values": {
+                    "path_match" : "*.value_obj" ,
+                    "mapping" : {
+                        "type" : "object"
+                    }
+                }
+            } ,
+            {
+                "obj_values_str" : {
+                    "path_match" : "*.value_obj.*" ,
+                    "match_mapping_type" : "string" ,
+                    "mapping" : {
+                        "type" : "text",
+                        "fields":{
+                        	"keyword":{
+                        		"type": "keyword"
+                        	}
+                        }
+                    }
+                }
+            } ,
+            {
+            	"json_str_values": {
+            		"path_match":"*.value_json_str",
+            		"match_mapping_type": "string",
+            		"mapping" : {
+		              	"type" : "text"
+                	}
+            	}
+            } ,
+            {
+            	"expected_next_update": {
+            		"path_match":"expected_next_*",
+            		"match_mapping_type": "string",
+            		"mapping" : {
+		              	"type" : "date"
+                	}
+            	}
+            }
+        ] , 
+        "properties" : {
+            "date_time" : {
+                "type": "date"
+            } ,
+            "latlon": { 
+                "type": "geo_point"
+            } ,
+            "deviceModel" : {
+            	"type": "keyword",
+            	"fields": {
+            		"text": {
+            			"type": "text"
+            		}
+            	}
+            } ,
+            "deviceName" : {
+            	"type": "keyword",
+            	"fields": { 
+            		"text": {
+            			"type": "text"
+            		}
+            	}
+            }
+        }
+    }
+}

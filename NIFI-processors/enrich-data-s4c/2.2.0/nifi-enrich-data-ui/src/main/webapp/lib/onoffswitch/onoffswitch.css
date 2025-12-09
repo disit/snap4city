@@ -1,0 +1,118 @@
+/*
+ *  Copyright (C) 2020 DISIT Lab http://www.disit.org - University of Florence
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+ */
+
+.onoffswitch {
+    position: relative;
+    width: 150px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+.onoffswitch-checkbox {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.onoffswitch-label {
+    display: block;
+    overflow: hidden;
+    cursor: pointer;
+    border-radius: 20px;
+}
+
+.onoffswitch-inner {
+    display: block; 
+    width: 200%; 
+    margin-left: -100%;
+    transition: margin 0.3s ease-in 0s;
+}
+
+.onoffswitch-inner:before, .onoffswitch-inner:after {
+    display: block; 
+    float: left; 
+    width: 50%; 
+    height: 30px; 
+    padding: 0; 
+    line-height: 30px;
+    font-size: 14px; 
+    color: white; 
+    font-family: Trebuchet, Arial, sans-serif; 
+    font-weight: bold;
+    box-sizing: border-box;
+}
+
+.onoffswitch-inner:before {
+    /* content: "CONFIGURE"; */
+    content: attr(data-text-on);
+    padding-left: 10px;
+    /* background-color: #34A7C1; */
+    background-color: #004849;    
+    color: #FFFFFF;
+}
+.onoffswitch-inner:after {
+    /* content: "TEST"; */
+    content: attr(data-text-off);
+    padding-right: 10px;
+    /* background-color: #EEEEEE; */
+    background-color: rgb(114,142,155);
+    color: #FFFFFF;
+    text-align: right;
+}
+.onoffswitch-switch {
+    display: block;
+    width: 36px;
+    margin: -3px;
+    background: #FFFFFF;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 116px;
+    /* border: 2px solid #999999; */
+    /* border: 2px solid white; */
+    border-radius: 20px;
+    transition: all 0.3s ease-in 0s; 
+    box-shadow: 0 3px 1px -2px rgba(0,0,0,0.2) ,
+                0 2px 2px 0 rgba(0,0,0,0.14) ,
+                0 1px 2px 0 rgba(0,0,0,0.12);
+}
+.onoffswitch.on .onoffswitch-switch {
+  /* background-color: #34A7C1;
+  border-color: #34A7C1; */
+  background-color: #004849;
+  border-color: #004849;
+}
+
+.onoffswitch.off .onoffswitch-switch {
+  /* background-color: #EEEEEE;
+  border-color: #EEEEEE; */
+  background-color: rgb(114,142,155);
+  border-color: rgb(114,142,155);
+}
+
+/* .onoffswitch.on .onoffswitch-label {
+  border-color: #34A7C1;
+}
+
+.onoffswitch.off .onoffswitch-label {
+  border-color: #EEEEEE;
+} */
+
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
+    margin-left: 0;
+}
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
+    right: 0px; 
+}

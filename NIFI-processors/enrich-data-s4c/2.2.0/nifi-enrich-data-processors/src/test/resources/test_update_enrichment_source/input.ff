@@ -1,0 +1,12 @@
+{
+	"a" : 123 ,
+	"id" : "test-id" ,
+	"location" : {
+	    "coordinates":[19.2 , 16.8]
+	},
+	"model":{
+		"type": "string",
+		"value": "VeryGoodModel",
+		"metadata": {}
+	}
+}

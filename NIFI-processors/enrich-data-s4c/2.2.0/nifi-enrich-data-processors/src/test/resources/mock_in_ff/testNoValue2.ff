@@ -1,0 +1,37 @@
+{  
+   "id":"123456789",
+   "type":"AirQualityObserved",
+   "BooleanTestAttr":{
+      "type":"Boolean",
+      "metadata":{}
+   },
+   "PM10":{  
+      "type":"Number",
+      "metadata":{}
+   },
+   "PM2.5":{  
+      "type":"Number",
+      "metadata":{}
+   },
+   "address":{  
+      "type":"StructuredValue",
+      "metadata":{}
+   },
+   "dateObserved":{  
+      "type":"Text",
+      "metadata":{}
+   },
+   "location":{  
+      "type":"StructuredValue",
+      "metadata":{}
+   },
+   "reliability":{  
+      "type":"Number",
+      "metadata":{}
+   },
+   "source":{  
+      "type":"Text",
+      "metadata":{}
+   },
+   "date_time":"2025-07-28T13:23:33.668Z"
+}
