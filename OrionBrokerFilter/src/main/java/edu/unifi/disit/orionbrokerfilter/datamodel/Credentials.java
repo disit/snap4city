@@ -88,6 +88,10 @@ public class Credentials {
 			return isValidK1K2(k1, k2);
 	}
 
+	public boolean isValidK1K2Only(String k1, String k2) {
+		return isValidK1K2(k1, k2);
+	}
+
 	@Override
 	public String toString() {
 		return "Credentials [username=" + username + ", pksha1=" + pksha1 + ", k1=" + k1 + ", k2=" + k2 + "]";

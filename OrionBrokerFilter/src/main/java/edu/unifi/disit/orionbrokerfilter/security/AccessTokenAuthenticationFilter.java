@@ -97,6 +97,15 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 	@Value("${spring.openidconnect.password}")
 	private String password;
 
+	@Value("${spring.openidconnect.scope:openid}")
+	private String scope;
+
+	@Value("${spring.auth.k1k2.enabled:false}")
+	private boolean k1k2AuthEnabled;
+
+	@Value("${spring.auth.certificate.enabled:false}")
+	private boolean certificateAuthEnabled;
+
 	@Value("${spring.openidconnect.token_endpoint}")
 	private String token_endpoint;
 
@@ -120,6 +129,9 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 
 	@Value("${spring.elapsingcache.minutes}")
 	private Integer minutesElapsingCache;
+
+	@Value("${spring.auth.subscription.anyid.users:}")
+	private String subscriptionAnyIdUsers;
 
 	@Value("${multitenancy:false}")
 	private Boolean multitenancy;
@@ -170,7 +182,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		final HttpServletRequest req = (HttpServletRequest) request;
 		MultiReadHttpServletRequest multiReadRequest = new MultiReadHttpServletRequest((HttpServletRequest) request);
 
-                //SKIP checks if is OPTIONS request
+		//SKIP checks if is OPTIONS request
                 if(req.getMethod().equals("OPTIONS")) {
                   filterChain.doFilter(multiReadRequest, response);
                   return;
@@ -178,12 +190,14 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 
 		// retrieve https certicate
 		String pksha1 = null;
-		X509Certificate[] certs = (X509Certificate[]) multiReadRequest.getAttribute("javax.servlet.request.X509Certificate");
-		if ((certs != null) && (certs.length > 0)) {
-			String pk = new String(Base64.encode(certs[0].getPublicKey().getEncoded()), StandardCharsets.UTF_8);
-			logger.debug("certificate arrived, public key is:" + pk);
-			pksha1 = DigestUtils.sha1Hex(pk.getBytes());
-			logger.debug("sha1 public key is: {}", pksha1);
+		if (certificateAuthEnabled) {
+			X509Certificate[] certs = (X509Certificate[]) multiReadRequest.getAttribute("javax.servlet.request.X509Certificate");
+			if ((certs != null) && (certs.length > 0)) {
+				String pk = new String(Base64.encode(certs[0].getPublicKey().getEncoded()), StandardCharsets.UTF_8);
+				logger.debug("certificate arrived, public key is:" + pk);
+				pksha1 = DigestUtils.sha1Hex(pk.getBytes());
+				logger.debug("sha1 public key is: {}", pksha1);
+			}
 		}
 
 		// retrieve k1 k2 credentials
@@ -193,20 +207,6 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		// retrieve NGSI info
 		String queryType = ((HttpServletRequest) request).getServletPath();
 		String elementId = req.getParameter("elementid");// mandatory
-
-		// eventually enrich with MultiTenancy/ServicePath info
-		if (multitenancy) {// check always to be made
-			if (req.getHeader("Fiware-ServicePath") != null)
-				elementId = req.getHeader("Fiware-ServicePath") + "." + elementId;
-			else
-				elementId = "/." + elementId;
-			if (req.getHeader("Fiware-Service") != null)
-				elementId = req.getHeader("Fiware-Service") + "." + elementId;
-			else
-				elementId = "." + elementId;
-
-			logger.debug("elementid became:" + elementId);
-		}
 
 		// retrieve eventually accessToken
 		String requestedAccessToken = null;
@@ -223,16 +223,74 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 			version = "v2";
 		logger.debug("Version is:" + version);
 
-		if ((elementId != null)) {
+		if ("v2".equals(version)) {
+			String deviceIdFromPath = extractV2DeviceId(req);
+			if (deviceIdFromPath != null) {
+				if (elementId != null && !elementId.equals(deviceIdFromPath)) {
+					writeResponseError(response, messages.getMessage("login.ko.elementidnotvalid", null, multiReadRequest.getLocale()));
+					return;
+				}
+				elementId = deviceIdFromPath;
+			}
+		}
 
-			logger.debug("Received a request of type {} for {}", queryType, elementId);
+		List<String> subscriptionEntityIds = null;
+		boolean subscriptionHasIdPattern = false;
+		boolean allowAnySubscriptionId = false;
+		boolean isV2SubscriptionDelete = false;
+		boolean allowSubscriptionDeleteWithoutElementId = false;
+		if ("v2".equals(version) && "/v2/subscriptions".equals(req.getServletPath()) && "POST".equals(req.getMethod())) {
+			try {
+				allowAnySubscriptionId = isSubscriptionAnyIdAllowed(requestedAccessToken, multiReadRequest.getLocale());
+				SubscriptionEntityInfo subscriptionInfo = extractV2SubscriptionEntityInfo(multiReadRequest, multiReadRequest.getLocale(), allowAnySubscriptionId);
+				subscriptionEntityIds = subscriptionInfo.getIds();
+				subscriptionHasIdPattern = subscriptionInfo.hasIdPattern();
+				if (subscriptionEntityIds != null && !subscriptionEntityIds.isEmpty()) {
+					if (!allowAnySubscriptionId && elementId != null && !subscriptionEntityIds.contains(elementId)) {
+						writeResponseError(response, messages.getMessage("login.ko.elementidnotvalid", null, multiReadRequest.getLocale()));
+						return;
+					}
+					if (elementId == null && subscriptionEntityIds.size() == 1) {
+						elementId = subscriptionEntityIds.get(0);
+					}
+				}
+			} catch (CredentialsNotValidException e) {
+				writeResponseError(response, e.getMessage());
+				return;
+			}
+		}
+		if ("v2".equals(version) && "DELETE".equals(req.getMethod()) && req.getServletPath().startsWith("/v2/subscriptions")) {
+			isV2SubscriptionDelete = true;
+			allowAnySubscriptionId = isSubscriptionAnyIdAllowed(requestedAccessToken, multiReadRequest.getLocale());
+			allowSubscriptionDeleteWithoutElementId = allowAnySubscriptionId;
+		}
+
+		boolean hasSubscriptionIds = subscriptionEntityIds != null && !subscriptionEntityIds.isEmpty();
+		boolean hasSubscriptionIdsOrPattern = hasSubscriptionIds || subscriptionHasIdPattern;
+
+		// eventually enrich with MultiTenancy/ServicePath info
+		if (multitenancy) {// check always to be made
+			elementId = applyMultitenancy(elementId, req);
+			if (hasSubscriptionIds) {
+				List<String> enrichedIds = new ArrayList<String>();
+				for (String id : subscriptionEntityIds) {
+					enrichedIds.add(applyMultitenancy(id, req));
+				}
+				subscriptionEntityIds = enrichedIds;
+			}
+			logger.debug("elementid became:" + elementId);
+		}
+
+		if ((elementId != null) || hasSubscriptionIdsOrPattern || allowSubscriptionDeleteWithoutElementId) {
+
+			String logElementId = elementId != null ? elementId : (hasSubscriptionIds ? subscriptionEntityIds.toString() : (subscriptionHasIdPattern ? "<idPattern>" : "<subscriptionDelete>"));
+			logger.debug("Received a request of type {} for {}", queryType, logElementId);
 			if (k1 != null)
 				logger.debug("K1 {}", k1);
 			if (k2 != null)
 				logger.debug("K2 {}", k2);
 
 			try {
-
 				String sensorName = null;
 
 				if ("v1".equals(version)) {
@@ -241,7 +299,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 					sensorName = getSensorNameV1(multiReadRequest, isWriteQuery(queryType, req, version, multiReadRequest.getLocale()), req.getParameter("elementid"));// can return null, the passed elementid is the original one
 				} else if ("v2".equals(version)) {
 					logger.debug("Searching sensor name in API v2 body.");
-					sensorName = getSensorNameV2(multiReadRequest, req);// can return null, the passed elementid is the original one
+					sensorName = getSensorNameV2(multiReadRequest, req, elementId);// can return null, the passed elementid is the original one
 				} else
 					throw new CredentialsNotValidException(messages.getMessage("login.ko.requesturlmalformed", null, multiReadRequest.getLocale()));
 
@@ -267,7 +325,21 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
                                         }
                                 }
                                 
-				checkAuthorization(organization + ":" + contextBrokerName + ":" + elementId, elementType, sensorName, k1, k2, pksha1, requestedAccessToken, queryType, version, req, request.getLocale());
+				if (isV2SubscriptionDelete && allowSubscriptionDeleteWithoutElementId) {
+					logger.debug("Subscription delete any-id enabled for current user");
+				} else if ("v2".equals(version) && "/v2/subscriptions".equals(req.getServletPath()) && "POST".equals(req.getMethod())) {
+					if (allowAnySubscriptionId) {
+						logger.debug("Subscription any-id enabled for current user");
+					} else if (hasSubscriptionIds) {
+						for (String subscriptionElementId : subscriptionEntityIds) {
+							checkAuthorization(organization + ":" + contextBrokerName + ":" + subscriptionElementId, elementType, sensorName, k1, k2, pksha1, requestedAccessToken, queryType, version, req, request.getLocale());
+						}
+					} else {
+						checkAuthorization(organization + ":" + contextBrokerName + ":" + elementId, elementType, sensorName, k1, k2, pksha1, requestedAccessToken, queryType, version, req, request.getLocale());
+					}
+				} else {
+					checkAuthorization(organization + ":" + contextBrokerName + ":" + elementId, elementType, sensorName, k1, k2, pksha1, requestedAccessToken, queryType, version, req, request.getLocale());
+				}
 
 				logger.debug("Credentials ARE VALID");
 
@@ -359,6 +431,25 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		}
 	}
 
+	private String extractV2DeviceId(HttpServletRequest req) {
+		String requestUri = req.getRequestURI();
+		String marker = "/v2/entities/";
+		int start = requestUri.indexOf(marker);
+		if (start < 0) {
+			return null;
+		}
+		start += marker.length();
+		if (start >= requestUri.length()) {
+			return null;
+		}
+		int end = requestUri.indexOf("/", start);
+		if (end < 0) {
+			end = requestUri.length();
+		}
+		String deviceId = requestUri.substring(start, end);
+		return deviceId.isEmpty() ? null : deviceId;
+	}
+
 	private String retrieveUserName(String requestAccessToken, Locale lang) throws NoSuchMessageException, CredentialsNotValidException {
 
 		if (requestAccessToken == null)
@@ -444,7 +535,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		}
 	}
 
-	private String getSensorNameV2(HttpServletRequest multiReadRequest, HttpServletRequest req) throws IOException, NoSuchMessageException, CredentialsNotValidException {
+	private String getSensorNameV2(HttpServletRequest multiReadRequest, HttpServletRequest req, String elementId) throws IOException, NoSuchMessageException, CredentialsNotValidException {
 		String attribute = null;
 		int attributeStart;
 		int attributeEnd;
@@ -465,7 +556,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 				attributeStart = entityBody.indexOf("[\"", attrsIndex) + 2;
 				attributeEnd = entityBody.indexOf("\"", attributeStart);
 				attribute = entityBody.substring(attributeStart, attributeEnd);
-				if (entityBody.indexOf(req.getParameter("elementid")) == -1) {
+				if (elementId != null && entityBody.indexOf(elementId) == -1) {
 					logger.warn(messages.getMessage("login.ko.elementidnotvalid", null, multiReadRequest.getLocale()) + " entityBody is {}", entityBody);
 					throw new CredentialsNotValidException(messages.getMessage("login.ko.elementidnotvalid", null, multiReadRequest.getLocale()));
 				}
@@ -487,6 +578,79 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		return null;
 	}
 
+	private SubscriptionEntityInfo extractV2SubscriptionEntityInfo(HttpServletRequest multiReadRequest, Locale lang, boolean allowIdPattern)
+			throws IOException, CredentialsNotValidException {
+		String entityBody = IOUtils.toString(multiReadRequest.getInputStream(), StandardCharsets.UTF_8.toString());
+		List<String> ids = new ArrayList<String>();
+		boolean hasIdPattern = false;
+		try {
+			JsonNode rootNode = objectMapper.readTree(entityBody.getBytes());
+			JsonNode entitiesNode = rootNode.path("subject").path("entities");
+			if (entitiesNode.isArray()) {
+				Iterator<JsonNode> elements = entitiesNode.elements();
+				while (elements.hasNext()) {
+					JsonNode entityNode = elements.next();
+					JsonNode idPatternNode = entityNode.path("idPattern");
+					if (!idPatternNode.isMissingNode() && !idPatternNode.isNull() && !idPatternNode.asText().isEmpty()) {
+						if (!allowIdPattern) {
+							throw new CredentialsNotValidException(messages.getMessage("login.ko.idpatternnotallowed", null, lang));
+						}
+						hasIdPattern = true;
+					}
+					JsonNode idNode = entityNode.path("id");
+					if (!idNode.isMissingNode() && !idNode.isNull() && !idNode.asText().isEmpty()) {
+						ids.add(idNode.asText());
+					}
+				}
+			}
+		} catch (CredentialsNotValidException e) {
+			throw e;
+		} catch (Exception e) {
+			logger.warn("Unable to parse v2 subscription body for entity ids", e);
+		}
+		return new SubscriptionEntityInfo(ids, hasIdPattern);
+	}
+
+	private boolean isSubscriptionAnyIdAllowed(String accessToken, Locale lang) {
+		if (accessToken == null || subscriptionAnyIdUsers == null || subscriptionAnyIdUsers.trim().isEmpty()) {
+			return false;
+		}
+		String requestUsername;
+		try {
+			requestUsername = retrieveUserName(accessToken, lang);
+		} catch (CredentialsNotValidException e) {
+			logger.debug("Unable to retrieve username for subscription any-id check", e);
+			return false;
+		}
+		if (requestUsername == null || requestUsername.trim().isEmpty()) {
+			return false;
+		}
+		for (String entry : subscriptionAnyIdUsers.split(",")) {
+			if (requestUsername.equals(entry.trim())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static class SubscriptionEntityInfo {
+		private final List<String> ids;
+		private final boolean hasIdPattern;
+
+		private SubscriptionEntityInfo(List<String> ids, boolean hasIdPattern) {
+			this.ids = ids;
+			this.hasIdPattern = hasIdPattern;
+		}
+
+		private List<String> getIds() {
+			return ids;
+		}
+
+		private boolean hasIdPattern() {
+			return hasIdPattern;
+		}
+	}
+
 	private void writeResponseError(ServletResponse response, String msg) throws JsonProcessingException, IOException {
 		Response toreturn2 = new Response();
 		toreturn2.setResult(false);
@@ -503,16 +667,33 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
 	}
 
+	private String applyMultitenancy(String elementId, HttpServletRequest req) {
+		if (elementId == null) {
+			return null;
+		}
+		if (req.getHeader("Fiware-ServicePath") != null)
+			elementId = req.getHeader("Fiware-ServicePath") + "." + elementId;
+		else
+			elementId = "/." + elementId;
+		if (req.getHeader("Fiware-Service") != null)
+			elementId = req.getHeader("Fiware-Service") + "." + elementId;
+		else
+			elementId = "." + elementId;
+		return elementId;
+	}
+
 	private void checkAuthorization(String elementId, String elementType, String sensorName, String k1, String k2, String pksha1, String requestedAccessToken, String queryType, String version, HttpServletRequest req, Locale lang)
-			throws CredentialsNotValidException, UnsupportedEncodingException {
+			throws CredentialsNotValidException, UnsupportedEncodingException, IOException {
 
 		if (requestedAccessToken != null)// CLOUD-EDGE scenario
 			checkAuthorizationWithAccessToken(elementId, elementType, sensorName, requestedAccessToken, queryType, version, req, lang);
-		else// IOT-BUTTON like scenario
+		else if (k1k2AuthEnabled)// IOT-BUTTON like scenario
 			checkAuthorizationWithK1K2(elementId, elementType, sensorName, k1, k2, pksha1, queryType, version, req, lang);
+		else
+			throw new CredentialsNotValidException(messages.getMessage("login.ko.credentialsnotvalid", null, lang));
 	}
 
-	private CheckCredential retrieveCachedOwnership(String elementId, String elementType, String username, String accessToken, Locale lang) throws CredentialsNotValidException {
+	private CheckCredential retrieveCachedOwnership(String elementId, String elementType, String username, String accessToken, Locale lang) throws CredentialsNotValidException, IOException {
 
 		// retrieve cached credentials for Ownership
                 CheckCredential o = null;
@@ -548,7 +729,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		return o;
 	}
 
-	private CheckCredential retrieveCachedDelegation(String elementId, String elementType, String username, String accessToken, Locale lang) throws CredentialsNotValidException, UnsupportedEncodingException {
+	private CheckCredential retrieveCachedDelegation(String elementId, String elementType, String username, String accessToken, Locale lang) throws CredentialsNotValidException, UnsupportedEncodingException, IOException {
                 CheckCredential d = null;
                 ArrayList<CheckCredential> delegations;
 
@@ -584,7 +765,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 	}
 
 	private void checkAuthorizationWithAccessToken(String elementId, String elementType, String sensorName, String accessToken, String queryType, String version, HttpServletRequest req, Locale lang)
-			throws CredentialsNotValidException, UnsupportedEncodingException {
+			throws CredentialsNotValidException, UnsupportedEncodingException, IOException {
 
 		String requestUsername = retrieveUserName(accessToken, lang);
 
@@ -641,13 +822,19 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 	private void checkAuthorizationWithK1K2(String elementId, String elementType, String sensorName, String k1, String k2, String pksha1, String queryType, String version, HttpServletRequest req, Locale lang)
 			throws CredentialsNotValidException, UnsupportedEncodingException {
 
+		if (isK1K2Invalid(k1, k2)) {
+			logger.debug("K1/K2 missing or too short");
+			throw new CredentialsNotValidException(messages.getMessage("login.ko.credentialsnotvalid", null, lang));
+		}
+
 		CachedCredentials cc = getCachedCredentials(elementId, elementType, sensorName, lang);
 
 		// enforcement
+		boolean allowCertificateAuth = certificateAuthEnabled;
 		if (cc.getIsPublic()) {
 			if (isWriteQuery(queryType, req, version, lang)) {
 				logger.debug("The operation is WRITE on public");
-				if (cc.getOwnerCredentials().isValid(k1, k2, pksha1)) {
+				if (allowCertificateAuth ? cc.getOwnerCredentials().isValid(k1, k2, pksha1) : cc.getOwnerCredentials().isValidK1K2Only(k1, k2)) {
 					logger.debug("The owner credentials are valid");
 					return;
 				} else {
@@ -661,7 +848,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		} else {
 			if (isWriteQuery(queryType, req, version, lang)) {
 				logger.debug("The operation is WRITE on private");
-				if (cc.getOwnerCredentials().isValid(k1, k2, pksha1)) {
+				if (allowCertificateAuth ? cc.getOwnerCredentials().isValid(k1, k2, pksha1) : cc.getOwnerCredentials().isValidK1K2Only(k1, k2)) {
 					logger.debug("The owner credentials are valid");
 					return;
 				} else {
@@ -670,7 +857,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 				}
 			} else {
 				logger.debug("The operation is READ on private");
-				if (cc.getOwnerCredentials().isValid(k1, k2, pksha1)) {
+				if (allowCertificateAuth ? cc.getOwnerCredentials().isValid(k1, k2, pksha1) : cc.getOwnerCredentials().isValidK1K2Only(k1, k2)) {
 					logger.debug("The owner credentials are valid");
 					return;
 				} else {
@@ -678,8 +865,8 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 					// delegation as below
 					logger.debug("The owner credentials are not valid, check if there are any delegation");
 					for (Credentials c : cc.getDelegatedCredentials()) {
-						if (cc.getOwnerCredentials().getPksha1() == null) {// if the elementID is not protected with certificate, use k1, k2 enforcement
-							if (c.isValid(k1, k2, null)) {
+						if (!allowCertificateAuth || cc.getOwnerCredentials().getPksha1() == null) {// if the elementID is not protected with certificate, use k1, k2 enforcement
+							if (c.isValidK1K2Only(k1, k2)) {
 								logger.debug("One of the delegated credentials are valid, certificate not involved");
 								return;
 							}
@@ -695,6 +882,12 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 				}
 			}
 		}
+	}
+
+	private boolean isK1K2Invalid(String k1, String k2) {
+		String k1Trim = (k1 == null) ? null : k1.trim();
+		String k2Trim = (k2 == null) ? null : k2.trim();
+		return (k1Trim == null) || (k2Trim == null) || (k1Trim.isEmpty()) || (k2Trim.isEmpty()) || (k1Trim.length() < 10) || (k2Trim.length() < 10);
 	}
 
 	private String getUsername(String pksha1, Locale lang) throws CredentialsNotValidException {
@@ -872,6 +1065,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		params.add("grant_type", "refresh_token");
 		params.add("refresh_token", refreshToken);
 		params.add("client_id", clientId);
+		params.add("scope", scope);
 		params.add("username", username);
 		params.add("password", password);
 
@@ -910,8 +1104,8 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 			toreturn = atNode.asText();
 		} catch (HttpClientErrorException | IOException e) {
 			refreshToken = null; // force to re-login
-			logger.error("Trouble in getRefresh", e);
-			throw new CredentialsNotValidException(messages.getMessage("login.ko.networkproblems", null, lang));
+			logger.error("Trouble in getAccessToken", e);
+			throw new CredentialsNotValidException("Trouble in getAccessToken, see logs");
 		}
 
 		return toreturn;
@@ -922,6 +1116,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
 		params.add("grant_type", "password");
 		params.add("client_id", clientId);
+		params.add("scope", scope);
 		params.add("username", username);
 		params.add("password", password);
 
@@ -950,8 +1145,8 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 
 			refreshToken = atNode.asText();
 		} catch (HttpClientErrorException | IOException e) {
-			logger.error("Trouble in getAccessToken", e);
-			throw new CredentialsNotValidException(messages.getMessage("login.ko.networkproblems", null, lang));
+			logger.error("Trouble in getRefreshToken", e);
+			throw new CredentialsNotValidException("Trouble in getRefreshToken, see logs");
 		}
 	}
 
@@ -1168,7 +1363,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 			}
 		} catch (HttpClientErrorException | IOException e) {
 			logger.error("Trouble in getDelegatedCredentials", e);
-			throw new CredentialsNotValidException(messages.getMessage("login.ko.networkproblems", null, lang));
+			throw new CredentialsNotValidException("Trouble in getDelegatedCredentials, see logs");
 		}
 
 		cc.setDelegatedCredentials(toreturn);
@@ -1176,7 +1371,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		return cc;
 	}
 
-	private CheckCredential getOwnershipCC(String accessToken, String elementId, String elementType, String username, Locale lang) throws CredentialsNotValidException {
+	private CheckCredential getOwnershipCC(String accessToken, String elementId, String elementType, String username, Locale lang) throws CredentialsNotValidException, IOException {
 
 		CheckCredential toreturn = null;
 
@@ -1226,15 +1421,18 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
                                         certifiedDevice.get(elementName[2].replaceAll("\"", "")).setCertified(true);
                                 }
                         }
-		} catch (HttpClientErrorException | IOException e) {
-			logger.error("Trouble in getOwnerCredentials", e);
-			throw new CredentialsNotValidException(messages.getMessage("login.ko.networkproblems", null, lang));
+		} catch (HttpClientErrorException e) {
+			logger.error("Trouble in getOwnerCredentials: " + e.getRawStatusCode() + " " + e.getResponseBodyAsString(), e);
+			throw new CredentialsNotValidException("Trouble in getOwnerCredentials, see logs");
+		} catch (IOException e) {
+			logger.error("IO Trouble in getOwnerCredentials", e);
+			throw e;
 		}
 
 		return toreturn;
 	}
 
-	private CheckCredential getDelegationCC(String accessToken, String sensorUri, String elementType, String username, Locale lang) throws CredentialsNotValidException, UnsupportedEncodingException {
+	private CheckCredential getDelegationCC(String accessToken, String sensorUri, String elementType, String username, Locale lang) throws CredentialsNotValidException, UnsupportedEncodingException, IOException {
 
 		CheckCredential toreturn = null;
 
@@ -1289,10 +1487,13 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 			}
 
 			toreturn = new CheckCredential(elementType, username, result, minutesElapsingCache, kind);
-		} catch (HttpClientErrorException | IOException e) {
-			logger.error("Trouble in getDelegatedCredentials", e);
-			throw new CredentialsNotValidException(messages.getMessage("login.ko.networkproblems", null, lang));
-		}
+		} catch (HttpClientErrorException e) {
+			logger.error("Trouble in getDelegatedCredentials " +  e.getRawStatusCode()+" "+e.getResponseBodyAsString(), e);
+			throw new CredentialsNotValidException("Trouble in getDelegatedCredentials, see logs");
+		} catch (IOException e) {
+                        logger.error("IO Trouble in getDelegatedCredentials, see logs ", e);
+                        throw e;
+                }
 
 		return toreturn;
 	}
