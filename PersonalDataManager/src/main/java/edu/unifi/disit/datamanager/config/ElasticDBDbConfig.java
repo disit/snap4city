@@ -114,9 +114,11 @@ public class ElasticDBDbConfig {
                                      sslContext = null;
                                 }
                         } else if((ks = readKeyStore(keystoreFile, keystoretype, keystorePass)) != null) {
+                                logger.info("ELASTICSEARCH keystore from "+keystoreFile);
                                 sslContext = SSLContexts.custom().loadKeyMaterial(ks, keypass.toCharArray())
 					.build();
                         } else if(esProtocol.equals("https")) {
+                                logger.info("ELASTICSEARCH SSL keystore NOT loaded from '"+keystoreFile+"' using default");
                                 sslContext = SSLContext.getDefault();
                         } else {
                                 sslContext = null;

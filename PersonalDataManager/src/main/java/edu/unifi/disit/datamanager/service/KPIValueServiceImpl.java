@@ -43,6 +43,7 @@ import edu.unifi.disit.datamanager.datamodel.profiledb.OwnershipDAO;
 import edu.unifi.disit.datamanager.eventDrivenMessages.KafkaProducerConfig;
 import edu.unifi.disit.datamanager.exception.CredentialsException;
 import edu.unifi.disit.datamanager.exception.DataNotValidException;
+import org.springframework.dao.DataAccessResourceFailureException;
 
 @Service
 public class KPIValueServiceImpl implements IKPIValueService {
@@ -179,7 +180,7 @@ public class KPIValueServiceImpl implements IKPIValueService {
 	public KPIElasticValue getKPIElasticValueById(String id, Locale lang) throws CredentialsException {
 		logger.debug("getKPIValueById INVOKED on id {}", id);
 		this.setCorrectIndex();
-		return kpiElasticValueRepository.findById(id).orElse(null);
+		return kpiElasticValueRepository.findByIdSearch(id);
 	}
 
 	@Override
@@ -224,7 +225,13 @@ public class KPIValueServiceImpl implements IKPIValueService {
 	public KPIElasticValue saveKPIElasticValue(KPIElasticValue kpiElasticValue) throws CredentialsException {
 		logger.debug("saveKPIValue INVOKED on kpivalue {}", kpiElasticValue.getId());
 		this.setCorrectIndex();
-		kpiElasticValue = kpiElasticValueRepository.save(kpiElasticValue);
+                try {
+                  kpiElasticValue = kpiElasticValueRepository.save(kpiElasticValue);
+                } catch(DataAccessResourceFailureException e) {
+                  //fix for opensearch2
+                  if(e.getMessage() == null || !e.getMessage().startsWith("Unable to parse response body for Response"))
+                    throw e;
+                }
 		if (Boolean.TRUE.equals(KafkaProducerConfig.getSendMessageOnEventDriveMessages())) {
 			sendMessageOnEventDriveMessages(
 					KafkaProducerConfig.getPrefixTopic() + kpiElasticValue.getSensorId(), kpiElasticValue);
@@ -246,7 +253,13 @@ public class KPIValueServiceImpl implements IKPIValueService {
 	public void deleteKPIElasticValue(String id) throws CredentialsException {
 		logger.debug("deleteKPIValue INVOKED on id {}", id);
 		this.setCorrectIndex();
-		kpiElasticValueRepository.deleteById(id);
+                try {
+                  kpiElasticValueRepository.deleteById(id);
+                } catch(DataAccessResourceFailureException e) {
+                  //fix for opensearch2
+                  if(e.getMessage() == null || !e.getMessage().startsWith("Unable to parse response body for Response"))
+                    throw e;
+                }                  
 	}
 
 	@Override

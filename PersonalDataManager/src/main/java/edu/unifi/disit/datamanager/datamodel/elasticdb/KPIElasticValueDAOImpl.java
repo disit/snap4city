@@ -133,6 +133,32 @@ public class KPIElasticValueDAOImpl implements KPIElasticValueDAOCustom {
 	}
 
 	@Override
+	public KPIElasticValue findByIdSearch(String id) {
+		SearchResponse searchResponse = null;
+		try {
+			SearchRequest request = new SearchRequest(ConfigIndexBean.getIndexName());
+			SearchSourceBuilder source = new SearchSourceBuilder()
+					.query(QueryBuilders.idsQuery().addIds(id))
+					.size(1);
+			request.source(source);
+			searchResponse = elasticSearchClient.search(request, RequestOptions.DEFAULT);
+		} catch (IOException e) {
+			logger.warn(e.getMessage());
+		}
+
+		if (searchResponse != null && searchResponse.getHits().getHits().length > 0) {
+			try {
+				String hitJson = searchResponse.getHits().getHits()[0].getSourceAsString();
+				ObjectMapper objectMapper = new ObjectMapper();
+				return objectMapper.readValue(hitJson, KPIElasticValue.class);
+			} catch (IOException e) {
+				logger.warn(e.getMessage());
+			}
+		}
+		return null;
+	}
+
+	@Override
 	public Long countDocumentsBySensorId(String sensorID) {
 
 		SearchResponse searchResponse = null;

@@ -23,6 +23,8 @@ public interface KPIElasticValueDAOCustom {
 	List<KPIElasticValue> findBySensorIdNoPagesWithLimit(String sensorID, Date from, Date to, Integer first,
 			Integer last);
 
+	KPIElasticValue findByIdSearch(String id);
+
 	Long countDocumentsBySensorId(String sensorID);
 
 }
