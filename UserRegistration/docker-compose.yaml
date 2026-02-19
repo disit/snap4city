@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  php:
+    build: .
+    ports:
+      - "8085:80"
+    depends_on:
+      - mariadb
+    environment:
+      - SECRET_KEY=<SECRET_KEY>
+      - SECRET_IV=<SECRET_IV>
+      - ENCRYPT_METHOD=<ENC_MET>
+      - LDAP_SERVER=ldap://ldap
+      - LDAP_ADMIN_PASSWORD=ldap_password
+      - LDAP_ADMIN_USER=cn=admin,dc=ldap,dc=organization,dc=com
+      - LDAP_BASEDN=dc=ldap,dc=organization,dc=com
+      - LDAP_GROUP=dc=ldap,dc=organization,dc=com
+      - LDAP_ROLE=Manager
+      - LDAP_OU=Organization,Organization1
+      - LDAP_GROUPS=IOTDirectory,Dashboard
+      - LDAP_OPERATOR_ROLE=Manager
+      - LDAP_OPERATOR_GROUPS=IOTDirectory,Dashboard
+      - DB_HOST=mariadb
+      - DB_NAME=user_login
+      - DB_USER=dbuser
+      - DB_PASSWORD=dbpass
+      - MAIL_HOST=smtp_host
+      - MAIL_SMTPAUTH=false
+      - MAIL_SMTPSECURE=
+      - MAIL_SMTPAUTOTLS=false
+      - MAIL_PORT=25
+      - MAIL_USERNAME=mail_host_username
+      - MAIL_PASSWORD=mail_host_pass
+      - BASE_URL=http://dashboard/user-registration/
+      - MAIL_SENDER=snap4city@disit.org
+      - MAIL_SENDER_NAME=Snap4City
+      - MAIL_RECEIVER_NAME=[[user]]
+      - RECOVER_PASSWORD_MAIL_SUBJECT=Recover your password
+      - REGISTER_USER_MAIL_SUBJECT=Thanks for the registration!
+      - REGISTRATION_LINK_DURATION_IN_MIN=1440
+      - RECOVER_LINK_DURATION_IN_MIN=15
+      - TEMPLATES_FOLDER=/var/www/html/templates
+    networks:
+      - backend
+    volumes:
+      - ./templates:/var/www/html/templates
+
+  mariadb:
+    image: mariadb:11.4
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: rootpass
+      MARIADB_DATABASE: user_login
+      MARIADB_USER: dbuser
+      MARIADB_PASSWORD: dbpass
+    volumes:
+      - ./dump.sql:/docker-entrypoint-initdb.d/dump.sql:ro
+    networks:
+      - backend
+  ldap:
+    image: osixia/openldap:latest
+    environment:
+      LDAP_ORGANISATION: "organization"
+      LDAP_DOMAIN: "ldap.organization.com"
+      LDAP_ADMIN_PASSWORD: ldap_password
+    networks:
+      - backend
+networks:
+  backend:
