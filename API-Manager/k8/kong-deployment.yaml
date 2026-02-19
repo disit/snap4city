@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+
+  labels:
+    io.kompose.service: kong
+  name: kong
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: kong
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: C:\Users\fabri\AppData\Local\Microsoft\WinGet\Packages\Kubernetes.kompose_Microsoft.Winget.Source_8wekyb3d8bbwe\kompose.exe --file ..\docker-compose.yml convert
+        kompose.version: 1.35.0 (9532ceef3)
+      labels:
+        io.kompose.service: kong
+    spec:
+      containers:
+        - args:
+            - /bin/bash
+            - -c
+            - export KONG_PLUGINS=check-validity,bundled && kong start && tail -f /dev/null
+          env:
+            - name: KONG_ADMIN_ACCESS_LOG
+              value: /dev/stdout
+            - name: KONG_ADMIN_ERROR_LOG
+              value: /dev/stderr
+            - name: KONG_ADMIN_LISTEN
+              value: 0.0.0.0:8001, 0.0.0.0:8444 ssl
+            - name: KONG_DATABASE
+              value: postgres
+            - name: KONG_LUA_PACKAGE_PATH
+              value: '"/usr/local/share/lua/5.1/?.lua;;"'
+            - name: KONG_PG_DATABASE
+              value: kong
+            - name: KONG_PG_HOST
+              value: kong-database
+            - name: KONG_PG_PASSWORD
+              value: kong
+            - name: KONG_PG_PORT
+              value: "5432"
+            - name: KONG_PG_USER
+              value: kong
+            - name: KONG_PROXY_ACCESS_LOG
+              value: /dev/stdout
+            - name: KONG_PROXY_ERROR_LOG
+              value: /dev/stderr
+          image: kong:latest
+          name: kong
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+            - containerPort: 8443
+              protocol: TCP
+            - containerPort: 8001
+              protocol: TCP
+            - containerPort: 8444
+              protocol: TCP
+            - containerPort: 8002
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /usr/local/share/lua/5.1/kong/plugins/check-validity
+              name: kong-claim0
+      restartPolicy: Always
+      volumes:
+        - name: kong-claim0
+          persistentVolumeClaim:
+            claimName: kong-claim0

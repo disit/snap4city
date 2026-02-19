@@ -1,0 +1,174 @@
+services:
+# keycloak and its db have been added to test the offline token verification and do not interact with the rest of the apimanager
+# go edit the keycloak public key of the algorithm used to sign the tokens in the container api-manager
+  keycloak:
+    command:
+    - start
+    container_name: keycloak
+    environment:
+      KC_DB: postgres
+      KC_DB_PASSWORD: kc_db_password
+      KC_DB_URL: jdbc:postgresql://postgres-db:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_HOSTNAME_STRICT: "false"
+      KC_HTTP_RELATIVE_PATH: /auth
+      KC_LOG_LEVEL: INFO
+      KC_METRICS_ENABLED: "true"
+      KC_PROXY: edge
+      KC_PROXY_ADDRESS_FORWARDING: "true"
+      KC_REALM_NAME: admin
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: keycloak_admin_password
+    image: quay.io/keycloak/keycloak:24.0.5
+    logging:
+      driver: json-file
+      options:
+        max-file: '10'
+        max-size: 100m
+    ports:
+    - published: 8088
+      target: 8080
+    restart: unless-stopped
+
+  server:
+    container_name: php-server
+    build:
+      context: ./php-container
+    ports:
+      - 9000:80
+  postgres-db:
+    container_name: postgres-db
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_PASSWORD: kc_db_password
+      POSTGRES_USER: keycloak
+    healthcheck:
+      test:
+      - CMD
+      - pg_isready
+      - -U
+      - keycloak
+    image: postgres:15.7-alpine
+    logging:
+      driver: json-file
+      options:
+        max-file: '10'
+        max-size: 100m
+    restart: unless-stopped
+    volumes:
+    - postgres-volume:/var/lib/postgresql/data:rw
+  api-manager:
+    build: .
+    container_name: api-manager
+    environment:
+      - userdb=root
+      - passworddb=apimanagerpswroot
+      - hostdb=apimanager-db
+      - portdb=3306
+      - database=apimanager
+      - userinfopath=http://localhost:8088/auth/realms/master/protocol/openid-connect/userinfo
+      - certpath=http://localhost:8088/auth/realms/master/protocol/openid-connect/certs
+      - keycloak_public_key=editme
+    ports:
+      - "50000:50000"
+  kong-database:
+    image: postgres:14
+    restart: always
+    container_name: kong-db
+    environment:
+      - POSTGRES_USER=kong
+      - POSTGRES_PASSWORD=kong
+      - POSTGRES_DB=kong
+    volumes:
+      - kong:/var/lib/postgresql/data:rw
+      
+  kong-migration:
+    image: kong:latest
+    command: "kong migrations bootstrap"
+    container_name: kong-migration
+    restart: on-failure
+    environment:
+      - KONG_DATABASE=postgres
+      - KONG_PG_HOST=kong-database
+      - KONG_PG_PORT=5432
+      - KONG_PG_USER=kong
+      - KONG_PG_PASSWORD=kong
+      - KONG_PG_DATABASE=kong
+    depends_on:
+      - kong-database
+  
+  kong:
+    user: kong
+    container_name: kong
+    image: kong:latest
+    command: /bin/bash -c "export KONG_PLUGINS="check-validity,bundled" && export KONG_PASSWORD="ciao" && kong start && tail -f /dev/null"
+    restart: always
+    environment:
+      - KONG_DATABASE=postgres
+      - KONG_PG_HOST=kong-database
+      - KONG_PG_PORT=5432
+      - KONG_PG_USER=kong
+      - KONG_PG_PASSWORD=kong
+      - KONG_PG_DATABASE=kong
+      - KONG_ENFORCE_RBAC=on
+      - KONG_ADMIN_GUI_AUTH=basic-auth
+      - KONG_PASSWORD="thispassword"
+      - KONG_PROXY_ACCESS_LOG=/dev/stdout
+      - KONG_ADMIN_ACCESS_LOG=/dev/stdout
+      - KONG_PROXY_ERROR_LOG=/dev/stderr
+      - KONG_ADMIN_ERROR_LOG=/dev/stderr
+      - KONG_ADMIN_LISTEN=0.0.0.0:8001, 0.0.0.0:8444 ssl
+      - KONG_LUA_PACKAGE_PATH="/usr/local/share/lua/5.1/?.lua;;"
+    depends_on:
+      - kong-migration
+      - kong-database
+    ports:
+      - mode: host
+        host_ip: 0.0.0.0
+        target: 8000
+        published: "8000"
+        protocol: tcp
+      - mode: ingress
+        host_ip: 0.0.0.0
+        target: 8443
+        published: "8543"
+        protocol: tcp
+      - mode: ingress
+        target: 8001
+        published: "8001"
+        protocol: tcp
+      - mode: ingress
+        target: 8444
+        published: "8444"
+        protocol: tcp
+      - mode: ingress
+        target: 8002
+        published: "8002"
+        protocol: tcp
+    volumes:
+      - './kong/check-validity:/usr/local/share/lua/5.1/kong/plugins/check-validity'
+  apimanager-db: # change the passwords! should match the conf.ini
+    container_name: apimanager-db
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "no"
+      MYSQL_DATABASE: api-manager
+      MYSQL_PASSWORD: apimanagerpsw
+      MYSQL_ROOT_PASSWORD: apimanagerpswroot
+      MYSQL_USER: user
+      TZ: Europe/Rome
+    image: mariadb:10.3
+    logging:
+      driver: json-file
+      options:
+        max-file: '10'
+        max-size: 100m
+    restart: unless-stopped
+    ports:
+      - "3310:3306"  # expose to 3310 for debug reasons 
+    volumes:
+      - apimanager-db:/var/lib/mysql:rw
+      - ./mysqldump.sql:/docker-entrypoint-initdb.d/0_init.sql:rw  # tentative init
+volumes:
+  kong: {}
+  apimanager-db: {}
+  postgres-volume: {}

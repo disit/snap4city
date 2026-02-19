@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Pod
+metadata:
+
+  labels:
+    io.kompose.service: kong-migration
+  name: kong-migration
+spec:
+  containers:
+    - args:
+        - kong
+        - migrations
+        - bootstrap
+      env:
+        - name: KONG_DATABASE
+          value: postgres
+        - name: KONG_PG_DATABASE
+          value: kong
+        - name: KONG_PG_HOST
+          value: kong-database
+        - name: KONG_PG_PASSWORD
+          value: kong
+        - name: KONG_PG_PORT
+          value: "5432"
+        - name: KONG_PG_USER
+          value: kong
+      image: kong:latest
+      name: kong-migration
+  restartPolicy: OnFailure

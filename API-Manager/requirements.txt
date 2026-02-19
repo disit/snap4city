@@ -1,0 +1,6 @@
+cryptography
+mysql-connector-python
+PyJWT
+requests
+starlette
+uvicorn
