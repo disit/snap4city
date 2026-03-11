@@ -71,7 +71,7 @@ if(isset($_REQUEST['username']) && in_array($ipAddress, $trustedIpAddrs)) {
     exit;  
   }
   
-  $ROLES = array('RootAdmin','ToolAdmin','AreaManager','Manager','Public');
+  $ROLES = array('RootAdmin','ToolAdmin','AreaManager','Manager','Observer','Public');
   $uinfo->mainRole = 'none';
 
   if(isset($uinfo->roles)) {
