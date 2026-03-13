@@ -290,8 +290,10 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 				if (roles == null) {
 					roles = (ArrayList<String>) otherclaims.get("role");// fallback on role
 					if (roles == null) {
-						logger.warn("Empty roles in accesstoken");
-						throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
+						logger.warn("Empty roles in accesstoken, setting Observer role");
+						//throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
+                                                roles = new ArrayList<String>();
+                                                roles.add("Observer");
 					}
 				}
 
