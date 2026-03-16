@@ -186,17 +186,21 @@ async def checkvalidity(request):
                     query_2_2_a = "SELECT count(*) as amount FROM timedaccess WHERE resource = %s AND user = %s AND `request_ok`= 1 "
                     query_2_2_b = " SELECT sum(total_requests) AS amount FROM timedaccess_summary WHERE resource = %s AND user = %s "
                     period = json.loads(result[3])["period"]
-                    if period == 0:
+                    if period == 3:
                         query_2_3 = "AND YEAR(`beginaccess`) = YEAR(CURDATE()) "
-                    elif period == 1:
-                        query_2_3 = "AND YEAR(`beginaccess`) = YEAR(CURDATE()) AND MONTH(`beginaccess`) = MONTH(CURDATE()) "
+                        query_2_3_a = "AND YEAR(`access_day`) = YEAR(CURDATE()) "
                     elif period == 2:
+                        query_2_3 = "AND YEAR(`beginaccess`) = YEAR(CURDATE()) AND MONTH(`beginaccess`) = MONTH(CURDATE()) "
+                        query_2_3_a = "AND YEAR(`access_day`) = YEAR(CURDATE()) AND MONTH(`access_day`) = MONTH(CURDATE()) "
+                    elif period == 1:
                         query_2_3 = "AND YEAR(`beginaccess`) = YEAR(CURDATE()) AND WEEK(`beginaccess`, 1) = WEEK(CURDATE(), 1) "
-                    elif period == 3:
+                        query_2_3_a = "AND YEAR(`access_day`) = YEAR(CURDATE()) AND WEEK(`access_day`, 1) = WEEK(CURDATE(), 1) "
+                    elif period == 0:
                         query_2_3 = "AND DATE(`beginaccess`) = CURDATE();"
+                        query_2_3_a = "AND DATE(`access_day`) = CURDATE();"
                     else:
                         return Response("invalid interval", status_code=500)
-                    query_2 = query_2_1 + query_2_2_a + query_2_3 + "UNION" + query_2_2_b + query_2_3 + ") alias"
+                    query_2 = query_2_1 + query_2_2_a + query_2_3 + "UNION" + query_2_2_b + query_2_3_a + ") alias"
                     cursor.execute(query_2, (result[1],userinfodict["preferred_username"],result[1],userinfodict["preferred_username"],))
                     conn.commit()
                     result_2 = cursor.fetchone()
@@ -286,17 +290,21 @@ async def checkvalidity(request):
                 query_2_2_a = "SELECT count(*) as amount FROM timedaccess WHERE resource = %s AND user = %s AND `request_ok`= 1 "
                 query_2_2_b = " SELECT sum(total_requests) AS amount FROM timedaccess_summary WHERE resource = %s AND user = %s "
                 period = json.loads(result[3])["period"]
-                if period == 0:
+                if period == 3:
                     query_2_3 = "AND YEAR(`beginaccess`) = YEAR(CURDATE()) "
-                elif period == 1:
-                    query_2_3 = "AND YEAR(`beginaccess`) = YEAR(CURDATE()) AND MONTH(`beginaccess`) = MONTH(CURDATE()) "
+                    query_2_3_a = "AND YEAR(`access_day`) = YEAR(CURDATE()) "
                 elif period == 2:
+                    query_2_3 = "AND YEAR(`beginaccess`) = YEAR(CURDATE()) AND MONTH(`beginaccess`) = MONTH(CURDATE()) "
+                    query_2_3_a = "AND YEAR(`access_day`) = YEAR(CURDATE()) AND MONTH(`access_day`) = MONTH(CURDATE()) "
+                elif period == 1:
                     query_2_3 = "AND YEAR(`beginaccess`) = YEAR(CURDATE()) AND WEEK(`beginaccess`, 1) = WEEK(CURDATE(), 1) "
-                elif period == 3:
+                    query_2_3_a = "AND YEAR(`access_day`) = YEAR(CURDATE()) AND WEEK(`access_day`, 1) = WEEK(CURDATE(), 1) "
+                elif period == 0:
                     query_2_3 = "AND DATE(`beginaccess`) = CURDATE();"
+                    query_2_3_a = "AND DATE(`access_day`) = CURDATE();"
                 else:
                     return Response("invalid interval", status_code=500)
-                query_2 = query_2_1 + query_2_2_a + query_2_3 + "UNION" + query_2_2_b + query_2_3 + ") alias"
+                query_2 = query_2_1 + query_2_2_a + query_2_3 + "UNION" + query_2_2_b + query_2_3_a + ") alias"
                 cursor.execute(query_2, (result[1],username,result[1],username,))
                 conn.commit()
                 result_2 = cursor.fetchone()

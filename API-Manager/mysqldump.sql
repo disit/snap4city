@@ -9,8 +9,8 @@ CREATE TABLE if not exists `apitable` (
   `apiinternalurl` varchar(300) NOT NULL,
   `apiexternalurl` varchar(300) NOT NULL,
   `apiinfo` varchar(300) NOT NULL,
-  `apicreationdate` datetime NOT NULL DEFAULT current_timestamp(),
-  `apideletiondate` datetime DEFAULT NULL,
+  `apicreationdate` TIMESTAMP NOT NULL DEFAULT current_timestamp(),
+  `apideletiondate` TIMESTAMP DEFAULT '0000-00-00 00:00:00',
   `apistatus` varchar(45) NOT NULL DEFAULT 'inactive',
   `apiadditionalinfo` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT '{}',
   PRIMARY KEY (`idapi`,`apiname`),
@@ -25,8 +25,8 @@ CREATE TABLE if not exists `apitabledeleted` (
   `apiinternalurl` varchar(300) NOT NULL,
   `apiexternalurl` varchar(300) NOT NULL,
   `apiinfo` varchar(300) NOT NULL,
-  `apicreationdate` datetime NOT NULL DEFAULT current_timestamp(),
-  `apideletiondate` datetime DEFAULT NULL,
+  `apicreationdate` TIMESTAMP NOT NULL DEFAULT current_timestamp(),
+  `apideletiondate` TIMESTAMP DEFAULT '0000-00-00 00:00:00',
   `apistatus` varchar(45) NOT NULL DEFAULT 'inactive',
   `apiadditionalinfo` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT '{}',
   PRIMARY KEY (`idapi`)
@@ -37,8 +37,8 @@ CREATE TABLE if not exists `ratelimit` (
   `resource` int(11) NOT NULL,
   `kind_of_limit` set('TotalAccesses','AccessesOverTime','ContemporaryAccess') NOT NULL,
   `additional_info` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-  `timebegin` timestamp NOT NULL DEFAULT current_timestamp(),
-  `timeend` timestamp NULL DEFAULT NULL,
+  `timebegin` TIMESTAMP NOT NULL DEFAULT current_timestamp(),
+  `timeend` TIMESTAMP NULL DEFAULT NULL,
   `ip` varchar(45) NOT NULL DEFAULT "192.0.0.0/8",
   PRIMARY KEY (`user`,`resource`),
   KEY `d` (`resource`),
@@ -48,7 +48,7 @@ CREATE TABLE if not exists `ratelimit` (
 CREATE TABLE if not exists `timedaccess` (
   `idtimedaccess` int(11) NOT NULL AUTO_INCREMENT,
   `user` varchar(45) DEFAULT NULL,
-  `beginaccess` datetime NOT NULL DEFAULT current_timestamp(),
+  `beginaccess` TIMESTAMP NOT NULL DEFAULT current_timestamp(),
   `resource` int(11) DEFAULT NULL,
   `result` longtext DEFAULT NULL,
   `extracted_id` varchar(45) DEFAULT NULL,
@@ -62,7 +62,7 @@ CREATE TABLE if not exists `requests` (
   `idnew_table` int(11) NOT NULL AUTO_INCREMENT,
   `result` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
   `extracted_id` varchar(45) DEFAULT NULL,
-  `endaccess` datetime DEFAULT current_timestamp(),
+  `endaccess` TIMESTAMP DEFAULT current_timestamp(),
   PRIMARY KEY (`idnew_table`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -71,8 +71,8 @@ CREATE TABLE if not exists `deletedratelimit` (
   `resource` int(11) NOT NULL,
   `kind_of_limit` set('TotalAccesses','AccessesOverTime','ContemporaryAccess') NOT NULL,
   `additional_info` longtext CHARACTER SET utf8mb4 NOT NULL,
-  `timebegin` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `timeend` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00'
+  `timebegin` TIMESTAMP NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `timeend` TIMESTAMP NOT NULL DEFAULT '0000-00-00 00:00:00'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `timedaccess_summary`;
@@ -85,7 +85,7 @@ CREATE TABLE `timedaccess_summary` (
   `total_requests` int(11) NOT NULL,
   `successful_requests` int(11) NOT NULL,
   PRIMARY KEY (`user`,`access_day`,`resource`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 DELIMITER ;;
 CREATE DEFINER=`root`@`%` PROCEDURE `compress_timedaccess`()
