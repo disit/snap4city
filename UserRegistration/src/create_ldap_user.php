@@ -184,6 +184,20 @@ function register_to_ldap($uid, $email, $password){
             outputHTML("Something went wrong. Please contact support if the problem persist", 500);
         }
     }
+    $ldap_norg_group = getenv("LDAP_NORG_GROUP") ?: "";
+    if($ldap_norg_group == ""){
+        error_log("Fail to get LDAP Neutral org group. Environment variable not read");
+        ldap_close($ldapConn);
+        outputHTML("Something went wrong. Please contact support if the problem persist", 500);
+    }
+    $neutral_org_member = ['member' => $newUserDn];
+    $organizational_role_4 = "cn=$ldap_norg_group,$ldapBaseDn";
+        $modifyEntry_4 = @ldap_mod_add($ldapConn, $organizational_role_4, $neutral_org_member);
+        if (!$modifyEntry_4) {
+            error_log("Fail to add user to $ldap_norg_group: ". ldap_error($ldapConn));
+            ldap_close($ldapConn);
+            outputHTML("Something went wrong. Please contact support if the problem persist", 500);
+        }
     //success
     outputHTML(null, 200);
 }

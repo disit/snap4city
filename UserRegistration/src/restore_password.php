@@ -23,12 +23,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $user = htmlspecialchars($_POST['user']);
-    if($user == ''){
+    $email = $_POST['email'];
+    $escapedEmail = htmlspecialchars($email);
+    if($escapedEmail == ''){
         http_response_code(409);
         $messageOutput["code"] = "409";
-        $messageOutput['error'] = "Empty username";
-        $messageOutput["message"] = "Username is empty";
+        $messageOutput['error'] = "Empty email";
+        $messageOutput["message"] = "Email is empty";
         echo json_encode($messageOutput);
         exit();
     }
@@ -41,7 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     try{
         $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $email = search_user_on_ldap($user);
+        $user = search_user_on_ldap($email);
         $datetime = new DateTime();
         $token = substr(str_shuffle(str_repeat('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',12)),0,12);
         $registration_time = $datetime->format(DateTimeInterface::ATOM);
@@ -78,7 +79,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $messageOutput["message"] = "Method not allowed";
     echo json_encode($messageOutput);
 }
-function search_user_on_ldap($user){
+function search_user_on_ldap($email){
     $ldapServer = getenv('LDAP_SERVER') ?: 'ldap://ldap';
     $ldapAdminUser = getenv("LDAP_ADMIN_USER") ?: 'cn=admin,dc=ldap,dc=organization,dc=com'; // The admin user with appropriate privileges
     $ldapAdminPassword = getenv("LDAP_ADMIN_PASSWORD") ?: "ldap_password"; // The password for the admin user
@@ -108,10 +109,10 @@ function search_user_on_ldap($user){
         echo json_encode($messageOutput);
         exit();
     }
-    $search_filter = "(cn=$user)";
+    $search_filter = "(mail=$email)";
     $search_result = ldap_search($ldap_conn, $ldapBaseDn, $search_filter);
     if (!$search_result) {
-        error_log("LDAP search by cn=$user failed:" . ldap_error($ldap_conn));
+        error_log("LDAP search by mail=$email failed:" . ldap_error($ldap_conn));
         ldap_close($ldap_conn);
         http_response_code(500);
         $messageOutput["code"] = "500";
@@ -131,7 +132,7 @@ function search_user_on_ldap($user){
         exit();
     }
     ldap_close($ldap_conn);
-    return $entries[0]['mail'][0];
+    return $entries[0]['cn'][0];
 }
 function send_email($user, $email, $token){
     // Constructing the URL with the token

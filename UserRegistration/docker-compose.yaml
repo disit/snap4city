@@ -21,6 +21,7 @@ services:
       - LDAP_GROUPS=IOTDirectory,Dashboard
       - LDAP_OPERATOR_ROLE=Manager
       - LDAP_OPERATOR_GROUPS=IOTDirectory,Dashboard
+      - LDAP_NORG_GROUP=ExternalUsers
       - DB_HOST=mariadb
       - DB_NAME=user_login
       - DB_USER=dbuser
