@@ -130,16 +130,23 @@ async def checkvalidity(request):
                 cursor.execute(query_f, (None,None,"{'result':'Request not forwarded with Kong', 'errors':'Failed to retrieve userinfo from token', 'headers':'"+format_headers(str(request.headers))+"', 'path':'"+request.headers['x-original-request']+"'}",randid))
                 conn.commit()
                 return Response("Failed to retrieve userinfo from token, ensure that the token is valid and has its userinfo available", status_code=500)
-            if userinfodict["preferred_username"]:
+            username=""
+            if "preferred_username" in userinfodict.keys():     #usually the name is here
+                username = userinfodict["preferred_username"]
+            elif "username" in userinfodict.keys():             #if it wasn't there, maybe it's here: this is true for tokens from nodered
+                username = userinfodict["username"]
+            else:                                               #at this point we assume it isn't here at all
+                raise KeyError
+            if username:
             
                 query = '''SELECT ratelimit.*,operative_apitable.apiexternalurl FROM ratelimit JOIN operative_apitable ON ratelimit.resource = operative_apitable.idapi WHERE %s LIKE CONCAT(apiexternalurl, '%') AND user=%s AND operative_apitable.apistatus="active" ORDER BY LENGTH(apiexternalurl) DESC limit 1;'''
-                cursor.execute(query, (request.headers['x-original-request'],userinfodict["preferred_username"],))
+                cursor.execute(query, (request.headers['x-original-request'],username,))
                 conn.commit()
                 result = cursor.fetchone()
 
                 if not result:
                     query_f = "INSERT INTO timedaccess (`user`,`resource`,`result`,`extracted_id`) VALUES (%s,%s,%s,%s);"
-                    cursor.execute(query_f, (userinfodict["preferred_username"],None,"{'result':'Request not forwarded with Kong', 'errors':'No rule found for user and resource', 'headers':'"+format_headers(str(request.headers))+"', 'path':'"+request.headers['x-original-request']+"'}",randid))
+                    cursor.execute(query_f, (username,None,"{'result':'Request not forwarded with Kong', 'errors':'No rule found for user and resource', 'headers':'"+format_headers(str(request.headers))+"', 'path':'"+request.headers['x-original-request']+"'}",randid))
                     conn.commit()
                     return Response("Rule not found for this user/path", status_code=403)
                 # checking origin
@@ -148,13 +155,13 @@ async def checkvalidity(request):
                         ip_to_match = request.headers['x-forwarded-for'].split(', ')[0]
                         if not check_ip(address=ip_to_match,network=result[-2]):
                             query_f = "INSERT INTO timedaccess (`user`,`resource`,`result`,`extracted_id`) VALUES (%s,%s,%s,%s);"
-                            cursor.execute(query_f, (userinfodict["preferred_username"],None,"{'result':'Request not forwarded with Kong', 'errors':'This connection is not allowed from the source ip', 'headers':'"+format_headers(str(request.headers))+"', 'path':'"+request.headers['x-original-request']+"'}",randid))
+                            cursor.execute(query_f, (username,None,"{'result':'Request not forwarded with Kong', 'errors':'This connection is not allowed from the source ip', 'headers':'"+format_headers(str(request.headers))+"', 'path':'"+request.headers['x-original-request']+"'}",randid))
                             conn.commit()
                             return Response("This connection is not allowed from the source ip", status_code=403)
                 except Exception:
                     print(f"Rule matched: {str(result)}, ip detected: {request.headers['x-forwarded-for'].split(', ')[0]}")
                     query_f = "INSERT INTO timedaccess (`user`,`resource`,`result`,`extracted_id`) VALUES (%s,%s,%s,%s);"
-                    cursor.execute(query_f, (userinfodict["preferred_username"],None,"{'result':'Request not forwarded with Kong', 'errors':'Issues while determining if origin ip is allowed.', 'headers':'"+format_headers(str(request.headers))+"', 'path':'"+request.headers['x-original-request']+"'}",randid))
+                    cursor.execute(query_f, (username,None,"{'result':'Request not forwarded with Kong', 'errors':'Issues while determining if origin ip is allowed.', 'headers':'"+format_headers(str(request.headers))+"', 'path':'"+request.headers['x-original-request']+"'}",randid))
                     conn.commit()
                     return Response("Issues while determining if origin ip is allowed: "+traceback.format_exc(), status_code=403)
                 # end check origin
@@ -163,22 +170,22 @@ async def checkvalidity(request):
                     pass
                 else:
                     query_f = "INSERT INTO timedaccess (`user`,`resource`,`result`,`extracted_id`) VALUES (%s,%s,%s,%s);"
-                    cursor.execute(query_f, (userinfodict["preferred_username"],result[1],"{'result':'Request not forwarded with Kong', 'errors':'Rule is not valid at the current time', 'headers':'"+format_headers(str(request.headers))+"'}",randid))
+                    cursor.execute(query_f, (username,result[1],"{'result':'Request not forwarded with Kong', 'errors':'Rule is not valid at the current time', 'headers':'"+format_headers(str(request.headers))+"'}",randid))
                     conn.commit()
                     return Response("outside rule time validity", status_code=401)
                 if list(result[2])[0] == "TotalAccesses":
                     query_2 = "SELECT sum(amount) FROM (SELECT count(*) as amount FROM timedaccess WHERE resource = %s AND user = %s AND `request_ok`= 1 UNION SELECT sum(total_requests) AS amount FROM timedaccess_summary WHERE resource = %s AND user = %s) alias;"
-                    cursor.execute(query_2, (result[1],userinfodict["preferred_username"],result[1], userinfodict["preferred_username"]))
+                    cursor.execute(query_2, (result[1],username,result[1], username))
                     conn.commit()
                     result_2 = cursor.fetchone()
                     if result_2[0] < json.loads(result[3])["amount"]:
                         query_3 = "INSERT INTO timedaccess (`user`,`resource`,`result`,`extracted_id`,`request_ok`) VALUES (%s,%s,%s,%s,1);"
-                        cursor.execute(query_3, (userinfodict["preferred_username"],result[1],"{'result':'Request forwarded with Kong', 'errors':'', 'headers':'"+format_headers(str(request.headers))+"'}",randid))
+                        cursor.execute(query_3, (username,result[1],"{'result':'Request forwarded with Kong', 'errors':'', 'headers':'"+format_headers(str(request.headers))+"'}",randid))
                         conn.commit()
                         return JSONResponse({"id":randid}, status_code=200)
                     else:
                         query_3 = "INSERT INTO timedaccess (`user`,`resource`,`result`,`extracted_id`) VALUES (%s,%s,%s,%s);"
-                        cursor.execute(query_3, (userinfodict["preferred_username"],result[1],"{'result':'Request not forwarded with Kong', 'errors':'Used more than "+str(json.loads(result[3])["amount"])+" requests', 'headers':'"+format_headers(str(request.headers))+"'}",randid))
+                        cursor.execute(query_3, (username,result[1],"{'result':'Request not forwarded with Kong', 'errors':'Used more than "+str(json.loads(result[3])["amount"])+" requests', 'headers':'"+format_headers(str(request.headers))+"'}",randid))
                         conn.commit()
                         return Response("too many requests", status_code=429)
                 elif list(result[2])[0] == "AccessesOverTime":
@@ -196,42 +203,42 @@ async def checkvalidity(request):
                         query_2_3 = "AND YEAR(`beginaccess`) = YEAR(CURDATE()) AND WEEK(`beginaccess`, 1) = WEEK(CURDATE(), 1) "
                         query_2_3_a = "AND YEAR(`access_day`) = YEAR(CURDATE()) AND WEEK(`access_day`, 1) = WEEK(CURDATE(), 1) "
                     elif period == 0:
-                        query_2_3 = "AND DATE(`beginaccess`) = CURDATE();"
-                        query_2_3_a = "AND DATE(`access_day`) = CURDATE();"
+                        query_2_3 = "AND DATE(`beginaccess`) = CURDATE()"
+                        query_2_3_a = "AND DATE(`access_day`) = CURDATE()"
                     else:
                         return Response("invalid interval", status_code=500)
                     query_2 = query_2_1 + query_2_2_a + query_2_3 + "UNION" + query_2_2_b + query_2_3_a + ") alias"
-                    cursor.execute(query_2, (result[1],userinfodict["preferred_username"],result[1],userinfodict["preferred_username"],))
+                    cursor.execute(query_2, (result[1],username,result[1],username,))
                     conn.commit()
                     result_2 = cursor.fetchone()
                     if result_2[0] < json.loads(result[3])["amount"]:
                         query_3 = "INSERT INTO timedaccess (`user`,`resource`,`result`,`extracted_id`,`request_ok`) VALUES (%s,%s,%s,%s,1);"
-                        cursor.execute(query_3, (userinfodict["preferred_username"],result[1],"{'result':'Request forwarded with Kong', 'errors':'', 'headers':'"+format_headers(str(request.headers))+"'}",randid))
+                        cursor.execute(query_3, (username,result[1],"{'result':'Request forwarded with Kong', 'errors':'', 'headers':'"+format_headers(str(request.headers))+"'}",randid))
                         conn.commit()
                         return JSONResponse({"id":randid}, status_code=200)
                     else:
                         query_3 = "INSERT INTO timedaccess (`user`,`resource`,`result`,`extracted_id`) VALUES (%s,%s,%s,%s);"
-                        cursor.execute(query_3, (userinfodict["preferred_username"],result[1],"{'result':'Request not forwarded with Kong', 'errors':'Used more than "+str(json.loads(result[3])["amount"])+" requests in given timeframe', 'headers':'"+format_headers(str(request.headers))+"'}",randid))
+                        cursor.execute(query_3, (username,result[1],"{'result':'Request not forwarded with Kong', 'errors':'Used more than "+str(json.loads(result[3])["amount"])+" requests in given timeframe', 'headers':'"+format_headers(str(request.headers))+"'}",randid))
                         conn.commit()
                         return Response("too many requests", status_code=429)
                 elif list(result[2])[0] == "ContemporaryAccess":
                     query_2 = "SELECT count(*) FROM timedaccess JOIN requests ON requests.extracted_id = timedaccess.extracted_id AND resource = %s AND user = %s AND requests.endaccess = 0 "
-                    cursor.execute(query_2, (result[1],userinfodict["preferred_username"],))
+                    cursor.execute(query_2, (result[1],username,))
                     conn.commit()
                     result_2 = cursor.fetchone()
                     if result_2[0] < json.loads(result[3])["amount"]:
                         query_3 = "INSERT INTO timedaccess (`user`,`resource`,`result`,`extracted_id`,`request_ok`) VALUES (%s,%s,%s,%s,1);"
-                        cursor.execute(query_3, (userinfodict["preferred_username"],result[1],"{'result':'Request forwarded with Kong', 'errors':'', 'headers':'"+format_headers(str(request.headers))+"'}",randid))
+                        cursor.execute(query_3, (username,result[1],"{'result':'Request forwarded with Kong', 'errors':'', 'headers':'"+format_headers(str(request.headers))+"'}",randid))
                         conn.commit()
                         return JSONResponse({"id":randid}, status_code=200)
                     else:
                         query_3 = "INSERT INTO timedaccess (`user`,`resource`,`result`,`extracted_id`) VALUES (%s,%s,%s,%s);"
-                        cursor.execute(query_3, (userinfodict["preferred_username"],result[1],"{'result':'Request not forwarded with Kong', 'errors':'Used more than "+str(json.loads(result[3])["amount"])+" concurrent requests', 'headers':'"+format_headers(str(request.headers))+"'}",randid))
+                        cursor.execute(query_3, (username,result[1],"{'result':'Request not forwarded with Kong', 'errors':'Used more than "+str(json.loads(result[3])["amount"])+" concurrent requests', 'headers':'"+format_headers(str(request.headers))+"'}",randid))
                         conn.commit()
                         return Response("too many requests", status_code=429)
                 else:
                     query_f = "INSERT INTO timedaccess (`user`,`resource`,`result`,`extracted_id`) VALUES (%s,%s,%s,%s);"
-                    cursor.execute(query_f, (userinfodict["preferred_username"],result[1],"{'result':'Request not forwarded with Kong', 'errors':'Illegal rule', 'headers':'"+format_headers(str(request.headers))+"'}",randid))
+                    cursor.execute(query_f, (username,result[1],"{'result':'Request not forwarded with Kong', 'errors':'Illegal rule', 'headers':'"+format_headers(str(request.headers))+"'}",randid))
                     conn.commit()
                     return Response("Illegal rule", status_code=503)
         # unauthenticated user
@@ -300,8 +307,8 @@ async def checkvalidity(request):
                     query_2_3 = "AND YEAR(`beginaccess`) = YEAR(CURDATE()) AND WEEK(`beginaccess`, 1) = WEEK(CURDATE(), 1) "
                     query_2_3_a = "AND YEAR(`access_day`) = YEAR(CURDATE()) AND WEEK(`access_day`, 1) = WEEK(CURDATE(), 1) "
                 elif period == 0:
-                    query_2_3 = "AND DATE(`beginaccess`) = CURDATE();"
-                    query_2_3_a = "AND DATE(`access_day`) = CURDATE();"
+                    query_2_3 = "AND DATE(`beginaccess`) = CURDATE()"
+                    query_2_3_a = "AND DATE(`access_day`) = CURDATE()"
                 else:
                     return Response("invalid interval", status_code=500)
                 query_2 = query_2_1 + query_2_2_a + query_2_3 + "UNION" + query_2_2_b + query_2_3_a + ") alias"
