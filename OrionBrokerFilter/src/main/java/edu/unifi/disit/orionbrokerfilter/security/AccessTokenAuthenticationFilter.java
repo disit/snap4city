@@ -291,23 +291,12 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 				logger.debug("K2 {}", k2);
 
 			try {
-				String sensorName = null;
-
-				if ("v1".equals(version)) {
-					logger.debug("Searching sensor name in API v1 body.");
-					// passing the original elementId, without any path conversion...
-					sensorName = getSensorNameV1(multiReadRequest, isWriteQuery(queryType, req, version, multiReadRequest.getLocale()), req.getParameter("elementid"));// can return null, the passed elementid is the original one
-				} else if ("v2".equals(version)) {
-					logger.debug("Searching sensor name in API v2 body.");
-					sensorName = getSensorNameV2(multiReadRequest, req, elementId);// can return null, the passed elementid is the original one
-				} else
+				if (!"v1".equals(version) && !"v2".equals(version)) {
 					throw new CredentialsNotValidException(messages.getMessage("login.ko.requesturlmalformed", null, multiReadRequest.getLocale()));
-
-				String elementType = "IOTID";
-				if (sensorName != null) {
-					elementType = "ServiceURI";
-					logger.debug("sensor's name {} - It's a serviceURI", sensorName);
 				}
+
+				String sensorName = null;
+				String elementType = "IOTID";
 
                                 if(use_blockchain) {
                                         if(!certifiedDevice.containsKey(elementId)){
