@@ -65,6 +65,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.unifi.disit.datamanager.datamodel.ActivityAccessType;
 import edu.unifi.disit.datamanager.datamodel.Response;
+import edu.unifi.disit.datamanager.datamodel.UserRolesType;
 import edu.unifi.disit.datamanager.exception.AccessTokenNotValidException;
 import edu.unifi.disit.datamanager.service.IActivityService;
 
@@ -289,12 +290,10 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 				ArrayList<String> roles = (ArrayList<String>) otherclaims.get("roles");// try get from roles
 				if (roles == null) {
 					roles = (ArrayList<String>) otherclaims.get("role");// fallback on role
-					if (roles == null) {
-						logger.warn("Empty roles in accesstoken, setting Observer role");
-						//throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
-                                                roles = new ArrayList<String>();
-                                                roles.add("Observer");
-					}
+				}
+				if ((roles == null) || roles.isEmpty()) {
+					roles = new ArrayList<>(Collections.singletonList(UserRolesType.Observer.toString()));
+					logger.warn("Empty roles in accesstoken of user "+username+", defaulting to " + UserRolesType.Observer);
 				}
 
 				loggerDM.info("AccessToken username {} + Roles {}", username, roles.toArray());
@@ -357,12 +356,14 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 		}
 
 		if (iroles == null) {
-			loggerDM.error("roles not found");
-			throw new AccessTokenNotValidException(messages.getMessage("login.ko.accesstokennotvalid", null, lang));
+			loggerDM.warn("roles not found, defaulting to {}", UserRolesType.Observer);
+			roles.add(UserRolesType.Observer.toString());
 		}
 
-		while (iroles.hasNext())
+		while ((iroles != null) && iroles.hasNext())
 			roles.add(iroles.next().asText());
+		if (roles.isEmpty())
+			roles.add(UserRolesType.Observer.toString());
 
 		loggerDM.info("AccessToken username {} + Roles {}", username, roles.toArray());
 

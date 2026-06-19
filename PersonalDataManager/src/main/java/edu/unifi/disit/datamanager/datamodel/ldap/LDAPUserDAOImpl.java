@@ -97,17 +97,14 @@ public class LDAPUserDAOImpl implements LDAPUserDAO {
 	public boolean groupnameExist(String groupname) {
 
 		int startindexCN = groupname.indexOf("cn=");
-
-		// ou has always to exist
 		int startindexOU = groupname.indexOf("ou=");
-		if (startindexOU == -1)
-			return false;
-
-		int endindexOU = groupname.indexOf(',', startindexOU + 3);
-		if (endindexOU == -1)
-			return false;
-
-		String ouGroupname = groupname.substring(startindexOU + 3, endindexOU);
+		String ouGroupname = null;
+		if (startindexOU != -1) {
+			int endindexOU = groupname.indexOf(',', startindexOU + 3);
+			if (endindexOU == -1)
+				return false;
+			ouGroupname = groupname.substring(startindexOU + 3, endindexOU);
+		}
 
 		// String cnGroupname = groupname.substring(startindexCN + 3, endindexCN);
 
@@ -121,10 +118,23 @@ public class LDAPUserDAOImpl implements LDAPUserDAO {
 
 			String cnGroupname = groupname.substring(startindexCN + 3, endindexCN);
 
+			if (ouGroupname != null) {
+				return !ldapTemplate
+						.search(query()
+								.attributes("cn")
+								.where("objectClass").is("groupOfNames").and("cn").is(cnGroupname).and("ou").is(ouGroupname),
+								new AttributesMapper<String>() {
+									public String mapFromAttributes(Attributes attrs) throws NamingException {
+										return attrs.get("cn").get().toString();
+									}
+								})
+						.isEmpty();
+			}
+
 			return !ldapTemplate
 					.search(query()
 							.attributes("cn")
-							.where("objectClass").is("groupOfNames").and("cn").is(cnGroupname).and("ou").is(ouGroupname),
+							.where("objectClass").is("groupOfNames").and("cn").is(cnGroupname),
 							new AttributesMapper<String>() {
 								public String mapFromAttributes(Attributes attrs) throws NamingException {
 									return attrs.get("cn").get().toString();
@@ -133,6 +143,8 @@ public class LDAPUserDAOImpl implements LDAPUserDAO {
 					.isEmpty();
 		} else {
 			// organization scenario
+			if (ouGroupname == null)
+				return false;
 			return !ldapTemplate
 					.search(query()
 							.attributes("ou")
@@ -155,17 +167,15 @@ public class LDAPUserDAOImpl implements LDAPUserDAO {
 
 		List<List<String>> returno;
 
-		// ou has always to exist
 		int startindexOU = groupnamefilter.indexOf("ou=");
-		if (startindexOU == -1) {
-			throw new LDAPException(messages.getMessage("ldap.ko.noouspecified", null, lang));
+		String ouGroupname = null;
+		if (startindexOU != -1) {
+			int endindexOU = groupnamefilter.indexOf(',', startindexOU + 3);
+			if (endindexOU == -1) {
+				throw new LDAPException(messages.getMessage("ldap.ko.noouspecified", null, lang));
+			}
+			ouGroupname = groupnamefilter.substring(startindexOU + 3, endindexOU);
 		}
-		int endindexOU = groupnamefilter.indexOf(',', startindexOU + 3);
-		if (endindexOU == -1) {
-			throw new LDAPException(messages.getMessage("ldap.ko.noouspecified", null, lang));
-		}
-
-		String ouGroupname = groupnamefilter.substring(startindexOU + 3, endindexOU);
 
 		if (startindexCN != -1) {
 			// group scenario
@@ -178,20 +188,38 @@ public class LDAPUserDAOImpl implements LDAPUserDAO {
 
 			String cnGroupname = groupnamefilter.substring(startindexCN + 3, endindexCN);
 
-			returno = ldapTemplate.search(query()
-					.attributes("member")
-					.where("objectClass").is("groupOfNames").and("cn").is(cnGroupname).and("ou").is(ouGroupname),
-					new AttributesMapper<List<String>>() {
-						public List<String> mapFromAttributes(Attributes attrs) throws NamingException {
-							NamingEnumeration<String> all = (NamingEnumeration<String>) attrs.get("member").getAll();
-							List<String> result = new ArrayList<>();
-							while (all.hasMore())
-								result.add(all.next());
-							return result;
-						}
-					});
+			if (ouGroupname != null) {
+				returno = ldapTemplate.search(query()
+						.attributes("member")
+						.where("objectClass").is("groupOfNames").and("cn").is(cnGroupname).and("ou").is(ouGroupname),
+						new AttributesMapper<List<String>>() {
+							public List<String> mapFromAttributes(Attributes attrs) throws NamingException {
+								NamingEnumeration<String> all = (NamingEnumeration<String>) attrs.get("member").getAll();
+								List<String> result = new ArrayList<>();
+								while (all.hasMore())
+									result.add(all.next());
+								return result;
+							}
+						});
+			} else {
+				returno = ldapTemplate.search(query()
+						.attributes("member")
+						.where("objectClass").is("groupOfNames").and("cn").is(cnGroupname),
+						new AttributesMapper<List<String>>() {
+							public List<String> mapFromAttributes(Attributes attrs) throws NamingException {
+								NamingEnumeration<String> all = (NamingEnumeration<String>) attrs.get("member").getAll();
+								List<String> result = new ArrayList<>();
+								while (all.hasMore())
+									result.add(all.next());
+								return result;
+							}
+						});
+			}
 		} else {
 			// ou scenario
+			if (ouGroupname == null) {
+				throw new LDAPException(messages.getMessage("ldap.ko.noouspecified", null, lang));
+			}
 
 			returno = ldapTemplate.search(query()
 					.attributes("l")
