@@ -14,25 +14,32 @@ package edu.unifi.disit.orionbrokerfilter.datamodel;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Ownership extends Credentials {
 
 	String elementUrl;
 	Date elapsingDate;
-
-	public Ownership(Integer minutesElapsingCache) {
+        
+	public Ownership(Integer minutesElapsingCache, Integer maxMinutesRandomCache) {
 		super();
 
 		Calendar c = Calendar.getInstance();
+                if(maxMinutesRandomCache !=null && maxMinutesRandomCache > 0) {
+                   minutesElapsingCache += ThreadLocalRandom.current().nextInt(maxMinutesRandomCache);
+                }
 		c.add(Calendar.MINUTE, minutesElapsingCache);
 		this.elapsingDate = c.getTime();
 	}
 
-	public Ownership(String elementUrl, String k1, String k2, String username, String pksha1, Integer minutesElapsingCache) {
+	public Ownership(String elementUrl, String k1, String k2, String username, String pksha1, Integer minutesElapsingCache, Integer maxMinutesRandomCache) {
 		super(k1, k2, username, pksha1);
 		this.elementUrl = elementUrl;
 		Calendar c = Calendar.getInstance();
-		c.add(Calendar.MINUTE, minutesElapsingCache);
+                if(maxMinutesRandomCache !=null && maxMinutesRandomCache > 0) {
+                   minutesElapsingCache += ThreadLocalRandom.current().nextInt(maxMinutesRandomCache+1);
+                }
+                c.add(Calendar.MINUTE, minutesElapsingCache);
 		this.elapsingDate = c.getTime();
 	}
 

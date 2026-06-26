@@ -14,23 +14,30 @@ package edu.unifi.disit.orionbrokerfilter.datamodel;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class DelegationPublic {
 
 	String elementType;
 	Date elapsingDate;
 
-	public DelegationPublic(Integer minutesElapsingCache) {
+	public DelegationPublic(Integer minutesElapsingCache, Integer maxMinutesRandomCache) {
 		Calendar c = Calendar.getInstance();
+                if(maxMinutesRandomCache !=null && maxMinutesRandomCache > 0) {
+                   minutesElapsingCache += ThreadLocalRandom.current().nextInt(maxMinutesRandomCache);
+                }
 		c.add(Calendar.MINUTE, minutesElapsingCache);
 		this.elapsingDate = c.getTime();
 	}
 
-	public DelegationPublic(String elementType, Integer minutesElapsingCache) {
+	public DelegationPublic(String elementType, Integer minutesElapsingCache, Integer maxMinutesRandomCache) {
 
 		this.elementType = elementType;
 
 		Calendar c = Calendar.getInstance();
+                if(maxMinutesRandomCache !=null && maxMinutesRandomCache > 0) {
+                   minutesElapsingCache += ThreadLocalRandom.current().nextInt(maxMinutesRandomCache);
+                }
 		c.add(Calendar.MINUTE, minutesElapsingCache);
 		this.elapsingDate = c.getTime();
 	}

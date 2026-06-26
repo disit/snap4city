@@ -18,20 +18,20 @@ public class CheckCredential extends DelegationPublic {
 	Boolean result = false;
 	String kind;
 
-	public CheckCredential(Integer minutesElapsingCache) {
-		super(minutesElapsingCache);
+	public CheckCredential(Integer minutesElapsingCache, Integer maxMinutesRandomCache) {
+		super(minutesElapsingCache, maxMinutesRandomCache);
 	}
 
-	public CheckCredential(String elementType, String username, Boolean result, Integer minutesElapsingCache) {
-		super(elementType, minutesElapsingCache);
+	public CheckCredential(String elementType, String username, Boolean result, Integer minutesElapsingCache, Integer maxMinutesRandomCache) {
+		super(elementType, minutesElapsingCache, maxMinutesRandomCache);
 
 		this.username = username;
 		this.result = result;
 		this.kind = "READ_ACCESS";
 	}
 
-	public CheckCredential(String elementType, String username, Boolean result, Integer minutesElapsingCache, String kind) {
-		super(elementType, minutesElapsingCache);
+	public CheckCredential(String elementType, String username, Boolean result, Integer minutesElapsingCache, Integer maxMinutesRandomCache, String kind) {
+		super(elementType, minutesElapsingCache, maxMinutesRandomCache);
 
 		this.username = username;
 		this.result = result;

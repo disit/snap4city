@@ -130,6 +130,9 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 	@Value("${spring.elapsingcache.minutes}")
 	private Integer minutesElapsingCache;
 
+	@Value("${spring.max_random_elapsingcache.minutes:0}")
+	private Integer maxMinutesRandomElapsingCache;
+        
 	@Value("${spring.auth.subscription.anyid.users:}")
 	private String subscriptionAnyIdUsers;
 
@@ -1219,7 +1222,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 				pksha1 = pksha1Node.asText();
 			}
 
-			toreturn = new Ownership(elementUrlNode.asText(), k1Node.asText(), k2Node.asText(), usernameNode.asText(), pksha1, minutesElapsingCache);
+			toreturn = new Ownership(elementUrlNode.asText(), k1Node.asText(), k2Node.asText(), usernameNode.asText(), pksha1, minutesElapsingCache, maxMinutesRandomElapsingCache);
 		} catch (HttpClientErrorException | IOException e) {
 			logger.error("Trouble in getOwnerCredentials", e);
 			throw new CredentialsNotValidException(messages.getMessage("login.ko.networkproblems", null, lang));
@@ -1396,7 +1399,7 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 				result = false;
 			}
 
-			toreturn = new CheckCredential(elementType, username, result, minutesElapsingCache);
+			toreturn = new CheckCredential(elementType, username, result, minutesElapsingCache, maxMinutesRandomElapsingCache);
 
                         if(result && use_blockchain) {
                                 JsonNode elNode = els.next();
@@ -1470,12 +1473,12 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 						logger.debug("The retrieved data does not contains messageNode");
 						// throw new CredentialsNotValidException(messages.getMessage("login.ko.configurationerror", null, lang));
 					} else if ("PUBLIC".equalsIgnoreCase(messageNode.asText()))
-						cachedDelegationPublic.put(sensorUri, new DelegationPublic(elementType, minutesElapsingCache));
+						cachedDelegationPublic.put(sensorUri, new DelegationPublic(elementType, minutesElapsingCache, maxMinutesRandomElapsingCache));
 				}
 
 			}
 
-			toreturn = new CheckCredential(elementType, username, result, minutesElapsingCache, kind);
+			toreturn = new CheckCredential(elementType, username, result, minutesElapsingCache, maxMinutesRandomElapsingCache, kind);
 		} catch (HttpClientErrorException e) {
 			logger.error("Trouble in getDelegatedCredentials " +  e.getRawStatusCode()+" "+e.getResponseBodyAsString(), e);
 			throw new CredentialsNotValidException("Trouble in getDelegatedCredentials, see logs");
