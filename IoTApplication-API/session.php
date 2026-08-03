@@ -19,49 +19,48 @@
 require '../vendor/autoload.php';
 use Jumbojett\OpenIDConnectClient;
 
-if(isset($_REQUEST['username'])) {
-  $uinfo=new stdClass();
-  $uinfo->username=$_REQUEST['username'];
-} else {
-  $oidc = new OpenIDConnectClient();
-  $oidc->providerConfigParam(array('userinfo_endpoint'=>$sso_userinfo_endpoint));
+$oidc = new OpenIDConnectClient();
+$oidc->providerConfigParam(array('userinfo_endpoint'=>$sso_userinfo_endpoint));
 
-  if(isset($_SESSION['accessToken'])) {
-    $accessToken=$_SESSION['accessToken'];
-  } else if(isset($_REQUEST['accessToken'])) {
-    $accessToken=$_REQUEST['accessToken'];
+if(isset($_REQUEST['accessToken'])) {
+  $accessToken=$_REQUEST['accessToken'];
+} else {
+  $headers = array_change_key_case(getallheaders(), CASE_LOWER);
+  if (isset($headers['authorization']) && strlen($headers['authorization'])>7 && 
+        substr( strtolower($headers['authorization']), 0, 7 ) === "bearer ") {
+    $accessToken=substr($headers['authorization'],7);
   } else {
     header("HTTP/1.1 401 Unauthorized");
     echo '{"error":"No token provided"}';
     exit;
   }
-  $oidc->setAccessToken($accessToken);
-  $payload=$oidc->getAccessTokenPayload();
-  //var_dump($payload);
-  $uinfo = $oidc->requestUserInfo();
-  if(isset($uinfo->error)) {
-    header("HTTP/1.1 401 Unauthorized");
-    echo json_encode($uinfo);
-    exit;  
-  }
+}
+$oidc->setAccessToken($accessToken);
+$payload=$oidc->getAccessTokenPayload();
+//var_dump($payload);
+$uinfo = $oidc->requestUserInfo();
+if(isset($uinfo->error)) {
+  header("HTTP/1.1 401 Unauthorized");
+  echo json_encode($uinfo);
+  exit;  
+}
 
-  if(!isset($uinfo->username) && isset($uinfo->preferred_username))
-    $uinfo->username = $uinfo->preferred_username;
-  
-  if(!isset($uinfo->username)) {
-    header("HTTP/1.1 400 BAD REQUEST");
-    echo '{"error":"No username found", "user":'.json_encode($uinfo).'}';
-    exit;  
-  }
-  
-  $ROLES = array('ToolAdmin','AreaManager','Manager','Public');
-  $uinfo->mainRole = '';
-  if(isset($uinfo->roles)) {
-    foreach($ROLES as $r) {
-      if(in_array($r, $uinfo->roles)) {
-        $uinfo->mainRole = $r;
-        break;
-      }
+if(!isset($uinfo->username) && isset($uinfo->preferred_username))
+  $uinfo->username = $uinfo->preferred_username;
+
+if(!isset($uinfo->username)) {
+  header("HTTP/1.1 400 BAD REQUEST");
+  echo '{"error":"No username found (missing scope=oidc ?)", "user":'.json_encode($uinfo).'}';
+  exit;  
+}
+
+$ROLES = array('ToolAdmin','AreaManager','Manager','Public');
+$uinfo->mainRole = '';
+if(isset($uinfo->roles)) {
+  foreach($ROLES as $r) {
+    if(in_array($r, $uinfo->roles)) {
+      $uinfo->mainRole = $r;
+      break;
     }
   }
 }

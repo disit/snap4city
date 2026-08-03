@@ -16,10 +16,11 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
 
-function http_get($url) {
+function http_get($url, $header = null) {
   $opts = array('http' =>
       array(
           'method'  => 'GET',
+          'header'  => $header
       )
   );
   
@@ -32,11 +33,11 @@ function http_get($url) {
   return array("httpcode"=>explode(" ",$http_response_header[0])[1],"result"=>json_decode($result, true));
 }
 
-function http_post($url, $data, $mimetype) {
+function http_post($url, $data, $mimetype, $header = "") {
   $opts = array('http' =>
       array(
           'method'  => 'POST',
-          'header'  => 'Content-type: '.$mimetype,
+          'header'  => 'Content-type: '.$mimetype.($header ? "\r\n".$header : ""),
           'content' => $data,
           'ignore_errors' => true 
       )
