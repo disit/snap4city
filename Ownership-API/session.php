@@ -22,64 +22,60 @@ require_once 'common.php';
 use Jumbojett\OpenIDConnectClient;
 
 $ipAddress = @get_client_ip_server();
-if(isset($_REQUEST['username']) && in_array($ipAddress, $trustedIpAddrs)) {
-  $uinfo=new stdClass();
-  $uinfo->username=$_REQUEST['username'];
-  $uinfo->mainRole='';
+
+$oidc = new OpenIDConnectClient();
+$oidc->providerConfigParam(array('userinfo_endpoint'=>$sso_userinfo_endpoint));
+
+if(isset($_SESSION['accessToken'])) {
+  $accessToken=$_SESSION['accessToken'];
+} else if(isset($_REQUEST['accessToken'])) {
+  $accessToken=$_REQUEST['accessToken'];
 } else {
-  $oidc = new OpenIDConnectClient();
-  $oidc->providerConfigParam(array('userinfo_endpoint'=>$sso_userinfo_endpoint));
-
-  if(isset($_SESSION['accessToken'])) {
-    $accessToken=$_SESSION['accessToken'];
-  } else if(isset($_REQUEST['accessToken'])) {
-    $accessToken=$_REQUEST['accessToken'];
+  $headers = array_change_key_case(getallheaders(), CASE_LOWER);
+  if (isset($headers['authorization']) && strlen($headers['authorization'])>7 && 
+          substr( strtolower($headers['authorization']), 0, 7 ) === "bearer ") {
+      $accessToken=substr($headers['authorization'],7);
   } else {
-    $headers = array_change_key_case(getallheaders(), CASE_LOWER);
-    if (isset($headers['authorization']) && strlen($headers['authorization'])>8 && 
-            substr( strtolower($headers['authorization']), 0, 7 ) === "bearer ") {
-        $accessToken=substr($headers['authorization'],7);
-    } else {
-        header("HTTP/1.1 401 Unauthorized");
-        echo "No token provided or invalid authorization header";
-        ownership_access_log(['op'=>$OPERATION,'result'=>'NO_TOKEN']);
-        exit;
-    }
+      header("HTTP/1.1 401 Unauthorized");
+      echo "No token provided or invalid authorization header";
+      ownership_access_log(['op'=>$OPERATION,'result'=>'NO_TOKEN']);
+      exit;
   }
-  $oidc->setAccessToken($accessToken);
-  $payload=$oidc->getAccessTokenPayload();
-  //var_dump($payload);
-  $uinfo = $oidc->requestUserInfo();
-  if(isset($uinfo->error)) {
-    header("HTTP/1.1 401 Unauthorized");
-    echo json_encode($uinfo);
-    ownership_access_log(['op'=>$OPERATION,'result'=>'UNAUTHORIZED']);
-    $f=fopen($log_path."/ownership-error.log","a");
-    fwrite($f,date('c')." $OPERATION USERINFO ERROR: ".json_encode($uinfo)." tkn:".$accessToken."\n");
-    exit;  
-  }
+}
+$oidc->setAccessToken($accessToken);
+$payload=$oidc->getAccessTokenPayload();
+//var_dump($payload);
+$uinfo = $oidc->requestUserInfo();
+if(isset($uinfo->error)) {
+  header("HTTP/1.1 401 Unauthorized");
+  echo json_encode($uinfo);
+  ownership_access_log(['op'=>$OPERATION,'result'=>'UNAUTHORIZED']);
+  $f=fopen($log_path."/ownership-error.log","a");
+  fwrite($f,date('c')." $OPERATION USERINFO ERROR: ".json_encode($uinfo)." tkn:".$accessToken."\n");
+  exit;  
+}
 
-  if(!isset($uinfo->username) && isset($uinfo->preferred_username))
-    $uinfo->username = $uinfo->preferred_username;
-  
-  if(!isset($uinfo->username)) {
-    header("HTTP/1.1 400 BAD REQUEST");
-    echo "No username found ".json_encode($uinfo);
-    $f=fopen($log_path."/ownership-error.log","a");
-    fwrite($f,date('c')." $OPERATION USERINFO ERROR: no username found ".json_encode($uinfo)." accessToken: ".$accessToken."\n");
-    ownership_access_log(['op'=>$OPERATION,'result'=>'NO_USERNAME','id'=>$_REQUEST['elementId']]);
-    exit;  
-  }
-  
-  $ROLES = array('RootAdmin','ToolAdmin','AreaManager','Manager','Observer','Public');
-  $uinfo->mainRole = 'none';
+if(!isset($uinfo->username) && isset($uinfo->preferred_username)) {
+  $uinfo->username = $uinfo->preferred_username;
+}
 
-  if(isset($uinfo->roles)) {
-    foreach($ROLES as $r) {
-      if(in_array($r, $uinfo->roles)) {
-        $uinfo->mainRole = $r;
-        break;
-      }
+if(!isset($uinfo->username)) {
+  header("HTTP/1.1 400 BAD REQUEST");
+  echo "No username found (missing scope=oidc ?)".json_encode($uinfo);
+  $f=fopen($log_path."/ownership-error.log","a");
+  fwrite($f,date('c')." $OPERATION USERINFO ERROR: no username found ".json_encode($uinfo)." accessToken: ".$accessToken."\n");
+  ownership_access_log(['op'=>$OPERATION,'result'=>'NO_USERNAME','id'=>$_REQUEST['elementId']]);
+  exit;  
+}
+
+$ROLES = array('RootAdmin','ToolAdmin','AreaManager','Manager','Observer','Public');
+$uinfo->mainRole = 'none';
+
+if(isset($uinfo->roles)) {
+  foreach($ROLES as $r) {
+    if(in_array($r, $uinfo->roles)) {
+      $uinfo->mainRole = $r;
+      break;
     }
   }
 }

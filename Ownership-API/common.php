@@ -171,7 +171,7 @@ function wsTunnelRegisterClient(&$app) {
       return "fail db connection to ".$wstunnel_db_host;
     }
     
-    $client_id = $app->elementId;
+    $client_id = mysqli_escape_string($link, $app->elementId);
 
     //check if already registered
     $r = mysqli_query($link, "SELECT code FROM client_list WHERE client_id='$client_id'");

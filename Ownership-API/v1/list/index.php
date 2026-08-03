@@ -51,8 +51,14 @@ if(isset($_REQUEST['pubkeySHA1'])) {
   $filter .= "AND publickeySHA1 = '".$pubkeySHA1."' ";
 }
 
-if ($uinfo->mainRole == 'RootAdmin' && !$onlyMine) {
-  $userFilter = "1 ";
+if ($uinfo->mainRole == 'ToolAdmin' && isset($_REQUEST['username'])) {
+  $userFilter = "username='" . mysqli_escape_string($db, $_REQUEST['username']) . "' ";
+} else if ($uinfo->mainRole == 'RootAdmin' && !$onlyMine) {
+  if(isset($_REQUEST['username'])) {
+    $userFilter = "username='" . mysqli_escape_string($db, $_REQUEST['username']) . "' ";
+  } else {
+    $userFilter = "1 ";
+  }
 } else {
   $userFilter = "username='" . mysqli_escape_string($db, $uinfo->username) . "' ";
 }
