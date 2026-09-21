@@ -1,0 +1,11 @@
+.git
+node_modules
+vendor
+research
+upstream-tree.json
+.env
+secrets
+dist
+test-data
+*.tar
+*.tgz

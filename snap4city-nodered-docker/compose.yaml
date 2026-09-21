@@ -1,0 +1,15 @@
+services:
+  nodered:
+    image: snap4city-nodered:2.2.2-arm
+    platform: ${DOCKER_PLATFORM:-linux/arm/v7}
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "${BIND_ADDRESS:-127.0.0.1}:${HTTP_PORT:-1880}:1880"
+    volumes:
+      - nodered-data:/data
+    security_opt:
+      - no-new-privileges:true
+volumes:
+  nodered-data:
