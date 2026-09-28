@@ -71,11 +71,11 @@ public class DeviceGroupElement implements Serializable {
 	// @Transient TODO , make this field transient, so it is not included in tehe SELECT query towards the DB
 	// moreover, remove the findByUsernameAndElementIdAndElementTypeAndDeleteTimeIsNull in DAO
 	// see DeviceGroupElementDAO.java
-	@Formula("( select o.username from devicegroup g, ownership o where g.id = device_group_id and o.elementId = elementId and o.elementType = elementType union select o.username from devicegroup g, kpidata o where g.id = device_group_id and o.id = elementId and elementType in ('MyKPI','MyData','MyPOI','KPI') )")
+	@Formula("( select o.username from devicegroup g, ownership o where g.id = device_group_id and o.elementId = elementId and o.elementType = elementType and o.deleted is null union select o.username from devicegroup g, kpidata o where g.id = device_group_id and o.id = elementId and elementType in ('MyKPI','MyData','MyPOI','KPI') )")
 	private String username;
 
 	//@Transient
-	@Formula("( select o.elementName from devicegroup g, ownership o where g.id = device_group_id and o.elementId = elementId and o.elementType = elementType union select o.value_name from devicegroup g, kpidata o where g.id = device_group_id and o.id = elementId and elementType in ('MyKPI','MyData','MyPOI','KPI') )")
+	@Formula("( select o.elementName from devicegroup g, ownership o where g.id = device_group_id and o.elementId = elementId and o.elementType = elementType and o.deleted is null union select o.value_name from devicegroup g, kpidata o where g.id = device_group_id and o.id = elementId and elementType in ('MyKPI','MyData','MyPOI','KPI') )")
 	private String elementName;
 
 	//@Transient
