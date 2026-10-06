@@ -133,7 +133,10 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
 	@Value("${spring.max_random_elapsingcache.minutes:0}")
 	private Integer maxMinutesRandomElapsingCache;
         
-	@Value("${spring.auth.subscription.anyid.users:}")
+	@Value("${spring.elapsingcache_fail.minutes:1}")
+	private Integer minutesElapsingFailCache;
+
+        @Value("${spring.auth.subscription.anyid.users:}")
 	private String subscriptionAnyIdUsers;
 
 	@Value("${multitenancy:false}")
@@ -713,6 +716,9 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
                         if (o == null) {
                                 logger.debug("retrieving credentials for ownership");
                                 o = getOwnershipCC(accessToken, elementId, elementType, username, lang);
+                                if(!o.getResult()) {
+                                      o.setElapsingDate(minutesElapsingFailCache);
+                                }
                                 ownerships.add(o);
                                 cachedOwnership.put(elementId, ownerships);
                         }
@@ -748,6 +754,9 @@ public class AccessTokenAuthenticationFilter extends GenericFilterBean {
                     if (d == null) {
                             logger.debug("retrieving credentials for delegation");
                             d = getDelegationCC(accessToken, elementId, elementType, username, lang);
+                            if(!d.getResult()) {
+                                d.setElapsingDate(minutesElapsingFailCache);
+                            }
                             delegations.add(d);
                             cachedDelegation.put(elementId, delegations);
                     }

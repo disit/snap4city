@@ -19,10 +19,12 @@ import java.util.concurrent.ThreadLocalRandom;
 public class DelegationPublic {
 
 	String elementType;
+        Date requestDate;
 	Date elapsingDate;
 
 	public DelegationPublic(Integer minutesElapsingCache, Integer maxMinutesRandomCache) {
 		Calendar c = Calendar.getInstance();
+                requestDate = c.getTime();
                 if(maxMinutesRandomCache !=null && maxMinutesRandomCache > 0) {
                    minutesElapsingCache += ThreadLocalRandom.current().nextInt(maxMinutesRandomCache);
                 }
@@ -35,6 +37,7 @@ public class DelegationPublic {
 		this.elementType = elementType;
 
 		Calendar c = Calendar.getInstance();
+                this.requestDate = c.getTime();
                 if(maxMinutesRandomCache !=null && maxMinutesRandomCache > 0) {
                    minutesElapsingCache += ThreadLocalRandom.current().nextInt(maxMinutesRandomCache);
                 }
@@ -62,6 +65,13 @@ public class DelegationPublic {
 		this.elapsingDate = elapsingDate;
 	}
 
+	public void setElapsingDate(Integer minutesElapsingCache) {
+		Calendar c = Calendar.getInstance();
+                c.setTime(requestDate);
+		c.add(Calendar.MINUTE, minutesElapsingCache);
+		this.elapsingDate = c.getTime();
+	}
+        
 	@Override
 	public String toString() {
 		return "PublicDelegation [elementType=" + elementType + ", elapsingDate=" + elapsingDate + "]";
