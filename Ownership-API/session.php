@@ -69,7 +69,7 @@ if(!isset($uinfo->username)) {
 }
 
 $ROLES = array('RootAdmin','ToolAdmin','AreaManager','Manager','Observer','Public');
-$uinfo->mainRole = 'none';
+$uinfo->mainRole = 'Observer';
 
 if(isset($uinfo->roles)) {
   foreach($ROLES as $r) {
