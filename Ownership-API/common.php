@@ -128,16 +128,17 @@ function encryptOSSL($string) {
 function getElementDelegations($elId, $elType, $accessToken, $includeWriteOnly=false) {
   require 'config.php';
   
-  $r = http_get($datamanager_api_url."/v3/apps/$elId/delegator?sourceRequest=ownership&elementType=$elType",$accessToken);
+  $url = $datamanager_api_url."/v3/apps/$elId/delegator?sourceRequest=ownership&elementType=$elType";
+  $r = http_get($url, $accessToken);
   $users = array();
   $orgs = array();
   $grps = array();
-  if ($r['httpcode']==200) {
+  if ($r['httpcode']==200 || $r['httpcode']==204) {
     foreach ($r['result'] as $k) {
       if(!$includeWriteOnly && isset($k['kind']) && $k['kind'] == 'WRITE_ONLY')
           continue;
       if(isset($k['usernameDelegated'])) {
-        $users[] = encryptOSSL($k['usernameDelegated']);
+        $users[] = encryptOSSL(strtolower($k['usernameDelegated']));
       } else if(isset($k['groupnameDelegated'])){
         if(substr($k['groupnameDelegated'],0,3)==="ou=") {
           $orgs[] = substr($k['groupnameDelegated'],3,strpos($k['groupnameDelegated'],',')-3);
@@ -146,19 +147,29 @@ function getElementDelegations($elId, $elType, $accessToken, $includeWriteOnly=f
         }
       }
     }
+  } else {
+      error_log("OWNERSHIP DLG ERROR request $url code: ".$r['httpcode']);
+      return null;
   }
-  $r = http_get($datamanager_api_url."/v1/groupelement/?sourceRequest=ownership&elementId=$elId&elementType=$elType",$accessToken);
-  //var_dump($r);
-  if ($r['httpcode']==200) {
+  
+  $url = $datamanager_api_url."/v1/groupelement/?sourceRequest=ownership&elementId=$elId&elementType=$elType";
+  $r = http_get($url, $accessToken);
+  if ($r['httpcode']==200 || $r['httpcode']==204) {
     foreach ($r['result'] as $k) {
       if(isset($k['deviceGroupId'])) {
         $rr = getElementDelegations($k['deviceGroupId'], 'MyGroup', $accessToken);
+        if($rr == null) {
+           return null;
+        }
         //var_dump($rr);
         $users = array_values(array_unique(array_merge($users,$rr['users'])));
         $orgs = array_values(array_unique(array_merge($orgs,$rr['orgs'])));
         $grps = array_values(array_unique(array_merge($grps,$rr['grps'])));
       }
     }
+  } else {
+      error_log("OWNERSHIP GRP DLG ERROR request $url code: ".$r['httpcode']);
+      return null;
   }
   return array('users'=>$users,'orgs'=>$orgs,'grps'=>$grps);
 }

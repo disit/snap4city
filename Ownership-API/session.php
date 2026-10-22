@@ -61,7 +61,7 @@ if(!isset($uinfo->username) && isset($uinfo->preferred_username)) {
 
 if(!isset($uinfo->username)) {
   header("HTTP/1.1 400 BAD REQUEST");
-  echo "No username found (missing scope=oidc ?)".json_encode($uinfo);
+  echo "No username found (missing scope=oidc ?) ".json_encode($uinfo);
   $f=fopen($log_path."/ownership-error.log","a");
   fwrite($f,date('c')." $OPERATION USERINFO ERROR: no username found ".json_encode($uinfo)." accessToken: ".$accessToken."\n");
   ownership_access_log(['op'=>$OPERATION,'result'=>'NO_USERNAME','id'=>$_REQUEST['elementId']]);
