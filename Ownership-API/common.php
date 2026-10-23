@@ -138,7 +138,7 @@ function getElementDelegations($elId, $elType, $accessToken, $includeWriteOnly=f
       if(!$includeWriteOnly && isset($k['kind']) && $k['kind'] == 'WRITE_ONLY')
           continue;
       if(isset($k['usernameDelegated'])) {
-        $users[] = encryptOSSL(strtolower($k['usernameDelegated']));
+        $users[] = encryptOSSL($k['usernameDelegated'] == 'ANONYMOUS' ? $k['usernameDelegated'] : strtolower($k['usernameDelegated']));
       } else if(isset($k['groupnameDelegated'])){
         if(substr($k['groupnameDelegated'],0,3)==="ou=") {
           $orgs[] = substr($k['groupnameDelegated'],3,strpos($k['groupnameDelegated'],',')-3);
