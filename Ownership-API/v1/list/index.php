@@ -102,6 +102,11 @@ while($o=mysqli_fetch_object($r)) {
   }
   if(isset($_REQUEST['delegations'])) {
     $delegations = getElementDelegations($o->elementId, $o->elementType, $accessToken, isset($_REQUEST['includeWriteOnly']));
+    if($delegations == null) {
+        echo "ERROR getting delegations of ".$o->elementId;
+        //stop to fail json encoding
+        exit;
+    }
     $o->usersDelegations = $delegations['users'];
     $o->orgsDelegations = $delegations['orgs'];
     $o->grpsDelegations = $delegations['grps'];

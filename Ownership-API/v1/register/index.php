@@ -15,6 +15,7 @@
    You should have received a copy of the GNU Affero General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 $OPERATION = 'REGISTER';
+$wstunnel_result = '';
 
 include("../../session.php");
 require_once("../../config.php");
@@ -193,8 +194,9 @@ if($r && $c=mysqli_fetch_array($r)) {
     $o->id=$id;
   } else {
     header("HTTP/1.1 400 BAD REQUEST");
-    echo '{"error":"reached limit of '.$limit.'","limit":'.$limit.',"current":'.$c[0].'}';
-    ownership_access_log(['op'=>$OPERATION,'user'=>$uinfo->username,'role'=>$uinfo->mainRole,'result'=>" for $org:".$o->elementType." reached limit ".$c[0]."/$limit"]);
+    $current = isset($c[0]) ? $c[0] : 0;
+    echo '{"error":"reached limit of '.$limit.'","limit":'.$limit.',"current":'.$current.'}';
+    ownership_access_log(['op'=>$OPERATION,'user'=>$uinfo->username,'role'=>$uinfo->mainRole,'result'=>" for $org:".$o->elementType." reached limit ".$current."/$limit"]);
     exit;          
   }  
 }

@@ -31,7 +31,11 @@ if(isset($_SESSION['accessToken'])) {
 } else if(isset($_REQUEST['accessToken'])) {
   $accessToken=$_REQUEST['accessToken'];
 } else {
-  $headers = array_change_key_case(getallheaders(), CASE_LOWER);
+  $headers = function_exists('getallheaders') ? getallheaders() : array();
+  if (!is_array($headers)) {
+    $headers = array();
+  }
+  $headers = array_change_key_case($headers, CASE_LOWER);
   if (isset($headers['authorization']) && strlen($headers['authorization'])>7 && 
           substr( strtolower($headers['authorization']), 0, 7 ) === "bearer ") {
       $accessToken=substr($headers['authorization'],7);
@@ -64,7 +68,7 @@ if(!isset($uinfo->username)) {
   echo "No username found (missing scope=oidc ?) ".json_encode($uinfo);
   $f=fopen($log_path."/ownership-error.log","a");
   fwrite($f,date('c')." $OPERATION USERINFO ERROR: no username found ".json_encode($uinfo)." accessToken: ".$accessToken."\n");
-  ownership_access_log(['op'=>$OPERATION,'result'=>'NO_USERNAME','id'=>$_REQUEST['elementId']]);
+  ownership_access_log(['op'=>$OPERATION,'result'=>'NO_USERNAME','id'=>$_REQUEST['elementId'] ?? 'no elementId']);
   exit;  
 }
 
@@ -82,17 +86,17 @@ if(isset($uinfo->roles)) {
 
 function get_client_ip_server() {
     $ipaddress = '';
-    if ($_SERVER['HTTP_CLIENT_IP'])
+    if (isset($_SERVER['HTTP_CLIENT_IP']))
         $ipaddress = $_SERVER['HTTP_CLIENT_IP'];
-    else if($_SERVER['HTTP_X_FORWARDED_FOR'])
+    else if(isset($_SERVER['HTTP_X_FORWARDED_FOR']))
         $ipaddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
-    else if($_SERVER['HTTP_X_FORWARDED'])
+    else if(isset($_SERVER['HTTP_X_FORWARDED']))
         $ipaddress = $_SERVER['HTTP_X_FORWARDED'];
-    else if($_SERVER['HTTP_FORWARDED_FOR'])
+    else if(isset($_SERVER['HTTP_FORWARDED_FOR']))
         $ipaddress = $_SERVER['HTTP_FORWARDED_FOR'];
-    else if($_SERVER['HTTP_FORWARDED'])
+    else if(isset($_SERVER['HTTP_FORWARDED']))
         $ipaddress = $_SERVER['HTTP_FORWARDED'];
-    else if($_SERVER['REMOTE_ADDR'])
+    else if(isset($_SERVER['REMOTE_ADDR']))
         $ipaddress = $_SERVER['REMOTE_ADDR'];
     else
         $ipaddress = 'UNKNOWN';

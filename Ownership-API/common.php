@@ -133,7 +133,7 @@ function getElementDelegations($elId, $elType, $accessToken, $includeWriteOnly=f
   $users = array();
   $orgs = array();
   $grps = array();
-  if ($r['httpcode']==200 || $r['httpcode']==204) {
+  if ($r['httpcode']==200 && is_array($r['result'])) {
     foreach ($r['result'] as $k) {
       if(!$includeWriteOnly && isset($k['kind']) && $k['kind'] == 'WRITE_ONLY')
           continue;
@@ -147,14 +147,14 @@ function getElementDelegations($elId, $elType, $accessToken, $includeWriteOnly=f
         }
       }
     }
-  } else {
+  } else if($r['httpcode']!=204){
       error_log("OWNERSHIP DLG ERROR request $url code: ".$r['httpcode']);
       return null;
   }
   
   $url = $datamanager_api_url."/v1/groupelement/?sourceRequest=ownership&elementId=$elId&elementType=$elType";
   $r = http_get($url, $accessToken);
-  if ($r['httpcode']==200 || $r['httpcode']==204) {
+  if ($r['httpcode']==200 && is_array($r['result'])) {
     foreach ($r['result'] as $k) {
       if(isset($k['deviceGroupId'])) {
         $rr = getElementDelegations($k['deviceGroupId'], 'MyGroup', $accessToken);
@@ -167,7 +167,7 @@ function getElementDelegations($elId, $elType, $accessToken, $includeWriteOnly=f
         $grps = array_values(array_unique(array_merge($grps,$rr['grps'])));
       }
     }
-  } else {
+  } else if($r['httpcode']!=204) {
       error_log("OWNERSHIP GRP DLG ERROR request $url code: ".$r['httpcode']);
       return null;
   }
@@ -229,7 +229,8 @@ function http_get($url, $token) {
   $result = file_get_contents($url, false, $context);
   //echo "result:$result\n";
   //var_dump($http_response_header);
-  return array("httpcode"=>explode(" ",$http_response_header[0])[1],"result"=>json_decode($result, true));
+  $httpcode = isset($http_response_header[0]) ? (int) (explode(" ", $http_response_header[0])[1] ?? 0) : 0;
+  return array("httpcode"=>$httpcode,"result"=>$result === false ? null : json_decode($result, true));
 }
 
 function http_post($url, $data, $mimetype) {
@@ -248,5 +249,6 @@ function http_post($url, $data, $mimetype) {
   $result = file_get_contents($url, false, $context);
   //echo "result:$result\n";
   //var_dump($http_response_header);
-  return array("httpcode"=>explode(" ",$http_response_header[0])[1],"result"=>json_decode($result, true));
+  $httpcode = isset($http_response_header[0]) ? (int) (explode(" ", $http_response_header[0])[1] ?? 0) : 0;
+  return array("httpcode"=>$httpcode,"result"=>$result === false ? null : json_decode($result, true));
 }
