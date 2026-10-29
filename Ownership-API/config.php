@@ -64,3 +64,31 @@ $datamanager_api_url = 'http://localhost/mypersonaldata/api';
 #$wstunnel_db_passw = 'password';
 
 #$iot_app_edge_url = 'http://localhost/edge/';
+
+$conf=array(
+'db_host'=>'localhost',
+'database'=>'profiledb',
+'db_user'=>'user',
+'db_pwd'=>'password',
+'sso_client_id'=>'php-ownership-api',
+'sso_client_secret'=>'',
+'sso_userinfo_endpoint'=>'http://localhost:8088/auth/realms/master/protocol/openid-connect/userinfo',
+'ldapServer'=>'localhost',
+'ldapPort'=>'389',
+'ldapBaseDN'=>'dc=test,dc=example,dc=org'
+'ldapAdminDN'>'cn=admin,dc=ldap,dc=organization,dc=org',
+'ldapAdminPwd'=>'...',
+'encryptionMethod'=>'AES-256-CBC',
+'encryptionInitKey'=>'...',
+'encryptionIvKey'=>'...'.
+'log_path'=>'/tmp'
+);
+
+//set vars using env vars as OWN_DB_HOST, OWN_DATABASE, ...
+foreach($conf as $k=>$v) {
+  $vv=getenv("OWN_".strtoupper($k));
+  if($vv!==FALSE)
+    $v=$vv;
+  $$k=$v;
+}
+
