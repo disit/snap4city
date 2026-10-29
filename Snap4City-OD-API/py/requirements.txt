@@ -1,5 +1,5 @@
 pyYAML==6.0.0
-jinja2==2.11.2
+jinja2==2.11.3
 markupsafe==1.1.1
 itsdangerous==1.1.0
 numpy==1.19.2
